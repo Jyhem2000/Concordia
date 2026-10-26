@@ -24,29 +24,13 @@ export type ProductId = `T0-${Four}` | `T1-${Six}` | `T2-${Seven}` | `T3-${Seven
 
 /** Tags système (chap. 3) */
 export type TagId =
-  | 'TAG-LEGAL'
-  | 'TAG-PERISHABLE'
-  | 'TAG-FRAGILE'
-  | 'TAG-ADDICTIVE'
-  | 'TAG-ODOROUS'
-  | 'TAG-CULTURE'
-  | 'TAG-TECH'
-  | 'TAG-CHEMICAL'
-  | 'TAG-FLAMMABLE'
+  'TAG-LEGAL' | 'TAG-PERISHABLE' | 'TAG-FRAGILE' | 'TAG-ADDICTIVE' | 'TAG-ODOROUS' | 'TAG-CULTURE' | 'TAG-TECH' | 'TAG-CHEMICAL' | 'TAG-FLAMMABLE'
 
 /** Districts (chap. 4) */
 export type DistrictId = `D${1 | 2 | 3 | 4 | 5 | 6}`
 
 /** Lieux spéciaux (chap. 4) */
-export type LocationId =
-  | 'LOC-D1-1'
-  | 'LOC-D1-2'
-  | 'LOC-D2-1'
-  | 'LOC-D3-1'
-  | 'LOC-D4-1'
-  | 'LOC-D4-2'
-  | 'LOC-D5-1'
-  | 'LOC-D6-1'
+export type LocationId = 'LOC-D1-1' | 'LOC-D1-2' | 'LOC-D2-1' | 'LOC-D3-1' | 'LOC-D4-1' | 'LOC-D4-2' | 'LOC-D5-1' | 'LOC-D6-1'
 
 /** Véhicules, modules, équipiers (chap. 5) */
 export type VehicleId = `VEH-${Four}`
@@ -60,8 +44,83 @@ export type RoadEventId = `EVT-R${Eight | '09' | '10' | '11' | '12' | '13' | '14
 export type LotteryEventId = 'EVT-L01'
 export type EventId = GlobalEventId | LocalEventId | RoadEventId | LotteryEventId
 
-export type GameDataId =
-  ProductId | TagId | DistrictId | LocationId | VehicleId | ModuleId | CrewId | EventId
+export type GameDataId = ProductId | TagId | DistrictId | LocationId | VehicleId | ModuleId | CrewId | EventId
+
+// ─── Données de jeu (src/data/, qui fait foi pour les stats) ───
+
+export type Range = { min: number; max: number }
+
+/** Profil de vente pendant le couvre-feu (chap. 7) */
+export type NightProfile = 'festive' | 'diurnal'
+
+export type Product = {
+  tier: Tier
+  basePrice: number
+  tags: readonly TagId[]
+  /** Tier 0 : chaque caisse masque 1 caisse de ce tag (chap. 3, masquage 1:1) */
+  masks?: TagId
+  nightProfile?: NightProfile
+  /** Remplace le stock du tier */
+  dailyStock?: Range
+  /** Chance d'apparaître chaque jour dans la boutique de son district producteur */
+  appearanceChance?: number
+}
+
+export type TierStats = {
+  /** Stock en boutique, par produit et par jour */
+  dailyStock: Range
+  /** Quota de demande par produit et par district ; null = illimité */
+  demandQuota: { neutral: number; strong: number } | null
+  /** Ajouté au coefficient de Forte demande du district (chap. 7) */
+  strongDemandBonus: number
+}
+
+/** Officielle : connectée à Aeterna, fermée la nuit sous un certain ICC. Fixe : toujours ouverte. */
+export type PumpType = 'official' | 'fixed'
+
+export type District = {
+  /** Place dans la pyramide sociale, du pire (0) au meilleur (5) */
+  echelon: number
+  /** Étoiles de sécurité (1 à 5) : bluff, corruption, plafond de fuite (chap. 6) */
+  security: number
+  baseRisk: number
+  /** Prix de base d'une ration de Synthanol */
+  fuelPrice: number
+  pump: PumpType
+  /** Tag ciblé par la détection spéciale du district */
+  detection: TagId | null
+  droneJudges: boolean
+  /** Coefficient de marché des produits de la liste Production */
+  coefProduction: number
+  /** Coefficient de marché des produits en Forte demande, avant bonus de tier */
+  coefStrongDemand: number
+  production: readonly ProductId[]
+  strongDemand: readonly ProductId[]
+}
+
+export type Vehicle = {
+  price: number
+  /** Emplacements de soute (1 caisse = 1 emplacement) */
+  cargo: number
+  moduleSlots: number
+  /** PV max du châssis */
+  maxChassis: number
+  /** Capacité du réservoir, en rations */
+  tank: number
+  /** Rations consommées par trajet, selon la phase */
+  fuelPerTrip: Record<Phase, number>
+}
+
+export type ModuleCategory = 'conservation' | 'camouflage' | 'tactical'
+
+export type Module = {
+  price: number
+  category: ModuleCategory
+}
+
+export type Crew = {
+  dailySalary: number
+}
 
 // ─── État de la partie ───
 

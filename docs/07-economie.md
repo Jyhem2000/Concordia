@@ -13,20 +13,15 @@ Chaque district propose **au moins 10 produits** (jusqu'à 12 en `[D4]`, davanta
 3. **Complément neutre :** si le total est inférieur à 10, tirage aléatoire de produits de Tier 1 à 3 neutres pour ce district.
 
 * **Exclusion :** un district ne vend **jamais** un produit de sa liste Forte demande, sauf événement qui le précise.
-* **Stocks :** par produit et par jour, selon le tier (chap. 3). Modificateurs : `[EVT-G05]`, `[EVT-D1-01]`, `[EVT-D3-03]`.
+* **Stocks :** par produit et par jour, selon le tier ([`products.ts`](../src/data/products.ts)). Modificateurs : `[EVT-G05]`, `[EVT-D1-01]`, `[EVT-D3-03]`.
 * **Demande universelle :** le joueur peut **toujours vendre** n'importe quelle caisse, dans n'importe quel district.
 
 ## Cours du jour (06h00)
 ```
 Cours = Arrondi( Prix_Base × Coef_District × Bruit × Mult_Événement )
 ```
-* **Coef_District :** coefficient Production, Neutre (1.00) ou Forte demande du district (chap. 4). En Forte demande, on ajoute le **bonus de tier** — plus le produit est dangereux, plus il se paie cher :
-
-| Tier | 1 | 2 | 3 | 4 |
-| :--- | :---: | :---: | :---: | :---: |
-| Bonus de tier (Forte demande) | −0.10 | ±0 | +0.10 | +0.30 |
-
-  *Ex. : `[T4-01]` en `[D6]` = 2.30 + 0.30 = **2.60** ; `[T1-01]` en `[D1]` = 1.50 − 0.10 = **1.40**.*
+* **Coef_District :** coefficient Production, Neutre (1.00) ou Forte demande du district ([`districts.ts`](../src/data/districts.ts)). En Forte demande, on ajoute le **bonus de tier** ([`products.ts`](../src/data/products.ts)) — plus le produit est dangereux, plus il se paie cher.
+  *Ex. :* `[T4-01]` en `[D6]` se paie au coefficient de Forte demande de `[D6]` plus le bonus du Tier 4.
 * **Bruit :** tirage uniforme quotidien entre **0.70** et **1.30**, propre à chaque produit dans chaque district. Un mauvais tirage aux deux bouts peut rendre un trajet perdant.
 * **Mult_Événement = min( 4, Mult_EvtActif × Bonus_Influence )**
   * *Mult_EvtActif :* 1.00 par défaut. Si un événement global et un local touchent le même produit, on garde celui dont l'écart `|Mult − 1.00|` est le plus fort (égalité : le local prime).
@@ -36,7 +31,7 @@ Cours = Arrondi( Prix_Base × Coef_District × Bruit × Mult_Événement )
 
 ## Quota de demande
 Pendant de la boutique : un district n'achète qu'une quantité limitée de chaque produit.
-* **Quota :** par produit et par district, selon le tier et le statut du produit dans le district (chap. 3). Modificateurs (multiplicatifs entre eux) : `[CREW-03]`, carte « contrebandier concurrent » de `[LOC-D5-1]`.
+* **Quota :** par produit et par district, selon le tier et le statut du produit dans le district ([`products.ts`](../src/data/products.ts)). Modificateurs (multiplicatifs entre eux) : `[CREW-03]`, carte « contrebandier concurrent » de `[LOC-D5-1]`.
 * **Demande restante :** pleine au Jour 1. Chaque vente la consomme, de jour comme de nuit. **Chaque matin à 06h00, elle remonte d'1/3 du quota** (arrondi au supérieur), sans dépasser le quota. Vider un marché le pénalise donc environ 3 jours.
 * **Au-delà de la demande restante, le marché est saturé :** chaque caisse supplémentaire se vend **×0.50** (`Coef_Demande`).
 * **Pic suspect :** vendre au-delà de la demande restante alerte Aeterna — **le lendemain**, le risque de base de ce district augmente de **+10 %** (icône 👁️ sur la carte).
@@ -65,7 +60,7 @@ Prix_Vente = Arrondi( Cours × 0,90 × Coef_Demande × Coef_Condition × Savoir_
 * *Intention — des builds, pas une recette :* chaque axe de bonus vise une famille de produits différente (équipier, modules, `[LOC-D2-1]`, nuit). Les combinaisons rapportent davantage, mais les plafonds (`Mult_Événement`, `Savoir_Faire`) empêchent une seule combinaison d'écraser les autres.
 
 ## Paiement en nature
-Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est valorisée à son **prix de base** (chap. 3), jamais au cours local. Les caisses restent utiles (connivence, pas de cash exposé), mais ne sont pas une monnaie au rabais.
+Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est valorisée à son **prix de base** ([`products.ts`](../src/data/products.ts)), jamais au cours local. Les caisses restent utiles (connivence, pas de cash exposé), mais ne sont pas une monnaie au rabais.
 
 ---
 
@@ -83,12 +78,12 @@ Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est 
 ## Les trois portefeuilles
 
 ### Cash-Puce (portefeuille courant)
-* **Départ :** **2 000 ₡**. Utilisable partout, ne rapporte **aucun intérêt**.
+* **Départ :** [`balance.ts`](../src/data/balance.ts). Utilisable partout, ne rapporte **aucun intérêt**.
 * **Vulnérable :** ponctionné par les sanctions d'interception, le racket de `[D4]` et la collecte de protection, et **effacé** à l'audit du Jour 30.
 * *Lore :* les transactions du marché noir se font de puce à puce, en local. Pour économiser ses serveurs, Aeterna n'analyse jamais l'historique P2P : à l'audit, elle formate brutalement toutes les puces. Personne n'est démasqué, mais tout crédit non transféré offshore est vaporisé.
 
 ### Dette mafieuse
-* **Créancier :** `[LOC-D1-1]`. **Solde unique :** la dette de départ, les emprunts et les reliquats (dépannage, collecte) s'ajoutent au même solde. **Départ :** **5 000 ₡**.
+* **Créancier :** `[LOC-D1-1]`. **Solde unique :** la dette de départ, les emprunts et les reliquats (dépannage, collecte) s'ajoutent au même solde. **Départ :** [`balance.ts`](../src/data/balance.ts).
 * **Dette initiale soldée :** statut acquis **définitivement** la première fois que le solde atteint 0. Il débloque l'emprunt tactique, la collecte de protection et la modale « Objectifs du Jour 30 ».
 * **Taux :** **+10 % par jour** sur tout le solde, composés à chaque routine matinale (pas le Jour 1).
 * **Échéances :**
@@ -123,7 +118,7 @@ Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est 
 ---
 
 ## Routes commerciales de référence
-*Intention d'équilibrage, non normatif : en cas d'écart, les listes du chap. 4 font foi.*
+*Intention d'équilibrage, non normatif : en cas d'écart, les listes de [`districts.ts`](../src/data/districts.ts) font foi.*
 * **Démarrage (Jours 1–6) :** `[T1-04]` et `[T1-06]` de `[D1]` → vente en `[D4]` → `[T1-01]`, `[T1-03]` ou `[T2-02]` de `[D4]` → revente en `[D2]` ou `[D1]` (plein à `[LOC-D1-2]`). Variante : `[T2-03]`, `[T2-04]` de `[D1]` → `[D2]`, `[D3]` ou `[D5]`.
 * **Pharmaceutique (Jours 7–18) :** `[T3-04]` de `[D3]` (plus quelques `[T2-05]` gardés pour les fuites, revendables en `[D1]`) → vente en `[D4]` → `[T3-02]`, `[T3-03]`, `[T3-06]` de `[D4]` → revente en `[D3]` ou `[D5]`, gains mis à l'abri via `[LOC-D5-1]`.
 * **Haute trahison (Jours 19–30) :** `[T4-01]`, `[T4-02]` de `[D4]` ou `[T4-05]` de `[D3]` → forcer les barrages de `[D6]` (enchères à `[LOC-D6-1]`) → sécuriser le pactole à `[LOC-D5-1]` avant l'audit.

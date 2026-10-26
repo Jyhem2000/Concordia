@@ -9,22 +9,19 @@
           \     |     /
            \— [D3] —/
 ```
-  Liaisons : D4–D1, D1–D2, D1–D3, D2–D3, D2–D5, D3–D5, D5–D6. *Ex. :* `[D4]` → `[D6]` traverse `[D1]`, `[D2]` et `[D5]` (+3 rations, +15 %).
+  Liaisons : `MAP_LINKS` dans [`districts.ts`](../src/data/districts.ts) (le schéma n'est qu'une illustration). *Ex. :* `[D4]` → `[D6]` traverse `[D1]`, `[D2]` et `[D5]` (+3 rations, +15 %).
 * **Pompes :** *officielle* = connectée à Aeterna, **fermée la nuit** si l'ICC est sous 50 % (chap. 2) ; *fixe* = toujours ouverte.
 * **Coefficients de marché** (chap. 7) : chaque district applique un coefficient à ses produits de **Production**, aux produits **Neutres** (1.00) et à ceux en **Forte demande** (plus le bonus de tier).
 
-## Tableau de synthèse
+## Stats des districts
+Les stats de chaque district sont dans [`districts.ts`](../src/data/districts.ts), qui fait foi :
+* *Échelon :* place dans la pyramide sociale, du pire (0) au meilleur (5).
+* *Sécurité :* le nombre d'étoiles entre dans le bluff, la corruption et le plafond de fuite (chap. 6).
+* *Risque de base* (chap. 6), *prix du Synthanol*, type de *pompe*, *détection spéciale* (tag ciblé, chap. 3) et présence de *Drones-Juges* (chap. 6).
+* *Coefficients de marché :* la Forte demande est échelonnée sur le danger — plus le district est risqué, mieux il paie.
+* *Production* et *Forte demande :* produits fabriqués sur place et produits les plus recherchés (chap. 7).
 
-| ID | Nom | Échelon | Sécurité | Risque de base | Synthanol | Pompe | Détection spéciale | Drones-Juges | Coef. Production | Coef. Demande |
-| :--- | :--- | :---: | :---: | :---: | :---: | :--- | :--- | :---: | :---: | :---: |
-| `[D4]` | Rust Valley | 0 | ★★☆☆☆ | 20 % | 80 ₡ | fixe (pirate) | — (zone hors-réseau) | — | 0.75 | 1.40 |
-| `[D1]` | Hives | 1 | ★☆☆☆☆ | 10 % | 80 ₡ | officielle | — | — | 0.75 | 1.50 |
-| `[D2]` | Pastel-Heights | 2 | ★★☆☆☆ | 20 % | 120 ₡ | officielle | Délation idéologique (`[TAG-CULTURE]`) | — | 0.75 | 1.60 |
-| `[D3]` | Panacea | 3 | ★★★☆☆ | 35 % | 150 ₡ | officielle | Bio-scanners (`[TAG-CHEMICAL]`) | — | 0.75 | 1.75 |
-| `[D5]` | The Glass Spire | 4 | ★★★★☆ | 40 % | 200 ₡ | officielle | Scanners EM (`[TAG-TECH]`) | ✓ | 0.75 | 1.90 |
-| `[D6]` | Olympus-Green | 5 | ★★★★★ | 55 % | 300 ₡ | officielle | Scanners EM (`[TAG-TECH]`) + chiens-robots (`[TAG-ODOROUS]` ×2) | ✓ | 0.85 | 2.30 |
-
-*Échelon :* place dans la pyramide sociale, du pire (0) au meilleur (5). *Sécurité :* le nombre d'étoiles entre dans le bluff, la corruption et le plafond de fuite (chap. 6). *Coef. Demande :* échelonné sur le danger — plus le district est risqué, mieux il paie. Montants en ₡ : valeurs de base, indexées sur l'inflation (chap. 7).
+Montants en ₡ : valeurs de base, indexées sur l'inflation (chap. 7).
 
 ---
 
@@ -32,8 +29,6 @@
 * **Échelon 1 — Catégorie C, prolétariat sous camisole.** 60 % de la population. Chaleur étouffante (38 °C), eau tiède rationnée, sédation maximale (`[T0-01]` + `[T0-03]`). Rêve anesthésié de monter en `[D2]`.
 * **Ambiance :** tours de béton brutales autour de la Cantine Centrale. Les ouvriers passent leurs soirées hypnotisés par les loteries virtuelles. Le marché noir est toléré comme « soupape de décompression » : un peu de vrai soda ou de saucisson le week-end suffit à empêcher les émeutes de la faim.
 * **Sécurité :** caméras bas de gamme souvent en panne, patrouilles humaines de la BRC fatiguées et corruptibles.
-* **Production :** `[T0-01]`, `[T0-02]`, `[T1-04]`, `[T1-06]`, `[T2-03]` *(caves des Ruches)*, `[T2-04]` *(ateliers de réparation clandestins)*
-* **Forte demande :** `[T1-01]`, `[T1-02]`, `[T1-05]`, `[T2-01]`, `[T2-02]`, `[T2-05]`, `[T2-06]`
 
 ### `[LOC-D1-1]` L'Arrière-Salle de Viktor Varga (usurier mafieux)
 Boucherie clandestine de Viktor Varga et de ses « Bouchers ».
@@ -53,8 +48,6 @@ Bar enfumé réservé aux routiers, où l'on sert l'eau de l'Exemption Métaboli
 * **Ambiance :** façades pastel, citoyens récemment promus (influenceurs d'État, étudiants zélés, comités de voisinage). Moins drogués que `[D1]`, ils savent d'où ils viennent : leur terreur d'être rétrogradés les pousse à un zèle hystérique : ils dénoncent sans relâche le jour, et s'empiffrent de charcuterie en cachette la nuit.
 * **Sécurité :** peu de patrouilles lourdes (agents humains), mais les **Voisins-Vigiles** dénoncent les camions suspects via l'application d'Aeterna pour gagner des points d'ICC.
 * **Menace — Délation idéologique :** tout ce qui sent la culture interdite est signalé, la détection de `[TAG-CULTURE]` s'applique ici (chap. 3).
-* **Production :** `[T0-01]`, `[T0-04]`, `[T1-02]`, `[T2-06]`, `[T2-07]`, `[T3-05]`, `[T3-07]`
-* **Forte demande :** `[T1-03]`, `[T2-02]`, `[T2-03]`, `[T3-01]`, `[T4-04]`
 
 ### `[LOC-D2-1]` Le Studio de « Karma-Cham » (influenceuse d'État corrompue)
 Icône officielle le jour, mercenaire vénale en coulisses. **Panique Algorithmique sur Commande :**
@@ -68,8 +61,6 @@ Icône officielle le jour, mercenaire vénale en coulisses. **Panique Algorithmi
 * **Échelon 3 — Catégorie B+, caste scientifique & médicale.** Air stérile (22 °C), vraies douches, cafés de synthèse.
 * **Ambiance :** immense secteur blanc saturé de javel : laboratoires du DSC, usines de synthèse, centres de quarantaine. C'est ici qu'Aeterna modélise les « variants saisonniers ». Les chercheurs savent ce qu'il y a dans `[T0-01]` et enchaînent des gardes de 60h, terrifiés qu'une baisse d'ICC les renvoie de l'autre côté de la seringue.
 * **Sécurité :** portiques de désinfection obligatoires, bio-scanners IA, agents humains.
-* **Production :** `[T0-02]`, `[T0-03]`, `[T1-05]`, `[T2-05]`, `[T3-04]`, `[T4-04]`, `[T4-05]`
-* **Forte demande :** `[T1-02]`, `[T2-01]`, `[T2-03]`, `[T3-02]`, `[T3-03]`
 
 ### `[LOC-D3-1]` La Morgue Arrière (Dr. K.)
 | Service | Coût | Cooldown | Effet |
@@ -96,8 +87,7 @@ Icône officielle le jour, mercenaire vénale en coulisses. **Panique Algorithmi
   * **Refuser :** les miliciens pillent **30 % de la soute en commençant par les caisses les plus chères** (`[T4-06]` compris : il finira chez la rébellion), tabassent le joueur (**−20 PV** de Santé) et cabossent le camion (**−25 PV** de châssis).
   * **Modificateur :** `[VEH-04]`.
 * **Nuit :** dormir ici = bivouac (chap. 2).
-* **Production :** `[T1-01]`, `[T1-03]`, `[T2-01]`, `[T2-02]`, `[T3-01]`, `[T3-02]`, `[T3-03]`, `[T3-06]`, `[T4-01]`, `[T4-02]` — le moteur n'en tire que **6 à 8 par jour**.
-* **Forte demande :** `[T1-04]`, `[T1-06]`, `[T2-06]`, `[T2-07]`, `[T3-04]`, `[T3-05]`, `[T4-03]`, `[T4-04]`, `[T4-06]`
+* **Production :** parmi sa liste de production, le moteur n'en tire que **6 à 8 par jour**.
 
 ### `[LOC-D4-1]` Le Garage « Faraday » (Mécano-Mitch)
 Tenu par un ancien ingénieur spatial viré pour avoir refusé de manger des insectes. Seul endroit pour acheter un châssis, acheter des modules et **changer les modules montés** (gratuit, chap. 5), et **réparer le châssis : 40 ₡ par PV manquant** (modificateur : `[EVT-D4-03]`).
@@ -115,8 +105,6 @@ Ancien analyste de données d'Aeterna, terré dans une caravane blindée sous le
 * **Ambiance :** gratte-ciels où travaillent les bureaucrates du DSC, les superviseurs d'Aeterna et les truqueurs de la Loterie. Totalement lucides mais bloqués par le plafond de verre de `[D6]`, ils survivent sous caféine, nicotine, antidépresseurs et délation entre collègues.
 * **Sécurité :** portiques à rayons X, scanners électromagnétiques, douaniers d'élite et Drones-Juges.
 * **Menace — Urbanisme panoptique** (LiDAR 360°) : l'éjection manuelle est **interdite** ; seuls `[MOD-07]` ou `[VEH-04]` la permettent.
-* **Production :** `[T0-03]`, `[T0-04]`, `[T2-06]` *(saisies de la censure)*, `[T4-03]`, `[T4-06]` *(fuites rares)*
-* **Forte demande :** `[T1-02]`, `[T1-05]`, `[T2-04]`, `[T3-02]`, `[T3-03]`, `[T3-06]`, `[T3-07]`, `[T4-02]`, `[T4-04]`
 
 ### `[LOC-D5-1]` La Laverie « Crypto-Clean » (banque offshore ministérielle)
 Les vrais blanchisseurs ne sont pas les punks de `[D4]` mais les hauts fonctionnaires corrompus du Ministère des Finances, seuls à pouvoir créer des comptes fantômes dans le registre central pour y cacher leurs propres pots-de-vin. Ce sont aussi les superviseurs qui alimentent l'algorithme de la Loterie.
@@ -145,8 +133,6 @@ Les vrais blanchisseurs ne sont pas les punks de `[D4]` mais les hauts fonctionn
 * **Sécurité :** scanners électromagnétiques, détecteurs biométriques d'ICC, douaniers d'élite et Drones-Juges.
 * **Menace — Chiens-robots militaires :** les malus de `[TAG-ODOROUS]` sont **×2**.
 * **Menace — Dalle bio-scellée** (grilles laser, capteurs sismiques) : l'éjection est **impossible**, même avec `[MOD-07]` — **sauf** via `[VEH-04]`.
-* **Production** *(réserves VIP, stocks très restreints)* : `[T4-03]`, `[T4-04]`
-* **Forte demande** *(« vente jackpot »)* : `[T1-03]`, `[T2-07]`, `[T3-01]`, `[T3-02]`, `[T3-03]`, `[T3-07]`, `[T4-01]`, `[T4-02]`, `[T4-05]`, `[T4-06]`
 
 ### `[LOC-D6-1]` Le « Velvet-Silo » (cabaret sensoriel & sous-sol de débauche)
 Lupanar clandestin et bar à oxygène caché dans les galeries de climatisation sous les villas, accessible par les quais de service. Ouvert de jour seulement : les oligarques festoient en journée climatisée, la nuit appartient aux purges.

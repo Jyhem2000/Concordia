@@ -15,7 +15,7 @@ Le résultat est **borné entre 5 % et 95 %, après** tous les multiplicateurs. 
 
 | Terme | Calcul / sources |
 | :--- | :--- |
-| **Base_District** | risque de base du district (chap. 4) ; remplacé par `[EVT-D5-02]` |
+| **Base_District** | risque de base du district ([`districts.ts`](../src/data/districts.ts)) ; remplacé par `[EVT-D5-02]` |
 | **Suspicion** | selon l'ICC (chap. 2) |
 | **Malus_Tags** | pour chaque tag détectable : *valeur du tag × part de la cargaison* — `[TAG-ODOROUS]`, `[TAG-TECH]`, `[TAG-CHEMICAL]`, `[TAG-CULTURE]` |
 | **Malus_Contexte** (additif) | trajet de nuit (chap. 2), districts traversés (chap. 4), portique du sas de `[D4]` (chap. 4), `[VEH-04]`, balise de `[T4-06]`, ronde renforcée, Fiche S, pic suspect de la veille (chap. 7), embuscades de la dette (chap. 7), purge préventive de `[EVT-L01]`, carte « capitaine de la BRC » de `[LOC-D5-1]` (négative), `[EVT-G02]`, `[EVT-D1-03]`, `[EVT-D4-01]` |
@@ -27,7 +27,7 @@ Le résultat est **borné entre 5 % et 95 %, après** tous les multiplicateurs. 
 
 **Part de la cargaison :** (caisses du tag non masquées + **0,5** × caisses du tag masquées) ÷ caisses transportées (masquage, chap. 3). Une soute « diluée » dans du légal est donc moins suspecte, quelle que soit la taille du camion.
 
-**Exemple affiché au joueur :** `[VEH-02]` vers `[D5]` de jour, ICC 80 %, 12 caisses dont 4 `[TAG-TECH]` et 6 `[TAG-LEGAL]`.
+**Exemple affiché au joueur** *(valeurs indicatives)* : `[VEH-02]` vers `[D5]` de jour, ICC 80 %, 12 caisses dont 4 `[TAG-TECH]` et 6 `[TAG-LEGAL]`.
 `( 40 (base) + 10 (suspicion) + 50 × 4/12 (Tech) − 20 × 6/12 (couverture) ) × 0,85 (Zéro-C) = 56,7 × 0,85 = 48,2 % → 48 %`
 
 **Ronde renforcée :** chaque matin, Aeterna tire **1 district** parmi `[D1]`, `[D2]`, `[D3]`, `[D5]`, `[D6]` : **+20 %** de risque pour la journée. Caché au joueur, sauf avec `[CREW-01]`.
@@ -84,12 +84,12 @@ Chance = min( 95 %,  50 % + Offre + Connivence − 5 % × (étoiles du district 
 | 3 × le tarif standard ou plus | +40 % |
 
 * **Connivence (+10 %)** si l'offre contient un produit apprécié des agents : `[T1-02]`, `[T1-05]`, `[T3-03]` en `[D1]`, `[D2]`, `[D3]` (agents humains) ; `[T3-02]`, `[T3-03]` en `[D5]`, `[D6]` (douaniers d'élite).
-* **Drones-Juges** (districts équipés, chap. 4) : **20 %** d'échec critique incompressible, tiré avant le jet (ils sont incorruptibles : il faut tomber sur un douanier).
+* **Drones-Juges** (districts équipés, [`districts.ts`](../src/data/districts.ts)) : **20 %** d'échec critique incompressible, tiré avant le jet (ils sont incorruptibles : il faut tomber sur un douanier).
 * **Succès :** l'agent coupe sa caméra-piéton ; passage garanti, ICC inchangé.
 * **Échec :** confiscation + amende de **50 %** + **−15 % d'ICC** + garde à vue de **1 jour**, quel que soit le tier.
 
 ### 3. Fuite — *« Pied au plancher ! »*
-* **Chance de base :** **35 %**. **Plafond :** **95 % − 5 % × (étoiles du district − 1)** (95 % en `[D1]`, 75 % en `[D6]`).
+* **Chance de base :** **35 %**. **Plafond :** **95 % − 5 % × (étoiles du district − 1)** (95 % pour 1 étoile, 75 % pour 5 étoiles).
 * **Bonus :** `[MOD-06]`, `[CREW-02]`, `[VEH-03]`. **Malus :** Fiche S, Sédation.
 * **Sacrifices :** 1 largage offensif max (`[TAG-FLAMMABLE]` **ou** `[TAG-CHEMICAL]`) + dopage `[T2-05]` (cumulable).
 * **Succès :** cargaison sauvée, **+1 niveau de Fiche S**, mais **−15 à −30 PV** de châssis (tirage uniforme entier ; `[MOD-06]`, `[VEH-03]`), casse `[TAG-FRAGILE]`, et **−15 % d'ICC** (caméras de trafic ; `[VEH-03]`, `[MOD-05]`).

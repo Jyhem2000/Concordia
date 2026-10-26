@@ -10,7 +10,7 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 ## Les jauges
 
 ### ICC — Indice de Conformité Civique
-* **Échelle :** 0 % à 100 %. **Départ :** 100 %. S'érode facilement, lent et coûteux à restaurer.
+* **Échelle :** 0 % à 100 %. **Départ :** [`balance.ts`](../src/data/balance.ts). S'érode facilement, lent et coûteux à restaurer.
 * **Suspicion :** ajoute **0,5 × (100 − ICC)** au risque d'interception (ex. ICC 60 % → +20 %).
 * **Paliers de crédit social** (seule échelle de référence, reprise par l'interface, chap. 9) :
 
@@ -26,19 +26,19 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 * **Atténuateurs de pertes :** `[MOD-05]`, `[VEH-03]` (inutiles en `[D4]`, où la fuite ne coûte pas d'ICC).
 
 ### Santé du joueur
-* **Échelle :** 0 à 100 PV. **Départ :** 100 PV. **À 0 PV :** mort (Game Over).
+* **Échelle :** 0 à 100 PV. **Départ :** [`balance.ts`](../src/data/balance.ts). **À 0 PV :** mort (Game Over).
 * **Pertes létales :** échec de fuite (chap. 6), racket des milices de `[D4]`.
 * **Pertes non-létales** (plancher à 1 PV, ou défini à la source) : aléas routiers, coup de chaleur de `[EVT-G01]`, tabassage de la dette, garde à vue, nuit blanche sous `[T2-05]`.
 * **Soins :** sommeil au relais routier, `[LOC-D3-1]`.
 
 ### Intégrité du châssis (PV véhicule)
-* **Maximum :** selon le véhicule (chap. 5). **Réparation :** `[LOC-D4-1]`.
+* **Maximum :** selon le véhicule ([`vehicles.ts`](../src/data/vehicles.ts)). **Réparation :** `[LOC-D4-1]`.
 * **Pertes :** trajet de nuit, `[EVT-G01]`, `[T2-05]`, éjection manuelle, fuite, explosion `[TAG-FLAMMABLE]`, racket de `[D4]`, aléas `[EVT-R02]`, `[EVT-R05]`, `[EVT-R08]`, `[EVT-R09]`, `[EVT-R10]`.
 * **Dépannage d'urgence (anti soft-lock) :** à 0 PV, une dépanneuse du DSC intervient (en `[D4]`, celle des mécanos pirates, aux mêmes conditions) : **demi-journée** perdue, châssis remis à **25 % de ses PV max**, facture de **2 500 ₡** (si le Cash-Puce ne suffit pas, le reliquat s'ajoute à la dette). Si le châssis tombe à 0 pendant un trajet, le trajet se termine (arrivée à destination), puis le dépannage s'applique.
 
 ### Réservoir de Synthanol
-* **Unité :** la Ration. **Capacité et consommation :** selon le véhicule (chap. 5) et la distance (chap. 4).
-* **Prix d'une ration :** fixé par district (chap. 4).
+* **Unité :** la Ration. **Capacité et consommation :** selon le véhicule ([`vehicles.ts`](../src/data/vehicles.ts)) et la distance (chap. 4).
+* **Prix d'une ration :** fixé par district ([`districts.ts`](../src/data/districts.ts)).
 * **Siphonage / Corvée DSC (anti soft-lock) :** bloqué avec 0 ration, une soute vide et pas assez de Cash-Puce pour 1 ration locale → **+1 ration** gratuite contre **−5 % d'ICC** et une **demi-journée** perdue. En `[D4]`, ce sont les milices qui « prêtent » la ration, aux mêmes conditions.
 
 ### Exemption Métabolique & Sédation
@@ -66,7 +66,7 @@ Acheter / vendre au marché, faire le plein, utiliser les lieux spéciaux du dis
 
 ### Trajet
 * **Maximum 2 par jour :** 1 de jour, 1 de nuit. Un trajet = **une destination**, quelle que soit la distance : les districts traversés sont de simples passages (aucun arrêt, aucun commerce, aucun test d'interception), ils ne coûtent que du carburant et du risque (chap. 4). Tous les districts sont accessibles dès le Jour 1, mais pas tous voisins (carte au chap. 4).
-* **Coût :** consommation du véhicule selon la phase (chap. 5), plus le surcoût des districts traversés (chap. 4).
+* **Coût :** consommation du véhicule selon la phase ([`vehicles.ts`](../src/data/vehicles.ts)), plus le surcoût des districts traversés (chap. 4).
 * **Résolution :** consommation → test d'interception dans le district de destination (chap. 6), ou racket en `[D4]` → s'il n'y a pas eu d'interception, tirage d'un aléa routier → arrivée (effets d'arrivée des événements locaux actifs, ex. `[EVT-D3-01]`).
 
 ### Le dilemme de 20h00

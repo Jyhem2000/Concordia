@@ -21,6 +21,12 @@ Simulation économique satirique (Drug Wars-like). Game design : [docs/](docs/RE
 | `src/i18n/`   | Textes traduits, clés dérivées des IDs                                                   |
 | `src/ui/`     | Composants React, découpés comme le chap. 9 (bandeau, marché, soute, carte…)             |
 
+Données de jeu :
+
+- **Le code fait foi pour les stats.** Prix, tags, coefficients, listes de production, capacités et valeurs de départ vivent dans `src/data/` et ont été retirés des docs, qui gardent les règles, les effets et le lore.
+- Un effet chiffré encore décrit dans les docs (passif, service, formule, événement) migre dans `src/data/` ou `src/engine/` quand le moteur l'implémente, et disparaît alors des docs.
+- `src/data/data.test.ts` vérifie la cohérence des données avec les règles du design (Tier 0 seul Légal, Production et Forte demande disjointes, carte connexe…).
+
 Conventions du moteur :
 
 - **Pureté :** une action produit un nouvel état, sans effet de bord. L'aléatoire passe par `createRng(state.rng)` et son état est réécrit dans `GameState`.

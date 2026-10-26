@@ -3,7 +3,7 @@
 * **Single-Page Application** réactive, écran unique responsive : mobile-first en portrait (onglets rapides en bas d'écran), panneaux côte à côte sur desktop / paysage.
 * **Aucun chiffre codé en dur :** boutons et panneaux affichent les valeurs calculées depuis les règles du jour (inflation comprise).
 * **Principe de transparence — « zéro calculatrice, zéro boîte noire » :** chaque probabilité, prix ou coût affiché peut être touché pour révéler son **détail ligne par ligne**, avec la source de chaque ligne (district, tag, module, équipier, événement…). Le joueur occasionnel lit le total ; le joueur optimisateur lit le détail et ajuste son build.
-  * *Ex. (risque) :* « Base D5 40 % · Suspicion +10 % · Tech (4/12) +16,7 % · Couverture légale −10 % = 56,7 % · Zéro-C ×0,85 = **48 %** ».
+  * *Ex. (risque, valeurs indicatives) :* « Base D5 40 % · Suspicion +10 % · Tech (4/12) +16,7 % · Couverture légale −10 % = 56,7 % · Zéro-C ×0,85 = **48 %** ».
 
 ## Bandeau supérieur permanent & briefing de 06h00
 * **Téléscripteur d'Aeterna (Flash Info TV) :** messages passifs-agressifs, **indice d'inflation du jour**, événement global, événements locaux du jour.

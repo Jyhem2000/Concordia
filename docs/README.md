@@ -20,16 +20,22 @@
 
 ## Règles de rédaction
 1. **Un chiffre, un seul endroit.** Une valeur (prix, %, durée…) n'est écrite que là où la donnée est définie. Un bonus est écrit chez ce qui le produit (le module, le véhicule, l'événement…) ; les formules ne font que citer la source.
-2. **IDs réservés aux données de jeu** — les entités qui auront des stats et des effets en base :
+   * **Le code fait foi pour les stats.** Les caractéristiques des données de jeu (prix, tags, coefficients, listes de production, capacités, valeurs de départ…) vivent dans `src/data/` et n'apparaissent plus dans ces docs, qui gardent les règles, les effets et le lore.
+   * Un effet chiffré encore décrit ici (passif, service, formule, événement) migre dans le code quand le moteur l'implémente, et disparaît alors des docs.
+   * Les exemples chiffrés sont des illustrations : en cas d'écart, le code fait foi.
+   * Les textes affichés en jeu (noms, messages) sont dans `src/i18n/fr.ts`. Les noms restent cités ici pour la lisibilité.
+2. **IDs réservés aux données de jeu** — les entités qui ont des stats et des effets :
 
-| ID | Donnée | Défini dans |
-| :--- | :--- | :--- |
-| `T0-01` … `T4-06` | Produits | chap. 3 |
-| `TAG-*` | Tags | chap. 3 |
-| `D1` … `D6` | Districts | chap. 4 |
-| `LOC-Dx-y` | Lieux spéciaux | chap. 4 |
-| `VEH-*`, `MOD-*`, `CREW-*` | Véhicules, modules, équipiers | chap. 5 |
-| `EVT-G*`, `EVT-Dx-*`, `EVT-R*`, `EVT-L*` | Événements | chap. 8 |
+| ID | Donnée | Règles | Stats (font foi) |
+| :--- | :--- | :--- | :--- |
+| `T0-01` … `T4-06` | Produits et tiers | chap. 3 | [`products.ts`](../src/data/products.ts) |
+| `TAG-*` | Tags | chap. 3 | — |
+| `D1` … `D6` | Districts et carte | chap. 4 | [`districts.ts`](../src/data/districts.ts) |
+| `LOC-Dx-y` | Lieux spéciaux | chap. 4 | — |
+| `VEH-*`, `MOD-*`, `CREW-*` | Véhicules, modules, équipiers | chap. 5 | [`vehicles.ts`](../src/data/vehicles.ts) |
+| `EVT-G*`, `EVT-Dx-*`, `EVT-R*`, `EVT-L*` | Événements | chap. 8 | — |
+
+Constantes globales (valeurs de départ…) : [`balance.ts`](../src/data/balance.ts).
 
 3. Hors de son chapitre, une donnée à ID est citée **par son ID seul** (pas de libellé ni de stat recopiés).
 4. Les montants en ₡ des services et frais sont des **valeurs de base au Jour 1**, indexées sur l'inflation (chap. 7).
