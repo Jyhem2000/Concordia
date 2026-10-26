@@ -56,21 +56,11 @@ export type BreakdownBuilder = {
   build(): Breakdown
 }
 
-export function breakdown(
-  source: BreakdownSource,
-  base: Operand,
-  params?: BreakdownParams,
-): BreakdownBuilder {
+export function breakdown(source: BreakdownSource, base: Operand, params?: BreakdownParams): BreakdownBuilder {
   const lines: BreakdownLine[] = []
   let total = 0
 
-  const push = (
-    op: BreakdownOp,
-    source: BreakdownSource,
-    operand: Operand,
-    next: (value: number) => number,
-    params?: BreakdownParams,
-  ) => {
+  const push = (op: BreakdownOp, source: BreakdownSource, operand: Operand, next: (value: number) => number, params?: BreakdownParams) => {
     const value = typeof operand === 'number' ? operand : operand.total
     total = next(value)
     lines.push({
@@ -90,13 +80,11 @@ export function breakdown(
       return total
     },
     add(source, term, params) {
-      if (typeof term !== 'number' || term !== 0)
-        push('add', source, term, (v) => total + v, params)
+      if (typeof term !== 'number' || term !== 0) push('add', source, term, (v) => total + v, params)
       return builder
     },
     mul(source, factor, params) {
-      if (typeof factor !== 'number' || factor !== 1)
-        push('mul', source, factor, (v) => total * v, params)
+      if (typeof factor !== 'number' || factor !== 1) push('mul', source, factor, (v) => total * v, params)
       return builder
     },
     set(source, value, params) {

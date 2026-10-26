@@ -12,34 +12,19 @@ describe('breakdown', () => {
       .build()
 
     expect(risk.total).toBeCloseTo(0.48195)
-    expect(risk.lines.map((line) => line.source)).toEqual([
-      'D5',
-      'rule.suspicion',
-      'TAG-TECH',
-      'TAG-LEGAL',
-      'VEH-02',
-    ])
+    expect(risk.lines.map((line) => line.source)).toEqual(['D5', 'rule.suspicion', 'TAG-TECH', 'TAG-LEGAL', 'VEH-02'])
     expect(risk.lines[3].total).toBeCloseTo(0.567)
     expect(risk.lines[2].params).toEqual({ count: 4, cargo: 12 })
   })
 
   it("n'enregistre pas les lignes sans effet", () => {
-    const result = breakdown('D1', 0.1)
-      .add('rule.suspicion', 0)
-      .mul('VEH-01', 1)
-      .set('EVT-D5-02', 0.1)
-      .clamp(0, 1)
-      .build()
+    const result = breakdown('D1', 0.1).add('rule.suspicion', 0).mul('VEH-01', 1).set('EVT-D5-02', 0.1).clamp(0, 1).build()
 
     expect(result.lines).toHaveLength(1)
   })
 
   it("enregistre le plafonnement quand il s'applique", () => {
-    const result = breakdown('D6', 0.55)
-      .add('rule.night', 0.25)
-      .add('T4-06', 0.3)
-      .clamp(0, 1)
-      .build()
+    const result = breakdown('D6', 0.55).add('rule.night', 0.25).add('T4-06', 0.3).clamp(0, 1).build()
 
     expect(result.total).toBe(1)
     expect(result.lines.at(-1)).toMatchObject({ op: 'clamp', source: 'rule.clamp', total: 1 })

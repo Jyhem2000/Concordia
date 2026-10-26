@@ -27,6 +27,12 @@ Conventions du moteur :
 - **Transparence :** tout calcul affiché au joueur renvoie un `Breakdown` (total + lignes sourcées), pour le détail « zéro boîte noire » (chap. 9).
 - **Unités :** probabilités et multiplicateurs en fractions (`0.25`), jauges sur l'échelle des docs (ICC 0–100), montants en ₡ entiers.
 
+Traductions :
+
+- **Un seul fichier par langue :** `src/i18n/fr.ts` est le catalogue de référence (tous les textes, indexés par les IDs des docs). L'anglais se fera en copiant ce fichier en `en.ts` (`satisfies Messages` : toute clé manquante casse la compilation), puis en l'ajoutant à `locales` dans `src/i18n/index.ts`.
+- **Aucun texte en dur dans les composants :** `const { t, credits, percent, label } = useI18n()`. Les nombres passent par les formateurs (`credits(2500)` → « 2 500 ₡ »), les lignes de `Breakdown` par `label(source)`.
+- Le moteur ne manipule jamais de texte, seulement des IDs.
+
 ## Scripts
 
 | Commande               | Rôle                                 |
