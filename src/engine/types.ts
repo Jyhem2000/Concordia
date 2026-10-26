@@ -1,0 +1,92 @@
+import type { RngState } from './rng.ts'
+
+/*
+ * Conventions d'unités du moteur :
+ * - les probabilités et les multiplicateurs sont des fractions (25 % → 0.25, ×0,85 → 0.85) ;
+ * - les jauges (ICC, Santé, châssis) sont sur leur échelle des docs : ICC 0–100, Santé 0–100 PV ;
+ * - les montants sont en ₡ entiers.
+ */
+
+// ─── IDs des données de jeu (registre : README des docs, règle n°2) ───
+// Les fichiers de src/data/ doivent couvrir chaque union (`satisfies Record<…Id, …>`).
+
+type Two = '01' | '02'
+type Three = Two | '03'
+type Four = Three | '04'
+type Six = Four | '05' | '06'
+type Seven = Six | '07'
+type Eight = Seven | '08'
+
+export type Tier = 0 | 1 | 2 | 3 | 4
+
+/** Produits (chap. 3) */
+export type ProductId = `T0-${Four}` | `T1-${Six}` | `T2-${Seven}` | `T3-${Seven}` | `T4-${Six}`
+
+/** Tags système (chap. 3) */
+export type TagId =
+  | 'TAG-LEGAL'
+  | 'TAG-PERISHABLE'
+  | 'TAG-FRAGILE'
+  | 'TAG-ADDICTIVE'
+  | 'TAG-ODOROUS'
+  | 'TAG-CULTURE'
+  | 'TAG-TECH'
+  | 'TAG-CHEMICAL'
+  | 'TAG-FLAMMABLE'
+
+/** Districts (chap. 4) */
+export type DistrictId = `D${1 | 2 | 3 | 4 | 5 | 6}`
+
+/** Lieux spéciaux (chap. 4) */
+export type LocationId =
+  | 'LOC-D1-1'
+  | 'LOC-D1-2'
+  | 'LOC-D2-1'
+  | 'LOC-D3-1'
+  | 'LOC-D4-1'
+  | 'LOC-D4-2'
+  | 'LOC-D5-1'
+  | 'LOC-D6-1'
+
+/** Véhicules, modules, équipiers (chap. 5) */
+export type VehicleId = `VEH-${Four}`
+export type ModuleId = `MOD-${Eight}`
+export type CrewId = `CREW-${Three}`
+
+/** Événements (chap. 8) */
+export type GlobalEventId = `EVT-G${Six}`
+export type LocalEventId = `EVT-${DistrictId}-${Three}`
+export type RoadEventId = `EVT-R${Eight | '09' | '10' | '11' | '12' | '13' | '14' | '15'}`
+export type LotteryEventId = 'EVT-L01'
+export type EventId = GlobalEventId | LocalEventId | RoadEventId | LotteryEventId
+
+export type GameDataId =
+  ProductId | TagId | DistrictId | LocationId | VehicleId | ModuleId | CrewId | EventId
+
+// ─── État de la partie ───
+
+/** Service de jour (06h00 – 20h00) ou couvre-feu forcé (chap. 2) */
+export type Phase = 'day' | 'night'
+
+/**
+ * État minimal et sérialisable d'une partie : c'est lui qui est sauvegardé.
+ * Les valeurs dérivées (risque, prix nets…) ne sont jamais stockées, elles se recalculent.
+ */
+export type GameState = {
+  /** Jour 1 à 30 */
+  day: number
+  phase: Phase
+  districtId: DistrictId
+  /** Cash-Puce */
+  cash: number
+  /** Solde de la dette mafieuse */
+  debt: number
+  /** Solde du compte offshore */
+  offshore: number
+  /** Indice de Conformité Civique, 0–100 */
+  icc: number
+  /** Santé du joueur, 0–100 PV */
+  health: number
+  /** État du générateur aléatoire : sauvegardé pour que recharger ne relance pas les dés */
+  rng: RngState
+}

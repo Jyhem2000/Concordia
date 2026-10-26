@@ -1,31 +1,30 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
+import { randomSeed } from '../engine/rng.ts'
+import { createInitialState } from '../engine/state.ts'
+import type { GameState } from '../engine/types.ts'
 
-type GameState = {
-  day: number
+type GameStore = {
+  /** État de la partie, remplacé en bloc par le moteur à chaque action */
+  game: GameState
+  newGame: () => void
 }
 
-type GameActions = {
-  reset: () => void
-}
-
-const initialState: GameState = {
-  day: 1,
-}
-
-export const useGameStore = create<GameState & GameActions>()(
+export const useGameStore = create<GameStore>()(
   persist(
     (set) => ({
-      ...initialState,
-      reset: () => set(initialState),
+      game: createInitialState(randomSeed()),
+      newGame: () => set({ game: createInitialState(randomSeed()) }),
     }),
     {
       name: 'concordia-save',
       storage: createJSONStorage(() => localStorage),
       // Incrémenter à chaque changement de forme de GameState et gérer la migration
-      version: 1,
+      version: 2,
+      // Pas de migration avant la première version publique : une sauvegarde obsolète repart de zéro
+      migrate: () => ({ game: createInitialState(randomSeed()) }),
       // Seules les données sont sauvegardées, pas les actions
-      partialize: ({ day }) => ({ day }),
+      partialize: ({ game }) => ({ game }),
     },
   ),
 )

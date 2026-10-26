@@ -9,6 +9,23 @@ Simulation économique satirique (Drug Wars-like). Game design : [docs/](docs/RE
 - Zustand + middleware `persist` pour l'état et la sauvegarde (`src/stores/`)
 - Motion (ex-Framer Motion) pour les animations : `import { motion } from 'motion/react'`
 - lucide-react pour les icônes
+- Vitest pour les tests du moteur
+
+## Arborescence
+
+| Dossier       | Rôle                                                                                     |
+| :------------ | :--------------------------------------------------------------------------------------- |
+| `src/data/`   | Contenu fixe du jeu, indexé par les IDs des docs (produits, districts, constantes…)      |
+| `src/engine/` | Règles pures, sans React et testées : types, RNG à graine, `Breakdown`, calculs, actions |
+| `src/stores/` | Stores Zustand : état de la partie sauvegardé, réglages                                  |
+| `src/i18n/`   | Textes traduits, clés dérivées des IDs                                                   |
+| `src/ui/`     | Composants React, découpés comme le chap. 9 (bandeau, marché, soute, carte…)             |
+
+Conventions du moteur :
+
+- **Pureté :** une action produit un nouvel état, sans effet de bord. L'aléatoire passe par `createRng(state.rng)` et son état est réécrit dans `GameState`.
+- **Transparence :** tout calcul affiché au joueur renvoie un `Breakdown` (total + lignes sourcées), pour le détail « zéro boîte noire » (chap. 9).
+- **Unités :** probabilités et multiplicateurs en fractions (`0.25`), jauges sur l'échelle des docs (ICC 0–100), montants en ₡ entiers.
 
 ## Scripts
 
@@ -17,5 +34,7 @@ Simulation économique satirique (Drug Wars-like). Game design : [docs/](docs/RE
 | `npm run dev`          | Serveur de dev                       |
 | `npm run build`        | Vérification TypeScript + build      |
 | `npm run lint`         | ESLint                               |
+| `npm test`             | Tests Vitest (une passe)             |
+| `npm run test:watch`   | Tests Vitest en continu              |
 | `npm run format`       | Formate tout le projet avec Prettier |
 | `npm run format:check` | Vérifie le formatage sans modifier   |
