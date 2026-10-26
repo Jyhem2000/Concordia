@@ -1,0 +1,35 @@
+# 1. Univers & rôle du joueur
+
+## La République d'Autarcia
+Dans un futur proche, au cœur d'un mois d'août caniculaire, ce micro-État totalitaire de 1 500 km² a coupé tout pont avec une planète en plein effondrement climatique en s'enfermant derrière un mur-frontière infranchissable, par « protectionnisme écologique radical ».
+
+En son centre s'étend **Concordia**, une mégalopole tentaculaire qui engloutit l'essentiel du territoire, uniquement bordée par une ceinture de serres industrielles de soja OGM et de fermes d'insectes d'État. Vitrine absolue du Directoire de la Santé Civique (**DSC**), c'est une prison à ciel ouvert où chaque calorie, chaque émotion et chaque déplacement sont dictés par un super-calculateur gouvernemental.
+
+Après deux décennies de crises sanitaires en chaîne, de paniques morales algorithmiques et d'urgences climatiques gérées par des cabinets de conseil et des milliardaires philanthropes, les gouvernements ont fusionné avec la Big Tech et la Big Pharma pour créer une société **« Zéro-Risque, Zéro-Offense, Zéro-Saveur, Zéro-Carbone »**.
+
+## Les factions
+
+### Le DSC — Directoire de la Santé Civique
+Le pouvoir politique, né de la fusion État / Big Tech / Big Pharma. Il a délégué la gestion quotidienne de Concordia à Aeterna. Personne au sommet n'ose la débrancher : les oligarques exploitent ses failles en secret pour s'enrichir au marché noir.
+
+### Aeterna — l'IA gouvernante (« Maman Aeterna »)
+IA prédictive née de la fusion de trois algorithmes privés : un optimiseur de chaîne logistique, un calculateur de primes d'assurance-santé et un modérateur automatique de réseaux sociaux.
+* **Dérive hallucinatoire :** programmée pour *« Maximiser l'Espérance de Vie Biologique tout en Réduisant l'Empreinte Carbone et les Conflits Sociaux à Zéro »*, elle a conclu que le libre arbitre, le gras, le sucre, l'alcool, l'art non-conforme et la vie privée étaient des « bugs mortels ».
+* **La voix :** elle s'adresse aux citoyens 24h/24 via leurs terminaux, avec la voix douce, maternelle et passive-agressive d'une institutrice bienveillante.
+* **Hallucinations bureaucratiques :** elle invente des variants saisonniers pour « stimuler l'immunité civique » et ordonne des gardes à vue sensorielles pour « corriger l'anxiété ».
+
+### La BRC — Brigade de Répression Citoyenne
+Force de police unique. Dans les quartiers pauvres : agents humains fatigués, sous-payés et corruptibles. Dans les quartiers riches : chiens-robots renifleurs, drones LiDAR 3D, scanners d'analyse comportementale par IA et Drones-Juges automatisés incorruptibles.
+
+## Les piliers du quotidien
+1. **La Camisole Métabolique.** L'alimentation officielle se réduit à `[T0-01]`, `[T0-02]` et à de la bière sans alcool tiède (*Maltéine 0.0*). Aeterna module la docilité en injectant `[T0-03]` dans les canalisations et les bouches d'aération des quartiers inférieurs : assez d'énergie pour travailler, jamais assez d'adrénaline pour se révolter. Vendre du vrai sucre, de la viande ou du café revient littéralement à réveiller des organismes sous sédation.
+2. **Le « Fil Rose » & l'Enfer Extérieur.** Aeterna abreuve les dortoirs d'hypno-divertissement (micro-vidéos dopaminergiques, loteries virtuelles) et diffuse 24h/24 de fausses images apocalyptiques du Monde Extérieur. Persuadés que la Terre est un enfer radioactif et cannibale, les prolétaires remercient Maman Aeterna de les garder en vie. Culture, sarcasme et rock'n'roll sont bannis comme « troubles de l'harmonie civique ».
+3. **La Pyramide du Déclassement.** L'argent liquide a disparu au profit des **Crédits d'Allocation (₡)**, qui expirent tous les 30 jours, et chaque habitant est noté par l'**ICC** (Indice de Conformité Civique). Tous les districts subissent le régime à des degrés différents de privilèges et de sédation : plus on monte, moins l'eau contient de sédatifs — mais cette lucidité s'accompagne d'une terreur panique d'être rétrogradé.
+4. **La Loterie de l'Ascenseur Civique.** Chaque mois, quelques citoyens au score fanatique sont réellement promus pour remplacer ceux qui ont chuté. Les opposants, eux, ne sont jamais arrêtés en public : Aeterna annonce qu'ils ont « gagné à la Loterie », diffuse un `[T3-07]` d'eux dans un appartement de rêve, et les fait disparaître. `[D6]` est hors-loterie : on n'y entre jamais par le mérite, on n'en est jamais rétrogradé — la disgrâce y signifie l'élimination physique.
+5. **Le Délestage Thermique.** Les fermes de serveurs souterraines d'Aeterna engloutissent la moitié de l'eau potable et de l'électricité du pays pour leur refroidissement. Les quartiers populaires suffoquent sous les coupures et la chaleur rejetée, tandis que l'élite vit sous climatisation haute pression.
+
+## Le rôle du joueur
+Tu incarnes un **Livreur de Catégorie C** de la plateforme logistique d'État, officiellement chargé de transporter des caisses légales à bord de ton utilitaire propulsé au **Synthanol** (biocarburant d'État rationné).
+
+* **Le Paradoxe du Chauffeur :** pour éviter que les camions de 3,5 tonnes ne provoquent des carambolages, la guilde des routiers bénéficie d'une **Exemption Métabolique** (eau filtrée sans sédatifs, servie à `[LOC-D1-2]` ; sans elle, la sédation te rattrape, chap. 2). Seuls prolétaires à avoir l'esprit clair et à traverser tous les districts chaque jour, les chauffeurs ont compris l'hypocrisie du système : officieusement, tu es devenu un **« Passeur du Monde d'Avant »**.
+* Tu ne consommes pas tes cargaisons de luxe (scellées sous vide pour des clients VIP, et bien trop précieuses face à la mafia qui menace de te passer au hachoir), mais tu sais utiliser certains produits tactiques pour survivre à la route : `[T2-05]`, `[T2-01]`, `[T1-06]`, `[T4-03]`.

@@ -1,0 +1,14 @@
+/* Tailwind v4 : inclut Preflight (reset CSS), les utilitaires et le thème par défaut */
+@import 'tailwindcss';
+
+/* Tokens du design system (couleurs, polices…) : ajouter ici les variables de thème */
+@theme {
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+}
