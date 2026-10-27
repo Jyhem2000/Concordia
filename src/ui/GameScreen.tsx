@@ -9,11 +9,14 @@ import TravelPanel from './map/TravelPanel.tsx'
 import MarketPanel from './market/MarketPanel.tsx'
 import ObjectivesPanel from './objectives/ObjectivesPanel.tsx'
 import PlacesPanel from './places/PlacesPanel.tsx'
+import RoadEventScreen from './road/RoadEventScreen.tsx'
+import RoadReportPanel from './road/RoadReportPanel.tsx'
 
-/** Écran unique : bandeau en haut, marché à gauche ; briefing, guichets, fin de journée et carte à droite (chap. 10). Un barrage prend tout l'écran. */
+/** Écran unique : bandeau en haut, marché à gauche ; briefing, guichets, fin de journée et carte à droite (chap. 10). Un barrage ou un aléa routier prend tout l'écran. */
 export default function GameScreen() {
   const finished = useGameStore((s) => s.game.status === 'finished')
   const intercepted = useGameStore((s) => s.game.interception !== null)
+  const roadEvent = useGameStore((s) => s.game.roadEvent !== null)
 
   return (
     <div className="flex min-h-full flex-col">
@@ -22,6 +25,8 @@ export default function GameScreen() {
         <EndScreen />
       ) : intercepted ? (
         <InterceptionScreen />
+      ) : roadEvent ? (
+        <RoadEventScreen />
       ) : (
         <main className="mx-auto grid w-full max-w-7xl flex-1 gap-4 p-4 md:grid-cols-5">
           <div className="min-w-0 md:col-span-3">
@@ -29,6 +34,7 @@ export default function GameScreen() {
           </div>
           <div className="flex min-w-0 flex-col gap-4 md:col-span-2">
             <InterceptionReportPanel />
+            <RoadReportPanel />
             <BriefingPanel />
             <PlacesPanel />
             <EveningPanel />

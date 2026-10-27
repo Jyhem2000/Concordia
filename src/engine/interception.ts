@@ -7,11 +7,13 @@ import type { ActionError } from './actions.ts'
 import { breakdown, type Breakdown } from './breakdown.ts'
 import { baseValue, cargoUsed, giveCrates, isIllegal, maskedQty, ownedQty, ownsCrates, tagShare, tierShare } from './cargo.ts'
 import { breakOnFlee, breakOnShock, crateValue, explodeFlammable, paymentValue } from './condition.ts'
+import { arrive, tagFactor } from './events.ts'
 import { changeHealth, gainRouteIcc } from './gauges.ts'
 import { indexed } from './inflation.ts'
 import { keysOf } from './records.ts'
 import { createRng, type Rng } from './rng.ts'
 import { serveCustody } from './routine.ts'
+import { loseHalfDay } from './time.ts'
 import type { CargoLot, CrateCount, GameState, Interception, InterceptionMove, InterceptionReport, Offer, ProductId, Tactics } from './types.ts'
 
 /*
@@ -109,7 +111,7 @@ export function bluffChance(state: GameState, { bluffAids = [] }: Tactics = NO_T
   for (const tag of keysOf(TAGS)) {
     const { bluffMalus, smell } = TAGS[tag]
     if (!bluffMalus) continue
-    const malus = bluffMalus * tagShare(cargo, tag) * (smell ? DISTRICTS[state.districtId].odorFactor : 1)
+    const malus = bluffMalus * tagShare(cargo, tag) * tagFactor(state, state.districtId, tag, smell ? DISTRICTS[state.districtId].odorFactor : 1)
     // Une aide qui neutralise les chiens-robots annule le malus d'odeur
     chance.add(tag, smell && cancelsSmell ? 0 : -malus)
   }
@@ -470,7 +472,8 @@ function finish(state: GameState, report: InterceptionReport, executed: boolean)
   if (!report.over) return { ...towed.state, interceptionReport: fullReport }
 
   const passed: GameState = { ...towed.state, interception: null, interceptionReport: fullReport }
-  return report.custodyDays > 0 ? serveCustody(passed, report.custodyDays) : passed
+  // Barrage franchi : le trajet s'achève par l'arrivée ; la garde à vue, elle, s'achève à 20h00 au poste
+  return report.custodyDays > 0 ? serveCustody(passed, report.custodyDays) : arrive(passed)
 }
 
 function endGame(state: GameState, report: InterceptionReport, id: 'execution' | 'death'): GameState {
@@ -484,10 +487,7 @@ export function emergencyTow(state: GameState): { state: GameState; bill: number
   const paid = Math.min(state.cash, bill)
   const chassis = Math.round(VEHICLES[state.vehicleId].maxChassis * EMERGENCY_TOW.chassisRestore)
   const towed: GameState = { ...state, chassis, cash: state.cash - paid, debt: state.debt + bill - paid }
-  // De jour, le joueur passe à 20h00 ; de nuit, il est immobilisé le lendemain (et se repose)
-  const halfDayLost: GameState =
-    state.phase === 'day' ? { ...towed, dayTripDone: true, dayOver: true } : { ...towed, immobilizedTomorrow: true, lastCurfewDay: null }
-  return { state: halfDayLost, bill }
+  return { state: loseHalfDay(towed), bill }
 }
 
 /** Tirage du barrage à l'arrivée d'un trajet : renvoie l'interception qui commence, ou null */

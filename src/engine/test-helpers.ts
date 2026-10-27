@@ -52,10 +52,26 @@ export const HIGH_ROLL_RNG = findRng((draw) => draw >= 0.99)
 /** Tirage bas : barrage assuré au prochain trajet, succès de la prochaine option tentée */
 export const LOW_ROLL_RNG = findRng((draw) => draw < 0.01)
 
-/** Enchaîne des actions en acceptant la fouille à chaque barrage rencontré */
+/** Enchaîne des actions en acceptant la fouille à chaque barrage, et la première option possible à chaque aléa routier */
 export function play(state: GameState, ...actions: Action[]): GameState {
   return actions.reduce((current, action) => {
     const next = run(current, action)
-    return next.interception ? run(next, { type: 'intercept', move: 'search' }) : next
+    const searched = next.interception ? run(next, { type: 'intercept', move: 'search' }) : next
+    return searched.roadEvent ? settleRoad(searched) : searched
   }, state)
+}
+
+const ROAD_TRIES: readonly Action[] = [
+  { type: 'road', choice: 'a', pay: 0 },
+  { type: 'road', choice: 'a', pay: 1 },
+  { type: 'road', choice: 'b', pay: 0 },
+]
+
+/** Règle un aléa routier par la première option possible */
+export function settleRoad(state: GameState): GameState {
+  const action = defined(
+    ROAD_TRIES.find((tried) => errorOf(state, tried) === null),
+    'option d’aléa possible',
+  )
+  return run(state, action)
 }

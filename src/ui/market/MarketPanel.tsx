@@ -4,7 +4,7 @@ import { FRESHNESS } from '../../data/balance.ts'
 import { checkUseProduct, maxBuy } from '../../engine/actions.ts'
 import { freshnessOf } from '../../engine/condition.ts'
 import { averageCost, ownedQty } from '../../engine/cargo.ts'
-import { demandQuota, demandRefill, productStatus, quoteBreakdown, saleQuote, shopProducts } from '../../engine/market.ts'
+import { demandQuota, demandRefill, productStatus, quote, quoteBreakdown, saleQuote, shopProducts } from '../../engine/market.ts'
 import type { FreshnessStage, ProductId, Tier } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -74,15 +74,20 @@ export default function MarketPanel() {
 function MarketRow({ productId }: MarketRowProps) {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
-  const { t, credits } = useI18n()
+  const { t, credits, signedPercent } = useI18n()
 
   const product = PRODUCTS[productId]
   const district = game.districtId
   const stock = game.markets[district].stock[productId]
   const owned = ownedQty(game.cargo, productId)
   const cost = averageCost(game.cargo, productId)
-  const status = productStatus(district, productId)
-  const quota = demandQuota(district, productId)
+  const status = productStatus(game, district, productId)
+  const quota = demandQuota(game, district, productId)
+  // Tendance : variation depuis le relevé de la veille dans ce district (chap. 7)
+  const history = game.memory[district] ?? []
+  const yesterday = history.find((seen) => seen.day === game.day - 1)?.quotes[productId]
+  const today = quote(game, district, productId)
+  const trend = yesterday ? today / yesterday - 1 : null
   const demandLeft = game.markets[district].demand[productId]
   const buyMax = maxBuy(game, productId)
   const sale = owned > 0 ? saleQuote(game, productId, 1) : null
@@ -122,6 +127,9 @@ function MarketRow({ productId }: MarketRowProps) {
       <dl className="mt-1 grid grid-cols-2 gap-x-4 gap-y-0.5 text-sm sm:grid-cols-4">
         <Field label={t.market.quote}>
           <Detailed breakdown={quoteBreakdown(game, district, productId)} format={credits} />
+          {trend !== null && trend !== 0 && (
+            <span className={`ml-1 text-xs ${trend > 0 ? 'text-green-300' : 'text-red-300'}`}>{t.market.trend(signedPercent(trend, 0))}</span>
+          )}
         </Field>
         <Field label={t.market.stock}>{stock === undefined ? <span className="text-zinc-500">{t.market.notInShop}</span> : stock}</Field>
         <Field label={t.market.demand}>

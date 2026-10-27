@@ -12,12 +12,14 @@ import {
   SHOP_MIN_PRODUCTS,
 } from '../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../data/districts.ts'
+import { EVENT_MULT_CAP } from '../data/events.ts'
 import { PRODUCT_IDS, PRODUCTS, TIERS } from '../data/products.ts'
-import { breakdown, type Breakdown, type RuleSource } from './breakdown.ts'
+import { breakdown, type Breakdown, type BreakdownBuilder, type RuleSource } from './breakdown.ts'
 import { takeLots } from './cargo.ts'
 import { freshnessFactor, freshnessOf } from './condition.ts'
 import { indexed } from './inflation.ts'
 import { recordOf } from './records.ts'
+import { drawAppearances, eventMultiplier, hasVice, stockFactor, type EventContext } from './events.ts'
 import type { Rng } from './rng.ts'
 import type { CargoLot, DistrictId, DistrictMarket, FreshnessStage, GameState, MarketMemory, ProductId } from './types.ts'
 
@@ -27,18 +29,19 @@ import type { CargoLot, DistrictId, DistrictMarket, FreshnessStage, GameState, M
 
 export type ProductStatus = 'production' | 'neutral' | 'strong'
 
-export function productStatus(districtId: DistrictId, productId: ProductId): ProductStatus {
+/** Statut public d'un produit dans un district ; les vices de la Loterie y ajoutent une Forte demande (chap. 8) */
+export function productStatus(ctx: EventContext, districtId: DistrictId, productId: ProductId): ProductStatus {
   const district = DISTRICTS[districtId]
   if (district.production.includes(productId)) return 'production'
-  if (district.strongDemand.includes(productId)) return 'strong'
+  if (district.strongDemand.includes(productId) || hasVice(ctx, districtId, productId)) return 'strong'
   return 'neutral'
 }
 
 /** Quota de demande d'un produit dans un district ; null = illimité */
-export function demandQuota(districtId: DistrictId, productId: ProductId): number | null {
+export function demandQuota(ctx: EventContext, districtId: DistrictId, productId: ProductId): number | null {
   const quota = TIERS[PRODUCTS[productId].tier].demandQuota
   if (!quota) return null
-  return productStatus(districtId, productId) === 'strong' ? quota.strong : quota.neutral
+  return productStatus(ctx, districtId, productId) === 'strong' ? quota.strong : quota.neutral
 }
 
 /** Demande reconstituée chaque matin */
@@ -48,7 +51,7 @@ export function demandRefill(quota: number): number {
 
 // ─── Tirage de 06h00 ───
 
-function drawShop(districtId: DistrictId, rng: Rng): Partial<Record<ProductId, number>> {
+function drawShop(ctx: EventContext, districtId: DistrictId, rng: Rng): Partial<Record<ProductId, number>> {
   const district = DISTRICTS[districtId]
   // Socle officiel : tout le Tier 0, partout
   const shop = new Set<ProductId>(PRODUCT_IDS.filter((id) => PRODUCTS[id].tier === 0))
@@ -64,16 +67,20 @@ function drawShop(districtId: DistrictId, rng: Rng): Partial<Record<ProductId, n
   const neutrals = rng.shuffle(
     PRODUCT_IDS.filter((id) => {
       const tier = PRODUCTS[id].tier
-      return tier >= 1 && tier <= 3 && !shop.has(id) && productStatus(districtId, id) === 'neutral'
+      return tier >= 1 && tier <= 3 && !shop.has(id) && productStatus(ctx, districtId, id) === 'neutral'
     }),
   )
   while (shop.size < SHOP_MIN_PRODUCTS && neutrals.length > 0) shop.add(neutrals.pop()!)
+
+  // Apparitions à l'achat des événements : dérogation à l'exclusion (chap. 8)
+  for (const id of drawAppearances(ctx, districtId, rng)) shop.add(id)
 
   const stock: Partial<Record<ProductId, number>> = {}
   for (const id of shop) {
     const product = PRODUCTS[id]
     const range = product.dailyStock ?? TIERS[product.tier].dailyStock
-    stock[id] = rng.int(range.min, range.max)
+    // Facteur de stock des événements : arrondi au supérieur, au moins 1
+    stock[id] = Math.max(1, Math.ceil(rng.int(range.min, range.max) * stockFactor(ctx, districtId, id)))
   }
   return stock
 }
@@ -83,33 +90,50 @@ export function shopProducts(market: DistrictMarket): ProductId[] {
   return PRODUCT_IDS.filter((id) => market.stock[id] !== undefined)
 }
 
-/** Marché du jour d'un district. Sans marché de la veille, la demande est pleine (Jour 1). */
-export function drawMarket(districtId: DistrictId, rng: Rng, previous?: DistrictMarket): DistrictMarket {
-  const noise = recordOf(PRODUCT_IDS, () => rng.float(QUOTE_NOISE.min, QUOTE_NOISE.max))
+/**
+ * Marché du jour d'un district. Sans marché de la veille (Jour 1), la demande est pleine et l'écart de tendance
+ * tiré entre ses bornes ; ensuite, l'écart garde une part de celui de la veille, plus un choc (chap. 7).
+ */
+export function drawMarket(ctx: EventContext, districtId: DistrictId, rng: Rng, previous?: DistrictMarket): DistrictMarket {
+  const { persistence, shock, max } = QUOTE_NOISE
+  const noise = recordOf(PRODUCT_IDS, (id) => {
+    const before = previous?.noise[id]
+    const gap = before === undefined ? rng.float(-max, max) : (before - 1) * persistence + rng.float(-shock, shock)
+    return 1 + Math.min(max, Math.max(-max, gap))
+  })
   const demand: Partial<Record<ProductId, number>> = {}
   for (const id of PRODUCT_IDS) {
-    const quota = demandQuota(districtId, id)
+    const quota = demandQuota(ctx, districtId, id)
     if (quota !== null) {
       const left = previous?.demand[id]
       demand[id] = left === undefined ? quota : Math.min(quota, left + demandRefill(quota))
     }
   }
-  return { noise, stock: drawShop(districtId, rng), demand }
+  return { noise, stock: drawShop(ctx, districtId, rng), demand }
 }
 
-export function drawMarkets(rng: Rng, previous?: Record<DistrictId, DistrictMarket>): Record<DistrictId, DistrictMarket> {
-  return recordOf(DISTRICT_IDS, (id) => drawMarket(id, rng, previous?.[id]))
+export function drawMarkets(ctx: EventContext, rng: Rng, previous?: Record<DistrictId, DistrictMarket>): Record<DistrictId, DistrictMarket> {
+  return recordOf(DISTRICT_IDS, (id) => drawMarket(ctx, id, rng, previous?.[id]))
 }
 
 // ─── Cours et prix ───
 
-/** Cours du jour = Arrondi( Prix_Base × Coef_District × Bruit ) */
+/** Cours du jour = Arrondi( Prix_Base × Coef_District × Bruit × Mult_Événement ) */
 export function quoteBreakdown(state: GameState, districtId: DistrictId, productId: ProductId): Breakdown {
+  const quote = districtQuote(state, districtId, productId)
+  quote.mul('rule.noise', state.markets[districtId].noise[productId])
+  // Mult_Événement : le multiplicateur retenu, plafonné (chap. 7 et 8)
+  const event = eventMultiplier(state, districtId, productId)
+  if (event) quote.mul(event.source, Math.min(EVENT_MULT_CAP, event.factor))
+  return quote.round().build()
+}
+
+/** Prix de base × Coef_District : le cours normal, sans tendance ni événement */
+function districtQuote(ctx: EventContext, districtId: DistrictId, productId: ProductId): BreakdownBuilder {
   const product = PRODUCTS[productId]
   const district = DISTRICTS[districtId]
   const quote = breakdown(productId, product.basePrice)
-
-  const status = productStatus(districtId, productId)
+  const status = productStatus(ctx, districtId, productId)
   if (status === 'production') quote.mul('rule.production', district.coefProduction)
   if (status === 'strong') {
     const coef = breakdown('rule.strong-demand', district.coefStrongDemand)
@@ -117,12 +141,21 @@ export function quoteBreakdown(state: GameState, districtId: DistrictId, product
       .build()
     quote.mul('rule.strong-demand', coef)
   }
+  return quote
+}
 
-  return quote.mul('rule.noise', state.markets[districtId].noise[productId]).round().build()
+/** Cours normal d'un produit dans un district (repère de l'historique, chap. 10) */
+export function normalQuote(ctx: EventContext, districtId: DistrictId, productId: ProductId): number {
+  return districtQuote(ctx, districtId, productId).round().build().total
 }
 
 export function quote(state: GameState, districtId: DistrictId, productId: ProductId): number {
   return quoteBreakdown(state, districtId, productId).total
+}
+
+/** Dernier relevé des cours d'un district, ou undefined s'il n'a jamais été visité */
+export function lastSeen(state: GameState, districtId: DistrictId): MarketMemory | undefined {
+  return state.memory[districtId]?.at(-1)
 }
 
 /** Cours observés dans un district, pour la mémoire de marché */

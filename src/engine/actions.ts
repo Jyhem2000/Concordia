@@ -7,10 +7,12 @@ import { cargoUsed, giveCrates, ownedQty, takeLots } from './cargo.ts'
 import { depositBreakdown, loanRoom, offshoreBalance, withdrawFrom } from './finance.ts'
 import { checkMove, drawInterception, emergencyTow, resolveMove } from './interception.ts'
 import { crossedDistricts, shortestRoute } from './map.ts'
+import { arrive, drawRoadEvent, heatWave } from './events.ts'
 import { changeHealth } from './gauges.ts'
 import { fuelPriceBreakdown, grindableQty, grinderSale, quote, saleQuote } from './market.ts'
 import { keysOf } from './records.ts'
 import { risk } from './risk.ts'
+import { checkRoadChoice, resolveRoadChoice, type RoadChoiceId } from './road.ts'
 import { createRng } from './rng.ts'
 import { sleep } from './routine.ts'
 import { remember } from './state.ts'
@@ -39,6 +41,8 @@ export type Action =
   | { type: 'withdraw'; amount: number }
   /** Option de l'écran d'interception ; `offer` pour la corruption */
   | { type: 'intercept'; move: InterceptionMove; offer?: Offer; tactics?: Tactics }
+  /** Option d'un aléa routier ; `pay` : index du paiement choisi quand l'option en propose plusieurs */
+  | { type: 'road'; choice: RoadChoiceId; pay?: number }
 
 export type ActionError =
   | 'game-over'
@@ -73,6 +77,8 @@ export type ActionError =
   | 'too-weak'
   | 'grinder-full'
   | 'not-grindable'
+  | 'road-event'
+  | 'no-road-event'
 
 export type ActionResult = { ok: true; state: GameState } | { ok: false; error: ActionError }
 
@@ -208,29 +214,38 @@ function travel(state: GameState, to: DistrictId): ActionResult {
   const tripRisk = risk(state, to, { includePatrol: true })
   const rng = createRng(state.rng)
   const interception = drawInterception(rng, tripRisk, DISTRICTS[to].offGrid)
+  // Sans barrage ni racket, un aléa routier peut survenir (chap. 8)
+  const roadEvent = interception ? null : drawRoadEvent(state, rng)
 
-  // Mode furtif : les galeries de nuit usent le châssis, sauf si des caisses refroidissent le moteur (chap. 2 et 3)
-  const night = state.phase === 'night' ? nightWear(state) : { cargo: state.cargo, chassisWear: 0, coolingCrates: 0 }
+  // Usure du trajet : galeries de nuit, ou canicule de jour ; des caisses peuvent refroidir le moteur (chap. 2, 3 et 8)
+  const heat = state.phase === 'day' ? heatWave(state) : null
+  const wear = tripWear(state, state.phase === 'night' ? NIGHT_TRIP_CHASSIS_WEAR : (heat?.dayTripChassis ?? 0))
+  const stroke = heat ? changeHealth(state, -heat.dayTripHealth, 1) : null
   const arrived: GameState = {
     ...state,
     districtId: to,
     fuel: state.fuel - plan.fuelCost,
-    chassis: Math.max(0, state.chassis - night.chassisWear),
-    cargo: night.cargo.map((lot) => (lot.travelled ? lot : { ...lot, travelled: true })),
-    tripReport: { chassisWear: night.chassisWear, coolingCrates: night.coolingCrates },
+    health: stroke?.state.health ?? state.health,
+    chassis: Math.max(0, state.chassis - wear.chassisWear),
+    cargo: wear.cargo.map((lot) => (lot.travelled ? lot : { ...lot, travelled: true })),
+    tripReport: { chassisWear: wear.chassisWear, coolingCrates: wear.coolingCrates, heatHealth: stroke ? -stroke.delta : 0 },
     dayTripDone: state.dayTripDone || state.phase === 'day',
     nightTripDone: state.nightTripDone || state.phase === 'night',
     interception,
     interceptionReport: null,
+    roadEvent,
+    roadReport: null,
+    events: roadEvent ? { ...state.events, roadDays: { ...state.events.roadDays, [roadEvent]: state.day } } : state.events,
     rng: rng.state,
   }
-  // Sans barrage, le trajet se termine ici ; sinon le dépannage attend la fin du contrôle
-  const done = interception ? arrived : emergencyTow(arrived).state
+  // Sans barrage ni aléa, le trajet se termine ici ; sinon le dépannage et l'arrivée attendent leur résolution
+  const done = interception || roadEvent ? arrived : arrive(emergencyTow(arrived).state)
   return { ok: true, state: remember(done, to) }
 }
 
-/** Usure du trajet de nuit, ou refroidissement par les caisses qui le permettent si le joueur l'a activé */
-function nightWear(state: GameState): { cargo: CargoLot[]; chassisWear: number; coolingCrates: number } {
+/** Usure d'un trajet, ou refroidissement par les caisses qui le permettent si le joueur l'a activé */
+function tripWear(state: GameState, chassisWear: number): { cargo: CargoLot[]; chassisWear: number; coolingCrates: number } {
+  if (chassisWear === 0) return { cargo: [...state.cargo], chassisWear: 0, coolingCrates: 0 }
   const coolant = state.autoCooling
     ? PRODUCT_IDS.find((id) => {
         const cooling = PRODUCTS[id].cooling
@@ -241,7 +256,7 @@ function nightWear(state: GameState): { cargo: CargoLot[]; chassisWear: number; 
   if (coolant && cooling) {
     return { cargo: giveCrates(state.cargo, [{ productId: coolant, qty: cooling.crates }]), chassisWear: 0, coolingCrates: cooling.crates }
   }
-  return { cargo: [...state.cargo], chassisWear: NIGHT_TRIP_CHASSIS_WEAR, coolingCrates: 0 }
+  return { cargo: [...state.cargo], chassisWear, coolingCrates: 0 }
 }
 
 // ─── Produits utilisables (chap. 3) ───
@@ -363,13 +378,18 @@ function forceCurfew(state: GameState, drink?: ProductId): ActionResult {
 
 export function applyAction(state: GameState, action: Action): ActionResult {
   if (state.status !== 'playing') return fail('game-over')
-  // Un barrage se règle avant toute autre action
+  // Un barrage, puis un aléa routier, se règlent avant toute autre action
   if (state.interception && action.type !== 'intercept') return fail('intercepted')
+  if (state.roadEvent && action.type !== 'road') return fail('road-event')
 
   switch (action.type) {
     case 'intercept': {
       const error = checkMove(state, action.move, action.offer, action.tactics)
       return error ? fail(error) : { ok: true, state: resolveMove(state, action.move, action.offer, action.tactics) }
+    }
+    case 'road': {
+      const error = checkRoadChoice(state, action.choice, action.pay)
+      return error ? fail(error) : { ok: true, state: resolveRoadChoice(state, action.choice, action.pay) }
     }
     case 'buy':
       return isQuantity(action.qty) ? buy(state, action.productId, action.qty) : fail('invalid-quantity')

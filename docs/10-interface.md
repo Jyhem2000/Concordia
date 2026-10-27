@@ -7,7 +7,7 @@
   * *Ex. (risque, valeurs indicatives) :* « Base D5 40 % · Suspicion +10 % · Tech (4/12) +16,7 % · Couverture légale −10 % = 56,7 % · Zéro-C ×0,85 = **48 %** ».
 
 ## Bandeau supérieur permanent & briefing de 06h00
-* **Téléscripteur d'Aeterna (Flash Info TV) :** sous les barres d'état, un message passif-agressif par jour, **l'indice d'inflation du jour** et sa hausse depuis la veille, l'événement global et les événements locaux du jour.
+* **Téléscripteur d'Aeterna (Flash Info TV) :** sous les barres d'état, un message passif-agressif par jour, **l'indice d'inflation du jour** et sa hausse depuis la veille, l'événement global et les événements locaux du jour, les contrecoups, le tirage de la Loterie et ses vices en cours, et la **rumeur** du lendemain avec sa fiabilité. Chaque événement se déplie sur ses effets exacts (produits et facteurs, risque, tags, stocks).
 * **Barres d'état (toujours visibles) :**
   * Jour X / 30 + ☀️ ou 🌙, et le moment de la journée (Journée, 20h00, Nuit, chap. 2) avec l'état du trajet du moment (disponible ou effectué) ;
   * Cash-Puce (jaune) · Compte offshore (cyan, cadenas, taux effectif) · Dette (rouge, prochaine échéance : tabassage, puis retard si la dette initiale n'a jamais été soldée, puis audit ; mention « en retard » une fois le retard acquis) ;
@@ -44,6 +44,7 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
   * **demande restante** sur chaque ligne, avec sa reconstitution du lendemain (*« Demande restante : 5 (+2 demain) »*), le prix saturé s'affichant au-delà ;
   * **PMA** sur chaque ligne possédée, ex. *« En soute : 8 (acheté à 410 ₡/u) »*.
   * **État** sur chaque ligne possédée : caisses par état de fraîcheur, caisses abîmées, et délai avant que le lot le plus ancien pourrisse.
+  * **Tendance** : variation du cours depuis la dernière observation dans ce district, si elle date de la veille.
   * **Utiliser** sur les produits qui ont une action joueur (`[T4-03]`), avec son effet ou la raison d'un refus.
   * **Marge** sur chaque ligne possédée : gain net de la prochaine caisse vendue (₡/u et % de son prix d'achat), et gain net si l'on vend tout (saturation comprise). Icône verte (rentable), ambre (marge faible, sous un seuil d'affichage fixé dans `Margin.tsx`) ou rouge (à perte).
 * **Fiche produit :** sous le nom, les tags du produit en pastilles ; une fiche dépliable détaille, sans rien cacher :
@@ -51,7 +52,8 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
   * les actions du produit (aide au bluff, dopage, nuit blanche, refroidissement, pass d'identité, balise) ;
   * la sanction en cas de saisie (formalité, amende, ou garde à vue pour le haut tier) ;
   * les agents qui l'apprécient (connivence) et les milices qui le prennent en premier ;
-  * où le vendre : districts en Forte demande et districts producteurs (profil public, chap. 7), et le meilleur cours mémorisé ailleurs avec son ancienneté.
+  * où le vendre : districts en Forte demande et districts producteurs (profil public, chap. 7, vices de la Loterie compris), et le meilleur cours mémorisé ailleurs avec son ancienneté ;
+  * l'**historique des cours** observés dans le district actuel, en courbe, avec le cours normal (sans tendance ni événement) en repère ; la valeur de chaque jour au survol, et le tableau des valeurs pour les lecteurs d'écran.
 * **Filtres** par tag et par tier (Tous, En soute, chaque tag) ; curseurs d'achat / vente (+1, +5, MAX).
 * **Onglet lieux spéciaux :** accès direct aux services du district, coûts du jour et cooldowns affichés.
   * *Hachoir de `[LOC-D1-1]`* : caisses rachetables, prix par caisse détaillable, limite du jour restante.
@@ -62,10 +64,13 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
 * **Produits en soute par district :** sous chaque district, chaque produit en soute avec son statut public (Forte demande, Production) et son cours mémorisé, ou « jamais vu ».
 * **Marge estimée :** sous chaque district, les cours mémorisés des produits en soute portent la même icône de marge, estimée sur le cours vu moins la commission de puce (sans savoir-faire ni saturation).
 * **Mémoire de marché :** au toucher d'un district, derniers cours observés avec leur ancienneté (*« vu il y a 3 jours »*), en fourchette en cas de Sédation ; cours en temps réel avec `[CREW-02]`.
-* **Bulles d'indices :** événements du jour, ronde renforcée révélée par `[CREW-01]` (🚓), pic suspect de la veille (👁️).
+* **Bulles d'indices :** événements du jour (nom de l'événement local sous le district, effets au toucher), ronde renforcée révélée par `[CREW-01]` (🚓), pic suspect de la veille (👁️).
 * **Panneau de prévision (au clic sur un district) :** itinéraire et districts traversés, rations nécessaires, étoiles de sécurité, prix local du Synthanol, lieux spéciaux, et le **risque d'interception** pour la soute actuelle (détaillable), avant validation. La ronde renforcée, cachée, n'y figure pas ; tout le reste est exact. Les districts en pic suspect portent l'icône 👁️.
 * **Dernier trajet :** ce que le dernier trajet a coûté hors barrage (usure du châssis ou caisses consommées pour refroidir le moteur).
 * **Boutons de départ :** « Rouler de jour » ; à 20h00, « Dormir au relais » (ou « Bivouac » en `[D4]`) face à « Forcer le couvre-feu », chacun affichant coûts et effets calculés.
+
+## Écran d'aléa routier
+Comme le barrage, il occupe tout l'écran jusqu'au choix : la situation, puis les deux options avec leurs coûts et effets exacts (₡ indexés, ICC, Santé, châssis, rations, caisse demandée), la chance d'un pari, et la raison d'une option indisponible. Après le choix, un compte rendu détaille ce qui a changé.
 
 ## Écran d'interception
 Options numérotées **0** Fouille · **1** Bluff · **2** Corruption · **3** Fuite · **4** Éjection (masquée dès qu'une autre action a été tentée). Le barrage occupe tout l'écran : aucune autre action n'est possible avant de l'avoir réglé. Face aux milices de `[D4]` : Payer le péage · Forcer le passage · Refuser. Si la fouille effective serait fatale (`[T4-06]` en soute), l'écran l'annonce. L'annonce du barrage le situe **à 300 m** : il est encore temps d'éjecter la cargaison ou de tourner les talons. Chaque option affiche sa **probabilité détaillable** et ses **conséquences en cas de succès et d'échec**. Pour la corruption, l'offre se compose de Cash-Puce (raccourcis aux paliers de bonus, du minimum accepté au dernier palier) et de caisses de la soute. Pour chaque produit en soute : la valeur en paiement d'une caisse, son prix d'achat, le gain ou la perte face au cash, et la mention « connivence » si les agents l'apprécient. La valeur totale de l'offre et la chance détaillée se mettent à jour en temps réel. Le bluff propose les aides possibles (caisses à donner ou sacrifier) et la fuite le largage offensif (libellé avec son effet : une caisse jetée derrière soi aveugle les poursuivants) et le dopage, chance recalculée à chaque choix ; le compte rendu compte à part les caisses sacrifiées ; la fuite annonce aussi les risques de casse et d'explosion de la soute. Face aux milices, l'option « Payer en caisses » annonce à l'avance les caisses qui seraient prises et leur valeur.

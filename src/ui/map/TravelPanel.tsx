@@ -4,12 +4,13 @@ import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { planTravel } from '../../engine/actions.ts'
 import { averageCost, isIllegal } from '../../engine/cargo.ts'
-import { estimatedUnitSale, productStatus } from '../../engine/market.ts'
+import { estimatedUnitSale, lastSeen, productStatus } from '../../engine/market.ts'
 import { riskBreakdown } from '../../engine/risk.ts'
 import type { DistrictId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
+import EventDetails from '../events/EventDetails.tsx'
 import Detailed from '../shared/Detailed.tsx'
 import Margin from '../shared/Margin.tsx'
 
@@ -65,11 +66,16 @@ function LastTrip() {
   const report = useGameStore((s) => s.game.tripReport)
   const coolant = PRODUCT_IDS.find((id) => PRODUCTS[id].cooling)
   const { t } = useI18n()
-  if (!report || (report.chassisWear === 0 && report.coolingCrates === 0)) return null
+  if (!report) return null
+  const parts = [
+    ...(report.coolingCrates > 0 && coolant ? [t.travel.cooled(report.coolingCrates, t.product[coolant].name)] : []),
+    ...(report.chassisWear > 0 ? [t.travel.wear(report.chassisWear)] : []),
+    ...(report.heatHealth > 0 ? [t.travel.heatStroke(report.heatHealth)] : []),
+  ]
+  if (parts.length === 0) return null
   return (
     <p className="px-3 pt-2 text-xs text-zinc-400">
-      {t.travel.lastTrip} :{' '}
-      {report.coolingCrates > 0 && coolant ? t.travel.cooled(report.coolingCrates, t.product[coolant].name) : t.travel.wear(report.chassisWear)}
+      {t.travel.lastTrip} : {parts.join(' · ')}
     </p>
   )
 }
@@ -78,7 +84,9 @@ function DistrictRow({ districtId }: DistrictRowProps) {
   const here = useGameStore((s) => s.game.districtId === districtId)
   const day = useGameStore((s) => s.game.day)
   const cargo = useGameStore((s) => s.game.cargo)
-  const memory = useGameStore((s) => s.game.memory[districtId])
+  const memory = useGameStore((s) => lastSeen(s.game, districtId))
+  const events = useGameStore((s) => s.game.events)
+  const phase = useGameStore((s) => s.game.phase)
   const peak = useGameStore((s) => s.game.suspiciousPeaks.includes(districtId))
   const { t, credits } = useI18n()
 
@@ -106,6 +114,8 @@ function DistrictRow({ districtId }: DistrictRowProps) {
             )}
           </div>
           <div className="text-xs text-zinc-400">{t.district[districtId].subtitle}</div>
+          {/* Événement local du jour, visible dès 06h00 (chap. 8) */}
+          {events.local[districtId] && <EventDetails event={events.local[districtId]} className="text-xs text-amber-200" />}
         </div>
         {here ? (
           <span className="flex items-center gap-1 text-xs text-amber-300">
@@ -124,7 +134,7 @@ function DistrictRow({ districtId }: DistrictRowProps) {
           {owned.length > 0 && (
             <ul className="mt-0.5 text-zinc-300" title={t.travel.estimateHint}>
               {owned.map((id) => {
-                const status = productStatus(districtId, id)
+                const status = productStatus({ day, phase, events }, districtId, id)
                 return (
                   <li key={id} className="flex justify-between gap-2">
                     <span className="truncate">

@@ -1,6 +1,19 @@
 import type { ActionError } from '../engine/actions.ts'
 import type { RuleSource } from '../engine/breakdown.ts'
-import type { CrewId, DistrictId, EndingId, EventId, LocationId, ModuleId, ProductId, TagId, Tier, VehicleId } from '../engine/types.ts'
+import type {
+  CrewId,
+  DistrictId,
+  EndingId,
+  EventId,
+  GlobalEventId,
+  LocationId,
+  ModuleId,
+  ProductId,
+  RoadEventId,
+  TagId,
+  Tier,
+  VehicleId,
+} from '../engine/types.ts'
 
 /*
  * Catalogue de référence : tous les textes du jeu, en français.
@@ -17,6 +30,7 @@ const NBSP = String.fromCharCode(0xa0)
 
 type Named = { name: string }
 type NamedWithSubtitle = Named & { subtitle: string }
+type RoadTexts = { situation: string; a: string; b: string }
 
 export const fr = {
   /** Balise de langue BCP 47 pour Intl (séparateurs, décimales, pourcentages) */
@@ -68,7 +82,7 @@ export const fr = {
     'rule.production': 'Production locale',
     'rule.strong-demand': 'Forte demande',
     'rule.tier-bonus': 'Bonus de tier',
-    'rule.noise': 'Fluctuation du jour',
+    'rule.noise': 'Tendance du marché',
     'rule.quote': 'Cours du jour',
     'rule.commission': 'Commission de puce',
     'rule.saturation': 'Marché saturé',
@@ -119,6 +133,7 @@ export const fr = {
     'rule.flee-cap': 'Plafond de fuite',
     'rule.eject-manual': 'Éjection manuelle',
     'rule.emergency-tow': "Dépannage d'urgence",
+    'rule.aftershock': 'Contrecoup',
   } satisfies Record<RuleSource, string>,
 
   // ─── Interface ───
@@ -170,12 +185,109 @@ export const fr = {
     sleep: (icc: string, health: number) => `Nuit au relais : ICC ${icc}, Santé +${health}`,
     custody: (health: number) => `Nuit en caisson blanc, hymnes à 90 décibels : −${health} PV.`,
     rotten: (crates: number) => `${crates} caisse${crates > 1 ? 's' : ''} pourrie${crates > 1 ? 's' : ''}, détruite${crates > 1 ? 's' : ''} à 06h00.`,
+    heat: (product: string, melted: number, aged: number, rotten: number) =>
+      `Canicule : ${melted} × ${product} fondu en soute, ${aged} caisse${aged > 1 ? 's' : ''} périssable${aged > 1 ? 's' : ''} vieillie${aged > 1 ? 's' : ''}, ${rotten} pourrie${rotten > 1 ? 's' : ''} et détruite${rotten > 1 ? 's' : ''}.`,
+    lockedIn: (district: string) => `Complexe bouclé : vous restez au sas de ${district}, la journée commence à 20h00.`,
     debtInterest: 'Dette après intérêts',
     beating: (health: number) => `Les Bouchers de Viktor sont passés : −${health} PV.`,
     debtLate: "Dette initiale jamais soldée : taux majoré et embuscades jusqu'à la fin de la partie.",
     protection: 'Collecte de protection',
     protectionToDebt: (amount: string) => `Cash-Puce insuffisant : ${amount} ajoutés à la dette.`,
     offshoreInterest: 'Intérêts offshore',
+  },
+
+  events: {
+    rumor: (text: string, reliability: string) => `Rumeur pour demain : ${text} (se vérifie ${reliability} du temps)`,
+    aftershock: (name: string, rush: string, sale: string) =>
+      `Contrecoup de « ${name} » : cours ${rush} sur ce qui a flambé hier, ${sale} sur ce qui a été bradé`,
+    local: (district: string, name: string) => `${district} : ${name}`,
+    promoted: (name: string, district: string) =>
+      `🎉 Félicitations à ${name}, promu·e Citoyen·ne d'Honneur à ${district} ! Purge préventive : contrôles renforcés aujourd'hui.`,
+    demoted: (name: string, from: string, to: string) => `🌱 ${name}, ex-${from}, rejoint avec enthousiasme ${to}.`,
+    vice: (product: string, district: string, until: number) =>
+      `Son goût pour « ${product} » l'y suit : Forte demande à ${district} jusqu'au J${until}.`,
+    names: [
+      'Mme R. Marini',
+      'M. K. Okafor',
+      'Mme L. Varga',
+      'M. T. Nguyen',
+      'Mme S. Haddad',
+      'M. J. Kowalski',
+      'Mme A. Lindqvist',
+      'M. D. Mbeki',
+      'Mme E. Rossi',
+      'M. P. Tanaka',
+    ],
+    effects: {
+      price: (products: string, factor: string, dayOnly: boolean) => `Cours ${factor} : ${products}${dayOnly ? ' (jour seulement)' : ''}`,
+      appear: (products: string, factor: string) => `En vente exceptionnelle, cours ${factor} : ${products}`,
+      appearSome: (min: number, max: number, products: string, factor: string) =>
+        `${min} à ${max} produits en vente exceptionnelle, cours ${factor} sur tous : ${products}`,
+      stockAll: (factor: string) => `Stocks des boutiques ${factor}`,
+      stock: (products: string, factor: string) => `Stock ${factor} : ${products}`,
+      risk: (add: string) => `Risque de contrôle ${add}`,
+      finalRisk: (factor: string) => `Risque de contrôle final ${factor}`,
+      baseRisk: (value: string) => `Risque de base porté à ${value}`,
+      tagOff: (tag: string) => `Effets ${tag} annulés`,
+      tag: (tag: string, factor: string) => `Effets ${tag} ${factor}`,
+      halfDay: "Entrer dans le district, ou s'y trouver à 06h00, coûte une demi-journée au sas",
+      heat: (product: string, days: number, chassis: number, health: number) =>
+        `À 06h00 : ${product} fond en soute, les autres périssables vieillissent de ${days} jours. Trajets de jour : châssis −${chassis} (sauf refroidissement), Santé −${health}`,
+      tagged: (tag: string) => `tout ${tag}`,
+      tiers: (tiers: string) => `tout Tier ${tiers}`,
+      scope: (districts: string) => ` — ${districts}`,
+    },
+  },
+
+  rumor: {
+    'EVT-G01': 'la météo annonce un épisode de chaleur « historique »',
+    'EVT-G02': "des toux suspectes sont signalées dans les files d'attente du DSC",
+    'EVT-G03': 'des techniciens du Cloud sont sortis en sueur des data-centers',
+    'EVT-G04': 'un documentaire choc sur le méthane serait en montage',
+    'EVT-G05': 'les syndicats de transport se réunissent à huis clos',
+    'EVT-G06': "les traiteurs de l'élite refusent toute nouvelle commande",
+  } satisfies Record<GlobalEventId, string>,
+
+  road: {
+    title: 'Aléa routier',
+    payWith: 'Payer avec',
+    cost: {
+      fuel: (rations: number) => `${rations} ration${rations > 1 ? 's' : ''}`,
+      crates: (qty: number, product: string) => `${qty} × ${product}`,
+      cratesMissing: (qty: number, what: string) => `${qty} caisse${qty > 1 ? 's' : ''} ${what}`,
+      tier: (tiers: string) => `de Tier ${tiers}`,
+      freeSlot: 'une place libre en soute',
+    },
+    outcome: {
+      cash: (amount: string) => `Cash-Puce ${amount}`,
+      icc: (points: string) => `ICC ${points}`,
+      health: (pv: string) => `Santé ${pv}`,
+      chassis: (pv: string) => `Châssis ${pv}`,
+      fuel: (rations: string) => `Rations ${rations}`,
+      crate: (tier: number) => `1 caisse au hasard de Tier ${tier}`,
+      nothing: 'Aucun effet',
+    },
+    gamble: (chance: string, win: string, lose: string) => `Pari, ${chance} de chance : ${win} ; sinon : ${lose}`,
+    won: 'pari gagné',
+    lost: 'pari perdu',
+    fuelGain: 'Rations',
+    events: {
+      'EVT-R01': { situation: "Un écolier des Jeunesses d'Aeterna relève le numéro de tes pneus.", a: 'Acheter son silence', b: "L'ignorer" },
+      'EVT-R02': { situation: 'Un chômeur photographie ta soute ouverte pour toucher la prime.', a: 'Acheter son silence', b: 'Foncer' },
+      'EVT-R03': { situation: 'Trois retraités du Comité « Air Pur » bloquent un passage piéton.', a: 'Écouter le sermon', b: 'Les enfumer' },
+      'EVT-R04': { situation: "Un auto-stoppeur lève le pouce. Ses bottes ressemblent à celles d'un indic.", a: 'Refuser', b: 'Le prendre' },
+      'EVT-R05': { situation: 'Le terminal exige de fixer la caméra 8 secondes, à 70 km/h.', a: 'Obéir', b: 'Faire sauter le fusible' },
+      'EVT-R06': { situation: 'Quiz vocal de rééducation : réciter le Décret Zéro-Carbone.', a: 'Payer la « formation civique »', b: 'Bafouiller' },
+      'EVT-R07': { situation: 'Collecte de sang au péage : 400 ml « volontaires ».', a: 'Donner', b: 'Payer la dispense' },
+      'EVT-R08': { situation: 'Bridage moteur forcé à 15 km/h sur tout le secteur.', a: 'Subir', b: 'Court-circuiter' },
+      'EVT-R09': { situation: "Un citoyen en hypoglycémie s'effondre devant ton pare-chocs.", a: 'Contourner par le trottoir', b: "L'aider" },
+      'EVT-R10': { situation: 'Un convoi de « gagnants de la Loterie » bloque la voie rapide.', a: 'Attendre', b: 'Prendre la bretelle de chantier' },
+      'EVT-R11': { situation: 'Nuage de désinfection aérienne : javel et sédatifs.', a: 'Apnée', b: "Arroser l'habitacle" },
+      'EVT-R12': { situation: "Un drone-livreur s'est crashé sur la chaussée, batterie intacte.", a: 'Signaler (déposition au poste)', b: 'Piller' },
+      'EVT-R13': { situation: 'Une citerne du DSC en panne, son chauffeur novice en larmes.', a: 'Aider', b: 'Passer' },
+      'EVT-R14': { situation: "Péage caritatif : autocollants « J'aime Maman Aeterna ».", a: 'Acheter', b: 'Refuser' },
+      'EVT-R15': { situation: 'Un autre contrebandier propose un échange dans un angle mort.', a: 'Troc aveugle', b: 'Refuser' },
+    } satisfies Record<RoadEventId, RoadTexts>,
   },
 
   place: {
@@ -231,6 +343,7 @@ export const fr = {
     demandLeft: (left: number, refill: number) => (refill > 0 ? `${left} (+${refill} demain)` : `${left}`),
     saturated: (qty: number) => `dont ${qty} à prix saturé`,
     averageCost: (cost: string) => `acheté ${cost}/u`,
+    trend: (change: string) => `${change} depuis hier`,
     condition: 'État',
     freshness: { extra: 'Extra-Frais', standard: 'Standard', gamey: 'Faisandé', spoiled: 'Avarié' },
     damaged: 'abîmée',
@@ -283,6 +396,9 @@ export const fr = {
     best: (quote: string, district: string, age: number) =>
       `Meilleur cours vu ailleurs : ${quote} à ${district} (${age === 0 ? "aujourd'hui" : `il y a ${age} jour${age > 1 ? 's' : ''}`})`,
     noMemory: 'Aucun cours vu ailleurs pour ce produit',
+    historyEmpty: 'Historique des cours : il faut au moins deux relevés dans ce district.',
+    historyLabel: (district: string) => `Cours observés à ${district}, jour par jour, avec le cours normal en pointillé`,
+    historyReadout: (district: string, day: number, quote: string, normal: string) => `${district}, J${day} : ${quote} (cours normal ${normal})`,
   },
 
   margin: {
@@ -397,6 +513,7 @@ export const fr = {
     neverSeen: 'jamais vu',
     wear: (pv: number) => `usure du châssis −${pv}`,
     cooled: (crates: number, product: string) => `moteur refroidi : ${crates} × ${product} consommées`,
+    heatStroke: (health: number) => `coup de chaleur, Santé −${health}`,
     estimateHint: 'Marge estimée sur le cours vu, commission déduite (hors savoir-faire et saturation)',
   },
 
@@ -496,6 +613,8 @@ export const fr = {
     'too-weak': 'Santé trop basse pour une nuit blanche de plus.',
     'grinder-full': 'Le Hachoir a atteint sa limite du jour.',
     'not-grindable': 'Viktor ne rachète que les périssables Faisandés ou Avariés.',
+    'road-event': 'Un aléa routier attend votre choix.',
+    'no-road-event': 'Aucun aléa routier en cours.',
   } satisfies Record<ActionError, string>,
 
   // ─── Données de jeu (chap. 3 à 8) ───

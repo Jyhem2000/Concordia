@@ -1,5 +1,6 @@
 import { START_CASH, START_DEBT, START_DISTRICT, START_HEALTH, START_ICC } from '../data/balance.ts'
 import { START_VEHICLE, VEHICLES } from '../data/vehicles.ts'
+import { drawEvents, NO_EVENTS } from './events.ts'
 import { drawMarkets, observeMarket } from './market.ts'
 import { drawPatrol } from './risk.ts'
 import { createRng, seedRng } from './rng.ts'
@@ -8,8 +9,9 @@ import type { DistrictId, GameState } from './types.ts'
 /** Nouvelle partie au Jour 1, 06h00 : pas de routine matinale, marchés tirés une première fois. */
 export function createInitialState(seed: number): GameState {
   const rng = createRng(seedRng(seed))
-  const markets = drawMarkets(rng)
   const patrolDistrict = drawPatrol(rng)
+  const events = drawEvents(NO_EVENTS, 1, rng, true)
+  const markets = drawMarkets({ day: 1, phase: 'day', events }, rng)
   const state: GameState = {
     status: 'playing',
     day: 1,
@@ -21,6 +23,9 @@ export function createInitialState(seed: number): GameState {
     cargo: [],
     markets,
     memory: {},
+    events,
+    roadEvent: null,
+    roadReport: null,
     dayTripDone: false,
     nightTripDone: false,
     lastCurfewDay: null,
@@ -55,7 +60,8 @@ export function createInitialState(seed: number): GameState {
   return remember(state, START_DISTRICT)
 }
 
-/** Mémorise les cours du jour d'un district où se trouve le joueur */
+/** Mémorise les cours d'un district où se trouve le joueur : un relevé par jour, le dernier du jour l'emporte (chap. 7) */
 export function remember(state: GameState, districtId: DistrictId): GameState {
-  return { ...state, memory: { ...state.memory, [districtId]: observeMarket(state, districtId) } }
+  const history = (state.memory[districtId] ?? []).filter((seen) => seen.day !== state.day)
+  return { ...state, memory: { ...state.memory, [districtId]: [...history, observeMarket(state, districtId)] } }
 }

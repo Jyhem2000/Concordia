@@ -1,14 +1,18 @@
 import { CUSTODY, DEBT_BEATING, DEBT_LATE, ENDINGS, GAME_LENGTH_DAYS, PROTECTION, RELAY_SLEEP } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
+import { PRODUCTS } from '../data/products.ts'
+import { TAGS } from '../data/tags.ts'
 import { ownedQty } from './cargo.ts'
 import { debtInterestBreakdown, offshoreBalance, offshoreInterestBreakdown, protectionBreakdown } from './finance.ts'
 import { removeRotten } from './condition.ts'
 import { changeHealth, gainRouteIcc, iccTier } from './gauges.ts'
+import { drawEvents, hasEffect, heatWave } from './events.ts'
 import { drawMarkets } from './market.ts'
 import { drawPatrol } from './risk.ts'
 import { createRng } from './rng.ts'
 import { remember } from './state.ts'
-import type { Ending, EndingId, GameState, MorningBriefing } from './types.ts'
+import { loseHalfDay } from './time.ts'
+import type { Ending, EndingId, GameState, MorningBriefing, ProductId } from './types.ts'
 
 /** Nuit au relais routier du DSC si le district en a un, sinon bivouac sans gain de sommeil (chap. 2) */
 export function sleepsAtRelay(state: GameState): boolean {
@@ -85,6 +89,8 @@ function morningRoutine(state: GameState, night: Night): GameState {
     sleep: spent.sleep,
     custodyHealth: spent.custodyHealth,
     rotten: 0,
+    heat: null,
+    lockedIn: false,
     debtInterest: null,
     beating: 0,
     debtLate: false,
@@ -125,12 +131,40 @@ function morningRoutine(state: GameState, night: Night): GameState {
   briefing.rotten = rot.rotten
   s = { ...s, cargo: rot.cargo }
 
-  // 7. Ronde renforcée, reconstitution de la demande, cours et boutiques
+  // 7. Ronde renforcée, événements, puis demande, cours et boutiques qu'ils modifient
   const rng = createRng(s.rng)
   const patrolDistrict = drawPatrol(rng)
-  s = { ...s, patrolDistrict, markets: drawMarkets(rng, s.markets), rng: rng.state, briefing }
+  const events = drawEvents(s.events, day, rng)
+  s = { ...s, patrolDistrict, events }
+  s = { ...s, markets: drawMarkets(s, rng, s.markets), rng: rng.state }
 
-  return remember(s, s.districtId)
+  // 8. Effets du matin des événements : canicule, sas (chap. 8)
+  const heat = heatWave(s)
+  if (heat) {
+    const scorched = scorch(s, heat.melts, heat.ageDays)
+    s = scorched.state
+    briefing.heat = scorched.report
+  }
+  if (hasEffect(s, s.districtId, 'halfDay')) {
+    s = loseHalfDay(s)
+    briefing.lockedIn = true
+  }
+
+  return remember({ ...s, briefing }, s.districtId)
+}
+
+/** Canicule à 06h00 : un produit fond, les autres périssables vieillissent ; ceux qui atteignent Pourri sont détruits */
+function scorch(state: GameState, melts: ProductId, ageDays: number): { state: GameState; report: NonNullable<MorningBriefing['heat']> } {
+  const melted = ownedQty(state.cargo, melts)
+  let aged = 0
+  const cargo = state.cargo.flatMap((lot) => {
+    if (lot.productId === melts) return []
+    if (!PRODUCTS[lot.productId].tags.some((tag) => TAGS[tag].perishable)) return [lot]
+    aged += lot.qty
+    return [{ ...lot, boughtDay: lot.boughtDay - ageDays }]
+  })
+  const rot = removeRotten({ ...state, cargo })
+  return { state: { ...state, cargo: rot.cargo }, report: { melted, rotten: rot.rotten, aged: aged - rot.rotten } }
 }
 
 /** Fins qui sont des défaites (Game Over), par opposition aux grandes fins de l'audit */

@@ -3,6 +3,7 @@
 ## Information de marché
 * **District actuel :** cours exacts du jour.
 * **Autres districts :** le joueur ne voit que la **mémoire de marché** — le dernier cours qu'il y a lui-même observé, avec sa date (*« vu il y a 3 jours »*). Brouillée en cas de Sédation (chap. 2).
+* **Historique :** chaque observation (à l'arrivée dans un district, et chaque matin dans le district où l'on se trouve) est gardée, une par district et par jour (la dernière du jour l'emporte, par exemple de nuit quand un multiplicateur « jour seulement » tombe).
 * **Vision en temps réel :** `[CREW-02]`.
 * **Profil public des districts :** les listes Production et Forte demande de chaque district sont connues de tous (catalogue de consommation du DSC, rumeur des quais) : la carte et la fiche de chaque produit les affichent. Ce qui reste à découvrir sur place, c'est le cours du jour (bruit, événements) et la boutique.
 * Les événements (globaux et locaux) sont publics : ils passent au téléscripteur dès 06h00 (chap. 8).
@@ -23,11 +24,16 @@ Cours = Arrondi( Prix_Base × Coef_District × Bruit × Mult_Événement )
 ```
 * **Coef_District :** coefficient Production, Neutre (1.00) ou Forte demande du district ([`districts.ts`](../src/data/districts.ts)). En Forte demande, on ajoute le **bonus de tier** ([`products.ts`](../src/data/products.ts)) — plus le produit est dangereux, plus il se paie cher.
   *Ex. :* `[T4-01]` en `[D6]` se paie au coefficient de Forte demande de `[D6]` plus le bonus du Tier 4.
-* **Bruit :** tirage uniforme quotidien (`QUOTE_NOISE` dans [`balance.ts`](../src/data/balance.ts)), propre à chaque produit dans chaque district. Un mauvais tirage aux deux bouts peut rendre un trajet perdant.
-* **Mult_Événement = min( 4, Mult_EvtActif × Bonus_Influence )**
-  * *Mult_EvtActif :* 1.00 par défaut. Si un événement global et un local touchent le même produit, on garde celui dont l'écart `|Mult − 1.00|` est le plus fort (égalité : le local prime).
+* **Bruit (tendance du marché) :** propre à chaque produit dans chaque district, il **garde la mémoire de la veille** et revient vers la normale (`QUOTE_NOISE` dans [`balance.ts`](../src/data/balance.ts)) :
+  ```
+  Écart du jour = Persistance × Écart de la veille + Choc du jour   (borné)
+  Bruit = 1 + Écart du jour
+  ```
+  Le choc est tiré uniformément chaque matin ; le Jour 1, l'écart est tiré uniformément entre les bornes. *Lecture :* un produit anormalement bon marché aujourd'hui le restera probablement demain, puis revient vers son cours normal en quelques jours ; une hausse de plusieurs jours n'annonce pas une baisse, seulement un retour progressif. Un mauvais tirage aux deux bouts peut rendre un trajet perdant. L'historique des cours observés (fiche produit, chap. 10) permet de lire ces tendances.
+* **Mult_Événement = min( plafond, Mult_EvtActif × Bonus_Influence )** (plafond : `EVENT_MULT_CAP` dans [`events.ts`](../src/data/events.ts))
+  * *Mult_EvtActif :* 1.00 par défaut. Si plusieurs multiplicateurs touchent le même produit (événement global, local, contrecoup, chap. 8), on garde celui dont l'écart `|Mult − 1.00|` est le plus fort (égalité : le local prime, puis le contrecoup cède).
   * *Bonus_Influence :* `[LOC-D2-1]`, multiplié par-dessus.
-  * *Plafond :* **×4**, quel que soit le cumul.
+  * *Plafond :* quel que soit le cumul, jamais au-dessus.
 * **Le cours est fixe toute la journée.** La nuit ne recalcule rien ; elle n'applique que deux ajustements connus dès le matin : le profil nuit à la vente, et l'annulation des événements marqués « jour seulement ».
 
 ## Quota de demande

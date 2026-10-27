@@ -2,10 +2,12 @@ import { DAMAGED_FACTOR, FRESHNESS, HIGH_TIER, SEARCH } from '../../data/balance
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
+import { lastSeen, productStatus } from '../../engine/market.ts'
 import type { District, DistrictId, ProductId, TagId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import { FOCUS_RING } from '../shared/focus.ts'
+import QuoteChart from './QuoteChart.tsx'
 
 type ProductSheetProps = {
   productId: ProductId
@@ -13,9 +15,9 @@ type ProductSheetProps = {
 
 /** Fiche produit dépliable : effets des tags, actions, sanction et où vendre, sans rien cacher (chap. 10) */
 export default function ProductSheet({ productId }: ProductSheetProps) {
-  const memory = useGameStore((s) => s.game.memory)
-  const here = useGameStore((s) => s.game.districtId)
-  const day = useGameStore((s) => s.game.day)
+  // Profil public (vices de la Loterie compris) et mémoire de marché se lisent sur la partie entière
+  const game = useGameStore((s) => s.game)
+  const { day, districtId: here } = game
   const { t, percent, signedPercent, credits } = useI18n()
   const product = PRODUCTS[productId]
 
@@ -67,10 +69,10 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
   const tolls = where((district) => district.tollFavorites.includes(productId))
 
   // Où le vendre : profil public, puis meilleur cours mémorisé ailleurs (chap. 7)
-  const strong = where((district) => district.strongDemand.includes(productId))
-  const produced = where((district) => district.production.includes(productId))
+  const strong = DISTRICT_IDS.filter((id) => productStatus(game, id, productId) === 'strong')
+  const produced = DISTRICT_IDS.filter((id) => productStatus(game, id, productId) === 'production')
   const best = DISTRICT_IDS.flatMap((id) => {
-    const seen = memory[id]
+    const seen = lastSeen(game, id)
     const quote = seen?.quotes[productId]
     return id !== here && seen && quote !== undefined ? [{ id, quote, age: day - seen.day }] : []
   }).reduce<{ id: DistrictId; quote: number; age: number } | null>((top, entry) => (top === null || entry.quote > top.quote ? entry : top), null)
@@ -94,6 +96,7 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
           <li key={line}>{line}</li>
         ))}
       </ul>
+      <QuoteChart productId={productId} />
     </details>
   )
 }

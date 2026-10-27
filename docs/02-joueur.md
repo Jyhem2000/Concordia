@@ -67,7 +67,8 @@ Le Jour 1 commence sans routine : pas d'intérêts, inflation à ×1,00, boutiqu
 4. Intérêts du compte offshore.
 5. Dégradation de fraîcheur des caisses `[TAG-PERISHABLE]` (chap. 3). Protection de l'Exemption Métabolique **−1 jour**.
 6. Récupération des caisses larguées la veille via `[MOD-07]`.
-7. Tirage de la ronde renforcée, reconstitution des quotas de demande, calcul des cours et des boutiques (chap. 7), tirage de l'événement global, des événements locaux et, les jours de tirage, de la Loterie (chap. 8).
+7. Tirage de la ronde renforcée ; entrée en vigueur de l'événement global tiré la veille, tirage des événements locaux, de la Loterie les jours de tirage, de l'événement global du lendemain et de sa rumeur ; contrecoups (chap. 8). Puis, parce que les événements les modifient : reconstitution des quotas de demande, cours et boutiques (chap. 7).
+8. Effets du matin des événements : canicule sur les périssables, sas de `[EVT-D3-01]` si le joueur se trouve en `[D3]` (chap. 8).
 
 ### Service de jour (06h00 – 20h00)
 Acheter / vendre au marché, faire le plein, utiliser les lieux spéciaux du district, et effectuer **1 trajet de jour**. Une fois arrivé, on peut à nouveau commercer avant 20h00.
@@ -75,7 +76,7 @@ Acheter / vendre au marché, faire le plein, utiliser les lieux spéciaux du dis
 ### Trajet
 * **Maximum 2 par jour :** 1 de jour, 1 de nuit. Un trajet = **une destination**, quelle que soit la distance : les districts traversés sont de simples passages (aucun arrêt, aucun commerce, aucun test d'interception), ils ne coûtent que du carburant et du risque (chap. 4). Tous les districts sont accessibles dès le Jour 1, mais pas tous voisins (carte au chap. 4).
 * **Coût :** consommation du véhicule selon la phase ([`vehicles.ts`](../src/data/vehicles.ts)), plus le surcoût des districts traversés (chap. 4).
-* **Résolution :** consommation (et usure du châssis de nuit) → test d'interception dans le district de destination (chap. 6), ou racket en `[D4]` → s'il n'y a pas eu d'interception, tirage d'un aléa routier → arrivée (effets d'arrivée des événements locaux actifs, ex. `[EVT-D3-01]`).
+* **Résolution :** consommation (et usure du châssis de nuit, ou de jour pendant la canicule `[EVT-G01]`) → test d'interception dans le district de destination (chap. 6), ou racket en `[D4]` → s'il n'y a pas eu d'interception, tirage d'un aléa routier, en suspens jusqu'au choix (chap. 8) → dépannage d'urgence si le châssis est à 0 → arrivée (effets d'arrivée des événements locaux actifs, ex. `[EVT-D3-01]`, sauf garde à vue).
   * Le risque est celui **du départ** : phase, soute et district quitté au moment de partir, c'est-à-dire celui affiché par le panneau de prévision (ronde renforcée en plus).
   * Le joueur arrêté est déjà dans le district de destination : il y reste en cas de garde à vue.
   * Si le châssis tombe à 0, le dépannage d'urgence s'applique à la fin du trajet, contrôle compris.

@@ -66,7 +66,7 @@ describe('trajets', () => {
     expect(state.districtId).toBe('D2')
     expect(state.fuel).toBe(start.fuel - VEHICLES['VEH-01'].fuelPerTrip.day)
     expect(state.cargo.every((lot) => lot.travelled)).toBe(true)
-    expect(state.memory.D2?.day).toBe(1)
+    expect(state.memory.D2?.at(-1)?.day).toBe(1)
   })
 
   it('facture les districts traversés', () => {
@@ -75,7 +75,7 @@ describe('trajets', () => {
   })
 
   it('autorise 1 trajet de jour et 1 de nuit', () => {
-    const afterDay = run(start, { type: 'travel', to: 'D2' })
+    const afterDay = play(start, { type: 'travel', to: 'D2' })
     expect(errorOf(afterDay, { type: 'travel', to: 'D1' })).toBe('trip-done')
     const afterNight = play(afterDay, { type: 'forceCurfew' }, { type: 'travel', to: 'D1' })
     expect(afterNight.districtId).toBe('D1')
@@ -110,7 +110,7 @@ describe('journées', () => {
     const state = run(start, { type: 'travel', to: 'D2' }, { type: 'sleep' })
     expect(state).toMatchObject({ day: 2, phase: 'day', dayTripDone: false, nightTripDone: false })
     expect(state.markets.D1.noise).not.toEqual(start.markets.D1.noise)
-    expect(state.memory.D2?.day).toBe(2)
+    expect(state.memory.D2?.at(-1)?.day).toBe(2)
   })
 
   it('verrouille le couvre-feu le lendemain d’une nuit blanche', () => {
@@ -199,7 +199,7 @@ describe('produits utilisables et Hachoir', () => {
     const cooled = run(night, { type: 'travel', to: 'D2' })
     expect(cooled.chassis).toBe(VEHICLES['VEH-01'].maxChassis)
     expect(ownedQty(cooled.cargo, 'T0-02')).toBe(3 - defined(PRODUCTS['T0-02'].cooling).crates)
-    expect(cooled.tripReport).toEqual({ chassisWear: 0, coolingCrates: defined(PRODUCTS['T0-02'].cooling).crates })
+    expect(cooled.tripReport).toEqual({ chassisWear: 0, coolingCrates: defined(PRODUCTS['T0-02'].cooling).crates, heatHealth: 0 })
     const worn = run({ ...night, autoCooling: false }, { type: 'travel', to: 'D2' })
     expect(worn.chassis).toBeLessThan(VEHICLES['VEH-01'].maxChassis)
   })

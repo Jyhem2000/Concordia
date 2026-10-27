@@ -11,11 +11,13 @@ import {
   WANTED,
 } from '../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../data/districts.ts'
+import { LOTTERY } from '../data/events.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import { TAGS } from '../data/tags.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import { breakdown, type Breakdown, type BreakdownBuilder } from './breakdown.ts'
 import { ownedQty, tagShare } from './cargo.ts'
+import { activeEffects, isPurged, tagFactor } from './events.ts'
 import { iccTier } from './gauges.ts'
 import { crossedDistricts, shortestRoute } from './map.ts'
 import { keysOf } from './records.ts'
@@ -43,7 +45,12 @@ export function riskBreakdown(state: GameState, to: DistrictId, { includePatrol 
   if (destination.iccScanners && iccTier(state.icc) === 'deviant') return breakdown('rule.icc-scanners', 1).build()
 
   const risk = breakdown(to, destination.baseRisk)
+  const effects = activeEffects(state, to)
+  // Risque de base imposé par un événement (ex. audit du Comité de Pureté)
+  for (const { source, effect } of effects) if (effect.kind === 'baseRisk') risk.set(source, effect.value)
   if (!offGrid) addGridRisks(risk, state, to, includePatrol)
+  for (const { source, effect } of effects) if (effect.kind === 'risk') risk.add(source, effect.add)
+  if (isPurged(state, to)) risk.add('EVT-L01', LOTTERY.promotedRisk)
 
   // Contexte physique : il s'applique partout, zone hors-réseau comprise
   if (state.phase === 'night') risk.add('rule.night-trip', NIGHT_TRIP_RISK)
@@ -59,6 +66,8 @@ export function riskBreakdown(state: GameState, to: DistrictId, { includePatrol 
   const vehicleFactor = VEHICLES[state.vehicleId].riskFactor
   if (vehicleFactor !== undefined) risk.mul(state.vehicleId, vehicleFactor)
   if (!offGrid && destination.goldFastLane && iccTier(state.icc) === 'gold') risk.mul('rule.gold-fast-lane', GOLD_FAST_LANE_FACTOR)
+  // Risque final d'un événement : après tous les autres termes, avant les bornes
+  for (const { source, effect } of effects) if (effect.kind === 'finalRisk') risk.mul(source, effect.factor)
 
   return risk.clamp(RISK_BOUNDS.min, RISK_BOUNDS.max).build()
 }
@@ -82,9 +91,10 @@ function addGridRisks(risk: BreakdownBuilder, state: GameState, to: DistrictId, 
     const share = tagShare(state.cargo, tag)
     if (share === 0) continue
     const { tripRisk, detectedRisk, cover, smell } = TAGS[tag]
-    const odorFactor = smell ? destination.odorFactor : 1
-    if (tripRisk) risk.add(tag, tripRisk * share * odorFactor)
-    if (detectedRisk && destination.detection === tag) risk.add(tag, detectedRisk * share)
+    // Les événements annulent ou doublent les effets d'un tag ; l'odeur ne cumule pas avec le doublement du district
+    const factor = tagFactor(state, to, tag, smell ? destination.odorFactor : 1)
+    if (tripRisk) risk.add(tag, tripRisk * share * factor)
+    if (detectedRisk && destination.detection === tag) risk.add(tag, detectedRisk * share * factor)
     if (cover) risk.add(tag, -cover * share)
   }
 

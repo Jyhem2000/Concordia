@@ -51,6 +51,61 @@ export type GameDataId = ProductId | TagId | DistrictId | LocationId | VehicleId
 
 export type Range = { min: number; max: number }
 
+/** Produits visés par un effet d'événement : liste, tag ou tiers */
+export type ProductSelector = readonly ProductId[] | { tag: TagId } | { tiers: readonly Tier[] }
+
+/** Effet d'un événement (chap. 8) ; `districts` restreint un effet global à certains districts */
+export type EventEffect = { districts?: readonly DistrictId[] } & (
+  | { kind: 'price'; products: ProductSelector; factor: number; dayOnly?: boolean }
+  /** Apparition à l'achat (dérogation à l'exclusion) : `count` produits tirés parmi la liste, tous si absent ; le facteur vaut pour toute la liste */
+  | { kind: 'appear'; products: readonly ProductId[]; count?: Range; factor: number }
+  /** Facteur sur le stock tiré ; tous les produits si `products` est absent */
+  | { kind: 'stock'; products?: readonly ProductId[]; factor: number }
+  | { kind: 'risk'; add: number }
+  /** Risque final : multiplié après tous les autres termes */
+  | { kind: 'finalRisk'; factor: number }
+  | { kind: 'baseRisk'; value: number }
+  /** Effets d'un tag (risque au trajet, détection, malus de bluff) annulés (0) ou multipliés */
+  | { kind: 'tag'; tag: TagId; factor: number }
+  /** Demi-journée perdue à l'arrivée ou à 06h00 dans le district */
+  | { kind: 'halfDay' }
+  /** Canicule : fonte d'un produit, vieillissement des périssables, usure des trajets de jour */
+  | { kind: 'heat'; melts: ProductId; ageDays: number; dayTripChassis: number; dayTripHealth: number }
+)
+
+export type GameEvent = { effects: readonly EventEffect[] }
+
+/** Coût d'une option d'aléa routier ; tous les éléments sont dus */
+export type RoadCost = {
+  cash?: number
+  fuel?: number
+  /** Caisses demandées : produit précis, ou la moins chère d'un tag ou de tiers */
+  crates?: { qty: number; productId?: ProductId; tag?: TagId; tiers?: readonly Tier[] }
+  /** Une place libre en soute (caisse gagnée) */
+  freeSlot?: boolean
+}
+
+/** Effets d'une option d'aléa routier ; ₡ indexés sur l'inflation */
+export type RoadOutcome = {
+  cash?: number
+  icc?: number
+  health?: number
+  chassis?: number
+  fuel?: number
+  /** Une caisse au hasard dans ce tier */
+  crateTier?: Tier
+}
+
+export type RoadChoice = {
+  /** Paiements possibles, au choix du joueur ; aucun = option gratuite */
+  pay?: readonly RoadCost[]
+  outcome?: RoadOutcome
+  /** Pari : issue tirée au moment du choix */
+  gamble?: { chance: number; win: RoadOutcome; lose: RoadOutcome }
+}
+
+export type RoadEvent = { a: RoadChoice; b: RoadChoice }
+
 /** Profil de vente pendant le couvre-feu (chap. 7) */
 export type NightProfile = 'festive' | 'diurnal'
 
@@ -279,6 +334,8 @@ export type Tactics = {
 
 /** Ce que le dernier trajet a coûté hors barrage */
 export type TripReport = {
+  /** Coup de chaleur d'un trajet de jour pendant la canicule : PV de Santé perdus */
+  heatHealth: number
   /** PV de châssis perdus (usure de nuit) */
   chassisWear: number
   /** Caisses consommées pour refroidir le moteur à la place de l'usure */
@@ -295,6 +352,10 @@ export type MorningBriefing = {
   custodyHealth: number
   /** Caisses périssables pourries, détruites à 06h00 */
   rotten: number
+  /** Canicule : caisses fondues ou pourries par la chaleur ; null sans canicule */
+  heat: { melted: number; rotten: number; aged: number } | null
+  /** Sas d'un événement local : la journée commence à 20h00 */
+  lockedIn: boolean
   /** PV perdus au tabassage de l'échéance de la dette, 0 sinon */
   beating: number
   /** Vrai le matin où la dette passe en retard (taux majoré, embuscades) */
@@ -302,6 +363,52 @@ export type MorningBriefing = {
   /** Collecte de protection : montant dû, part payée en Cash-Puce, reliquat ajouté à la dette */
   protection: { due: Breakdown; paid: number; toDebt: number } | null
   offshoreInterest: Breakdown | null
+}
+
+/** Événements en cours et tirages à venir (chap. 8) */
+export type EventsState = {
+  global: GlobalEventId | null
+  local: Partial<Record<DistrictId, LocalEventId>>
+  /** Événements d'hier : source des contrecoups du jour */
+  yesterday: { global: GlobalEventId | null; local: Partial<Record<DistrictId, LocalEventId>> }
+  /** Dernier jour de déclenchement de chaque événement local (cooldown) */
+  localDays: Partial<Record<LocalEventId, number>>
+  /** Événement global déjà tiré pour demain, caché au joueur */
+  tomorrow: GlobalEventId | null
+  /** Rumeur publiée aujourd'hui sur demain (vraie ou fausse) */
+  rumor: GlobalEventId | null
+  lottery: Lottery | null
+  /** Dernier jour de chaque aléa routier (cooldown) */
+  roadDays: Partial<Record<RoadEventId, number>>
+}
+
+/** Dernier tirage de la Loterie : promu, déclassé et vice emporté */
+export type Lottery = {
+  day: number
+  promoted: DistrictId
+  demoted: DistrictId
+  /** Produit qui passe en Forte demande dans `viceDistrict` jusqu'à `viceUntil` inclus */
+  vice: ProductId | null
+  viceDistrict: DistrictId
+  viceUntil: number
+  /** Index des noms tirés (lore) */
+  names: { promoted: number; demoted: number }
+}
+
+/** Compte rendu d'un aléa routier : option choisie et variations */
+export type RoadReport = {
+  eventId: RoadEventId
+  choice: 'a' | 'b'
+  /** Issue du pari, null sans pari */
+  won: boolean | null
+  cash: number
+  icc: number
+  health: number
+  chassis: number
+  fuel: number
+  crates: number
+  /** Facture du dépannage d'urgence si le châssis est tombé à 0 */
+  towBill: number
 }
 
 /** États de fraîcheur d'une caisse périssable (chap. 3) ; une caisse pourrie est détruite */
@@ -352,7 +459,12 @@ export type GameState = {
   fuel: number
   cargo: readonly CargoLot[]
   markets: Record<DistrictId, DistrictMarket>
-  memory: Partial<Record<DistrictId, MarketMemory>>
+  /** Cours observés par district, un relevé par jour, du plus ancien au plus récent */
+  memory: Partial<Record<DistrictId, readonly MarketMemory[]>>
+  events: EventsState
+  /** Aléa routier en attente du choix du joueur : le trajet est suspendu */
+  roadEvent: RoadEventId | null
+  roadReport: RoadReport | null
   dayTripDone: boolean
   nightTripDone: boolean
   /** Dernier jour où le couvre-feu a été forcé (épuisement nerveux, chap. 2) */

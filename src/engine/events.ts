@@ -1,0 +1,269 @@
+import { DISTRICT_IDS, DISTRICTS } from '../data/districts.ts'
+import { AFTERSHOCK, EVENT_CHANCES, EVENT_COOLDOWNS, GLOBAL_EVENTS, LOCAL_EVENTS, LOTTERY, ROAD_EVENTS, RUMOR } from '../data/events.ts'
+import { PRODUCTS } from '../data/products.ts'
+import type { BreakdownSource } from './breakdown.ts'
+import { keysOf } from './records.ts'
+import type { Rng } from './rng.ts'
+import { loseHalfDay } from './time.ts'
+import type {
+  DistrictId,
+  EventEffect,
+  EventsState,
+  GameState,
+  GlobalEventId,
+  LocalEventId,
+  Lottery,
+  ProductId,
+  ProductSelector,
+  RoadEventId,
+  TagId,
+} from './types.ts'
+
+/*
+ * Événements (chap. 8) : tirages de 06h00, effets en vigueur dans un district, contrecoups, Loterie.
+ */
+
+/** Ce que les règles d'événements lisent de la partie */
+export type EventContext = Pick<GameState, 'day' | 'phase' | 'events'>
+
+export type ActiveEffect = { source: GlobalEventId | LocalEventId; local: boolean; effect: EventEffect }
+
+const GLOBAL_EVENT_IDS = keysOf(GLOBAL_EVENTS)
+const LOCAL_EVENT_IDS = keysOf(LOCAL_EVENTS)
+const ROAD_EVENT_IDS = keysOf(ROAD_EVENTS)
+
+export const NO_EVENTS: EventsState = {
+  global: null,
+  local: {},
+  yesterday: { global: null, local: {} },
+  localDays: {},
+  tomorrow: null,
+  rumor: null,
+  lottery: null,
+  roadDays: {},
+}
+
+/** Événements locaux propres à un district */
+export function localEventsOf(districtId: DistrictId): LocalEventId[] {
+  return LOCAL_EVENT_IDS.filter((id) => id.startsWith(`EVT-${districtId}-`))
+}
+
+/** Tous les effets d'un événement global ou local */
+export function eventEffects(event: GlobalEventId | LocalEventId): readonly EventEffect[] {
+  return isGlobal(event) ? GLOBAL_EVENTS[event].effects : LOCAL_EVENTS[event].effects
+}
+
+/** Effets d'un événement qui portent sur un district (les effets globaux peuvent viser certains districts) */
+function effectsIn(event: GlobalEventId | LocalEventId, districtId: DistrictId): EventEffect[] {
+  return eventEffects(event).filter((effect) => !effect.districts || effect.districts.includes(districtId))
+}
+
+function isGlobal(event: GlobalEventId | LocalEventId): event is GlobalEventId {
+  return event.startsWith('EVT-G')
+}
+
+/** Effets en vigueur aujourd'hui dans un district : événement global, puis événement local */
+export function activeEffects(ctx: EventContext, districtId: DistrictId): ActiveEffect[] {
+  const { global, local } = ctx.events
+  const here = local[districtId]
+  return [
+    ...(global ? effectsIn(global, districtId).map((effect) => ({ source: global, local: false, effect })) : []),
+    ...(here ? effectsIn(here, districtId).map((effect) => ({ source: here, local: true, effect })) : []),
+  ]
+}
+
+export function selects(selector: ProductSelector, productId: ProductId): boolean {
+  if (isProductList(selector)) return selector.includes(productId)
+  if ('tag' in selector) return PRODUCTS[productId].tags.includes(selector.tag)
+  return selector.tiers.includes(PRODUCTS[productId].tier)
+}
+
+export function isProductList(selector: ProductSelector): selector is readonly ProductId[] {
+  return Array.isArray(selector)
+}
+
+/** Multiplicateur de prix d'un effet sur un produit, ou null s'il ne le touche pas */
+function priceFactor(effect: EventEffect, productId: ProductId): number | null {
+  if (effect.kind === 'price' && selects(effect.products, productId)) return effect.factor
+  if (effect.kind === 'appear' && effect.products.includes(productId)) return effect.factor
+  return null
+}
+
+// ─── Mult_EvtActif (chap. 7) ───
+
+export type EventMultiplier = { source: BreakdownSource; factor: number }
+
+/**
+ * Multiplicateur d'événement d'un produit dans un district : parmi les événements en vigueur et les contrecoups,
+ * le plus fort écart à 1 l'emporte ; égalité : le local prime, puis le contrecoup cède.
+ */
+export function eventMultiplier(ctx: EventContext, districtId: DistrictId, productId: ProductId): EventMultiplier | null {
+  const candidates: { source: BreakdownSource; factor: number; rank: number }[] = []
+  for (const { source, local, effect } of activeEffects(ctx, districtId)) {
+    const factor = priceFactor(effect, productId)
+    // Les multiplicateurs « jour seulement » tombent après 20h00
+    const dayOnly = effect.kind === 'price' && effect.dayOnly === true
+    if (factor !== null && !(dayOnly && ctx.phase === 'night')) candidates.push({ source, factor, rank: local ? 2 : 1 })
+  }
+  for (const factor of aftershockFactors(ctx, districtId, productId)) candidates.push({ source: 'rule.aftershock', factor, rank: 0 })
+
+  const best = candidates.reduce<(typeof candidates)[number] | null>((top, candidate) => {
+    if (top === null) return candidate
+    const gap = Math.abs(candidate.factor - 1) - Math.abs(top.factor - 1)
+    return gap > 0 || (gap === 0 && candidate.rank > top.rank) ? candidate : top
+  }, null)
+  return best && best.factor !== 1 ? { source: best.source, factor: best.factor } : null
+}
+
+/** Événements d'hier qui ont touché des cours dans ce district et ne se répètent pas aujourd'hui */
+export function aftershockEvents(ctx: EventContext, districtId: DistrictId): (GlobalEventId | LocalEventId)[] {
+  const { yesterday, global, local } = ctx.events
+  const yesterdayLocal = yesterday.local[districtId]
+  return [
+    ...(yesterday.global && yesterday.global !== global ? [yesterday.global] : []),
+    ...(yesterdayLocal && yesterdayLocal !== local[districtId] ? [yesterdayLocal] : []),
+  ].filter((event) => effectsIn(event, districtId).some((effect) => effect.kind === 'price' || effect.kind === 'appear'))
+}
+
+/** Contrecoups d'un produit : l'effet inverse des multiplicateurs d'hier */
+function aftershockFactors(ctx: EventContext, districtId: DistrictId, productId: ProductId): number[] {
+  return aftershockEvents(ctx, districtId).flatMap((event) =>
+    effectsIn(event, districtId).flatMap((effect) => {
+      const factor = priceFactor(effect, productId)
+      if (factor === null || factor === 1) return []
+      return [factor > 1 ? AFTERSHOCK.afterRush : AFTERSHOCK.afterSale]
+    }),
+  )
+}
+
+// ─── Tags, stocks, apparitions ───
+
+/**
+ * Facteur d'un tag dans un district (risque au trajet, détection, malus de bluff) : une annulation l'emporte,
+ * sinon le plus fort facteur, sans cumul avec le facteur propre au district (`base`, ex. l'odeur en D6).
+ */
+export function tagFactor(ctx: EventContext, districtId: DistrictId, tag: TagId, base = 1): number {
+  const factors = activeEffects(ctx, districtId).flatMap(({ effect }) => (effect.kind === 'tag' && effect.tag === tag ? [effect.factor] : []))
+  if (factors.includes(0)) return 0
+  return Math.max(base, ...factors)
+}
+
+/** Facteur de stock d'un produit, cumulé sur les effets en vigueur */
+export function stockFactor(ctx: EventContext, districtId: DistrictId, productId: ProductId): number {
+  return activeEffects(ctx, districtId).reduce(
+    (factor, { effect }) => (effect.kind === 'stock' && (!effect.products || effect.products.includes(productId)) ? factor * effect.factor : factor),
+    1,
+  )
+}
+
+/** Produits qui apparaissent à l'achat (dérogation à l'exclusion), tirés si l'événement n'en impose qu'une partie */
+export function drawAppearances(ctx: EventContext, districtId: DistrictId, rng: Rng): ProductId[] {
+  return activeEffects(ctx, districtId).flatMap(({ effect }) => {
+    if (effect.kind !== 'appear') return []
+    if (!effect.count) return [...effect.products]
+    return rng.shuffle(effect.products).slice(0, rng.int(effect.count.min, effect.count.max))
+  })
+}
+
+/** Le district a-t-il un effet de ce type en vigueur ? */
+export function hasEffect(ctx: EventContext, districtId: DistrictId, kind: EventEffect['kind']): boolean {
+  return activeEffects(ctx, districtId).some(({ effect }) => effect.kind === kind)
+}
+
+/** Canicule en vigueur (événement global) */
+export function heatWave(ctx: EventContext): Extract<EventEffect, { kind: 'heat' }> | null {
+  const global = ctx.events.global
+  if (!global) return null
+  for (const effect of GLOBAL_EVENTS[global].effects) if (effect.kind === 'heat') return effect
+  return null
+}
+
+/** Arrivée dans un district (chap. 2) : effets d'arrivée des événements locaux, comme le sas de `[EVT-D3-01]` */
+export function arrive(state: GameState): GameState {
+  return hasEffect(state, state.districtId, 'halfDay') ? loseHalfDay(state) : state
+}
+
+// ─── Loterie ───
+
+/** Vice emporté par le déclassé : le produit passe en Forte demande dans le district inférieur */
+export function hasVice(ctx: EventContext, districtId: DistrictId, productId: ProductId): boolean {
+  const lottery = ctx.events.lottery
+  return (
+    lottery !== null && lottery.vice === productId && lottery.viceDistrict === districtId && ctx.day >= lottery.day && ctx.day <= lottery.viceUntil
+  )
+}
+
+/** District du promu le jour du tirage : purge préventive */
+export function isPurged(ctx: EventContext, districtId: DistrictId): boolean {
+  const lottery = ctx.events.lottery
+  return lottery !== null && lottery.day === ctx.day && lottery.promoted === districtId
+}
+
+function drawLottery(day: number, rng: Rng): Lottery | null {
+  const promoted = rng.pick(LOTTERY.promotedFrom)
+  const demoted = rng.pick(LOTTERY.demotedFrom.filter((id) => id !== promoted))
+  const viceDistrict = LOTTERY.lower[demoted]
+  if (!viceDistrict) return null
+  const lower = DISTRICTS[viceDistrict]
+  const vices = DISTRICTS[demoted].strongDemand.filter((id) => !lower.production.includes(id) && !lower.strongDemand.includes(id))
+  return {
+    day,
+    promoted,
+    demoted,
+    vice: vices.length > 0 ? rng.pick(vices) : null,
+    viceDistrict,
+    viceUntil: day + LOTTERY.viceDays - 1,
+    names: { promoted: rng.int(0, 999), demoted: rng.int(0, 999) },
+  }
+}
+
+// ─── Tirages ───
+
+/**
+ * Tirages de 06h00 (chap. 8) : l'événement global tiré la veille entre en vigueur, puis les locaux,
+ * la Loterie, l'événement global du lendemain et sa rumeur. Le Jour 1, l'événement global du jour est tiré sur place.
+ */
+export function drawEvents(previous: EventsState, day: number, rng: Rng, firstDay = false): EventsState {
+  const drawGlobal = () => (rng.chance(EVENT_CHANCES.global) ? rng.pick(GLOBAL_EVENT_IDS) : null)
+  const global = firstDay ? drawGlobal() : previous.tomorrow
+
+  const local: Partial<Record<DistrictId, LocalEventId>> = {}
+  const localDays = { ...previous.localDays }
+  for (const districtId of DISTRICT_IDS) {
+    if (!rng.chance(EVENT_CHANCES.local)) continue
+    const ready = localEventsOf(districtId).filter((id) => (localDays[id] ?? -Infinity) + EVENT_COOLDOWNS.local <= day)
+    if (ready.length === 0) continue
+    const event = rng.pick(ready)
+    local[districtId] = event
+    localDays[event] = day
+  }
+
+  const lottery = LOTTERY.days.includes(day) ? drawLottery(day, rng) : previous.lottery
+  const tomorrow = drawGlobal()
+  // Une rumeur fuite parfois sur l'événement de demain ; sans événement, une fausse rumeur circule parfois
+  const rumor = tomorrow ? (rng.chance(RUMOR.leak) ? tomorrow : null) : rng.chance(RUMOR.falseAlarm) ? rng.pick(GLOBAL_EVENT_IDS) : null
+
+  return {
+    global,
+    local,
+    yesterday: firstDay ? { global: null, local: {} } : { global: previous.global, local: previous.local },
+    localDays,
+    tomorrow,
+    rumor,
+    lottery,
+    roadDays: previous.roadDays,
+  }
+}
+
+/** Fiabilité affichée d'une rumeur : part des rumeurs qui se vérifient */
+export function rumorReliability(): number {
+  const leaked = EVENT_CHANCES.global * RUMOR.leak
+  return leaked / (leaked + (1 - EVENT_CHANCES.global) * RUMOR.falseAlarm)
+}
+
+/** Aléa routier d'un trajet sans interception, parmi ceux hors cooldown, ou null */
+export function drawRoadEvent(state: GameState, rng: Rng): RoadEventId | null {
+  if (!rng.chance(EVENT_CHANCES.road)) return null
+  const ready = ROAD_EVENT_IDS.filter((id) => (state.events.roadDays[id] ?? -Infinity) + EVENT_COOLDOWNS.road <= state.day)
+  return ready.length > 0 ? rng.pick(ready) : null
+}

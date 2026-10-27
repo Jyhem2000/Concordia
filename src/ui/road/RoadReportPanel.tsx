@@ -1,0 +1,51 @@
+import { Signpost } from 'lucide-react'
+import { useState } from 'react'
+import { ICC_MAX } from '../../data/balance.ts'
+import type { RoadReport } from '../../engine/types.ts'
+import { useI18n } from '../../i18n/useI18n.ts'
+import { useGameStore } from '../../stores/gameStore.ts'
+import Button from '../shared/Button.tsx'
+
+/** Compte rendu chiffré du dernier aléa routier (transparence, chap. 10) */
+export default function RoadReportPanel() {
+  const report = useGameStore((s) => s.game.roadReport)
+  const { t, credits, signedCredits, signedPercent, number } = useI18n()
+  // Compte rendu refermé : état d'interface éphémère, le suivant s'affichera de nouveau
+  const [dismissed, setDismissed] = useState<RoadReport | null>(null)
+  if (!report || report === dismissed) return null
+
+  const signed = (value: number) => (value > 0 ? `+${number(value)}` : number(value))
+  const deltas = [
+    { key: 'cash', label: t.report.cash, value: report.cash, text: signedCredits(report.cash) },
+    { key: 'icc', label: t.report.icc, value: report.icc, text: signedPercent(report.icc / ICC_MAX, 0) },
+    { key: 'health', label: t.report.health, value: report.health, text: signed(report.health) },
+    { key: 'chassis', label: t.report.chassis, value: report.chassis, text: signed(report.chassis) },
+    { key: 'fuel', label: t.road.fuelGain, value: report.fuel, text: signed(report.fuel) },
+    { key: 'crates', label: t.report.crates, value: report.crates, text: signed(report.crates) },
+  ].filter(({ value }) => value !== 0)
+
+  return (
+    <section className="rounded border border-zinc-700 bg-zinc-900/60 p-3 text-sm">
+      <h2 className="flex items-center gap-1.5 font-bold text-amber-300 uppercase">
+        <Signpost size={14} aria-hidden="true" />
+        {t.road.title} — {t.event[report.eventId].name}
+      </h2>
+      <ul className="mt-1 space-y-0.5">
+        <li className="flex flex-wrap gap-1.5">
+          <span className="font-bold">{t.road.events[report.eventId][report.choice]}</span>
+          {report.won !== null && <span className={report.won ? 'text-green-400' : 'text-red-300'}>{report.won ? t.road.won : t.road.lost}</span>}
+        </li>
+        {deltas.map(({ key, label, text, value }) => (
+          <li key={key} className={`flex gap-1.5 ${value < 0 ? 'text-red-300' : 'text-green-400'}`}>
+            <span className="text-zinc-400">{label}</span>
+            {text}
+          </li>
+        ))}
+        {report.towBill > 0 && <li className="text-red-300">{t.report.tow(credits(report.towBill))}</li>}
+      </ul>
+      <Button className="mt-2" onClick={() => setDismissed(report)}>
+        {t.report.dismiss}
+      </Button>
+    </section>
+  )
+}

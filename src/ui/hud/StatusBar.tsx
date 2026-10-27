@@ -22,6 +22,7 @@ import { effectiveOffshoreRate, nextDebtDeadline, nextProtectionDay, offshoreBal
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
+import EventsTicker from './EventsTicker.tsx'
 import Ticker from './Ticker.tsx'
 
 type StatProps = {
@@ -93,6 +94,7 @@ export default function StatusBar() {
         </Button>
       </div>
       <Ticker />
+      <EventsTicker />
       {game.day >= AUDIT_COUNTDOWN_DAY && (
         <p className="flex items-center justify-center gap-1.5 border-t border-amber-900 bg-amber-950/40 px-4 py-1 text-center text-xs text-amber-200">
           <Hourglass size={12} aria-hidden="true" />

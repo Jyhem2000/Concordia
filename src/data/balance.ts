@@ -1,4 +1,4 @@
-import type { DistrictId, IccTier, NightProfile, ProductId, Range } from '../engine/types.ts'
+import type { DistrictId, IccTier, NightProfile, ProductId } from '../engine/types.ts'
 
 /*
  * Constantes globales d'équilibrage. Ce fichier fait foi ; chaque valeur cite le chapitre
@@ -70,8 +70,11 @@ export const SIPHON = { fuel: 1, iccLoss: 5 }
 /** Indice d'inflation du jour = 1 + (jour − 1) / INFLATION_PERIOD_DAYS */
 export const INFLATION_PERIOD_DAYS = 15
 
-/** Bruit quotidien du cours : tirage uniforme, par produit et par district */
-export const QUOTE_NOISE: Range = { min: 0.7, max: 1.3 }
+/**
+ * Tendance du cours, par produit et par district (chap. 7) : écart du jour = persistance × écart de la veille
+ * + choc uniforme dans ±shock, borné à ±max ; Bruit = 1 + écart
+ */
+export const QUOTE_NOISE = { persistence: 0.6, shock: 0.2, max: 0.3 }
 
 /** Taille minimale de la boutique du jour */
 export const SHOP_MIN_PRODUCTS = 10

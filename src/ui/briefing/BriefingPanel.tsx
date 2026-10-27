@@ -2,6 +2,7 @@ import { Sunrise } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { ICC_MAX } from '../../data/balance.ts'
 import type { MorningBriefing } from '../../engine/types.ts'
+import { heatWave } from '../../engine/events.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
@@ -52,6 +53,8 @@ function isEmpty(briefing: MorningBriefing): boolean {
     !hasSleepGains(briefing) &&
     briefing.custodyHealth === 0 &&
     briefing.rotten === 0 &&
+    !briefing.heat &&
+    !briefing.lockedIn &&
     !briefing.debtInterest &&
     briefing.beating === 0 &&
     !briefing.debtLate &&
@@ -63,6 +66,9 @@ function isEmpty(briefing: MorningBriefing): boolean {
 /** Une ligne par effet de la routine, dans son ordre d'application (chap. 2) */
 function BriefingLines({ briefing }: BriefingLinesProps) {
   const { t, credits, signedPercent } = useI18n()
+  const districtId = useGameStore((s) => s.game.districtId)
+  // Effet de canicule du jour, pour nommer le produit qui fond
+  const heat = useGameStore((s) => (briefing.heat ? heatWave(s.game) : null))
   const { sleep, custodyHealth, debtInterest, beating, debtLate, protection, offshoreInterest } = briefing
 
   return (
@@ -70,6 +76,12 @@ function BriefingLines({ briefing }: BriefingLinesProps) {
       {sleep && hasSleepGains(briefing) && <li>{t.briefing.sleep(signedPercent(sleep.icc / ICC_MAX, 0), sleep.health)}</li>}
       {custodyHealth > 0 && <li className="text-red-300">{t.briefing.custody(custodyHealth)}</li>}
       {briefing.rotten > 0 && <li className="text-red-300">{t.briefing.rotten(briefing.rotten)}</li>}
+      {heat && (
+        <li className="text-red-300">
+          {t.briefing.heat(t.product[heat.melts].name, briefing.heat?.melted ?? 0, briefing.heat?.aged ?? 0, briefing.heat?.rotten ?? 0)}
+        </li>
+      )}
+      {briefing.lockedIn && <li className="text-red-300">{t.briefing.lockedIn(t.district[districtId].name)}</li>}
       {debtInterest && (
         <li>
           <BriefingRow label={t.briefing.debtInterest} className="text-red-300">
