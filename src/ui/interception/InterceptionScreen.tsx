@@ -11,6 +11,7 @@ import { averageCost, ownedQty } from '../../engine/cargo.ts'
 import { paymentValue } from '../../engine/condition.ts'
 import {
   bribeChance,
+  checkpointPlace,
   bribeRate,
   checkMove,
   ejectChance,
@@ -87,7 +88,10 @@ export default function InterceptionScreen() {
           <ShieldAlert size={20} aria-hidden="true" />
           {t.interception.title[interception.kind]}
         </h1>
-        <p className="mt-1 text-zinc-300">{t.interception.intro[interception.kind](t.district[game.districtId].name)}</p>
+        <p className="mt-1 text-zinc-300">
+          {t.interception.intro[interception.kind](t.interception.place[checkpointPlace(game)](t.district[game.districtId].name))}
+        </p>
+        {interception.jammed && <p className="mt-1 text-sky-300">{t.interception.jammed}</p>}
         {lethalProduct && !racket && (
           <p role="alert" className="mt-2 flex items-center gap-1.5 font-bold text-red-400">
             <Skull size={16} aria-hidden="true" />
@@ -202,7 +206,7 @@ function BribeForm({ label }: BribeFormProps) {
   const error = checkMove(game, 'bribe', offer)
   const cratesValue = paymentValue(game, offeredCrates)
   const presets = [BRIBE.minOfferRatio, ...BRIBE.offerBonuses.map(({ ratio }) => ratio)]
-  const owned = [...new Set(game.cargo.map((lot) => lot.productId))]
+  const owned = [...new Set(game.cargo.map((lot) => lot.productId))].filter((id) => !PRODUCTS[id].sealed)
   const setQty = (productId: ProductId, qty: number) => setCrates((current) => ({ ...current, [productId]: qty }))
 
   return (

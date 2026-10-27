@@ -67,6 +67,7 @@ function ReportLines({ report }: ReportLinesProps) {
       ))}
       {report.custodyDays > 0 && <li className="text-red-300">{t.report.custody(report.custodyDays)}</li>}
       {report.towBill > 0 && <li className="text-red-300">{t.report.tow(credits(report.towBill))}</li>}
+      {report.jammerSeized && <li className="text-red-300">{t.report.jammerSeized}</li>}
       <li className="text-zinc-300">{report.over ? t.report.passed : t.report.ongoing}</li>
     </ul>
   )

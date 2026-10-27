@@ -57,6 +57,7 @@ export const MODULES: Readonly<Record<ModuleId, Module>> = {
   'MOD-06': { price: 15_000, category: 'tactical', ram: { fleeBonus: 0.3, damageFactor: 0.5 } },
   'MOD-07': { price: 10_000, category: 'tactical', trapdoor: { chance: 0.75, cooldownDays: 3, maxRecovery: 0.75 } },
   'MOD-08': { price: 45_000, category: 'tactical', fakeTerminal: { bluffBonus: 0.35, bribeRateFactor: 0.5 } },
+  'MOD-09': { price: 20_000, category: 'tactical', droneJammer: true },
 }
 
 /** Frais de recrutement à la Cantine, indexés (le premier recrutement est gratuit) */

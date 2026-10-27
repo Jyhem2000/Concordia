@@ -153,7 +153,7 @@ function useEquipmentTexts() {
   }
 
   const module = (id: ModuleId): string => {
-    const { freshnessDelay, heatProof, tagFactor, smoothRide, rotatingPlate, ram, trapdoor, fakeTerminal } = MODULES[id]
+    const { freshnessDelay, heatProof, tagFactor, smoothRide, rotatingPlate, ram, trapdoor, fakeTerminal, droneJammer } = MODULES[id]
     return [
       ...(freshnessDelay ? [g.freshnessDelay(freshnessDelay)] : []),
       ...(heatProof ? [g.heatProof] : []),
@@ -165,6 +165,7 @@ function useEquipmentTexts() {
       ...(ram ? [g.ram(signedPercent(ram.fleeBonus, 0), multiplier(ram.damageFactor))] : []),
       ...(trapdoor ? [g.trapdoor(percent(trapdoor.chance, 0), trapdoor.cooldownDays, percent(trapdoor.maxRecovery, 0))] : []),
       ...(fakeTerminal ? [g.fakeTerminal(signedPercent(fakeTerminal.bluffBonus, 0), multiplier(fakeTerminal.bribeRateFactor))] : []),
+      ...(droneJammer ? [g.droneJammer] : []),
     ].join(' ')
   }
 

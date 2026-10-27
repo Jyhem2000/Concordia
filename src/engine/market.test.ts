@@ -21,7 +21,7 @@ describe('boutique du jour', () => {
         const district = DISTRICTS[districtId]
 
         expect(shop.length, districtId).toBeGreaterThanOrEqual(SHOP_MIN_PRODUCTS)
-        for (const id of PRODUCT_IDS.filter((id) => PRODUCTS[id].tier === 0)) expect(shop, districtId).toContain(id)
+        for (const id of PRODUCT_IDS.filter((id) => PRODUCTS[id].tier === 0 && !PRODUCTS[id].sealed)) expect(shop, districtId).toContain(id)
         for (const id of district.strongDemand) expect(shop, districtId).not.toContain(id)
         if (!district.productionDraw) {
           for (const id of district.production) {

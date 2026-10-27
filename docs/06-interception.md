@@ -18,7 +18,7 @@ Le résultat est **borné, après** tous les multiplicateurs (`RISK_BOUNDS` dans
 | **Base_District** | risque de base du district ([`districts.ts`](../src/data/districts.ts)) ; remplacé par `[EVT-D5-02]` |
 | **Suspicion** | selon l'ICC (chap. 2) |
 | **Malus_Tags** | pour chaque tag détectable : *valeur du tag × part de la cargaison* — `[TAG-ODOROUS]`, `[TAG-TECH]`, `[TAG-CHEMICAL]`, `[TAG-CULTURE]` |
-| **Malus_Contexte** (additif) | trajet de nuit (chap. 2), districts traversés (chap. 4), portique du sas de `[D4]` (chap. 4), `[VEH-04]`, balise de `[T4-06]`, ronde renforcée, Fiche S, pic suspect de la veille (chap. 7), embuscades de la dette (chap. 7), purge préventive de `[EVT-L01]`, carte « capitaine de la BRC » de `[LOC-D5-1]` (négative), `[EVT-G02]`, `[EVT-D1-03]`, `[EVT-D4-01]` |
+| **Malus_Contexte** (additif) | trajet de nuit hors mission (chap. 2), districts traversés (chap. 4), portique du sas de `[D4]` (chap. 4), `[VEH-04]`, balise de `[T4-06]`, ronde renforcée, Fiche S, pic suspect de la veille (chap. 7), embuscades de la dette (chap. 7), purge préventive de `[EVT-L01]`, carte « capitaine de la BRC » de `[LOC-D5-1]` (négative), `[EVT-G02]`, `[EVT-D1-03]`, `[EVT-D4-01]` |
 | **Couverture** (additive) | `[TAG-LEGAL]` |
 | **Bonus_Équipement** (multiplicatif) | produit des coefficients de `[VEH-01]`, `[VEH-02]`, `[CREW-01]` et du coupe-file Citoyen Or (chap. 2) |
 | **Multiplicateurs_finaux** | `[EVT-D3-02]`, `[EVT-D5-03]` |
@@ -33,7 +33,7 @@ Le résultat est **borné, après** tous les multiplicateurs (`RISK_BOUNDS` dans
 **Ronde renforcée :** chaque matin (et dès le Jour 1), Aeterna tire **1 district** hors zone hors-réseau : malus de risque pour la journée (`PATROL_RISK` dans [`balance.ts`](../src/data/balance.ts)). Caché au joueur, sauf avec `[CREW-01]`.
 
 ### Fiche S algorithmique (niveau de recherche)
-* Chaque **fuite réussie** ajoute **1 niveau**, jusqu'à un maximum.
+* Chaque **fuite réussie** ajoute **1 niveau**, jusqu'à un maximum ; chaque **trajet de nuit hors mission** qui passe sans interception aussi (l'écart est enregistré, chap. 2).
 * Par niveau : malus aux prochaines fuites et au risque d'interception partout (`WANTED` dans [`balance.ts`](../src/data/balance.ts)).
 * **−1 niveau** par nuit passée au relais routier (le bivouac ne compte pas).
 * Affichée en permanence dans le bandeau (chap. 10) : *« Votre profil suscite l'intérêt bienveillant d'Aeterna. »*
@@ -41,9 +41,11 @@ Le résultat est **borné, après** tous les multiplicateurs (`RISK_BOUNDS` dans
 ### Barrage fixe ou contrôle volant
 Une interception de la BRC prend l'une de deux formes, tirée au moment où elle se déclenche :
 * **Barrage fixe** — un checkpoint au sas du district, **visible à 300 m** : toutes les options sont ouvertes, éjection et fuite comprises.
-* **Contrôle volant** — un drone a repéré le véhicule et une moto de la BRC le coince contre le trottoir ; l'agent a déjà la main sur la portière. **Ni éjection ni fuite** : trop tard pour vider la soute ou démarrer. Restent la fouille, le bluff et la corruption.
+* **Contrôle volant** — un drone a repéré le véhicule et une unité de la BRC le coince (contre le trottoir de jour, dans la galerie de nuit, au quai de service de `[D5]` et `[D6]`) ; l'agent a déjà la main sur la portière. **Ni éjection ni fuite** : trop tard pour vider la soute ou démarrer. Restent la fouille, le bluff et la corruption.
 * **Part des contrôles volants :** propre à chaque district (`flyingCheckShare` dans [`districts.ts`](../src/data/districts.ts) : rare dans les ruches où la BRC manque de drones, fréquente au sommet), majorée dans le district de la ronde renforcée, faite d'unités mobiles (`FLYING_CHECK` dans [`balance.ts`](../src/data/balance.ts)). En zone hors-réseau, les milices tiennent toujours une barricade visible (chap. 4).
 * *Intention :* sans contrôle volant, la fuite (avec largage et dopage) devient le repli universel dès que la cargaison vaut cher. Le contrôle volant oblige à préparer aussi le bluff (masquage, Tier 0, aides) ou la corruption (cash de réserve, caisses appréciées des agents) : chaque build garde ses failles.
+* **Brouilleur de drones** (`[MOD-09]`, chap. 5) : une fois par jour, un contrôle volant devient un barrage fixe.
+* **Lieu du barrage :** le texte suit la couche du réseau (chap. 4) : entrée du district de jour, galerie de service de nuit, sas du quai de service en `[D5]` et `[D6]`.
 * L'app annonce la forme du contrôle dès l'écran d'interception, et le panneau de prévision affiche la part de contrôles volants du district de destination (chap. 10).
 
 ---
@@ -54,7 +56,7 @@ Le joueur accepte la fouille (**0**) ou tente une action : **1** Bluff, **2** Co
 **Amendes et saisies :** un pourcentage du Cash-Puce au moment de la sanction (après paiement d'une offre de corruption perdue, par exemple), arrondi au ₡.
 **Compte rendu :** après chaque option, l'app détaille ce qui a été perdu ou gagné (₡, caisses dont celles sacrifiées par une tactique, ICC, Santé, châssis, Fiche S, garde à vue, dépannage).
 
-**Fouille effective :** fouille acceptée, ou échec d'un bluff, d'une corruption, d'une fuite ou d'une éjection — déclencheur de la règle de mort de `[T4-06]`.
+**Fouille effective :** fouille acceptée, ou échec d'un bluff, d'une corruption, d'une fuite ou d'une éjection — déclencheur de la règle de mort de `[T4-06]` et de la saisie du brouilleur `[MOD-09]` (garde à vue d'au moins un jour).
 **Sédation** (chap. 2) : **−10 %** au bluff, à la corruption et à la fuite.
 
 ### 0. Accepter la fouille (sanction de base)

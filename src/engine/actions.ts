@@ -8,6 +8,7 @@ import { depositBreakdown, loanRoom, offshoreBalance, withdrawFrom } from './fin
 import { checkMove, drawInterception, emergencyTow, resolveMove } from './interception.ts'
 import { crossedDistricts, shortestRoute } from './map.ts'
 import { dismiss, hire } from './crew.ts'
+import { acceptMission, checkMission, isOnMission, recordDeviation } from './night.ts'
 import { auction, blackmail, consultCassandre, deliverVip, forge, orderInfluence, requestVip, visitMorgue, type MorgueService } from './services.ts'
 import { buyModule, buyVehicle, mountedEffect, mountModule, repair } from './equipment.ts'
 import { arrive, drawRoadEvent, heatWave } from './events.ts'
@@ -46,8 +47,8 @@ export type Action =
   | { type: 'sell'; productId: ProductId; qty: number }
   | { type: 'refuel'; qty: number }
   | { type: 'travel'; to: DistrictId }
-  /** `drink` : produit bu pour une nuit blanche forcée malgré l'épuisement */
-  | { type: 'forceCurfew'; drink?: ProductId }
+  /** Tournée de nuit ; `drink` : boisson pour une nuit blanche malgré l'épuisement ; `mission` : accepter la mission du soir */
+  | { type: 'forceCurfew'; drink?: ProductId; mission?: boolean }
   | { type: 'useProduct'; productId: ProductId }
   | { type: 'grind'; productId: ProductId; qty: number }
   | { type: 'setAutoCooling'; enabled: boolean }
@@ -121,6 +122,7 @@ export type ActionError =
   | 'crew-lost'
   | 'no-crew'
   | 'pump-closed'
+  | 'no-mission'
   | 'not-eligible'
   | 'cooldown'
   | 'already-healthy'
@@ -169,6 +171,8 @@ function buy(state: GameState, productId: ProductId, qty: number): ActionResult 
 }
 
 function sell(state: GameState, productId: ProductId, qty: number): ActionResult {
+  // Les caisses scellées d'une mission de nuit appartiennent au DSC (chap. 2)
+  if (PRODUCTS[productId].sealed) return fail('not-for-sale')
   if (qty > ownedQty(state.cargo, productId)) return fail('not-enough-cargo')
   const { total, saturatedQty } = saleQuote(state, productId, qty)
   const market = state.markets[state.districtId]
@@ -270,6 +274,7 @@ function travel(state: GameState, to: DistrictId): ActionResult {
   const tripRisk = risk(state, to, { includePatrol: true })
   const rng = createRng(state.rng)
   const interception = drawInterception(rng, tripRisk, state, to)
+  const jammed = interception?.jammed === true
   // Sans barrage ni racket, un aléa routier peut survenir (chap. 8)
   const roadEvent = interception ? null : drawRoadEvent(state, rng)
 
@@ -287,7 +292,14 @@ function travel(state: GameState, to: DistrictId): ActionResult {
     health: stroke?.state.health ?? state.health,
     chassis: Math.max(0, state.chassis - wear.chassisWear),
     cargo: wear.cargo.map((lot) => (lot.travelled ? lot : { ...lot, travelled: true })),
-    tripReport: { chassisWear: wear.chassisWear, coolingCrates: wear.coolingCrates, heatHealth: stroke ? -stroke.delta : 0 },
+    tripReport: {
+      chassisWear: wear.chassisWear,
+      coolingCrates: wear.coolingCrates,
+      heatHealth: stroke ? -stroke.delta : 0,
+      mission: null,
+      missionFee: 0,
+    },
+    jammerDay: jammed ? state.day : state.jammerDay,
     dayTripDone: state.dayTripDone || state.phase === 'day',
     nightTripDone: state.nightTripDone || state.phase === 'night',
     interception,
@@ -298,7 +310,9 @@ function travel(state: GameState, to: DistrictId): ActionResult {
     rng: rng.state,
   }
   // Sans barrage ni aléa, le trajet se termine ici ; sinon le dépannage et l'arrivée attendent leur résolution
-  const done = interception || roadEvent ? arrived : arrive(emergencyTow(arrived).state)
+  // De nuit, un trajet hors mission qui passe sans interception est un écart enregistré (chap. 2)
+  const logged = state.phase === 'night' && !interception && !isOnMission(state, to) ? recordDeviation(arrived) : arrived
+  const done = interception || roadEvent ? logged : arrive(emergencyTow(logged).state)
   return { ok: true, state: remember(done, to) }
 }
 
@@ -407,7 +421,7 @@ function withdraw(state: GameState, amount: number): ActionResult {
 
 // ─── Fin de journée ───
 
-/** Le couvre-feu forcé le Jour J est verrouillé le soir du Jour J+1 (épuisement nerveux, chap. 2) */
+/** La tournée de nuit du Jour J est verrouillée le soir du Jour J+1 (épuisement nerveux, chap. 2) */
 export function checkForceCurfew(state: GameState, drink?: ProductId): ActionError | null {
   if (state.status !== 'playing') return 'game-over'
   if (state.phase !== 'day') return 'not-daytime'
@@ -422,9 +436,11 @@ export function checkForceCurfew(state: GameState, drink?: ProductId): ActionErr
   return null
 }
 
-function forceCurfew(state: GameState, drink?: ProductId): ActionResult {
-  const error = checkForceCurfew(state, drink)
+function forceCurfew(state: GameState, drink?: ProductId, mission = false): ActionResult {
+  const error = checkForceCurfew(state, drink) ?? (mission ? checkMission(state) : null)
   if (error) return fail(error)
+  // La plateforme charge les caisses scellées de la mission acceptée (chap. 2)
+  if (mission) state = acceptMission(state)
   const curfewStreak = state.lastCurfewDay === state.day - 1 ? state.curfewStreak + 1 : 1
   const night: GameState = { ...state, phase: 'night', lastCurfewDay: state.day, curfewStreak }
   const sleepless = drink ? PRODUCTS[drink].sleeplessNight : undefined
@@ -509,7 +525,7 @@ export function applyAction(state: GameState, action: Action): ActionResult {
     case 'travel':
       return travel(state, action.to)
     case 'forceCurfew':
-      return forceCurfew(state, action.drink)
+      return forceCurfew(state, action.drink, action.mission)
     case 'useProduct':
       return applyProduct(state, action.productId)
     case 'grind':

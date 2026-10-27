@@ -1,8 +1,11 @@
 # 4. Districts & lieux spéciaux
 
 ## Règles géographiques
-* **Circulation des citoyens :** vers le bas, libre ; vers le haut, sur laissez-passer accordé selon l'ICC (chap. 1). C'est le verrou qui rend crédibles les promotions de la Loterie (chap. 8).
-* **Accès libre dès le Jour 1 pour le joueur.** En tant que livreur de Catégorie C, il passe partout, mais ne circule jamais sur les avenues privées des élites : il emprunte le **Réseau Logistique Souterrain** (sas de maintenance et quais de service). Même les ministères et les milliardaires ont besoin que les Livreurs de Catégorie C approvisionnent leurs cuisines, livrent l'eau des domestiques et évacuent leurs déchets — mais les portiques à l'entrée des tunnels y sont impitoyables.
+* **Circulation des citoyens :** vers le bas, libre ; vers le haut, sur laissez-passer **professionnel** seulement (livreurs, personnel de service, techniciens), jamais pour une visite privée, quel que soit l'ICC (chap. 1). La Résidence d'Acclimatation des promus est fermée à tous. C'est le verrou qui rend crédibles les promotions de la Loterie (chap. 8).
+* **Accès libre dès le Jour 1 pour le joueur.** En tant que livreur de Catégorie C, il passe partout, par le **réseau logistique**, en trois couches (`access` dans [`districts.ts`](../src/data/districts.ts)) :
+  * **voies logistiques de surface**, de jour, entre districts et dans les districts inférieurs : rues et voies rapides réservées aux utilitaires (aléas routiers, contrôles volants en pleine rue) ;
+  * **galeries de service**, de nuit : tunnels de maintenance filmés, au-dessus des fermes de serveurs (usure, chap. 2) ; personne à croiser ;
+  * **quais de service des élites**, seule entrée des livreurs à `[D5]` et `[D6]`, de jour comme de nuit : jamais d'avenue privée, mais des portiques impitoyables au sas. Même les ministères et les milliardaires ont besoin que les livreurs approvisionnent leurs cuisines, livrent l'eau des domestiques et évacuent leurs déchets.
 * **Carte :** les districts ne sont pas tous voisins. Un trajet vers un district non voisin passe par les districts intermédiaires : **un surcoût en rations (`FUEL_PER_CROSSED_DISTRICT` dans [`balance.ts`](../src/data/balance.ts)) et un malus de risque par district traversé (`CROSSED_DISTRICT_RISK`)** (le test d'interception n'a lieu qu'à destination). L'app propose l'itinéraire le plus court.
 
 ```

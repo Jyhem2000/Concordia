@@ -199,7 +199,7 @@ describe('produits utilisables et Hachoir', () => {
     const cooled = run(night, { type: 'travel', to: 'D2' })
     expect(cooled.chassis).toBe(VEHICLES['VEH-01'].maxChassis)
     expect(ownedQty(cooled.cargo, 'T0-02')).toBe(3 - defined(PRODUCTS['T0-02'].cooling).crates)
-    expect(cooled.tripReport).toEqual({ chassisWear: 0, coolingCrates: defined(PRODUCTS['T0-02'].cooling).crates, heatHealth: 0 })
+    expect(cooled.tripReport).toMatchObject({ chassisWear: 0, coolingCrates: defined(PRODUCTS['T0-02'].cooling).crates, heatHealth: 0 })
     const worn = run({ ...night, autoCooling: false }, { type: 'travel', to: 'D2' })
     expect(worn.chassis).toBeLessThan(VEHICLES['VEH-01'].maxChassis)
   })

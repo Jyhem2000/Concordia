@@ -23,6 +23,7 @@ import { moduleTagFactor } from './equipment.ts'
 import { activeEffects, forgedCard, isPurged, tagFactor } from './events.ts'
 import { passActive } from './services.ts'
 import { iccTier } from './gauges.ts'
+import { isOnMission } from './night.ts'
 import { crossedDistricts, shortestRoute } from './map.ts'
 import { keysOf } from './records.ts'
 import type { Rng } from './rng.ts'
@@ -60,7 +61,8 @@ export function riskBreakdown(state: GameState, to: DistrictId, { includePatrol 
   if (isPurged(state, to)) risk.add('EVT-L01', LOTTERY.promotedRisk)
 
   // Contexte physique : il s'applique partout, zone hors-réseau comprise
-  if (state.phase === 'night') risk.add('rule.night-trip', NIGHT_TRIP_RISK)
+  // De nuit, seul un trajet hors mission est une anomalie (chap. 2)
+  if (state.phase === 'night' && !isOnMission(state, to)) risk.add('rule.night-trip', NIGHT_TRIP_RISK)
   const crossed = crossedDistricts(shortestRoute(state.districtId, to)).length
   risk.add('rule.crossed-districts', crossed * CROSSED_DISTRICT_RISK, { count: crossed })
   risk.add('rule.exit-gate', DISTRICTS[state.districtId].exitGateRisk)

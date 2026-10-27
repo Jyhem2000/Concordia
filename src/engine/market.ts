@@ -72,7 +72,7 @@ export function demandRefill(quota: number): number {
 function drawShop(ctx: EventContext, districtId: DistrictId, rng: Rng): Partial<Record<ProductId, number>> {
   const district = DISTRICTS[districtId]
   // Socle officiel : tout le Tier 0, partout
-  const shop = new Set<ProductId>(PRODUCT_IDS.filter((id) => PRODUCTS[id].tier === 0))
+  const shop = new Set<ProductId>(PRODUCT_IDS.filter((id) => PRODUCTS[id].tier === 0 && !PRODUCTS[id].sealed))
 
   const draw = district.productionDraw
   const production = draw ? rng.shuffle(district.production).slice(0, rng.int(draw.min, draw.max)) : district.production

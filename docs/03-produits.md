@@ -26,7 +26,7 @@ Chaque caisse de Tier 0 masque **1 caisse** du tag associé à ce produit (champ
 `[TAG-PERISHABLE]`, `[TAG-TECH]` et les autres tags sans colonne de masquage ne se masquent pas (pour la Tech : `[MOD-03]`).
 
 ### Cycle de fraîcheur
-Tout lot acheté démarre **Extra-Frais**. L'Extra-Frais est une **prime de livraison express** : elle ne survit pas à 20h00 (couvre-feu forcé, demi-journée perdue, sortie de garde à vue). Coefficients et âges : `FRESHNESS` dans [`balance.ts`](../src/data/balance.ts) ; le coefficient de fraîcheur entre dans le Savoir-Faire (chap. 7).
+Tout lot acheté démarre **Extra-Frais**. L'Extra-Frais est une **prime de livraison express** : elle ne survit pas à 20h00 (tournée de nuit, demi-journée perdue, sortie de garde à vue). Coefficients et âges : `FRESHNESS` dans [`balance.ts`](../src/data/balance.ts) ; le coefficient de fraîcheur entre dans le Savoir-Faire (chap. 7).
 
 | État | Coefficient de vente | Période (sans équipement) |
 | :--- | :--- | :--- |
@@ -71,6 +71,7 @@ Stock par jour, quota de demande (chap. 7) et bonus de Forte demande de chaque t
 * **[T0-01]** — Briques de pâte nutritive grise (« Bug-Blocks »), base de la Camisole Métabolique. Leur odeur d'insecte fermenté couvre n'importe quel saucisson.
 * **[T0-02]** — Garantie 0 % d'électrolytes pour éviter l'excitation citoyenne. **Refroidissement moteur :** des caisses (`cooling` dans [`products.ts`](../src/data/products.ts)) sont consommées automatiquement pour annuler l'usure d'un trajet de nuit ou la surchauffe de `[EVT-G01]`, s'il en reste assez. Désactivable depuis le panneau du soir ; la carte indique ce que le dernier trajet a consommé ou usé.
 * **[T0-03]** — Pilules d'acceptation prescrites par Aeterna, aussi injectées dans l'eau courante.
+* **Caisses scellées du DSC** — chargées par la plateforme pour une mission de nuit (chap. 2) : légales, Tier 0, hors commerce (jamais en boutique, ni vendues, ni données, valeur nulle), livrées d'office ou reprises à 06h00. Elles n'existent que la nuit.
 * **[T0-04]** — Petit guide papier rédigé par Aeterna. **Action contrôle :** donner des caisses à l'agent donne un bonus au bluff (`bluffAid` dans [`products.ts`](../src/data/products.ts)). Les caisses sont données avant le verdict, quel qu'il soit ; la chance se calcule sur la soute qui reste.
 
 ## Tier 1
@@ -109,7 +110,7 @@ Stock par jour, quota de demande (chap. 7) et bonus de Forte demande de chaque t
 * **[T2-04]** — Téléphones 2G sans GPS ni micro d'écoute, retapés dans les ateliers clandestins des Ruches.
 * **[T2-05]** — Boisson énergisante bannie. **Double action :**
   1. **Dopage pilote** (fuite ou passage forcé, une fois par jour) : chance de fuite en plus, mais perte de châssis (un choc, qui peut casser les fragiles) et d'ICC, sauf face aux milices (`doping` dans [`products.ts`](../src/data/products.ts)).
-  2. **Nuit blanche forcée** (à 20h00) : lève l'épuisement pour une 2e nuit consécutive, au prix de Santé, et interdite sous un seuil de Santé (`sleeplessNight` dans [`products.ts`](../src/data/products.ts)). Une 3e nuit d'affilée reste impossible.
+  2. **Nuit blanche** (à 20h00) : lève l'épuisement pour une 2e tournée de nuit consécutive, au prix de Santé, et interdite sous un seuil de Santé (`sleeplessNight` dans [`products.ts`](../src/data/products.ts)). Une 3e nuit d'affilée reste impossible.
   * Chaque usage **boit une caisse**.
 * **[T2-06]** — Encyclopédie non-censurée d'avant-guerre, films interdits, archives de mèmes.
 * **[T2-07]** — Produit par de vraies abeilles dans des ruches clandestines cachées sur les toits végétalisés de `[D2]`, en bocaux de verre cassants, chargé de pollens et d'enzymes traqués par les bio-scanners.

@@ -8,7 +8,7 @@
 | **Local** | Routine matinale : une chance par district qu'un de ses 3 événements se déclenche, parmi ceux hors cooldown. **Visibles dès 06h00** sur la carte et le téléscripteur. | la journée, dans ce district | par événement |
 | **Contrecoup** | Le lendemain d'un événement qui a touché des cours, si le même événement ne se répète pas. | la journée | — |
 | **Loterie** | Jours fixes de tirage, à 06h00. | voir plus bas | — |
-| **Routier** | Trajet **sans interception** (ni barrage ni racket) : une chance d'aléa. 2 choix, résolus en 1 clic. | instantané | par aléa |
+| **Routier** | Trajet **de jour sans interception** (ni barrage ni racket) : une chance d'aléa. 2 choix, résolus en 1 clic. La nuit, dans les galeries de service, personne à croiser : jamais d'aléa. | instantané | par aléa |
 
 ### Règles communes
 * **Ordre :** les événements sont tirés à 06h00 **avant** la demande, les cours et les boutiques, qu'ils modifient (chap. 2, routine matinale, étape 7).
@@ -96,7 +96,7 @@
 
 ## Aléas routiers
 
-**Résolution :** l'aléa est tiré après le test d'interception, s'il n'y a eu ni barrage ni racket, parmi les aléas hors cooldown. Le trajet reste suspendu jusqu'au choix (aucune autre action possible). Ensuite viennent le dépannage d'urgence si le châssis est tombé à 0, puis l'arrivée (effets d'arrivée des événements locaux).
+**Résolution :** de jour seulement (sur les voies de surface, chap. 4), l'aléa est tiré après le test d'interception, s'il n'y a eu ni barrage ni racket, parmi les aléas hors cooldown. Le trajet reste suspendu jusqu'au choix (aucune autre action possible). Ensuite viennent le dépannage d'urgence si le châssis est tombé à 0, puis l'arrivée (effets d'arrivée des événements locaux).
 * **Coûts :** une option n'est proposée que si le joueur peut en payer tous les coûts (₡, caisses, rations, place libre en soute). Les pertes de Santé et de châssis se paient toujours. Chaque aléa garde au moins une option toujours possible.
 * **Paiement au choix** (« 1 caisse ou des ₡ ») : le joueur choisit. Une caisse demandée par tag ou par tier est la **moins chère** (prix de base) parmi celles qui conviennent, annoncée avant de valider.
 * **Paris** (`[EVT-R04]`) : chance annoncée avant de valider.

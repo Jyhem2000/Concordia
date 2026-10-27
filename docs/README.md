@@ -28,10 +28,10 @@ Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la dé
 | :--- | :--- | :--- |
 | **Partie** | objectif, audit du Jour 30, défaites (hachoir, mort, exécution), grandes fins, score | chap. 2 → chap. 7 (dette, compte offshore) |
 | **Jauges** | ICC (paliers, suspicion, gains de route et plafond), Santé, châssis, carburant, Exemption Métabolique et Sédation | chap. 2 → chap. 5 (capacités du véhicule) |
-| **Journée** | moments (Journée, 20h00, Nuit), routine de 06h00, service de jour, dilemme de 20h00 (relais, bivouac, couvre-feu forcé), épuisement, demi-journée perdue, immobilisation, dépannage d'urgence | chap. 2 |
-| **Trajet** | ordre de résolution, consommation, usure de nuit et canicule, carte et districts traversés, zone hors-réseau | chap. 2 → chap. 4 → chap. 8 (canicule) |
+| **Journée** | moments (Journée, 20h00, Nuit), routine de 06h00, service de jour, dilemme de 20h00 (relais, bivouac, tournée de nuit), missions de nuit et caisses scellées, épuisement, demi-journée perdue, immobilisation, dépannage d'urgence | chap. 2 |
+| **Trajet** | ordre de résolution, consommation, usure de nuit et canicule, carte et districts traversés, couches du réseau (surface, galeries, quais), zone hors-réseau, mission de nuit | chap. 2 → chap. 4 → chap. 8 (canicule, aléas de jour) |
 | **Risque d'interception** | formule, risque de base, suspicion, tags détectés, contexte (nuit, traversée, portique, balise, ronde renforcée, Fiche S, pic suspect, embuscades), couverture légale, bonus d'équipement, multiplicateurs finaux | chap. 6 → chap. 3 (tags, masquage) → chap. 4 (détection des districts) → chap. 8 (effets d'événements) |
-| **Contrôle** | barrage fixe ou contrôle volant, fouille et sanctions, bluff (aides), corruption (offre, connivence, Drones-Juges), fuite (largage, dopage, casse, explosions), éjection, exécution sommaire, garde à vue | chap. 6 → chap. 3 (actions des produits, état des caisses) |
+| **Contrôle** | barrage fixe ou contrôle volant, brouilleur de drones, fouille et sanctions, bluff (aides), corruption (offre, connivence, Drones-Juges), fuite (largage, dopage, casse, explosions), éjection, exécution sommaire, garde à vue | chap. 6 → chap. 3 (actions des produits, état des caisses) |
 | **Racket des milices** | péage en ₡ ou en caisses, passage forcé, refus | chap. 4 → chap. 6 |
 | **Produits** | tags, masquage 1:1, tiers, catalogue, actions (aide au bluff, largage, dopage, nuit blanche, refroidissement, pass d'identité, balise) | chap. 3 |
 | **État des caisses** | fraîcheur (Extra-Frais à Pourri), casse des fragiles, explosion des inflammables, valeur d'une caisse abîmée ou défraîchie | chap. 3 → chap. 7 (vente, paiement en nature) |
@@ -39,7 +39,7 @@ Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la dé
 | **Vente** | prix de vente, commission, savoir-faire (fraîcheur, nuit, rendements décroissants), clause anti-arbitrage, lots les plus anciens d'abord | chap. 7 → chap. 3 (fraîcheur) |
 | **Argent** | Cash-Puce, paiement en nature, inflation et indexation, dette (intérêts, tabassage, retard, avance de survie, emprunt tactique), collecte de protection, compte offshore | chap. 7 → chap. 4 (guichets des lieux spéciaux) |
 | **Lieux spéciaux** | services, horaires, effets de chaque lieu | chap. 4 → chap. 7 (dette, offshore) |
-| **Équipement** | véhicules, modules, équipage, salaires | chap. 5 |
+| **Équipement** | véhicules, modules (brouilleur de drones compris), équipage, salaires | chap. 5 |
 | **Événements** | globaux, locaux, rumeurs, contrecoups, Loterie, aléas routiers | chap. 8 |
 | **Prévisibilité** | ce que le joueur sait ou peut deviner (cours, rumeurs, contrecoups, Loterie) et ce qui reste caché (ronde renforcée) | chap. 7 → chap. 8 → chap. 6 |
 | **Affichage** | où chaque règle est montrée et détaillée au joueur | chap. 10 |

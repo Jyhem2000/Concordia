@@ -24,7 +24,8 @@ Le cœur de la stratégie : l'équipement visé, la famille de produits, les mé
 | **Chaîne du froid** | `[VEH-03]`, `[MOD-01]`, `[CREW-03]` | `[TAG-PERISHABLE]`, fraîcheur, savoir-faire | Le build périssable rapporte-t-il assez pour son coût ? |
 | **Couverture légale** | `[VEH-02]`, `[MOD-02]` | soute diluée de Tier 0, masquage, produits odorants | La dilution vaut-elle la place perdue en soute ? |
 | **Électronique** | `[MOD-03]` | `[TAG-TECH]` vers `[D5]` et `[D6]` | Le blindage rend-il la Tech rentable ? |
-| **Nuit festive** | `[MOD-04]`, `[MOD-06]` | couvre-feu forcé, profil festif, fuite | La nuit paie-t-elle son risque et son usure ? |
+| **Nuit festive** | `[MOD-04]`, `[MOD-06]` | tournées de nuit sur mission (et hors mission quand la marge le justifie), profil festif, fuite | La nuit paie-t-elle son risque, son usure et la place des caisses scellées ? |
+| **Fuite au sommet** | `[MOD-06]`, `[MOD-09]`, `[CREW-02]` | haut tier vers `[D5]` et `[D6]`, fuite, brouilleur contre les contrôles volants | Le brouilleur rend-il la fuite viable au sommet sans devenir incontournable ? |
 | **Corruption** | `[CREW-01]`, `[MOD-08]` | paiement en nature, connivence, `[TAG-ADDICTIVE]` | Payer les agents est-il une stratégie, pas un dernier recours ? |
 | **Citoyen modèle** | `[VEH-02]`, `[MOD-08]` | ICC au palier Or, bluff, coupe-file, services qui rendent de l'ICC | Garder l'ICC haut est-il tenable et rentable ? |
 | **Rentier** | `[CREW-02]` | cours en temps réel, dépôts offshore précoces | Les intérêts suffisent-ils à porter une partie ? |
@@ -37,11 +38,11 @@ Un plan est une politique : quand acheter l'équipement (et s'il faut emprunter)
 ### Axe 2 — Le tempérament (combien de risque)
 Quelques réglages qui s'appliquent à n'importe quel plan :
 
-| Tempérament | Risque d'interception max. par trajet | Réserve de Cash-Puce | Couvre-feu forcé | Réponse au barrage |
+| Tempérament | Risque d'interception max. par trajet | Réserve de Cash-Puce | Tournée de nuit | Réponse au barrage |
 | :--- | :--- | :--- | :--- | :--- |
-| **Prudent** | bas | gardée (plein + amende possible) | jamais | fouille ou corruption sûre |
-| **Équilibré** | moyen | minimale | si la marge nocturne le justifie | l'option de meilleure espérance |
-| **Casse-cou** | élevé | aucune | dès que possible | fuite ou bluff dès qu'ils ont une chance |
+| **Prudent** | bas | gardée (plein + amende possible) | sur mission seulement | fouille ou corruption sûre |
+| **Équilibré** | moyen | minimale | sur mission, hors mission si la marge nocturne le justifie | l'option de meilleure espérance |
+| **Casse-cou** | élevé | aucune | dès que possible, mission ou non | fuite ou bluff dès qu'ils ont une chance |
 
 Les seuils exacts sont des paramètres de bot, fixés et notés à chaque campagne.
 

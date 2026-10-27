@@ -49,7 +49,9 @@ export default function MarketPanel() {
   const { t } = useI18n()
 
   const shop = shopProducts(game.markets[game.districtId])
-  const owned = game.cargo.map((lot) => lot.productId)
+  // Les caisses scellées d'une mission ne se vendent pas : elles ont leur propre ligne
+  const owned = game.cargo.map((lot) => lot.productId).filter((id) => !PRODUCTS[id].sealed)
+  const sealed = game.cargo.reduce((total, lot) => (PRODUCTS[lot.productId].sealed ? total + lot.qty : total), 0)
   // Produits en soute d'abord, puis la boutique ; par tier puis par ID
   const rows = [...new Set([...owned, ...shop])].sort(
     (a, b) => Number(ownedQty(game.cargo, b) > 0) - Number(ownedQty(game.cargo, a) > 0) || PRODUCTS[a].tier - PRODUCTS[b].tier || a.localeCompare(b),
@@ -61,6 +63,7 @@ export default function MarketPanel() {
         {t.market.title} — {t.district[game.districtId].name}
       </h2>
       {(game.phase === 'night' || game.dayOver) && <p className="px-3 pt-2 text-sm text-indigo-300">{t.market.streetOnly}</p>}
+      {sealed > 0 && game.mission && <p className="px-3 pt-2 text-sm text-sky-300">{t.travel.sealed(sealed, t.district[game.mission.to].name)}</p>}
       <ul className="divide-y divide-zinc-800">
         {rows.map((id) => (
           <MarketRow key={id} productId={id} />

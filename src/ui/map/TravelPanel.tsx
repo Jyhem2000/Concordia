@@ -67,12 +67,14 @@ function Exposure() {
 function LastTrip() {
   const report = useGameStore((s) => s.game.tripReport)
   const coolant = PRODUCT_IDS.find((id) => PRODUCTS[id].cooling)
-  const { t } = useI18n()
+  const { t, credits } = useI18n()
   if (!report) return null
   const parts = [
     ...(report.coolingCrates > 0 && coolant ? [t.travel.cooled(report.coolingCrates, t.product[coolant].name)] : []),
     ...(report.chassisWear > 0 ? [t.travel.wear(report.chassisWear)] : []),
     ...(report.heatHealth > 0 ? [t.travel.heatStroke(report.heatHealth)] : []),
+    ...(report.mission === 'delivered' ? [t.travel.delivered(credits(report.missionFee))] : []),
+    ...(report.mission === 'deviated' ? [t.travel.deviated] : []),
   ]
   if (parts.length === 0) return null
   return (
@@ -88,6 +90,8 @@ function DistrictRow({ districtId }: DistrictRowProps) {
   const cargo = useGameStore((s) => s.game.cargo)
   const memory = useGameStore((s) => lastSeen(s.game, districtId))
   const blurred = useGameStore((s) => isMemoryBlurred(s.game, districtId))
+  // Destination de la mission de nuit acceptée
+  const missionHere = useGameStore((s) => s.game.phase === 'night' && s.game.mission?.to === districtId)
   // Vance révèle chaque matin le district de la ronde renforcée
   const patrolled = useGameStore((s) => Boolean(crewEffect(s.game, 'revealsPatrol')) && s.game.patrolDistrict === districtId)
   const events = useGameStore((s) => s.game.events)
@@ -111,6 +115,7 @@ function DistrictRow({ districtId }: DistrictRowProps) {
               {'★'.repeat(security)}
             </span>
             <span className="sr-only">{t.travel.security(security)}</span>
+            {missionHere && <span className="ml-2 rounded bg-sky-900/60 px-1 text-xs font-normal text-sky-200">{t.travel.mission}</span>}
             {patrolled && (
               <span className="ml-2 inline-flex text-sky-300" title={t.travel.patrol}>
                 <Siren size={14} aria-hidden="true" />

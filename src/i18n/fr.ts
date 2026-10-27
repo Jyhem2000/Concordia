@@ -58,7 +58,7 @@ export const fr = {
   moment: {
     day: 'Journée (06h00 – 20h00)',
     curfew: '20h00 : couvre-feu',
-    night: 'Nuit (couvre-feu forcé)',
+    night: 'Nuit (tournée de nuit)',
     tripLeft: 'trajet disponible',
     tripDone: 'trajet effectué',
   },
@@ -142,6 +142,7 @@ export const fr = {
     'rule.emergency-tow': "Dépannage d'urgence",
     'rule.aftershock': 'Contrecoup',
     'rule.repair': 'Réparation (par PV)',
+    'rule.night-mission': 'Prime de mission de nuit',
     'rule.refining': 'Affinage de Mama Rosa (Standard vendu Extra-Frais)',
     'rule.sedation': 'Sédation',
     'rule.cantine': 'Tarif syndical',
@@ -208,6 +209,8 @@ export const fr = {
     salaryInKind: (name: string, amount: string, product: string) => `Salaire de ${name} : ${amount} et 1 × ${product}.`,
     salaryCell: (name: string) => `${name} reste à son poste pendant votre garde à vue (pas de salaire).`,
     unpaid: (name: string) => `Cash-Puce insuffisant : ${name} ne travaille pas aujourd'hui.`,
+    missionReclaimed: (crates: number) =>
+      `Mission de nuit non livrée : la plateforme reprend ${crates} caisses scellées et note le retard (ICC en baisse).`,
     vipFailed: 'Commande VIP manquée : ICC en baisse, le Velvet-Silo vous ferme ses portes.',
     informant: "Faux dossier : l'indic a été « promu ». Fiche S effacée, ICC en hausse.",
     crewLost: (name: string) => `Loterie : ${name} a été « promu ». Vous ne le reverrez plus ; le prochain recrutement est gratuit.`,
@@ -447,6 +450,7 @@ export const fr = {
     trapdoor: (chance: string, cooldown: number, recovery: string) =>
       `Éjection par les égouts (${chance}, sans dégât, sauf Olympus-Green), recharge ${cooldown} jours ; le lendemain, 0 à ${recovery} des caisses rapportées.`,
     fakeTerminal: (bonus: string, factor: string) => `Bluff ${bonus} ; tarif standard de corruption ${factor}.`,
+    droneJammer: 'Une fois par jour, un contrôle volant devient un barrage fixe. Découvert à la fouille : saisi, garde à vue.',
   },
 
   place: {
@@ -570,13 +574,21 @@ export const fr = {
 
   interception: {
     title: { brc: 'Barrage de la BRC', flying: 'Contrôle volant de la BRC', racket: 'Racket des milices' },
-    intro: {
-      brc: (district: string) =>
-        `Barrage de la BRC à 300 m, à l'entrée de ${district}. Un agent vous fait signe de vous ranger : il est encore temps de vider la soute ou de tourner les talons.`,
-      flying: (district: string) =>
-        `Un drone vous a repéré à ${district} : une moto de la BRC vous coince contre le trottoir et l'agent a déjà la main sur la portière. Trop tard pour fuir ou vider la soute.`,
-      racket: (district: string) => `Une barricade des milices barre l'entrée de ${district}. Les miliciens réclament leur dû.`,
+    /** Lieu du contrôle selon la couche du réseau (chap. 4) */
+    place: {
+      street: (district: string) => `à l'entrée de ${district}`,
+      gallery: (district: string) => `dans la galerie de service de ${district}`,
+      docks: (district: string) => `au sas du quai de service de ${district}`,
     },
+    intro: {
+      brc: (place: string) =>
+        `Barrage de la BRC à 300 m, ${place}. Un agent vous fait signe de vous ranger : il est encore temps de vider la soute ou de tourner les talons.`,
+      flying: (place: string) =>
+        `Un drone vous a repéré ${place} : une unité de la BRC vous coince et l'agent a déjà la main sur la portière. Trop tard pour fuir ou vider la soute.`,
+      racket: (place: string) => `Une barricade des milices barre le passage, ${place}. Les miliciens réclament leur dû.`,
+    },
+    jammed:
+      'Votre brouilleur a fait décrocher le drone : la BRC a dû dresser ce barrage plus loin. Attention : découvert à la fouille, il vaut une garde à vue.',
     chance: 'Chance',
     moves: {
       search: 'Accepter la fouille',
@@ -654,6 +666,7 @@ export const fr = {
     wanted: 'Fiche S',
     damaged: 'Caisses endommagées',
     exploded: 'Caisses explosées',
+    jammerSeized: "Brouilleur de drones découvert et saisi : sabotage d'infrastructure.",
     sacrificed: 'dont caisses sacrifiées',
     custody: (days: number) => `Garde à vue : ${days} jour${days > 1 ? 's' : ''}, sortie à 20h00.`,
     tow: (bill: string) => `Châssis à 0 : dépannage d'urgence facturé ${bill}.`,
@@ -687,6 +700,10 @@ export const fr = {
     wear: (pv: number) => `usure du châssis −${pv}`,
     cooled: (crates: number, product: string) => `moteur refroidi : ${crates} × ${product} consommées`,
     heatStroke: (health: number) => `coup de chaleur, Santé −${health}`,
+    delivered: (fee: string) => `mission livrée, prime ${fee}`,
+    deviated: 'écart de mission enregistré, +1 niveau de Fiche S',
+    mission: 'Mission de nuit',
+    sealed: (crates: number, district: string) => `${crates} caisses scellées du DSC à livrer à ${district}`,
     estimateHint: 'Marge estimée sur le cours vu, commission déduite (hors savoir-faire et saturation)',
   },
 
@@ -698,12 +715,19 @@ export const fr = {
     siphon: 'Corvée DSC',
     siphonHint: "Une ration contre de l'ICC et une demi-journée.",
     curfewTitle: '20h00 — couvre-feu sanitaire',
-    forceCurfew: 'Forcer le couvre-feu',
+    forceCurfew: 'Tournée de nuit',
     forceCurfewHint:
-      'Un second trajet, de nuit. La ville Zéro-Carbone éteint ses lampadaires et met ses caméras en veille, mais tout ce qui roule devient suspect. Interdit le lendemain.',
+      "Un second trajet, dans les galeries de service : tout y est filmé. Sur mission, le trajet est couvert ; hors mission, c'est un écart (risque accru, +1 niveau de Fiche S). Interdit le lendemain.",
+    missionOffer: (district: string, crates: number, fee: string) =>
+      `Mission de ce soir : livrer ${crates} caisses scellées à ${district}, prime ${fee}.`,
+    missionHere: (district: string) => `Mission de ce soir vers ${district} : vous y êtes déjà, rien à livrer.`,
+    noMission: 'Pas de mission de nuit ce soir : toute tournée sera hors mission.',
+    acceptMission: 'Accepter la mission',
+    missionActive: (district: string) => `Tournée de nuit sur mission : livrer à ${district}.`,
+    offMission: 'Tournée de nuit hors mission : tout trajet sera un écart enregistré.',
     sleepRelay: 'Dormir au relais',
     bivouac: 'Bivouac',
-    nightNotice: 'Couvre-feu forcé : 1 trajet de nuit, puis dormir.',
+    nightNotice: 'Tournée de nuit : 1 trajet, puis dormir.',
     sleepless: (product: string, health: number) => `Nuit blanche quand même : boire 1 × ${product} (Santé −${health})`,
     cooling: (crates: number, product: string) => `Refroidir le moteur la nuit avec ${crates} × ${product} au lieu d'user le châssis`,
   },
@@ -793,6 +817,7 @@ export const fr = {
     'no-free-slot': 'Plus de slot libre sur ce châssis : démontez un module.',
     'crew-lost': 'Disparu à la Loterie : il ne reviendra pas.',
     'no-crew': 'Aucun équipier engagé.',
+    'no-mission': 'Aucune mission de nuit valable ce soir.',
     'pump-closed': "Pompe officielle fermée la nuit pour votre niveau d'ICC.",
     'not-eligible': "Impossible ici ou aujourd'hui.",
     cooldown: 'Pas encore disponible.',
@@ -831,6 +856,7 @@ export const fr = {
     'T0-02': { name: 'Eau Minérale Déminéralisée' },
     'T0-03': { name: 'Antidépresseurs Doux « Sourire+ »' },
     'T0-04': { name: "Manuels d'Auto-Censure Citoyenne" },
+    'T0-05': { name: 'Caisses scellées du DSC' },
     'T1-01': { name: 'Sodas « Mega-Cola » (Vrai Sucre)' },
     'T1-02': { name: "Grains d'Arabica Torréfiés" },
     'T1-03': { name: 'Beurre de Baratte Demi-Sel' },
@@ -904,6 +930,7 @@ export const fr = {
     'MOD-06': { name: 'Pare-Buffles en Acier Trempé' },
     'MOD-07': { name: 'Trappe de Largage « Égouts »' },
     'MOD-08': { name: 'Faux Terminal « Citoyen Or »' },
+    'MOD-09': { name: 'Brouilleur de Drones « Grésil »' },
   } satisfies Record<ModuleId, Named>,
 
   crew: {

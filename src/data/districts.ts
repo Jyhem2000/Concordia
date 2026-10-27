@@ -22,6 +22,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     odorFactor: 1,
     goldFastLane: false,
     iccScanners: false,
+    access: 'street',
     flyingCheckShare: 0.15,
     ejection: { manual: true, trapdoor: true },
     bribeFavorites: ['T1-02', 'T1-05', 'T3-03'], // agents humains
@@ -52,6 +53,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     odorFactor: 1,
     goldFastLane: false,
     iccScanners: false,
+    access: 'street',
     flyingCheckShare: 0.25,
     ejection: { manual: true, trapdoor: true },
     bribeFavorites: ['T1-02', 'T1-05', 'T3-03'], // agents humains
@@ -75,6 +77,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     odorFactor: 1,
     goldFastLane: false,
     iccScanners: false,
+    access: 'street',
     flyingCheckShare: 0.3,
     ejection: { manual: true, trapdoor: true },
     bribeFavorites: ['T1-02', 'T1-05', 'T3-03'], // agents humains
@@ -98,6 +101,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     odorFactor: 1,
     goldFastLane: false,
     iccScanners: false,
+    access: 'street',
     flyingCheckShare: 0,
     ejection: { manual: true, trapdoor: true },
     bribeFavorites: [], // pas de BRC
@@ -123,6 +127,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     odorFactor: 1,
     goldFastLane: true,
     iccScanners: false,
+    access: 'docks', // quais de service des élites
     flyingCheckShare: 0.4,
     ejection: { manual: false, trapdoor: true }, // LiDAR : seuls les égouts
     bribeFavorites: ['T3-02', 'T3-03'], // douaniers d'élite
@@ -152,6 +157,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     odorFactor: 2, // chiens-robots militaires
     goldFastLane: true,
     iccScanners: true,
+    access: 'docks', // quais de service des élites
     flyingCheckShare: 0.5,
     ejection: { manual: false, trapdoor: false }, // dalle bio-scellée
     bribeFavorites: ['T3-02', 'T3-03'], // douaniers d'élite
@@ -166,7 +172,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
 }
 
 /**
- * Liaisons directes du Réseau Logistique Souterrain (non orientées).
+ * Liaisons directes du réseau logistique (non orientées).
  *
  *   D4 — D1 — D2 — D5 — D6
  *          \   |   /

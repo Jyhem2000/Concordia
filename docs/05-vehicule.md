@@ -35,6 +35,7 @@
 | `[MOD-06]` | Pare-Buffles en Acier Trempé | Fuite et passage forcé : chance en plus ; dégâts de châssis de la fuite (succès et échec) et perte de Santé de l'échec divisés (arrondis en faveur du joueur). |
 | `[MOD-07]` | Trappe de Largage « Égouts » | Mode d'éjection par les égouts : partout sauf en `[D6]` (dalle bio-scellée), y compris en `[D5]` où l'éjection manuelle est interdite. Cooldown en jours à compter de l'usage, réussi ou non. Réussite plus probable que le mode manuel, sans dégât. **Récupération :** le lendemain à 06h00, des complices rapportent une part tirée au hasard (uniformément, arrondie à la caisse inférieure) des caisses larguées, dans la limite de la place en soute ; le reste est perdu. Les caisses rapportées gardent leur état. |
 | `[MOD-08]` | Faux Terminal « Citoyen Or » | Bonus au bluff ; tarif standard de corruption réduit. |
+| `[MOD-09]` | Brouilleur de Drones « Grésil » | **Une fois par jour**, quand un drone repère le camion, il le fait décrocher : le **contrôle volant devient un barrage fixe** un peu plus loin (fuite et éjection redeviennent possibles ; l'interception a toujours lieu). **Sabotage d'infrastructure :** découvert lors d'une fouille effective (chap. 6), il est saisi (perdu) et la sanction comprend une garde à vue, même avec une soute de bas tier ou légale. |
 
 ---
 

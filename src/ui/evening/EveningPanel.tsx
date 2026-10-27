@@ -1,9 +1,11 @@
 import { BedDouble, Fuel, Siren } from 'lucide-react'
+import { useState } from 'react'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { VEHICLES } from '../../data/vehicles.ts'
 import { ownedQty } from '../../engine/cargo.ts'
 import { canSiphon, checkForceCurfew, maxRefuel } from '../../engine/actions.ts'
 import { fuelPriceBreakdown } from '../../engine/market.ts'
+import { checkMission, missionFee, missionOffer, sealedCount } from '../../engine/night.ts'
 import { sleepsAtRelay } from '../../engine/routine.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -19,7 +21,12 @@ export default function EveningPanel() {
 
   const tank = VEHICLES[game.vehicleId].tank
   const refuelMax = maxRefuel(game)
-  const curfewError = checkForceCurfew(game)
+  // Mission de nuit du soir : acceptée par défaut quand elle est valable (chap. 2)
+  const [accept, setAccept] = useState(true)
+  const offer = missionOffer(game)
+  const withMission = accept && offer !== null
+  const missionError = withMission ? checkMission(game) : null
+  const curfewError = checkForceCurfew(game) ?? missionError
   const sleepLabel = sleepsAtRelay(game) ? t.evening.sleepRelay : t.evening.bivouac
   // Produits qui changent la nuit : boisson pour une nuit blanche, eau pour refroidir le moteur (chap. 3)
   const drinks = PRODUCT_IDS.filter((id) => PRODUCTS[id].sleeplessNight && ownedQty(game.cargo, id) > 0)
@@ -58,12 +65,25 @@ export default function EveningPanel() {
               <Siren size={14} aria-hidden="true" />
               {t.evening.curfewTitle}
             </h2>
+            <p className="mt-1 text-xs text-sky-300">
+              {offer
+                ? t.evening.missionOffer(t.district[offer].name, sealedCount(game), credits(missionFee(game)))
+                : game.nightOffer
+                  ? t.evening.missionHere(t.district[game.nightOffer].name)
+                  : t.evening.noMission}
+            </p>
+            {offer && (
+              <label className="mt-1 flex items-center gap-1.5 text-xs text-zinc-300">
+                <input type="checkbox" checked={accept} onChange={(event) => setAccept(event.target.checked)} className={FOCUS_RING} />
+                {t.evening.acceptMission}
+              </label>
+            )}
             <div className="mt-2 flex flex-wrap gap-2">
               <Button variant="primary" onClick={() => dispatch({ type: 'sleep' })}>
                 <BedDouble size={14} className="mr-1 inline" aria-hidden="true" />
                 {sleepLabel}
               </Button>
-              <Button variant="danger" disabled={curfewError !== null} onClick={() => dispatch({ type: 'forceCurfew' })}>
+              <Button variant="danger" disabled={curfewError !== null} onClick={() => dispatch({ type: 'forceCurfew', mission: withMission })}>
                 {t.evening.forceCurfew}
               </Button>
             </div>
@@ -71,10 +91,14 @@ export default function EveningPanel() {
             {curfewError === 'exhausted' &&
               drinks.map((id) => {
                 const sleepless = PRODUCTS[id].sleeplessNight
-                const error = checkForceCurfew(game, id)
+                const error = checkForceCurfew(game, id) ?? missionError
                 return sleepless ? (
                   <div key={id} className="mt-1">
-                    <Button variant="danger" disabled={error !== null} onClick={() => dispatch({ type: 'forceCurfew', drink: id })}>
+                    <Button
+                      variant="danger"
+                      disabled={error !== null}
+                      onClick={() => dispatch({ type: 'forceCurfew', drink: id, mission: withMission })}
+                    >
                       {t.evening.sleepless(t.product[id].name, sleepless.healthLoss)}
                     </Button>
                     {error && <p className="text-xs text-zinc-400">{t.error[error]}</p>}
@@ -96,6 +120,9 @@ export default function EveningPanel() {
         ) : (
           <>
             <p className="text-indigo-300">{t.evening.nightNotice}</p>
+            <p className="mt-1 text-xs text-sky-300">
+              {game.mission ? t.evening.missionActive(t.district[game.mission.to].name) : t.evening.offMission}
+            </p>
             <Button variant="primary" className="mt-2" onClick={() => dispatch({ type: 'sleep' })}>
               <BedDouble size={14} className="mr-1 inline" aria-hidden="true" />
               {sleepLabel}

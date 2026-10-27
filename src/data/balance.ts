@@ -178,6 +178,9 @@ export const MASKED_CRATE_WEIGHT = 0.5
 
 /** Malus de contexte additifs */
 export const NIGHT_TRIP_RISK = 0.25
+
+/** Missions de nuit (chap. 2) : chance d'une offre, part de la soute en caisses scellées, prime (indexée), ICC perdu si non livrée */
+export const NIGHT_MISSION = { chance: 0.6, sealedShare: 0.2, fee: 200, undeliveredIccLoss: 3 }
 export const CROSSED_DISTRICT_RISK = 0.05
 export const SUSPICIOUS_PEAK_RISK = 0.1
 

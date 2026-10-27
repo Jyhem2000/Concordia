@@ -55,6 +55,8 @@ export function checkMove(state: GameState, move: InterceptionMove, offer: Offer
     case 'bribe':
       if (racket) return 'move-unavailable'
       if (!Number.isInteger(offer.cash) || offer.cash < 0) return 'invalid-amount'
+      // Les caisses scellées du DSC ne se donnent pas
+      if (offer.crates.some(({ productId }) => PRODUCTS[productId].sealed)) return 'not-eligible'
       if (offer.cash > state.cash) return 'not-enough-cash'
       if (!ownsCrates(state.cargo, offer.crates)) return 'not-enough-cargo'
       return offerValue(state, offer) < minimumOffer(state) ? 'offer-too-low' : null
@@ -219,6 +221,12 @@ export function fleeConsequences(state: GameState): {
   }
 }
 
+/** Où se tient le contrôle (chap. 4) : galerie de service la nuit, quai de service des élites, ou rue */
+export function checkpointPlace(state: GameState): 'street' | 'gallery' | 'docks' {
+  if (state.phase === 'night') return 'gallery'
+  return DISTRICTS[state.districtId].access === 'docks' ? 'docks' : 'street'
+}
+
 /** Malus de Sédation (chap. 2), 0 sous protection */
 const sedation = (state: GameState) => (isSedated(state) ? -SEDATION.penalty : 0)
 
@@ -256,7 +264,9 @@ export function tollInKind(state: GameState): CrateCount[] {
     const favorite = favorites.indexOf(lot.productId)
     return favorite === -1 ? favorites.length : favorite
   }
-  const order = [...state.cargo].sort((a, b) => rank(a) - rank(b) || PRODUCTS[b.productId].basePrice - PRODUCTS[a.productId].basePrice)
+  const order = state.cargo
+    .filter((lot) => !PRODUCTS[lot.productId].sealed)
+    .sort((a, b) => rank(a) - rank(b) || PRODUCTS[b.productId].basePrice - PRODUCTS[a.productId].basePrice)
 
   const taken = new Map<CrateCount['productId'], number>()
   let covered = 0
@@ -298,6 +308,7 @@ const emptyLedger = (): Ledger => ({
   exploded: 0,
   sacrificed: 0,
   towBill: 0,
+  jammerSeized: false,
 })
 
 /** Joue une option déjà validée par `checkMove` */
@@ -307,8 +318,10 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
   const roll = (chance: Breakdown) => rng.chance(chance.total)
   // La règle de mort se juge sur la soute avant confiscation
   const lethalCargo = isLethalSearch(state)
+  // Un bluff raté a déjà valu une fouille effective
+  const searchedBefore = state.interception?.bluffFailed === true
   const report = (s: GameState, chance: Breakdown | null, success: boolean | null, over: boolean, effectiveSearch: boolean): GameState =>
-    finish({ ...s, rng: rng.state }, { move, chance, success, over, ...ledger }, effectiveSearch && lethalCargo)
+    finish({ ...s, rng: rng.state }, { move, chance, success, over, ...ledger }, effectiveSearch && lethalCargo, effectiveSearch || searchedBefore)
 
   switch (move) {
     case 'search':
@@ -567,7 +580,7 @@ function noteCustody(ledger: Ledger, days: number) {
  * Fin de résolution, dans l'ordre : exécution sommaire (fouille effective avec un produit fatal),
  * mort si la Santé est tombée à 0, dépannage si le châssis est à 0, puis garde à vue.
  */
-function finish(state: GameState, report: InterceptionReport, executed: boolean): GameState {
+function finish(state: GameState, report: InterceptionReport, executed: boolean, searched: boolean): GameState {
   if (executed) return endGame(state, report, 'execution')
   if (state.health <= 0) return endGame(state, report, 'death')
 
@@ -575,9 +588,20 @@ function finish(state: GameState, report: InterceptionReport, executed: boolean)
   const fullReport: InterceptionReport = { ...report, towBill: towed.bill }
   if (!report.over) return { ...towed.state, interceptionReport: fullReport }
 
-  const passed: GameState = { ...towed.state, interception: null, interceptionReport: fullReport }
-  // Barrage franchi : le trajet s'achève par l'arrivée ; la garde à vue, elle, s'achève à 20h00 au poste
-  return report.custodyDays > 0 ? serveCustody(passed, report.custodyDays) : arrive(passed)
+  // Brouilleur de drones découvert à la fouille : sabotage d'infrastructure, saisi, garde à vue (chap. 5)
+  const jammer = searched ? mountedWith(towed.state, 'droneJammer') : undefined
+  const custodyDays = jammer ? Math.max(1, report.custodyDays) : report.custodyDays
+  const seized = jammer
+    ? {
+        ...towed.state,
+        modules: {
+          owned: towed.state.modules.owned.filter((id) => id !== jammer),
+          mounted: towed.state.modules.mounted.filter((id) => id !== jammer),
+        },
+      }
+    : towed.state
+  const passed: GameState = { ...seized, interception: null, interceptionReport: { ...fullReport, custodyDays, jammerSeized: jammer !== undefined } }
+  return custodyDays > 0 ? serveCustody(passed, custodyDays) : arrive(passed)
 }
 
 function endGame(state: GameState, report: InterceptionReport, id: 'execution' | 'death'): GameState {
@@ -606,5 +630,8 @@ export function drawInterception(rng: Rng, risk: number, state: GameState, to: D
   if (!rng.chance(risk)) return null
   if (DISTRICTS[to].offGrid) return { kind: 'racket', acted: false, bluffFailed: false }
   const flying = rng.chance(flyingCheckShare(state, to, true))
+  // Brouilleur de drones, une fois par jour : le drone décroche, la BRC dresse un barrage fixe plus loin
+  if (flying && mountedEffect(state, 'droneJammer') && state.jammerDay !== state.day)
+    return { kind: 'brc', acted: false, bluffFailed: false, jammed: true }
   return { kind: flying ? 'flying' : 'brc', acted: false, bluffFailed: false }
 }

@@ -5,6 +5,7 @@ import type { BreakdownSource } from './breakdown.ts'
 import { keysOf } from './records.ts'
 import type { Rng } from './rng.ts'
 import { refreshExemption } from './crew.ts'
+import { deliverMission } from './night.ts'
 import { loseHalfDay } from './time.ts'
 import type {
   DistrictId,
@@ -185,8 +186,9 @@ export function heatWave(ctx: EventContext): Extract<EventEffect, { kind: 'heat'
 /** Arrivée dans un district (chap. 2) : effets d'arrivée des événements locaux, comme le sas de `[EVT-D3-01]` */
 export function arrive(state: GameState): GameState {
   const arrived = hasEffect(state, state.districtId, 'halfDay') ? loseHalfDay(state) : state
-  // Arriver en D1 de jour, c'est passer à la Cantine : l'Exemption Métabolique revient au maximum
-  return refreshExemption(arrived)
+  // Arriver en D1 de jour, c'est passer à la Cantine : l'Exemption Métabolique revient au maximum ;
+  // arriver de nuit dans le district de la mission, c'est livrer les caisses scellées
+  return refreshExemption(deliverMission(arrived))
 }
 
 // ─── Loterie ───
@@ -294,7 +296,8 @@ export function rumorReliability(): number {
 
 /** Aléa routier d'un trajet sans interception, parmi ceux hors cooldown, ou null */
 export function drawRoadEvent(state: GameState, rng: Rng): RoadEventId | null {
-  if (!rng.chance(EVENT_CHANCES.road)) return null
+  // La nuit, dans les galeries de service, personne à croiser (chap. 8)
+  if (state.phase !== 'day' || !rng.chance(EVENT_CHANCES.road)) return null
   const ready = ROAD_EVENT_IDS.filter((id) => (state.events.roadDays[id] ?? -Infinity) + EVENT_COOLDOWNS.road <= state.day)
   return ready.length > 0 ? rng.pick(ready) : null
 }

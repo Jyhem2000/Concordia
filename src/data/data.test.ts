@@ -39,9 +39,9 @@ describe('produits (chap. 3)', () => {
     }
   })
 
-  it('masquent un tag si et seulement si Tier 0', () => {
+  it('masquent un tag si et seulement si Tier 0 (hors caisses scellées)', () => {
     for (const [id, product] of products) {
-      expect('masks' in product, id).toBe(product.tier === 0)
+      expect('masks' in product, id).toBe(product.tier === 0 && !product.sealed)
     }
   })
 

@@ -21,7 +21,7 @@ type Eight = Seven | '08'
 export type Tier = 0 | 1 | 2 | 3 | 4
 
 /** Produits (chap. 3) */
-export type ProductId = `T0-${Four}` | `T1-${Six}` | `T2-${Seven}` | `T3-${Seven}` | `T4-${Six}`
+export type ProductId = `T0-${Four | '05'}` | `T1-${Six}` | `T2-${Seven}` | `T3-${Seven}` | `T4-${Six}`
 
 /** Tags système (chap. 3) */
 export type TagId =
@@ -35,7 +35,7 @@ export type LocationId = 'LOC-D1-1' | 'LOC-D1-2' | 'LOC-D2-1' | 'LOC-D3-1' | 'LO
 
 /** Véhicules, modules, équipiers (chap. 5) */
 export type VehicleId = `VEH-${Four}`
-export type ModuleId = `MOD-${Eight}`
+export type ModuleId = `MOD-${Eight | '09'}`
 export type CrewId = `CREW-${Three}`
 
 /** Événements (chap. 8) */
@@ -148,6 +148,8 @@ export type Product = {
   beaconRisk?: number
   /** Une fouille effective avec ce produit en soute est fatale (exécution sommaire, chap. 2) */
   lethalOnSearch?: boolean
+  /** Caisses scellées du DSC (mission de nuit) : hors commerce, ni vendues ni données (chap. 2) */
+  sealed?: boolean
   /** Refroidissement moteur : caisses consommées pour annuler l'usure d'un trajet de nuit */
   cooling?: { crates: number }
   /** Dopage pilote en fuite (une caisse bue, une fois par jour) */
@@ -197,6 +199,8 @@ export type District = {
   /** Détecteurs biométriques d'ICC : un Déviant notoire y est intercepté à coup sûr (chap. 2) */
   iccScanners: boolean
   /** Éjection d'urgence possible (dalle bio-scellée sinon) */
+  /** Entrée des livreurs de jour : voies de surface, ou quais de service des élites (chap. 4) */
+  access: 'street' | 'docks'
   /** Part des interceptions BRC qui sont des contrôles volants : ni fuite ni éjection (chap. 6) */
   flyingCheckShare: number
   /** Modes d'éjection autorisés : décharge manuelle, trappe de MOD-07 (le broyeur de VEH-04 passe partout) */
@@ -274,6 +278,8 @@ export type Module = {
   trapdoor?: { chance: number; cooldownDays: number; maxRecovery: number }
   /** Faux terminal : bonus au bluff, tarif standard de corruption multiplié */
   fakeTerminal?: { bluffBonus: number; bribeRateFactor: number }
+  /** Brouilleur de drones : une fois par jour, un contrôle volant devient un barrage fixe ; saisi à la fouille */
+  droneJammer?: boolean
 }
 
 export type Crew = {
@@ -304,7 +310,7 @@ export type Crew = {
 
 // ─── État de la partie ───
 
-/** Service de jour (06h00 – 20h00) ou couvre-feu forcé (chap. 2) */
+/** Service de jour (06h00 – 20h00) ou tournée de nuit (chap. 2) */
 export type Phase = 'day' | 'night'
 
 /** `finished` : audit du Jour 30 passé ou défaite ; la fin est dans `GameState.ending` */
@@ -338,6 +344,8 @@ export type Interception = {
   acted: boolean
   /** Bluff raté : bluff et éjection fermés, amende relevée, malus à la corruption et à la fuite */
   bluffFailed: boolean
+  /** Le brouilleur de drones a fait décrocher le drone : le contrôle volant est devenu un barrage fixe */
+  jammed?: boolean
 }
 
 /** Options de l'écran d'interception (BRC) et du racket des milices */
@@ -379,6 +387,8 @@ export type InterceptionReport = {
   sacrificed: number
   /** Facture du dépannage d'urgence si le châssis est tombé à 0 */
   towBill: number
+  /** Brouilleur de drones découvert à la fouille et saisi */
+  jammerSeized: boolean
 }
 
 /** Tactiques d'une option de barrage : aides au bluff, sacrifices et dopage en fuite (chap. 3 et 6) */
@@ -399,6 +409,10 @@ export type TripReport = {
   chassisWear: number
   /** Caisses consommées pour refroidir le moteur à la place de l'usure */
   coolingCrates: number
+  /** Trajet de nuit : mission livrée, ou écart enregistré ; null de jour ou sous barrage */
+  mission: 'delivered' | 'deviated' | null
+  /** Prime de la mission livrée */
+  missionFee: number
 }
 
 /** Ce que la nuit et la routine de 06h00 ont changé, pour le briefing du matin (chap. 2 et 10) */
@@ -423,6 +437,8 @@ export type MorningBriefing = {
   crewLost: CrewId | null
   /** Commande VIP manquée : ICC perdue, Silo verrouillé */
   vipFailed: boolean
+  /** Caisses scellées d'une mission non livrée, reprises par la plateforme */
+  missionReclaimed: number
   /** Faux dossier de l'indic : Fiche S effacée, ICC gagné */
   informant: boolean
   /** PV perdus au tabassage de l'échéance de la dette, 0 sinon */
@@ -584,6 +600,12 @@ export type GameState = {
   vip: { productId: ProductId; day: number } | null
   /** Velvet-Silo verrouillé jusqu'à ce jour inclus (commande VIP manquée) */
   velvetLock: number | null
+  /** Mission de nuit proposée pour ce soir (district), tirée le matin */
+  nightOffer: DistrictId | null
+  /** Mission de nuit acceptée, jusqu'à sa livraison ou à 06h00 */
+  mission: { to: DistrictId } | null
+  /** Dernier jour où le brouilleur de drones a servi (une fois par jour) */
+  jammerDay: number | null
   /** Échéance du retard franchie : taux majoré et embuscades jusqu'à la fin de la partie */
   debtLate: boolean
   offshore: OffshoreAccount

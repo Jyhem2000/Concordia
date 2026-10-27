@@ -7,6 +7,7 @@ import { ownedQty } from './cargo.ts'
 import { debtInterestBreakdown, offshoreBalance, offshoreInterestBreakdown, protectionBreakdown } from './finance.ts'
 import { isPerishable, removeRotten } from './condition.ts'
 import { expireVip } from './services.ts'
+import { drawNightOffer, reclaimSealed } from './night.ts'
 import { mountedEffect, recoverDumped } from './equipment.ts'
 import { changeHealth, gainRouteIcc, iccTier } from './gauges.ts'
 import { crewEffect, payCrew, refreshExemption } from './crew.ts'
@@ -29,7 +30,7 @@ type Night = 'relay' | 'bivouac' | 'cell'
 /** Nuit, puis audit le Jour 30 à minuit ou routine matinale de 06h00 (chap. 2) */
 export function sleep(state: GameState): GameState {
   if (state.day >= GAME_LENGTH_DAYS) return audit(state)
-  // Après un couvre-feu forcé, la nuit blanche ne rapporte aucun gain de sommeil (chap. 2)
+  // Après une tournée de nuit, la nuit blanche ne rapporte aucun gain de sommeil (chap. 2)
   const night: Night = state.phase === 'day' && sleepsAtRelay(state) ? 'relay' : 'bivouac'
   return morningRoutine({ ...state, interceptionReport: null }, night)
 }
@@ -99,6 +100,7 @@ function morningRoutine(state: GameState, night: Night): GameState {
     crew: null,
     crewLost: null,
     vipFailed: false,
+    missionReclaimed: 0,
     informant: false,
     debtInterest: null,
     beating: 0,
@@ -114,6 +116,11 @@ function morningRoutine(state: GameState, night: Night): GameState {
   const payroll = payCrew(s, night === 'cell')
   s = payroll.state
   if (crewId) briefing.crew = { id: crewId, paid: payroll.paid, crate: payroll.crate }
+
+  // Mission de nuit non livrée : la plateforme reprend ses caisses scellées et note le retard
+  const reclaimed = reclaimSealed(s)
+  s = reclaimed.state
+  briefing.missionReclaimed = reclaimed.crates
 
   // 3. Intérêts et échéances de la dette
   briefing.debtInterest = debtInterestBreakdown(s)
@@ -165,7 +172,7 @@ function morningRoutine(state: GameState, night: Night): GameState {
   const rng = createRng(s.rng)
   const patrolDistrict = drawPatrol(rng)
   const events = drawEvents(s.events, day, rng)
-  s = { ...s, patrolDistrict, events }
+  s = { ...s, patrolDistrict, events, nightOffer: drawNightOffer(rng) }
   // La Loterie peut désigner l'équipier actif : il disparaît pour de bon (chap. 8)
   // Un faux dossier accepté protège l'équipier de ce tirage ; celui de l'indic efface la Fiche S
   const forged = events.lottery?.day === day && events.lottery.card !== null

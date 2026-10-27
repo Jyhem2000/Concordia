@@ -78,6 +78,7 @@ export type RuleId =
   | 'emergency-tow'
   | 'aftershock'
   | 'repair'
+  | 'night-mission'
   | 'refining'
   | 'sedation'
   | 'cantine'

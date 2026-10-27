@@ -20,6 +20,8 @@ export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
   'T0-02': { tier: 0, basePrice: 15, tags: ['TAG-LEGAL'], masks: 'TAG-FLAMMABLE', cooling: { crates: 2 } },
   'T0-03': { tier: 0, basePrice: 40, tags: ['TAG-LEGAL'], masks: 'TAG-CHEMICAL' },
   'T0-04': { tier: 0, basePrice: 25, tags: ['TAG-LEGAL'], masks: 'TAG-CULTURE', bluffAid: { crates: 5, bonus: 0.1, cancelsSmell: false } },
+  // Caisses scellées du DSC : chargées pour une mission de nuit, hors commerce (chap. 2)
+  'T0-05': { tier: 0, basePrice: 0, tags: ['TAG-LEGAL'], sealed: true },
 
   // Tier 1 : petits plaisirs coupables
   'T1-01': { tier: 1, basePrice: 80, tags: ['TAG-ADDICTIVE', 'TAG-FRAGILE'] },
@@ -81,3 +83,6 @@ export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
 }
 
 export const PRODUCT_IDS = keysOf(PRODUCTS)
+
+/** Caisses scellées des missions de nuit */
+export const SEALED_PRODUCT: ProductId = 'T0-05'
