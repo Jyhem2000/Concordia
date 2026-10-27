@@ -43,6 +43,9 @@ export default function StatusBar() {
   const vehicle = VEHICLES[game.vehicleId]
   const deadline = nextDebtDeadline(game)
   const protectionDay = nextProtectionDay(game)
+  // Moment de la journée : Journée, 20h00 (journée finie avant l'heure), Nuit (chap. 2)
+  const moment = game.phase === 'night' ? 'night' : game.dayOver ? 'curfew' : 'day'
+  const tripDone = game.phase === 'day' ? game.dayTripDone : game.nightTripDone
   const debtNotes = [...(game.debtLate ? [t.hud.debtLate] : []), ...(deadline === null ? [] : [t.hud.nextBeating(deadline)])]
 
   const restart = () => {
@@ -55,7 +58,10 @@ export default function StatusBar() {
         <span className="flex items-center gap-1.5 font-bold text-amber-300">
           {game.phase === 'day' ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}
           {t.format.day(game.day, GAME_LENGTH_DAYS)}
-          <span className="sr-only">{t.phase[game.phase]}</span>
+        </span>
+        <span className="text-zinc-300">
+          {t.moment[moment]}
+          {moment !== 'curfew' && <span className="text-zinc-400"> · {tripDone ? t.moment.tripDone : t.moment.tripLeft}</span>}
         </span>
         <Stat icon={MapPin} label={t.district[game.districtId].name} />
         <Stat icon={Coins} label={t.gauge.cash} value={credits(game.cash)} className="text-yellow-300" />

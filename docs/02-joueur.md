@@ -51,6 +51,14 @@ Seuls les routiers boivent l'eau sans sédatifs de `[LOC-D1-2]` : c'est elle qui
 
 ## Déroulé d'une journée
 
+### Les moments de la journée
+Le **Jour** (Jour 1 à Jour 30) est la date. Chaque jour se découpe en trois moments, toujours nommés ainsi :
+* **Journée** (06h00 – 20h00) : commerce, lieux spéciaux, 1 trajet de jour. Elle commence par la routine matinale.
+* **20h00** : le couvre-feu sanitaire et son dilemme (dormir, bivouaquer ou forcer). On y arrive quand le joueur le décide, ou d'office après la perte d'une demi-journée (voir plus bas) : seul le marché de rue reste alors ouvert.
+* **Nuit** (après 20h00, couvre-feu forcé) : marché de rue seulement, 1 trajet de nuit, puis dormir. La nuit s'achève à la routine de 06h00 du jour suivant.
+
+Le bandeau affiche la date, le moment et si le trajet du moment est encore disponible (chap. 10).
+
 ### Routine matinale (06h00), dans l'ordre
 Le Jour 1 commence sans routine : pas d'intérêts, inflation à ×1,00, boutiques et événements tirés une première fois.
 1. Publication de l'**indice d'inflation** du jour (chap. 7).
@@ -76,7 +84,7 @@ Acheter / vendre au marché, faire le plein, utiliser les lieux spéciaux du dis
 Les sirènes d'Aeterna annoncent le couvre-feu sanitaire. Trois options :
 * **Dormir au relais routier du DSC** (dans chaque district sauf `[D4]`, côté quais de service) : jusqu'à 06h00. **Gain d'ICC et de Santé** (`RELAY_SLEEP` dans [`balance.ts`](../src/data/balance.ts)), réinitialise l'épuisement, baisse la Fiche S d'un niveau (chap. 6).
 * **Bivouac** (seule façon de dormir en `[D4]`) : réinitialise l'épuisement, mais **0 ICC, 0 PV**, et la Fiche S ne baisse pas (aucun capteur ne certifie ta nuit sage).
-* **Forcer le couvre-feu :** un second trajet dans la journée. La nuit qui suit ne rapporte aucun gain de sommeil et ne baisse pas la Fiche S, même en dormant ensuite dans un district à relais.
+* **Forcer le couvre-feu :** un second trajet dans la journée. *Pourquoi c'est possible :* la nuit, la ville « Zéro-Carbone » éteint ses lampadaires et met une partie de ses caméras en veille pour économiser l'énergie (Aeterna refroidit ses processeurs) ; il y a moins d'yeux, mais tout ce qui roule est une anomalie, sans foule où se fondre, d'où le risque accru. La nuit qui suit ne rapporte aucun gain de sommeil et ne baisse pas la Fiche S, même en dormant ensuite dans un district à relais.
   * *Avantages :* écouler sa cargaison avant la dégradation de 06h00 ou la fin d'un événement ; profil nuit des produits (chap. 7).
   * *Surveillance accrue :* un malus au risque d'interception (`NIGHT_TRIP_RISK` dans [`balance.ts`](../src/data/balance.ts)) (milices de `[D4]` comprises), aucun gain de sommeil.
   * *Mode furtif :* consommation de nuit du véhicule et usure du châssis (`NIGHT_TRIP_CHASSIS_WEAR` dans [`balance.ts`](../src/data/balance.ts)) (surchauffe des galeries). L'usure de châssis (pas la consommation) est annulée par `[MOD-04]` ou `[T0-02]`.

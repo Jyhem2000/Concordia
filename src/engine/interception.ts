@@ -227,6 +227,7 @@ const emptyLedger = (): Ledger => ({
   custodyDays: 0,
   damaged: 0,
   exploded: 0,
+  sacrificed: 0,
   towBill: 0,
 })
 
@@ -247,7 +248,7 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
     case 'bluff': {
       const chance = bluffChance(state, tactics)
       // Les caisses d'aide sont données (ou sacrifiées) avant le verdict
-      const aided = give(state, ledger, aidCrates(tactics.bluffAids ?? []))
+      const aided = sacrifice(state, ledger, aidCrates(tactics.bluffAids ?? []))
       if (roll(chance)) return report(gainIcc(aided, ledger, BLUFF.successIccGain), chance, true, true, false)
       const caught = loseIcc(aided, ledger, BLUFF.failIccLoss)
       // Soute légale : la fausse déclaration ne coûte que l'ICC
@@ -358,10 +359,10 @@ function refuseToll(state: GameState, ledger: Ledger, rng: Rng): GameState {
  * châssis, perte d'ICC sauf face aux milices)
  */
 function prepareFlight(state: GameState, ledger: Ledger, { drop, dope }: Tactics, rng: Rng, racket: boolean): GameState {
-  let s = drop ? give(state, ledger, [{ productId: drop, qty: 1 }]) : state
+  let s = drop ? sacrifice(state, ledger, [{ productId: drop, qty: 1 }]) : state
   const doping = dope ? PRODUCTS[dope].doping : undefined
   if (dope && doping) {
-    s = give(s, ledger, [{ productId: dope, qty: 1 }])
+    s = sacrifice(s, ledger, [{ productId: dope, qty: 1 }])
     s = hitChassis({ ...s, lastDopingDay: s.day }, ledger, doping.chassisLoss, rng)
     if (!racket) s = loseIcc(s, ledger, doping.iccLoss)
   }
@@ -405,6 +406,14 @@ function give(state: GameState, ledger: Ledger, crates: readonly CrateCount[]): 
   const cargo = giveCrates(state.cargo, crates)
   ledger.crates -= cargoUsed(state.cargo) - cargoUsed(cargo)
   return { ...state, cargo }
+}
+
+/** Caisses perdues par une tactique du joueur, comptées à part au compte rendu */
+function sacrifice(state: GameState, ledger: Ledger, crates: readonly CrateCount[]): GameState {
+  const before = ledger.crates
+  const given = give(state, ledger, crates)
+  ledger.sacrificed += before - ledger.crates
+  return given
 }
 
 function pay(state: GameState, ledger: Ledger, amount: number): GameState {

@@ -25,7 +25,6 @@ type MoveCardProps = {
 export default function MoveCard({ move, label, chance, outcomes, tactics, customAction = false, children }: MoveCardProps) {
   const dispatch = useGameStore((s) => s.dispatch)
   const error = useGameStore((s) => checkMove(s.game, move, NO_OFFER, tactics))
-  const racket = useGameStore((s) => s.game.interception?.kind === 'racket')
   const { t, percent } = useI18n()
 
   return (
@@ -45,8 +44,6 @@ export default function MoveCard({ move, label, chance, outcomes, tactics, custo
           </span>
         )}
       </div>
-      {/* Le slogan d'Aeterna n'a pas cours chez les milices */}
-      {chance && !racket && <p className="mt-1 text-xs text-amber-200">{t.interception.odds(percent(chance.total, 0))}</p>}
       <ul className="mt-1 space-y-0.5 text-xs text-zinc-400">
         {outcomes.map((outcome) => (
           <li key={outcome}>{outcome}</li>

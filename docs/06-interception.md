@@ -44,7 +44,7 @@ Le résultat est **borné, après** tous les multiplicateurs (`RISK_BOUNDS` dans
 Le joueur accepte la fouille (**0**) ou tente une action : **1** Bluff, **2** Corruption, **3** Fuite, **4** Éjection (uniquement en tout premier).
 **Ordre de résolution d'une option :** exécution sommaire (fouille effective avec `[T4-06]`, jugée sur la soute *avant* confiscation) → mort si la Santé tombe à 0 → dépannage d'urgence si le châssis tombe à 0 → garde à vue. Les gardes à vue ne se cumulent pas : la plus longue s'applique.
 **Amendes et saisies :** un pourcentage du Cash-Puce au moment de la sanction (après paiement d'une offre de corruption perdue, par exemple), arrondi au ₡.
-**Compte rendu :** après chaque option, l'app détaille ce qui a été perdu ou gagné (₡, caisses, ICC, Santé, châssis, Fiche S, garde à vue, dépannage).
+**Compte rendu :** après chaque option, l'app détaille ce qui a été perdu ou gagné (₡, caisses dont celles sacrifiées par une tactique, ICC, Santé, châssis, Fiche S, garde à vue, dépannage).
 
 **Fouille effective :** fouille acceptée, ou échec d'un bluff, d'une corruption, d'une fuite ou d'une éjection — déclencheur de la règle de mort de `[T4-06]`.
 **Sédation** (chap. 2) : **−10 %** au bluff, à la corruption et à la fuite.
@@ -97,7 +97,8 @@ Chance = min( plafond,  base + Offre + Connivence − malus × (étoiles du dist
 * **Sacrifices :** 1 largage offensif max (une caisse `[TAG-FLAMMABLE]` **ou** `[TAG-CHEMICAL]` ; si le produit porte les deux tags, le meilleur bonus compte) + dopage `[T2-05]` (cumulable). Les caisses sacrifiées ou bues sont perdues quel que soit le résultat. Le joueur choisit le produit à sacrifier ; l'app montre le bonus de chacun.
 * **Succès :** cargaison sauvée, **+1 niveau de Fiche S**, mais perte de châssis (tirage uniforme entier dans une fourchette ; `[MOD-06]`, `[VEH-03]`), casse `[TAG-FRAGILE]`, et perte d'ICC (caméras de trafic ; `[VEH-03]`, `[MOD-05]`).
 * **Échec :** explosions `[TAG-FLAMMABLE]` d'abord, puis confiscation + saisie d'une part du Cash-Puce + perte d'ICC ; perte de châssis et de Santé (`[MOD-06]`), mortelle si la Santé tombe à 0 ; garde à vue.
-* Avant validation, l'app affiche la chance et le pire scénario : *« Aeterna estime vos chances de survie fiscale à 35 %. »*
+* Avant validation, l'app affiche la chance et les conséquences du succès et de l'échec.
+* *Le largage n'est pas une éjection :* on ne cache rien, on jette une caisse derrière soi pendant la fuite (nuage chimique, nappe enflammée) pour aveugler les poursuivants. Se débarrasser de l'illégal, c'est l'éjection, avant le barrage.
 
 ### 4. Éjection / broyage d'urgence — *« Se débarrasser de la cargaison avant le barrage »*
 * **Activation :** uniquement au tout début de l'interception, à 300 m du barrage.

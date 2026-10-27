@@ -239,7 +239,6 @@ function BribeForm({ label }: BribeFormProps) {
         <p className="flex flex-wrap gap-1.5 text-xs">
           <span className="text-zinc-400">{t.interception.chance}</span>
           <Detailed breakdown={bribeChance(game, offer)} format={(chance) => percent(chance, 0)} />
-          <span className="text-amber-200">{t.interception.odds(percent(bribeChance(game, offer).total, 0))}</span>
         </p>
       )}
       <div>

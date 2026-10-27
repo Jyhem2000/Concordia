@@ -33,9 +33,13 @@ export const fr = {
     day: (day: number, total: number) => `Jour ${day} / ${total}`,
   },
 
-  phase: {
-    day: 'Jour',
-    night: 'Nuit',
+  /** Moment de la journée (chap. 2) : Journée, 20h00, Nuit */
+  moment: {
+    day: 'Journée (06h00 – 20h00)',
+    curfew: '20h00 : couvre-feu',
+    night: 'Nuit (couvre-feu forcé)',
+    tripLeft: 'trajet disponible',
+    tripDone: 'trajet effectué',
   },
 
   gauge: {
@@ -256,10 +260,10 @@ export const fr = {
   interception: {
     title: { brc: 'Barrage de la BRC', racket: 'Racket des milices' },
     intro: {
-      brc: (district: string) => `Un barrage de la BRC vous arrête à ${district}. Les agents s'approchent de la fourgonnette.`,
-      racket: (district: string) => `Les miliciens de ${district} bloquent le passage et réclament leur dû.`,
+      brc: (district: string) =>
+        `Barrage de la BRC à 300 m, à l'entrée de ${district}. Un agent vous fait signe de vous ranger : il est encore temps de vider la soute ou de tourner les talons.`,
+      racket: (district: string) => `Une barricade des milices barre l'entrée de ${district}. Les miliciens réclament leur dû.`,
     },
-    odds: (chance: string) => `Aeterna estime vos chances de survie fiscale à ${chance}.`,
     chance: 'Chance',
     moves: {
       search: 'Accepter la fouille',
@@ -291,13 +295,13 @@ export const fr = {
     removeCrate: (product: string) => `Offrir une caisse de moins : ${product}`,
     cancelsSmell: "annule le malus d'odeur",
     bluffAid: (crates: number, product: string, effect: string) => `Donner ${crates} × ${product} à l'agent (${effect})`,
-    drop: 'Largage offensif',
+    drop: 'Largage offensif (une caisse jetée derrière vous aveugle les poursuivants)',
     breakageRisk: (tag: string, chance: string, factor: string) =>
       `En cas de succès, chaque caisse ${tag} peut casser (${chance}) : elle se vendra et paiera ${factor}.`,
     explosionRisk: (tag: string, chance: string, chassis: string) =>
       `En cas d'échec, chaque caisse ${tag} non masquée peut exploser (${chance}, châssis ${chassis}).`,
     noDrop: 'Aucun',
-    dropOption: (product: string, bonus: string) => `1 × ${product} (${bonus})`,
+    dropOption: (product: string, bonus: string) => `Jeter 1 × ${product} : ${bonus} de chance de fuite`,
     dope: (product: string, bonus: string, chassis: number, icc: number) =>
       `Dopage : boire 1 × ${product} (${bonus}, châssis −${chassis}, ICC −${icc} % sauf face aux milices ; une fois par jour)`,
     tollInKind: (crates: string, value: string) => `Les miliciens prendraient : ${crates} (valeur ${value}, sans rendre la monnaie).`,
@@ -329,6 +333,7 @@ export const fr = {
     wanted: 'Fiche S',
     damaged: 'Caisses endommagées',
     exploded: 'Caisses explosées',
+    sacrificed: 'dont caisses sacrifiées',
     custody: (days: number) => `Garde à vue : ${days} jour${days > 1 ? 's' : ''}, sortie à 20h00.`,
     tow: (bill: string) => `Châssis à 0 : dépannage d'urgence facturé ${bill}.`,
     dismiss: 'Compris',
@@ -363,7 +368,8 @@ export const fr = {
     siphonHint: "Une ration contre de l'ICC et une demi-journée.",
     curfewTitle: '20h00 — couvre-feu sanitaire',
     forceCurfew: 'Forcer le couvre-feu',
-    forceCurfewHint: 'Un second trajet, de nuit. Interdit le lendemain.',
+    forceCurfewHint:
+      'Un second trajet, de nuit. La ville Zéro-Carbone éteint ses lampadaires et met ses caméras en veille, mais tout ce qui roule devient suspect. Interdit le lendemain.',
     sleepRelay: 'Dormir au relais',
     bivouac: 'Bivouac',
     nightNotice: 'Couvre-feu forcé : 1 trajet de nuit, puis dormir.',

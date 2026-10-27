@@ -41,6 +41,7 @@ function ReportLines({ report }: ReportLinesProps) {
   const deltas = [
     { key: 'cash', label: t.report.cash, value: report.cash, text: signedCredits(report.cash) },
     { key: 'crates', label: t.report.crates, value: report.crates, text: signed(report.crates) },
+    { key: 'sacrificed', label: t.report.sacrificed, value: -report.sacrificed, text: number(report.sacrificed) },
     { key: 'icc', label: t.report.icc, value: report.icc, text: signedPercent(report.icc / ICC_MAX, 0) },
     { key: 'health', label: t.report.health, value: report.health, text: signed(report.health) },
     { key: 'chassis', label: t.report.chassis, value: report.chassis, text: signed(report.chassis) },

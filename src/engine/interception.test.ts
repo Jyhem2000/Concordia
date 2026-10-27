@@ -269,6 +269,7 @@ describe('tactiques de barrage (chap. 3)', () => {
     expect(ownedQty(fled.cargo, 'T1-06')).toBe(1)
     expect(ownedQty(fled.cargo, 'T2-05')).toBe(1)
     expect(fled.lastDopingDay).toBe(5)
+    expect(defined(fled.interceptionReport).sacrificed).toBe(2)
     expect(fled.icc).toBe(100 - doping.iccLoss - FLEE.success.iccLoss)
     expect(errorOf({ ...fled, interception: brc }, { type: 'intercept', move: 'flee', tactics: { dope: 'T2-05' } })).toBe('doping-used')
   })

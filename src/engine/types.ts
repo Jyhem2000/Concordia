@@ -261,6 +261,8 @@ export type InterceptionReport = {
   damaged: number
   /** Caisses inflammables détruites par explosion */
   exploded: number
+  /** Caisses données, larguées ou bues par une tactique (aides au bluff, largage, dopage) */
+  sacrificed: number
   /** Facture du dépannage d'urgence si le châssis est tombé à 0 */
   towBill: number
 }
