@@ -85,33 +85,26 @@ Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est 
 ### Dette mafieuse
 * **Créancier :** `[LOC-D1-1]`. **Solde unique :** la dette de départ, les emprunts et les reliquats (dépannage, collecte) s'ajoutent au même solde. **Départ :** [`balance.ts`](../src/data/balance.ts).
 * **Dette initiale soldée :** statut acquis **définitivement** la première fois que le solde atteint 0. Il débloque l'emprunt tactique, la collecte de protection et la modale « Objectifs du Jour 30 ».
-* **Taux :** **+10 % par jour** sur tout le solde, composés à chaque routine matinale (pas le Jour 1).
+* **Taux :** un taux quotidien (`DEBT_DAILY_RATE` dans [`balance.ts`](../src/data/balance.ts)) sur tout le solde, composés à chaque routine matinale (pas le Jour 1).
 * **Échéances :**
-  * **Jour 10, 06h00 :** si le solde dépasse **10 000 ₡**, les Bouchers tabassent le joueur : **−30 PV** de Santé, sans descendre sous **5 PV** (un débiteur mort ne paie plus).
-  * **Jour 20, 06h00 :** si la dette initiale n'a **jamais** été soldée, le taux passe à **+20 % par jour** et ses hommes de main renseignent patrouilles et milices : **+15 %** au risque d'interception partout (*embuscades*). Ces deux pénalités restent acquises jusqu'à la fin de la partie, même après remboursement.
+  * **Tabassage** (jour, seuil, PV perdus et plancher : `DEBT_BEATING` dans [`balance.ts`](../src/data/balance.ts)) **:** à 06h00 du jour d'échéance, si le solde dépasse le seuil, les Bouchers tabassent le joueur, sans le faire descendre sous un plancher de Santé (un débiteur mort ne paie plus).
+  * **Retard** (jour, taux majoré et malus de risque : `DEBT_LATE` dans [`balance.ts`](../src/data/balance.ts)) **:** à 06h00 du jour d'échéance, si la dette initiale n'a **jamais** été soldée, le taux est majoré et ses hommes de main renseignent patrouilles et milices : malus au risque d'interception partout (*embuscades*). Ces deux pénalités restent acquises jusqu'à la fin de la partie, même après remboursement.
   * **Jour 30, minuit :** audit — le solde doit être à 0 (chap. 2).
-* **Emprunt tactique :** une fois la dette initiale soldée, le joueur peut réemprunter jusqu'à un solde de **100 000 ₡**, au taux en vigueur.
+* **Emprunt tactique :** une fois la dette initiale soldée, le joueur peut réemprunter jusqu'à un plafond de solde (`LOAN_CEILING` dans [`balance.ts`](../src/data/balance.ts)), au taux en vigueur.
 * **Augmentée** par le dépannage d'urgence (chap. 2) et la collecte de protection ; **réduite** par le Hachoir de `[LOC-D1-1]`.
 
 ### Collecte de protection
 *« Viktor ne t'oublie pas. Viktor n'oublie personne. »*
-* **Quand :** une fois la dette initiale soldée, à 06h00 les **Jours 7, 14, 21 et 28**.
-* **Montant :** **10 % de ta richesse visible** = Cash-Puce + valeur de la soute (au prix de base). Le compte offshore est invisible pour Viktor.
+* **Quand :** une fois la dette initiale soldée, à 06h00 des jours de collecte (`PROTECTION` dans [`balance.ts`](../src/data/balance.ts)).
+* **Montant :** **une part de ta richesse visible** = Cash-Puce + valeur de la soute (au prix de base). Le compte offshore est invisible pour Viktor.
 * **Paiement :** prélevé automatiquement sur le Cash-Puce ; le reliquat éventuel s'ajoute à la dette.
 * **Affichage :** date et estimation de la prochaine collecte en permanence (chap. 9). *Lecture stratégique :* arriver léger au matin de la collecte, ou blanchir avant.
 
 ### Compte offshore
 * **Guichet :** `[LOC-D5-1]`, de jour uniquement.
 * **Insaisissable :** ni la BRC, ni les milices, ni Viktor, ni l'audit n'y touchent.
-* **Dépôt :** commission de **5 %**. **Retrait :** gratuit mais sur place, l'argent redevient du Cash-Puce exposé.
-* **Rendement — intérêts simples** (les intérêts versés ne produisent pas d'intérêts), versés à la routine matinale sur le solde déposé avant 20h00. Le taux baisse par tranche, à cause des **« frais de conformité »** :
-
-| Tranche du solde | Taux / jour |
-| :--- | :---: |
-| 0 – 200 000 ₡ | 1,5 % |
-| 200 000 – 500 000 ₡ | 1,0 % |
-| au-delà de 500 000 ₡ | 0,5 % |
-
+* **Dépôt :** commission de la Laverie (`OFFSHORE_DEPOSIT_FACTOR` dans [`balance.ts`](../src/data/balance.ts)). **Retrait :** gratuit mais sur place, l'argent redevient du Cash-Puce exposé. Les intérêts versés sont retirés en premier, les dépôts (seuls à rapporter) en dernier.
+* **Rendement — intérêts simples** (les intérêts versés ne produisent pas d'intérêts), versés à la routine matinale sur le solde déposé avant 20h00. Le taux baisse par tranche du solde déposé, à cause des **« frais de conformité »** (`OFFSHORE_TRANCHES` dans [`balance.ts`](../src/data/balance.ts)).
 * **Modificateur :** `[CREW-02]`. L'app affiche le **taux effectif** du compte.
 * **Score final** = solde à l'audit.
 

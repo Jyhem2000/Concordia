@@ -1,3 +1,4 @@
+import type { Breakdown } from './breakdown.ts'
 import type { RngState } from './rng.ts'
 
 /*
@@ -129,8 +130,43 @@ export type Crew = {
 /** Service de jour (06h00 – 20h00) ou couvre-feu forcé (chap. 2) */
 export type Phase = 'day' | 'night'
 
-/** `finished` : la partie a passé le Jour 30 (l'audit et les fins viendront avec la dette) */
+/** `finished` : audit du Jour 30 passé ou défaite ; la fin est dans `GameState.ending` */
 export type GameStatus = 'playing' | 'finished'
+
+/** Paliers de crédit social (chap. 2), du plus haut au plus bas */
+export type IccTier = 'gold' | 'ordinary' | 'probation' | 'deviant'
+
+/** Fins de partie (chap. 2) : les quatre grandes fins, puis les défaites */
+export type EndingId = 'saboteur' | 'elite' | 'mafia' | 'standard' | 'bio-bricks' | 'death' | 'execution'
+
+export type Ending = {
+  id: EndingId
+  /** Score final : solde du compte offshore à l'audit (0 en cas de défaite) */
+  score: number
+}
+
+/** Compte offshore : intérêts simples, donc dépôts et intérêts versés sont suivis à part (chap. 7) */
+export type OffshoreAccount = {
+  /** Dépôts nets de commission : seule base des intérêts */
+  deposited: number
+  /** Intérêts versés, qui ne produisent pas d'intérêts */
+  interest: number
+}
+
+/** Ce que la nuit et la routine de 06h00 ont changé, pour le briefing du matin (chap. 2 et 9) */
+export type MorningBriefing = {
+  day: number
+  /** Gains de la nuit au relais routier (après plafond d'ICC) ; null au bivouac */
+  sleep: { icc: number; health: number } | null
+  debtInterest: Breakdown | null
+  /** PV perdus au tabassage de l'échéance de la dette, 0 sinon */
+  beating: number
+  /** Vrai le matin où la dette passe en retard (taux majoré, embuscades) */
+  debtLate: boolean
+  /** Collecte de protection : montant dû, part payée en Cash-Puce, reliquat ajouté à la dette */
+  protection: { due: Breakdown; paid: number; toDebt: number } | null
+  offshoreInterest: Breakdown | null
+}
 
 /** Caisses d'un même produit achetées ensemble */
 export type CargoLot = {
@@ -182,12 +218,21 @@ export type GameState = {
   cash: number
   /** Solde de la dette mafieuse */
   debt: number
-  /** Solde du compte offshore */
-  offshore: number
+  /** Statut acquis définitivement la première fois que la dette atteint 0 (chap. 7) */
+  initialDebtPaid: boolean
+  /** Échéance du retard franchie : taux majoré et embuscades jusqu'à la fin de la partie */
+  debtLate: boolean
+  offshore: OffshoreAccount
   /** Indice de Conformité Civique, 0–100 */
   icc: number
+  /** Gains de route d'ICC déjà reçus depuis 06h00 (plafond quotidien) */
+  iccRouteGains: number
   /** Santé du joueur, 0–100 PV */
   health: number
+  /** Briefing de la dernière routine matinale ; null au Jour 1 */
+  briefing: MorningBriefing | null
+  /** Fin de partie, une fois `status` à `finished` */
+  ending: Ending | null
   /** État du générateur aléatoire : sauvegardé pour que recharger ne relance pas les dés */
   rng: RngState
 }

@@ -1,4 +1,4 @@
-import type { DistrictId, NightProfile, Range } from '../engine/types.ts'
+import type { DistrictId, IccTier, NightProfile, ProductId, Range } from '../engine/types.ts'
 
 /*
  * Constantes globales d'équilibrage. Ce fichier fait foi ; chaque valeur cite le chapitre
@@ -22,6 +22,30 @@ export const START_DEBT = 5_000
 export const START_ICC = 100
 
 export const START_HEALTH = 100
+
+/** Seuil bas (ICC inclus) de chaque palier de crédit social, du plus haut au plus bas */
+export const ICC_TIERS: readonly { tier: IccTier; min: number }[] = [
+  { tier: 'gold', min: 85 },
+  { tier: 'ordinary', min: 50 },
+  { tier: 'probation', min: 30 },
+  { tier: 'deviant', min: 0 },
+]
+
+/** Gains de route d'ICC (sommeil au relais…) : plafond par jour, de 06h00 à 06h00 */
+export const ICC_DAILY_ROUTE_GAIN_CAP = 4
+
+/** Nuit au relais routier du DSC (pas au bivouac de [D4]) */
+export const RELAY_SLEEP = { icc: 2, health: 5 }
+
+/** Le compte à rebours de l'audit s'affiche à partir de ce jour (chap. 9) */
+export const AUDIT_COUNTDOWN_DAY = 28
+
+/** Fins de partie (dette soldée), de la plus prestigieuse à la plus modeste : seuils de score offshore */
+export const ENDINGS = {
+  saboteur: { minScore: 1_000_000, requiredProduct: 'T4-06' as ProductId, district: 'D4' as DistrictId },
+  elite: { minScore: 500_000, iccTier: 'gold' as IccTier },
+  mafia: { minScore: 200_000 },
+}
 
 // ─── Trajets (chap. 2 et 4) ───
 
@@ -60,3 +84,32 @@ export const KNOW_HOW_EXCESS_FACTOR = 0.5
 
 /** Plafond du savoir-faire d'une caisse revendue sans avoir quitté son district d'achat */
 export const ANTI_ARBITRAGE_CAP = 1
+
+// ─── Dette mafieuse (chap. 7) ───
+
+/** Intérêts composés par jour, à chaque routine matinale (pas le Jour 1) */
+export const DEBT_DAILY_RATE = 0.1
+
+/** Échéance du tabassage : au-delà du solde seuil, perte de Santé sans descendre sous le plancher */
+export const DEBT_BEATING = { day: 10, threshold: 10_000, healthLoss: 30, healthFloor: 5 }
+
+/** Échéance du retard : dette initiale jamais soldée → taux majoré et embuscades, jusqu'à la fin de la partie */
+export const DEBT_LATE = { day: 20, dailyRate: 0.2, ambushRisk: 0.15 }
+
+/** Emprunt tactique (dette initiale soldée) : solde maximal de la dette */
+export const LOAN_CEILING = 100_000
+
+/** Collecte de protection (dette initiale soldée) : jours et part de la richesse visible */
+export const PROTECTION = { days: [7, 14, 21, 28] as readonly number[], rate: 0.1 }
+
+// ─── Compte offshore (chap. 7) ───
+
+/** Coefficient appliqué à chaque dépôt (commission de la Laverie) */
+export const OFFSHORE_DEPOSIT_FACTOR = 0.95
+
+/** Intérêts simples par jour, par tranche du solde déposé ; `upTo` null = au-delà */
+export const OFFSHORE_TRANCHES: readonly { upTo: number | null; dailyRate: number }[] = [
+  { upTo: 200_000, dailyRate: 0.015 },
+  { upTo: 500_000, dailyRate: 0.01 },
+  { upTo: null, dailyRate: 0.005 },
+]

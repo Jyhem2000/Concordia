@@ -24,9 +24,14 @@ export function createInitialState(seed: number): GameState {
     lastCurfewDay: null,
     cash: START_CASH,
     debt: START_DEBT,
-    offshore: 0,
+    initialDebtPaid: false,
+    debtLate: false,
+    offshore: { deposited: 0, interest: 0 },
     icc: START_ICC,
+    iccRouteGains: 0,
     health: START_HEALTH,
+    briefing: null,
+    ending: null,
     rng: rng.state,
   }
   return remember(state, START_DISTRICT)

@@ -1,11 +1,12 @@
-import { FUEL_PER_CROSSED_DISTRICT, GAME_LENGTH_DAYS, SIPHON } from '../data/balance.ts'
+import { FUEL_PER_CROSSED_DISTRICT, SIPHON } from '../data/balance.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import { cargoUsed, ownedQty, takeLots } from './cargo.ts'
+import { depositBreakdown, loanRoom, offshoreBalance, withdrawFrom } from './finance.ts'
 import { crossedDistricts, shortestRoute } from './map.ts'
-import { drawMarkets, fuelPriceBreakdown, quote, saleQuote } from './market.ts'
-import { createRng } from './rng.ts'
+import { fuelPriceBreakdown, quote, saleQuote } from './market.ts'
+import { sleep } from './routine.ts'
 import { remember } from './state.ts'
-import type { DistrictId, GameState, ProductId } from './types.ts'
+import type { DistrictId, GameState, LocationId, ProductId } from './types.ts'
 
 /*
  * Actions du joueur : chaque action produit un nouvel état, ou une erreur sans rien changer.
@@ -20,6 +21,10 @@ export type Action =
   | { type: 'forceCurfew' }
   | { type: 'sleep' }
   | { type: 'siphon' }
+  | { type: 'repay'; amount: number }
+  | { type: 'borrow'; amount: number }
+  | { type: 'deposit'; amount: number }
+  | { type: 'withdraw'; amount: number }
 
 export type ActionError =
   | 'game-over'
@@ -36,6 +41,13 @@ export type ActionError =
   | 'not-daytime'
   | 'exhausted'
   | 'siphon-unavailable'
+  | 'invalid-amount'
+  | 'not-at-location'
+  | 'location-closed'
+  | 'no-debt'
+  | 'loan-locked'
+  | 'loan-ceiling'
+  | 'not-enough-offshore'
 
 export type ActionResult = { ok: true; state: GameState } | { ok: false; error: ActionError }
 
@@ -174,6 +186,61 @@ function travel(state: GameState, to: DistrictId): ActionResult {
   return { ok: true, state: remember(arrived, to) }
 }
 
+// ─── Lieux spéciaux : dette et compte offshore (chap. 4 et 7) ───
+
+/** District d'un lieu spécial, lu dans son ID (`LOC-D1-1` → `D1`) */
+export function locationDistrict(locationId: LocationId): DistrictId {
+  return locationId.slice(4, 6) as DistrictId
+}
+
+/** Les lieux spéciaux ouvrent de jour, dans leur district ; renvoie la raison sinon */
+export function checkLocation(state: GameState, locationId: LocationId): ActionError | null {
+  if (state.status !== 'playing') return 'game-over'
+  if (state.districtId !== locationDistrict(locationId)) return 'not-at-location'
+  if (state.phase !== 'day') return 'location-closed'
+  return null
+}
+
+export function maxRepay(state: GameState): number {
+  return Math.min(state.cash, state.debt)
+}
+
+function repay(state: GameState, amount: number): ActionResult {
+  const closed = checkLocation(state, 'LOC-D1-1')
+  if (closed) return fail(closed)
+  if (state.debt === 0) return fail('no-debt')
+  if (amount > state.cash) return fail('not-enough-cash')
+  if (amount > state.debt) return fail('invalid-amount')
+  const debt = state.debt - amount
+  return { ok: true, state: { ...state, cash: state.cash - amount, debt, initialDebtPaid: state.initialDebtPaid || debt === 0 } }
+}
+
+function borrow(state: GameState, amount: number): ActionResult {
+  const closed = checkLocation(state, 'LOC-D1-1')
+  if (closed) return fail(closed)
+  if (!state.initialDebtPaid) return fail('loan-locked')
+  if (amount > loanRoom(state)) return fail('loan-ceiling')
+  return { ok: true, state: { ...state, cash: state.cash + amount, debt: state.debt + amount } }
+}
+
+function deposit(state: GameState, amount: number): ActionResult {
+  const closed = checkLocation(state, 'LOC-D5-1')
+  if (closed) return fail(closed)
+  if (amount > state.cash) return fail('not-enough-cash')
+  const credited = depositBreakdown(amount).total
+  return {
+    ok: true,
+    state: { ...state, cash: state.cash - amount, offshore: { ...state.offshore, deposited: state.offshore.deposited + credited } },
+  }
+}
+
+function withdraw(state: GameState, amount: number): ActionResult {
+  const closed = checkLocation(state, 'LOC-D5-1')
+  if (closed) return fail(closed)
+  if (amount > offshoreBalance(state.offshore)) return fail('not-enough-offshore')
+  return { ok: true, state: { ...state, cash: state.cash + amount, offshore: withdrawFrom(state.offshore, amount) } }
+}
+
 // ─── Fin de journée ───
 
 /** Le couvre-feu forcé le Jour J est verrouillé le soir du Jour J+1 (épuisement nerveux, chap. 2) */
@@ -188,24 +255,6 @@ function forceCurfew(state: GameState): ActionResult {
   const error = checkForceCurfew(state)
   if (error) return fail(error)
   return { ok: true, state: { ...state, phase: 'night', lastCurfewDay: state.day } }
-}
-
-/** Nuit (relais routier ou bivouac) puis routine matinale de 06h00 */
-function sleep(state: GameState): ActionResult {
-  if (state.day >= GAME_LENGTH_DAYS) return { ok: true, state: { ...state, status: 'finished' } }
-
-  const rng = createRng(state.rng)
-  const markets = drawMarkets(rng, state.markets)
-  const morning: GameState = {
-    ...state,
-    day: state.day + 1,
-    phase: 'day',
-    dayTripDone: false,
-    nightTripDone: false,
-    markets,
-    rng: rng.state,
-  }
-  return { ok: true, state: remember(morning, morning.districtId) }
 }
 
 // ─── Point d'entrée ───
@@ -225,8 +274,16 @@ export function applyAction(state: GameState, action: Action): ActionResult {
     case 'forceCurfew':
       return forceCurfew(state)
     case 'sleep':
-      return sleep(state)
+      return { ok: true, state: sleep(state) }
     case 'siphon':
       return siphon(state)
+    case 'repay':
+      return isQuantity(action.amount) ? repay(state, action.amount) : fail('invalid-amount')
+    case 'borrow':
+      return isQuantity(action.amount) ? borrow(state, action.amount) : fail('invalid-amount')
+    case 'deposit':
+      return isQuantity(action.amount) ? deposit(state, action.amount) : fail('invalid-amount')
+    case 'withdraw':
+      return isQuantity(action.amount) ? withdraw(state, action.amount) : fail('invalid-amount')
   }
 }

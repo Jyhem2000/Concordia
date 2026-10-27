@@ -12,16 +12,16 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 ### ICC — Indice de Conformité Civique
 * **Échelle :** 0 % à 100 %. **Départ :** [`balance.ts`](../src/data/balance.ts). S'érode facilement, lent et coûteux à restaurer.
 * **Suspicion :** ajoute **0,5 × (100 − ICC)** au risque d'interception (ex. ICC 60 % → +20 %).
-* **Paliers de crédit social** (seule échelle de référence, reprise par l'interface, chap. 9) :
+* **Paliers de crédit social** (seule échelle de référence, reprise par l'interface, chap. 9 ; seuils : `ICC_TIERS` dans [`balance.ts`](../src/data/balance.ts)), du plus haut au plus bas :
 
-| ICC | Statut | Effet |
+| Palier | Statut | Effet |
 | :--- | :--- | :--- |
-| **≥ 85 %** | Citoyen Or | **Coupe-file :** risque **×0,90** aux portiques de `[D5]` et `[D6]`. Requis pour la fin Élite. |
-| 50 – 84 % | Citoyen ordinaire | — |
-| **30 – 49 %** | Citoyen sous réserve | Pompes officielles **fermées la nuit**. `[LOC-D6-1]` inaccessible. |
-| **< 30 %** | Déviant notoire | Effets du palier précédent, et toute entrée en `[D6]` déclenche **automatiquement** une interception. |
+| 1 | Citoyen Or | **Coupe-file :** risque **×0,90** aux portiques de `[D5]` et `[D6]`. Requis pour la fin Élite. |
+| 2 | Citoyen ordinaire | — |
+| 3 | Citoyen sous réserve | Pompes officielles **fermées la nuit**. `[LOC-D6-1]` inaccessible. |
+| 4 | Déviant notoire | Effets du palier précédent, et toute entrée en `[D6]` déclenche **automatiquement** une interception. |
 
-* **Gains de route :** sommeil au relais routier, contrôle avec soute légale, bluff réussi, certains aléas routiers. **Plafond : +4 % d'ICC par jour** (de 06h00 à 06h00), au-delà les gains de route sont perdus. Le reste du plafond du jour est affiché dans le bandeau (chap. 9).
+* **Gains de route :** sommeil au relais routier, contrôle avec soute légale, bluff réussi, certains aléas routiers. **Plafond quotidien** (`ICC_DAILY_ROUTE_GAIN_CAP` dans [`balance.ts`](../src/data/balance.ts), de 06h00 à 06h00), au-delà les gains de route sont perdus. Le reste du plafond du jour est affiché dans le bandeau (chap. 9).
 * **Gains hors plafond** (le chemin cher) : `[LOC-D3-1]`, `[LOC-D5-1]`, `[LOC-D6-1]`, `[T4-03]`.
 * **Atténuateurs de pertes :** `[MOD-05]`, `[VEH-03]` (inutiles en `[D4]`, où la fuite ne coûte pas d'ICC).
 
@@ -71,7 +71,7 @@ Acheter / vendre au marché, faire le plein, utiliser les lieux spéciaux du dis
 
 ### Le dilemme de 20h00
 Les sirènes d'Aeterna annoncent le couvre-feu sanitaire. Trois options :
-* **Dormir au relais routier du DSC** (dans chaque district sauf `[D4]`, côté quais de service) : jusqu'à 06h00. **+2 % d'ICC**, **+5 PV** de Santé, réinitialise l'épuisement, baisse la Fiche S d'un niveau (chap. 6).
+* **Dormir au relais routier du DSC** (dans chaque district sauf `[D4]`, côté quais de service) : jusqu'à 06h00. **Gain d'ICC et de Santé** (`RELAY_SLEEP` dans [`balance.ts`](../src/data/balance.ts)), réinitialise l'épuisement, baisse la Fiche S d'un niveau (chap. 6).
 * **Bivouac** (seule façon de dormir en `[D4]`) : réinitialise l'épuisement, mais **0 ICC, 0 PV**, et la Fiche S ne baisse pas (aucun capteur ne certifie ta nuit sage).
 * **Forcer le couvre-feu :** un second trajet dans la journée.
   * *Avantages :* écouler sa cargaison avant la dégradation de 06h00 ou la fin d'un événement ; profil nuit des produits (chap. 7).
@@ -95,7 +95,7 @@ Si le joueur a forcé le couvre-feu le Jour J, le couvre-feu est **verrouillé l
 2. Sinon, **Formatage Brutal** : le Cash-Puce est remis à 0 et la soute ne peut plus être vendue.
 3. **Score final = solde du compte offshore.** Les fins sont évaluées de la plus prestigieuse à la plus modeste ; la première dont toutes les conditions sont remplies se déclenche.
 
-> **Attention :** la dette se rembourse à `[LOC-D1-1]` et le compte offshore s'alimente à `[LOC-D5-1]`, tous deux **de jour uniquement**. Un compte à rebours s'affiche à partir du Jour 28 (chap. 9).
+> **Attention :** la dette se rembourse à `[LOC-D1-1]` et le compte offshore s'alimente à `[LOC-D5-1]`, tous deux **de jour uniquement**. Un compte à rebours s'affiche les derniers jours (`AUDIT_COUNTDOWN_DAY` dans [`balance.ts`](../src/data/balance.ts) ; chap. 9).
 
 ### Défaites (Game Over)
 * **Mort biologique :** Santé à 0 PV.
@@ -107,9 +107,9 @@ L'écran « Objectifs du Jour 30 » les affiche une fois la dette initiale sold�
 
 | Fin | Conditions (dette soldée) | Épilogue |
 | :--- | :--- | :--- |
-| **Ultime — « Le Saboteur du Monde d'Avant »** | Score ≥ **1 000 000 ₡** + au moins **1 caisse de `[T4-06]`** en soute + être **en `[D4]`** à minuit | Tu achètes le passage sur le chalutier blindé des cartels à l'écluse de `[D4]`. En franchissant le mur vers les îles libres, tu diffuses les preuves sur le Fil Rose : Concordia s'embrase derrière toi pendant que tu sirotes un vrai whisky au soleil. |
-| **Élite — « Nouvel Oligarque d'Olympus-Green »** | Score ≥ **500 000 ₡** + statut **Citoyen Or** (sinon, dossier rejeté : fin suivante) | Tu rachètes en sous-main le fauteuil d'un Haut-Commissaire éliminé lors d'une purge et emménages sous la verrière de `[D6]` : c'est toi qui commandes de la vraie viande aux petits livreurs. |
-| **Mafieuse — « Baron de Rust Valley »** | Score ≥ **200 000 ₡** (aucun prérequis d'ICC) | Ton casier est trop grillé pour la haute société, mais tu rachètes la boucherie de `[LOC-D1-1]` et les quais de `[D4]` : tu es le nouveau parrain de la contrebande. |
+| **Ultime — « Le Saboteur du Monde d'Avant »** | Score ≥ seuil Ultime + au moins **1 caisse de `[T4-06]`** en soute + être **en `[D4]`** à minuit | Tu achètes le passage sur le chalutier blindé des cartels à l'écluse de `[D4]`. En franchissant le mur vers les îles libres, tu diffuses les preuves sur le Fil Rose : Concordia s'embrase derrière toi pendant que tu sirotes un vrai whisky au soleil. |
+| **Élite — « Nouvel Oligarque d'Olympus-Green »** | Score ≥ seuil Élite + statut **Citoyen Or** (sinon, dossier rejeté : fin suivante) | Tu rachètes en sous-main le fauteuil d'un Haut-Commissaire éliminé lors d'une purge et emménages sous la verrière de `[D6]` : c'est toi qui commandes de la vraie viande aux petits livreurs. |
+| **Mafieuse — « Baron de Rust Valley »** | Score ≥ seuil Mafieuse (aucun prérequis d'ICC) | Ton casier est trop grillé pour la haute société, mais tu rachètes la boucherie de `[LOC-D1-1]` et les quais de `[D4]` : tu es le nouveau parrain de la contrebande. |
 | **Standard — « Survivant du Mois d'Août »** | Aucune autre fin atteinte | Tu as échappé au hachoir, mais ton pécule ne rachète pas ta liberté. Demain 06h00, septembre commence et tu remontes dans ta fourgonnette… |
 
-*Les seuils de score seront recalés en jouant une fois l'économie codée.*
+*Seuils de score : `ENDINGS` dans [`balance.ts`](../src/data/balance.ts), à recaler en jouant.*

@@ -2,6 +2,7 @@ import { BedDouble, Fuel, Siren } from 'lucide-react'
 import { VEHICLES } from '../../data/vehicles.ts'
 import { canSiphon, checkForceCurfew, maxRefuel } from '../../engine/actions.ts'
 import { fuelPriceBreakdown } from '../../engine/market.ts'
+import { sleepsAtRelay } from '../../engine/routine.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
@@ -16,8 +17,7 @@ export default function EveningPanel() {
   const tank = VEHICLES[game.vehicleId].tank
   const refuelMax = maxRefuel(game)
   const curfewError = checkForceCurfew(game)
-  // Rust Valley n'a pas de relais routier du DSC : on y bivouaque
-  const sleepLabel = game.districtId === 'D4' ? t.evening.bivouac : t.evening.sleepRelay
+  const sleepLabel = sleepsAtRelay(game) ? t.evening.sleepRelay : t.evening.bivouac
 
   return (
     <section className="rounded border border-zinc-800 bg-zinc-900/40 text-sm">

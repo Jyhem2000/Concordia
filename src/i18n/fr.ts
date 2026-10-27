@@ -1,5 +1,5 @@
 import type { ActionError } from '../engine/actions.ts'
-import type { CrewId, DistrictId, EventId, LocationId, ModuleId, ProductId, TagId, Tier, VehicleId } from '../engine/types.ts'
+import type { CrewId, DistrictId, EndingId, EventId, LocationId, ModuleId, ProductId, TagId, Tier, VehicleId } from '../engine/types.ts'
 
 /*
  * Catalogue de référence : tous les textes du jeu, en français.
@@ -72,6 +72,17 @@ export const fr = {
     'night-diurnal': 'Nuit (clients endormis)',
     'diminishing-returns': 'Rendements décroissants',
     'anti-arbitrage': 'Pas de voyage, pas de bonus',
+    'debt-balance': 'Solde de la veille',
+    'debt-rate': 'Intérêts du jour',
+    'debt-late-rate': 'Intérêts majorés (retard)',
+    cash: 'Cash-Puce',
+    'cargo-value': 'Soute (prix de base)',
+    protection: 'Part de Viktor',
+    'offshore-tranche-1': '1re tranche',
+    'offshore-tranche-2': '2e tranche',
+    'offshore-tranche-3': '3e tranche',
+    deposit: 'Dépôt',
+    'laundry-fee': 'Commission de la Laverie',
   } as Record<string, string>,
 
   // ─── Interface ───
@@ -81,6 +92,50 @@ export const fr = {
     cargo: 'Soute',
     newGame: 'Nouvelle partie',
     newGameConfirm: 'Abandonner la partie en cours et recommencer au Jour 1 ?',
+    offshoreRate: (rate: string) => `${rate}/j`,
+    debtLate: 'en retard',
+    nextBeating: (day: number) => `échéance J${day}`,
+    nextProtection: (day: number, amount: string) => `Collecte de Viktor J${day} : ≈ ${amount}`,
+    countdown: 'Audit le Jour 30 à minuit : dernier remboursement et dernier dépôt offshore possibles le J30 avant 20h00.',
+  },
+
+  briefing: {
+    title: (day: number) => `Briefing de 06h00 — Jour ${day}`,
+    dismiss: 'Compris',
+    sleep: (icc: string, health: number) => `Nuit au relais : ICC ${icc}, Santé +${health}`,
+    debtInterest: 'Dette après intérêts',
+    beating: (health: number) => `Les Bouchers de Viktor sont passés : −${health} PV.`,
+    debtLate: "Dette initiale jamais soldée : taux majoré et embuscades jusqu'à la fin de la partie.",
+    protection: 'Collecte de protection',
+    protectionToDebt: (amount: string) => `Cash-Puce insuffisant : ${amount} ajoutés à la dette.`,
+    offshoreInterest: 'Intérêts offshore',
+  },
+
+  place: {
+    closedAtNight: 'Fermé pendant le couvre-feu.',
+    amount: 'Montant',
+    max: 'MAX',
+    debtTitle: 'Dette',
+    repay: 'Rembourser',
+    borrow: 'Emprunter',
+    borrowLocked: "L'emprunt tactique s'ouvre une fois la dette initiale soldée.",
+    loanRoom: (amount: string) => `Encore ${amount} empruntables`,
+    offshoreTitle: 'Compte offshore',
+    deposit: 'Déposer',
+    withdraw: 'Retirer',
+    credited: 'Crédité',
+    balance: (deposited: string, interest: string) => `dont dépôts ${deposited}, intérêts ${interest}`,
+    rate: 'Taux du jour',
+    nextInterest: (amount: string) => `+${amount} demain matin`,
+  },
+
+  objectives: {
+    title: 'Objectifs du Jour 30',
+    score: 'Score (compte offshore)',
+    threshold: (amount: string) => `≥ ${amount}`,
+    goldStatus: 'Statut Citoyen Or',
+    inCargo: (product: string) => `${product} en soute`,
+    atMidnight: (district: string) => `Être à ${district} à minuit`,
   },
 
   breakdown: {
@@ -150,9 +205,42 @@ export const fr = {
   },
 
   end: {
-    title: "Fin du mois d'août",
-    body: "Le Jour 30 est passé. L'audit et les fins arriveront avec la dette.",
-    finalCash: 'Cash-Puce final',
+    score: 'Score final (compte offshore)',
+    gameOver: 'Game Over',
+    endings: {
+      saboteur: {
+        title: "Le Saboteur du Monde d'Avant",
+        epilogue:
+          "Le chalutier blindé des cartels franchit l'écluse de Rust Valley. Derrière le mur, les preuves inondent le Fil Rose et Concordia s'embrase pendant que tu goûtes un vrai whisky au soleil des îles libres.",
+      },
+      elite: {
+        title: "Nouvel Oligarque d'Olympus-Green",
+        epilogue:
+          "Le fauteuil d'un Haut-Commissaire purgé t'attendait. Sous la verrière d'Olympus-Green, c'est désormais toi qui commandes de la vraie viande aux petits livreurs.",
+      },
+      mafia: {
+        title: 'Baron de Rust Valley',
+        epilogue:
+          'Trop grillé pour la haute société, tu rachètes la boucherie de Viktor et les quais de Rust Valley : la contrebande a un nouveau parrain.',
+      },
+      standard: {
+        title: "Survivant du Mois d'Août",
+        epilogue:
+          'Tu as échappé au hachoir, mais ton pécule ne rachète pas ta liberté. Demain 06h00, septembre commence et tu remontes dans ta fourgonnette…',
+      },
+      'bio-bricks': {
+        title: 'Recyclé en Bio-Briques',
+        epilogue: "L'audit tombe, la dette court toujours. Viktor ne rachète pas, il recycle : direction le hachoir.",
+      },
+      death: {
+        title: 'Mort biologique',
+        epilogue: "Ton cœur lâche avant ta fourgonnette. Le DSC recycle l'une et l'autre.",
+      },
+      execution: {
+        title: 'Suicidé de 3 balles dans le dos',
+        epilogue: 'La fouille a trouvé la balise. Le rapport officiel conclut à un suicide.',
+      },
+    } satisfies Record<EndingId, { title: string; epilogue: string }>,
   },
 
   error: {
@@ -170,6 +258,13 @@ export const fr = {
     'not-daytime': 'Possible seulement de jour.',
     exhausted: "Épuisement nerveux : pas de seconde nuit blanche d'affilée.",
     'siphon-unavailable': "La corvée DSC n'est possible que bloqué, sans carburant, ni cargaison, ni Cash-Puce.",
+    'invalid-amount': 'Montant invalide.',
+    'not-at-location': "Ce lieu n'est pas dans ce district.",
+    'location-closed': 'Fermé pendant le couvre-feu.',
+    'no-debt': 'Aucune dette à rembourser.',
+    'loan-locked': "Viktor ne prête qu'une fois la dette initiale soldée.",
+    'loan-ceiling': "Plafond d'emprunt atteint.",
+    'not-enough-offshore': 'Solde offshore insuffisant.',
   } satisfies Record<ActionError, string>,
 
   // ─── Données de jeu (chap. 3 à 8) ───

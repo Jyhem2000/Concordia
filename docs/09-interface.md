@@ -16,7 +16,7 @@
   * **Fiche S** (0 à 3 icônes 🎯, détail des malus au toucher) ;
   * **Balise** 📡 tant que `[T4-06]` est en soute ;
   * **Prochaine collecte de Viktor** (date et montant estimé ; apparaît une fois la dette initiale soldée).
-* **Compte à rebours de l'audit** (à partir du Jour 28) : *« Dernier dépôt offshore possible : J30, 19h59 »* et *« Dernier remboursement possible : J30, 19h59 »*.
+* **Compte à rebours de l'audit** (à partir de `AUDIT_COUNTDOWN_DAY`, [`balance.ts`](../src/data/balance.ts)) : *« Dernier dépôt offshore possible : J30, 19h59 »* et *« Dernier remboursement possible : J30, 19h59 »*.
 * **Graphique d'inflation :** au toucher de l'indice, courbe de l'historique depuis le Jour 1 et projection jusqu'au Jour 30.
 
 ### Dégradation de l'UI selon l'ICC
