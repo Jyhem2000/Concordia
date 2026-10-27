@@ -1,4 +1,5 @@
 import { applyAction, type Action, type ActionError } from './actions.ts'
+import { createRng, seedRng, type RngState } from './rng.ts'
 import { createInitialState } from './state.ts'
 import type { GameState } from './types.ts'
 
@@ -31,4 +32,30 @@ export function defined<T>(value: T | null | undefined, what = 'valeur'): T {
 /** Partie de référence à graine fixe, modifiable champ par champ pour isoler une règle */
 export function gameAt(day: number, patch: Partial<GameState> = {}, seed = 99): GameState {
   return { ...createInitialState(seed), day, ...patch }
+}
+
+/** Premier état du générateur dont le prochain tirage satisfait `accept` */
+function findRng(accept: (draw: number) => boolean): RngState {
+  for (let seed = 1; ; seed++) {
+    if (accept(createRng(seedRng(seed)).next())) return seedRng(seed)
+  }
+}
+
+/*
+ * Un jet réussit quand le tirage est sous la probabilité (`rng.chance`). Les risques et les chances
+ * étant bornés (au moins 5 %, au plus 95 %), ces deux graines fixent l'issue du prochain jet :
+ */
+
+/** Tirage haut : aucun barrage au prochain trajet, échec de la prochaine option tentée */
+export const HIGH_ROLL_RNG = findRng((draw) => draw >= 0.99)
+
+/** Tirage bas : barrage assuré au prochain trajet, succès de la prochaine option tentée */
+export const LOW_ROLL_RNG = findRng((draw) => draw < 0.01)
+
+/** Enchaîne des actions en acceptant la fouille à chaque barrage rencontré */
+export function play(state: GameState, ...actions: Action[]): GameState {
+  return actions.reduce((current, action) => {
+    const next = run(current, action)
+    return next.interception ? run(next, { type: 'intercept', move: 'search' }) : next
+  }, state)
 }

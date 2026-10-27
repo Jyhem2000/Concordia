@@ -38,9 +38,9 @@ export default function PlacesPanel() {
   )
 }
 
-/** Les lieux spéciaux ferment pendant le couvre-feu (chap. 2) */
+/** Les lieux spéciaux ouvrent de 06h00 à 20h00 (chap. 2) */
 function Place({ locationId, children }: PlaceProps) {
-  const closed = useGameStore((s) => s.game.phase === 'night')
+  const closed = useGameStore((s) => s.game.phase === 'night' || s.game.dayOver)
   const { t } = useI18n()
 
   return (

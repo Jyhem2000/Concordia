@@ -1,14 +1,18 @@
-import { FUEL_PER_CROSSED_DISTRICT, SIPHON } from '../data/balance.ts'
+import { FUEL_PER_CROSSED_DISTRICT, NIGHT_TRIP_CHASSIS_WEAR, SIPHON } from '../data/balance.ts'
+import { DISTRICTS } from '../data/districts.ts'
 import { LOCATIONS } from '../data/locations.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import { cargoUsed, ownedQty, takeLots } from './cargo.ts'
 import { depositBreakdown, loanRoom, offshoreBalance, withdrawFrom } from './finance.ts'
+import { checkMove, drawInterception, emergencyTow, resolveMove } from './interception.ts'
 import { crossedDistricts, shortestRoute } from './map.ts'
 import { fuelPriceBreakdown, quote, saleQuote } from './market.ts'
+import { keysOf } from './records.ts'
+import { risk } from './risk.ts'
+import { createRng } from './rng.ts'
 import { sleep } from './routine.ts'
 import { remember } from './state.ts'
-import { keysOf } from './records.ts'
-import type { DistrictId, GameState, LocationId, LocationService, ProductId } from './types.ts'
+import type { DistrictId, GameState, InterceptionMove, LocationId, LocationService, ProductId } from './types.ts'
 
 /*
  * Actions du joueur : chaque action produit un nouvel état, ou une erreur sans rien changer.
@@ -27,6 +31,8 @@ export type Action =
   | { type: 'borrow'; amount: number }
   | { type: 'deposit'; amount: number }
   | { type: 'withdraw'; amount: number }
+  /** Option de l'écran d'interception ; `amount` = offre de corruption */
+  | { type: 'intercept'; move: InterceptionMove; amount?: number }
 
 export type ActionError =
   | 'game-over'
@@ -50,6 +56,10 @@ export type ActionError =
   | 'loan-locked'
   | 'loan-ceiling'
   | 'not-enough-offshore'
+  | 'intercepted'
+  | 'not-intercepted'
+  | 'move-unavailable'
+  | 'offer-too-low'
 
 export type ActionResult = { ok: true; state: GameState } | { ok: false; error: ActionError }
 
@@ -91,15 +101,18 @@ function buy(state: GameState, productId: ProductId, qty: number): ActionResult 
 
 function sell(state: GameState, productId: ProductId, qty: number): ActionResult {
   if (qty > ownedQty(state.cargo, productId)) return fail('not-enough-cargo')
-  const { total } = saleQuote(state, productId, qty)
+  const { total, saturatedQty } = saleQuote(state, productId, qty)
   const market = state.markets[state.districtId]
   const demandLeft = market.demand[productId]
+  // Vendre au-delà de la demande alerte Aeterna : pic suspect demain dans ce district (chap. 7)
+  const oversold = saturatedQty > 0 && !state.oversold.includes(state.districtId) ? [...state.oversold, state.districtId] : state.oversold
 
   return {
     ok: true,
     state: {
       ...state,
       cash: state.cash + total,
+      oversold,
       cargo: takeLots(state.cargo, productId, qty).remaining,
       markets:
         demandLeft === undefined
@@ -145,6 +158,7 @@ function siphon(state: GameState): ActionResult {
       icc: Math.max(0, state.icc - SIPHON.iccLoss),
       // Demi-journée perdue : le joueur passe directement à 20h00
       dayTripDone: true,
+      dayOver: true,
     },
   }
 }
@@ -177,15 +191,27 @@ function travel(state: GameState, to: DistrictId): ActionResult {
   const plan = planTravel(state, to)
   if (plan.error) return fail(plan.error)
 
+  // Le risque se calcule au départ (phase, soute, district quitté), ronde renforcée comprise
+  const tripRisk = risk(state, to, { includePatrol: true })
+  const rng = createRng(state.rng)
+  const interception = drawInterception(rng, tripRisk, DISTRICTS[to].offGrid)
+
   const arrived: GameState = {
     ...state,
     districtId: to,
     fuel: state.fuel - plan.fuelCost,
+    // Mode furtif : les galeries de nuit usent le châssis (chap. 2)
+    chassis: state.phase === 'night' ? Math.max(0, state.chassis - NIGHT_TRIP_CHASSIS_WEAR) : state.chassis,
     cargo: state.cargo.map((lot) => (lot.travelled ? lot : { ...lot, travelled: true })),
     dayTripDone: state.dayTripDone || state.phase === 'day',
     nightTripDone: state.nightTripDone || state.phase === 'night',
+    interception,
+    interceptionReport: null,
+    rng: rng.state,
   }
-  return { ok: true, state: remember(arrived, to) }
+  // Sans barrage, le trajet se termine ici ; sinon le dépannage attend la fin du contrôle
+  const done = interception ? arrived : emergencyTow(arrived).state
+  return { ok: true, state: remember(done, to) }
 }
 
 // ─── Lieux spéciaux : dette et compte offshore (chap. 4 et 7) ───
@@ -199,7 +225,7 @@ export function locationFor(state: GameState, service: LocationService): Locatio
 export function checkService(state: GameState, service: LocationService): ActionError | null {
   if (state.status !== 'playing') return 'game-over'
   if (!locationFor(state, service)) return 'not-at-location'
-  if (state.phase !== 'day') return 'location-closed'
+  if (state.phase !== 'day' || state.dayOver) return 'location-closed'
   return null
 }
 
@@ -263,8 +289,15 @@ function forceCurfew(state: GameState): ActionResult {
 
 export function applyAction(state: GameState, action: Action): ActionResult {
   if (state.status !== 'playing') return fail('game-over')
+  // Un barrage se règle avant toute autre action
+  if (state.interception && action.type !== 'intercept') return fail('intercepted')
 
   switch (action.type) {
+    case 'intercept': {
+      if (action.move === 'bribe' && !isQuantity(action.amount ?? 0)) return fail('invalid-amount')
+      const error = checkMove(state, action.move, action.amount)
+      return error ? fail(error) : { ok: true, state: resolveMove(state, action.move, action.amount) }
+    }
     case 'buy':
       return isQuantity(action.qty) ? buy(state, action.productId, action.qty) : fail('invalid-quantity')
     case 'sell':

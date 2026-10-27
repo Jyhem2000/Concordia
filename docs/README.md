@@ -29,9 +29,9 @@
 | ID | Donnée | Règles | Stats (font foi) |
 | :--- | :--- | :--- | :--- |
 | `T0-01` … `T4-06` | Produits et tiers | chap. 3 | [`products.ts`](../src/data/products.ts) |
-| `TAG-*` | Tags | chap. 3 | — |
+| `TAG-*` | Tags | chap. 3 | [`tags.ts`](../src/data/tags.ts) |
 | `D1` … `D6` | Districts et carte | chap. 4 | [`districts.ts`](../src/data/districts.ts) |
-| `LOC-Dx-y` | Lieux spéciaux | chap. 4 | — |
+| `LOC-Dx-y` | Lieux spéciaux | chap. 4 | [`locations.ts`](../src/data/locations.ts) |
 | `VEH-*`, `MOD-*`, `CREW-*` | Véhicules, modules, équipiers | chap. 5 | [`vehicles.ts`](../src/data/vehicles.ts) |
 | `EVT-G*`, `EVT-Dx-*`, `EVT-R*`, `EVT-L*` | Événements | chap. 8 | — |
 
@@ -41,3 +41,5 @@ Constantes globales (valeurs de départ…) : [`balance.ts`](../src/data/balance
 4. Les montants en ₡ des services et frais sont des **valeurs de base au Jour 1**, indexées sur l'inflation (chap. 7).
 5. Toute mécanique chiffrée doit être **affichée et détaillable** dans l'app (chap. 9) : le joueur ne calcule jamais, mais peut toujours comprendre.
 6. Le lore, les factions (Aeterna, DSC, BRC…), les monnaies et les règles (garde à vue, couvre-feu…) s'écrivent en clair, sans ID.
+7. **Les docs décrivent toutes les règles.** Développeur ou joueur, on doit comprendre le jeu sans lire le code. Toute décision prise en codant (ordre de résolution, arrondi, cas limite, interprétation d'une règle ambiguë) est écrite dans le chapitre concerné, dans le même changement. Seuls les chiffres vivent dans le code (règle 1).
+8. **Relecture critique avant chaque étape.** Avant d'implémenter un chapitre, on le relit et on le remet en cause : mécanique impossible ou bugguée, gameplay sans intérêt, lore incohérent, règle déjà contredite par le code. Les corrections sont tranchées et écrites avant de coder.

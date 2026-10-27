@@ -34,11 +34,13 @@ Pendant de la boutique : un district n'achète qu'une quantité limitée de chaq
 * **Quota :** par produit et par district, selon le tier et le statut du produit dans le district ([`products.ts`](../src/data/products.ts)). Modificateurs (multiplicatifs entre eux) : `[CREW-03]`, carte « contrebandier concurrent » de `[LOC-D5-1]`.
 * **Demande restante :** pleine au Jour 1. Chaque vente la consomme, de jour comme de nuit. **Chaque matin à 06h00, elle remonte d'une fraction du quota** (`DEMAND_REFILL_DIVISOR` dans [`balance.ts`](../src/data/balance.ts), arrondi au supérieur), sans dépasser le quota. Vider un marché le pénalise donc plusieurs jours.
 * **Au-delà de la demande restante, le marché est saturé :** chaque caisse supplémentaire se vend à prix réduit (`Coef_Demande`, `SATURATED_SALE_FACTOR` dans [`balance.ts`](../src/data/balance.ts)).
-* **Pic suspect :** vendre au-delà de la demande restante alerte Aeterna — **le lendemain**, le risque de base de ce district augmente de **+10 %** (icône 👁️ sur la carte).
+* **Pic suspect :** vendre au-delà de la demande restante alerte Aeterna — **le lendemain**, le risque de base de ce district augmente pour toute la journée (un seul pic par district, quel que soit le nombre de ventes saturées ; `SUSPICIOUS_PEAK_RISK` dans [`balance.ts`](../src/data/balance.ts) ; icône 👁️ sur la carte).
 * **Affichage :** *« Demande restante : 5 (+2 demain) »* sur chaque ligne du tableau des cours (chap. 9).
 * *Lecture stratégique :* on répartit ses ventes **dans le temps et dans l'espace** (8 caisses en `[D6]` aujourd'hui, le reste en `[D5]` demain, et on laisse `[D6]` se reconstituer), en arbitrant avec la fraîcheur et la collecte de Viktor.
 
 ## Prix de vente
+* **Ordre de vente :** les caisses d'un produit partent des lots les plus anciens aux plus récents ; chaque caisse garde son prix d'achat et son statut de voyage (clause anti-arbitrage).
+* **Arrondis :** tout montant calculé (cours, prix de vente, intérêts, amendes, commissions, collecte) est arrondi au ₡ le plus proche. Exceptions : l'offre minimale de corruption et le pillage des milices sont arrondis au supérieur.
 ```
 Prix_Vente = Arrondi( Cours × Commission × Coef_Demande × Coef_Condition × Savoir_Faire )
 ```
@@ -85,7 +87,7 @@ Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est 
 ### Dette mafieuse
 * **Créancier :** `[LOC-D1-1]`. **Solde unique :** la dette de départ, les emprunts et les reliquats (dépannage, collecte) s'ajoutent au même solde. **Départ :** [`balance.ts`](../src/data/balance.ts).
 * **Dette initiale soldée :** statut acquis **définitivement** la première fois que le solde atteint 0. Il débloque l'emprunt tactique, la collecte de protection et la modale « Objectifs du Jour 30 ».
-* **Taux :** un taux quotidien (`DEBT_DAILY_RATE` dans [`balance.ts`](../src/data/balance.ts)) sur tout le solde, composés à chaque routine matinale (pas le Jour 1).
+* **Taux :** un taux quotidien, arrondi au ₡ chaque matin (`DEBT_DAILY_RATE` dans [`balance.ts`](../src/data/balance.ts)) sur tout le solde, composés à chaque routine matinale (pas le Jour 1).
 * **Échéances :**
   * **Tabassage** (jour, seuil, PV perdus et plancher : `DEBT_BEATING` dans [`balance.ts`](../src/data/balance.ts)) **:** à 06h00 du jour d'échéance, si le solde dépasse le seuil, les Bouchers tabassent le joueur, sans le faire descendre sous un plancher de Santé (un débiteur mort ne paie plus).
   * **Retard** (jour, taux majoré et malus de risque : `DEBT_LATE` dans [`balance.ts`](../src/data/balance.ts)) **:** à 06h00 du jour d'échéance, si la dette initiale n'a **jamais** été soldée, le taux est majoré et ses hommes de main renseignent patrouilles et milices : malus au risque d'interception partout (*embuscades*). Ces deux pénalités restent acquises jusqu'à la fin de la partie, même après remboursement.

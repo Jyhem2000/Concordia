@@ -1,0 +1,210 @@
+import { describe, expect, it } from 'vitest'
+import {
+  BLUFF,
+  BRIBE,
+  CUSTODY,
+  EJECT,
+  EMERGENCY_TOW,
+  FLEE,
+  GAME_LENGTH_DAYS,
+  NIGHT_TRIP_CHASSIS_WEAR,
+  RACKET,
+  SEARCH,
+  WANTED,
+} from '../data/balance.ts'
+import { VEHICLES } from '../data/vehicles.ts'
+import { cargoUsed, ownedQty } from './cargo.ts'
+import { bribeChance, bribeRate, fleeChance, minimumOffer, toll } from './interception.ts'
+import { sleep } from './routine.ts'
+import { defined, errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
+import type { CargoLot, GameState, Interception, ProductId } from './types.ts'
+
+const lot = (productId: ProductId, qty: number): CargoLot => ({ productId, qty, unitCost: 1, travelled: true })
+const brc: Interception = { kind: 'brc', acted: false, bluffFailed: false }
+const racket: Interception = { kind: 'racket', acted: false, bluffFailed: false }
+
+/** Joueur arrêté à un barrage de Pastel-Heights, avec 10 000 ₡ et la soute donnée */
+const stopped = (cargo: CargoLot[], patch: Partial<GameState> = {}): GameState =>
+  gameAt(5, { districtId: 'D2', cash: 10_000, cargo, interception: brc, dayTripDone: true, ...patch })
+
+describe('arrivée au barrage', () => {
+  it('arrête le joueur à destination sur un tirage bas, et bloque toute autre action', () => {
+    const state = run(gameAt(2, { rng: LOW_ROLL_RNG }), { type: 'travel', to: 'D2' })
+    expect(state.districtId).toBe('D2')
+    expect(state.interception).toEqual(brc)
+    expect(errorOf(state, { type: 'sleep' })).toBe('intercepted')
+  })
+
+  it('remplace la BRC par le racket des milices en zone hors-réseau', () => {
+    const state = run(gameAt(2, { rng: LOW_ROLL_RNG }), { type: 'travel', to: 'D4' })
+    expect(state.interception?.kind).toBe('racket')
+    expect(errorOf(state, { type: 'intercept', move: 'bluff' })).toBe('move-unavailable')
+  })
+
+  it('use le châssis de nuit', () => {
+    const state = run(gameAt(2, { phase: 'night', rng: HIGH_ROLL_RNG }), { type: 'travel', to: 'D2' })
+    expect(state.chassis).toBe(VEHICLES['VEH-01'].maxChassis - NIGHT_TRIP_CHASSIS_WEAR)
+  })
+})
+
+describe('fouille', () => {
+  it("n'est qu'une formalité avec une soute légale", () => {
+    const state = run(stopped([lot('T0-01', 3)], { icc: 90 }), { type: 'intercept', move: 'search' })
+    expect(state.interception).toBeNull()
+    expect(state.icc).toBe(90 + SEARCH.legalIccGain)
+    expect(ownedQty(state.cargo, 'T0-01')).toBe(3)
+  })
+
+  it('confisque l’illégal de bas tier et met une amende', () => {
+    const state = run(stopped([lot('T0-01', 2), lot('T2-01', 3)]), { type: 'intercept', move: 'search' })
+    expect(state.cargo).toEqual([lot('T0-01', 2)])
+    expect(state.cash).toBe(10_000 * (1 - SEARCH.low.fine))
+    expect(state.icc).toBe(100 - SEARCH.low.iccLoss)
+    expect(state.day).toBe(5)
+  })
+
+  it('envoie en garde à vue pour du haut tier : routine en cellule, sortie à 20h00 le lendemain', () => {
+    const state = run(stopped([lot('T3-01', 1)]), { type: 'intercept', move: 'search' })
+    expect(state).toMatchObject({ day: 6, phase: 'day', dayTripDone: true, dayOver: true, districtId: 'D2', interception: null })
+    expect(state.health).toBe(100 - CUSTODY.healthLossPerMorning)
+    expect(state.briefing?.custodyHealth).toBe(CUSTODY.healthLossPerMorning)
+  })
+
+  it('déclenche l’audit si la garde à vue franchit le Jour 30 à minuit', () => {
+    const state = run(stopped([lot('T3-01', 1)], { day: GAME_LENGTH_DAYS }), { type: 'intercept', move: 'search' })
+    expect(state.status).toBe('finished')
+    expect(state.ending?.id).toBe('bio-bricks')
+  })
+
+  it('exécute le joueur si la fouille trouve le produit fatal', () => {
+    const state = run(stopped([lot('T4-06', 1)]), { type: 'intercept', move: 'search' })
+    expect(state.status).toBe('finished')
+    expect(state.ending?.id).toBe('execution')
+  })
+})
+
+describe('bluff', () => {
+  it('fait passer toute la cargaison en cas de succès', () => {
+    // Une soute diluée dans le Tier 0 rend le bluff crédible
+    const state = run(stopped([lot('T0-01', 3), lot('T2-01', 1)], { icc: 80, rng: LOW_ROLL_RNG }), { type: 'intercept', move: 'bluff' })
+    expect(state.interception).toBeNull()
+    expect(ownedQty(state.cargo, 'T2-01')).toBe(1)
+    expect(state.icc).toBe(80 + BLUFF.successIccGain)
+  })
+
+  it('aggrave la suite en cas d’échec : bluff et éjection fermés, malus à la corruption et à la fuite', () => {
+    const before = stopped([lot('T2-01', 3)], { rng: HIGH_ROLL_RNG })
+    const state = run(before, { type: 'intercept', move: 'bluff' })
+    expect(state.interception).toEqual({ kind: 'brc', acted: true, bluffFailed: true })
+    expect(state.icc).toBe(100 - BLUFF.failIccLoss)
+    expect(errorOf(state, { type: 'intercept', move: 'eject' })).toBe('move-unavailable')
+    expect(fleeChance(state).total).toBeCloseTo(fleeChance(before).total - BLUFF.followUpPenalty)
+
+    const searched = run(state, { type: 'intercept', move: 'search' })
+    expect(searched.cash).toBe(10_000 * (1 - BLUFF.failedFine.low))
+  })
+})
+
+describe('corruption', () => {
+  it('refuse une offre sous le minimum, et l’offre est perdue même en cas d’échec', () => {
+    const state = stopped([lot('T2-01', 3)], { rng: HIGH_ROLL_RNG })
+    expect(errorOf(state, { type: 'intercept', move: 'bribe', amount: minimumOffer(state) - 1 })).toBe('offer-too-low')
+    const offer = bribeRate(state).total
+    const failed = run(state, { type: 'intercept', move: 'bribe', amount: offer })
+    expect(failed.cash).toBe(Math.round((10_000 - offer) * (1 - BRIBE.fail.fine)))
+    expect(failed.icc).toBe(100 - BRIBE.fail.iccLoss)
+  })
+
+  it('monte avec la valeur de l’offre, par paliers, et compte les Drones-Juges', () => {
+    const state = stopped([lot('T2-01', 3)])
+    const rate = bribeRate(state).total
+    expect(bribeChance(state, rate * 2).total).toBeGreaterThan(bribeChance(state, rate).total)
+    const guarded = { ...state, districtId: 'D5' as const }
+    expect(bribeChance(guarded, rate).lines.at(-1)?.source).toBe('rule.drone-judges')
+  })
+
+  it('laisse passer en cas de succès', () => {
+    const state = stopped([lot('T2-01', 3)], { rng: LOW_ROLL_RNG })
+    const passed = run(state, { type: 'intercept', move: 'bribe', amount: minimumOffer(state) })
+    expect(passed.interception).toBeNull()
+    expect(ownedQty(passed.cargo, 'T2-01')).toBe(3)
+  })
+})
+
+describe('fuite', () => {
+  it('sauve la cargaison au prix du châssis, de l’ICC et d’un niveau de Fiche S', () => {
+    const state = run(stopped([lot('T2-01', 3)], { rng: LOW_ROLL_RNG }), { type: 'intercept', move: 'flee' })
+    expect(ownedQty(state.cargo, 'T2-01')).toBe(3)
+    expect(state.wanted).toBe(1)
+    expect(state.icc).toBe(100 - FLEE.success.iccLoss)
+    const lost = VEHICLES['VEH-01'].maxChassis - state.chassis
+    expect(lost).toBeGreaterThanOrEqual(FLEE.success.chassisLoss.min)
+    expect(lost).toBeLessThanOrEqual(FLEE.success.chassisLoss.max)
+  })
+
+  it('perd la Fiche S en chance de fuite', () => {
+    expect(fleeChance(stopped([], { wanted: 2 })).total).toBeCloseTo(FLEE.base - 2 * WANTED.fleePenaltyPerLevel)
+  })
+
+  it('coûte cher en cas d’échec, jusqu’à la mort si la Santé tombe à 0', () => {
+    const state = run(stopped([lot('T2-01', 3)], { rng: HIGH_ROLL_RNG }), { type: 'intercept', move: 'flee' })
+    expect(state.cargo).toEqual([])
+    expect(state.day).toBe(6)
+    const dead = run(stopped([lot('T2-01', 3)], { rng: HIGH_ROLL_RNG, health: FLEE.fail.healthLoss }), { type: 'intercept', move: 'flee' })
+    expect(dead.ending?.id).toBe('death')
+  })
+
+  it('déclenche le dépannage si le châssis tombe à 0', () => {
+    const state = run(stopped([lot('T2-01', 1)], { rng: HIGH_ROLL_RNG, chassis: 10 }), { type: 'intercept', move: 'flee' })
+    expect(state.chassis).toBe(VEHICLES['VEH-01'].maxChassis * EMERGENCY_TOW.chassisRestore)
+    expect(defined(state.interceptionReport).towBill).toBeGreaterThan(0)
+  })
+})
+
+describe('éjection', () => {
+  it('vide la soute illégale avant le barrage en cas de succès', () => {
+    const state = run(stopped([lot('T0-01', 2), lot('T4-06', 1)], { rng: LOW_ROLL_RNG }), { type: 'intercept', move: 'eject' })
+    expect(state.status).toBe('playing')
+    expect(state.cargo).toEqual([lot('T0-01', 2)])
+    expect(state.chassis).toBe(VEHICLES['VEH-01'].maxChassis - EJECT.chassisLoss)
+  })
+
+  it('n’est possible qu’en tout premier et hors dalle bio-scellée', () => {
+    expect(errorOf(stopped([], { interception: { ...brc, acted: true } }), { type: 'intercept', move: 'eject' })).toBe('move-unavailable')
+    expect(errorOf(stopped([], { districtId: 'D6' }), { type: 'intercept', move: 'eject' })).toBe('move-unavailable')
+  })
+})
+
+describe('racket des milices', () => {
+  const cargo = [lot('T3-01', 2), lot('T1-01', 4)]
+
+  it('fait payer le péage sur la valeur de la soute', () => {
+    const state = stopped(cargo, { districtId: 'D4', interception: racket })
+    const paid = run(state, { type: 'intercept', move: 'payToll' })
+    expect(paid.cash).toBe(10_000 - toll(state))
+    expect(cargoUsed(paid.cargo)).toBe(6)
+  })
+
+  it('pille les caisses les plus chères en cas de refus', () => {
+    const refused = run(stopped(cargo, { districtId: 'D4', interception: racket }), { type: 'intercept', move: 'refuseToll' })
+    const looted = Math.ceil(6 * RACKET.refuse.lootShare)
+    expect(cargoUsed(refused.cargo)).toBe(6 - looted)
+    expect(ownedQty(refused.cargo, 'T3-01')).toBe(0)
+    expect(refused.health).toBe(100 - RACKET.refuse.healthLoss)
+  })
+})
+
+describe('suites du barrage', () => {
+  it('transforme une vente saturée en pic suspect le lendemain', () => {
+    const market = gameAt(2).markets.D1
+    const demand = defined(market.demand['T2-01'])
+    const sold = run(gameAt(2, { cargo: [lot('T2-01', demand + 1)] }), { type: 'sell', productId: 'T2-01', qty: demand + 1 })
+    expect(sold.oversold).toEqual(['D1'])
+    expect(sleep(sold).suspiciousPeaks).toEqual(['D1'])
+  })
+
+  it('baisse la Fiche S après une nuit au relais, pas après une nuit blanche', () => {
+    expect(sleep(gameAt(2, { wanted: 2 })).wanted).toBe(1)
+    expect(sleep(gameAt(2, { wanted: 2, phase: 'night' })).wanted).toBe(2)
+  })
+})

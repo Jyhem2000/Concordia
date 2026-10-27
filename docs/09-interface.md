@@ -9,13 +9,14 @@
 * **Téléscripteur d'Aeterna (Flash Info TV) :** messages passifs-agressifs, **indice d'inflation du jour**, événement global, événements locaux du jour.
 * **Barres d'état (toujours visibles) :**
   * Jour X / 30 + ☀️ ou 🌙 ;
-  * Cash-Puce (jaune) · Compte offshore (cyan, cadenas, taux effectif) · Dette (rouge, prochaine échéance) ;
+  * Cash-Puce (jaune) · Compte offshore (cyan, cadenas, taux effectif) · Dette (rouge, prochaine échéance : tabassage, puis retard si la dette initiale n'a jamais été soldée, puis audit ; mention « en retard » une fois le retard acquis) ;
   * ICC (couleur selon le palier ci-dessous, avec le prochain seuil de crédit social et le **reste du plafond de gains du jour**) ;
   * Santé ❤️ · Châssis 🔧 (sur le max du véhicule) · Synthanol ⛽ (sur la capacité du véhicule, + achat rapide au prix local) ;
   * **Exemption Métabolique** 💧 (jours de protection restants ; alerte la veille, icône de Sédation une fois à 0) ;
   * **Fiche S** (0 à 3 icônes 🎯, détail des malus au toucher) ;
   * **Balise** 📡 tant que `[T4-06]` est en soute ;
   * **Prochaine collecte de Viktor** (date et montant estimé ; apparaît une fois la dette initiale soldée).
+* **Briefing de 06h00 :** chaque matin, un encadré refermable récapitule la nuit et la routine : gains de sommeil, PV perdus en cellule, dette après intérêts, tabassage, passage en retard, collecte de Viktor (et reliquat ajouté à la dette), intérêts offshore. Chaque montant est détaillable.
 * **Compte à rebours de l'audit** (à partir de `AUDIT_COUNTDOWN_DAY`, [`balance.ts`](../src/data/balance.ts)) : *« Dernier dépôt offshore possible : J30, 19h59 »* et *« Dernier remboursement possible : J30, 19h59 »*.
 * **Graphique d'inflation :** au toucher de l'indice, courbe de l'historique depuis le Jour 1 et projection jusqu'au Jour 30.
 
@@ -40,19 +41,21 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
   * 📉 vert (prix très bas / production locale) · 🔥 orange (forte demande) · 🚀 rouge clignotant (explosion liée à un événement) ;
   * profil nuit à côté du prix (🌙 + / 🌙 −) ;
   * **demande restante** sur chaque ligne, avec sa reconstitution du lendemain (*« Demande restante : 5 (+2 demain) »*), le prix saturé s'affichant au-delà ;
-  * **PMA** sur chaque ligne possédée, ex. *« En soute : 8 (acheté à 410 ₡/u — gain net : +320 ₡/u) »*.
+  * **PMA** sur chaque ligne possédée, ex. *« En soute : 8 (acheté à 410 ₡/u) »*.
+  * **Marge** sur chaque ligne possédée : gain net de la prochaine caisse vendue (₡/u et % de son prix d'achat), et gain net si l'on vend tout (saturation comprise). Icône verte (rentable), ambre (marge faible, sous un seuil d'affichage fixé dans `Margin.tsx`) ou rouge (à perte).
 * **Filtres** par tag et par tier (Tous, En soute, chaque tag) ; curseurs d'achat / vente (+1, +5, MAX).
 * **Onglet lieux spéciaux :** accès direct aux services du district, coûts du jour et cooldowns affichés.
 
 ## Vue « Carte tactique & navigation »
 * Carte schématique style terminal rétro-futuriste des six districts et de leurs liaisons (chap. 4).
+* **Marge estimée :** sous chaque district, les cours mémorisés des produits en soute portent la même icône de marge, estimée sur le cours vu moins la commission de puce (sans savoir-faire ni saturation).
 * **Mémoire de marché :** au toucher d'un district, derniers cours observés avec leur ancienneté (*« vu il y a 3 jours »*), en fourchette en cas de Sédation ; cours en temps réel avec `[CREW-02]`.
 * **Bulles d'indices :** événements du jour, ronde renforcée révélée par `[CREW-01]` (🚓), pic suspect de la veille (👁️).
-* **Panneau de prévision (au clic sur un district) :** itinéraire et districts traversés, rations nécessaires, étoiles de sécurité, prix local du Synthanol, lieux spéciaux, et le **risque d'interception exact** pour la soute actuelle (détaillable), avant validation.
+* **Panneau de prévision (au clic sur un district) :** itinéraire et districts traversés, rations nécessaires, étoiles de sécurité, prix local du Synthanol, lieux spéciaux, et le **risque d'interception** pour la soute actuelle (détaillable), avant validation. La ronde renforcée, cachée, n'y figure pas ; tout le reste est exact. Les districts en pic suspect portent l'icône 👁️.
 * **Boutons de départ :** « Rouler de jour » ; à 20h00, « Dormir au relais » (ou « Bivouac » en `[D4]`) face à « Forcer le couvre-feu », chacun affichant coûts et effets calculés.
 
 ## Écran d'interception
-Options numérotées **0** Fouille · **1** Bluff · **2** Corruption · **3** Fuite · **4** Éjection (grisée dès qu'une autre action a été tentée). Chaque option affiche sa **probabilité détaillable** et ses **conséquences en cas d'échec** (*« Aeterna estime vos chances de survie fiscale à 35 % »*). Pour la corruption, un curseur d'offre (de 0,5× le tarif standard à 3× et plus) montre la chance en temps réel.
+Options numérotées **0** Fouille · **1** Bluff · **2** Corruption · **3** Fuite · **4** Éjection (masquée dès qu'une autre action a été tentée). Le barrage occupe tout l'écran : aucune autre action n'est possible avant de l'avoir réglé. Face aux milices de `[D4]` : Payer le péage · Forcer le passage · Refuser. Si la fouille effective serait fatale (`[T4-06]` en soute), l'écran l'annonce. Chaque option affiche sa **probabilité détaillable** et ses **conséquences en cas d'échec** (*« Aeterna estime vos chances de survie fiscale à 35 % »*). Pour la corruption, un curseur d'offre (du minimum accepté par l'agent jusqu'au dernier palier de bonus, et au-delà) montre la chance en temps réel.
 
 ## Modale « Objectifs du Jour 30 »
 Accessible une fois la dette initiale soldée : les quatre grandes fins et la progression vers chacune (score, statut Citoyen Or, `[T4-06]` en soute, position en `[D4]` à minuit).

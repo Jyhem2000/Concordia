@@ -1,9 +1,10 @@
+import { CUSTODY, DEBT_BEATING, DEBT_LATE, ENDINGS, GAME_LENGTH_DAYS, PROTECTION, RELAY_SLEEP } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
-import { DEBT_BEATING, DEBT_LATE, ENDINGS, GAME_LENGTH_DAYS, PROTECTION, RELAY_SLEEP } from '../data/balance.ts'
 import { ownedQty } from './cargo.ts'
 import { debtInterestBreakdown, offshoreBalance, offshoreInterestBreakdown, protectionBreakdown } from './finance.ts'
 import { changeHealth, gainRouteIcc, iccTier } from './gauges.ts'
 import { drawMarkets } from './market.ts'
+import { drawPatrol } from './risk.ts'
 import { createRng } from './rng.ts'
 import { remember } from './state.ts'
 import type { Ending, EndingId, GameState, MorningBriefing } from './types.ts'
@@ -13,28 +14,73 @@ export function sleepsAtRelay(state: GameState): boolean {
   return DISTRICTS[state.districtId].relay
 }
 
+/** Où le joueur passe la nuit : chacune a ses effets à la routine de 06h00 (chap. 2 et 6) */
+type Night = 'relay' | 'bivouac' | 'cell'
+
 /** Nuit, puis audit le Jour 30 à minuit ou routine matinale de 06h00 (chap. 2) */
 export function sleep(state: GameState): GameState {
   if (state.day >= GAME_LENGTH_DAYS) return audit(state)
+  // Après un couvre-feu forcé, la nuit blanche ne rapporte aucun gain de sommeil (chap. 2)
+  const night: Night = state.phase === 'day' && sleepsAtRelay(state) ? 'relay' : 'bivouac'
+  return morningRoutine({ ...state, interceptionReport: null }, night)
+}
 
-  let night = state
-  let sleepGains: MorningBriefing['sleep'] = null
-  if (sleepsAtRelay(state)) {
-    const icc = gainRouteIcc(night, RELAY_SLEEP.icc)
-    const health = changeHealth(icc.state, RELAY_SLEEP.health)
-    night = health.state
-    sleepGains = { icc: icc.gained, health: health.delta }
+/**
+ * Garde à vue (chap. 6) : chaque jour en cellule fait passer une routine matinale, sans gain de sommeil.
+ * Le joueur ressort à 20h00, dans le district de l'interception, reposé. Franchir le Jour 30 à minuit
+ * en cellule déclenche l'audit.
+ */
+export function serveCustody(state: GameState, days: number): GameState {
+  let s = state
+  for (let served = 0; served < days; served++) {
+    if (s.day >= GAME_LENGTH_DAYS) return audit(s)
+    s = morningRoutine(s, 'cell')
   }
-  return morningRoutine(night, sleepGains)
+  return { ...s, dayTripDone: true, dayOver: true, lastCurfewDay: null }
+}
+
+/** Effets de la nuit, appliqués avant la routine : gains au relais, PV perdus en cellule */
+function spendNight(state: GameState, night: Night): { state: GameState; sleep: MorningBriefing['sleep']; custodyHealth: number } {
+  switch (night) {
+    case 'relay': {
+      const icc = gainRouteIcc(state, RELAY_SLEEP.icc)
+      const health = changeHealth(icc.state, RELAY_SLEEP.health)
+      // Une nuit sage au relais, certifiée par les capteurs, fait baisser la Fiche S
+      const rested = { ...health.state, wanted: Math.max(0, state.wanted - 1) }
+      return { state: rested, sleep: { icc: icc.gained, health: health.delta }, custodyHealth: 0 }
+    }
+    case 'bivouac':
+      return { state, sleep: null, custodyHealth: 0 }
+    case 'cell': {
+      const cell = changeHealth(state, -CUSTODY.healthLossPerMorning, CUSTODY.healthFloor)
+      return { state: cell.state, sleep: null, custodyHealth: -cell.delta }
+    }
+  }
 }
 
 /** Routine matinale, dans l'ordre des docs (chap. 2) ; le Jour 1 n'en a pas */
-function morningRoutine(state: GameState, sleepGains: MorningBriefing['sleep']): GameState {
+function morningRoutine(state: GameState, night: Night): GameState {
+  const spent = spendNight(state, night)
   const day = state.day + 1
-  let s: GameState = { ...state, day, phase: 'day', dayTripDone: false, nightTripDone: false, iccRouteGains: 0 }
+  // Un dépannage de nuit immobilise le joueur toute la journée : pas de trajet de jour
+  const immobilized = spent.state.immobilizedTomorrow
+  let s: GameState = {
+    ...spent.state,
+    day,
+    phase: 'day',
+    dayTripDone: immobilized,
+    dayOver: immobilized,
+    nightTripDone: false,
+    immobilizedTomorrow: false,
+    iccRouteGains: 0,
+    // Les ventes saturées d'hier deviennent les pics suspects du jour (chap. 7)
+    suspiciousPeaks: spent.state.oversold,
+    oversold: [],
+  }
   const briefing: MorningBriefing = {
     day,
-    sleep: sleepGains,
+    sleep: spent.sleep,
+    custodyHealth: spent.custodyHealth,
     debtInterest: null,
     beating: 0,
     debtLate: false,
@@ -70,9 +116,10 @@ function morningRoutine(state: GameState, sleepGains: MorningBriefing['sleep']):
   briefing.offshoreInterest = offshoreInterestBreakdown(s.offshore)
   if (briefing.offshoreInterest) s = { ...s, offshore: { ...s.offshore, interest: s.offshore.interest + briefing.offshoreInterest.total } }
 
-  // 7. Reconstitution de la demande, cours et boutiques
+  // 7. Ronde renforcée, reconstitution de la demande, cours et boutiques
   const rng = createRng(s.rng)
-  s = { ...s, markets: drawMarkets(rng, s.markets), rng: rng.state, briefing }
+  const patrolDistrict = drawPatrol(rng)
+  s = { ...s, patrolDistrict, markets: drawMarkets(rng, s.markets), rng: rng.state, briefing }
 
   return remember(s, s.districtId)
 }

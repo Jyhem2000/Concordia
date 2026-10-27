@@ -5,10 +5,11 @@ import { canSiphon, checkService, fuelPrice, maxBuy, maxRepay, planTravel, type 
 import { cargoUsed, ownedQty } from './cargo.ts'
 import { quote, shopProducts } from './market.ts'
 import { createInitialState } from './state.ts'
-import { defined, errorOf, gameAt, run } from './test-helpers.ts'
+import { defined, errorOf, gameAt, HIGH_ROLL_RNG, play, run } from './test-helpers.ts'
 import type { GameState, ProductId } from './types.ts'
 
-const start = createInitialState(2024)
+// Tirage haut : le premier trajet ne tombe sur aucun barrage
+const start: GameState = { ...createInitialState(2024), rng: HIGH_ROLL_RNG }
 const cheapest = (state: GameState): ProductId =>
   shopProducts(state.markets[state.districtId]).sort((a, b) => quote(state, state.districtId, a) - quote(state, state.districtId, b))[0]
 
@@ -72,7 +73,7 @@ describe('trajets', () => {
   it('autorise 1 trajet de jour et 1 de nuit', () => {
     const afterDay = run(start, { type: 'travel', to: 'D2' })
     expect(errorOf(afterDay, { type: 'travel', to: 'D1' })).toBe('trip-done')
-    const afterNight = run(afterDay, { type: 'forceCurfew' }, { type: 'travel', to: 'D1' })
+    const afterNight = play(afterDay, { type: 'forceCurfew' }, { type: 'travel', to: 'D1' })
     expect(afterNight.districtId).toBe('D1')
     expect(errorOf(afterNight, { type: 'travel', to: 'D2' })).toBe('trip-done')
   })
@@ -128,7 +129,7 @@ describe('journées', () => {
 
   it('est déterministe pour une même graine', () => {
     const actions: Action[] = [{ type: 'travel', to: 'D3' }, { type: 'sleep' }, { type: 'travel', to: 'D5' }, { type: 'sleep' }]
-    expect(run(createInitialState(5), ...actions)).toEqual(run(createInitialState(5), ...actions))
+    expect(play(createInitialState(5), ...actions)).toEqual(play(createInitialState(5), ...actions))
   })
 })
 

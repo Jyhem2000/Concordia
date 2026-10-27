@@ -7,20 +7,20 @@
 
 | ID | Libellé | Règles |
 | :--- | :--- | :--- |
-| `[TAG-LEGAL]` | Légal | Ne peut jamais devenir illégal. Un produit Légal ne porte **aucun autre tag**. **Couverture :** **−20 % × part de Légal** dans la cargaison. Chaque caisse **masque 1 caisse** du tag indiqué dans sa fiche (voir *Masquage*). Interactions : `[VEH-02]`. Sans effet en `[D4]`. |
+| `[TAG-LEGAL]` | Légal | Ne peut jamais devenir illégal. Un produit Légal ne porte **aucun autre tag**. **Couverture :** risque retiré × part de Légal dans la cargaison (valeurs des tags : [`tags.ts`](../src/data/tags.ts)). Chaque caisse **masque 1 caisse** du tag indiqué dans sa fiche (voir *Masquage*). Interactions : `[VEH-02]`. Sans effet en `[D4]`. |
 | `[TAG-PERISHABLE]` | Périssable | **Cycle de fraîcheur** (ci-dessous). Modificateurs : `[MOD-01]`, `[VEH-03]`, `[CREW-03]`, `[EVT-G01]`, `[LOC-D2-1]`. Rachat des lots dégradés : `[LOC-D1-1]`. |
 | `[TAG-FRAGILE]` | Fragile | Lors d'une **fuite réussie**, chaque caisse a **30 %** de chance d'être endommagée : elle se vend alors **×0.50**. **Chocs :** hors fuite, à chaque perte de châssis d'au moins **10 PV** en une fois (aléas, racket, dopage, éjection…), chaque caisse intacte a **10 %** de chance d'être endommagée. Immunité : `[MOD-04]`. |
 | `[TAG-ADDICTIVE]` | Addictif | Monnaie de corruption (liste exacte au chap. 6). Interactions : `[CREW-01]`, `[EVT-D3-02]`, `[EVT-R01]`. |
-| `[TAG-ODOROUS]` | Odorant | **Au trajet :** **+25 % × part odorante** de la cargaison. **Au contrôle :** **−20 % × part odorante** au bluff (*malus d'odeur*), annulable par `[T2-01]`. Modificateurs (sur les deux malus) : `[D6]`, `[EVT-G04]`, `[MOD-02]`, `[EVT-D1-01]` ; les doublements de `[D6]` et `[EVT-G04]` ne se cumulent pas. |
-| `[TAG-CULTURE]` | Culture | Cible idéologique : **+25 % × part culturelle** de la cargaison dans les districts à **délation idéologique** (chap. 4). Modificateur : `[EVT-D2-01]`. Interaction : `[LOC-D2-1]`. |
-| `[TAG-TECH]` | Tech | **+50 % × part Tech** de la cargaison dans les districts équipés de **scanners électromagnétiques** (chap. 4). Modificateurs : `[MOD-03]`, `[EVT-G03]`, `[EVT-D5-03]`. |
-| `[TAG-CHEMICAL]` | Chimique | **+25 % × part chimique** de la cargaison dans les districts équipés de **bio-scanners** (chap. 4). Modificateur : `[LOC-D3-1]`. **Largage offensif** en fuite : sacrifier 1 caisse crée un nuage aveuglant, **+15 %** de réussite. Interactions : `[EVT-D2-03]`, `[LOC-D2-1]`. |
+| `[TAG-ODOROUS]` | Odorant | **Au trajet :** risque ajouté × part odorante de la cargaison. **Au contrôle :** chance retirée au bluff × part odorante (*malus d'odeur*), annulable par `[T2-01]`. Modificateurs (sur les deux malus) : `[D6]`, `[EVT-G04]`, `[MOD-02]`, `[EVT-D1-01]` ; les doublements de `[D6]` et `[EVT-G04]` ne se cumulent pas. |
+| `[TAG-CULTURE]` | Culture | Cible idéologique : **risque ajouté × part culturelle** de la cargaison dans les districts à **délation idéologique** (chap. 4). Modificateur : `[EVT-D2-01]`. Interaction : `[LOC-D2-1]`. |
+| `[TAG-TECH]` | Tech | **risque ajouté × part Tech** de la cargaison dans les districts équipés de **scanners électromagnétiques** (chap. 4). Modificateurs : `[MOD-03]`, `[EVT-G03]`, `[EVT-D5-03]`. |
+| `[TAG-CHEMICAL]` | Chimique | **risque ajouté × part chimique** de la cargaison dans les districts équipés de **bio-scanners** (chap. 4). Modificateur : `[LOC-D3-1]`. **Largage offensif** en fuite : sacrifier 1 caisse crée un nuage aveuglant, **+15 %** de réussite. Interactions : `[EVT-D2-03]`, `[LOC-D2-1]`. |
 | `[TAG-FLAMMABLE]` | Inflammable | **Explosion :** en cas d'échec de fuite, chaque caisse **non masquée** a **25 %** de chance d'exploser (**−15 PV** de châssis, caisse détruite). **Largage offensif** en fuite : déverser / enflammer 1 caisse, **+20 %** de réussite. |
 
 ### Masquage 1:1 (partiel)
-Chaque caisse de Tier 0 masque **1 caisse** du tag associé à ce produit (champ `masks`). Une caisse ne peut être masquée qu'une fois. Une caisse masquée :
-* **compte pour moitié** dans la part de son tag pour la détection (odeur, culture, chimique) : le masquage réduit le risque sans jamais l'annuler ;
-* compte dans le bonus de bluff (chap. 6) ;
+Chaque caisse de Tier 0 masque **1 caisse** du tag associé à ce produit (champ `masks`). Le masquage se compte **tag par tag** : pour un tag, le nombre de caisses masquées est le plus petit entre les caisses de Tier 0 qui masquent ce tag et les caisses qui le portent. Une caisse ne peut être masquée qu'une fois **par tag** : une caisse à deux tags masquables (ex. `[T2-01]`, odorant et chimique) a besoin d'un Tier 0 pour chacun. Une caisse masquée :
+* **compte pour une fraction** (`MASKED_CRATE_WEIGHT` dans [`balance.ts`](../src/data/balance.ts)) dans la part de son tag pour la détection (odeur, culture, chimique) : le masquage réduit le risque sans jamais l'annuler ;
+* compte dans le bonus de bluff (chap. 6), qui compte les **masquages effectifs**, c'est-à-dire les caisses de Tier 0 qui masquent réellement une caisse ;
 * est protégée de l'explosion `[TAG-FLAMMABLE]`.
 
 `[TAG-PERISHABLE]`, `[TAG-TECH]` et les autres tags sans colonne de masquage ne se masquent pas (pour la Tech : `[MOD-03]`).
@@ -147,5 +147,5 @@ Stock par jour, quota de demande (chap. 7) et bonus de Forte demande de chaque t
 * **[T4-06]** — Serveur optronique arraché aux salles blanches ministérielles, contenant les preuves qu'Aeterna fabrique les pandémies et que le DSC revend la vraie nourriture au marché noir.
   * **Stock :** réduit, avec une apparition aléatoire dans son district producteur (`dailyStock` et `appearanceChance` dans [`products.ts`](../src/data/products.ts)).
   * **Mort subite :** une fouille effective avec au moins 1 caisse en soute déclenche l'exécution sommaire (Game Over).
-  * **Balise de traçage :** tant qu'au moins 1 caisse est en soute, **+10 %** au risque d'interception partout, racket de `[D4]` compris (les milices captent aussi le signal).
+  * **Balise de traçage :** tant qu'au moins 1 caisse est en soute, un malus au risque d'interception partout (`beaconRisk` dans [`products.ts`](../src/data/products.ts)), racket de `[D4]` compris (les milices captent aussi le signal).
   * **Objectif ultime :** condition de la fin « Saboteur » (chap. 2).

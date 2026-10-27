@@ -14,6 +14,7 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
     cargo: 10,
     moduleSlots: 1,
     maxChassis: 100,
+    riskFactor: 0.9, // profil bas
     tank: 6,
     fuelPerTrip: { day: 1, night: 1 },
   },

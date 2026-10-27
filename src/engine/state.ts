@@ -1,6 +1,7 @@
 import { START_CASH, START_DEBT, START_DISTRICT, START_HEALTH, START_ICC } from '../data/balance.ts'
 import { START_VEHICLE, VEHICLES } from '../data/vehicles.ts'
 import { drawMarkets, observeMarket } from './market.ts'
+import { drawPatrol } from './risk.ts'
 import { createRng, seedRng } from './rng.ts'
 import type { DistrictId, GameState } from './types.ts'
 
@@ -8,6 +9,7 @@ import type { DistrictId, GameState } from './types.ts'
 export function createInitialState(seed: number): GameState {
   const rng = createRng(seedRng(seed))
   const markets = drawMarkets(rng)
+  const patrolDistrict = drawPatrol(rng)
   const state: GameState = {
     status: 'playing',
     day: 1,
@@ -30,6 +32,15 @@ export function createInitialState(seed: number): GameState {
     icc: START_ICC,
     iccRouteGains: 0,
     health: START_HEALTH,
+    chassis: VEHICLES[START_VEHICLE].maxChassis,
+    wanted: 0,
+    patrolDistrict,
+    suspiciousPeaks: [],
+    oversold: [],
+    dayOver: false,
+    immobilizedTomorrow: false,
+    interception: null,
+    interceptionReport: null,
     briefing: null,
     ending: null,
     rng: rng.state,

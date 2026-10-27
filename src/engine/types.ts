@@ -54,6 +54,20 @@ export type Range = { min: number; max: number }
 /** Profil de vente pendant le couvre-feu (chap. 7) */
 export type NightProfile = 'festive' | 'diurnal'
 
+/** Effets chiffrés d'un tag sur le risque et le contrôle (chap. 3) ; absent = sans effet */
+export type Tag = {
+  /** Couverture : risque retiré × part du tag dans la cargaison */
+  cover?: number
+  /** Risque ajouté × part du tag, à chaque trajet */
+  tripRisk?: number
+  /** Risque ajouté × part du tag, dans les districts qui détectent ce tag */
+  detectedRisk?: number
+  /** Chance de bluff retirée × part du tag */
+  bluffMalus?: number
+  /** Malus d'odeur : multipliés par le facteur d'odeur du district (chiens-robots) */
+  smell?: boolean
+}
+
 export type Product = {
   tier: Tier
   basePrice: number
@@ -65,6 +79,10 @@ export type Product = {
   dailyStock?: Range
   /** Chance d'apparaître chaque jour dans la boutique de son district producteur */
   appearanceChance?: number
+  /** Balise de traçage : risque ajouté partout tant qu'une caisse est en soute */
+  beaconRisk?: number
+  /** Une fouille effective avec ce produit en soute est fatale (exécution sommaire, chap. 2) */
+  lethalOnSearch?: boolean
 }
 
 export type TierStats = {
@@ -93,6 +111,18 @@ export type District = {
   /** Tag ciblé par la détection spéciale du district */
   detection: TagId | null
   droneJudges: boolean
+  /** Zone hors-réseau : pas de BRC, racket des milices à la place (chap. 4) */
+  offGrid: boolean
+  /** Risque ajouté à destination pour tout trajet au départ de ce district (portique du sas) */
+  exitGateRisk: number
+  /** Multiplicateur des malus d'odeur (chiens-robots) */
+  odorFactor: number
+  /** Coupe-file des Citoyens Or aux portiques (chap. 2) */
+  goldFastLane: boolean
+  /** Détecteurs biométriques d'ICC : un Déviant notoire y est intercepté à coup sûr (chap. 2) */
+  iccScanners: boolean
+  /** Éjection d'urgence possible (dalle bio-scellée sinon) */
+  ejectionAllowed: boolean
   /** Coefficient de marché des produits de la liste Production */
   coefProduction: number
   /** Coefficient de marché des produits en Forte demande, avant bonus de tier */
@@ -118,6 +148,8 @@ export type Vehicle = {
   moduleSlots: number
   /** PV max du châssis */
   maxChassis: number
+  /** Coefficient d'équipement sur le risque d'interception ; absent = ×1 */
+  riskFactor?: number
   /** Capacité du réservoir, en rations */
   tank: number
   /** Rations consommées par trajet, selon la phase */
@@ -163,12 +195,46 @@ export type OffshoreAccount = {
   interest: number
 }
 
+/** Barrage en cours, à résoudre avant toute autre action (chap. 6) ; `racket` en zone hors-réseau (chap. 4) */
+export type Interception = {
+  kind: 'brc' | 'racket'
+  /** Une action a déjà été tentée : l'éjection n'est plus possible */
+  acted: boolean
+  /** Bluff raté : bluff et éjection fermés, amende relevée, malus à la corruption et à la fuite */
+  bluffFailed: boolean
+}
+
+/** Options de l'écran d'interception (BRC) et du racket des milices */
+export type InterceptionMove = 'search' | 'bluff' | 'bribe' | 'flee' | 'eject' | 'payToll' | 'refuseToll'
+
+/** Ce qu'une option a coûté ou rapporté, pour le compte rendu affiché au joueur */
+export type InterceptionReport = {
+  move: InterceptionMove
+  /** Chance de l'option tentée (détaillable) ; null pour une option sans jet */
+  chance: Breakdown | null
+  /** Issue du jet ; null pour une option sans jet */
+  success: boolean | null
+  /** Vrai si le barrage est franchi (ou la garde à vue purgée) */
+  over: boolean
+  cash: number
+  crates: number
+  icc: number
+  health: number
+  chassis: number
+  wanted: number
+  custodyDays: number
+  /** Facture du dépannage d'urgence si le châssis est tombé à 0 */
+  towBill: number
+}
+
 /** Ce que la nuit et la routine de 06h00 ont changé, pour le briefing du matin (chap. 2 et 9) */
 export type MorningBriefing = {
   day: number
   /** Gains de la nuit au relais routier (après plafond d'ICC) ; null au bivouac */
   sleep: { icc: number; health: number } | null
   debtInterest: Breakdown | null
+  /** Nuit en cellule (garde à vue) : PV perdus */
+  custodyHealth: number
   /** PV perdus au tabassage de l'échéance de la dette, 0 sinon */
   beating: number
   /** Vrai le matin où la dette passe en retard (taux majoré, embuscades) */
@@ -239,6 +305,25 @@ export type GameState = {
   iccRouteGains: number
   /** Santé du joueur, 0–100 PV */
   health: number
+  /** PV du châssis du véhicule */
+  chassis: number
+  /** Fiche S algorithmique : niveau de recherche, 0 à 3 (chap. 6) */
+  wanted: number
+  /** District de la ronde renforcée du jour, caché au joueur */
+  patrolDistrict: DistrictId | null
+  /** Districts en pic suspect aujourd'hui (ventes saturées la veille, chap. 7) */
+  suspiciousPeaks: readonly DistrictId[]
+  /** Districts où le joueur a vendu au-delà de la demande aujourd'hui : pics suspects de demain */
+  oversold: readonly DistrictId[]
+  /**
+   * Service de jour terminé avant le couvre-feu (« passé à 20h00 » : demi-journée perdue, sortie de garde à vue,
+   * immobilisation) : plus de trajet de jour ni de lieu spécial, seul le marché de rue reste ouvert (chap. 2)
+   */
+  dayOver: boolean
+  /** Le dépannage de cette nuit immobilisera le joueur demain jusqu'à 20h00 */
+  immobilizedTomorrow: boolean
+  interception: Interception | null
+  interceptionReport: InterceptionReport | null
   /** Briefing de la dernière routine matinale ; null au Jour 1 */
   briefing: MorningBriefing | null
   /** Fin de partie, une fois `status` à `finished` */

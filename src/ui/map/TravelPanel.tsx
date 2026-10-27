@@ -1,12 +1,14 @@
-import { MapPin } from 'lucide-react'
+import { Eye, MapPin } from 'lucide-react'
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { planTravel } from '../../engine/actions.ts'
 import { averageCost } from '../../engine/cargo.ts'
 import { estimatedUnitSale } from '../../engine/market.ts'
+import { riskBreakdown } from '../../engine/risk.ts'
 import type { DistrictId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
+import Detailed from '../shared/Detailed.tsx'
 import Margin from '../shared/Margin.tsx'
 
 type DistrictRowProps = {
@@ -43,6 +45,7 @@ function DistrictRow({ districtId }: DistrictRowProps) {
   const day = useGameStore((s) => s.game.day)
   const cargo = useGameStore((s) => s.game.cargo)
   const memory = useGameStore((s) => s.game.memory[districtId])
+  const peak = useGameStore((s) => s.game.suspiciousPeaks.includes(districtId))
   const { t, credits } = useI18n()
 
   const memoryLabel = !memory ? t.travel.memoryNever : memory.day === day ? t.travel.memoryToday : t.travel.memoryDaysAgo(day - memory.day)
@@ -61,6 +64,12 @@ function DistrictRow({ districtId }: DistrictRowProps) {
               {'★'.repeat(security)}
             </span>
             <span className="sr-only">{t.travel.security(security)}</span>
+            {peak && (
+              <span className="ml-2 inline-flex text-red-300" title={t.travel.peak}>
+                <Eye size={14} aria-hidden="true" />
+                <span className="sr-only">{t.travel.peak}</span>
+              </span>
+            )}
           </div>
           <div className="text-xs text-zinc-400">{t.district[districtId].subtitle}</div>
         </div>
@@ -100,7 +109,7 @@ function TravelButton({ to }: TravelButtonProps) {
   // planTravel lit plusieurs champs de la partie (phase, carburant, trajets faits…) : on passe l'état entier
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
-  const { t } = useI18n()
+  const { t, percent } = useI18n()
   const plan = planTravel(game, to)
   const route = plan.crossed.length === 0 ? t.travel.direct : t.travel.via(plan.crossed.map((id) => t.district[id].name).join(', '))
 
@@ -111,6 +120,10 @@ function TravelButton({ to }: TravelButtonProps) {
       </Button>
       <div className="mt-0.5 text-xs text-zinc-400">
         {route} · {t.travel.fuel(plan.fuelCost)}
+      </div>
+      <div className="flex justify-end gap-1.5 text-xs" title={t.travel.riskHint}>
+        <span className="text-zinc-400">{t.travel.risk}</span>
+        <Detailed breakdown={riskBreakdown(game, to, { includePatrol: false })} format={(risk) => percent(risk, 0)} align="right" />
       </div>
       {plan.error && plan.error !== 'trip-done' && <div className="text-xs text-red-300">{t.error[plan.error]}</div>}
     </div>

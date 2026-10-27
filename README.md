@@ -47,13 +47,14 @@ Elles s'appliquent à tout le code, sans exception non justifiée. **Toute nouve
 
 - Identifiants (types, fonctions, variables, fichiers) en anglais ; commentaires en français ; textes du jeu uniquement dans `src/i18n/`.
 - Code complet : ni placeholder ni `TODO` dans le code commité.
+- Docs à jour : toute règle décidée en codant (ordre de résolution, arrondi, cas limite) est écrite dans le chapitre concerné de `docs/`, dans le même commit (règle 7 de [docs/README.md](docs/README.md)).
 
 **Où vivent les types et les constantes**
 
 - `src/engine/types.ts` : le modèle du jeu partagé par tous les modules, c'est-à-dire les IDs, les entités décrites dans `src/data/` (`Product`, `District`, `Location`…) et l'état sauvegardé (`GameState` et ses sous-types de jeu).
 - Ailleurs, un type vit avec la fonction qui le produit ou le consomme, et il est exporté si d'autres modules en ont besoin : `Action` dans `actions.ts`, `SaleQuote` dans `market.ts`, les props dans leur composant. C'est aussi le cas des briques techniques que l'état embarque, comme `Breakdown` (`breakdown.ts`) ou `RngState` (`rng.ts`) : elles restent avec leur implémentation.
 - `src/data/balance.ts` : les nombres d'équilibrage (taux, seuils, durées, bornes des jauges), chacun citant son chapitre.
-- `src/data/*.ts` (hors `balance.ts`) : les tables de contenu, une par famille d'entités (produits, districts, lieux, véhicules).
+- `src/data/*.ts` (hors `balance.ts`) : les tables de contenu, une par famille d'entités (produits, tags, districts, lieux, véhicules).
 - Aucun ID de donnée ni chiffre de règle en dur dans `src/engine/` ou `src/ui/` : une propriété de district, de lieu ou de produit se lit dans sa table. Seules exceptions : les constantes de présentation sans effet de jeu (couleurs, seuil visuel de marge), déclarées en tête du composant.
 
 **TypeScript**

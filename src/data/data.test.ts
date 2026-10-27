@@ -15,6 +15,7 @@ import {
 } from './balance.ts'
 import { DISTRICTS, MAP_LINKS } from './districts.ts'
 import { PRODUCTS, TIERS } from './products.ts'
+import { TAGS } from './tags.ts'
 import { VEHICLES } from './vehicles.ts'
 
 /*
@@ -164,5 +165,26 @@ describe('équilibrage (balance.ts)', () => {
     }
     expect(ascending(PROTECTION.days)).toBe(true)
     expect(DEBT_BEATING.day).toBeLessThan(DEBT_LATE.day)
+  })
+})
+
+describe('risque (chap. 3, 4 et 6)', () => {
+  it('donne aux tags des effets positifs, la couverture au seul tag Légal', () => {
+    for (const [id, tag] of entriesOf(TAGS)) {
+      for (const value of [tag.cover, tag.tripRisk, tag.detectedRisk, tag.bluffMalus]) if (value !== undefined) expect(value, id).toBeGreaterThan(0)
+      expect(tag.cover !== undefined, id).toBe(id === 'TAG-LEGAL')
+    }
+  })
+
+  it('ne fait détecter par les districts que des tags qui ont un effet de détection', () => {
+    for (const [id, district] of districts) if (district.detection) expect(TAGS[district.detection].detectedRisk, id).toBeGreaterThan(0)
+  })
+
+  it('laisse la zone hors-réseau sans détection ni relais du DSC', () => {
+    for (const [id, district] of districts) {
+      if (!district.offGrid) continue
+      expect(district.detection, id).toBeNull()
+      expect(district.relay, id).toBe(false)
+    }
   })
 })

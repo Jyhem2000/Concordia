@@ -69,6 +69,8 @@ export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
     tags: ['TAG-TECH', 'TAG-CULTURE'],
     dailyStock: { min: 1, max: 2 },
     appearanceChance: 0.15,
+    beaconRisk: 0.1,
+    lethalOnSearch: true,
   },
 }
 

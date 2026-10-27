@@ -9,7 +9,7 @@
 
 | ID | Nom | Passif |
 | :--- | :--- | :--- |
-| `[VEH-01]` | Fourgonnette « Citi-Volt » (départ) | **Profil bas :** risque d'interception **×0,90**. *Éco-Moteur :* consomme autant de nuit que de jour (les autres châssis consomment davantage la nuit). |
+| `[VEH-01]` | Fourgonnette « Citi-Volt » (départ) | **Profil bas :** risque d'interception réduit (`riskFactor` dans [`vehicles.ts`](../src/data/vehicles.ts)). *Éco-Moteur :* consomme autant de nuit que de jour (les autres châssis consomment davantage la nuit). |
 | `[VEH-02]` | Navette « Zéro-C » | **Camouflage corporatif :** aux couleurs du DSC ; tant que les caisses `[TAG-LEGAL]` font **≥ 20 %** de la cargaison, risque **×0,85**. |
 | `[VEH-03]` | Fourgon Bio-Médical « Panacea-V8 » | **Chaîne du froid médicale :** les pertes de fraîcheur du matin n'ont lieu **qu'un matin sur deux** (le passage à Standard de 20h reste inchangé). **Transpondeur d'urgence :** en `[D3]` et `[D5]`, lors d'une fuite : **+25 %** de réussite, **0 dégât** de châssis en cas de succès, perte d'ICC du succès **÷2** (arrondie en faveur du joueur). |
 | `[VEH-04]` | Compacteur Sanitaire « Bunker-Lourd » | **Monstre blindé & benne acide :** au racket de `[D4]`, péage **÷2**, et un « Forcer » réussi ne coûte **aucun dégât** de châssis ; **broyeur acide** (mode d'éjection) utilisable partout, sans cooldown, **70 %** de réussite, 0 dégât, contrebande dissoute sans récupération (`[MOD-07]` reste prioritaire s'il est disponible). *Contrepartie :* **+10 %** au risque (tonnage hors-norme). |

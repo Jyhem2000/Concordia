@@ -8,7 +8,7 @@ import {
   OFFSHORE_TRANCHES,
   PROTECTION,
 } from '../data/balance.ts'
-import { PRODUCTS } from '../data/products.ts'
+import { baseValue } from './cargo.ts'
 import { breakdown, type Breakdown, type RuleSource } from './breakdown.ts'
 import type { GameState, OffshoreAccount } from './types.ts'
 
@@ -55,8 +55,7 @@ export function nextProtectionDay(state: GameState): number | null {
 
 /** Montant de la collecte : une part de la richesse visible, Cash-Puce et soute au prix de base */
 export function protectionBreakdown(state: GameState): Breakdown {
-  const cargoValue = state.cargo.reduce((total, lot) => total + PRODUCTS[lot.productId].basePrice * lot.qty, 0)
-  return breakdown('rule.cash', state.cash).add('rule.cargo-value', cargoValue).mul('rule.protection', PROTECTION.rate).round().build()
+  return breakdown('rule.cash', state.cash).add('rule.cargo-value', baseValue(state.cargo)).mul('rule.protection', PROTECTION.rate).round().build()
 }
 
 // ─── Compte offshore ───

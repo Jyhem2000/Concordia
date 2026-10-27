@@ -2,7 +2,7 @@
 
 ## Règles géographiques
 * **Accès libre dès le Jour 1.** Le joueur ne circule jamais sur les avenues privées des élites : il emprunte le **Réseau Logistique Souterrain** (sas de maintenance et quais de service). Même les ministères et les milliardaires ont besoin que les Livreurs de Catégorie C approvisionnent leurs cuisines, livrent l'eau des domestiques et évacuent leurs déchets — mais les portiques à l'entrée des tunnels y sont impitoyables.
-* **Carte :** les districts ne sont pas tous voisins. Un trajet vers un district non voisin passe par les districts intermédiaires : **un surcoût en rations (`FUEL_PER_CROSSED_DISTRICT` dans [`balance.ts`](../src/data/balance.ts)) et +5 % de risque par district traversé** (le test d'interception n'a lieu qu'à destination). L'app propose l'itinéraire le plus court.
+* **Carte :** les districts ne sont pas tous voisins. Un trajet vers un district non voisin passe par les districts intermédiaires : **un surcoût en rations (`FUEL_PER_CROSSED_DISTRICT` dans [`balance.ts`](../src/data/balance.ts)) et un malus de risque par district traversé (`CROSSED_DISTRICT_RISK`)** (le test d'interception n'a lieu qu'à destination). L'app propose l'itinéraire le plus court.
 
 ```
 [D4] — [D1] — [D2] — [D5] — [D6]
@@ -75,16 +75,16 @@ Icône officielle le jour, mercenaire vénale en coulisses. **Panique Algorithmi
 * **Échelon 0 — l'Angle Mort Toléré.** Bannis, survivalistes et contrebandiers sans puce d'ICC, retranchés dans un ancien bassin industriel fluvial contre le mur-frontière.
 * **Pourquoi ne fuient-ils pas ?** L'unique accès à l'extérieur est un canal-écluse hérissé de mines magnétiques et de tourelles autonomes : seuls les chalutiers blindés des cartels, munis des codes vendus par les oligarques de `[D6]`, le franchissent de nuit. Et les barons locaux règnent ici en maîtres grâce au ravitaillement occulte de `[D6]`.
 * **Pourquoi le régime les tolère :** c'est l'unique sas d'entrée de la contrebande extérieure. Classée « Décharge à Rendement Négatif » pour qu'Aeterna n'y envoie pas la BRC, la zone n'est accessible qu'aux livreurs de Catégorie C, autorisés à y déverser les déchets de la ville.
-* **Portique du sas :** le régime tolère la décharge, mais surveille ce qui en sort. Tout trajet **au départ de `[D4]`** passe un portique de décontamination : **+15 %** au risque d'interception à destination.
+* **Portique du sas :** le régime tolère la décharge, mais surveille ce qui en sort. Tout trajet **au départ de `[D4]`** passe un portique de décontamination : malus au risque d'interception à destination (`exitGateRisk` dans [`districts.ts`](../src/data/districts.ts)).
 * **Ambiance :** mécanos renégats et Bouchers de la Vieille École vivent en seigneurs libres, de petits élevages clandestins, de `[T1-04]` et de prélèvements sur la charcuterie de passage, mais dépendent des livreurs pour les antibiotiques, les nouilles et l'huile de leurs générateurs.
 * **Crédits sans puce :** les bannis n'ont pas de puce ; les milices encaissent les ₡ sur des puces mortes qu'elles écoulent ensuite via les livreurs, contre une commission.
 * **Zone hors-réseau :** ni caméras, ni BRC. Au calcul du risque, *ce qui dépend d'Aeterna disparaît, ce qui est physique reste* :
   * s'appliquent : risque de base, trajet de nuit, districts traversés, `[EVT-D4-01]`, `[VEH-01]`, `[CREW-01]`, balise de `[T4-06]`, embuscades de la dette (chap. 7) ;
   * valent 0 : suspicion d'ICC, malus de tags, couverture légale et camouflage de `[VEH-02]`, ronde renforcée, Fiche S, pic suspect, malus d'événements visant la BRC.
 * **Menace — Racket des milices** (remplace l'interception de la BRC : ni bluff, ni corruption, ni éjection, ni garde à vue). Le joueur choisit :
-  * **Payer le péage :** **10 % de la valeur de la soute** (au prix de base), en ₡ **ou** en caisses choisies par les miliciens (`[T1-06]`, `[T3-03]` et `[T3-04]` en priorité).
+  * **Payer le péage :** **une part de la valeur de la soute** (au prix de base ; `RACKET` dans [`balance.ts`](../src/data/balance.ts)), en ₡ **ou** en caisses choisies par les miliciens (`[T1-06]`, `[T3-03]` et `[T3-04]` en priorité).
   * **Forcer :** jet de fuite (chap. 6, mêmes bonus, sacrifices et Sédation). La Fiche S est ignorée : ni malus au jet, ni niveau gagné. Aucune perte d'ICC, dopage `[T2-05]` compris. Succès : passage avec dégâts de châssis et casse comme une fuite. Échec : sanction du refus.
-  * **Refuser :** les miliciens pillent **30 % de la soute en commençant par les caisses les plus chères** (`[T4-06]` compris : il finira chez la rébellion), tabassent le joueur (**−20 PV** de Santé) et cabossent le camion (**−25 PV** de châssis).
+  * **Refuser :** les miliciens pillent **une part de la soute (arrondie à la caisse supérieure) en commençant par les caisses les plus chères** (`[T4-06]` compris : il finira chez la rébellion), tabassent le joueur (perte de Santé) et cabossent le camion (perte de châssis).
   * **Modificateur :** `[VEH-04]`.
 * **Nuit :** dormir ici = bivouac (chap. 2).
 * **Production :** le moteur n'en tire chaque jour qu'une partie (`productionDraw` dans [`districts.ts`](../src/data/districts.ts)).
@@ -131,7 +131,7 @@ Les vrais blanchisseurs ne sont pas les punks de `[D4]` mais les hauts fonctionn
 * **Échelon 5 — Catégorie S, l'oligarchie intouchable.** Moins de 1 % de la population, 100 % du pouvoir. Verrière climatisée à 21 °C en surpression, comme une salle blanche.
 * **Ambiance :** colline verdoyante sur une dalle d'architecte au-dessus des échangeurs, où règnent les Hauts-Commissaires du DSC et les propriétaires d'Aeterna. Ils imposent la sobriété au peuple en s'offrant banquets de viande et clonage organique. Hors-loterie : tout oligarque jugé déviant est « suicidé » en coulisses.
 * **Sécurité :** scanners électromagnétiques, détecteurs biométriques d'ICC, douaniers d'élite et Drones-Juges.
-* **Menace — Chiens-robots militaires :** les malus de `[TAG-ODOROUS]` sont **×2**.
+* **Menace — Chiens-robots militaires :** les malus de `[TAG-ODOROUS]` sont multipliés (`odorFactor` dans [`districts.ts`](../src/data/districts.ts)).
 * **Menace — Dalle bio-scellée** (grilles laser, capteurs sismiques) : l'éjection est **impossible**, même avec `[MOD-07]` — **sauf** via `[VEH-04]`.
 
 ### `[LOC-D6-1]` Le « Velvet-Silo » (cabaret sensoriel & sous-sol de débauche)

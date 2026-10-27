@@ -123,3 +123,105 @@ export const OFFSHORE_TRANCHES: readonly { upTo: number | null; dailyRate: numbe
   { upTo: 500_000, dailyRate: 0.01 },
   { upTo: null, dailyRate: 0.005 },
 ]
+
+// ─── Châssis (chap. 2) ───
+
+/** Usure du châssis par trajet de nuit (surchauffe des galeries) */
+export const NIGHT_TRIP_CHASSIS_WEAR = 5
+
+/** Dépannage d'urgence à 0 PV : châssis remis à une part du max, facture (reliquat ajouté à la dette) */
+export const EMERGENCY_TOW = { chassisRestore: 0.25, bill: 2_500 }
+
+// ─── Risque d'interception (chap. 6) ───
+
+/** Bornes du risque, appliquées après tous les multiplicateurs */
+export const RISK_BOUNDS = { min: 0.05, max: 0.95 }
+
+/** Suspicion : risque ajouté par point d'ICC manquant */
+export const SUSPICION_PER_ICC_POINT = 0.005
+
+/** Poids d'une caisse masquée dans la part de son tag (masquage 1:1, chap. 3) */
+export const MASKED_CRATE_WEIGHT = 0.5
+
+/** Malus de contexte additifs */
+export const NIGHT_TRIP_RISK = 0.25
+export const CROSSED_DISTRICT_RISK = 0.05
+export const SUSPICIOUS_PEAK_RISK = 0.1
+
+/** Ronde renforcée : chaque matin, un district (hors zone hors-réseau) est tiré, cachée au joueur */
+export const PATROL_RISK = 0.2
+
+/** Coupe-file des Citoyens Or dans les districts qui en ont un */
+export const GOLD_FAST_LANE_FACTOR = 0.9
+
+/** Fiche S algorithmique : niveau max, risque ajouté et chance de fuite retirée par niveau */
+export const WANTED = { maxLevel: 3, riskPerLevel: 0.05, fleePenaltyPerLevel: 0.1 }
+
+// ─── Interception (chap. 6) ───
+
+/** Tier à partir duquel une caisse illégale aggrave la sanction */
+export const HIGH_TIER = 3
+
+/** Garde à vue : PV perdus par matin en cellule, sans descendre sous le plancher */
+export const CUSTODY = { healthLossPerMorning: 15, healthFloor: 1 }
+
+/** Fouille acceptée : soute légale (gain d'ICC), illégal de bas tier, illégal de haut tier */
+export const SEARCH = {
+  legalIccGain: 2,
+  low: { fine: 0.2, iccLoss: 5, custodyDays: 0 },
+  high: { fine: 0.35, iccLoss: 12, custodyDays: 1 },
+}
+
+/** Bluff administratif */
+export const BLUFF = {
+  base: 0.25,
+  tier0ShareBonus: 0.3,
+  perMaskedCrate: 0.05,
+  maskedCap: 0.25,
+  perExtraStar: 0.05,
+  cap: 0.9,
+  successIccGain: 3,
+  failIccLoss: 3,
+  /** Après un bluff raté : taux d'amende de la fouille, et chance retirée à la corruption et à la fuite */
+  failedFine: { low: 0.3, high: 0.45 },
+  followUpPenalty: 0.2,
+}
+
+/** Corruption : tarif standard, bonus d'offre (par paliers), échec critique des Drones-Juges */
+export const BRIBE = {
+  base: 0.5,
+  perExtraStar: 0.05,
+  cap: 0.95,
+  ratePerStar: 1_500,
+  rateIllegalCargoShare: 0.1,
+  minOfferRatio: 0.5,
+  offerBonuses: [
+    { ratio: 1, bonus: 0.15 },
+    { ratio: 2, bonus: 0.3 },
+    { ratio: 3, bonus: 0.4 },
+  ],
+  droneCriticalFailure: 0.2,
+  fail: { fine: 0.5, iccLoss: 15, custodyDays: 1 },
+}
+
+/** Fuite : chance de base, plafond selon les étoiles, conséquences */
+export const FLEE = {
+  base: 0.35,
+  capBase: 0.95,
+  capPerExtraStar: 0.05,
+  success: { chassisLoss: { min: 15, max: 30 }, iccLoss: 15 },
+  fail: { cashSeizure: 0.4, iccLoss: 25, chassisLoss: 35, healthLoss: 15, custodyDays: 1 },
+}
+
+/** Éjection manuelle (décharge dans une ruelle) ; un échec aggrave la fouille */
+export const EJECT = {
+  manualChance: 0.45,
+  chassisLoss: 10,
+  fail: { fineRaise: 0.2, iccLoss: 10, custodyDays: 1 },
+}
+
+/** Racket des milices en zone hors-réseau (chap. 4) */
+export const RACKET = {
+  tollRate: 0.1,
+  refuse: { lootShare: 0.3, healthLoss: 20, chassisLoss: 25 },
+}

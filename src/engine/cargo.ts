@@ -1,4 +1,6 @@
-import type { CargoLot, ProductId } from './types.ts'
+import { MASKED_CRATE_WEIGHT } from '../data/balance.ts'
+import { PRODUCTS } from '../data/products.ts'
+import type { CargoLot, ProductId, TagId, Tier } from './types.ts'
 
 /** Emplacements de soute occupés (1 caisse = 1 emplacement) */
 export function cargoUsed(cargo: readonly CargoLot[]): number {
@@ -36,4 +38,40 @@ export function takeLots(cargo: readonly CargoLot[], productId: ProductId, qty: 
     if (portion < lot.qty) remaining.push({ ...lot, qty: lot.qty - portion })
   }
   return { remaining, taken }
+}
+
+/** Caisses en soute qui portent ce tag */
+export function taggedQty(cargo: readonly CargoLot[], tag: TagId): number {
+  return cargo.reduce((total, lot) => (PRODUCTS[lot.productId].tags.includes(tag) ? total + lot.qty : total), 0)
+}
+
+/** Caisses de ce tag masquées par les caisses de Tier 0 qui le masquent, 1 pour 1 (chap. 3) */
+export function maskedQty(cargo: readonly CargoLot[], tag: TagId): number {
+  const maskers = cargo.reduce((total, lot) => (PRODUCTS[lot.productId].masks === tag ? total + lot.qty : total), 0)
+  return Math.min(maskers, taggedQty(cargo, tag))
+}
+
+/** Part d'un tag dans la cargaison ; une caisse masquée compte pour MASKED_CRATE_WEIGHT (chap. 6) */
+export function tagShare(cargo: readonly CargoLot[], tag: TagId): number {
+  const total = cargoUsed(cargo)
+  if (total === 0) return 0
+  const masked = maskedQty(cargo, tag)
+  return (taggedQty(cargo, tag) - masked + masked * MASKED_CRATE_WEIGHT) / total
+}
+
+/** Part des caisses d'un tier donné dans la cargaison */
+export function tierShare(cargo: readonly CargoLot[], tier: Tier): number {
+  const total = cargoUsed(cargo)
+  if (total === 0) return 0
+  return cargo.reduce((sum, lot) => (PRODUCTS[lot.productId].tier === tier ? sum + lot.qty : sum), 0) / total
+}
+
+/** Caisses illégales : tout ce qui ne porte pas le tag Légal */
+export function isIllegal(lot: CargoLot): boolean {
+  return !PRODUCTS[lot.productId].tags.includes('TAG-LEGAL')
+}
+
+/** Valeur des caisses au prix de base (collecte, péage, tarif de corruption) */
+export function baseValue(cargo: readonly CargoLot[]): number {
+  return cargo.reduce((total, lot) => total + PRODUCTS[lot.productId].basePrice * lot.qty, 0)
 }

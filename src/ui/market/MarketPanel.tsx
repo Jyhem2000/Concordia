@@ -55,7 +55,7 @@ export default function MarketPanel() {
       <h2 className="border-b border-zinc-800 px-3 py-2 font-bold tracking-wide text-amber-300 uppercase">
         {t.market.title} — {t.district[game.districtId].name}
       </h2>
-      {game.phase === 'night' && <p className="px-3 pt-2 text-sm text-indigo-300">{t.market.streetOnly}</p>}
+      {(game.phase === 'night' || game.dayOver) && <p className="px-3 pt-2 text-sm text-indigo-300">{t.market.streetOnly}</p>}
       <ul className="divide-y divide-zinc-800">
         {rows.map((id) => (
           <MarketRow key={id} productId={id} />

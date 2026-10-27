@@ -1,5 +1,6 @@
 import {
   Coins,
+  Crosshair,
   Fuel,
   HandCoins,
   HeartPulse,
@@ -12,9 +13,10 @@ import {
   ShieldCheck,
   Sun,
   TrendingUp,
+  Wrench,
   type LucideIcon,
 } from 'lucide-react'
-import { AUDIT_COUNTDOWN_DAY, GAME_LENGTH_DAYS, ICC_MAX } from '../../data/balance.ts'
+import { AUDIT_COUNTDOWN_DAY, GAME_LENGTH_DAYS, ICC_MAX, WANTED } from '../../data/balance.ts'
 import { VEHICLES } from '../../data/vehicles.ts'
 import { cargoUsed } from '../../engine/cargo.ts'
 import { effectiveOffshoreRate, nextDebtDeadline, nextProtectionDay, offshoreBalance, protectionBreakdown } from '../../engine/finance.ts'
@@ -74,6 +76,8 @@ export default function StatusBar() {
         />
         <Stat icon={ShieldCheck} label={t.gauge.icc} value={percent(game.icc / ICC_MAX, 0)} />
         <Stat icon={HeartPulse} label={t.gauge.health} value={number(game.health, 0)} />
+        <Stat icon={Wrench} label={t.gauge.chassis} value={`${game.chassis}/${vehicle.maxChassis}`} />
+        {game.wanted > 0 && <Stat icon={Crosshair} label={t.hud.wanted(game.wanted, WANTED.maxLevel)} className="text-red-300" />}
         <Stat icon={Fuel} label={t.gauge.fuel} value={`${game.fuel}/${vehicle.tank}`} />
         <Stat icon={Package} label={t.hud.cargo} value={`${cargoUsed(game.cargo)}/${vehicle.cargo}`} />
         <Stat icon={TrendingUp} label={t.hud.inflation(multiplier(inflationIndex(game.day)))} />
