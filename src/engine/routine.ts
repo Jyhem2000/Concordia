@@ -1,3 +1,4 @@
+import { DISTRICTS } from '../data/districts.ts'
 import { DEBT_BEATING, DEBT_LATE, ENDINGS, GAME_LENGTH_DAYS, PROTECTION, RELAY_SLEEP } from '../data/balance.ts'
 import { ownedQty } from './cargo.ts'
 import { debtInterestBreakdown, offshoreBalance, offshoreInterestBreakdown, protectionBreakdown } from './finance.ts'
@@ -5,11 +6,11 @@ import { changeHealth, gainRouteIcc, iccTier } from './gauges.ts'
 import { drawMarkets } from './market.ts'
 import { createRng } from './rng.ts'
 import { remember } from './state.ts'
-import type { Ending, GameState, MorningBriefing } from './types.ts'
+import type { Ending, EndingId, GameState, MorningBriefing } from './types.ts'
 
-/** Rust Valley n'a pas de relais routier du DSC : on y bivouaque, sans gain de sommeil (chap. 2) */
+/** Nuit au relais routier du DSC si le district en a un, sinon bivouac sans gain de sommeil (chap. 2) */
 export function sleepsAtRelay(state: GameState): boolean {
-  return state.districtId !== 'D4'
+  return DISTRICTS[state.districtId].relay
 }
 
 /** Nuit, puis audit le Jour 30 à minuit ou routine matinale de 06h00 (chap. 2) */
@@ -74,6 +75,13 @@ function morningRoutine(state: GameState, sleepGains: MorningBriefing['sleep']):
   s = { ...s, markets: drawMarkets(rng, s.markets), rng: rng.state, briefing }
 
   return remember(s, s.districtId)
+}
+
+/** Fins qui sont des défaites (Game Over), par opposition aux grandes fins de l'audit */
+const DEFEATS: readonly EndingId[] = ['bio-bricks', 'death', 'execution']
+
+export function isDefeat(ending: EndingId): boolean {
+  return DEFEATS.includes(ending)
 }
 
 /** Fin évaluée de la plus prestigieuse à la plus modeste, dette soldée (chap. 2) */

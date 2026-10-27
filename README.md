@@ -39,6 +39,73 @@ Traductions :
 - **Aucun texte en dur dans les composants :** `const { t, credits, percent, label } = useI18n()`. Les nombres passent par les formateurs (`credits(2500)` → « 2 500 ₡ »), les lignes de `Breakdown` par `label(source)`.
 - Le moteur ne manipule jamais de texte, seulement des IDs.
 
+## Règles de code
+
+Elles s'appliquent à tout le code, sans exception non justifiée. **Toute nouvelle règle adoptée s'ajoute ici** ; une exception assumée est expliquée en commentaire à l'endroit concerné.
+
+**Général**
+
+- Identifiants (types, fonctions, variables, fichiers) en anglais ; commentaires en français ; textes du jeu uniquement dans `src/i18n/`.
+- Code complet : ni placeholder ni `TODO` dans le code commité.
+
+**Où vivent les types et les constantes**
+
+- `src/engine/types.ts` : le modèle du jeu partagé par tous les modules, c'est-à-dire les IDs, les entités décrites dans `src/data/` (`Product`, `District`, `Location`…) et l'état sauvegardé (`GameState` et ses sous-types de jeu).
+- Ailleurs, un type vit avec la fonction qui le produit ou le consomme, et il est exporté si d'autres modules en ont besoin : `Action` dans `actions.ts`, `SaleQuote` dans `market.ts`, les props dans leur composant. C'est aussi le cas des briques techniques que l'état embarque, comme `Breakdown` (`breakdown.ts`) ou `RngState` (`rng.ts`) : elles restent avec leur implémentation.
+- `src/data/balance.ts` : les nombres d'équilibrage (taux, seuils, durées, bornes des jauges), chacun citant son chapitre.
+- `src/data/*.ts` (hors `balance.ts`) : les tables de contenu, une par famille d'entités (produits, districts, lieux, véhicules).
+- Aucun ID de donnée ni chiffre de règle en dur dans `src/engine/` ou `src/ui/` : une propriété de district, de lieu ou de produit se lit dans sa table. Seules exceptions : les constantes de présentation sans effet de jeu (couleurs, seuil visuel de marge), déclarées en tête du composant.
+
+**TypeScript**
+
+- Mode strict, ni `any` ni `unknown` non vérifié, ni assertion `!`.
+- Pas de cast `as` : inférence, annotations, `satisfies` ou type guards. Seules les conversions `Object.keys` / `entries` / `fromEntries` sont confinées dans `src/engine/records.ts`.
+- Unions exhaustives : un libellé de règle (`RuleId`), d'erreur ou de fin manquant casse la compilation (`satisfies Record<…, …>`).
+- Props typées en tête de fichier, nommées d'après le composant : `MarketRowProps`.
+
+**React (avec le React Compiler)**
+
+- Jamais de `useMemo`, `useCallback` ni `React.memo`.
+- Rendu pur : aucune mutation de donnée externe ; l'état dérivé se calcule dans des constantes au rendu.
+- `useEffect` réservé aux synchronisations externes réelles (listeners natifs, timers), jamais pour synchroniser deux états.
+- Clés de liste stables et uniques, jamais l'index ; seule exception, une liste figée sans identité propre (lignes d'un `Breakdown`), justifiée en commentaire.
+- `useState` réservé à l'éphémère d'interface (saisie, panneau refermé).
+
+**Zustand**
+
+- Sélecteurs fins : `useGameStore((s) => s.game.day)`. L'état entier seulement quand une fonction du moteur en a besoin, et le commentaire le dit.
+- Les changements d'état passent par les actions du store (`dispatch`, `newGame`), qui délèguent au moteur.
+- Le stockage navigateur passe uniquement par le middleware `persist`.
+
+**Tailwind CSS v4**
+
+- Config CSS-first dans `src/index.css`, pas de `tailwind.config.js`.
+- Un seul thème (sombre), aucune variante `dark:`.
+- Classes standard, pas de valeurs arbitraires (`p-4`, pas `p-[17px]`).
+- Mobile d'abord : styles de base pour le téléphone, variantes `sm:` / `md:` pour les écrans larges.
+
+**Accessibilité**
+
+- HTML sémantique : `<button>` pour tout clic, `<header>`, `<main>`, `<section>`, listes.
+- Icônes lucide : `size` explicite et `aria-hidden="true"` ; une information portée par une icône ou une couleur est doublée d'un texte `sr-only`.
+- Un bouton sans texte explicite porte un `aria-label` traduit (la page est en `lang="fr"`, un libellé anglais serait mal prononcé).
+- Focus clavier visible sur tout élément interactif (`FOCUS_RING`).
+- États d'affichage : données, liste vide, erreur (bandeau d'erreur d'action, `ErrorBoundary` autour de l'application). Pas d'état de chargement tant que rien n'est asynchrone.
+
+**Animations (Motion)**
+
+- `import { motion } from 'motion/react'`, uniquement `transform` et `opacity`, transitions courtes (200 à 300 ms). `MotionConfig` respecte le réglage « réduire les animations » de l'OS.
+
+**Tests (Vitest)**
+
+- Toute logique pure et tout store sont testés, sur leurs comportements et non leurs détails internes.
+- Un fichier de test à côté de sa source (`finance.ts` → `finance.test.ts`), aides partagées dans `src/engine/test-helpers.ts`.
+- `src/data/data.test.ts` vérifie la cohérence des données et des constantes d'équilibrage.
+
+**Fichiers**
+
+- LF partout (`.gitattributes`, `.editorconfig`, Prettier).
+
 ## Scripts
 
 | Commande               | Rôle                                 |

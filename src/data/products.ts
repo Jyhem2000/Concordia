@@ -1,3 +1,4 @@
+import { keysOf } from '../engine/records.ts'
 import type { Product, ProductId, Tier, TierStats } from '../engine/types.ts'
 
 /*
@@ -71,4 +72,4 @@ export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
   },
 }
 
-export const PRODUCT_IDS = Object.keys(PRODUCTS) as ProductId[]
+export const PRODUCT_IDS = keysOf(PRODUCTS)

@@ -1,4 +1,4 @@
-import type { BreakdownSource } from '../engine/breakdown.ts'
+import { isRuleSource, type BreakdownSource } from '../engine/breakdown.ts'
 import { fr } from './fr.ts'
 
 export type Messages = typeof fr
@@ -70,7 +70,7 @@ function createI18n(locale: Locale): I18n {
 }
 
 function labelOf(t: Messages, source: BreakdownSource): string {
-  if (source.startsWith('rule.')) return t.rule[source.slice('rule.'.length)] ?? source
+  if (isRuleSource(source)) return t.rule[source]
 
   const sections: Record<string, { name: string }>[] = [t.tag, t.product, t.district, t.location, t.vehicle, t.module, t.crew, t.event]
   for (const section of sections) {

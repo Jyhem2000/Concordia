@@ -23,7 +23,7 @@ export default function EveningPanel() {
     <section className="rounded border border-zinc-800 bg-zinc-900/40 text-sm">
       <div className="border-b border-zinc-800 p-3">
         <h2 className="flex items-center gap-1.5 font-bold text-amber-300 uppercase">
-          <Fuel size={14} />
+          <Fuel size={14} aria-hidden="true" />
           {t.evening.fuelTitle} {game.fuel}/{tank}
         </h2>
         <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -49,12 +49,12 @@ export default function EveningPanel() {
         {game.phase === 'day' ? (
           <>
             <h2 className="flex items-center gap-1.5 font-bold text-amber-300 uppercase">
-              <Siren size={14} />
+              <Siren size={14} aria-hidden="true" />
               {t.evening.curfewTitle}
             </h2>
             <div className="mt-2 flex flex-wrap gap-2">
               <Button variant="primary" onClick={() => dispatch({ type: 'sleep' })}>
-                <BedDouble size={14} className="mr-1 inline" />
+                <BedDouble size={14} className="mr-1 inline" aria-hidden="true" />
                 {sleepLabel}
               </Button>
               <Button variant="danger" disabled={curfewError !== null} onClick={() => dispatch({ type: 'forceCurfew' })}>
@@ -67,7 +67,7 @@ export default function EveningPanel() {
           <>
             <p className="text-indigo-300">{t.evening.nightNotice}</p>
             <Button variant="primary" className="mt-2" onClick={() => dispatch({ type: 'sleep' })}>
-              <BedDouble size={14} className="mr-1 inline" />
+              <BedDouble size={14} className="mr-1 inline" aria-hidden="true" />
               {sleepLabel}
             </Button>
           </>

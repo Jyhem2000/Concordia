@@ -19,9 +19,13 @@ export const START_CASH = 2_000
 /** Dette mafieuse de départ (chap. 7) */
 export const START_DEBT = 5_000
 
-export const START_ICC = 100
+/** Bornes hautes des jauges du joueur (ICC en %, Santé en PV), plancher à 0 */
+export const ICC_MAX = 100
+export const HEALTH_MAX = 100
 
-export const START_HEALTH = 100
+export const START_ICC = ICC_MAX
+
+export const START_HEALTH = HEALTH_MAX
 
 /** Seuil bas (ICC inclus) de chaque palier de crédit social, du plus haut au plus bas */
 export const ICC_TIERS: readonly { tier: IccTier; min: number }[] = [
@@ -40,10 +44,16 @@ export const RELAY_SLEEP = { icc: 2, health: 5 }
 /** Le compte à rebours de l'audit s'affiche à partir de ce jour (chap. 9) */
 export const AUDIT_COUNTDOWN_DAY = 28
 
+type EndingRules = {
+  saboteur: { minScore: number; requiredProduct: ProductId; district: DistrictId }
+  elite: { minScore: number; iccTier: IccTier }
+  mafia: { minScore: number }
+}
+
 /** Fins de partie (dette soldée), de la plus prestigieuse à la plus modeste : seuils de score offshore */
-export const ENDINGS = {
-  saboteur: { minScore: 1_000_000, requiredProduct: 'T4-06' as ProductId, district: 'D4' as DistrictId },
-  elite: { minScore: 500_000, iccTier: 'gold' as IccTier },
+export const ENDINGS: Readonly<EndingRules> = {
+  saboteur: { minScore: 1_000_000, requiredProduct: 'T4-06', district: 'D4' },
+  elite: { minScore: 500_000, iccTier: 'gold' },
   mafia: { minScore: 200_000 },
 }
 

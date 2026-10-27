@@ -1,5 +1,18 @@
 import { describe, expect, it } from 'vitest'
-import type { DistrictId, ProductId } from '../engine/types.ts'
+import { OFFSHORE_TRANCHE_SOURCES } from '../engine/finance.ts'
+import { entriesOf } from '../engine/records.ts'
+import type { DistrictId } from '../engine/types.ts'
+import {
+  AUDIT_COUNTDOWN_DAY,
+  DEBT_BEATING,
+  DEBT_LATE,
+  ENDINGS,
+  GAME_LENGTH_DAYS,
+  ICC_TIERS,
+  OFFSHORE_DEPOSIT_FACTOR,
+  OFFSHORE_TRANCHES,
+  PROTECTION,
+} from './balance.ts'
 import { DISTRICTS, MAP_LINKS } from './districts.ts'
 import { PRODUCTS, TIERS } from './products.ts'
 import { VEHICLES } from './vehicles.ts'
@@ -9,8 +22,8 @@ import { VEHICLES } from './vehicles.ts'
  * doit casser un test plutôt qu'une partie.
  */
 
-const products = Object.entries(PRODUCTS) as [ProductId, (typeof PRODUCTS)[ProductId]][]
-const districts = Object.entries(DISTRICTS) as [DistrictId, (typeof DISTRICTS)[DistrictId]][]
+const products = entriesOf(PRODUCTS)
+const districts = entriesOf(DISTRICTS)
 
 describe('produits (chap. 3)', () => {
   it('ont le tier de leur ID', () => {
@@ -117,5 +130,39 @@ describe('véhicules (chap. 5)', () => {
     for (const [id, vehicle] of Object.entries(VEHICLES)) {
       expect(vehicle.fuelPerTrip.night, id).toBeGreaterThanOrEqual(vehicle.fuelPerTrip.day)
     }
+  })
+})
+
+describe('équilibrage (balance.ts)', () => {
+  const ascending = (values: readonly number[]) => values.every((value, i) => i === 0 || value > values[i - 1])
+
+  it('classe les paliers d’ICC du plus haut au plus bas, jusqu’à 0', () => {
+    const mins = ICC_TIERS.map(({ min }) => min)
+    expect(ascending([...mins].reverse())).toBe(true)
+    expect(mins.at(-1)).toBe(0)
+  })
+
+  it('exige un score plus élevé pour chaque fin plus prestigieuse', () => {
+    expect(ascending([ENDINGS.mafia.minScore, ENDINGS.elite.minScore, ENDINGS.saboteur.minScore])).toBe(true)
+  })
+
+  it('ordonne les tranches offshore, la dernière sans plafond, chacune avec son libellé', () => {
+    const limits = OFFSHORE_TRANCHES.map(({ upTo }) => upTo)
+    expect(limits.at(-1)).toBeNull()
+    expect(ascending(limits.slice(0, -1).map((limit) => limit ?? Infinity))).toBe(true)
+    expect(OFFSHORE_TRANCHES.length).toBeLessThanOrEqual(OFFSHORE_TRANCHE_SOURCES.length)
+    expect(ascending([...OFFSHORE_TRANCHES.map(({ dailyRate }) => dailyRate)].reverse())).toBe(true)
+    expect(OFFSHORE_DEPOSIT_FACTOR).toBeGreaterThan(0)
+    expect(OFFSHORE_DEPOSIT_FACTOR).toBeLessThanOrEqual(1)
+  })
+
+  it('place les échéances dans la partie, dans l’ordre', () => {
+    const days = [...PROTECTION.days, DEBT_BEATING.day, DEBT_LATE.day, AUDIT_COUNTDOWN_DAY]
+    for (const day of days) {
+      expect(day).toBeGreaterThan(1)
+      expect(day).toBeLessThanOrEqual(GAME_LENGTH_DAYS)
+    }
+    expect(ascending(PROTECTION.days)).toBe(true)
+    expect(DEBT_BEATING.day).toBeLessThan(DEBT_LATE.day)
   })
 })

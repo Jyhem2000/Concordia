@@ -33,10 +33,6 @@ describe('i18n (fr)', () => {
     expect(i18n.label('rule.clamp')).toBe('Plafond')
   })
 
-  it("laisse l'ID visible quand une règle n'a pas de libellé", () => {
-    expect(i18n.label('rule.inconnue')).toBe('rule.inconnue')
-  })
-
   it('réutilise la même instance par langue', () => {
     expect(getI18n('fr')).toBe(i18n)
   })

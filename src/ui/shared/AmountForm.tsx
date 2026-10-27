@@ -1,19 +1,21 @@
 import { useState, type FormEvent } from 'react'
 import { useI18n } from '../../i18n/useI18n.ts'
-import Button from './Button.tsx'
+import Button, { type ButtonVariant } from './Button.tsx'
+import { FOCUS_RING } from './focus.ts'
 
-type Props = {
+type AmountFormProps = {
   label: string
   max: number
   onSubmit: (amount: number) => void
-  variant?: 'default' | 'primary' | 'danger'
-  /** Aperçu sous le champ, à partir du montant saisi (ex. somme créditée après commission) */
-  preview?: (amount: number) => string | null
+  variant?: ButtonVariant
+  /** Aperçu à côté du champ, à partir du montant saisi (ex. somme créditée après commission) */
+  preview?: (amount: number) => string
 }
 
 /** Saisie d'un montant en ₡ avec raccourci MAX, pour les guichets (dette, offshore) */
-export default function AmountForm({ label, max, onSubmit, variant = 'primary', preview }: Props) {
+export default function AmountForm({ label, max, onSubmit, variant = 'primary', preview }: AmountFormProps) {
   const { t } = useI18n()
+  // Saisie en cours : état d'interface éphémère, jamais sauvegardé
   const [value, setValue] = useState('')
   const amount = Math.floor(Number(value))
   const valid = Number.isFinite(amount) && amount > 0 && amount <= max
@@ -39,9 +41,9 @@ export default function AmountForm({ label, max, onSubmit, variant = 'primary', 
         aria-label={`${label} — ${t.place.amount}`}
         disabled={max < 1}
         onChange={(event) => setValue(event.target.value)}
-        className="w-28 rounded border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm disabled:opacity-35"
+        className={`w-28 rounded border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm disabled:opacity-35 ${FOCUS_RING}`}
       />
-      <Button disabled={max < 1} onClick={() => setValue(String(max))}>
+      <Button disabled={max < 1} aria-label={`${label} — ${t.place.max}`} onClick={() => setValue(String(max))}>
         {t.place.max}
       </Button>
       <Button type="submit" variant={variant} disabled={!valid}>

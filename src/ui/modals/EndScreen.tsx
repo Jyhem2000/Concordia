@@ -1,9 +1,7 @@
-import type { EndingId } from '../../engine/types.ts'
+import { isDefeat } from '../../engine/routine.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
-
-const DEFEATS: readonly EndingId[] = ['bio-bricks', 'death', 'execution']
 
 /** Écran de fin : la fin débloquée à l'audit du Jour 30, ou la défaite (chap. 2) */
 export default function EndScreen() {
@@ -11,7 +9,7 @@ export default function EndScreen() {
   const newGame = useGameStore((s) => s.newGame)
   const { t, credits } = useI18n()
   const id = ending?.id ?? 'standard'
-  const defeat = DEFEATS.includes(id)
+  const defeat = isDefeat(id)
 
   return (
     <main className="mx-auto flex max-w-lg flex-1 flex-col items-center justify-center gap-4 p-4 text-center">

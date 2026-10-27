@@ -6,7 +6,7 @@ import type { GameDataId } from './types.ts'
  *
  * Ex. (risque) :
  *   breakdown('D5', 0.4)
- *     .add('rule.suspicion', 0.1)
+ *     .add('EVT-G02', 0.15)
  *     .add('TAG-TECH', 0.167, { count: 4, cargo: 12 })
  *     .add('TAG-LEGAL', -0.1)
  *     .mul('VEH-02', 0.85)
@@ -17,8 +17,43 @@ import type { GameDataId } from './types.ts'
  * le détail ne montre que ce qui a réellement pesé.
  */
 
-/** ID de donnée de jeu (D5, MOD-03, TAG-TECH…) ou clé de règle sans ID (`rule.suspicion`) */
-export type BreakdownSource = GameDataId | `rule.${string}`
+/** Règles sans ID de donnée pouvant apparaître dans un détail ; chacune a son libellé dans le catalogue i18n */
+export type RuleId =
+  | 'clamp'
+  | 'round'
+  | 'inflation'
+  | 'production'
+  | 'strong-demand'
+  | 'tier-bonus'
+  | 'noise'
+  | 'quote'
+  | 'commission'
+  | 'saturation'
+  | 'know-how'
+  | 'night-festive'
+  | 'night-diurnal'
+  | 'diminishing-returns'
+  | 'anti-arbitrage'
+  | 'debt-balance'
+  | 'debt-rate'
+  | 'debt-late-rate'
+  | 'cash'
+  | 'cargo-value'
+  | 'protection'
+  | 'offshore-tranche-1'
+  | 'offshore-tranche-2'
+  | 'offshore-tranche-3'
+  | 'deposit'
+  | 'laundry-fee'
+
+export type RuleSource = `rule.${RuleId}`
+
+/** ID de donnée de jeu (D5, MOD-03, TAG-TECH…) ou règle sans ID (`rule.inflation`) */
+export type BreakdownSource = GameDataId | RuleSource
+
+export function isRuleSource(source: BreakdownSource): source is RuleSource {
+  return source.startsWith('rule.')
+}
 
 export type BreakdownOp = 'base' | 'add' | 'mul' | 'set' | 'clamp' | 'round'
 

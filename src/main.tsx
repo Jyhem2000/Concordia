@@ -4,7 +4,10 @@ import { MotionConfig } from 'motion/react'
 import './index.css'
 import App from './App.tsx'
 
-createRoot(document.getElementById('root')!).render(
+const root = document.getElementById('root')
+if (!root) throw new Error('Élément #root introuvable dans index.html')
+
+createRoot(root).render(
   <StrictMode>
     {/* Respecte le réglage « réduire les animations » de l'OS */}
     <MotionConfig reducedMotion="user">

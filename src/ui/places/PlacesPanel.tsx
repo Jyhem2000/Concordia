@@ -1,48 +1,58 @@
 import { Landmark, Lock } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { checkLocation, locationDistrict, maxRepay } from '../../engine/actions.ts'
+import { LOCATIONS } from '../../data/locations.ts'
+import { maxRepay } from '../../engine/actions.ts'
+import { keysOf } from '../../engine/records.ts'
 import { depositBreakdown, effectiveOffshoreRate, loanRoom, offshoreBalance, offshoreInterestBreakdown } from '../../engine/finance.ts'
-import type { LocationId } from '../../engine/types.ts'
+import type { LocationId, LocationService } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import AmountForm from '../shared/AmountForm.tsx'
 import Detailed from '../shared/Detailed.tsx'
 
-/** Lieux spéciaux gérés à ce stade : l'usurier et la banque offshore (chap. 4 et 7) */
-const PLACES: readonly LocationId[] = ['LOC-D1-1', 'LOC-D5-1']
+type PlaceProps = {
+  locationId: LocationId
+  children: ReactNode
+}
 
-/** Guichets du district courant ; rien si le district n'en a pas */
+type ServiceDeskProps = {
+  service: LocationService
+}
+
+/** Guichets des lieux spéciaux du district courant qui rendent un service implémenté ; rien sinon */
 export default function PlacesPanel() {
   const districtId = useGameStore((s) => s.game.districtId)
-  const here = PLACES.filter((id) => locationDistrict(id) === districtId)
+  const here = keysOf(LOCATIONS).filter((id) => LOCATIONS[id].district === districtId && LOCATIONS[id].services.length > 0)
   if (here.length === 0) return null
 
   return (
     <>
       {here.map((id) => (
         <Place key={id} locationId={id}>
-          {id === 'LOC-D1-1' ? <DebtDesk /> : <OffshoreDesk />}
+          {LOCATIONS[id].services.map((service) => (
+            <ServiceDesk key={service} service={service} />
+          ))}
         </Place>
       ))}
     </>
   )
 }
 
-function Place({ locationId, children }: { locationId: LocationId; children: ReactNode }) {
-  const game = useGameStore((s) => s.game)
+/** Les lieux spéciaux ferment pendant le couvre-feu (chap. 2) */
+function Place({ locationId, children }: PlaceProps) {
+  const closed = useGameStore((s) => s.game.phase === 'night')
   const { t } = useI18n()
-  const closed = checkLocation(game, locationId) === 'location-closed'
 
   return (
     <section className="rounded border border-zinc-800 bg-zinc-900/40 p-3 text-sm">
       <h2 className="flex items-center gap-1.5 font-bold text-amber-300 uppercase">
-        <Landmark size={14} />
+        <Landmark size={14} aria-hidden="true" />
         {t.location[locationId].name}
       </h2>
       <p className="text-xs text-zinc-400">{t.location[locationId].subtitle}</p>
       {closed ? (
         <p className="mt-2 flex items-center gap-1.5 text-indigo-300">
-          <Lock size={14} />
+          <Lock size={14} aria-hidden="true" />
           {t.place.closedAtNight}
         </p>
       ) : (
@@ -50,6 +60,15 @@ function Place({ locationId, children }: { locationId: LocationId; children: Rea
       )}
     </section>
   )
+}
+
+function ServiceDesk({ service }: ServiceDeskProps) {
+  switch (service) {
+    case 'debt':
+      return <DebtDesk />
+    case 'offshore':
+      return <OffshoreDesk />
+  }
 }
 
 function DebtDesk() {

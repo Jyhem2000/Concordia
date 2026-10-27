@@ -2,17 +2,18 @@ import { describe, expect, it } from 'vitest'
 import { SHOP_MIN_PRODUCTS } from '../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../data/districts.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
-import { demandQuota, demandRefill, drawMarket, productStatus, quoteBreakdown, saleQuote } from './market.ts'
+import { demandQuota, demandRefill, drawMarket, productStatus, quoteBreakdown, saleQuote, shopProducts } from './market.ts'
 import { createRng, seedRng } from './rng.ts'
 import { createInitialState } from './state.ts'
-import type { GameState, ProductId } from './types.ts'
+import { defined } from './test-helpers.ts'
+import type { GameState } from './types.ts'
 
 describe('boutique du jour', () => {
   for (const seed of [1, 2, 3, 4, 5]) {
     it(`respecte les règles de composition (graine ${seed})`, () => {
       const rng = createRng(seedRng(seed))
       for (const districtId of DISTRICT_IDS) {
-        const shop = Object.keys(drawMarket(districtId, rng).stock) as ProductId[]
+        const shop = shopProducts(drawMarket(districtId, rng))
         const district = DISTRICTS[districtId]
 
         expect(shop.length, districtId).toBeGreaterThanOrEqual(SHOP_MIN_PRODUCTS)
@@ -29,9 +30,9 @@ describe('boutique du jour', () => {
 
   it('ne tire en D4 qu’une partie de sa production', () => {
     const rng = createRng(seedRng(9))
-    const { min, max } = DISTRICTS.D4.productionDraw!
+    const { min, max } = defined(DISTRICTS.D4.productionDraw)
     for (let i = 0; i < 50; i++) {
-      const shop = Object.keys(drawMarket('D4', rng).stock) as ProductId[]
+      const shop = shopProducts(drawMarket('D4', rng))
       const drawn = shop.filter((id) => DISTRICTS.D4.production.includes(id)).length
       expect(drawn).toBeGreaterThanOrEqual(min)
       expect(drawn).toBeLessThanOrEqual(max)
@@ -41,7 +42,7 @@ describe('boutique du jour', () => {
   it('reconstitue la demande d’un tiers du quota par matin, sans dépasser le quota', () => {
     const rng = createRng(seedRng(4))
     const yesterday = drawMarket('D1', rng)
-    const quota = demandQuota('D1', 'T2-01')!
+    const quota = defined(demandQuota('D1', 'T2-01'))
     const today = drawMarket('D1', rng, { ...yesterday, demand: { ...yesterday.demand, 'T2-01': 0 } })
     expect(today.demand['T2-01']).toBe(demandRefill(quota))
     expect(drawMarket('D1', rng, yesterday).demand['T2-01']).toBe(quota)
@@ -64,7 +65,7 @@ describe('cours du jour', () => {
 
   it('ajoute le bonus de tier en Forte demande', () => {
     expect(productStatus('D6', 'T4-01')).toBe('strong')
-    const coefLine = quoteBreakdown(state, 'D6', 'T4-01').lines.find((line) => line.source === 'rule.strong-demand')!
+    const coefLine = defined(quoteBreakdown(state, 'D6', 'T4-01').lines.find((line) => line.source === 'rule.strong-demand'))
     expect(coefLine.value).toBeCloseTo(DISTRICTS.D6.coefStrongDemand + 0.3)
   })
 
@@ -89,7 +90,7 @@ describe('prix de vente', () => {
 
   it('vend à moitié prix au-delà de la demande restante', () => {
     const state = withLot(true)
-    const demand = state.markets.D1.demand['T2-02']!
+    const demand = defined(state.markets.D1.demand['T2-02'])
     const sale = saleQuote(state, 'T2-02', demand + 2)
     expect(sale.saturatedQty).toBe(2)
     expect(sale.total).toBeLessThan(saleQuote(state, 'T2-02', 1).total * (demand + 2))

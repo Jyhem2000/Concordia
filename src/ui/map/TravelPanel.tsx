@@ -1,23 +1,34 @@
 import { MapPin } from 'lucide-react'
-import { DISTRICTS } from '../../data/districts.ts'
+import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { planTravel } from '../../engine/actions.ts'
 import { averageCost } from '../../engine/cargo.ts'
 import { estimatedUnitSale } from '../../engine/market.ts'
-import type { DistrictId, ProductId } from '../../engine/types.ts'
+import type { DistrictId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import Margin from '../shared/Margin.tsx'
 
+type DistrictRowProps = {
+  districtId: DistrictId
+}
+
+type TravelButtonProps = {
+  to: DistrictId
+}
+
 /** Ordre d'affichage : de la périphérie au sommet de la pyramide (carte du chap. 4) */
-const order = (Object.keys(DISTRICTS) as DistrictId[]).sort((a, b) => DISTRICTS[a].echelon - DISTRICTS[b].echelon)
+const order = [...DISTRICT_IDS].sort((a, b) => DISTRICTS[a].echelon - DISTRICTS[b].echelon)
 
 /** Carte tactique : destinations, coût du trajet et mémoire de marché (chap. 9) */
 export default function TravelPanel() {
+  const tripDone = useGameStore((s) => (s.game.phase === 'day' ? s.game.dayTripDone : s.game.nightTripDone))
   const { t } = useI18n()
   return (
     <section className="rounded border border-zinc-800 bg-zinc-900/40">
       <h2 className="border-b border-zinc-800 px-3 py-2 font-bold tracking-wide text-amber-300 uppercase">{t.travel.title}</h2>
+      {/* Raison commune à toutes les destinations : dite une fois plutôt que sous chaque bouton */}
+      {tripDone && <p className="px-3 pt-2 text-xs text-zinc-400">{t.error['trip-done']}</p>}
       <ul className="divide-y divide-zinc-800">
         {order.map((id) => (
           <DistrictRow key={id} districtId={id} />
@@ -27,17 +38,18 @@ export default function TravelPanel() {
   )
 }
 
-function DistrictRow({ districtId }: { districtId: DistrictId }) {
-  const game = useGameStore((s) => s.game)
-  const dispatch = useGameStore((s) => s.dispatch)
+function DistrictRow({ districtId }: DistrictRowProps) {
+  const here = useGameStore((s) => s.game.districtId === districtId)
+  const day = useGameStore((s) => s.game.day)
+  const cargo = useGameStore((s) => s.game.cargo)
+  const memory = useGameStore((s) => s.game.memory[districtId])
   const { t, credits } = useI18n()
-  const here = districtId === game.districtId
-  const memory = game.memory[districtId]
 
-  const memoryLabel = !memory ? t.travel.memoryNever : memory.day === game.day ? t.travel.memoryToday : t.travel.memoryDaysAgo(game.day - memory.day)
+  const memoryLabel = !memory ? t.travel.memoryNever : memory.day === day ? t.travel.memoryToday : t.travel.memoryDaysAgo(day - memory.day)
+  const security = DISTRICTS[districtId].security
 
   // Cours mémorisés des produits en soute : ce qui compte pour décider où vendre
-  const owned = [...new Set(game.cargo.map((lot) => lot.productId))] as ProductId[]
+  const owned = [...new Set(cargo.map((lot) => lot.productId))]
 
   return (
     <li className={`px-3 py-2 text-sm ${here ? 'bg-amber-500/5' : ''}`}>
@@ -45,17 +57,20 @@ function DistrictRow({ districtId }: { districtId: DistrictId }) {
         <div>
           <div className="font-bold">
             {t.district[districtId].name}
-            <span className="ml-2 font-normal text-amber-400">{'★'.repeat(DISTRICTS[districtId].security)}</span>
+            <span className="ml-2 font-normal text-amber-400" aria-hidden="true">
+              {'★'.repeat(security)}
+            </span>
+            <span className="sr-only">{t.travel.security(security)}</span>
           </div>
           <div className="text-xs text-zinc-400">{t.district[districtId].subtitle}</div>
         </div>
         {here ? (
           <span className="flex items-center gap-1 text-xs text-amber-300">
-            <MapPin size={12} />
+            <MapPin size={12} aria-hidden="true" />
             {t.travel.here}
           </span>
         ) : (
-          <TravelButton to={districtId} onGo={() => dispatch({ type: 'travel', to: districtId })} />
+          <TravelButton to={districtId} />
         )}
       </div>
 
@@ -68,7 +83,7 @@ function DistrictRow({ districtId }: { districtId: DistrictId }) {
                 <li key={id} className="flex justify-between gap-2">
                   <span className="truncate">{t.product[id].name}</span>
                   <span className="flex items-center gap-1.5">
-                    <Margin revenue={estimatedUnitSale(memory.quotes[id])} cost={averageCost(game.cargo, id) ?? 0} showAmount={false} />
+                    <Margin revenue={estimatedUnitSale(memory.quotes[id])} cost={averageCost(cargo, id) ?? 0} showAmount={false} />
                     {credits(memory.quotes[id])}
                   </span>
                 </li>
@@ -81,20 +96,23 @@ function DistrictRow({ districtId }: { districtId: DistrictId }) {
   )
 }
 
-function TravelButton({ to, onGo }: { to: DistrictId; onGo: () => void }) {
+function TravelButton({ to }: TravelButtonProps) {
+  // planTravel lit plusieurs champs de la partie (phase, carburant, trajets faits…) : on passe l'état entier
   const game = useGameStore((s) => s.game)
+  const dispatch = useGameStore((s) => s.dispatch)
   const { t } = useI18n()
   const plan = planTravel(game, to)
   const route = plan.crossed.length === 0 ? t.travel.direct : t.travel.via(plan.crossed.map((id) => t.district[id].name).join(', '))
 
   return (
     <div className="text-right">
-      <Button variant="primary" disabled={plan.error !== null} title={plan.error ? t.error[plan.error] : undefined} onClick={onGo}>
+      <Button variant="primary" disabled={plan.error !== null} onClick={() => dispatch({ type: 'travel', to })}>
         {t.travel.go[game.phase]}
       </Button>
       <div className="mt-0.5 text-xs text-zinc-400">
         {route} · {t.travel.fuel(plan.fuelCost)}
       </div>
+      {plan.error && plan.error !== 'trip-done' && <div className="text-xs text-red-300">{t.error[plan.error]}</div>}
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { FUEL_PER_CROSSED_DISTRICT, SIPHON } from '../data/balance.ts'
+import { LOCATIONS } from '../data/locations.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import { cargoUsed, ownedQty, takeLots } from './cargo.ts'
 import { depositBreakdown, loanRoom, offshoreBalance, withdrawFrom } from './finance.ts'
@@ -6,7 +7,8 @@ import { crossedDistricts, shortestRoute } from './map.ts'
 import { fuelPriceBreakdown, quote, saleQuote } from './market.ts'
 import { sleep } from './routine.ts'
 import { remember } from './state.ts'
-import type { DistrictId, GameState, LocationId, ProductId } from './types.ts'
+import { keysOf } from './records.ts'
+import type { DistrictId, GameState, LocationId, LocationService, ProductId } from './types.ts'
 
 /*
  * Actions du joueur : chaque action produit un nouvel état, ou une erreur sans rien changer.
@@ -188,15 +190,15 @@ function travel(state: GameState, to: DistrictId): ActionResult {
 
 // ─── Lieux spéciaux : dette et compte offshore (chap. 4 et 7) ───
 
-/** District d'un lieu spécial, lu dans son ID (`LOC-D1-1` → `D1`) */
-export function locationDistrict(locationId: LocationId): DistrictId {
-  return locationId.slice(4, 6) as DistrictId
+/** Lieu qui rend ce service dans le district du joueur, s'il y en a un */
+export function locationFor(state: GameState, service: LocationService): LocationId | null {
+  return keysOf(LOCATIONS).find((id) => LOCATIONS[id].district === state.districtId && LOCATIONS[id].services.includes(service)) ?? null
 }
 
-/** Les lieux spéciaux ouvrent de jour, dans leur district ; renvoie la raison sinon */
-export function checkLocation(state: GameState, locationId: LocationId): ActionError | null {
+/** Un service s'obtient de jour, dans un lieu du district qui le rend ; renvoie la raison sinon */
+export function checkService(state: GameState, service: LocationService): ActionError | null {
   if (state.status !== 'playing') return 'game-over'
-  if (state.districtId !== locationDistrict(locationId)) return 'not-at-location'
+  if (!locationFor(state, service)) return 'not-at-location'
   if (state.phase !== 'day') return 'location-closed'
   return null
 }
@@ -206,7 +208,7 @@ export function maxRepay(state: GameState): number {
 }
 
 function repay(state: GameState, amount: number): ActionResult {
-  const closed = checkLocation(state, 'LOC-D1-1')
+  const closed = checkService(state, 'debt')
   if (closed) return fail(closed)
   if (state.debt === 0) return fail('no-debt')
   if (amount > state.cash) return fail('not-enough-cash')
@@ -216,7 +218,7 @@ function repay(state: GameState, amount: number): ActionResult {
 }
 
 function borrow(state: GameState, amount: number): ActionResult {
-  const closed = checkLocation(state, 'LOC-D1-1')
+  const closed = checkService(state, 'debt')
   if (closed) return fail(closed)
   if (!state.initialDebtPaid) return fail('loan-locked')
   if (amount > loanRoom(state)) return fail('loan-ceiling')
@@ -224,7 +226,7 @@ function borrow(state: GameState, amount: number): ActionResult {
 }
 
 function deposit(state: GameState, amount: number): ActionResult {
-  const closed = checkLocation(state, 'LOC-D5-1')
+  const closed = checkService(state, 'offshore')
   if (closed) return fail(closed)
   if (amount > state.cash) return fail('not-enough-cash')
   const credited = depositBreakdown(amount).total
@@ -235,7 +237,7 @@ function deposit(state: GameState, amount: number): ActionResult {
 }
 
 function withdraw(state: GameState, amount: number): ActionResult {
-  const closed = checkLocation(state, 'LOC-D5-1')
+  const closed = checkService(state, 'offshore')
   if (closed) return fail(closed)
   if (amount > offshoreBalance(state.offshore)) return fail('not-enough-offshore')
   return { ok: true, state: { ...state, cash: state.cash + amount, offshore: withdrawFrom(state.offshore, amount) } }

@@ -1,3 +1,4 @@
+import { keysOf } from '../engine/records.ts'
 import type { District, DistrictId } from '../engine/types.ts'
 
 /*
@@ -13,6 +14,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     baseRisk: 0.1,
     fuelPrice: 80,
     pump: 'official',
+    relay: true,
     detection: null,
     droneJudges: false,
     coefProduction: 0.75,
@@ -33,6 +35,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     baseRisk: 0.2,
     fuelPrice: 120,
     pump: 'official',
+    relay: true,
     detection: 'TAG-CULTURE', // délation idéologique
     droneJudges: false,
     coefProduction: 0.75,
@@ -46,6 +49,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     baseRisk: 0.35,
     fuelPrice: 150,
     pump: 'official',
+    relay: true,
     detection: 'TAG-CHEMICAL', // bio-scanners
     droneJudges: false,
     coefProduction: 0.75,
@@ -59,6 +63,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     baseRisk: 0.2,
     fuelPrice: 80,
     pump: 'fixed', // pompe pirate
+    relay: false, // pas de relais du DSC : bivouac
     detection: null, // zone hors-réseau
     droneJudges: false,
     coefProduction: 0.75,
@@ -74,6 +79,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     baseRisk: 0.4,
     fuelPrice: 200,
     pump: 'official',
+    relay: true,
     detection: 'TAG-TECH', // scanners électromagnétiques
     droneJudges: true,
     coefProduction: 0.75,
@@ -93,6 +99,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     baseRisk: 0.55,
     fuelPrice: 300,
     pump: 'official',
+    relay: true,
     detection: 'TAG-TECH', // scanners électromagnétiques (les chiens-robots : chap. 4)
     droneJudges: true,
     coefProduction: 0.85,
@@ -121,4 +128,4 @@ export const MAP_LINKS: readonly (readonly [DistrictId, DistrictId])[] = [
   ['D5', 'D6'],
 ]
 
-export const DISTRICT_IDS = Object.keys(DISTRICTS) as DistrictId[]
+export const DISTRICT_IDS = keysOf(DISTRICTS)

@@ -88,6 +88,8 @@ export type District = {
   /** Prix de base d'une ration de Synthanol */
   fuelPrice: number
   pump: PumpType
+  /** Relais routier du DSC où dormir ; sinon bivouac, sans gain de sommeil (chap. 2) */
+  relay: boolean
   /** Tag ciblé par la détection spéciale du district */
   detection: TagId | null
   droneJudges: boolean
@@ -99,6 +101,14 @@ export type District = {
   /** Nombre de produits de la liste Production tirés chaque jour ; absent = toute la liste */
   productionDraw?: Range
   strongDemand: readonly ProductId[]
+}
+
+/** Services rendus par les lieux spéciaux implémentés (chap. 4 et 7) */
+export type LocationService = 'debt' | 'offshore'
+
+export type Location = {
+  district: DistrictId
+  services: readonly LocationService[]
 }
 
 export type Vehicle = {

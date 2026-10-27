@@ -2,13 +2,32 @@ import type { ReactNode } from 'react'
 import { PRODUCTS } from '../../data/products.ts'
 import { maxBuy } from '../../engine/actions.ts'
 import { averageCost, ownedQty } from '../../engine/cargo.ts'
-import { demandQuota, demandRefill, productStatus, quoteBreakdown, saleQuote } from '../../engine/market.ts'
+import { demandQuota, demandRefill, productStatus, quoteBreakdown, saleQuote, shopProducts } from '../../engine/market.ts'
 import type { ProductId, Tier } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import Detailed from '../shared/Detailed.tsx'
 import Margin from '../shared/Margin.tsx'
+
+type MarketRowProps = {
+  productId: ProductId
+}
+
+type FieldProps = {
+  label: string
+  /** Occupe deux colonnes de la grille */
+  wide?: boolean
+  children: ReactNode
+}
+
+type QuantityButtonsProps = {
+  label: string
+  max: number
+  maxLabel: string
+  onPick: (qty: number) => void
+  variant: 'primary' | 'danger'
+}
 
 /** Couleur de chaque tier (chap. 9) */
 const tierColors: Record<Tier, string> = {
@@ -24,7 +43,7 @@ export default function MarketPanel() {
   const game = useGameStore((s) => s.game)
   const { t } = useI18n()
 
-  const shop = Object.keys(game.markets[game.districtId].stock) as ProductId[]
+  const shop = shopProducts(game.markets[game.districtId])
   const owned = game.cargo.map((lot) => lot.productId)
   // Produits en soute d'abord, puis la boutique ; par tier puis par ID
   const rows = [...new Set([...owned, ...shop])].sort(
@@ -46,7 +65,7 @@ export default function MarketPanel() {
   )
 }
 
-function MarketRow({ productId }: { productId: ProductId }) {
+function MarketRow({ productId }: MarketRowProps) {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
   const { t, credits } = useI18n()
@@ -117,7 +136,7 @@ function MarketRow({ productId }: { productId: ProductId }) {
   )
 }
 
-function Field({ label, wide = false, children }: { label: string; wide?: boolean; children: ReactNode }) {
+function Field({ label, wide = false, children }: FieldProps) {
   return (
     <div className={`flex gap-1.5 ${wide ? 'col-span-2' : ''}`}>
       <dt className="text-zinc-500">{label}</dt>
@@ -126,23 +145,15 @@ function Field({ label, wide = false, children }: { label: string; wide?: boolea
   )
 }
 
-type QuantityButtonsProps = {
-  label: string
-  max: number
-  maxLabel: string
-  onPick: (qty: number) => void
-  variant: 'primary' | 'danger'
-}
-
 /** Curseurs d'achat / vente : +1, +5, MAX (chap. 9) */
 function QuantityButtons({ label, max, maxLabel, onPick, variant }: QuantityButtonsProps) {
   return (
     <span className="flex items-center gap-1">
       <span className="text-xs text-zinc-400">{label}</span>
-      <Button variant={variant} disabled={max < 1} onClick={() => onPick(1)}>
+      <Button variant={variant} disabled={max < 1} aria-label={`${label} 1`} onClick={() => onPick(1)}>
         1
       </Button>
-      <Button variant={variant} disabled={max < 5} onClick={() => onPick(5)}>
+      <Button variant={variant} disabled={max < 5} aria-label={`${label} 5`} onClick={() => onPick(5)}>
         5
       </Button>
       <Button variant={variant} disabled={max < 1} onClick={() => onPick(max)}>

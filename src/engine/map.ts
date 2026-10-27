@@ -6,8 +6,7 @@ export function shortestRoute(from: DistrictId, to: DistrictId): DistrictId[] {
   const previous = new Map<DistrictId, DistrictId | null>([[from, null]])
   const queue: DistrictId[] = [from]
 
-  while (queue.length > 0) {
-    const current = queue.shift()!
+  for (let current = queue.shift(); current !== undefined; current = queue.shift()) {
     if (current === to) break
     for (const [a, b] of MAP_LINKS) {
       const next = a === current ? b : b === current ? a : null

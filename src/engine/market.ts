@@ -14,6 +14,7 @@ import { PRODUCT_IDS, PRODUCTS, TIERS } from '../data/products.ts'
 import { breakdown, type Breakdown } from './breakdown.ts'
 import { takeLots } from './cargo.ts'
 import { indexed } from './inflation.ts'
+import { recordOf } from './records.ts'
 import type { Rng } from './rng.ts'
 import type { CargoLot, DistrictId, DistrictMarket, GameState, MarketMemory, ProductId } from './types.ts'
 
@@ -74,12 +75,16 @@ function drawShop(districtId: DistrictId, rng: Rng): Partial<Record<ProductId, n
   return stock
 }
 
+/** Produits de la boutique du jour, dans l'ordre du catalogue */
+export function shopProducts(market: DistrictMarket): ProductId[] {
+  return PRODUCT_IDS.filter((id) => market.stock[id] !== undefined)
+}
+
 /** Marché du jour d'un district. Sans marché de la veille, la demande est pleine (Jour 1). */
 export function drawMarket(districtId: DistrictId, rng: Rng, previous?: DistrictMarket): DistrictMarket {
-  const noise = {} as Record<ProductId, number>
+  const noise = recordOf(PRODUCT_IDS, () => rng.float(QUOTE_NOISE.min, QUOTE_NOISE.max))
   const demand: Partial<Record<ProductId, number>> = {}
   for (const id of PRODUCT_IDS) {
-    noise[id] = rng.float(QUOTE_NOISE.min, QUOTE_NOISE.max)
     const quota = demandQuota(districtId, id)
     if (quota !== null) {
       const left = previous?.demand[id]
@@ -90,9 +95,7 @@ export function drawMarket(districtId: DistrictId, rng: Rng, previous?: District
 }
 
 export function drawMarkets(rng: Rng, previous?: Record<DistrictId, DistrictMarket>): Record<DistrictId, DistrictMarket> {
-  const markets = {} as Record<DistrictId, DistrictMarket>
-  for (const id of DISTRICT_IDS) markets[id] = drawMarket(id, rng, previous?.[id])
-  return markets
+  return recordOf(DISTRICT_IDS, (id) => drawMarket(id, rng, previous?.[id]))
 }
 
 // ─── Cours et prix ───
@@ -121,9 +124,7 @@ export function quote(state: GameState, districtId: DistrictId, productId: Produ
 
 /** Cours observés dans un district, pour la mémoire de marché */
 export function observeMarket(state: GameState, districtId: DistrictId): MarketMemory {
-  const quotes = {} as Record<ProductId, number>
-  for (const id of PRODUCT_IDS) quotes[id] = quote(state, districtId, id)
-  return { day: state.day, quotes }
+  return { day: state.day, quotes: recordOf(PRODUCT_IDS, (id) => quote(state, districtId, id)) }
 }
 
 /** Savoir_Faire = produit des bonus de vente, avec rendements décroissants et clause anti-arbitrage */

@@ -1,4 +1,5 @@
 import type { ActionError } from '../engine/actions.ts'
+import type { RuleSource } from '../engine/breakdown.ts'
 import type { CrewId, DistrictId, EndingId, EventId, LocationId, ModuleId, ProductId, TagId, Tier, VehicleId } from '../engine/types.ts'
 
 /*
@@ -57,33 +58,33 @@ export const fr = {
 
   /** Libellés des lignes de Breakdown sans ID de donnée (`rule.*`) */
   rule: {
-    clamp: 'Plafond',
-    round: 'Arrondi',
-    inflation: 'Inflation du jour',
-    production: 'Production locale',
-    'strong-demand': 'Forte demande',
-    'tier-bonus': 'Bonus de tier',
-    noise: 'Fluctuation du jour',
-    quote: 'Cours du jour',
-    commission: 'Commission de puce',
-    saturation: 'Marché saturé',
-    'know-how': 'Savoir-faire',
-    'night-festive': 'Nuit festive',
-    'night-diurnal': 'Nuit (clients endormis)',
-    'diminishing-returns': 'Rendements décroissants',
-    'anti-arbitrage': 'Pas de voyage, pas de bonus',
-    'debt-balance': 'Solde de la veille',
-    'debt-rate': 'Intérêts du jour',
-    'debt-late-rate': 'Intérêts majorés (retard)',
-    cash: 'Cash-Puce',
-    'cargo-value': 'Soute (prix de base)',
-    protection: 'Part de Viktor',
-    'offshore-tranche-1': '1re tranche',
-    'offshore-tranche-2': '2e tranche',
-    'offshore-tranche-3': '3e tranche',
-    deposit: 'Dépôt',
-    'laundry-fee': 'Commission de la Laverie',
-  } as Record<string, string>,
+    'rule.clamp': 'Plafond',
+    'rule.round': 'Arrondi',
+    'rule.inflation': 'Inflation du jour',
+    'rule.production': 'Production locale',
+    'rule.strong-demand': 'Forte demande',
+    'rule.tier-bonus': 'Bonus de tier',
+    'rule.noise': 'Fluctuation du jour',
+    'rule.quote': 'Cours du jour',
+    'rule.commission': 'Commission de puce',
+    'rule.saturation': 'Marché saturé',
+    'rule.know-how': 'Savoir-faire',
+    'rule.night-festive': 'Nuit festive',
+    'rule.night-diurnal': 'Nuit (clients endormis)',
+    'rule.diminishing-returns': 'Rendements décroissants',
+    'rule.anti-arbitrage': 'Pas de voyage, pas de bonus',
+    'rule.debt-balance': 'Solde de la veille',
+    'rule.debt-rate': 'Intérêts du jour',
+    'rule.debt-late-rate': 'Intérêts majorés (retard)',
+    'rule.cash': 'Cash-Puce',
+    'rule.cargo-value': 'Soute (prix de base)',
+    'rule.protection': 'Part de Viktor',
+    'rule.offshore-tranche-1': '1re tranche',
+    'rule.offshore-tranche-2': '2e tranche',
+    'rule.offshore-tranche-3': '3e tranche',
+    'rule.deposit': 'Dépôt',
+    'rule.laundry-fee': 'Commission de la Laverie',
+  } satisfies Record<RuleSource, string>,
 
   // ─── Interface ───
 
@@ -134,6 +135,8 @@ export const fr = {
     score: 'Score (compte offshore)',
     threshold: (amount: string) => `≥ ${amount}`,
     goldStatus: 'Statut Citoyen Or',
+    met: 'Atteint :',
+    unmet: 'Pas encore :',
     inCargo: (product: string) => `${product} en soute`,
     atMidnight: (district: string) => `Être à ${district} à minuit`,
   },
@@ -186,6 +189,7 @@ export const fr = {
     memoryNever: 'Cours jamais observés',
     memoryToday: "Cours vus aujourd'hui",
     memoryDaysAgo: (days: number) => `Cours vus il y a ${days} jour${days > 1 ? 's' : ''}`,
+    security: (stars: number) => `Sécurité ${stars} sur 5`,
     estimateHint: 'Marge estimée sur le cours vu, commission déduite (hors savoir-faire et saturation)',
   },
 
@@ -241,6 +245,12 @@ export const fr = {
         epilogue: 'La fouille a trouvé la balise. Le rapport officiel conclut à un suicide.',
       },
     } satisfies Record<EndingId, { title: string; epilogue: string }>,
+  },
+
+  crash: {
+    title: 'Panne du terminal de bord',
+    body: "Une erreur inattendue a interrompu l'affichage. La sauvegarde est peut-être corrompue : recommencer une partie remet tout d'aplomb.",
+    retry: 'Réessayer',
   },
 
   error: {

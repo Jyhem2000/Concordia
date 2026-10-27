@@ -1,14 +1,18 @@
 import type { Breakdown, BreakdownLine } from '../../engine/breakdown.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 
-type Props = {
+type BreakdownViewProps = {
   breakdown: Breakdown
   /** Mise en forme du total (₡, %…) ; les opérandes sont des nombres bruts */
   formatTotal: (value: number) => string
 }
 
+type LinesProps = {
+  lines: readonly BreakdownLine[]
+}
+
 /** Détail ligne par ligne d'un calcul : « zéro calculatrice, zéro boîte noire » (chap. 9) */
-export default function BreakdownView({ breakdown, formatTotal }: Props) {
+export default function BreakdownView({ breakdown, formatTotal }: BreakdownViewProps) {
   const { t } = useI18n()
   return (
     <div className="text-xs">
@@ -21,7 +25,7 @@ export default function BreakdownView({ breakdown, formatTotal }: Props) {
   )
 }
 
-function Lines({ lines }: { lines: readonly BreakdownLine[] }) {
+function Lines({ lines }: LinesProps) {
   const { label, number, multiplier } = useI18n()
 
   const operand = (line: BreakdownLine) => {
@@ -39,8 +43,10 @@ function Lines({ lines }: { lines: readonly BreakdownLine[] }) {
 
   return (
     <ul className="space-y-0.5">
-      {lines.map((line, i) => (
-        <li key={i}>
+      {/* Liste figée (Breakdown gelé, jamais réordonné ni filtré) et sans identifiant propre :
+          la position est l'identité de la ligne, l'index est donc une clé stable ici */}
+      {lines.map((line, position) => (
+        <li key={position}>
           <div className="flex justify-between gap-3">
             <span className="text-zinc-400">{label(line.source)}</span>
             <span>{operand(line)}</span>

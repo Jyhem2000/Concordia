@@ -18,9 +18,11 @@ export default function GameScreen() {
       {finished ? (
         <EndScreen />
       ) : (
-        <main className="mx-auto grid w-full max-w-7xl flex-1 gap-4 p-4 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-          <MarketPanel />
-          <div className="flex flex-col gap-4">
+        <main className="mx-auto grid w-full max-w-7xl flex-1 gap-4 p-4 md:grid-cols-5">
+          <div className="min-w-0 md:col-span-3">
+            <MarketPanel />
+          </div>
+          <div className="flex min-w-0 flex-col gap-4 md:col-span-2">
             <BriefingPanel />
             <PlacesPanel />
             <EveningPanel />

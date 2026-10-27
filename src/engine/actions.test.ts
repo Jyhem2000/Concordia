@@ -1,29 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { GAME_LENGTH_DAYS, SIPHON } from '../data/balance.ts'
+import { GAME_LENGTH_DAYS, LOAN_CEILING, OFFSHORE_DEPOSIT_FACTOR, SIPHON } from '../data/balance.ts'
 import { VEHICLES } from '../data/vehicles.ts'
-import { applyAction, canSiphon, fuelPrice, maxBuy, planTravel, type Action } from './actions.ts'
+import { canSiphon, checkService, fuelPrice, maxBuy, maxRepay, planTravel, type Action } from './actions.ts'
 import { cargoUsed, ownedQty } from './cargo.ts'
-import { quote } from './market.ts'
+import { quote, shopProducts } from './market.ts'
 import { createInitialState } from './state.ts'
+import { defined, errorOf, gameAt, run } from './test-helpers.ts'
 import type { GameState, ProductId } from './types.ts'
-
-const run = (state: GameState, ...actions: Action[]): GameState =>
-  actions.reduce((current, action) => {
-    const result = applyAction(current, action)
-    if (!result.ok) throw new Error(`${action.type} : ${result.error}`)
-    return result.state
-  }, state)
-
-const errorOf = (state: GameState, action: Action) => {
-  const result = applyAction(state, action)
-  return result.ok ? null : result.error
-}
 
 const start = createInitialState(2024)
 const cheapest = (state: GameState): ProductId =>
-  (Object.keys(state.markets[state.districtId].stock) as ProductId[]).sort(
-    (a, b) => quote(state, state.districtId, a) - quote(state, state.districtId, b),
-  )[0]
+  shopProducts(state.markets[state.districtId]).sort((a, b) => quote(state, state.districtId, a) - quote(state, state.districtId, b))[0]
 
 describe('achat et vente', () => {
   it('débite le Cash-Puce, remplit la soute et vide le stock', () => {
@@ -31,15 +18,19 @@ describe('achat et vente', () => {
     const state = run(start, { type: 'buy', productId: id, qty: 2 })
     expect(state.cash).toBe(start.cash - 2 * quote(start, 'D1', id))
     expect(ownedQty(state.cargo, id)).toBe(2)
-    expect(state.markets.D1.stock[id]).toBe(start.markets.D1.stock[id]! - 2)
+    expect(state.markets.D1.stock[id]).toBe(defined(start.markets.D1.stock[id]) - 2)
   })
 
   it('refuse un produit hors boutique, une soute pleine ou un achat trop cher', () => {
-    const shop = Object.keys(start.markets.D1.stock)
-    const absent = (['T4-06', 'T4-01', 'T3-03'] as ProductId[]).find((id) => !shop.includes(id))!
+    const shop = shopProducts(start.markets.D1)
+    const candidates: ProductId[] = ['T4-06', 'T4-01', 'T3-03']
+    const absent = defined(
+      candidates.find((id) => !shop.includes(id)),
+      'produit hors boutique',
+    )
     expect(errorOf(start, { type: 'buy', productId: absent, qty: 1 })).toBe('not-for-sale')
     expect(errorOf({ ...start, cash: 0 }, { type: 'buy', productId: cheapest(start), qty: 1 })).toBe('not-enough-cash')
-    const full = { ...start, cargo: [{ productId: 'T0-01' as const, qty: VEHICLES['VEH-01'].cargo, unitCost: 1, travelled: false }] }
+    const full: GameState = { ...start, cargo: [{ productId: 'T0-01', qty: VEHICLES['VEH-01'].cargo, unitCost: 1, travelled: false }] }
     expect(errorOf(full, { type: 'buy', productId: cheapest(start), qty: 1 })).toBe('cargo-full')
     expect(maxBuy(full, cheapest(start))).toBe(0)
   })
@@ -54,7 +45,7 @@ describe('achat et vente', () => {
   it('consomme la demande restante', () => {
     const state: GameState = { ...start, cargo: [{ productId: 'T2-01', qty: 3, unitCost: 1, travelled: true }] }
     const after = run(state, { type: 'sell', productId: 'T2-01', qty: 3 })
-    expect(after.markets.D1.demand['T2-01']).toBe(state.markets.D1.demand['T2-01']! - 3)
+    expect(after.markets.D1.demand['T2-01']).toBe(defined(state.markets.D1.demand['T2-01']) - 3)
   })
 
   it('refuse les quantités invalides', () => {
@@ -138,5 +129,43 @@ describe('journées', () => {
   it('est déterministe pour une même graine', () => {
     const actions: Action[] = [{ type: 'travel', to: 'D3' }, { type: 'sleep' }, { type: 'travel', to: 'D5' }, { type: 'sleep' }]
     expect(run(createInitialState(5), ...actions)).toEqual(run(createInitialState(5), ...actions))
+  })
+})
+
+describe('guichets : dette et compte offshore', () => {
+  it('ouvrent de jour, dans leur district seulement', () => {
+    expect(checkService(gameAt(2, { districtId: 'D1' }), 'debt')).toBeNull()
+    expect(checkService(gameAt(2, { districtId: 'D5' }), 'offshore')).toBeNull()
+    expect(errorOf(gameAt(2, { districtId: 'D2' }), { type: 'repay', amount: 100 })).toBe('not-at-location')
+    expect(errorOf(gameAt(2, { phase: 'night' }), { type: 'repay', amount: 100 })).toBe('location-closed')
+    expect(errorOf(gameAt(2), { type: 'deposit', amount: 100 })).toBe('not-at-location')
+  })
+
+  it("soldent la dette initiale pour de bon et débloquent l'emprunt tactique", () => {
+    const rich = gameAt(2, { cash: start.debt + 500 })
+    expect(maxRepay(rich)).toBe(start.debt)
+    expect(errorOf(rich, { type: 'borrow', amount: 100 })).toBe('loan-locked')
+    expect(errorOf(rich, { type: 'repay', amount: start.debt + 1 })).toBe('invalid-amount')
+
+    const paid = run(rich, { type: 'repay', amount: start.debt })
+    expect(paid).toMatchObject({ debt: 0, cash: 500, initialDebtPaid: true })
+    expect(errorOf(paid, { type: 'repay', amount: 1 })).toBe('no-debt')
+
+    // Statut définitif : réemprunter ne le retire pas
+    const loan = run(paid, { type: 'borrow', amount: 1_000 })
+    expect(loan).toMatchObject({ debt: 1_000, cash: 1_500, initialDebtPaid: true })
+    expect(errorOf(loan, { type: 'borrow', amount: LOAN_CEILING })).toBe('loan-ceiling')
+  })
+
+  it('créditent les dépôts commission déduite et rendent les retraits en Cash-Puce', () => {
+    const atLaundry = gameAt(2, { districtId: 'D5' })
+    const deposited = run(atLaundry, { type: 'deposit', amount: 1_000 })
+    expect(deposited.offshore.deposited).toBe(Math.round(1_000 * OFFSHORE_DEPOSIT_FACTOR))
+    expect(deposited.cash).toBe(atLaundry.cash - 1_000)
+
+    const withdrawn = run(deposited, { type: 'withdraw', amount: 100 })
+    expect(withdrawn.cash).toBe(deposited.cash + 100)
+    expect(errorOf(atLaundry, { type: 'withdraw', amount: 1 })).toBe('not-enough-offshore')
+    expect(errorOf(atLaundry, { type: 'deposit', amount: 0 })).toBe('invalid-amount')
   })
 })
