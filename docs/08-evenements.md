@@ -18,7 +18,7 @@
 * **Stocks :** un facteur de stock s'applique au stock tiré, arrondi au supérieur, au moins 1.
 * **Risque :** les ajouts de risque des événements visent les contrôles d'Aeterna et ne s'appliquent pas dans la zone hors-réseau, sauf mention (milices de `[D4]`). Un risque « final » est multiplié après tous les autres termes, avant les bornes.
 * **Tags :** un événement peut annuler ou doubler l'effet d'un tag (risque au trajet, détection, malus de bluff) dans les districts qu'il touche. Pour l'odeur, les doublements de `[D6]` et `[EVT-G04]` ne se cumulent pas ; une annulation l'emporte toujours.
-* **Effets qui dépendent d'éléments pas encore en jeu** (modules, équipage, lieux spéciaux de `[D2]` à `[D6]`) : ils s'appliqueront avec eux ; en attendant, l'immunité ou l'exception n'existe pas.
+* **Effets liés à l'équipement et aux lieux :** immunité du caisson cryo à la canicule (chap. 5), laissez-passer de la Morgue contre l'alerte sanitaire, réparations moins chères au garage pendant le tournoi, prédictions de Cassandre-88 et faux dossiers de la Laverie (chap. 4).
 
 ### Rumeurs (événements globaux)
 * Chaque matin, le moteur tire l'événement global **du lendemain**. S'il y en a un, une rumeur le laisse fuiter **le jour même** avec une certaine chance ; s'il n'y en a pas, une fausse rumeur (un événement global au hasard) circule parfois. Chances : `RUMOR` dans [`events.ts`](../src/data/events.ts).
@@ -40,7 +40,7 @@
 ## Loterie de l'Ascenseur Civique
 
 `[EVT-L01]` **Tirage hebdomadaire** à 06h00, aux jours de `LOTTERY` ([`events.ts`](../src/data/events.ts)). L'ascenseur civique tourne dans les deux sens : chaque tirage désigne un **promu** et un **déclassé**, annoncés au téléscripteur. Le promu est tiré parmi `[D1]`, `[D2]`, `[D3]`, `[D5]` ; le déclassé parmi `[D2]`, `[D3]`, `[D5]`, jamais le district du promu (il n'y a rien sous `[D1]` dans la pyramide de l'ICC). `[D4]` est hors-ICC ; `[D6]` est hors-loterie, on y meurt seulement « de mort naturelle ».
-* **Falsification :** la veille d'un tirage, à `[LOC-D5-1]` (chap. 4, à venir).
+* **Falsification :** la veille d'un tirage, à `[LOC-D5-1]` (chap. 4) ; un faux dossier accepté impose un rôle et protège l'équipier.
 
 | Rôle | Ce que dit Aeterna | Ce qui se passe vraiment | Effet en jeu |
 | :--- | :--- | :--- | :--- |

@@ -1,10 +1,12 @@
-import { CUSTODY, DEBT_BEATING, DEBT_LATE, ENDINGS, GAME_LENGTH_DAYS, PROTECTION, RELAY_SLEEP } from '../data/balance.ts'
+import { ICC_MAX, CUSTODY, DEBT_BEATING, DEBT_LATE, ENDINGS, GAME_LENGTH_DAYS, PROTECTION, RELAY_SLEEP } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
 import { LOTTERY } from '../data/events.ts'
+import { FORGERY } from '../data/locations.ts'
 import { MODULES } from '../data/vehicles.ts'
 import { ownedQty } from './cargo.ts'
 import { debtInterestBreakdown, offshoreBalance, offshoreInterestBreakdown, protectionBreakdown } from './finance.ts'
 import { isPerishable, removeRotten } from './condition.ts'
+import { expireVip } from './services.ts'
 import { mountedEffect, recoverDumped } from './equipment.ts'
 import { changeHealth, gainRouteIcc, iccTier } from './gauges.ts'
 import { crewEffect, payCrew, refreshExemption } from './crew.ts'
@@ -96,6 +98,8 @@ function morningRoutine(state: GameState, night: Night): GameState {
     recovered: null,
     crew: null,
     crewLost: null,
+    vipFailed: false,
+    informant: false,
     debtInterest: null,
     beating: 0,
     debtLate: false,
@@ -147,6 +151,11 @@ function morningRoutine(state: GameState, night: Night): GameState {
     s = { ...s, cargo: recovered.cargo, dumped: [], rng: shareRng.state }
   }
 
+  // Commande VIP du Velvet-Silo dont l'échéance est passée
+  const vip = expireVip(s)
+  s = vip.state
+  briefing.vipFailed = vip.failed
+
   // 5. Fraîcheur : les périssables pourris sont détruits
   const rot = removeRotten(s)
   briefing.rotten = rot.rotten
@@ -158,7 +167,13 @@ function morningRoutine(state: GameState, night: Night): GameState {
   const events = drawEvents(s.events, day, rng)
   s = { ...s, patrolDistrict, events }
   // La Loterie peut désigner l'équipier actif : il disparaît pour de bon (chap. 8)
-  if (events.lottery?.day === day && s.crew.active && rng.chance(LOTTERY.crewLossChance)) {
+  // Un faux dossier accepté protège l'équipier de ce tirage ; celui de l'indic efface la Fiche S
+  const forged = events.lottery?.day === day && events.lottery.card !== null
+  if (forged && events.lottery?.card === 'informant') {
+    s = { ...s, wanted: 0, icc: Math.min(ICC_MAX, s.icc + FORGERY.informantIcc) }
+    briefing.informant = true
+  }
+  if (events.lottery?.day === day && !forged && s.crew.active && rng.chance(LOTTERY.crewLossChance)) {
     briefing.crewLost = s.crew.active
     s = { ...s, crew: { ...s.crew, active: null, paidDay: null, lost: [...s.crew.lost, s.crew.active], freeHire: true } }
   }

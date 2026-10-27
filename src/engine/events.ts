@@ -10,6 +10,7 @@ import type {
   DistrictId,
   EventEffect,
   EventsState,
+  ForgeryCard,
   GameState,
   GlobalEventId,
   LocalEventId,
@@ -29,7 +30,7 @@ export type EventContext = Pick<GameState, 'day' | 'phase' | 'events'>
 
 export type ActiveEffect = { source: GlobalEventId | LocalEventId; local: boolean; effect: EventEffect }
 
-const GLOBAL_EVENT_IDS = keysOf(GLOBAL_EVENTS)
+export const GLOBAL_EVENT_IDS = keysOf(GLOBAL_EVENTS)
 const LOCAL_EVENT_IDS = keysOf(LOCAL_EVENTS)
 const ROAD_EVENT_IDS = keysOf(ROAD_EVENTS)
 
@@ -42,6 +43,8 @@ export const NO_EVENTS: EventsState = {
   rumor: null,
   lottery: null,
   roadDays: {},
+  prophecy: null,
+  forgery: null,
 }
 
 /** Événements locaux propres à un district */
@@ -196,27 +199,46 @@ export function hasVice(ctx: EventContext, districtId: DistrictId, productId: Pr
   )
 }
 
-/** District du promu le jour du tirage : purge préventive */
+/** District du promu le jour du tirage : purge préventive, sauf si un faux dossier a imposé le promu */
 export function isPurged(ctx: EventContext, districtId: DistrictId): boolean {
   const lottery = ctx.events.lottery
-  return lottery !== null && lottery.day === ctx.day && lottery.promoted === districtId
+  const forgedPromotion = lottery?.card === 'captain' || lottery?.card === 'competitor' || lottery?.card === 'informant'
+  return lottery !== null && lottery.day === ctx.day && lottery.promoted === districtId && !forgedPromotion
 }
 
-function drawLottery(day: number, rng: Rng): Lottery | null {
-  const promoted = rng.pick(LOTTERY.promotedFrom)
-  const demoted = rng.pick(LOTTERY.demotedFrom.filter((id) => id !== promoted))
+/** Carte de faux dossier en vigueur dans un district (capitaine, concurrent), pendant la durée des effets du tirage */
+export function forgedCard(ctx: EventContext, districtId: DistrictId): 'captain' | 'competitor' | null {
+  const lottery = ctx.events.lottery
+  if (!lottery || lottery.promoted !== districtId || ctx.day < lottery.day || ctx.day > lottery.viceUntil) return null
+  return lottery.card === 'captain' || lottery.card === 'competitor' ? lottery.card : null
+}
+
+/** Vices qu'un cadre déclassé de ce district peut emporter : ni produits ni déjà demandés en bas */
+export function viceChoices(district: DistrictId): ProductId[] {
+  const lower = LOTTERY.lower[district]
+  if (!lower) return []
+  const below = DISTRICTS[lower]
+  return DISTRICTS[district].strongDemand.filter((id) => !below.production.includes(id) && !below.strongDemand.includes(id))
+}
+
+/** Tirage de la Loterie ; un faux dossier accepté impose un rôle, l'autre reste tiré au hasard (chap. 4) */
+function drawLottery(day: number, rng: Rng, card: ForgeryCard | null): Lottery | null {
+  const cadre = card?.kind === 'cadre' ? card : null
+  const imposedPromotion = card?.kind === 'captain' || card?.kind === 'competitor' ? card.district : null
+  const promoted = imposedPromotion ?? rng.pick(LOTTERY.promotedFrom.filter((id) => id !== cadre?.district))
+  const demoted = cadre?.district ?? rng.pick(LOTTERY.demotedFrom.filter((id) => id !== promoted))
   const viceDistrict = LOTTERY.lower[demoted]
   if (!viceDistrict) return null
-  const lower = DISTRICTS[viceDistrict]
-  const vices = DISTRICTS[demoted].strongDemand.filter((id) => !lower.production.includes(id) && !lower.strongDemand.includes(id))
+  const vices = viceChoices(demoted)
   return {
     day,
     promoted,
     demoted,
-    vice: vices.length > 0 ? rng.pick(vices) : null,
+    vice: cadre ? cadre.vice : vices.length > 0 ? rng.pick(vices) : null,
     viceDistrict,
     viceUntil: day + LOTTERY.viceDays - 1,
     names: { promoted: rng.int(0, 999), demoted: rng.int(0, 999) },
+    card: card?.kind ?? null,
   }
 }
 
@@ -241,10 +263,14 @@ export function drawEvents(previous: EventsState, day: number, rng: Rng, firstDa
     localDays[event] = day
   }
 
-  const lottery = LOTTERY.days.includes(day) ? drawLottery(day, rng) : previous.lottery
-  const tomorrow = drawGlobal()
+  const forgery = previous.forgery?.day === day ? previous.forgery.card : null
+  const lottery = LOTTERY.days.includes(day) ? drawLottery(day, rng, forgery) : previous.lottery
+  // Prédiction de Cassandre-88 : l'événement de demain est garanti, et la rumeur ne se trompe pas
+  const prophecy = previous.prophecy?.day === day + 1 ? previous.prophecy.event : null
+  const drawn = drawGlobal()
+  const tomorrow = prophecy ?? drawn
   // Une rumeur fuite parfois sur l'événement de demain ; sans événement, une fausse rumeur circule parfois
-  const rumor = tomorrow ? (rng.chance(RUMOR.leak) ? tomorrow : null) : rng.chance(RUMOR.falseAlarm) ? rng.pick(GLOBAL_EVENT_IDS) : null
+  const rumor = prophecy ?? (tomorrow ? (rng.chance(RUMOR.leak) ? tomorrow : null) : rng.chance(RUMOR.falseAlarm) ? rng.pick(GLOBAL_EVENT_IDS) : null)
 
   return {
     global,
@@ -255,6 +281,8 @@ export function drawEvents(previous: EventsState, day: number, rng: Rng, firstDa
     rumor,
     lottery,
     roadDays: previous.roadDays,
+    prophecy: previous.prophecy && previous.prophecy.day >= day ? previous.prophecy : null,
+    forgery: previous.forgery && previous.forgery.day > day ? previous.forgery : null,
   }
 }
 

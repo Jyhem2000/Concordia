@@ -58,6 +58,8 @@ function isEmpty(briefing: MorningBriefing): boolean {
     !briefing.recovered &&
     !briefing.crew &&
     !briefing.crewLost &&
+    !briefing.vipFailed &&
+    !briefing.informant &&
     !briefing.debtInterest &&
     briefing.beating === 0 &&
     !briefing.debtLate &&
@@ -99,6 +101,8 @@ function BriefingLines({ briefing }: BriefingLinesProps) {
       )}
       {briefing.lockedIn && <li className="text-red-300">{t.briefing.lockedIn(t.district[districtId].name)}</li>}
       {briefing.crew && <CrewLine crew={briefing.crew} />}
+      {briefing.vipFailed && <li className="text-red-300">{t.briefing.vipFailed}</li>}
+      {briefing.informant && <li className="text-green-400">{t.briefing.informant}</li>}
       {briefing.crewLost && <li className="text-red-300">{t.briefing.crewLost(t.crew[briefing.crewLost].name)}</li>}
       {briefing.recovered && <li>{t.briefing.recovered(briefing.recovered.back, briefing.recovered.lost)}</li>}
       {debtInterest && (

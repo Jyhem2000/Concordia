@@ -216,7 +216,14 @@ export type District = {
 }
 
 /** Services rendus par les lieux spéciaux implémentés (chap. 4 et 7) */
-export type LocationService = 'debt' | 'grinder' | 'offshore' | 'garage' | 'crew'
+export type LocationService = 'debt' | 'grinder' | 'offshore' | 'garage' | 'crew' | 'influence' | 'morgue' | 'prophecy' | 'forgery' | 'velvet'
+
+/** Services à usage compté (coût croissant) ou à cooldown */
+export type ServiceKey = 'influence' | 'pass' | 'surgery' | 'certificate' | 'prophecy' | 'forgery' | 'auction' | 'blackmail' | 'vip'
+
+/** Carte d'un faux dossier de Loterie (chap. 4) */
+export type ForgeryCard =
+  { kind: 'captain' | 'competitor'; district: DistrictId } | { kind: 'informant' } | { kind: 'cadre'; district: DistrictId; vice: ProductId }
 
 export type Location = {
   district: DistrictId
@@ -414,6 +421,10 @@ export type MorningBriefing = {
   crew: { id: CrewId; paid: number | null; crate: ProductId | null } | null
   /** Équipier disparu au tirage de la Loterie */
   crewLost: CrewId | null
+  /** Commande VIP manquée : ICC perdue, Silo verrouillé */
+  vipFailed: boolean
+  /** Faux dossier de l'indic : Fiche S effacée, ICC gagné */
+  informant: boolean
   /** PV perdus au tabassage de l'échéance de la dette, 0 sinon */
   beating: number
   /** Vrai le matin où la dette passe en retard (taux majoré, embuscades) */
@@ -438,6 +449,10 @@ export type EventsState = {
   lottery: Lottery | null
   /** Dernier jour de chaque aléa routier (cooldown) */
   roadDays: Partial<Record<RoadEventId, number>>
+  /** Prédiction de Cassandre-88 : événement global garanti ce jour-là */
+  prophecy: { day: number; event: GlobalEventId } | null
+  /** Faux dossier accepté pour le tirage de ce jour-là */
+  forgery: { day: number; card: ForgeryCard } | null
 }
 
 /** Dernier tirage de la Loterie : promu, déclassé et vice emporté */
@@ -451,6 +466,8 @@ export type Lottery = {
   viceUntil: number
   /** Index des noms tirés (lore) */
   names: { promoted: number; demoted: number }
+  /** Carte du faux dossier qui a imposé un rôle, s'il y en a un */
+  card: ForgeryCard['kind'] | null
 }
 
 /** Compte rendu d'un aléa routier : option choisie et variations */
@@ -556,6 +573,16 @@ export type GameState = {
   }
   /** Jours de protection de l'Exemption Métabolique ; 0 = Sédation (chap. 2) */
   exemption: number
+  /** Lieux spéciaux : utilisations passées (coûts croissants) et dernier jour d'usage (cooldowns) */
+  services: { uses: Partial<Record<ServiceKey, number>>; lastDay: Partial<Record<ServiceKey, number>> }
+  /** Dernier jour de validité du laissez-passer de la Morgue */
+  morguePass: number | null
+  /** Panique algorithmique de Karma-Cham : tag dopé, le jour dit */
+  influence: { tag: TagId; day: number } | null
+  /** Commande VIP du Velvet-Silo : produit et jour de la commande */
+  vip: { productId: ProductId; day: number } | null
+  /** Velvet-Silo verrouillé jusqu'à ce jour inclus (commande VIP manquée) */
+  velvetLock: number | null
   /** Échéance du retard franchie : taux majoré et embuscades jusqu'à la fin de la partie */
   debtLate: boolean
   offshore: OffshoreAccount

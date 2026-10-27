@@ -155,6 +155,7 @@ describe('boutiques et vices', () => {
       viceDistrict: 'D3',
       viceUntil: 6,
       names: { promoted: 0, demoted: 0 },
+      card: null,
     } as const
     expect(productStatus({ ...ctx({ lottery }), day: 5 }, 'D3', 'T2-04')).toBe('strong')
     expect(productStatus({ ...ctx({ lottery }), day: 7 }, 'D3', 'T2-04')).toBe('neutral')
@@ -181,6 +182,7 @@ describe('risque', () => {
       viceDistrict: 'D2',
       viceUntil: 5,
       names: { promoted: 0, demoted: 0 },
+      card: null,
     } as const
     expect(riskBreakdown(withEvents({ lottery }), 'D2', { includePatrol: false }).lines.some((line) => line.source === 'EVT-L01')).toBe(true)
   })

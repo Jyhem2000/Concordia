@@ -12,6 +12,7 @@ import {
 } from '../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../data/districts.ts'
 import { LOTTERY } from '../data/events.ts'
+import { FORGERY, MORGUE } from '../data/locations.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import { TAGS } from '../data/tags.ts'
 import { VEHICLES } from '../data/vehicles.ts'
@@ -19,7 +20,8 @@ import { breakdown, type Breakdown, type BreakdownBuilder } from './breakdown.ts
 import { cargoUsed, ownedQty, tagShare } from './cargo.ts'
 import { crewEffect, workingCrew } from './crew.ts'
 import { moduleTagFactor } from './equipment.ts'
-import { activeEffects, isPurged, tagFactor } from './events.ts'
+import { activeEffects, forgedCard, isPurged, tagFactor } from './events.ts'
+import { passActive } from './services.ts'
 import { iccTier } from './gauges.ts'
 import { crossedDistricts, shortestRoute } from './map.ts'
 import { keysOf } from './records.ts'
@@ -51,7 +53,10 @@ export function riskBreakdown(state: GameState, to: DistrictId, { includePatrol 
   // Risque de base imposé par un événement (ex. audit du Comité de Pureté)
   for (const { source, effect } of effects) if (effect.kind === 'baseRisk') risk.set(source, effect.value)
   if (!offGrid) addGridRisks(risk, state, to, includePatrol)
-  for (const { source, effect } of effects) if (effect.kind === 'risk') risk.add(source, effect.add)
+  // Le laissez-passer de la Morgue protège en D3 du surcroît de sécurité de l'alerte sanitaire
+  const passCovers = (source: string) => passActive(state) && to === MORGUE.pass.district && source === MORGUE.pass.cancels
+  for (const { source, effect } of effects) if (effect.kind === 'risk' && !passCovers(source)) risk.add(source, effect.add)
+  if (forgedCard(state, to) === 'captain') risk.add('LOC-D5-1', FORGERY.captainRisk)
   if (isPurged(state, to)) risk.add('EVT-L01', LOTTERY.promotedRisk)
 
   // Contexte physique : il s'applique partout, zone hors-réseau comprise
@@ -104,7 +109,9 @@ function addGridRisks(risk: BreakdownBuilder, state: GameState, to: DistrictId, 
     if (share === 0) continue
     const { tripRisk, detectedRisk, cover, smell } = TAGS[tag]
     // Les événements annulent ou doublent les effets d'un tag ; l'odeur ne cumule pas avec le doublement du district
-    const factor = tagFactor(state, to, tag, smell ? destination.odorFactor : 1) * moduleTagFactor(state, tag)
+    // Laissez-passer de la Morgue : les bio-scanners de D3 ne détectent plus le chimique
+    const passed = passActive(state) && to === MORGUE.pass.district && tag === MORGUE.pass.tag ? 0 : 1
+    const factor = tagFactor(state, to, tag, smell ? destination.odorFactor : 1) * moduleTagFactor(state, tag) * passed
     if (tripRisk) risk.add(tag, tripRisk * share * factor)
     if (detectedRisk && destination.detection === tag) risk.add(tag, detectedRisk * share * factor)
     if (cover) risk.add(tag, -cover * share)

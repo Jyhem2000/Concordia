@@ -13,7 +13,7 @@ import {
 } from '../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../data/districts.ts'
 import { EVENT_MULT_CAP } from '../data/events.ts'
-import { CANTINE } from '../data/locations.ts'
+import { CANTINE, FORGERY } from '../data/locations.ts'
 import { TAGS } from '../data/tags.ts'
 import { CREW } from '../data/vehicles.ts'
 import { PRODUCT_IDS, PRODUCTS, TIERS } from '../data/products.ts'
@@ -23,7 +23,8 @@ import { crewEffect } from './crew.ts'
 import { freshnessFactor, freshnessOf } from './condition.ts'
 import { indexed } from './inflation.ts'
 import { recordOf } from './records.ts'
-import { drawAppearances, eventMultiplier, hasVice, stockFactor, type EventContext } from './events.ts'
+import { influenceFactor } from './services.ts'
+import { drawAppearances, eventMultiplier, forgedCard, hasVice, stockFactor, type EventContext } from './events.ts'
 import type { Rng } from './rng.ts'
 import type { CargoLot, DistrictId, DistrictMarket, FreshnessStage, GameState, MarketMemory, ProductId } from './types.ts'
 
@@ -46,7 +47,9 @@ export function demandQuota(ctx: MarketContext, districtId: DistrictId, productI
   const quota = TIERS[PRODUCTS[productId].tier].demandQuota
   if (!quota) return null
   const base = productStatus(ctx, districtId, productId) === 'strong' ? quota.strong : quota.neutral
-  return Math.ceil(base * perishableQuotaFactor(ctx, productId))
+  // Carte « contrebandier concurrent » d'un faux dossier : clientèle orpheline dans ce district
+  const competitor = forgedCard(ctx, districtId) === 'competitor' ? FORGERY.competitorQuota : 1
+  return Math.ceil(base * perishableQuotaFactor(ctx, productId) * competitor)
 }
 
 /** Ce que lisent les tirages du marché : les événements, et l'équipier pour les quotas */
@@ -139,7 +142,11 @@ export function quoteBreakdown(state: GameState, districtId: DistrictId, product
   quote.mul('rule.noise', state.markets[districtId].noise[productId])
   // Mult_Événement : le multiplicateur retenu, plafonné (chap. 7 et 8)
   const event = eventMultiplier(state, districtId, productId)
-  if (event) quote.mul(event.source, Math.min(EVENT_MULT_CAP, event.factor))
+  const eventFactor = event ? Math.min(EVENT_MULT_CAP, event.factor) : 1
+  if (event) quote.mul(event.source, eventFactor)
+  // Bonus d'influence de Karma-Cham, par-dessus, sans dépasser le plafond
+  const influence = influenceFactor(state, productId)
+  if (influence !== 1) quote.mul('LOC-D2-1', Math.min(influence, EVENT_MULT_CAP / eventFactor))
   return quote.round().build()
 }
 

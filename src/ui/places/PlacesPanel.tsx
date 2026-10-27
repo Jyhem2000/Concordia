@@ -15,6 +15,7 @@ import AmountForm from '../shared/AmountForm.tsx'
 import Detailed from '../shared/Detailed.tsx'
 import CrewDesk from './CrewDesk.tsx'
 import GarageDesk from './GarageDesk.tsx'
+import { CassandreDesk, ForgeryDesk, KarmaDesk, MorgueDesk, VelvetDesk } from './SpecialDesks.tsx'
 
 type PlaceProps = {
   locationId: LocationId
@@ -80,6 +81,16 @@ function ServiceDesk({ service }: ServiceDeskProps) {
       return <GarageDesk />
     case 'crew':
       return <CrewDesk />
+    case 'influence':
+      return <KarmaDesk />
+    case 'morgue':
+      return <MorgueDesk />
+    case 'prophecy':
+      return <CassandreDesk />
+    case 'forgery':
+      return <ForgeryDesk />
+    case 'velvet':
+      return <VelvetDesk />
   }
 }
 

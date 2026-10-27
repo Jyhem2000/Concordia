@@ -8,6 +8,7 @@ import { depositBreakdown, loanRoom, offshoreBalance, withdrawFrom } from './fin
 import { checkMove, drawInterception, emergencyTow, resolveMove } from './interception.ts'
 import { crossedDistricts, shortestRoute } from './map.ts'
 import { dismiss, hire } from './crew.ts'
+import { auction, blackmail, consultCassandre, deliverVip, forge, orderInfluence, requestVip, visitMorgue, type MorgueService } from './services.ts'
 import { buyModule, buyVehicle, mountedEffect, mountModule, repair } from './equipment.ts'
 import { arrive, drawRoadEvent, heatWave } from './events.ts'
 import { changeHealth } from './gauges.ts'
@@ -22,6 +23,7 @@ import type {
   CargoLot,
   CrewId,
   DistrictId,
+  ForgeryCard,
   GameState,
   InterceptionMove,
   LocationId,
@@ -30,6 +32,7 @@ import type {
   Offer,
   ProductId,
   Tactics,
+  TagId,
   VehicleId,
 } from './types.ts'
 
@@ -62,6 +65,15 @@ export type Action =
   | { type: 'mountModule'; moduleId: ModuleId; mount: boolean }
   | { type: 'repair'; pv: number }
   | { type: 'hireCrew'; crewId: CrewId }
+  | { type: 'influence'; tag: TagId }
+  | { type: 'morgue'; service: MorgueService }
+  | { type: 'prophecy' }
+  | { type: 'forge'; card: ForgeryCard }
+  | { type: 'auction'; productId: ProductId }
+  /** Chantage payé en caisses (`inKind`) ou en Cash-Puce */
+  | { type: 'blackmail'; inKind: boolean }
+  | { type: 'vipRequest' }
+  | { type: 'vipDeliver' }
   | { type: 'dismissCrew' }
   /** Salaire réduit payé en caisses (Vance) : réglage du joueur */
   | { type: 'setPayInKind'; enabled: boolean }
@@ -109,6 +121,14 @@ export type ActionError =
   | 'crew-lost'
   | 'no-crew'
   | 'pump-closed'
+  | 'not-eligible'
+  | 'cooldown'
+  | 'already-healthy'
+  | 'prophecy-active'
+  | 'too-late'
+  | 'location-locked'
+  | 'contract-active'
+  | 'no-contract'
 
 export type ActionResult = { ok: true; state: GameState } | { ok: false; error: ActionError }
 
@@ -417,7 +437,12 @@ function forceCurfew(state: GameState, drink?: ProductId): ActionResult {
 
 /** Les services du garage s'obtiennent de jour, à Rust Valley */
 function garage(state: GameState, run: () => ActionResult): ActionResult {
-  const closed = checkService(state, 'garage')
+  return atService(state, 'garage', run)
+}
+
+/** Un service ne s'obtient que de jour, dans un lieu du district qui le rend */
+function atService(state: GameState, service: LocationService, run: () => ActionResult): ActionResult {
+  const closed = checkService(state, service)
   return closed ? fail(closed) : run()
 }
 
@@ -457,6 +482,22 @@ export function applyAction(state: GameState, action: Action): ActionResult {
       const closed = checkService(state, 'crew')
       return closed ? fail(closed) : dismiss(state)
     }
+    case 'influence':
+      return atService(state, 'influence', () => orderInfluence(state, action.tag))
+    case 'morgue':
+      return atService(state, 'morgue', () => visitMorgue(state, action.service))
+    case 'prophecy':
+      return atService(state, 'prophecy', () => consultCassandre(state))
+    case 'forge':
+      return atService(state, 'forgery', () => forge(state, action.card))
+    case 'auction':
+      return atService(state, 'velvet', () => auction(state, action.productId))
+    case 'blackmail':
+      return atService(state, 'velvet', () => blackmail(state, action.inKind))
+    case 'vipRequest':
+      return atService(state, 'velvet', () => requestVip(state))
+    case 'vipDeliver':
+      return atService(state, 'velvet', () => deliverVip(state))
     case 'setPayInKind':
       return { ok: true, state: { ...state, crew: { ...state.crew, payInKind: action.enabled } } }
     case 'buy':

@@ -32,6 +32,13 @@ type Named = { name: string }
 type NamedWithSubtitle = Named & { subtitle: string }
 type RoadTexts = { situation: string; a: string; b: string }
 
+/** Paniques algorithmiques de Karma-Cham, par tag proposé */
+const KARMA_OPTIONS: Partial<Record<TagId, string>> = {
+  'TAG-CULTURE': '« Cancel Wave Culturelle »',
+  'TAG-PERISHABLE': '« Rumeur de Pénurie Alimentaire »',
+  'TAG-CHEMICAL': '« Scandale Chimique & Pharmaceutique »',
+}
+
 export const fr = {
   /** Balise de langue BCP 47 pour Intl (séparateurs, décimales, pourcentages) */
   intlLocale: 'fr-FR',
@@ -201,6 +208,8 @@ export const fr = {
     salaryInKind: (name: string, amount: string, product: string) => `Salaire de ${name} : ${amount} et 1 × ${product}.`,
     salaryCell: (name: string) => `${name} reste à son poste pendant votre garde à vue (pas de salaire).`,
     unpaid: (name: string) => `Cash-Puce insuffisant : ${name} ne travaille pas aujourd'hui.`,
+    vipFailed: 'Commande VIP manquée : ICC en baisse, le Velvet-Silo vous ferme ses portes.',
+    informant: "Faux dossier : l'indic a été « promu ». Fiche S effacée, ICC en hausse.",
     crewLost: (name: string) => `Loterie : ${name} a été « promu ». Vous ne le reverrez plus ; le prochain recrutement est gratuit.`,
     recovered: (back: number, lost: number) =>
       `Trappe de largage : les complices rapportent ${back} caisse${back > 1 ? 's' : ''}, ${lost} perdue${lost > 1 ? 's' : ''}.`,
@@ -214,6 +223,8 @@ export const fr = {
   },
 
   events: {
+    prophecy: (text: string) => `Prédiction de Cassandre-88 pour demain : ${text} (certain)`,
+    influence: (tag: string, factor: string) => `Panique algorithmique : tout ${tag} ${factor} aujourd'hui`,
     rumor: (text: string, reliability: string) => `Rumeur pour demain : ${text} (se vérifie ${reliability} du temps)`,
     aftershock: (name: string, rush: string, sale: string) =>
       `Contrecoup de « ${name} » : cours ${rush} sur ce qui a flambé hier, ${sale} sur ce qui a été bradé`,
@@ -331,6 +342,76 @@ export const fr = {
     refining: 'affinage : Standard vendu au prix Extra-Frais',
     quota: (factor: string) => `quotas des périssables ${factor}`,
     inKindRule: (amount: string, tier: number) => `salaire réduit à ${amount} contre une caisse addictive de Tier ${tier} ou plus`,
+  },
+
+  desks: {
+    availableFrom: (day: number) => `Disponible à nouveau le J${day}.`,
+    karma: {
+      title: 'Panique Algorithmique sur Commande',
+      rule: (cost: string, factor: string, cooldown: number) =>
+        `${cost} : demain seulement, tous les produits du tag choisi valent ${factor} dans tous les districts (plafond compris). Recharge ${cooldown} jours, prix en hausse à chaque commande.`,
+      pending: (tag: string, day: number) => `Panique commandée : ${tag}, le J${day}.`,
+      options: KARMA_OPTIONS,
+    },
+    morgue: {
+      title: 'Services du Dr. K.',
+      services: { pass: 'Laissez-passer sanitaire', surgery: "Chirurgie d'urgence", certificate: 'Certificat de décontamination' },
+      passEffect: (days: number) => `${days} jours : bio-scanners de Panacea aveugles au chimique, alerte sanitaire sans effet à Panacea`,
+      surgeryEffect: (health: number, cap: number) => `Santé +${health}, jusqu'à ${cap} PV`,
+      certificateEffect: (icc: number) => `ICC +${icc} %, hors plafond`,
+      passValid: (day: number) => `Laissez-passer valable jusqu'au J${day}.`,
+    },
+    cassandre: {
+      title: 'Prédiction',
+      consult: 'Consulter',
+      cost: (cost: string, product: string, ahead: number) => `${cost} et 1 × ${product} : l'événement global de J+${ahead}, garanti`,
+      foretold: (day: number, event: string) => `Prédit pour le J${day} : ${event}.`,
+    },
+    forgery: {
+      title: 'Faux dossier de Loterie',
+      nextDraw: (day: number) => `Prochain tirage : J${day}. Le dossier se glisse la veille.`,
+      noDraw: "Plus de tirage avant l'audit.",
+      rule: (cost: string, chance: string) => `${cost}, perdus même en cas d'échec ; ${chance} de chance de passer.`,
+      card: 'Carte',
+      district: 'District',
+      vice: 'Vice emporté',
+      cards: {
+        captain: 'Un capitaine de la BRC',
+        competitor: 'Un contrebandier concurrent',
+        informant: "L'indic qui te suit",
+        cadre: 'Un cadre à dénoncer',
+      },
+      effects: {
+        captain: 'Promu : risque réduit dans ce district pendant 3 jours, sans purge.',
+        competitor: 'Promu : quotas de demande majorés dans ce district pendant 3 jours, sans purge.',
+        informant: 'Promu au hasard : Fiche S effacée et ICC en hausse au tirage, sans purge.',
+        cadre: "Déclassé : tu choisis le vice qu'il emporte un étage plus bas.",
+      },
+      submit: 'Glisser le dossier',
+      failure: (icc: number) => `Échec : ICC −${icc} % et +1 niveau de Fiche S.`,
+      accepted: 'Dossier accepté : « Merci pour votre contribution à la mobilité sociale. » Ton équipier est protégé du tirage.',
+      rejected: (icc: number) => `Dossier rejeté : « trop enthousiaste ». ICC −${icc} %, +1 niveau de Fiche S.`,
+    },
+    velvet: {
+      locked: (day: number) => `Commande VIP manquée : le Silo vous est fermé jusqu'au J${day}.`,
+      auctionTitle: 'Vente aux enchères masquée',
+      auctionRule: (factor: string, cooldown: number) => `1 caisse de Tier 3 ou 4 au cours local ${factor}, hors quota. Recharge ${cooldown} jours.`,
+      nothingToAuction: 'Aucune caisse de Tier 3 ou 4 en soute.',
+      auction: (product: string) => `Vendre 1 × ${product}`,
+      blackmailTitle: "Chantage sur l'oreiller",
+      blackmailRule: (icc: number, cooldown: number) => `ICC +${icc} %, hors plafond. Recharge ${cooldown} jours, prix en hausse à chaque fois.`,
+      payCash: 'Payer en Cash-Puce',
+      payCrates: 'Payer en caisses',
+      notEnoughCrates: 'pas assez de caisses acceptées en soute',
+      vipTitle: 'Commande spéciale VIP',
+      vipRule: (crates: number, factor: string, icc: number, lock: number) =>
+        `${crates} caisses d'un produit tiré au hasard, absent de la soute, à livrer avant 20h00 le lendemain, au cours local ${factor}, hors quota. Échec : ICC −${icc} % et Silo fermé ${lock} jours.`,
+      request: 'Demander une commande',
+      requestDetail: 'Produit de Tier 2 ou 3',
+      deliver: 'Livrer',
+      contract: (crates: number, product: string, deadline: number, value: string) =>
+        `${crates} × ${product}, avant le J${deadline} à 20h00 (valeur : ${value})`,
+    },
   },
 
   garage: {
@@ -713,6 +794,14 @@ export const fr = {
     'crew-lost': 'Disparu à la Loterie : il ne reviendra pas.',
     'no-crew': 'Aucun équipier engagé.',
     'pump-closed': "Pompe officielle fermée la nuit pour votre niveau d'ICC.",
+    'not-eligible': "Impossible ici ou aujourd'hui.",
+    cooldown: 'Pas encore disponible.',
+    'already-healthy': 'Le Dr. K. ne touche pas à un patient en si bonne santé.',
+    'prophecy-active': 'Une prédiction est déjà en cours.',
+    'too-late': 'Trop tard.',
+    'location-locked': 'Lieu verrouillé.',
+    'contract-active': 'Une commande est déjà en cours.',
+    'no-contract': 'Aucune commande en cours.',
   } satisfies Record<ActionError, string>,
 
   // ─── Données de jeu (chap. 3 à 8) ───

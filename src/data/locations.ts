@@ -1,4 +1,4 @@
-import type { Location, LocationId } from '../engine/types.ts'
+import type { DistrictId, GlobalEventId, Location, LocationId, ProductId, TagId, Tier } from '../engine/types.ts'
 
 /*
  * Lieux spéciaux (chap. 4) : district d'accueil et services implémentés. Le détail des services
@@ -11,13 +11,42 @@ export const CANTINE = { fuelPrice: 60 }
 /** Garage de Mécano-Mitch : prix d'un PV de châssis réparé (indexé) */
 export const GARAGE = { repairPerPv: 40 }
 
+/** Karma-Cham : panique algorithmique (coût indexé, hausse par usage), bonus d'influence le lendemain */
+export const KARMA = {
+  cost: 10_000,
+  costStep: 5_000,
+  cooldownDays: 5,
+  factor: 1.5,
+  tags: ['TAG-CULTURE', 'TAG-PERISHABLE', 'TAG-CHEMICAL'] as readonly TagId[],
+}
+
+/** Morgue du Dr. K. : laissez-passer, chirurgie, certificat (coûts indexés) */
+export const MORGUE = {
+  pass: { cost: 3_000, days: 5, district: 'D3' as DistrictId, tag: 'TAG-CHEMICAL' as TagId, cancels: 'EVT-G02' as GlobalEventId },
+  surgery: { cost: 3_500, cashShare: 0.1, cooldownDays: 5, health: 35, healthCap: 85 },
+  certificate: { cost: 4_000, costStep: 2_000, cooldownDays: 7, icc: 10 },
+}
+
+/** Cassandre-88 : prédiction de l'événement global à J+2 (coût indexé, hausse par usage, plus une caisse) */
+export const CASSANDRE = { cost: 3_000, costStep: 1_500, crate: 'T3-03' as ProductId, aheadDays: 2 }
+
+/** Faux dossier de Loterie à la Laverie (coût indexé, hausse par usage) et effets des cartes */
+export const FORGERY = { cost: 15_000, costStep: 15_000, chance: 0.6, failIccLoss: 10, captainRisk: -0.15, competitorQuota: 1.5, informantIcc: 5 }
+
+/** Velvet-Silo : enchères, chantage, commande VIP (coûts indexés) */
+export const VELVET = {
+  auction: { cooldownDays: 3, factor: 2, minTier: 3 },
+  blackmail: { cooldownDays: 4, cost: 8_000, costStep: 4_000, icc: 12, crates: ['T3-07', 'T3-02'] as readonly ProductId[] },
+  vip: { cooldownDays: 3, crates: 3, factor: 3.5, tiers: [2, 3] as readonly Tier[], failIccLoss: 10, lockDays: 5 },
+}
+
 export const LOCATIONS: Readonly<Record<LocationId, Location>> = {
   'LOC-D1-1': { district: 'D1', services: ['debt', 'grinder'] },
   'LOC-D1-2': { district: 'D1', services: ['crew'] },
-  'LOC-D2-1': { district: 'D2', services: [] },
-  'LOC-D3-1': { district: 'D3', services: [] },
+  'LOC-D2-1': { district: 'D2', services: ['influence'] },
+  'LOC-D3-1': { district: 'D3', services: ['morgue'] },
   'LOC-D4-1': { district: 'D4', services: ['garage'] },
-  'LOC-D4-2': { district: 'D4', services: [] },
-  'LOC-D5-1': { district: 'D5', services: ['offshore'] },
-  'LOC-D6-1': { district: 'D6', services: [] },
+  'LOC-D4-2': { district: 'D4', services: ['prophecy'] },
+  'LOC-D5-1': { district: 'D5', services: ['offshore', 'forgery'] },
+  'LOC-D6-1': { district: 'D6', services: ['velvet'] },
 }
