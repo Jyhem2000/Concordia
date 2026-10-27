@@ -1,5 +1,7 @@
 # 7. Économie : marché & finances
 
+> Les routes commerciales de référence (intention d'équilibrage) sont au chap. 9.
+
 ## Information de marché
 * **District actuel :** cours exacts du jour.
 * **Autres districts :** le joueur ne voit que la **mémoire de marché** — le dernier cours qu'il y a lui-même observé, avec sa date (*« vu il y a 3 jours »*). Brouillée en cas de Sédation (chap. 2).
@@ -122,11 +124,3 @@ Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est 
 * **Rendement — intérêts simples** (les intérêts versés ne produisent pas d'intérêts), versés à la routine matinale sur le solde déposé avant 20h00. Le taux baisse par tranche du solde déposé, à cause des **« frais de conformité »** (`OFFSHORE_TRANCHES` dans [`balance.ts`](../src/data/balance.ts)).
 * **Modificateur :** `[CREW-02]`. L'app affiche le **taux effectif** du compte.
 * **Score final** = solde à l'audit.
-
----
-
-## Routes commerciales de référence
-*Intention d'équilibrage, non normatif : en cas d'écart, les listes de [`districts.ts`](../src/data/districts.ts) font foi.*
-* **Démarrage (Jours 1–6) :** `[T1-04]` et `[T1-06]` de `[D1]` → vente en `[D4]` → `[T1-01]`, `[T1-03]` ou `[T2-02]` de `[D4]` → revente en `[D2]` ou `[D1]` (plein à `[LOC-D1-2]`). Variante : `[T2-03]`, `[T2-04]` de `[D1]` → `[D2]`, `[D3]` ou `[D5]`.
-* **Pharmaceutique (Jours 7–18) :** `[T3-04]` de `[D3]` (plus quelques `[T2-05]` gardés pour les fuites, revendables en `[D1]`) → vente en `[D4]` → `[T3-02]`, `[T3-03]`, `[T3-06]` de `[D4]` → revente en `[D3]` ou `[D5]`, gains mis à l'abri via `[LOC-D5-1]`.
-* **Haute trahison (Jours 19–30) :** `[T4-01]`, `[T4-02]` de `[D4]` ou `[T4-05]` de `[D3]` → forcer les barrages de `[D6]` (enchères à `[LOC-D6-1]`) → sécuriser le pactole à `[LOC-D5-1]` avant l'audit.
