@@ -27,6 +27,7 @@ export function createInitialState(seed: number): GameState {
     cash: START_CASH,
     debt: START_DEBT,
     initialDebtPaid: false,
+    advanced: 0,
     debtLate: false,
     offshore: { deposited: 0, interest: 0 },
     icc: START_ICC,

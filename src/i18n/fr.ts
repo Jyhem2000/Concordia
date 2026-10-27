@@ -185,7 +185,8 @@ export const fr = {
     debtTitle: 'Dette',
     repay: 'Rembourser',
     borrow: 'Emprunter',
-    borrowLocked: "L'emprunt tactique s'ouvre une fois la dette initiale soldée.",
+    advanceRule: (total: string) =>
+      `Avance de survie : tant que la dette initiale court, Viktor avance jusqu'à ${total} sur toute la partie, au taux de la dette. L'emprunt tactique s'ouvre une fois la dette initiale soldée.`,
     loanRoom: (amount: string) => `Encore ${amount} empruntables`,
     offshoreTitle: 'Compte offshore',
     deposit: 'Déposer',
@@ -247,6 +248,41 @@ export const fr = {
       strong: 'Forte demande',
       neutral: '',
     },
+  },
+
+  sheet: {
+    title: 'Fiche',
+    cover: (risk: string, offGrid: string) => `couverture, −${risk} de risque de contrôle × sa part dans la soute (sauf ${offGrid})`,
+    tripRisk: (risk: string, offGrid: string, doubled: string) =>
+      `+${risk} de risque de contrôle × sa part dans la soute, à chaque trajet (sauf ${offGrid}${doubled ? ` ; doublé à ${doubled}` : ''})`,
+    detectedRisk: (risk: string, districts: string) => `+${risk} de risque de contrôle × sa part dans la soute, à ${districts}`,
+    bluffMalus: (malus: string, doubled: string) => `−${malus} au bluff × sa part dans la soute${doubled ? ` (doublé à ${doubled})` : ''}`,
+    perishable: (rottenAge: number) =>
+      `Extra-Frais le jour de l'achat jusqu'à 20h00, puis Standard, Faisandé, Avarié ; pourrit le ${rottenAge}e matin`,
+    breakage: (flee: string, shock: string, threshold: number, factor: string) =>
+      `chaque caisse peut casser (${flee} en fuite réussie, ${shock} à chaque choc de ${threshold} PV de châssis ou plus) ; abîmée, elle vaut ${factor}`,
+    explosion: (chance: string, chassis: number) => `si une fuite échoue, chaque caisse non masquée peut exploser (${chance}, châssis −${chassis})`,
+    drop: (bonus: string) => `largage offensif en fuite : ${bonus} de chance de fuite pour 1 caisse`,
+    masks: (tag: string) => `Chaque caisse masque 1 caisse ${tag} (moins de risque, bonus au bluff)`,
+    bluffAid: (crates: number, effect: string) => `Au bluff : donner ${crates} caisse${crates > 1 ? 's' : ''} à l'agent (${effect})`,
+    doping: (bonus: string, chassis: number, icc: number) =>
+      `En fuite : dopage du pilote, ${bonus} de chance (châssis −${chassis}, ICC −${icc} %), une fois par jour`,
+    sleepless: (health: number) => `Le soir : une nuit blanche de plus malgré l'épuisement (Santé −${health})`,
+    cooling: (crates: number) => `La nuit : ${crates} caisses refroidissent le moteur au lieu d'user le châssis`,
+    beacon: (risk: string) => `Balise de traçage : ${risk} de risque de contrôle partout tant qu'il est en soute`,
+    lethal: 'Fouille effective avec ce produit en soute : exécution sommaire',
+    night: { festive: 'Se vend mieux la nuit', diurnal: 'Se vend moins bien la nuit' },
+    legal: 'Fouille : rien à craindre, simple formalité',
+    seizure: (fine: string, icc: number, custodyDays: number, high: boolean) =>
+      `Saisie : confiscation, amende de ${fine} du Cash-Puce, ICC −${icc}${high ? `, garde à vue ${custodyDays} jour${custodyDays > 1 ? 's' : ''} (haut tier)` : ''}`,
+    bribeFavorite: (districts: string) => `Apprécié des agents de ${districts} : connivence à la corruption`,
+    tollFavorite: (districts: string) => `Pris en premier par les milices de ${districts}`,
+    strong: (districts: string) => `Forte demande : ${districts}`,
+    nowhere: 'nulle part',
+    produced: (districts: string) => `Production : ${districts}`,
+    best: (quote: string, district: string, age: number) =>
+      `Meilleur cours vu ailleurs : ${quote} à ${district} (${age === 0 ? "aujourd'hui" : `il y a ${age} jour${age > 1 ? 's' : ''}`})`,
+    noMemory: 'Aucun cours vu ailleurs pour ce produit',
   },
 
   margin: {
@@ -354,6 +390,11 @@ export const fr = {
     riskHint: 'La ronde renforcée du jour reste cachée.',
     peak: "Pic suspect : risque accru aujourd'hui",
     lastTrip: 'Dernier trajet',
+    exposed: (crates: number, cost: string) =>
+      `Soute exposée : ${crates} caisse${crates > 1 ? 's' : ''} illégale${crates > 1 ? 's' : ''}, payée${crates > 1 ? 's' : ''} ${cost}.`,
+    exposedSanction: (fine: string, high: boolean) =>
+      `Une saisie les confisque, avec une amende de ${fine} du Cash-Puce${high ? ' et une garde à vue (haut tier à bord)' : ''}.`,
+    neverSeen: 'jamais vu',
     wear: (pv: number) => `usure du châssis −${pv}`,
     cooled: (crates: number, product: string) => `moteur refroidi : ${crates} × ${product} consommées`,
     estimateHint: 'Marge estimée sur le cours vu, commission déduite (hors savoir-faire et saturation)',
@@ -441,7 +482,7 @@ export const fr = {
     'not-at-location': "Ce lieu n'est pas dans ce district.",
     'location-closed': 'Fermé : les lieux spéciaux ouvrent de 06h00 à 20h00.',
     'no-debt': 'Aucune dette à rembourser.',
-    'loan-locked': "Viktor ne prête qu'une fois la dette initiale soldée.",
+    'advance-used': 'Avance de survie épuisée : Viktor ne prêtera plus avant que la dette initiale soit soldée.',
     'loan-ceiling': "Plafond d'emprunt atteint.",
     'not-enough-offshore': 'Solde offshore insuffisant.',
     intercepted: "Un barrage vous attend : réglez d'abord le contrôle.",

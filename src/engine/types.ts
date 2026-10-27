@@ -363,6 +363,8 @@ export type GameState = {
   debt: number
   /** Statut acquis définitivement la première fois que la dette atteint 0 (chap. 7) */
   initialDebtPaid: boolean
+  /** Total emprunté en avance de survie, avant que la dette initiale soit soldée */
+  advanced: number
   /** Échéance du retard franchie : taux majoré et embuscades jusqu'à la fin de la partie */
   debtLate: boolean
   offshore: OffshoreAccount

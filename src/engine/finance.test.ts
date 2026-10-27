@@ -8,6 +8,7 @@ import {
   OFFSHORE_DEPOSIT_FACTOR,
   OFFSHORE_TRANCHES,
   PROTECTION,
+  SURVIVAL_ADVANCE,
 } from '../data/balance.ts'
 import {
   debtInterestBreakdown,
@@ -37,8 +38,9 @@ describe('dette', () => {
     expect(nextDebtDeadline(gameAt(2, { debt: 0 }))).toBeNull()
   })
 
-  it("n'ouvre l'emprunt tactique qu'une fois la dette initiale soldée, jusqu'au plafond", () => {
-    expect(loanRoom(gameAt(2))).toBe(0)
+  it("limite l'avance de survie, puis n'ouvre l'emprunt tactique qu'une fois la dette initiale soldée, jusqu'au plafond", () => {
+    expect(loanRoom(gameAt(2))).toBe(SURVIVAL_ADVANCE)
+    expect(loanRoom(gameAt(2, { advanced: SURVIVAL_ADVANCE }))).toBe(0)
     expect(loanRoom(gameAt(2, { initialDebtPaid: true, debt: 1_000 }))).toBe(LOAN_CEILING - 1_000)
   })
 })

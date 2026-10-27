@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { GAME_LENGTH_DAYS, GRINDER, LOAN_CEILING, OFFSHORE_DEPOSIT_FACTOR, SIPHON } from '../data/balance.ts'
+import { GAME_LENGTH_DAYS, GRINDER, LOAN_CEILING, OFFSHORE_DEPOSIT_FACTOR, SIPHON, SURVIVAL_ADVANCE } from '../data/balance.ts'
 import { PRODUCTS } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import { canSiphon, checkService, fuelPrice, maxBuy, maxRepay, planTravel, type Action } from './actions.ts'
@@ -146,10 +146,19 @@ describe('guichets : dette et compte offshore', () => {
     expect(errorOf(gameAt(2), { type: 'deposit', amount: 100 })).toBe('not-at-location')
   })
 
+  it('avancent de quoi repartir tant que la dette initiale court, une seule fois sur la partie', () => {
+    const broke = gameAt(2, { cash: 2 })
+    const advanced = run(broke, { type: 'borrow', amount: SURVIVAL_ADVANCE - 500 })
+    expect(advanced).toMatchObject({ cash: SURVIVAL_ADVANCE - 498, debt: start.debt + SURVIVAL_ADVANCE - 500, advanced: SURVIVAL_ADVANCE - 500 })
+    // Rembourser ne reconstitue pas l'avance
+    const repaid = run(advanced, { type: 'repay', amount: 1_000 })
+    expect(errorOf(repaid, { type: 'borrow', amount: 501 })).toBe('advance-used')
+    expect(run(repaid, { type: 'borrow', amount: 500 }).advanced).toBe(SURVIVAL_ADVANCE)
+  })
+
   it("soldent la dette initiale pour de bon et débloquent l'emprunt tactique", () => {
     const rich = gameAt(2, { cash: start.debt + 500 })
     expect(maxRepay(rich)).toBe(start.debt)
-    expect(errorOf(rich, { type: 'borrow', amount: 100 })).toBe('loan-locked')
     expect(errorOf(rich, { type: 'repay', amount: start.debt + 1 })).toBe('invalid-amount')
 
     const paid = run(rich, { type: 'repay', amount: start.debt })

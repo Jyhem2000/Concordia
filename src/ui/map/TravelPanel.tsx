@@ -1,9 +1,10 @@
 import { Eye, MapPin } from 'lucide-react'
+import { HIGH_TIER, SEARCH } from '../../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { planTravel } from '../../engine/actions.ts'
-import { averageCost } from '../../engine/cargo.ts'
-import { estimatedUnitSale } from '../../engine/market.ts'
+import { averageCost, isIllegal } from '../../engine/cargo.ts'
+import { estimatedUnitSale, productStatus } from '../../engine/market.ts'
 import { riskBreakdown } from '../../engine/risk.ts'
 import type { DistrictId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
@@ -33,12 +34,29 @@ export default function TravelPanel() {
       {/* Raison commune à toutes les destinations : dite une fois plutôt que sous chaque bouton */}
       {tripDone && <p className="px-3 pt-2 text-xs text-zinc-400">{t.error['trip-done']}</p>}
       <LastTrip />
+      <Exposure />
       <ul className="divide-y divide-zinc-800">
         {order.map((id) => (
           <DistrictRow key={id} districtId={id} />
         ))}
       </ul>
     </section>
+  )
+}
+
+/** Ce qu'un barrage raté coûterait : caisses illégales en soute et sanction de base d'une saisie (chap. 6) */
+function Exposure() {
+  const cargo = useGameStore((s) => s.game.cargo)
+  const { t, credits, percent } = useI18n()
+  const illegal = cargo.filter(isIllegal)
+  const crates = illegal.reduce((total, lot) => total + lot.qty, 0)
+  if (crates === 0) return null
+  const cost = illegal.reduce((total, lot) => total + lot.qty * lot.unitCost, 0)
+  const high = illegal.some((lot) => PRODUCTS[lot.productId].tier >= HIGH_TIER)
+  return (
+    <p className="px-3 pt-2 text-xs text-amber-200">
+      {t.travel.exposed(crates, credits(cost))} {t.travel.exposedSanction(percent((high ? SEARCH.high : SEARCH.low).fine, 0), high)}
+    </p>
   )
 }
 
@@ -102,17 +120,30 @@ function DistrictRow({ districtId }: DistrictRowProps) {
       {!here && (
         <div className="mt-1 text-xs text-zinc-400">
           {memoryLabel}
-          {memory && owned.length > 0 && (
+          {/* Produits en soute : statut public du district (chap. 7) et cours mémorisé, pour décider où vendre */}
+          {owned.length > 0 && (
             <ul className="mt-0.5 text-zinc-300" title={t.travel.estimateHint}>
-              {owned.map((id) => (
-                <li key={id} className="flex justify-between gap-2">
-                  <span className="truncate">{t.product[id].name}</span>
-                  <span className="flex items-center gap-1.5">
-                    <Margin revenue={estimatedUnitSale(memory.quotes[id])} cost={averageCost(cargo, id) ?? 0} showAmount={false} />
-                    {credits(memory.quotes[id])}
-                  </span>
-                </li>
-              ))}
+              {owned.map((id) => {
+                const status = productStatus(districtId, id)
+                return (
+                  <li key={id} className="flex justify-between gap-2">
+                    <span className="truncate">
+                      {t.product[id].name}
+                      {status !== 'neutral' && (
+                        <span className={`ml-1.5 ${status === 'strong' ? 'text-orange-300' : 'text-green-300'}`}>{t.market.status[status]}</span>
+                      )}
+                    </span>
+                    {memory ? (
+                      <span className="flex items-center gap-1.5">
+                        <Margin revenue={estimatedUnitSale(memory.quotes[id])} cost={averageCost(cargo, id) ?? 0} showAmount={false} />
+                        {credits(memory.quotes[id])}
+                      </span>
+                    ) : (
+                      <span className="text-zinc-500">{t.travel.neverSeen}</span>
+                    )}
+                  </li>
+                )
+              })}
             </ul>
           )}
         </div>

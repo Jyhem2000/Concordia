@@ -106,6 +106,9 @@ export const DEBT_BEATING = { day: 10, threshold: 10_000, healthLoss: 30, health
 /** Échéance du retard : dette initiale jamais soldée → taux majoré et embuscades, jusqu'à la fin de la partie */
 export const DEBT_LATE = { day: 20, dailyRate: 0.2, ambushRisk: 0.15 }
 
+/** Avance de survie (dette initiale pas encore soldée) : total empruntable sur toute la partie */
+export const SURVIVAL_ADVANCE = 2_000
+
 /** Emprunt tactique (dette initiale soldée) : solde maximal de la dette */
 export const LOAN_CEILING = 100_000
 

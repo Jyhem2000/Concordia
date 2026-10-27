@@ -11,6 +11,7 @@ import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import Detailed from '../shared/Detailed.tsx'
 import Margin from '../shared/Margin.tsx'
+import ProductSheet from './ProductSheet.tsx'
 
 type MarketRowProps = {
   productId: ProductId
@@ -111,6 +112,11 @@ function MarketRow({ productId }: MarketRowProps) {
         {status !== 'neutral' && (
           <span className={`text-xs ${status === 'strong' ? 'text-orange-300' : 'text-green-300'}`}>{t.market.status[status]}</span>
         )}
+        {product.tags.map((tag) => (
+          <span key={tag} className="rounded bg-zinc-800 px-1 text-xs text-zinc-300">
+            {t.tag[tag].name}
+          </span>
+        ))}
       </div>
 
       <dl className="mt-1 grid grid-cols-2 gap-x-4 gap-y-0.5 text-sm sm:grid-cols-4">
@@ -150,6 +156,8 @@ function MarketRow({ productId }: MarketRowProps) {
           </Field>
         )}
       </dl>
+
+      <ProductSheet productId={productId} />
 
       <div className="mt-2 flex flex-wrap gap-1.5">
         {stock !== undefined && <QuantityButtons label={t.market.buy} max={buyMax} onPick={buy} maxLabel={t.market.max} variant="primary" />}

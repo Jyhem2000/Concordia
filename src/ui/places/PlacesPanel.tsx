@@ -1,6 +1,6 @@
 import { Landmark, Lock } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { GRINDER } from '../../data/balance.ts'
+import { GRINDER, SURVIVAL_ADVANCE } from '../../data/balance.ts'
 import { LOCATIONS } from '../../data/locations.ts'
 import { PRODUCT_IDS } from '../../data/products.ts'
 import { maxRepay } from '../../engine/actions.ts'
@@ -121,14 +121,11 @@ function DebtDesk() {
         <span className="font-bold text-red-300">{credits(game.debt)}</span>
       </p>
       <AmountForm label={t.place.repay} max={maxRepay(game)} onSubmit={(amount) => dispatch({ type: 'repay', amount })} />
-      {game.initialDebtPaid ? (
-        <>
-          <AmountForm label={t.place.borrow} variant="danger" max={room} onSubmit={(amount) => dispatch({ type: 'borrow', amount })} />
-          <p className="text-xs text-zinc-400">{t.place.loanRoom(credits(room))}</p>
-        </>
-      ) : (
-        <p className="text-xs text-zinc-400">{t.place.borrowLocked}</p>
-      )}
+      <AmountForm label={t.place.borrow} variant="danger" max={room} onSubmit={(amount) => dispatch({ type: 'borrow', amount })} />
+      <p className="text-xs text-zinc-400">
+        {t.place.loanRoom(credits(room))}
+        {!game.initialDebtPaid && <> · {t.place.advanceRule(credits(SURVIVAL_ADVANCE))}</>}
+      </p>
     </>
   )
 }

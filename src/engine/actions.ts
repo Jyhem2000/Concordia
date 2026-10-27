@@ -59,7 +59,7 @@ export type ActionError =
   | 'not-at-location'
   | 'location-closed'
   | 'no-debt'
-  | 'loan-locked'
+  | 'advance-used'
   | 'loan-ceiling'
   | 'not-enough-offshore'
   | 'intercepted'
@@ -294,9 +294,9 @@ function repay(state: GameState, amount: number): ActionResult {
 function borrow(state: GameState, amount: number): ActionResult {
   const closed = checkService(state, 'debt')
   if (closed) return fail(closed)
-  if (!state.initialDebtPaid) return fail('loan-locked')
-  if (amount > loanRoom(state)) return fail('loan-ceiling')
-  return { ok: true, state: { ...state, cash: state.cash + amount, debt: state.debt + amount } }
+  if (amount > loanRoom(state)) return fail(state.initialDebtPaid ? 'loan-ceiling' : 'advance-used')
+  const advanced = state.initialDebtPaid ? state.advanced : state.advanced + amount
+  return { ok: true, state: { ...state, cash: state.cash + amount, debt: state.debt + amount, advanced } }
 }
 
 function deposit(state: GameState, amount: number): ActionResult {

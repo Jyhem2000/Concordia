@@ -7,6 +7,7 @@ import {
   OFFSHORE_DEPOSIT_FACTOR,
   OFFSHORE_TRANCHES,
   PROTECTION,
+  SURVIVAL_ADVANCE,
 } from '../data/balance.ts'
 import { baseValue } from './cargo.ts'
 import { breakdown, type Breakdown, type RuleSource } from './breakdown.ts'
@@ -40,9 +41,9 @@ export function nextDebtDeadline(state: GameState): number | null {
   return GAME_LENGTH_DAYS
 }
 
-/** Somme qu'on peut encore emprunter à `[LOC-D1-1]` (emprunt tactique, dette initiale soldée) */
+/** Somme qu'on peut encore emprunter à `[LOC-D1-1]` : avance de survie, puis emprunt tactique une fois la dette initiale soldée */
 export function loanRoom(state: GameState): number {
-  return state.initialDebtPaid ? Math.max(0, LOAN_CEILING - state.debt) : 0
+  return state.initialDebtPaid ? Math.max(0, LOAN_CEILING - state.debt) : Math.max(0, SURVIVAL_ADVANCE - state.advanced)
 }
 
 // ─── Collecte de protection ───

@@ -46,12 +46,20 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
   * **État** sur chaque ligne possédée : caisses par état de fraîcheur, caisses abîmées, et délai avant que le lot le plus ancien pourrisse.
   * **Utiliser** sur les produits qui ont une action joueur (`[T4-03]`), avec son effet ou la raison d'un refus.
   * **Marge** sur chaque ligne possédée : gain net de la prochaine caisse vendue (₡/u et % de son prix d'achat), et gain net si l'on vend tout (saturation comprise). Icône verte (rentable), ambre (marge faible, sous un seuil d'affichage fixé dans `Margin.tsx`) ou rouge (à perte).
+* **Fiche produit :** sous le nom, les tags du produit en pastilles ; une fiche dépliable détaille, sans rien cacher :
+  * l'effet de chaque tag (risque ajouté ou retiré et où, malus de bluff, fraîcheur, casse, explosion, largage), le masquage d'un Tier 0 ;
+  * les actions du produit (aide au bluff, dopage, nuit blanche, refroidissement, pass d'identité, balise) ;
+  * la sanction en cas de saisie (formalité, amende, ou garde à vue pour le haut tier) ;
+  * les agents qui l'apprécient (connivence) et les milices qui le prennent en premier ;
+  * où le vendre : districts en Forte demande et districts producteurs (profil public, chap. 7), et le meilleur cours mémorisé ailleurs avec son ancienneté.
 * **Filtres** par tag et par tier (Tous, En soute, chaque tag) ; curseurs d'achat / vente (+1, +5, MAX).
 * **Onglet lieux spéciaux :** accès direct aux services du district, coûts du jour et cooldowns affichés.
   * *Hachoir de `[LOC-D1-1]`* : caisses rachetables, prix par caisse détaillable, limite du jour restante.
 
 ## Vue « Carte tactique & navigation »
 * Carte schématique style terminal rétro-futuriste des six districts et de leurs liaisons (chap. 4).
+* **Soute exposée :** en tête de carte, le nombre de caisses illégales en soute, ce qu'elles ont coûté, et la sanction de base d'une saisie (garde à vue si du haut tier est à bord).
+* **Produits en soute par district :** sous chaque district, chaque produit en soute avec son statut public (Forte demande, Production) et son cours mémorisé, ou « jamais vu ».
 * **Marge estimée :** sous chaque district, les cours mémorisés des produits en soute portent la même icône de marge, estimée sur le cours vu moins la commission de puce (sans savoir-faire ni saturation).
 * **Mémoire de marché :** au toucher d'un district, derniers cours observés avec leur ancienneté (*« vu il y a 3 jours »*), en fourchette en cas de Sédation ; cours en temps réel avec `[CREW-02]`.
 * **Bulles d'indices :** événements du jour, ronde renforcée révélée par `[CREW-01]` (🚓), pic suspect de la veille (👁️).

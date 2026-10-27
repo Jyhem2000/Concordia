@@ -4,6 +4,7 @@
 * **District actuel :** cours exacts du jour.
 * **Autres districts :** le joueur ne voit que la **mémoire de marché** — le dernier cours qu'il y a lui-même observé, avec sa date (*« vu il y a 3 jours »*). Brouillée en cas de Sédation (chap. 2).
 * **Vision en temps réel :** `[CREW-02]`.
+* **Profil public des districts :** les listes Production et Forte demande de chaque district sont connues de tous (catalogue de consommation du DSC, rumeur des quais) : la carte et la fiche de chaque produit les affichent. Ce qui reste à découvrir sur place, c'est le cours du jour (bruit, événements) et la boutique.
 * Les événements (globaux et locaux) sont publics : ils passent au téléscripteur dès 06h00 (chap. 8).
 
 ## Boutique du jour (générée à 06h00)
@@ -97,6 +98,7 @@ Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est 
   * **Tabassage** (jour, seuil, PV perdus et plancher : `DEBT_BEATING` dans [`balance.ts`](../src/data/balance.ts)) **:** à 06h00 du jour d'échéance, si le solde dépasse le seuil, les Bouchers tabassent le joueur, sans le faire descendre sous un plancher de Santé (un débiteur mort ne paie plus).
   * **Retard** (jour, taux majoré et malus de risque : `DEBT_LATE` dans [`balance.ts`](../src/data/balance.ts)) **:** à 06h00 du jour d'échéance, si la dette initiale n'a **jamais** été soldée, le taux est majoré et ses hommes de main renseignent patrouilles et milices : malus au risque d'interception partout (*embuscades*). Ces deux pénalités restent acquises jusqu'à la fin de la partie, même après remboursement.
   * **Jour 30, minuit :** audit — le solde doit être à 0 (chap. 2).
+* **Avance de survie :** tant que la dette initiale n'est pas soldée, Viktor avance au plus une somme fixe **sur toute la partie** (`SURVIVAL_ADVANCE` dans [`balance.ts`](../src/data/balance.ts)), ajoutée au solde au taux en vigueur. *Lore :* un débiteur à sec ne rembourse rien ; Viktor avance de quoi repartir, une fois. *Intention :* un joueur ruiné par un barrage n'est jamais bloqué sans issue, mais sa dette, et la menace de l'audit, grossissent. Les remboursements ne reconstituent pas l'avance.
 * **Emprunt tactique :** une fois la dette initiale soldée, le joueur peut réemprunter jusqu'à un plafond de solde (`LOAN_CEILING` dans [`balance.ts`](../src/data/balance.ts)), au taux en vigueur.
 * **Augmentée** par le dépannage d'urgence (chap. 2) et la collecte de protection ; **réduite** par le Hachoir de `[LOC-D1-1]`.
 

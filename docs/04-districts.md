@@ -32,7 +32,7 @@ Montants en ₡ : valeurs de base, indexées sur l'inflation (chap. 7).
 
 ### `[LOC-D1-1]` L'Arrière-Salle de Viktor Varga (usurier mafieux)
 Boucherie clandestine de Viktor Varga et de ses « Bouchers ».
-* **Dette :** remboursement et emprunts (chap. 7, *Dette mafieuse*).
+* **Dette :** remboursement, avance de survie tant que la dette initiale court, puis emprunt tactique (chap. 7, *Dette mafieuse*).
 * **Hachoir Industriel** — *« Viktor ne rachète pas, il recycle. »* Rachète les caisses `[TAG-PERISHABLE]` Faisandées ou Avariées au prix de **cours local du produit × coefficient de fraîcheur × une prime**, dans une limite de caisses par jour (`GRINDER` dans [`balance.ts`](../src/data/balance.ts)). Les lots les plus anciens partent en premier. Le montant rembourse d'abord la dette ; le surplus (ou tout, si la dette est à 0) est versé en Cash-Puce.
 
 ### `[LOC-D1-2]` La Cantine des Chauffeurs (« Chez Borg »)
