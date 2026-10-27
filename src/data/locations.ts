@@ -6,7 +6,7 @@ import type { Location, LocationId } from '../engine/types.ts'
  */
 
 export const LOCATIONS: Readonly<Record<LocationId, Location>> = {
-  'LOC-D1-1': { district: 'D1', services: ['debt'] },
+  'LOC-D1-1': { district: 'D1', services: ['debt', 'grinder'] },
   'LOC-D1-2': { district: 'D1', services: [] },
   'LOC-D2-1': { district: 'D2', services: [] },
   'LOC-D3-1': { district: 'D3', services: [] },

@@ -79,7 +79,8 @@ describe('prix de vente', () => {
   const withLot = (travelled: boolean, phase: GameState['phase'] = 'day'): GameState => ({
     ...base,
     phase,
-    cargo: [{ productId: 'T2-02', qty: 20, unitCost: 1, travelled }],
+    // Acheté la veille : fraîcheur standard (×1), pour isoler les autres coefficients
+    cargo: [{ productId: 'T2-02', qty: 20, unitCost: 1, travelled, boughtDay: 0, damaged: false }],
   })
 
   it('prélève la commission de puce', () => {
@@ -100,8 +101,8 @@ describe('prix de vente', () => {
     const state: GameState = {
       ...withLot(true),
       cargo: [
-        { productId: 'T2-02', qty: 2, unitCost: 100, travelled: true },
-        { productId: 'T2-02', qty: 3, unitCost: 300, travelled: true },
+        { productId: 'T2-02', qty: 2, unitCost: 100, travelled: true, boughtDay: 1, damaged: false },
+        { productId: 'T2-02', qty: 3, unitCost: 300, travelled: true, boughtDay: 1, damaged: false },
       ],
     }
     expect(saleQuote(state, 'T2-02', 1).cost).toBe(100)

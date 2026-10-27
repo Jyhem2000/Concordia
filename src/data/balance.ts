@@ -140,6 +140,27 @@ export const RISK_BOUNDS = { min: 0.05, max: 0.95 }
 /** Suspicion : risque ajouté par point d'ICC manquant */
 export const SUSPICION_PER_ICC_POINT = 0.005
 
+// ─── État des caisses (chap. 3) ───
+
+/**
+ * Cycle de fraîcheur des périssables : coefficient de vente de chaque état, et âge (matins passés
+ * depuis l'achat) à partir duquel il commence. Extra-Frais : jour d'achat, jusqu'à 20h00.
+ * Un lot qui atteint l'âge `rottenFromAge` est détruit à 06h00.
+ */
+export const FRESHNESS = {
+  extra: 1.3,
+  standard: 1,
+  gamey: { fromAge: 2, factor: 0.6 },
+  spoiled: { fromAge: 3, factor: 0.25 },
+  rottenFromAge: 4,
+}
+
+/** Coefficient d'une caisse endommagée (casse des fragiles), à la vente comme en paiement */
+export const DAMAGED_FACTOR = 0.5
+
+/** Hachoir de Viktor : prime sur le cours local des périssables dégradés, caisses rachetées par jour */
+export const GRINDER = { premium: 1.2, dailyLimit: 5 }
+
 /** Poids d'une caisse masquée dans la part de son tag (masquage 1:1, chap. 3) */
 export const MASKED_CRATE_WEIGHT = 0.5
 

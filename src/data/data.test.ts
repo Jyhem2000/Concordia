@@ -188,3 +188,12 @@ describe('risque (chap. 3, 4 et 6)', () => {
     }
   })
 })
+
+describe('produits utilisables (chap. 3)', () => {
+  it('ne refroidit le moteur qu’avec du légal, et donne des aides au bluff en quantité positive', () => {
+    for (const [id, product] of products) {
+      if (product.cooling) expect(product.tags, id).toContain('TAG-LEGAL')
+      if (product.bluffAid) expect(product.bluffAid.crates, id).toBeGreaterThan(0)
+    }
+  })
+})

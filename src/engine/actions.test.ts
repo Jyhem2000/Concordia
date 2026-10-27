@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { GAME_LENGTH_DAYS, LOAN_CEILING, OFFSHORE_DEPOSIT_FACTOR, SIPHON } from '../data/balance.ts'
+import { GAME_LENGTH_DAYS, GRINDER, LOAN_CEILING, OFFSHORE_DEPOSIT_FACTOR, SIPHON } from '../data/balance.ts'
+import { PRODUCTS } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import { canSiphon, checkService, fuelPrice, maxBuy, maxRepay, planTravel, type Action } from './actions.ts'
 import { cargoUsed, ownedQty } from './cargo.ts'
@@ -31,7 +32,10 @@ describe('achat et vente', () => {
     )
     expect(errorOf(start, { type: 'buy', productId: absent, qty: 1 })).toBe('not-for-sale')
     expect(errorOf({ ...start, cash: 0 }, { type: 'buy', productId: cheapest(start), qty: 1 })).toBe('not-enough-cash')
-    const full: GameState = { ...start, cargo: [{ productId: 'T0-01', qty: VEHICLES['VEH-01'].cargo, unitCost: 1, travelled: false }] }
+    const full: GameState = {
+      ...start,
+      cargo: [{ productId: 'T0-01', qty: VEHICLES['VEH-01'].cargo, unitCost: 1, travelled: false, boughtDay: 1, damaged: false }],
+    }
     expect(errorOf(full, { type: 'buy', productId: cheapest(start), qty: 1 })).toBe('cargo-full')
     expect(maxBuy(full, cheapest(start))).toBe(0)
   })
@@ -44,7 +48,7 @@ describe('achat et vente', () => {
   })
 
   it('consomme la demande restante', () => {
-    const state: GameState = { ...start, cargo: [{ productId: 'T2-01', qty: 3, unitCost: 1, travelled: true }] }
+    const state: GameState = { ...start, cargo: [{ productId: 'T2-01', qty: 3, unitCost: 1, travelled: true, boughtDay: 1, damaged: false }] }
     const after = run(state, { type: 'sell', productId: 'T2-01', qty: 3 })
     expect(after.markets.D1.demand['T2-01']).toBe(defined(state.markets.D1.demand['T2-01']) - 3)
   })
@@ -168,5 +172,55 @@ describe('guichets : dette et compte offshore', () => {
     expect(withdrawn.cash).toBe(deposited.cash + 100)
     expect(errorOf(atLaundry, { type: 'withdraw', amount: 1 })).toBe('not-enough-offshore')
     expect(errorOf(atLaundry, { type: 'deposit', amount: 0 })).toBe('invalid-amount')
+  })
+})
+
+describe('produits utilisables et Hachoir', () => {
+  const crates = (productId: ProductId, qty: number, boughtDay = 1): GameState['cargo'][number] => ({
+    productId,
+    qty,
+    unitCost: 1,
+    travelled: true,
+    boughtDay,
+    damaged: false,
+  })
+
+  it('refroidit le moteur avec de l’eau la nuit au lieu d’user le châssis, si le joueur le veut', () => {
+    const night = gameAt(2, { phase: 'night', rng: HIGH_ROLL_RNG, cargo: [crates('T0-02', 3)] })
+    const cooled = run(night, { type: 'travel', to: 'D2' })
+    expect(cooled.chassis).toBe(VEHICLES['VEH-01'].maxChassis)
+    expect(ownedQty(cooled.cargo, 'T0-02')).toBe(3 - defined(PRODUCTS['T0-02'].cooling).crates)
+    expect(cooled.tripReport).toEqual({ chassisWear: 0, coolingCrates: defined(PRODUCTS['T0-02'].cooling).crates })
+    const worn = run({ ...night, autoCooling: false }, { type: 'travel', to: 'D2' })
+    expect(worn.chassis).toBeLessThan(VEHICLES['VEH-01'].maxChassis)
+  })
+
+  it('autorise une 2e nuit blanche avec une boisson, jamais une 3e', () => {
+    const sleepless = defined(PRODUCTS['T2-05'].sleeplessNight)
+    const exhausted = gameAt(5, { lastCurfewDay: 4, curfewStreak: 1, cargo: [crates('T2-05', 2)] })
+    expect(errorOf(exhausted, { type: 'forceCurfew' })).toBe('exhausted')
+    const second = run(exhausted, { type: 'forceCurfew', drink: 'T2-05' })
+    expect(second).toMatchObject({ phase: 'night', curfewStreak: 2, health: 100 - sleepless.healthLoss })
+    expect(errorOf({ ...second, day: 6, phase: 'day' }, { type: 'forceCurfew', drink: 'T2-05' })).toBe('third-night')
+    expect(errorOf({ ...exhausted, health: sleepless.minHealth }, { type: 'forceCurfew', drink: 'T2-05' })).toBe('too-weak')
+  })
+
+  it('restaure l’ICC hors plafond une seule fois par partie', () => {
+    const state = gameAt(5, { icc: 40, iccRouteGains: 99, cargo: [crates('T4-03', 2)] })
+    const restored = run(state, { type: 'useProduct', productId: 'T4-03' })
+    expect(restored.icc).toBe(40 + defined(PRODUCTS['T4-03'].iccRestore))
+    expect(errorOf(restored, { type: 'useProduct', productId: 'T4-03' })).toBe('already-used')
+    expect(errorOf(state, { type: 'useProduct', productId: 'T2-01' })).toBe('not-usable')
+  })
+
+  it('fait racheter les périssables dégradés par le Hachoir, au profit de la dette puis du Cash-Puce', () => {
+    const state = gameAt(5, { debt: 100, cash: 0, cargo: [crates('T3-01', 6, 2), crates('T3-01', 2, 5)] })
+    expect(errorOf(state, { type: 'grind', productId: 'T3-01', qty: 7 })).toBe('not-grindable')
+    expect(errorOf(state, { type: 'grind', productId: 'T3-01', qty: GRINDER.dailyLimit + 1 })).toBe('grinder-full')
+    const ground = run(state, { type: 'grind', productId: 'T3-01', qty: 2 })
+    expect(ground.debt).toBe(0)
+    expect(ground.cash).toBeGreaterThan(0)
+    expect(ownedQty(ground.cargo, 'T3-01')).toBe(6)
+    expect(errorOf({ ...state, districtId: 'D2' }, { type: 'grind', productId: 'T3-01', qty: 1 })).toBe('not-at-location')
   })
 })

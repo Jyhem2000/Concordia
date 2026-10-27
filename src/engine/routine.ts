@@ -2,6 +2,7 @@ import { CUSTODY, DEBT_BEATING, DEBT_LATE, ENDINGS, GAME_LENGTH_DAYS, PROTECTION
 import { DISTRICTS } from '../data/districts.ts'
 import { ownedQty } from './cargo.ts'
 import { debtInterestBreakdown, offshoreBalance, offshoreInterestBreakdown, protectionBreakdown } from './finance.ts'
+import { removeRotten } from './condition.ts'
 import { changeHealth, gainRouteIcc, iccTier } from './gauges.ts'
 import { drawMarkets } from './market.ts'
 import { drawPatrol } from './risk.ts'
@@ -73,6 +74,8 @@ function morningRoutine(state: GameState, night: Night): GameState {
     nightTripDone: false,
     immobilizedTomorrow: false,
     iccRouteGains: 0,
+    grinderToday: 0,
+    tripReport: null,
     // Les ventes saturées d'hier deviennent les pics suspects du jour (chap. 7)
     suspiciousPeaks: spent.state.oversold,
     oversold: [],
@@ -81,6 +84,7 @@ function morningRoutine(state: GameState, night: Night): GameState {
     day,
     sleep: spent.sleep,
     custodyHealth: spent.custodyHealth,
+    rotten: 0,
     debtInterest: null,
     beating: 0,
     debtLate: false,
@@ -115,6 +119,11 @@ function morningRoutine(state: GameState, night: Night): GameState {
   // 4. Intérêts simples du compte offshore
   briefing.offshoreInterest = offshoreInterestBreakdown(s.offshore)
   if (briefing.offshoreInterest) s = { ...s, offshore: { ...s.offshore, interest: s.offshore.interest + briefing.offshoreInterest.total } }
+
+  // 5. Fraîcheur : les périssables pourris sont détruits
+  const rot = removeRotten(s)
+  briefing.rotten = rot.rotten
+  s = { ...s, cargo: rot.cargo }
 
   // 7. Ronde renforcée, reconstitution de la demande, cours et boutiques
   const rng = createRng(s.rng)

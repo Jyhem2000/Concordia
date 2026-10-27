@@ -43,9 +43,12 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
   * profil nuit à côté du prix (🌙 + / 🌙 −) ;
   * **demande restante** sur chaque ligne, avec sa reconstitution du lendemain (*« Demande restante : 5 (+2 demain) »*), le prix saturé s'affichant au-delà ;
   * **PMA** sur chaque ligne possédée, ex. *« En soute : 8 (acheté à 410 ₡/u) »*.
+  * **État** sur chaque ligne possédée : caisses par état de fraîcheur, caisses abîmées, et délai avant que le lot le plus ancien pourrisse.
+  * **Utiliser** sur les produits qui ont une action joueur (`[T4-03]`), avec son effet ou la raison d'un refus.
   * **Marge** sur chaque ligne possédée : gain net de la prochaine caisse vendue (₡/u et % de son prix d'achat), et gain net si l'on vend tout (saturation comprise). Icône verte (rentable), ambre (marge faible, sous un seuil d'affichage fixé dans `Margin.tsx`) ou rouge (à perte).
 * **Filtres** par tag et par tier (Tous, En soute, chaque tag) ; curseurs d'achat / vente (+1, +5, MAX).
 * **Onglet lieux spéciaux :** accès direct aux services du district, coûts du jour et cooldowns affichés.
+  * *Hachoir de `[LOC-D1-1]`* : caisses rachetables, prix par caisse détaillable, limite du jour restante.
 
 ## Vue « Carte tactique & navigation »
 * Carte schématique style terminal rétro-futuriste des six districts et de leurs liaisons (chap. 4).
@@ -53,10 +56,11 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
 * **Mémoire de marché :** au toucher d'un district, derniers cours observés avec leur ancienneté (*« vu il y a 3 jours »*), en fourchette en cas de Sédation ; cours en temps réel avec `[CREW-02]`.
 * **Bulles d'indices :** événements du jour, ronde renforcée révélée par `[CREW-01]` (🚓), pic suspect de la veille (👁️).
 * **Panneau de prévision (au clic sur un district) :** itinéraire et districts traversés, rations nécessaires, étoiles de sécurité, prix local du Synthanol, lieux spéciaux, et le **risque d'interception** pour la soute actuelle (détaillable), avant validation. La ronde renforcée, cachée, n'y figure pas ; tout le reste est exact. Les districts en pic suspect portent l'icône 👁️.
+* **Dernier trajet :** ce que le dernier trajet a coûté hors barrage (usure du châssis ou caisses consommées pour refroidir le moteur).
 * **Boutons de départ :** « Rouler de jour » ; à 20h00, « Dormir au relais » (ou « Bivouac » en `[D4]`) face à « Forcer le couvre-feu », chacun affichant coûts et effets calculés.
 
 ## Écran d'interception
-Options numérotées **0** Fouille · **1** Bluff · **2** Corruption · **3** Fuite · **4** Éjection (masquée dès qu'une autre action a été tentée). Le barrage occupe tout l'écran : aucune autre action n'est possible avant de l'avoir réglé. Face aux milices de `[D4]` : Payer le péage · Forcer le passage · Refuser. Si la fouille effective serait fatale (`[T4-06]` en soute), l'écran l'annonce. Chaque option affiche sa **probabilité détaillable** et ses **conséquences en cas d'échec** (*« Aeterna estime vos chances de survie fiscale à 35 % »*). Pour la corruption, l'offre se compose de Cash-Puce (raccourcis aux paliers de bonus, du minimum accepté au dernier palier) et de caisses de la soute. Pour chaque produit en soute : la valeur en paiement d'une caisse, son prix d'achat, le gain ou la perte face au cash, et la mention « connivence » si les agents l'apprécient. La valeur totale de l'offre et la chance détaillée se mettent à jour en temps réel. Face aux milices, l'option « Payer en caisses » annonce à l'avance les caisses qui seraient prises et leur valeur.
+Options numérotées **0** Fouille · **1** Bluff · **2** Corruption · **3** Fuite · **4** Éjection (masquée dès qu'une autre action a été tentée). Le barrage occupe tout l'écran : aucune autre action n'est possible avant de l'avoir réglé. Face aux milices de `[D4]` : Payer le péage · Forcer le passage · Refuser. Si la fouille effective serait fatale (`[T4-06]` en soute), l'écran l'annonce. Chaque option affiche sa **probabilité détaillable** et ses **conséquences en cas d'échec** (*« Aeterna estime vos chances de survie fiscale à 35 % »*). Pour la corruption, l'offre se compose de Cash-Puce (raccourcis aux paliers de bonus, du minimum accepté au dernier palier) et de caisses de la soute. Pour chaque produit en soute : la valeur en paiement d'une caisse, son prix d'achat, le gain ou la perte face au cash, et la mention « connivence » si les agents l'apprécient. La valeur totale de l'offre et la chance détaillée se mettent à jour en temps réel. Le bluff propose les aides possibles (caisses à donner ou sacrifier) et la fuite le largage offensif et le dopage, chance recalculée à chaque choix ; la fuite annonce aussi les risques de casse et d'explosion de la soute. Face aux milices, l'option « Payer en caisses » annonce à l'avance les caisses qui seraient prises et leur valeur.
 
 ## Modale « Objectifs du Jour 30 »
 Accessible une fois la dette initiale soldée : les quatre grandes fins et la progression vers chacune (score, statut Citoyen Or, `[T4-06]` en soute, position en `[D4]` à minuit).

@@ -1,5 +1,6 @@
 import { Eye, MapPin } from 'lucide-react'
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
+import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { planTravel } from '../../engine/actions.ts'
 import { averageCost } from '../../engine/cargo.ts'
 import { estimatedUnitSale } from '../../engine/market.ts'
@@ -31,12 +32,27 @@ export default function TravelPanel() {
       <h2 className="border-b border-zinc-800 px-3 py-2 font-bold tracking-wide text-amber-300 uppercase">{t.travel.title}</h2>
       {/* Raison commune à toutes les destinations : dite une fois plutôt que sous chaque bouton */}
       {tripDone && <p className="px-3 pt-2 text-xs text-zinc-400">{t.error['trip-done']}</p>}
+      <LastTrip />
       <ul className="divide-y divide-zinc-800">
         {order.map((id) => (
           <DistrictRow key={id} districtId={id} />
         ))}
       </ul>
     </section>
+  )
+}
+
+/** Ce que le dernier trajet a coûté hors barrage : usure ou refroidissement */
+function LastTrip() {
+  const report = useGameStore((s) => s.game.tripReport)
+  const coolant = PRODUCT_IDS.find((id) => PRODUCTS[id].cooling)
+  const { t } = useI18n()
+  if (!report || (report.chassisWear === 0 && report.coolingCrates === 0)) return null
+  return (
+    <p className="px-3 pt-2 text-xs text-zinc-400">
+      {t.travel.lastTrip} :{' '}
+      {report.coolingCrates > 0 && coolant ? t.travel.cooled(report.coolingCrates, t.product[coolant].name) : t.travel.wear(report.chassisWear)}
+    </p>
   )
 }
 

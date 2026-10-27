@@ -66,6 +66,14 @@ export type Tag = {
   bluffMalus?: number
   /** Malus d'odeur : multipliés par le facteur d'odeur du district (chiens-robots) */
   smell?: boolean
+  /** Cycle de fraîcheur (chap. 3) */
+  perishable?: boolean
+  /** Casse : en fuite réussie, et aux chocs de châssis hors fuite (chap. 3) */
+  breakage?: { fleeChance: number; shockChance: number; shockThreshold: number }
+  /** Explosion des caisses non masquées en cas d'échec de fuite (chap. 3) */
+  explosion?: { chance: number; chassisLoss: number }
+  /** Largage offensif en fuite : chance ajoutée en sacrifiant une caisse (chap. 3 et 6) */
+  fleeDropBonus?: number
 }
 
 export type Product = {
@@ -83,6 +91,16 @@ export type Product = {
   beaconRisk?: number
   /** Une fouille effective avec ce produit en soute est fatale (exécution sommaire, chap. 2) */
   lethalOnSearch?: boolean
+  /** Refroidissement moteur : caisses consommées pour annuler l'usure d'un trajet de nuit */
+  cooling?: { crates: number }
+  /** Dopage pilote en fuite (une caisse bue, une fois par jour) */
+  doping?: { fleeBonus: number; chassisLoss: number; iccLoss: number }
+  /** Nuit blanche forcée malgré l'épuisement (une caisse bue) */
+  sleeplessNight?: { healthLoss: number; minHealth: number }
+  /** Aide au bluff : caisses données ou sacrifiées à l'agent */
+  bluffAid?: { crates: number; bonus: number; cancelsSmell: boolean }
+  /** Restauration d'ICC hors plafond, une seule fois par partie (une caisse utilisée) */
+  iccRestore?: number
 }
 
 export type TierStats = {
@@ -138,7 +156,7 @@ export type District = {
 }
 
 /** Services rendus par les lieux spéciaux implémentés (chap. 4 et 7) */
-export type LocationService = 'debt' | 'offshore'
+export type LocationService = 'debt' | 'grinder' | 'offshore'
 
 export type Location = {
   district: DistrictId
@@ -239,8 +257,30 @@ export type InterceptionReport = {
   chassis: number
   wanted: number
   custodyDays: number
+  /** Caisses fragiles endommagées */
+  damaged: number
+  /** Caisses inflammables détruites par explosion */
+  exploded: number
   /** Facture du dépannage d'urgence si le châssis est tombé à 0 */
   towBill: number
+}
+
+/** Tactiques d'une option de barrage : aides au bluff, sacrifices et dopage en fuite (chap. 3 et 6) */
+export type Tactics = {
+  /** Produits dont les caisses sont données ou sacrifiées à l'agent pendant le bluff */
+  bluffAids?: readonly ProductId[]
+  /** Produit dont une caisse est larguée pendant la fuite (largage offensif) */
+  drop?: ProductId
+  /** Produit bu pour le dopage pilote pendant la fuite */
+  dope?: ProductId
+}
+
+/** Ce que le dernier trajet a coûté hors barrage */
+export type TripReport = {
+  /** PV de châssis perdus (usure de nuit) */
+  chassisWear: number
+  /** Caisses consommées pour refroidir le moteur à la place de l'usure */
+  coolingCrates: number
 }
 
 /** Ce que la nuit et la routine de 06h00 ont changé, pour le briefing du matin (chap. 2 et 10) */
@@ -251,6 +291,8 @@ export type MorningBriefing = {
   debtInterest: Breakdown | null
   /** Nuit en cellule (garde à vue) : PV perdus */
   custodyHealth: number
+  /** Caisses périssables pourries, détruites à 06h00 */
+  rotten: number
   /** PV perdus au tabassage de l'échéance de la dette, 0 sinon */
   beating: number
   /** Vrai le matin où la dette passe en retard (taux majoré, embuscades) */
@@ -260,6 +302,9 @@ export type MorningBriefing = {
   offshoreInterest: Breakdown | null
 }
 
+/** États de fraîcheur d'une caisse périssable (chap. 3) ; une caisse pourrie est détruite */
+export type FreshnessStage = 'extra' | 'standard' | 'gamey' | 'spoiled'
+
 /** Caisses d'un même produit achetées ensemble */
 export type CargoLot = {
   productId: ProductId
@@ -268,6 +313,10 @@ export type CargoLot = {
   unitCost: number
   /** Faux tant que le lot n'a pas quitté son district d'achat (clause anti-arbitrage, chap. 7) */
   travelled: boolean
+  /** Jour d'achat : base du cycle de fraîcheur des périssables (chap. 3) */
+  boughtDay: number
+  /** Caisses endommagées (casse des fragiles) : vendues et données à prix réduit */
+  damaged: boolean
 }
 
 /** Marché du jour d'un district, tiré à 06h00 */
@@ -340,6 +389,17 @@ export type GameState = {
   immobilizedTomorrow: boolean
   interception: Interception | null
   interceptionReport: InterceptionReport | null
+  tripReport: TripReport | null
+  /** Couvre-feux forcés consécutifs, jusqu'au dernier (épuisement nerveux) */
+  curfewStreak: number
+  /** Dernier jour d'un dopage pilote (une fois par jour) */
+  lastDopingDay: number | null
+  /** Restauration d'ICC hors plafond déjà utilisée (une fois par partie) */
+  iccRestoreUsed: boolean
+  /** Caisses rachetées aujourd'hui par le Hachoir de Viktor */
+  grinderToday: number
+  /** Refroidissement moteur automatique par les caisses qui le permettent (réglage du joueur) */
+  autoCooling: boolean
   /** Briefing de la dernière routine matinale ; null au Jour 1 */
   briefing: MorningBriefing | null
   /** Fin de partie, une fois `status` à `finished` */

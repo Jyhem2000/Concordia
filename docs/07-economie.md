@@ -46,7 +46,7 @@ Prix_Vente = Arrondi( Cours × Commission × Coef_Demande × Coef_Condition × S
 ```
 * **Commission de puce** (`SALE_COMMISSION` dans [`balance.ts`](../src/data/balance.ts)) **:** chaque vente P2P est ponctionnée par l'infrastructure d'Aeterna, à l'aveugle : le relais prélève sa part sans rien enregistrer (voir *Cash-Puce*). Acheter puis revendre au même endroit coûte donc toujours la commission.
 * **Coef_Demande :** 1.00 dans la limite de la demande restante, prix saturé au-delà.
-* **Coef_Condition :** `[TAG-FRAGILE]` (chap. 3).
+* **Coef_Condition :** caisse endommagée (`[TAG-FRAGILE]`, chap. 3 ; `DAMAGED_FACTOR` dans [`balance.ts`](../src/data/balance.ts)).
 * **Savoir_Faire = Coef_Fraîcheur × Coef_Nuit × Bonus_Mama**, avec **rendements décroissants** : au-delà d'un seuil, l'excédent ne compte qu'en partie (`KNOW_HOW_SOFT_CAP` et `KNOW_HOW_EXCESS_FACTOR` dans [`balance.ts`](../src/data/balance.ts)).
   * *Coef_Fraîcheur :* `[TAG-PERISHABLE]` (chap. 3).
   * *Coef_Nuit — profil nocturne* (pendant le couvre-feu ; coefficients : `NIGHT_PROFILE_FACTOR` dans [`balance.ts`](../src/data/balance.ts)) :
@@ -62,7 +62,7 @@ Prix_Vente = Arrondi( Cours × Commission × Coef_Demande × Coef_Condition × S
 * *Intention — des builds, pas une recette :* chaque axe de bonus vise une famille de produits différente (équipier, modules, `[LOC-D2-1]`, nuit). Les combinaisons rapportent davantage, mais les plafonds (`Mult_Événement`, `Savoir_Faire`) empêchent une seule combinaison d'écraser les autres.
 
 ## Paiement en nature
-Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est valorisée à son **prix de base** ([`products.ts`](../src/data/products.ts)), jamais au cours local ni à son prix d'achat. C'est un barème officieux, le même partout, que les agents et les milices appliquent sans discuter.
+Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est valorisée à son **prix de base** ([`products.ts`](../src/data/products.ts)), jamais au cours local ni à son prix d'achat, **réduit par son état** : une caisse endommagée ou défraîchie (Faisandée, Avariée) paie moins, l'Extra-Frais ne paie jamais plus. Les lots les plus anciens partent en premier. C'est un barème officieux, le même partout, que les agents et les milices appliquent sans discuter.
 * **Pourquoi payer en caisses :**
   1. **Une économie réelle** sur les caisses achetées sous leur prix de base (production locale, bonne fluctuation) : elles paient plus qu'elles n'ont coûté. À l'inverse, une caisse achetée cher (forte demande, mauvais tirage) paie moins qu'elle n'a coûté.
   2. **La connivence** en corruption (chap. 6) : certains produits rendent l'agent plus conciliant.

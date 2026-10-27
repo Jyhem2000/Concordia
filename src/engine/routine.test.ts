@@ -37,7 +37,7 @@ describe('routine matinale : collecte et offshore', () => {
       initialDebtPaid: true,
       debt: 0,
       cash: 10,
-      cargo: [{ productId: 'T3-01', qty: 5, unitCost: 1, travelled: true }],
+      cargo: [{ productId: 'T3-01', qty: 5, unitCost: 1, travelled: true, boughtDay: 1, damaged: false }],
     })
     const state = sleep(before)
     const protection = defined(state.briefing?.protection, 'collecte')
@@ -86,7 +86,7 @@ describe('audit du Jour 30', () => {
 
   it('évalue les fins de la plus prestigieuse à la plus modeste', () => {
     const { saboteur, elite, mafia } = ENDINGS
-    const beacon = [{ productId: saboteur.requiredProduct, qty: 1, unitCost: 1, travelled: true }]
+    const beacon = [{ productId: saboteur.requiredProduct, qty: 1, unitCost: 1, travelled: true, boughtDay: 1, damaged: false }]
     expect(endingFor(solvent({ offshore: offshore(saboteur.minScore), cargo: beacon, districtId: saboteur.district })).id).toBe('saboteur')
     // Sans la balise : fin suivante (Citoyen Or au départ)
     expect(endingFor(solvent({ offshore: offshore(saboteur.minScore), districtId: saboteur.district })).id).toBe('elite')

@@ -76,11 +76,6 @@ export function baseValue(cargo: readonly CargoLot[]): number {
   return cargo.reduce((total, lot) => total + PRODUCTS[lot.productId].basePrice * lot.qty, 0)
 }
 
-/** Valeur en paiement de caisses données (corruption, péage…) : toujours au prix de base (chap. 7) */
-export function paymentValue(crates: readonly CrateCount[]): number {
-  return crates.reduce((total, { productId, qty }) => total + PRODUCTS[productId].basePrice * qty, 0)
-}
-
 /** Retire des caisses données en paiement, lots les plus anciens d'abord */
 export function giveCrates(cargo: readonly CargoLot[], crates: readonly CrateCount[]): CargoLot[] {
   return crates.reduce<CargoLot[]>((remaining, { productId, qty }) => takeLots(remaining, productId, qty).remaining, [...cargo])

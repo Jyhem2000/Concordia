@@ -94,9 +94,9 @@ Chance = min( plafond,  base + Offre + Connivence − malus × (étoiles du dist
 ### 3. Fuite — *« Pied au plancher ! »*
 * **Chance de base** et **plafond** dégressif selon les étoiles du district : `FLEE` dans [`balance.ts`](../src/data/balance.ts).
 * **Bonus :** `[MOD-06]`, `[CREW-02]`, `[VEH-03]`. **Malus :** Fiche S, Sédation.
-* **Sacrifices :** 1 largage offensif max (`[TAG-FLAMMABLE]` **ou** `[TAG-CHEMICAL]`) + dopage `[T2-05]` (cumulable).
+* **Sacrifices :** 1 largage offensif max (une caisse `[TAG-FLAMMABLE]` **ou** `[TAG-CHEMICAL]` ; si le produit porte les deux tags, le meilleur bonus compte) + dopage `[T2-05]` (cumulable). Les caisses sacrifiées ou bues sont perdues quel que soit le résultat. Le joueur choisit le produit à sacrifier ; l'app montre le bonus de chacun.
 * **Succès :** cargaison sauvée, **+1 niveau de Fiche S**, mais perte de châssis (tirage uniforme entier dans une fourchette ; `[MOD-06]`, `[VEH-03]`), casse `[TAG-FRAGILE]`, et perte d'ICC (caméras de trafic ; `[VEH-03]`, `[MOD-05]`).
-* **Échec :** confiscation + saisie d'une part du Cash-Puce + perte d'ICC ; perte de châssis et de Santé (`[MOD-06]`), mortelle si la Santé tombe à 0 ; explosions `[TAG-FLAMMABLE]` ; garde à vue.
+* **Échec :** explosions `[TAG-FLAMMABLE]` d'abord, puis confiscation + saisie d'une part du Cash-Puce + perte d'ICC ; perte de châssis et de Santé (`[MOD-06]`), mortelle si la Santé tombe à 0 ; garde à vue.
 * Avant validation, l'app affiche la chance et le pire scénario : *« Aeterna estime vos chances de survie fiscale à 35 %. »*
 
 ### 4. Éjection / broyage d'urgence — *« Se débarrasser de la cargaison avant le barrage »*

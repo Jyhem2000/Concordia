@@ -15,13 +15,14 @@ import {
 import { DISTRICTS } from '../data/districts.ts'
 import { PRODUCTS } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
-import { cargoUsed, ownedQty, paymentValue } from './cargo.ts'
-import { bribeChance, bribeRate, fleeChance, minimumOffer, offerValue, toll, tollInKind } from './interception.ts'
+import { cargoUsed, ownedQty } from './cargo.ts'
+import { paymentValue } from './condition.ts'
+import { bluffChance, bribeChance, bribeRate, fleeChance, minimumOffer, offerValue, toll, tollInKind } from './interception.ts'
 import { sleep } from './routine.ts'
 import { defined, errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
 import type { CargoLot, GameState, Interception, Offer, ProductId } from './types.ts'
 
-const lot = (productId: ProductId, qty: number): CargoLot => ({ productId, qty, unitCost: 1, travelled: true })
+const lot = (productId: ProductId, qty: number): CargoLot => ({ productId, qty, unitCost: 1, travelled: true, boughtDay: 1, damaged: false })
 const brc: Interception = { kind: 'brc', acted: false, bluffFailed: false }
 const racket: Interception = { kind: 'racket', acted: false, bluffFailed: false }
 
@@ -138,8 +139,8 @@ describe('corruption', () => {
     const favorite = DISTRICTS.D2.bribeFavorites[0]
     const state = stopped([lot('T2-01', 3), lot(favorite, 2)])
     const inKind: Offer = { cash: 0, crates: [{ productId: favorite, qty: 2 }] }
-    expect(offerValue(inKind)).toBe(2 * PRODUCTS[favorite].basePrice)
-    const plain: Offer = { cash: offerValue(inKind), crates: [] }
+    expect(offerValue(state, inKind)).toBe(2 * PRODUCTS[favorite].basePrice)
+    const plain: Offer = { cash: offerValue(state, inKind), crates: [] }
     expect(bribeChance(state, inKind).total).toBeCloseTo(bribeChance(state, plain).total + BRIBE.connivance)
   })
 
@@ -213,7 +214,7 @@ describe('racket des milices', () => {
     const state = stopped([lot('T3-01', 2), lot('T1-06', 1), lot('T1-01', 4)], { districtId: 'D4', interception: racket })
     const taken = tollInKind(state)
     expect(taken[0].productId).toBe('T1-06')
-    expect(paymentValue(taken)).toBeGreaterThanOrEqual(toll(state))
+    expect(paymentValue(state, taken)).toBeGreaterThanOrEqual(toll(state))
     const paid = run(state, { type: 'intercept', move: 'payTollInKind' })
     expect(paid.cash).toBe(10_000)
     expect(paid.interception).toBeNull()
@@ -240,5 +241,42 @@ describe('suites du barrage', () => {
   it('baisse la Fiche S après une nuit au relais, pas après une nuit blanche', () => {
     expect(sleep(gameAt(2, { wanted: 2 })).wanted).toBe(1)
     expect(sleep(gameAt(2, { wanted: 2, phase: 'night' })).wanted).toBe(2)
+  })
+})
+
+describe('tactiques de barrage (chap. 3)', () => {
+  it('donne les manuels à l’agent pour un bonus de bluff, et sacrifie une épice contre le malus d’odeur', () => {
+    const manuals = defined(PRODUCTS['T0-04'].bluffAid)
+    const state = stopped([lot('T0-04', 6), lot('T1-02', 2)])
+    const aided = bluffChance(state, { bluffAids: ['T0-04'] })
+    expect(aided.lines.find((line) => line.source === 'T0-04')?.value).toBe(manuals.bonus)
+    expect(errorOf(stopped([lot('T0-04', 2)]), { type: 'intercept', move: 'bluff', tactics: { bluffAids: ['T0-04'] } })).toBe('not-enough-cargo')
+
+    const smelly = stopped([lot('T2-01', 3)])
+    expect(bluffChance(smelly, { bluffAids: ['T2-01'] }).total).toBeGreaterThan(bluffChance(smelly).total)
+    const bluffed = run({ ...state, rng: HIGH_ROLL_RNG }, { type: 'intercept', move: 'bluff', tactics: { bluffAids: ['T0-04'] } })
+    expect(ownedQty(bluffed.cargo, 'T0-04')).toBe(6 - manuals.crates)
+  })
+
+  it('largue une caisse et dope le pilote pour fuir, une fois par jour', () => {
+    const doping = defined(PRODUCTS['T2-05'].doping)
+    const state = stopped([lot('T1-06', 2), lot('T2-05', 2)])
+    const boosted = fleeChance(state, { drop: 'T1-06', dope: 'T2-05' })
+    expect(boosted.total).toBeGreaterThan(fleeChance(state).total)
+    expect(errorOf(state, { type: 'intercept', move: 'flee', tactics: { drop: 'T2-03' } })).toBe('move-unavailable')
+
+    const fled = run({ ...state, rng: LOW_ROLL_RNG }, { type: 'intercept', move: 'flee', tactics: { drop: 'T1-06', dope: 'T2-05' } })
+    expect(ownedQty(fled.cargo, 'T1-06')).toBe(1)
+    expect(ownedQty(fled.cargo, 'T2-05')).toBe(1)
+    expect(fled.lastDopingDay).toBe(5)
+    expect(fled.icc).toBe(100 - doping.iccLoss - FLEE.success.iccLoss)
+    expect(errorOf({ ...fled, interception: brc }, { type: 'intercept', move: 'flee', tactics: { dope: 'T2-05' } })).toBe('doping-used')
+  })
+
+  it('note la casse et les explosions au compte rendu', () => {
+    const failed = run(stopped([lot('T1-06', 4)], { rng: HIGH_ROLL_RNG }), { type: 'intercept', move: 'flee' })
+    const report = defined(failed.interceptionReport)
+    expect(report.exploded).toBeGreaterThanOrEqual(0)
+    expect(report.crates).toBe(-4)
   })
 })

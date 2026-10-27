@@ -1,18 +1,20 @@
-import { FUEL_PER_CROSSED_DISTRICT, NIGHT_TRIP_CHASSIS_WEAR, SIPHON } from '../data/balance.ts'
+import { FUEL_PER_CROSSED_DISTRICT, GRINDER, ICC_MAX, NIGHT_TRIP_CHASSIS_WEAR, SIPHON } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
 import { LOCATIONS } from '../data/locations.ts'
+import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
-import { cargoUsed, ownedQty, takeLots } from './cargo.ts'
+import { cargoUsed, giveCrates, ownedQty, takeLots } from './cargo.ts'
 import { depositBreakdown, loanRoom, offshoreBalance, withdrawFrom } from './finance.ts'
 import { checkMove, drawInterception, emergencyTow, resolveMove } from './interception.ts'
 import { crossedDistricts, shortestRoute } from './map.ts'
-import { fuelPriceBreakdown, quote, saleQuote } from './market.ts'
+import { changeHealth } from './gauges.ts'
+import { fuelPriceBreakdown, grindableQty, grinderSale, quote, saleQuote } from './market.ts'
 import { keysOf } from './records.ts'
 import { risk } from './risk.ts'
 import { createRng } from './rng.ts'
 import { sleep } from './routine.ts'
 import { remember } from './state.ts'
-import type { DistrictId, GameState, InterceptionMove, LocationId, LocationService, Offer, ProductId } from './types.ts'
+import type { CargoLot, DistrictId, GameState, InterceptionMove, LocationId, LocationService, Offer, ProductId, Tactics } from './types.ts'
 
 /*
  * Actions du joueur : chaque action produit un nouvel état, ou une erreur sans rien changer.
@@ -24,7 +26,11 @@ export type Action =
   | { type: 'sell'; productId: ProductId; qty: number }
   | { type: 'refuel'; qty: number }
   | { type: 'travel'; to: DistrictId }
-  | { type: 'forceCurfew' }
+  /** `drink` : produit bu pour une nuit blanche forcée malgré l'épuisement */
+  | { type: 'forceCurfew'; drink?: ProductId }
+  | { type: 'useProduct'; productId: ProductId }
+  | { type: 'grind'; productId: ProductId; qty: number }
+  | { type: 'setAutoCooling'; enabled: boolean }
   | { type: 'sleep' }
   | { type: 'siphon' }
   | { type: 'repay'; amount: number }
@@ -32,7 +38,7 @@ export type Action =
   | { type: 'deposit'; amount: number }
   | { type: 'withdraw'; amount: number }
   /** Option de l'écran d'interception ; `offer` pour la corruption */
-  | { type: 'intercept'; move: InterceptionMove; offer?: Offer }
+  | { type: 'intercept'; move: InterceptionMove; offer?: Offer; tactics?: Tactics }
 
 export type ActionError =
   | 'game-over'
@@ -60,6 +66,13 @@ export type ActionError =
   | 'not-intercepted'
   | 'move-unavailable'
   | 'offer-too-low'
+  | 'doping-used'
+  | 'not-usable'
+  | 'already-used'
+  | 'third-night'
+  | 'too-weak'
+  | 'grinder-full'
+  | 'not-grindable'
 
 export type ActionResult = { ok: true; state: GameState } | { ok: false; error: ActionError }
 
@@ -90,7 +103,7 @@ function buy(state: GameState, productId: ProductId, qty: number): ActionResult 
     state: {
       ...state,
       cash: state.cash - unitCost * qty,
-      cargo: [...state.cargo, { productId, qty, unitCost, travelled: false }],
+      cargo: [...state.cargo, { productId, qty, unitCost, travelled: false, boughtDay: state.day, damaged: false }],
       markets: {
         ...state.markets,
         [state.districtId]: { ...market, stock: { ...market.stock, [productId]: stock - qty } },
@@ -196,13 +209,15 @@ function travel(state: GameState, to: DistrictId): ActionResult {
   const rng = createRng(state.rng)
   const interception = drawInterception(rng, tripRisk, DISTRICTS[to].offGrid)
 
+  // Mode furtif : les galeries de nuit usent le châssis, sauf si des caisses refroidissent le moteur (chap. 2 et 3)
+  const night = state.phase === 'night' ? nightWear(state) : { cargo: state.cargo, chassisWear: 0, coolingCrates: 0 }
   const arrived: GameState = {
     ...state,
     districtId: to,
     fuel: state.fuel - plan.fuelCost,
-    // Mode furtif : les galeries de nuit usent le châssis (chap. 2)
-    chassis: state.phase === 'night' ? Math.max(0, state.chassis - NIGHT_TRIP_CHASSIS_WEAR) : state.chassis,
-    cargo: state.cargo.map((lot) => (lot.travelled ? lot : { ...lot, travelled: true })),
+    chassis: Math.max(0, state.chassis - night.chassisWear),
+    cargo: night.cargo.map((lot) => (lot.travelled ? lot : { ...lot, travelled: true })),
+    tripReport: { chassisWear: night.chassisWear, coolingCrates: night.coolingCrates },
     dayTripDone: state.dayTripDone || state.phase === 'day',
     nightTripDone: state.nightTripDone || state.phase === 'night',
     interception,
@@ -214,7 +229,40 @@ function travel(state: GameState, to: DistrictId): ActionResult {
   return { ok: true, state: remember(done, to) }
 }
 
-// ─── Lieux spéciaux : dette et compte offshore (chap. 4 et 7) ───
+/** Usure du trajet de nuit, ou refroidissement par les caisses qui le permettent si le joueur l'a activé */
+function nightWear(state: GameState): { cargo: CargoLot[]; chassisWear: number; coolingCrates: number } {
+  const coolant = state.autoCooling
+    ? PRODUCT_IDS.find((id) => {
+        const cooling = PRODUCTS[id].cooling
+        return cooling !== undefined && ownedQty(state.cargo, id) >= cooling.crates
+      })
+    : undefined
+  const cooling = coolant ? PRODUCTS[coolant].cooling : undefined
+  if (coolant && cooling) {
+    return { cargo: giveCrates(state.cargo, [{ productId: coolant, qty: cooling.crates }]), chassisWear: 0, coolingCrates: cooling.crates }
+  }
+  return { cargo: [...state.cargo], chassisWear: NIGHT_TRIP_CHASSIS_WEAR, coolingCrates: 0 }
+}
+
+// ─── Produits utilisables (chap. 3) ───
+
+/** Raison pour laquelle le produit ne peut pas être utilisé maintenant (restauration d'ICC), ou null */
+export function checkUseProduct(state: GameState, productId: ProductId): ActionError | null {
+  if (!PRODUCTS[productId].iccRestore) return 'not-usable'
+  if (ownedQty(state.cargo, productId) < 1) return 'not-enough-cargo'
+  if (state.iccRestoreUsed) return 'already-used'
+  return null
+}
+
+function applyProduct(state: GameState, productId: ProductId): ActionResult {
+  const error = checkUseProduct(state, productId)
+  if (error) return fail(error)
+  // Gain hors plafond (chap. 2) : une identité neuve ne passe pas par les gains de route
+  const icc = Math.min(ICC_MAX, state.icc + (PRODUCTS[productId].iccRestore ?? 0))
+  return { ok: true, state: { ...state, icc, iccRestoreUsed: true, cargo: giveCrates(state.cargo, [{ productId, qty: 1 }]) } }
+}
+
+// ─── Lieux spéciaux : dette, Hachoir et compte offshore (chap. 4 et 7) ───
 
 /** Lieu qui rend ce service dans le district du joueur, s'il y en a un */
 export function locationFor(state: GameState, service: LocationService): LocationId | null {
@@ -262,6 +310,20 @@ function deposit(state: GameState, amount: number): ActionResult {
   }
 }
 
+/** Hachoir de Viktor : rachat des périssables dégradés, déduit de la dette puis versé en Cash-Puce (chap. 4) */
+function grind(state: GameState, productId: ProductId, qty: number): ActionResult {
+  const closed = checkService(state, 'grinder')
+  if (closed) return fail(closed)
+  if (qty > grindableQty(state, productId)) return fail('not-grindable')
+  if (state.grinderToday + qty > GRINDER.dailyLimit) return fail('grinder-full')
+  const { total, cargo } = grinderSale(state, productId, qty)
+  const toDebt = Math.min(state.debt, total)
+  return {
+    ok: true,
+    state: { ...state, cargo, debt: state.debt - toDebt, cash: state.cash + total - toDebt, grinderToday: state.grinderToday + qty },
+  }
+}
+
 function withdraw(state: GameState, amount: number): ActionResult {
   const closed = checkService(state, 'offshore')
   if (closed) return fail(closed)
@@ -272,17 +334,29 @@ function withdraw(state: GameState, amount: number): ActionResult {
 // ─── Fin de journée ───
 
 /** Le couvre-feu forcé le Jour J est verrouillé le soir du Jour J+1 (épuisement nerveux, chap. 2) */
-export function checkForceCurfew(state: GameState): ActionError | null {
+export function checkForceCurfew(state: GameState, drink?: ProductId): ActionError | null {
   if (state.status !== 'playing') return 'game-over'
   if (state.phase !== 'day') return 'not-daytime'
-  if (state.lastCurfewDay === state.day - 1) return 'exhausted'
+  const exhausted = state.lastCurfewDay === state.day - 1
+  if (drink === undefined) return exhausted ? 'exhausted' : null
+  // Nuit blanche forcée : une boisson lève l'épuisement pour une 2e nuit, jamais une 3e (chap. 2 et 3)
+  const sleepless = PRODUCTS[drink].sleeplessNight
+  if (!sleepless || !exhausted) return 'not-usable'
+  if (ownedQty(state.cargo, drink) < 1) return 'not-enough-cargo'
+  if (state.curfewStreak >= 2) return 'third-night'
+  if (state.health <= sleepless.minHealth) return 'too-weak'
   return null
 }
 
-function forceCurfew(state: GameState): ActionResult {
-  const error = checkForceCurfew(state)
+function forceCurfew(state: GameState, drink?: ProductId): ActionResult {
+  const error = checkForceCurfew(state, drink)
   if (error) return fail(error)
-  return { ok: true, state: { ...state, phase: 'night', lastCurfewDay: state.day } }
+  const curfewStreak = state.lastCurfewDay === state.day - 1 ? state.curfewStreak + 1 : 1
+  const night: GameState = { ...state, phase: 'night', lastCurfewDay: state.day, curfewStreak }
+  const sleepless = drink ? PRODUCTS[drink].sleeplessNight : undefined
+  if (!drink || !sleepless) return { ok: true, state: night }
+  const drunk = { ...night, cargo: giveCrates(state.cargo, [{ productId: drink, qty: 1 }]) }
+  return { ok: true, state: changeHealth(drunk, -sleepless.healthLoss).state }
 }
 
 // ─── Point d'entrée ───
@@ -294,8 +368,8 @@ export function applyAction(state: GameState, action: Action): ActionResult {
 
   switch (action.type) {
     case 'intercept': {
-      const error = checkMove(state, action.move, action.offer)
-      return error ? fail(error) : { ok: true, state: resolveMove(state, action.move, action.offer) }
+      const error = checkMove(state, action.move, action.offer, action.tactics)
+      return error ? fail(error) : { ok: true, state: resolveMove(state, action.move, action.offer, action.tactics) }
     }
     case 'buy':
       return isQuantity(action.qty) ? buy(state, action.productId, action.qty) : fail('invalid-quantity')
@@ -306,7 +380,13 @@ export function applyAction(state: GameState, action: Action): ActionResult {
     case 'travel':
       return travel(state, action.to)
     case 'forceCurfew':
-      return forceCurfew(state)
+      return forceCurfew(state, action.drink)
+    case 'useProduct':
+      return applyProduct(state, action.productId)
+    case 'grind':
+      return isQuantity(action.qty) ? grind(state, action.productId, action.qty) : fail('invalid-quantity')
+    case 'setAutoCooling':
+      return { ok: true, state: { ...state, autoCooling: action.enabled } }
     case 'sleep':
       return { ok: true, state: sleep(state) }
     case 'siphon':

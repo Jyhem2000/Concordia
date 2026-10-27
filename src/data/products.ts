@@ -17,9 +17,9 @@ export const TIERS: Readonly<Record<Tier, TierStats>> = {
 export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
   // Tier 0 : marchandises officielles, couverture et masquage
   'T0-01': { tier: 0, basePrice: 10, tags: ['TAG-LEGAL'], masks: 'TAG-ODOROUS' },
-  'T0-02': { tier: 0, basePrice: 15, tags: ['TAG-LEGAL'], masks: 'TAG-FLAMMABLE' },
+  'T0-02': { tier: 0, basePrice: 15, tags: ['TAG-LEGAL'], masks: 'TAG-FLAMMABLE', cooling: { crates: 2 } },
   'T0-03': { tier: 0, basePrice: 40, tags: ['TAG-LEGAL'], masks: 'TAG-CHEMICAL' },
-  'T0-04': { tier: 0, basePrice: 25, tags: ['TAG-LEGAL'], masks: 'TAG-CULTURE' },
+  'T0-04': { tier: 0, basePrice: 25, tags: ['TAG-LEGAL'], masks: 'TAG-CULTURE', bluffAid: { crates: 5, bonus: 0.1, cancelsSmell: false } },
 
   // Tier 1 : petits plaisirs coupables
   'T1-01': { tier: 1, basePrice: 80, tags: ['TAG-ADDICTIVE', 'TAG-FRAGILE'] },
@@ -30,11 +30,17 @@ export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
   'T1-06': { tier: 1, basePrice: 110, tags: ['TAG-ODOROUS', 'TAG-FLAMMABLE'] },
 
   // Tier 2 : contrebande culturelle & épicerie noire
-  'T2-01': { tier: 2, basePrice: 350, tags: ['TAG-ODOROUS', 'TAG-CHEMICAL'] },
+  'T2-01': { tier: 2, basePrice: 350, tags: ['TAG-ODOROUS', 'TAG-CHEMICAL'], bluffAid: { crates: 1, bonus: 0, cancelsSmell: true } },
   'T2-02': { tier: 2, basePrice: 420, tags: ['TAG-ODOROUS', 'TAG-PERISHABLE'], nightProfile: 'festive' },
   'T2-03': { tier: 2, basePrice: 500, tags: ['TAG-CULTURE', 'TAG-FRAGILE'], nightProfile: 'festive' },
   'T2-04': { tier: 2, basePrice: 650, tags: ['TAG-TECH'] },
-  'T2-05': { tier: 2, basePrice: 380, tags: ['TAG-CHEMICAL', 'TAG-ADDICTIVE'] },
+  'T2-05': {
+    tier: 2,
+    basePrice: 380,
+    tags: ['TAG-CHEMICAL', 'TAG-ADDICTIVE'],
+    doping: { fleeBonus: 0.25, chassisLoss: 10, iccLoss: 5 },
+    sleeplessNight: { healthLoss: 10, minHealth: 10 },
+  },
   'T2-06': { tier: 2, basePrice: 550, tags: ['TAG-CULTURE', 'TAG-TECH'] },
   'T2-07': { tier: 2, basePrice: 480, tags: ['TAG-FRAGILE', 'TAG-CHEMICAL'] },
 
@@ -60,7 +66,7 @@ export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
   // Tier 4 : ennemis publics n°1
   'T4-01': { tier: 4, basePrice: 6_000, tags: ['TAG-PERISHABLE', 'TAG-ODOROUS'], nightProfile: 'festive' },
   'T4-02': { tier: 4, basePrice: 8_500, tags: ['TAG-CULTURE', 'TAG-FRAGILE'] },
-  'T4-03': { tier: 4, basePrice: 12_000, tags: ['TAG-TECH'] },
+  'T4-03': { tier: 4, basePrice: 12_000, tags: ['TAG-TECH'], iccRestore: 25 },
   'T4-04': { tier: 4, basePrice: 15_000, tags: ['TAG-CHEMICAL', 'TAG-FRAGILE'] },
   'T4-05': { tier: 4, basePrice: 18_000, tags: ['TAG-CHEMICAL', 'TAG-FRAGILE'] },
   'T4-06': {

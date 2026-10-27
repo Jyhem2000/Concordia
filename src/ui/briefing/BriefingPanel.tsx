@@ -51,6 +51,7 @@ function isEmpty(briefing: MorningBriefing): boolean {
   return (
     !hasSleepGains(briefing) &&
     briefing.custodyHealth === 0 &&
+    briefing.rotten === 0 &&
     !briefing.debtInterest &&
     briefing.beating === 0 &&
     !briefing.debtLate &&
@@ -68,6 +69,7 @@ function BriefingLines({ briefing }: BriefingLinesProps) {
     <ul className="mt-1 space-y-0.5">
       {sleep && hasSleepGains(briefing) && <li>{t.briefing.sleep(signedPercent(sleep.icc / ICC_MAX, 0), sleep.health)}</li>}
       {custodyHealth > 0 && <li className="text-red-300">{t.briefing.custody(custodyHealth)}</li>}
+      {briefing.rotten > 0 && <li className="text-red-300">{t.briefing.rotten(briefing.rotten)}</li>}
       {debtInterest && (
         <li>
           <BriefingRow label={t.briefing.debtInterest} className="text-red-300">

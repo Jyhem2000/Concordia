@@ -19,7 +19,7 @@ import { risk, riskBreakdown } from './risk.ts'
 import { defined, gameAt } from './test-helpers.ts'
 import type { CargoLot, DistrictId, GameState, ProductId } from './types.ts'
 
-const lot = (productId: ProductId, qty: number): CargoLot => ({ productId, qty, unitCost: 1, travelled: true })
+const lot = (productId: ProductId, qty: number): CargoLot => ({ productId, qty, unitCost: 1, travelled: true, boughtDay: 1, damaged: false })
 const vehicleFactor = defined(VEHICLES['VEH-01'].riskFactor)
 
 const termOf = (state: GameState, to: DistrictId, source: string) =>

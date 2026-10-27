@@ -51,7 +51,9 @@ describe('collecte de protection', () => {
   })
 
   it('porte sur le Cash-Puce et la soute au prix de base', () => {
-    const withCargo = protectionBreakdown(gameAt(2, { cash: 1_000, cargo: [{ productId: 'T3-01', qty: 2, unitCost: 1, travelled: true }] }))
+    const withCargo = protectionBreakdown(
+      gameAt(2, { cash: 1_000, cargo: [{ productId: 'T3-01', qty: 2, unitCost: 1, travelled: true, boughtDay: 1, damaged: false }] }),
+    )
     const cashOnly = protectionBreakdown(gameAt(2, { cash: 1_000 }))
     expect(cashOnly.total).toBe(Math.round(1_000 * PROTECTION.rate))
     expect(withCargo.total).toBeGreaterThan(cashOnly.total)

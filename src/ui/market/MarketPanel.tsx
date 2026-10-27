@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react'
 import { PRODUCTS } from '../../data/products.ts'
-import { maxBuy } from '../../engine/actions.ts'
+import { FRESHNESS } from '../../data/balance.ts'
+import { checkUseProduct, maxBuy } from '../../engine/actions.ts'
+import { freshnessOf } from '../../engine/condition.ts'
 import { averageCost, ownedQty } from '../../engine/cargo.ts'
 import { demandQuota, demandRefill, productStatus, quoteBreakdown, saleQuote, shopProducts } from '../../engine/market.ts'
-import type { ProductId, Tier } from '../../engine/types.ts'
+import type { FreshnessStage, ProductId, Tier } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
@@ -28,6 +30,9 @@ type QuantityButtonsProps = {
   onPick: (qty: number) => void
   variant: 'primary' | 'danger'
 }
+
+/** Ordre d'affichage des états de fraîcheur */
+const FRESHNESS_ORDER: readonly FreshnessStage[] = ['extra', 'standard', 'gamey', 'spoiled']
 
 /** Couleur de chaque tier (chap. 10) */
 const tierColors: Record<Tier, string> = {
@@ -82,6 +87,19 @@ function MarketRow({ productId }: MarketRowProps) {
   const sale = owned > 0 ? saleQuote(game, productId, 1) : null
   const saleAll = owned > 0 ? saleQuote(game, productId, owned) : null
 
+  // État des caisses en soute : fraîcheur des périssables, casse des fragiles (chap. 3)
+  const lots = game.cargo.filter((lot) => lot.productId === productId)
+  const stages = FRESHNESS_ORDER.flatMap((stage) => {
+    const qty = lots.reduce((total, lot) => (freshnessOf(game, lot) === stage ? total + lot.qty : total), 0)
+    return qty > 0 ? [`${qty} ${t.market.freshness[stage]}`] : []
+  })
+  const damaged = lots.reduce((total, lot) => (lot.damaged ? total + lot.qty : total), 0)
+  const oldest = lots.reduce((min, lot) => (freshnessOf(game, lot) ? Math.min(min, lot.boughtDay) : min), Infinity)
+  const rotsIn = Number.isFinite(oldest) ? FRESHNESS.rottenFromAge - (game.day - oldest) : null
+  const conditions = [...stages, ...(damaged > 0 ? [`${damaged} ${t.market.damaged}`] : []), ...(rotsIn !== null ? [t.market.rotsIn(rotsIn)] : [])]
+  const iccRestore = PRODUCTS[productId].iccRestore
+  const useError = useGameStore((s) => checkUseProduct(s.game, productId))
+
   const buy = (qty: number) => dispatch({ type: 'buy', productId, qty })
   const sell = (qty: number) => dispatch({ type: 'sell', productId, qty })
 
@@ -105,6 +123,11 @@ function MarketRow({ productId }: MarketRowProps) {
             ? t.market.unlimited
             : t.market.demandLeft(demandLeft, Math.min(quota - demandLeft, demandRefill(quota)))}
         </Field>
+        {owned > 0 && conditions.length > 0 && (
+          <Field label={t.market.condition} wide>
+            {conditions.join(' · ')}
+          </Field>
+        )}
         <Field label={t.market.owned}>
           {owned}
           {cost !== null && <span className="ml-1 text-xs text-zinc-400">({t.market.averageCost(credits(cost))})</span>}
@@ -131,6 +154,14 @@ function MarketRow({ productId }: MarketRowProps) {
       <div className="mt-2 flex flex-wrap gap-1.5">
         {stock !== undefined && <QuantityButtons label={t.market.buy} max={buyMax} onPick={buy} maxLabel={t.market.max} variant="primary" />}
         {owned > 0 && <QuantityButtons label={t.market.sell} max={owned} onPick={sell} maxLabel={t.market.max} variant="danger" />}
+        {owned > 0 && iccRestore !== undefined && (
+          <span className="flex items-center gap-1.5">
+            <Button disabled={useError !== null} onClick={() => dispatch({ type: 'useProduct', productId })}>
+              {t.market.use}
+            </Button>
+            <span className="text-xs text-zinc-400">{useError ? t.error[useError] : t.market.iccRestore(iccRestore)}</span>
+          </span>
+        )}
       </div>
     </li>
   )
