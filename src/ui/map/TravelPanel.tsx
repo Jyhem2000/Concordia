@@ -1,10 +1,13 @@
 import { MapPin } from 'lucide-react'
 import { DISTRICTS } from '../../data/districts.ts'
 import { planTravel } from '../../engine/actions.ts'
+import { averageCost } from '../../engine/cargo.ts'
+import { estimatedUnitSale } from '../../engine/market.ts'
 import type { DistrictId, ProductId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
+import Margin from '../shared/Margin.tsx'
 
 /** Ordre d'affichage : de la périphérie au sommet de la pyramide (carte du chap. 4) */
 const order = (Object.keys(DISTRICTS) as DistrictId[]).sort((a, b) => DISTRICTS[a].echelon - DISTRICTS[b].echelon)
@@ -60,11 +63,14 @@ function DistrictRow({ districtId }: { districtId: DistrictId }) {
         <div className="mt-1 text-xs text-zinc-400">
           {memoryLabel}
           {memory && owned.length > 0 && (
-            <ul className="mt-0.5 text-zinc-300">
+            <ul className="mt-0.5 text-zinc-300" title={t.travel.estimateHint}>
               {owned.map((id) => (
                 <li key={id} className="flex justify-between gap-2">
                   <span className="truncate">{t.product[id].name}</span>
-                  <span>{credits(memory.quotes[id])}</span>
+                  <span className="flex items-center gap-1.5">
+                    <Margin revenue={estimatedUnitSale(memory.quotes[id])} cost={averageCost(game.cargo, id) ?? 0} showAmount={false} />
+                    {credits(memory.quotes[id])}
+                  </span>
                 </li>
               ))}
             </ul>

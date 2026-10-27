@@ -95,6 +95,18 @@ describe('prix de vente', () => {
     expect(sale.total).toBeLessThan(saleQuote(state, 'T2-02', 1).total * (demand + 2))
   })
 
+  it("cumule le prix d'achat des caisses vendues, lots les plus anciens d'abord", () => {
+    const state: GameState = {
+      ...withLot(true),
+      cargo: [
+        { productId: 'T2-02', qty: 2, unitCost: 100, travelled: true },
+        { productId: 'T2-02', qty: 3, unitCost: 300, travelled: true },
+      ],
+    }
+    expect(saleQuote(state, 'T2-02', 1).cost).toBe(100)
+    expect(saleQuote(state, 'T2-02', 4).cost).toBe(100 + 100 + 300 + 300)
+  })
+
   it('applique le profil nuit festif, sauf sans avoir voyagé (anti-arbitrage)', () => {
     const day = saleQuote(withLot(true), 'T2-02', 1).total
     expect(saleQuote(withLot(true, 'night'), 'T2-02', 1).total).toBeGreaterThan(day)

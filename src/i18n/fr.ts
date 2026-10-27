@@ -100,6 +100,9 @@ export const fr = {
     demandLeft: (left: number, refill: number) => (refill > 0 ? `${left} (+${refill} demain)` : `${left}`),
     saturated: (qty: number) => `dont ${qty} à prix saturé`,
     averageCost: (cost: string) => `acheté ${cost}/u`,
+    margin: 'Marge',
+    marginUnit: '/u',
+    marginAll: (qty: number) => `tout (${qty}) :`,
     buy: 'Acheter',
     sell: 'Vendre',
     max: 'MAX',
@@ -107,6 +110,14 @@ export const fr = {
       production: 'Production locale',
       strong: 'Forte demande',
       neutral: '',
+    },
+  },
+
+  margin: {
+    trend: {
+      up: 'Vente rentable',
+      flat: 'Marge faible',
+      down: 'Vente à perte',
     },
   },
 
@@ -120,6 +131,7 @@ export const fr = {
     memoryNever: 'Cours jamais observés',
     memoryToday: "Cours vus aujourd'hui",
     memoryDaysAgo: (days: number) => `Cours vus il y a ${days} jour${days > 1 ? 's' : ''}`,
+    estimateHint: 'Marge estimée sur le cours vu, commission déduite (hors savoir-faire et saturation)',
   },
 
   evening: {

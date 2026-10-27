@@ -15,8 +15,12 @@ export type I18n = {
   t: Messages
   /** 2500 → « 2 500 ₡ » */
   credits(amount: number): string
+  /** 310 → « +310 ₡ », −40 → « −40 ₡ » */
+  signedCredits(amount: number): string
   /** Fraction → pourcentage : 0.567 → « 56,7 % » */
   percent(fraction: number, maxDigits?: number): string
+  /** Pourcentage signé : 0.25 → « +25 % » */
+  signedPercent(fraction: number, maxDigits?: number): string
   /** 0.85 → « ×0,85 » */
   multiplier(factor: number): string
   number(value: number, maxDigits?: number): string
@@ -56,7 +60,9 @@ function createI18n(locale: Locale): I18n {
     locale,
     t,
     credits: (amount) => t.format.credits(number(amount, 0)),
+    signedCredits: (amount) => t.format.credits(format(amount, { maximumFractionDigits: 0, signDisplay: 'exceptZero' })),
     percent: (fraction, maxDigits = 1) => format(fraction, { style: 'percent', maximumFractionDigits: maxDigits }),
+    signedPercent: (fraction, maxDigits = 1) => format(fraction, { style: 'percent', maximumFractionDigits: maxDigits, signDisplay: 'exceptZero' }),
     multiplier: (factor) => t.format.multiplier(number(factor)),
     number,
     label: (source) => labelOf(t, source),

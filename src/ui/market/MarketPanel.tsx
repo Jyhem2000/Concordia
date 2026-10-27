@@ -8,6 +8,7 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import Detailed from '../shared/Detailed.tsx'
+import Margin from '../shared/Margin.tsx'
 
 /** Couleur de chaque tier (chap. 9) */
 const tierColors: Record<Tier, string> = {
@@ -95,6 +96,17 @@ function MarketRow({ productId }: { productId: ProductId }) {
             {saleAll.saturatedQty > 0 && <span className="ml-1 text-xs text-red-300">{t.market.saturated(saleAll.saturatedQty)}</span>}
           </Field>
         )}
+        {sale && saleAll && (
+          <Field label={t.market.margin} wide>
+            <Margin revenue={sale.total} cost={sale.cost} unit={t.market.marginUnit} />
+            {owned > 1 && (
+              <>
+                <span className="ml-2 text-xs text-zinc-400">{t.market.marginAll(owned)}</span>
+                <Margin revenue={saleAll.total} cost={saleAll.cost} className="ml-1" />
+              </>
+            )}
+          </Field>
+        )}
       </dl>
 
       <div className="mt-2 flex flex-wrap gap-1.5">
@@ -105,11 +117,11 @@ function MarketRow({ productId }: { productId: ProductId }) {
   )
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+function Field({ label, wide = false, children }: { label: string; wide?: boolean; children: ReactNode }) {
   return (
-    <div className="flex gap-1.5">
+    <div className={`flex gap-1.5 ${wide ? 'col-span-2' : ''}`}>
       <dt className="text-zinc-500">{label}</dt>
-      <dd>{children}</dd>
+      <dd className="flex flex-wrap items-baseline">{children}</dd>
     </div>
   )
 }

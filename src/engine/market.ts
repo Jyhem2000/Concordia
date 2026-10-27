@@ -153,6 +153,8 @@ export function unitSaleBreakdown(state: GameState, lot: CargoLot, saturated: bo
 
 export type SaleQuote = {
   total: number
+  /** Prix d'achat cumulé des caisses vendues (lots les plus anciens d'abord) */
+  cost: number
   /** Caisses vendues au-delà de la demande restante */
   saturatedQty: number
   /** Détail du prix de la première caisse vendue */
@@ -165,6 +167,7 @@ export function saleQuote(state: GameState, productId: ProductId, qty: number): 
   const demandLeft = state.markets[state.districtId].demand[productId] ?? Infinity
 
   let total = 0
+  let cost = 0
   let sold = 0
   let first: Breakdown | null = null
   for (const lot of taken) {
@@ -172,10 +175,16 @@ export function saleQuote(state: GameState, productId: ProductId, qty: number): 
       const unit = unitSaleBreakdown(state, lot, sold >= demandLeft)
       first ??= unit
       total += unit.total
+      cost += lot.unitCost
       sold++
     }
   }
-  return { total, saturatedQty: Math.max(0, sold - demandLeft), first }
+  return { total, cost, saturatedQty: Math.max(0, sold - demandLeft), first }
+}
+
+/** Estimation du produit net d'une caisse à partir d'un cours mémorisé : commission seule, sans savoir-faire ni saturation */
+export function estimatedUnitSale(quote: number): number {
+  return Math.round(quote * SALE_COMMISSION)
 }
 
 /** Prix d'une ration de Synthanol dans le district actuel, indexé sur l'inflation */
