@@ -77,6 +77,7 @@ export type RuleId =
   | 'eject-manual'
   | 'emergency-tow'
   | 'aftershock'
+  | 'repair'
 
 export type RuleSource = `rule.${RuleId}`
 

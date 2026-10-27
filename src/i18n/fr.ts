@@ -134,6 +134,7 @@ export const fr = {
     'rule.eject-manual': 'Éjection manuelle',
     'rule.emergency-tow': "Dépannage d'urgence",
     'rule.aftershock': 'Contrecoup',
+    'rule.repair': 'Réparation (par PV)',
   } satisfies Record<RuleSource, string>,
 
   // ─── Interface ───
@@ -187,6 +188,8 @@ export const fr = {
     rotten: (crates: number) => `${crates} caisse${crates > 1 ? 's' : ''} pourrie${crates > 1 ? 's' : ''}, détruite${crates > 1 ? 's' : ''} à 06h00.`,
     heat: (product: string, melted: number, aged: number, rotten: number) =>
       `Canicule : ${melted} × ${product} fondu en soute, ${aged} caisse${aged > 1 ? 's' : ''} périssable${aged > 1 ? 's' : ''} vieillie${aged > 1 ? 's' : ''}, ${rotten} pourrie${rotten > 1 ? 's' : ''} et détruite${rotten > 1 ? 's' : ''}.`,
+    recovered: (back: number, lost: number) =>
+      `Trappe de largage : les complices rapportent ${back} caisse${back > 1 ? 's' : ''}, ${lost} perdue${lost > 1 ? 's' : ''}.`,
     lockedIn: (district: string) => `Complexe bouclé : vous restez au sas de ${district}, la journée commence à 20h00.`,
     debtInterest: 'Dette après intérêts',
     beating: (health: number) => `Les Bouchers de Viktor sont passés : −${health} PV.`,
@@ -231,6 +234,7 @@ export const fr = {
       tagOff: (tag: string) => `Effets ${tag} annulés`,
       tag: (tag: string, factor: string) => `Effets ${tag} ${factor}`,
       halfDay: "Entrer dans le district, ou s'y trouver à 06h00, coûte une demi-journée au sas",
+      repair: (factor: string) => `Réparations du garage ${factor}`,
       heat: (product: string, days: number, chassis: number, health: number) =>
         `À 06h00 : ${product} fond en soute, les autres périssables vieillissent de ${days} jours. Trajets de jour : châssis −${chassis} (sauf refroidissement), Santé −${health}`,
       tagged: (tag: string) => `tout ${tag}`,
@@ -288,6 +292,41 @@ export const fr = {
       'EVT-R14': { situation: "Péage caritatif : autocollants « J'aime Maman Aeterna ».", a: 'Acheter', b: 'Refuser' },
       'EVT-R15': { situation: 'Un autre contrebandier propose un échange dans un angle mort.', a: 'Troc aveugle', b: 'Refuser' },
     } satisfies Record<RoadEventId, RoadTexts>,
+  },
+
+  garage: {
+    repairTitle: 'Réparation du châssis',
+    repairRule: (missing: number) => `${missing} PV à réparer, prix par PV :`,
+    repair: 'Réparer (PV)',
+    modulesTitle: (mounted: number, slots: number) => `Modules (${mounted}/${slots} slots montés)`,
+    vehiclesTitle: 'Châssis',
+    vehicleRule: "Le nouveau châssis reprend la marchandise, le carburant et les modules ; l'ancien est perdu, sans reprise.",
+    vehicleStats: (cargo: number, slots: number, chassis: number, tank: number, day: number, night: number) =>
+      `Soute ${cargo} · ${slots} slot${slots > 1 ? 's' : ''} · châssis ${chassis} PV · réservoir ${tank} · ${day} ration${day > 1 ? 's' : ''} de jour, ${night} de nuit`,
+    buy: 'Acheter',
+    mount: 'Monter',
+    unmount: 'Démonter',
+    mounted: 'monté',
+    stored: 'en réserve',
+    lowProfile: (factor: string) => `Profil bas : risque de contrôle ${factor}.`,
+    ecoEngine: 'Consomme autant de nuit que de jour.',
+    camouflage: (factor: string, share: string) =>
+      `Camouflage corporatif : risque ${factor} si le Légal fait au moins ${share} de la soute (soute vide comprise).`,
+    coldChain: "Chaîne du froid : les périssables ne perdent de la fraîcheur qu'un matin sur deux.",
+    transponder: (districts: string, bonus: string, icc: string) =>
+      `Transpondeur à ${districts} : fuite ${bonus}, aucun dégât de châssis au succès, perte d'ICC ${icc}.`,
+    heavy: (toll: string, crusher: string, risk: string) =>
+      `Monstre blindé : péage des milices ${toll}, passage forcé sans dégât, broyeur acide partout (${crusher}, sans dégât). Risque de contrôle ${risk}.`,
+    freshnessDelay: (days: number) => `Cycle de fraîcheur retardé de ${days} jour${days > 1 ? 's' : ''}.`,
+    heatProof: 'Immunise soute et moteur contre la canicule.',
+    tagOff: (tag: string) => `Annule la détection ${tag}.`,
+    tagFactor: (tag: string, factor: string) => `Malus ${tag} ${factor} (risque et bluff).`,
+    smoothRide: "Fragiles immunisés à la casse ; pas d'usure de châssis la nuit.",
+    rotatingPlate: "Une fois par jour, une fuite réussie ne coûte pas d'ICC.",
+    ram: (bonus: string, factor: string) => `Fuite et passage forcé ${bonus} ; dégâts de la fuite ${factor}.`,
+    trapdoor: (chance: string, cooldown: number, recovery: string) =>
+      `Éjection par les égouts (${chance}, sans dégât, sauf Olympus-Green), recharge ${cooldown} jours ; le lendemain, 0 à ${recovery} des caisses rapportées.`,
+    fakeTerminal: (bonus: string, factor: string) => `Bluff ${bonus} ; tarif standard de corruption ${factor}.`,
   },
 
   place: {
@@ -466,6 +505,14 @@ export const fr = {
     fleeFailure: (seizure: string, icc: string, chassis: string, health: string) =>
       `Échec : confiscation, saisie de ${seizure} du Cash-Puce, ICC ${icc}, châssis ${chassis}, Santé ${health}.`,
     fleeFailureRacket: 'Échec : les miliciens appliquent la sanction du refus.',
+    ejectMode: {
+      trapdoor: 'Trappe de largage (égouts)',
+      crusher: 'Broyeur acide',
+      manual: "Éjection d'urgence (ruelle)",
+    },
+    ejectTrapdoor: (recovery: string, cooldown: number) =>
+      `Succès : l'illégal file aux égouts, sans dégât ; demain à 06h00, des complices en rapportent entre 0 et ${recovery}. Trappe indisponible ${cooldown} jours.`,
+    ejectCrusher: 'Succès : la contrebande est dissoute dans la benne, sans dégât ni récupération.',
     ejectSuccess: (chassis: string) => `Succès : l'illégal finit dans une ruelle, la fouille ne trouve rien. Châssis ${chassis}.`,
     ejectFailure: (raise: string, icc: string) => `Échec : sanction de base, amende +${raise}, ICC ${icc} de plus.`,
     toll: (amount: string) => `Péage : ${amount}.`,
@@ -618,6 +665,9 @@ export const fr = {
     'not-grindable': 'Viktor ne rachète que les périssables Faisandés ou Avariés.',
     'road-event': 'Un aléa routier attend votre choix.',
     'no-road-event': 'Aucun aléa routier en cours.',
+    'already-owned': 'Déjà possédé.',
+    'not-owned': 'Module non possédé ou non monté.',
+    'no-free-slot': 'Plus de slot libre sur ce châssis : démontez un module.',
   } satisfies Record<ActionError, string>,
 
   // ─── Données de jeu (chap. 3 à 8) ───

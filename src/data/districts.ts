@@ -23,7 +23,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     goldFastLane: false,
     iccScanners: false,
     flyingCheckShare: 0.15,
-    ejectionAllowed: true,
+    ejection: { manual: true, trapdoor: true },
     bribeFavorites: ['T1-02', 'T1-05', 'T3-03'], // agents humains
     tollFavorites: [],
     coefProduction: 0.75,
@@ -53,7 +53,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     goldFastLane: false,
     iccScanners: false,
     flyingCheckShare: 0.25,
-    ejectionAllowed: true,
+    ejection: { manual: true, trapdoor: true },
     bribeFavorites: ['T1-02', 'T1-05', 'T3-03'], // agents humains
     tollFavorites: [],
     coefProduction: 0.75,
@@ -76,7 +76,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     goldFastLane: false,
     iccScanners: false,
     flyingCheckShare: 0.3,
-    ejectionAllowed: true,
+    ejection: { manual: true, trapdoor: true },
     bribeFavorites: ['T1-02', 'T1-05', 'T3-03'], // agents humains
     tollFavorites: [],
     coefProduction: 0.75,
@@ -99,7 +99,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     goldFastLane: false,
     iccScanners: false,
     flyingCheckShare: 0,
-    ejectionAllowed: true,
+    ejection: { manual: true, trapdoor: true },
     bribeFavorites: [], // pas de BRC
     tollFavorites: ['T1-06', 'T3-03', 'T3-04'], // ce qui manque aux bannis
     coefProduction: 0.75,
@@ -124,7 +124,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     goldFastLane: true,
     iccScanners: false,
     flyingCheckShare: 0.4,
-    ejectionAllowed: true,
+    ejection: { manual: false, trapdoor: true }, // LiDAR : seuls les égouts
     bribeFavorites: ['T3-02', 'T3-03'], // douaniers d'élite
     tollFavorites: [],
     coefProduction: 0.75,
@@ -153,7 +153,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     goldFastLane: true,
     iccScanners: true,
     flyingCheckShare: 0.5,
-    ejectionAllowed: false, // dalle bio-scellée
+    ejection: { manual: false, trapdoor: false }, // dalle bio-scellée
     bribeFavorites: ['T3-02', 'T3-03'], // douaniers d'élite
     tollFavorites: [],
     coefProduction: 0.85,

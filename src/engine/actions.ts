@@ -6,6 +6,7 @@ import { cargoUsed, giveCrates, ownedQty, takeLots } from './cargo.ts'
 import { depositBreakdown, loanRoom, offshoreBalance, withdrawFrom } from './finance.ts'
 import { checkMove, drawInterception, emergencyTow, resolveMove } from './interception.ts'
 import { crossedDistricts, shortestRoute } from './map.ts'
+import { buyModule, buyVehicle, mountedEffect, mountModule, repair } from './equipment.ts'
 import { arrive, drawRoadEvent, heatWave } from './events.ts'
 import { changeHealth } from './gauges.ts'
 import { fuelPriceBreakdown, grindableQty, grinderSale, quote, saleQuote } from './market.ts'
@@ -15,7 +16,19 @@ import { checkRoadChoice, resolveRoadChoice, type RoadChoiceId } from './road.ts
 import { createRng } from './rng.ts'
 import { sleep } from './routine.ts'
 import { remember } from './state.ts'
-import type { CargoLot, DistrictId, GameState, InterceptionMove, LocationId, LocationService, Offer, ProductId, Tactics } from './types.ts'
+import type {
+  CargoLot,
+  DistrictId,
+  GameState,
+  InterceptionMove,
+  LocationId,
+  LocationService,
+  ModuleId,
+  Offer,
+  ProductId,
+  Tactics,
+  VehicleId,
+} from './types.ts'
 
 /*
  * Actions du joueur : chaque action produit un nouvel état, ou une erreur sans rien changer.
@@ -40,6 +53,11 @@ export type Action =
   | { type: 'withdraw'; amount: number }
   /** Option de l'écran d'interception ; `offer` pour la corruption */
   | { type: 'intercept'; move: InterceptionMove; offer?: Offer; tactics?: Tactics }
+  | { type: 'buyVehicle'; vehicleId: VehicleId }
+  | { type: 'buyModule'; moduleId: ModuleId }
+  /** Monter (`mount` vrai) ou démonter un module possédé */
+  | { type: 'mountModule'; moduleId: ModuleId; mount: boolean }
+  | { type: 'repair'; pv: number }
   /** Option d'un aléa routier ; `pay` : index du paiement choisi quand l'option en propose plusieurs */
   | { type: 'road'; choice: RoadChoiceId; pay?: number }
 
@@ -78,6 +96,9 @@ export type ActionError =
   | 'not-grindable'
   | 'road-event'
   | 'no-road-event'
+  | 'already-owned'
+  | 'not-owned'
+  | 'no-free-slot'
 
 export type ActionResult = { ok: true; state: GameState } | { ok: false; error: ActionError }
 
@@ -218,7 +239,10 @@ function travel(state: GameState, to: DistrictId): ActionResult {
 
   // Usure du trajet : galeries de nuit, ou canicule de jour ; des caisses peuvent refroidir le moteur (chap. 2, 3 et 8)
   const heat = state.phase === 'day' ? heatWave(state) : null
-  const wear = tripWear(state, state.phase === 'night' ? NIGHT_TRIP_CHASSIS_WEAR : (heat?.dayTripChassis ?? 0))
+  // Les suspensions annulent l'usure de nuit, le caisson cryo celle de la canicule
+  const nightWear = mountedEffect(state, 'smoothRide') ? 0 : NIGHT_TRIP_CHASSIS_WEAR
+  const heatWear = mountedEffect(state, 'heatProof') ? 0 : (heat?.dayTripChassis ?? 0)
+  const wear = tripWear(state, state.phase === 'night' ? nightWear : heatWear)
   const stroke = heat ? changeHealth(state, -heat.dayTripHealth, 1) : null
   const arrived: GameState = {
     ...state,
@@ -373,6 +397,14 @@ function forceCurfew(state: GameState, drink?: ProductId): ActionResult {
   return { ok: true, state: changeHealth(drunk, -sleepless.healthLoss).state }
 }
 
+// ─── Garage (chap. 4 et 5) ───
+
+/** Les services du garage s'obtiennent de jour, à Rust Valley */
+function garage(state: GameState, run: () => ActionResult): ActionResult {
+  const closed = checkService(state, 'garage')
+  return closed ? fail(closed) : run()
+}
+
 // ─── Point d'entrée ───
 
 export function applyAction(state: GameState, action: Action): ActionResult {
@@ -390,6 +422,14 @@ export function applyAction(state: GameState, action: Action): ActionResult {
       const error = checkRoadChoice(state, action.choice, action.pay)
       return error ? fail(error) : { ok: true, state: resolveRoadChoice(state, action.choice, action.pay) }
     }
+    case 'buyVehicle':
+      return garage(state, () => buyVehicle(state, action.vehicleId))
+    case 'buyModule':
+      return garage(state, () => buyModule(state, action.moduleId))
+    case 'mountModule':
+      return garage(state, () => mountModule(state, action.moduleId, action.mount))
+    case 'repair':
+      return isQuantity(action.pv) ? garage(state, () => repair(state, action.pv)) : fail('invalid-amount')
     case 'buy':
       return isQuantity(action.qty) ? buy(state, action.productId, action.qty) : fail('invalid-quantity')
     case 'sell':

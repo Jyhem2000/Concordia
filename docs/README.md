@@ -51,9 +51,9 @@ Les docs décrivent le jeu complet ; tout n'est pas encore en jeu. Ce tableau di
 | :---: | :--- | :--- |
 | 2 | Jauges (ICC, Santé, châssis, carburant), journée, couvre-feu, épuisement, demi-journée perdue, dépannage, audit et fins | Exemption Métabolique et Sédation, pompes officielles fermées la nuit |
 | 3 | Tags, masquage, fraîcheur, casse, explosions, actions des produits | — |
-| 4 | Carte, districts, racket et portique de `[D4]`, `[LOC-D1-1]` (dette, Hachoir), `[LOC-D5-1]` (compte offshore) | `[LOC-D1-2]`, `[LOC-D2-1]`, `[LOC-D3-1]`, `[LOC-D4-1]`, `[LOC-D4-2]`, `[LOC-D6-1]`, falsification de la Loterie |
-| 5 | `[VEH-01]` | Autres véhicules, modules, équipage et salaires |
-| 6 | Risque, Fiche S, barrage fixe et contrôle volant, toutes les options, garde à vue | Bonus de modules et d'équipiers |
+| 4 | Carte, districts, racket et portique de `[D4]`, `[LOC-D1-1]` (dette, Hachoir), `[LOC-D4-1]` (garage), `[LOC-D5-1]` (compte offshore) | `[LOC-D1-2]`, `[LOC-D2-1]`, `[LOC-D3-1]`, `[LOC-D4-2]`, `[LOC-D6-1]`, falsification de la Loterie |
+| 5 | Véhicules et modules | Équipage et salaires |
+| 6 | Risque, Fiche S, barrage fixe et contrôle volant, toutes les options et modes d'éjection, garde à vue, bonus des véhicules et modules | Bonus des équipiers |
 | 7 | Boutique, cours et tendance, quotas, prix de vente, paiement en nature, inflation, dette, avance de survie, collecte, compte offshore | Bonus d'influence (`[LOC-D2-1]`), flux de `[CREW-02]` |
 | 8 | Événements globaux et locaux, rumeurs, contrecoups, Loterie, aléas routiers | Effets liés aux modules, à l'équipage et aux lieux à venir (chap. 8, règles communes) |
 | 9 | — | Simulations, une fois le jeu complet |

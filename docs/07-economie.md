@@ -34,7 +34,7 @@ Cours = Arrondi( Prix_Base × Coef_District × Bruit × Mult_Événement )
   Le choc est tiré uniformément chaque matin ; le Jour 1, l'écart est tiré uniformément entre les bornes. *Lecture :* un produit anormalement bon marché aujourd'hui le restera probablement demain, puis revient vers son cours normal en quelques jours ; une hausse de plusieurs jours n'annonce pas une baisse, seulement un retour progressif. Un mauvais tirage aux deux bouts peut rendre un trajet perdant. L'historique des cours observés (fiche produit, chap. 10) permet de lire ces tendances.
 * **Mult_Événement = min( plafond, Mult_EvtActif × Bonus_Influence )** (plafond : `EVENT_MULT_CAP` dans [`events.ts`](../src/data/events.ts))
   * *Mult_EvtActif :* 1.00 par défaut. Si plusieurs multiplicateurs touchent le même produit (événement global, local, contrecoup, chap. 8), on garde celui dont l'écart `|Mult − 1.00|` est le plus fort (égalité : le local prime, puis le contrecoup cède).
-  * *Bonus_Influence :* `[LOC-D2-1]`, multiplié par-dessus.
+  * *Bonus_Influence :* `[LOC-D2-1]`, multiplié par-dessus, le lendemain de la commande seulement (1.00 sinon).
   * *Plafond :* quel que soit le cumul, jamais au-dessus.
 * **Le cours est fixe toute la journée.** La nuit ne recalcule rien ; elle n'applique que deux ajustements connus dès le matin : le profil nuit à la vente, et l'annulation des événements marqués « jour seulement ».
 

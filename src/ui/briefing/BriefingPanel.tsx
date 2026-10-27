@@ -55,6 +55,7 @@ function isEmpty(briefing: MorningBriefing): boolean {
     briefing.rotten === 0 &&
     !briefing.heat &&
     !briefing.lockedIn &&
+    !briefing.recovered &&
     !briefing.debtInterest &&
     briefing.beating === 0 &&
     !briefing.debtLate &&
@@ -82,6 +83,7 @@ function BriefingLines({ briefing }: BriefingLinesProps) {
         </li>
       )}
       {briefing.lockedIn && <li className="text-red-300">{t.briefing.lockedIn(t.district[districtId].name)}</li>}
+      {briefing.recovered && <li>{t.briefing.recovered(briefing.recovered.back, briefing.recovered.lost)}</li>}
       {debtInterest && (
         <li>
           <BriefingRow label={t.briefing.debtInterest} className="text-red-300">

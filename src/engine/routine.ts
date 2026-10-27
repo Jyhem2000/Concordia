@@ -1,10 +1,10 @@
 import { CUSTODY, DEBT_BEATING, DEBT_LATE, ENDINGS, GAME_LENGTH_DAYS, PROTECTION, RELAY_SLEEP } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
-import { PRODUCTS } from '../data/products.ts'
-import { TAGS } from '../data/tags.ts'
+import { MODULES } from '../data/vehicles.ts'
 import { ownedQty } from './cargo.ts'
 import { debtInterestBreakdown, offshoreBalance, offshoreInterestBreakdown, protectionBreakdown } from './finance.ts'
-import { removeRotten } from './condition.ts'
+import { isPerishable, removeRotten } from './condition.ts'
+import { mountedEffect, recoverDumped } from './equipment.ts'
 import { changeHealth, gainRouteIcc, iccTier } from './gauges.ts'
 import { drawEvents, hasEffect, heatWave } from './events.ts'
 import { drawMarkets } from './market.ts'
@@ -91,6 +91,7 @@ function morningRoutine(state: GameState, night: Night): GameState {
     rotten: 0,
     heat: null,
     lockedIn: false,
+    recovered: null,
     debtInterest: null,
     beating: 0,
     debtLate: false,
@@ -126,6 +127,15 @@ function morningRoutine(state: GameState, night: Night): GameState {
   briefing.offshoreInterest = offshoreInterestBreakdown(s.offshore)
   if (briefing.offshoreInterest) s = { ...s, offshore: { ...s.offshore, interest: s.offshore.interest + briefing.offshoreInterest.total } }
 
+  // 6. Les complices de la trappe rapportent une part des caisses larguées la veille
+  const trapdoor = MODULES['MOD-07'].trapdoor
+  if (s.dumped.length > 0 && trapdoor) {
+    const shareRng = createRng(s.rng)
+    const recovered = recoverDumped(s, shareRng.float(0, trapdoor.maxRecovery))
+    briefing.recovered = { back: recovered.back, lost: recovered.lost }
+    s = { ...s, cargo: recovered.cargo, dumped: [], rng: shareRng.state }
+  }
+
   // 5. Fraîcheur : les périssables pourris sont détruits
   const rot = removeRotten(s)
   briefing.rotten = rot.rotten
@@ -139,8 +149,9 @@ function morningRoutine(state: GameState, night: Night): GameState {
   s = { ...s, markets: drawMarkets(s, rng, s.markets), rng: rng.state }
 
   // 8. Effets du matin des événements : canicule, sas (chap. 8)
+  // Le caisson cryo protège la soute de la canicule
   const heat = heatWave(s)
-  if (heat) {
+  if (heat && !mountedEffect(s, 'heatProof')) {
     const scorched = scorch(s, heat.melts, heat.ageDays)
     s = scorched.state
     briefing.heat = scorched.report
@@ -159,7 +170,7 @@ function scorch(state: GameState, melts: ProductId, ageDays: number): { state: G
   let aged = 0
   const cargo = state.cargo.flatMap((lot) => {
     if (lot.productId === melts) return []
-    if (!PRODUCTS[lot.productId].tags.some((tag) => TAGS[tag].perishable)) return [lot]
+    if (!isPerishable(lot)) return [lot]
     aged += lot.qty
     return [{ ...lot, boughtDay: lot.boughtDay - ageDays }]
   })

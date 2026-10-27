@@ -1,47 +1,54 @@
 # 5. Véhicules, modules & équipage
 
+> Prix, capacités, bonus et salaires : [`vehicles.ts`](../src/data/vehicles.ts), qui fait foi. Ce chapitre porte les règles, les effets et le lore.
+
 ## Véhicules
-* **Achat** uniquement à `[LOC-D4-1]`. Le nouveau châssis reprend automatiquement la marchandise et les modules ; l'ancien est **perdu** (aucune reprise).
+* **Achat** uniquement à `[LOC-D4-1]`, de jour. Le prix n'est pas indexé sur l'inflation (chap. 7).
+* **Changement de châssis :** le nouveau véhicule reprend la marchandise, le carburant (dans la limite de son réservoir) et les modules possédés ; l'ancien est **perdu** (aucune reprise). Le nouveau châssis arrive en parfait état.
+  * Achat refusé si la soute actuelle dépasse la capacité du nouveau véhicule.
+  * Si le nouveau véhicule a moins de slots, les derniers modules montés sont démontés (ils restent possédés).
 * *Lore :* tous les châssis sont des utilitaires officiellement enregistrés auprès du DSC (modifiés en secret par Mécano-Mitch), d'où leur accès à tous les quais de service.
 * *Conso :* par trajet, selon la phase, plus le surcoût des districts traversés (chap. 4).
 * *Bonus de risque :* les passifs qui réduisent le risque sont des **multiplicateurs** (chap. 6).
-* *Stats* (prix, soute, slots de modules, PV max, réservoir, consommation de jour et de nuit) : `VEHICLES` dans [`vehicles.ts`](../src/data/vehicles.ts).
+* *Stats* (prix, soute, slots de modules, PV max, réservoir, consommation de jour et de nuit) et chiffres des passifs : `VEHICLES` dans [`vehicles.ts`](../src/data/vehicles.ts).
 
 | ID | Nom | Passif |
 | :--- | :--- | :--- |
-| `[VEH-01]` | Fourgonnette « Citi-Volt » (départ) | **Profil bas :** risque d'interception réduit (`riskFactor` dans [`vehicles.ts`](../src/data/vehicles.ts)). *Éco-Moteur :* consomme autant de nuit que de jour (les autres châssis consomment davantage la nuit). |
-| `[VEH-02]` | Navette « Zéro-C » | **Camouflage corporatif :** aux couleurs du DSC ; tant que les caisses `[TAG-LEGAL]` font **≥ 20 %** de la cargaison, risque **×0,85**. |
-| `[VEH-03]` | Fourgon Bio-Médical « Panacea-V8 » | **Chaîne du froid médicale :** les pertes de fraîcheur du matin n'ont lieu **qu'un matin sur deux** (le passage à Standard de 20h reste inchangé). **Transpondeur d'urgence :** en `[D3]` et `[D5]`, lors d'une fuite : **+25 %** de réussite, **0 dégât** de châssis en cas de succès, perte d'ICC du succès **÷2** (arrondie en faveur du joueur). |
-| `[VEH-04]` | Compacteur Sanitaire « Bunker-Lourd » | **Monstre blindé & benne acide :** au racket de `[D4]`, péage **÷2**, et un « Forcer » réussi ne coûte **aucun dégât** de châssis ; **broyeur acide** (mode d'éjection) utilisable partout, sans cooldown, **70 %** de réussite, 0 dégât, contrebande dissoute sans récupération (`[MOD-07]` reste prioritaire s'il est disponible). *Contrepartie :* **+10 %** au risque (tonnage hors-norme). |
+| `[VEH-01]` | Fourgonnette « Citi-Volt » (départ) | **Profil bas :** risque d'interception réduit (multiplicateur, zone hors-réseau comprise). *Éco-Moteur :* consomme autant de nuit que de jour (les autres châssis consomment davantage la nuit). |
+| `[VEH-02]` | Navette « Zéro-C » | **Camouflage corporatif :** aux couleurs du DSC ; tant que les caisses `[TAG-LEGAL]` font au moins une part de la cargaison, risque réduit (multiplicateur). Une soute vide n'a rien à cacher : le camouflage s'applique. Sans effet en zone hors-réseau. |
+| `[VEH-03]` | Fourgon Bio-Médical « Panacea-V8 » | **Chaîne du froid médicale :** les périssables ne perdent de la fraîcheur qu'**un matin sur deux** (chap. 3). **Transpondeur d'urgence :** en `[D3]` et `[D5]`, lors d'une fuite : chance en plus, **aucun dégât** de châssis en cas de succès, perte d'ICC du succès réduite (arrondie en faveur du joueur). |
+| `[VEH-04]` | Compacteur Sanitaire « Bunker-Lourd » | **Monstre blindé & benne acide :** au racket de `[D4]`, péage réduit, et un passage forcé réussi ne coûte **aucun dégât** de châssis. **Broyeur acide :** mode d'éjection utilisable **partout** (`[D5]` et `[D6]` compris), sans cooldown, sans dégât, contrebande dissoute sans récupération (`[MOD-07]` reste prioritaire s'il est disponible). *Contrepartie :* risque accru partout, zone hors-réseau comprise (tonnage hors-norme, c'est physique). |
 
 ---
 
 ## Modules
-Chaque châssis a un nombre strict de slots. Les modules s'achètent **définitivement** à `[LOC-D4-1]`, et c'est **uniquement là** qu'on choisit (gratuitement) lesquels sont montés. Le montage est donc un choix de build pour plusieurs jours, pas un réglage par trajet. Prix et catégorie : `MODULES` dans [`vehicles.ts`](../src/data/vehicles.ts).
+* Chaque châssis a un nombre strict de slots. Les modules s'achètent **définitivement** à `[LOC-D4-1]` ; un module acheté est monté aussitôt s'il reste un slot libre. C'est **uniquement là** qu'on monte ou démonte (gratuitement) ses modules. Le montage est donc un choix de build pour plusieurs jours, pas un réglage par trajet.
+* Seuls les modules **montés** agissent. Prix, catégorie et chiffres : `MODULES` dans [`vehicles.ts`](../src/data/vehicles.ts). Prix non indexés.
 
 | ID | Nom | Effet |
 | :--- | :--- | :--- |
-| `[MOD-01]` | Caisson Cryo à l'Azote Volé | Les caisses `[TAG-PERISHABLE]` restent **Extra-Frais jusqu'à 20h le lendemain** de l'achat (vente de jour ou de nuit), puis ne descendent **jamais sous Standard**. Protège soute **et** moteur contre `[EVT-G01]`. |
-| `[MOD-02]` | Diffuseur d'Échappement « Pin Sylvestre & Javel » | Réduit de **−75 %** les malus de `[TAG-ODOROUS]`. |
-| `[MOD-03]` | Doublure en Plomb & Cage de Faraday | Annule le malus de `[TAG-TECH]`. |
-| `[MOD-04]` | Suspensions & Silentblocs « Velours » | Immunise `[TAG-FRAGILE]` à la casse. Annule l'usure de châssis des trajets de nuit. |
-| `[MOD-05]` | Plaque d'Immatriculation Rotative « E-Ink » | **1 fois par jour**, lors d'une fuite réussie : annule la perte d'ICC des caméras de trafic. |
-| `[MOD-06]` | Pare-Buffles en Acier Trempé | Fuite : **+30 %** de réussite ; dégâts de châssis (succès et échec) et de Santé (échec) **÷2**. |
-| `[MOD-07]` | Trappe de Largage « Égouts » | Mode d'éjection, **cooldown 3 jours** (interdit en `[D6]`). Jet 1 : **75 %** de réussite, 0 dégât. Jet 2 (si réussi) : le lendemain à 06h00, des complices récupèrent un pourcentage **aléatoire uniforme entre 0 % et 75 %** des caisses larguées. |
-| `[MOD-08]` | Faux Terminal « Citoyen Or » | **+35 %** au bluff ; **−50 %** sur le tarif standard de corruption. |
+| `[MOD-01]` | Caisson Cryo à l'Azote Volé | **Un jour de retard** sur tout le cycle de fraîcheur des `[TAG-PERISHABLE]` : Extra-Frais jusqu'à 20h00 le lendemain de l'achat, et chaque état suivant un jour plus tard (chap. 3). Protège soute **et** moteur contre `[EVT-G01]` (ni fonte, ni vieillissement, ni usure de châssis ; le coup de chaleur du pilote reste). |
+| `[MOD-02]` | Diffuseur d'Échappement « Pin Sylvestre & Javel » | Réduit fortement les malus de `[TAG-ODOROUS]` (risque au trajet et malus de bluff), après les doublements de district ou d'événement. |
+| `[MOD-03]` | Doublure en Plomb & Cage de Faraday | Annule la détection de `[TAG-TECH]`. |
+| `[MOD-04]` | Suspensions & Silentblocs « Velours » | Immunise `[TAG-FRAGILE]` à la casse (fuite et chocs). Annule l'usure de châssis des trajets de nuit (aucune caisse de refroidissement n'est alors consommée). |
+| `[MOD-05]` | Plaque d'Immatriculation Rotative « E-Ink » | **Une fois par jour**, lors d'une fuite réussie devant la BRC : annule la perte d'ICC des caméras de trafic. |
+| `[MOD-06]` | Pare-Buffles en Acier Trempé | Fuite et passage forcé : chance en plus ; dégâts de châssis de la fuite (succès et échec) et perte de Santé de l'échec divisés (arrondis en faveur du joueur). |
+| `[MOD-07]` | Trappe de Largage « Égouts » | Mode d'éjection par les égouts : partout sauf en `[D6]` (dalle bio-scellée), y compris en `[D5]` où l'éjection manuelle est interdite. Cooldown en jours à compter de l'usage, réussi ou non. Réussite plus probable que le mode manuel, sans dégât. **Récupération :** le lendemain à 06h00, des complices rapportent une part tirée au hasard (uniformément, arrondie à la caisse inférieure) des caisses larguées, dans la limite de la place en soute ; le reste est perdu. Les caisses rapportées gardent leur état. |
+| `[MOD-08]` | Faux Terminal « Citoyen Or » | Bonus au bluff ; tarif standard de corruption réduit. |
 
 ---
 
 ## Équipage
-* **Recrutement** à `[LOC-D1-2]`, **1 seul équipier actif** à la fois. Le premier recrutement est gratuit ; chaque changement coûte **1 500 ₡**. Chaque équipier ouvre un build différent : sûreté (Vance), information et finance (Glitch), gastronomie périssable (Mama Rosa).
-* **Salaire payé d'avance :** à l'embauche pour le premier jour, puis à chaque routine matinale, avant toute prestation. S'il ne peut pas être payé, l'équipier ne travaille pas ce jour-là mais reste engagé. Montants : `CREW` dans [`vehicles.ts`](../src/data/vehicles.ts).
+* **Recrutement** à `[LOC-D1-2]`, de jour, **1 seul équipier actif** à la fois. Le premier recrutement est gratuit ; chaque recrutement suivant coûte des frais (indexés). **Renvoyer** l'équipier est gratuit. Chaque équipier ouvre un build différent : sûreté (Vance), information et finance (Glitch), gastronomie périssable (Mama Rosa).
+* **Salaire payé d'avance** (indexé) : à l'embauche pour le jour même, puis à chaque routine matinale, avant toute prestation (chap. 2). S'il ne peut pas être payé en Cash-Puce, l'équipier **ne travaille pas ce jour-là** (aucun bonus) mais reste engagé ; le salaire manqué ne s'ajoute pas à la dette. Les matins passés en cellule, aucun salaire n'est dû et l'équipier reste à son poste. Montants : `CREW` dans [`vehicles.ts`](../src/data/vehicles.ts).
+* **Disparition** (Loterie, chap. 8) : l'équipier disparaît définitivement (il ne peut plus être recruté), son salaire s'arrête, et le prochain recrutement est gratuit.
 * **Discrétion aux portiques :** Glitch et Mama Rosa, recherchées par Aeterna, ne montent jamais en cabine : elles opèrent en amont ou par radio cryptée. Seul Vance voyage en cabine, grâce à son badge d'inspecteur réserviste.
 
 | ID | Équipier | Bonus |
 | :--- | :--- | :--- |
-| `[CREW-01]` | « L'Ancien de la BRC » — Commandant Vance (copilote accrédité) | **Salaire réduit à 300 ₡** s'il **consomme** 1 caisse `[TAG-ADDICTIVE]` de **Tier 2 ou plus** de la soute à 06h00 (au choix du joueur) · Risque d'interception **×0,80** partout · **+15 %** à la corruption · révèle chaque matin le district de la ronde renforcée |
-| `[CREW-02]` | « Glitch » — jeune hackeuse sous caféine (opératrice radio distante) | **Flux pirate :** cours de tous les districts en temps réel · rendement offshore **+0,5 %** sur chaque tranche (sauf jours de garde à vue) · **+20 %** à la fuite (pirate les feux) · **+20 %** pour falsifier un dossier de Loterie |
-| `[CREW-03]` | « La Matriarche » — Mama Rosa Marini (atelier d'affinage) | Produits `[TAG-PERISHABLE]` vendus **×1.25** (bonus de savoir-faire, chap. 7) · **affinage :** les caisses Standard se revendent au coefficient Extra-Frais (**×1.30**) · quotas de demande des produits `[TAG-PERISHABLE]` **+50 %** (ses maîtres d'hôtel répartissent les livraisons) |
+| `[CREW-01]` | « L'Ancien de la BRC » — Commandant Vance (copilote accrédité) | **Salaire réduit** s'il **consomme** à 06h00 une caisse `[TAG-ADDICTIVE]` de Tier 2 ou plus (la moins chère au prix de base ; réglage du joueur, activé par défaut) · risque d'interception réduit partout, zone hors-réseau comprise (multiplicateur) · bonus à la corruption · **révèle chaque matin** le district de la ronde renforcée (carte et prévision du risque) |
+| `[CREW-02]` | « Glitch » — jeune hackeuse sous caféine (opératrice radio distante) | **Flux pirate :** cours de tous les districts en temps réel (mémoire de marché toujours à jour, jamais brouillée par la Sédation) · rendement offshore majoré sur chaque tranche, sauf les matins en cellule · bonus à la fuite et au passage forcé (elle pirate les feux) · bonus pour falsifier un dossier de Loterie |
+| `[CREW-03]` | « La Matriarche » — Mama Rosa Marini (atelier d'affinage) | Produits `[TAG-PERISHABLE]` vendus plus cher (bonus de savoir-faire, chap. 7) · **affinage :** les caisses Standard se vendent au coefficient Extra-Frais · quotas de demande des produits `[TAG-PERISHABLE]` majorés (arrondis au supérieur ; ses maîtres d'hôtel répartissent les livraisons) |
 
 * **Vance :** vieux limier désabusé de l'époque où la police n'était pas dirigée par Aeterna, avec un laissez-passer d'inspecteur honoraire.
 * **Glitch :** prodige du code bannie des écoles du DSC pour avoir fait réciter des poèmes anarchistes à Aeterna ; te guide depuis un cyber-squat blindé.

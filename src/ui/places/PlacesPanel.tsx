@@ -12,6 +12,7 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import AmountForm from '../shared/AmountForm.tsx'
 import Detailed from '../shared/Detailed.tsx'
+import GarageDesk from './GarageDesk.tsx'
 
 type PlaceProps = {
   locationId: LocationId
@@ -73,6 +74,8 @@ function ServiceDesk({ service }: ServiceDeskProps) {
       return <GrinderDesk />
     case 'offshore':
       return <OffshoreDesk />
+    case 'garage':
+      return <GarageDesk />
   }
 }
 

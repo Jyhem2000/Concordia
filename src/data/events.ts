@@ -125,8 +125,12 @@ export const LOCAL_EVENTS: Readonly<Record<LocalEventId, GameEvent>> = {
   'EVT-D4-02': {
     effects: [{ kind: 'appear', products: ['T3-03', 'T3-02', 'T3-06', 'T4-01', 'T4-02'], count: { min: 3, max: 5 }, factor: 0.65 }],
   },
-  // Réparations moins chères au garage de LOC-D4-1 : avec le garage (chap. 4)
-  'EVT-D4-03': { effects: [{ kind: 'price', products: ['T1-06', 'T2-02', 'T3-03'], factor: 2.2 }] },
+  'EVT-D4-03': {
+    effects: [
+      { kind: 'price', products: ['T1-06', 'T2-02', 'T3-03'], factor: 2.2 },
+      { kind: 'repair', factor: 0.8 },
+    ],
+  },
   'EVT-D5-01': { effects: [{ kind: 'price', products: ['T0-03', 'T1-02', 'T1-05', 'T3-03'], factor: 2.8 }] },
   'EVT-D5-02': {
     effects: [

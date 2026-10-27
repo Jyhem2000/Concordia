@@ -2,6 +2,7 @@ import { DAMAGED_FACTOR, FRESHNESS } from '../data/balance.ts'
 import { PRODUCTS } from '../data/products.ts'
 import { TAGS } from '../data/tags.ts'
 import { maskedQty, takeLots } from './cargo.ts'
+import { mountedEffect, vehicleOf } from './equipment.ts'
 import { keysOf } from './records.ts'
 import type { Rng } from './rng.ts'
 import type { CargoLot, CrateCount, FreshnessStage, GameState, TagId } from './types.ts'
@@ -13,10 +14,24 @@ import type { CargoLot, CrateCount, FreshnessStage, GameState, TagId } from './t
 
 // ─── Fraîcheur ───
 
-const isPerishable = (lot: CargoLot) => PRODUCTS[lot.productId].tags.some((tag) => TAGS[tag].perishable)
+export const isPerishable = (lot: CargoLot) => PRODUCTS[lot.productId].tags.some((tag) => TAGS[tag].perishable)
 
-/** Matins passés depuis l'achat */
-const ageOf = (state: GameState, lot: CargoLot) => state.day - lot.boughtDay
+/**
+ * Âge effectif d'un lot : matins passés depuis l'achat, retardés par le caisson cryo puis comptés
+ * un matin sur deux par la chaîne du froid (chap. 3 et 5)
+ */
+function ageOf(state: GameState, lot: CargoLot, day = state.day): number {
+  const delayed = Math.max(0, day - lot.boughtDay - (mountedEffect(state, 'freshnessDelay') ?? 0))
+  return vehicleOf(state).coldChain ? Math.ceil(delayed / 2) : delayed
+}
+
+/** Matins avant qu'un lot périssable pourrisse (détruit à 06h00), ou null */
+export function daysBeforeRot(state: GameState, lot: CargoLot): number | null {
+  if (!isPerishable(lot)) return null
+  let days = 1
+  while (ageOf(state, lot, state.day + days) < FRESHNESS.rottenFromAge) days++
+  return days
+}
 
 /** État de fraîcheur d'un lot périssable, ou null pour un produit qui ne se périme pas */
 export function freshnessOf(state: GameState, lot: CargoLot): FreshnessStage | null {

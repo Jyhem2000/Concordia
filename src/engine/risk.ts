@@ -16,7 +16,8 @@ import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import { TAGS } from '../data/tags.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import { breakdown, type Breakdown, type BreakdownBuilder } from './breakdown.ts'
-import { ownedQty, tagShare } from './cargo.ts'
+import { cargoUsed, ownedQty, tagShare } from './cargo.ts'
+import { moduleTagFactor } from './equipment.ts'
 import { activeEffects, isPurged, tagFactor } from './events.ts'
 import { iccTier } from './gauges.ts'
 import { crossedDistricts, shortestRoute } from './map.ts'
@@ -62,9 +63,16 @@ export function riskBreakdown(state: GameState, to: DistrictId, { includePatrol 
     if (beacon && ownedQty(state.cargo, id) > 0) risk.add(id, beacon)
   }
   if (state.debtLate) risk.add('rule.ambush', DEBT_LATE.ambushRisk)
+  // Tonnage hors-norme : physique, il compte aussi en zone hors-réseau
+  const vehicle = VEHICLES[state.vehicleId]
+  if (vehicle.heavy) risk.add(state.vehicleId, vehicle.heavy.riskAdd)
 
-  const vehicleFactor = VEHICLES[state.vehicleId].riskFactor
-  if (vehicleFactor !== undefined) risk.mul(state.vehicleId, vehicleFactor)
+  if (vehicle.riskFactor !== undefined) risk.mul(state.vehicleId, vehicle.riskFactor)
+  // Camouflage corporatif : assez de Légal en soute (une soute vide n'a rien à cacher)
+  const camouflage = vehicle.legalCamouflage
+  if (!offGrid && camouflage && (cargoUsed(state.cargo) === 0 || tagShare(state.cargo, 'TAG-LEGAL') >= camouflage.minShare)) {
+    risk.mul(state.vehicleId, camouflage.factor)
+  }
   if (!offGrid && destination.goldFastLane && iccTier(state.icc) === 'gold') risk.mul('rule.gold-fast-lane', GOLD_FAST_LANE_FACTOR)
   // Risque final d'un événement : après tous les autres termes, avant les bornes
   for (const { source, effect } of effects) if (effect.kind === 'finalRisk') risk.mul(source, effect.factor)
@@ -92,7 +100,7 @@ function addGridRisks(risk: BreakdownBuilder, state: GameState, to: DistrictId, 
     if (share === 0) continue
     const { tripRisk, detectedRisk, cover, smell } = TAGS[tag]
     // Les événements annulent ou doublent les effets d'un tag ; l'odeur ne cumule pas avec le doublement du district
-    const factor = tagFactor(state, to, tag, smell ? destination.odorFactor : 1)
+    const factor = tagFactor(state, to, tag, smell ? destination.odorFactor : 1) * moduleTagFactor(state, tag)
     if (tripRisk) risk.add(tag, tripRisk * share * factor)
     if (detectedRisk && destination.detection === tag) risk.add(tag, detectedRisk * share * factor)
     if (cover) risk.add(tag, -cover * share)

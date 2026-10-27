@@ -4,6 +4,8 @@ import { BLUFF, BRIBE, DAMAGED_FACTOR, EJECT, FLEE, ICC_MAX, RACKET, SEARCH } fr
 import { DISTRICTS } from '../../data/districts.ts'
 import { TAGS } from '../../data/tags.ts'
 import { keysOf } from '../../engine/records.ts'
+import { ejectMode } from '../../engine/equipment.ts'
+import { MODULES } from '../../data/vehicles.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { averageCost, ownedQty } from '../../engine/cargo.ts'
 import { paymentValue } from '../../engine/condition.ts'
@@ -12,6 +14,7 @@ import {
   bribeRate,
   checkMove,
   ejectChance,
+  fleeConsequences,
   isLethalSearch,
   minimumOffer,
   offerValue,
@@ -63,7 +66,10 @@ export default function InterceptionScreen() {
     : [t.interception.formality(icc(SEARCH.legalIccGain))]
   // Amende de la fouille si le bluff échoue : le moteur la relève
   const failedFine = searchSanction({ ...game, interception: { ...interception, bluffFailed: true } })?.fine ?? 0
-  const { success: fled, fail: caught } = FLEE
+  const { fail: caught } = FLEE
+  // Dégâts et pertes annoncés avec l'équipement actuel (pare-buffles, transpondeur, plaque rotative)
+  const fled = fleeConsequences(game)
+  const mode = ejectMode(game)
   // Risques propres à la soute pendant une fuite : casse des fragiles, explosion des inflammables (chap. 3)
   const cargoRisks = keysOf(TAGS).flatMap((tag) => {
     const { breakage, explosion } = TAGS[tag]
@@ -137,10 +143,10 @@ export default function InterceptionScreen() {
             label={racket ? t.interception.forceThrough : t.interception.moves.flee}
             outcomes={[
               ...(racket
-                ? [t.interception.fleeSuccessRacket(`${pv(fled.chassisLoss.min)} / ${pv(fled.chassisLoss.max)}`), t.interception.fleeFailureRacket]
+                ? [t.interception.fleeSuccessRacket(`${pv(fled.chassis.min)} / ${pv(fled.chassis.max)}`), t.interception.fleeFailureRacket]
                 : [
-                    t.interception.fleeSuccess(`${pv(fled.chassisLoss.min)} / ${pv(fled.chassisLoss.max)}`, icc(-fled.iccLoss)),
-                    t.interception.fleeFailure(pct(caught.cashSeizure), icc(-caught.iccLoss), pv(caught.chassisLoss), pv(caught.healthLoss)),
+                    t.interception.fleeSuccess(`${pv(fled.chassis.min)} / ${pv(fled.chassis.max)}`, icc(-fled.iccLoss)),
+                    t.interception.fleeFailure(pct(caught.cashSeizure), icc(-caught.iccLoss), pv(fled.failChassis), pv(fled.failHealth)),
                     ...custody(caught.custodyDays),
                   ]),
               ...cargoRisks,
@@ -150,10 +156,14 @@ export default function InterceptionScreen() {
         {available('eject') && (
           <MoveCard
             move="eject"
-            label={t.interception.moves.eject}
-            chance={ejectChance()}
+            label={mode ? t.interception.ejectMode[mode] : t.interception.moves.eject}
+            chance={ejectChance(game)}
             outcomes={[
-              t.interception.ejectSuccess(pv(EJECT.chassisLoss)),
+              mode === 'trapdoor'
+                ? t.interception.ejectTrapdoor(pct(MODULES['MOD-07'].trapdoor?.maxRecovery ?? 0), MODULES['MOD-07'].trapdoor?.cooldownDays ?? 0)
+                : mode === 'crusher'
+                  ? t.interception.ejectCrusher
+                  : t.interception.ejectSuccess(pv(EJECT.chassisLoss)),
               t.interception.ejectFailure(pct(EJECT.fail.fineRaise), icc(-EJECT.fail.iccLoss)),
               ...custody(EJECT.fail.custodyDays),
             ]}

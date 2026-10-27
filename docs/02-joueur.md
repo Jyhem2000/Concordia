@@ -43,8 +43,8 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 
 ### Exemption Métabolique & Sédation
 Seuls les routiers boivent l'eau sans sédatifs de `[LOC-D1-2]` : c'est elle qui leur garde l'esprit clair.
-* **Protection :** chaque passage à `[LOC-D1-2]` (de jour) remet la protection à **4 jours**. Elle baisse de 1 à chaque routine matinale. **Départ :** 4 jours.
-* **Sédation** (protection à 0, jusqu'au prochain passage à `[LOC-D1-2]`) : **−10 %** au bluff, à la corruption et à la fuite (racket de `[D4]` compris), et la mémoire de marché des autres districts est **brouillée** : les cours mémorisés s'affichent en fourchette **±20 %**. Le flux de `[CREW-02]` reste exact.
+* **Protection :** se trouver en `[D1]` de jour (au réveil ou à l'arrivée d'un trajet de jour, Cantine `[LOC-D1-2]`) la remet au maximum. Elle baisse de 1 à chaque routine matinale. Départ au maximum. Chiffres : `SEDATION` dans [`balance.ts`](../src/data/balance.ts).
+* **Sédation** (protection à 0, jusqu'au prochain passage en `[D1]` de jour) : malus au bluff, à la corruption et à la fuite (racket de `[D4]` compris), et la mémoire de marché des autres districts est **brouillée** : les cours mémorisés s'affichent en fourchette autour du vrai relevé (l'historique aussi). Le flux de `[CREW-02]` reste exact. Le district actuel n'est jamais brouillé.
 * L'app affiche les jours de protection restants et prévient la veille de la Sédation (chap. 10).
 
 ---
@@ -62,11 +62,11 @@ Le bandeau affiche la date, le moment et si le trajet du moment est encore dispo
 ### Routine matinale (06h00), dans l'ordre
 Le Jour 1 commence sans routine : pas d'intérêts, inflation à ×1,00, boutiques et événements tirés une première fois.
 1. Publication de l'**indice d'inflation** du jour (chap. 7).
-2. Paiement d'avance du salaire de l'équipier actif — sauf si le joueur était en garde à vue cette nuit-là.
+2. Paiement d'avance du salaire de l'équipier actif (chap. 5) — sauf si le joueur était en garde à vue cette nuit-là ; consommation éventuelle d'une caisse par `[CREW-01]`.
 3. Intérêts et échéances de la dette ; **collecte de protection** (chap. 7).
 4. Intérêts du compte offshore.
 5. Dégradation de fraîcheur des caisses `[TAG-PERISHABLE]` (chap. 3). Protection de l'Exemption Métabolique **−1 jour**.
-6. Récupération des caisses larguées la veille via `[MOD-07]`.
+6. Récupération des caisses larguées la veille via `[MOD-07]` ; échéance d'une commande VIP de `[LOC-D6-1]` dépassée (chap. 4).
 7. Tirage de la ronde renforcée ; entrée en vigueur de l'événement global tiré la veille, tirage des événements locaux, de la Loterie les jours de tirage, de l'événement global du lendemain et de sa rumeur ; contrecoups (chap. 8). Puis, parce que les événements les modifient : reconstitution des quotas de demande, cours et boutiques (chap. 7).
 8. Effets du matin des événements : canicule sur les périssables, sas de `[EVT-D3-01]` si le joueur se trouve en `[D3]` (chap. 8).
 

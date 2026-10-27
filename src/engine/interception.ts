@@ -2,11 +2,12 @@ import { BLUFF, BRIBE, EJECT, EMERGENCY_TOW, FLEE, FLYING_CHECK, HIGH_TIER, RACK
 import { DISTRICTS } from '../data/districts.ts'
 import { PRODUCTS } from '../data/products.ts'
 import { TAGS } from '../data/tags.ts'
-import { VEHICLES } from '../data/vehicles.ts'
+import { MODULES, VEHICLES } from '../data/vehicles.ts'
 import type { ActionError } from './actions.ts'
 import { breakdown, type Breakdown } from './breakdown.ts'
 import { baseValue, cargoUsed, giveCrates, isIllegal, maskedQty, ownedQty, ownsCrates, tagShare, tierShare } from './cargo.ts'
 import { breakOnFlee, breakOnShock, crateValue, explodeFlammable, paymentValue } from './condition.ts'
+import { ejectMode, moduleTagFactor, mountedEffect, mountedWith } from './equipment.ts'
 import { arrive, tagFactor } from './events.ts'
 import { changeHealth, gainRouteIcc } from './gauges.ts'
 import { indexed } from './inflation.ts'
@@ -60,11 +61,7 @@ export function checkMove(state: GameState, move: InterceptionMove, offer: Offer
       // Contrôle volant : l'agent tient déjà la portière
       return interception.kind === 'flying' ? 'move-unavailable' : checkFleeTactics(state, tactics)
     case 'eject':
-      return racket ||
-        interception.kind === 'flying' ||
-        interception.acted ||
-        interception.bluffFailed ||
-        !DISTRICTS[state.districtId].ejectionAllowed
+      return racket || interception.kind === 'flying' || interception.acted || interception.bluffFailed || !ejectMode(state)
         ? 'move-unavailable'
         : null
     case 'payToll':
@@ -129,11 +126,14 @@ export function bluffChance(state: GameState, { bluffAids = [] }: Tactics = NO_T
   for (const tag of keysOf(TAGS)) {
     const { bluffMalus, smell } = TAGS[tag]
     if (!bluffMalus) continue
-    const malus = bluffMalus * tagShare(cargo, tag) * tagFactor(state, state.districtId, tag, smell ? DISTRICTS[state.districtId].odorFactor : 1)
+    const factor = tagFactor(state, state.districtId, tag, smell ? DISTRICTS[state.districtId].odorFactor : 1) * moduleTagFactor(state, tag)
+    const malus = bluffMalus * tagShare(cargo, tag) * factor
     // Une aide qui neutralise les chiens-robots annule le malus d'odeur
     chance.add(tag, smell && cancelsSmell ? 0 : -malus)
   }
   for (const id of bluffAids) chance.add(id, PRODUCTS[id].bluffAid?.bonus ?? 0)
+  const terminal = mountedWith(state, 'fakeTerminal')
+  if (terminal) chance.add(terminal, MODULES[terminal].fakeTerminal?.bluffBonus ?? 0)
   return chance.clamp(0, BLUFF.cap).build()
 }
 
@@ -142,7 +142,10 @@ export function bribeRate(state: GameState): Breakdown {
   const fixed = indexed('rule.bribe-rate', BRIBE.ratePerStar * stars(state), state.day)
   const cargoShare = Math.round(BRIBE.rateIllegalCargoShare * baseValue(state.cargo.filter(isIllegal)))
   const rate = breakdown('rule.bribe-rate', fixed)
-  return (cargoShare > fixed.total ? rate.set('rule.bribe-cargo-share', cargoShare) : rate).build()
+  if (cargoShare > fixed.total) rate.set('rule.bribe-cargo-share', cargoShare)
+  const terminal = mountedWith(state, 'fakeTerminal')
+  if (terminal) rate.mul(terminal, MODULES[terminal].fakeTerminal?.bribeRateFactor ?? 1).round()
+  return rate.build()
 }
 
 /** En dessous de ce montant, l'agent refuse l'offre */
@@ -184,16 +187,53 @@ export function fleeChance(state: GameState, { drop, dope }: Tactics = NO_TACTIC
     .add('rule.bluff-failed', followUp(state.interception))
   if (drop) chance.add(drop, dropBonus(drop))
   if (dope) chance.add(dope, PRODUCTS[dope].doping?.fleeBonus ?? 0)
+  const ram = mountedWith(state, 'ram')
+  if (ram) chance.add(ram, MODULES[ram].ram?.fleeBonus ?? 0)
+  const transponder = activeTransponder(state)
+  if (transponder) chance.add(state.vehicleId, transponder.fleeBonus)
   return chance.clamp(0, cap, 'rule.flee-cap').build()
 }
 
-export function ejectChance(): Breakdown {
-  return breakdown('rule.eject-manual', EJECT.manualChance).build()
+/** Conséquences chiffrées d'une fuite avec l'équipement actuel, pour les annoncer avant de valider */
+export function fleeConsequences(state: GameState): {
+  chassis: { min: number; max: number }
+  iccLoss: number
+  failChassis: number
+  failHealth: number
+} {
+  const racket = state.interception?.kind === 'racket'
+  const unscathed = activeTransponder(state) || (racket && VEHICLES[state.vehicleId].heavy)
+  const ram = ramFactor(state)
+  const { min, max } = FLEE.success.chassisLoss
+  return {
+    chassis: unscathed ? { min: 0, max: 0 } : { min: Math.floor(min * ram), max: Math.floor(max * ram) },
+    iccLoss: flightIccLoss(state)[1],
+    failChassis: Math.floor(FLEE.fail.chassisLoss * ram),
+    failHealth: Math.floor(FLEE.fail.healthLoss * ram),
+  }
 }
 
-/** Péage des milices : part de la valeur de la soute au prix de base */
+/** Transpondeur d'urgence du véhicule, s'il agit dans le district actuel */
+function activeTransponder(state: GameState) {
+  const transponder = VEHICLES[state.vehicleId].transponder
+  return transponder && transponder.districts.includes(state.districtId) ? transponder : undefined
+}
+
+/** Chance d'éjection selon le mode retenu (trappe, broyeur, manuel) */
+export function ejectChance(state: GameState): Breakdown {
+  switch (ejectMode(state)) {
+    case 'trapdoor':
+      return breakdown('MOD-07', MODULES['MOD-07'].trapdoor?.chance ?? 0).build()
+    case 'crusher':
+      return breakdown(state.vehicleId, VEHICLES[state.vehicleId].heavy?.crusherChance ?? 0).build()
+    default:
+      return breakdown('rule.eject-manual', EJECT.manualChance).build()
+  }
+}
+
+/** Péage des milices : part de la valeur de la soute au prix de base, réduite pour un monstre blindé */
 export function toll(state: GameState): number {
-  return Math.round(RACKET.tollRate * baseValue(state.cargo))
+  return Math.round(RACKET.tollRate * baseValue(state.cargo) * (VEHICLES[state.vehicleId].heavy?.tollFactor ?? 1))
 }
 
 /**
@@ -296,30 +336,44 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
       const racket = state.interception?.kind === 'racket'
       const prepared = prepareFlight(state, ledger, tactics, rng, racket)
       if (roll(chance)) {
-        const lost = rng.int(FLEE.success.chassisLoss.min, FLEE.success.chassisLoss.max)
-        const escaped = shake(loseChassis(prepared, ledger, lost), ledger, breakOnFlee(prepared.cargo, rng))
+        const drawn = rng.int(FLEE.success.chassisLoss.min, FLEE.success.chassisLoss.max)
+        // Aucun dégât : transpondeur d'urgence, ou monstre blindé qui force les milices ; sinon le pare-buffles amortit
+        const unscathed = activeTransponder(state) || (racket && VEHICLES[state.vehicleId].heavy)
+        const lost = unscathed ? 0 : Math.floor(drawn * ramFactor(state))
+        const escaped = shake(loseChassis(prepared, ledger, lost), ledger, fragile(prepared, breakOnFlee(prepared.cargo, rng)))
         // Les milices ne fichent personne et ne coûtent pas d'ICC
         if (racket) return report(escaped, chance, true, true, false)
-        return report(loseIcc(addWanted(escaped, ledger), ledger, FLEE.success.iccLoss), chance, true, true, false)
+        const [plated, iccLost] = flightIccLoss(addWanted(escaped, ledger))
+        return report(loseIcc(plated, ledger, iccLost), chance, true, true, false)
       }
       // Le véhicule part en tête-à-queue : les inflammables non masqués peuvent exploser
       const blown = explode(prepared, ledger, rng)
       if (racket) return report(refuseToll(blown, ledger, rng), chance, false, true, false)
       const { cashSeizure, iccLoss, chassisLoss, healthLoss, custodyDays } = FLEE.fail
       const seized = pay(confiscate(blown, ledger), ledger, Math.round(blown.cash * cashSeizure))
-      const wrecked = loseHealth(loseChassis(loseIcc(seized, ledger, iccLoss), ledger, chassisLoss), ledger, healthLoss)
+      const ram = ramFactor(state)
+      const wrecked = loseHealth(
+        loseChassis(loseIcc(seized, ledger, iccLoss), ledger, Math.floor(chassisLoss * ram)),
+        ledger,
+        Math.floor(healthLoss * ram),
+      )
       noteCustody(ledger, custodyDays)
       return report(wrecked, chance, false, true, true)
     }
 
     case 'eject': {
-      const chance = ejectChance()
+      const mode = ejectMode(state)
+      const chance = ejectChance(state)
+      // La trappe entre en cooldown à l'usage, réussi ou non
+      const used = mode === 'trapdoor' ? { ...state, trapdoorDay: state.day } : state
       if (roll(chance)) {
         // Soute vidée avant le barrage : la fouille ne trouve rien, balise comprise
-        const dumped = confiscate(state, ledger)
+        const dumped = confiscate(used, ledger)
+        if (mode === 'trapdoor') return report({ ...dumped, dumped: used.cargo.filter(isIllegal) }, chance, true, true, false)
+        if (mode === 'crusher') return report(dumped, chance, true, true, false)
         return report(hitChassis(dumped, ledger, EJECT.chassisLoss, rng), chance, true, true, false)
       }
-      const filmed = loseIcc(state, ledger, EJECT.fail.iccLoss)
+      const filmed = loseIcc(used, ledger, EJECT.fail.iccLoss)
       const sanctioned = search(filmed, ledger, EJECT.fail.fineRaise)
       noteCustody(ledger, EJECT.fail.custodyDays)
       return report(sanctioned, chance, false, true, true)
@@ -411,7 +465,24 @@ function shake(state: GameState, ledger: Ledger, breakage: { cargo: CargoLot[]; 
 
 /** Perte de châssis hors fuite : au-delà du seuil, le choc peut casser les fragiles (chap. 3) */
 function hitChassis(state: GameState, ledger: Ledger, pv: number, rng: Rng): GameState {
-  return shake(loseChassis(state, ledger, pv), ledger, breakOnShock(state.cargo, rng, pv))
+  return shake(loseChassis(state, ledger, pv), ledger, fragile(state, breakOnShock(state.cargo, rng, pv)))
+}
+
+/** Les suspensions « Velours » immunisent les fragiles : la casse tirée ne s'applique pas */
+function fragile(state: GameState, breakage: { cargo: CargoLot[]; damaged: number }) {
+  return mountedEffect(state, 'smoothRide') ? { cargo: [...state.cargo], damaged: 0 } : breakage
+}
+
+/** Facteur du pare-buffles sur les dégâts de la fuite (1 sans module) */
+function ramFactor(state: GameState): number {
+  return mountedEffect(state, 'ram')?.damageFactor ?? 1
+}
+
+/** Perte d'ICC d'une fuite réussie : effacée une fois par jour par la plaque rotative, réduite par le transpondeur */
+function flightIccLoss(state: GameState): [GameState, number] {
+  if (mountedEffect(state, 'rotatingPlate') && state.plateDay !== state.day) return [{ ...state, plateDay: state.day }, 0]
+  const transponder = activeTransponder(state)
+  return [state, transponder ? Math.floor(FLEE.success.iccLoss * transponder.iccLossFactor) : FLEE.success.iccLoss]
 }
 
 /** Retire `qty` caisses en commençant par les plus chères (prix de base) */

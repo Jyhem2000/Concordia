@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react'
 import { PRODUCTS } from '../../data/products.ts'
-import { FRESHNESS } from '../../data/balance.ts'
 import { checkUseProduct, maxBuy } from '../../engine/actions.ts'
-import { freshnessOf } from '../../engine/condition.ts'
+import { daysBeforeRot, freshnessOf } from '../../engine/condition.ts'
 import { averageCost, ownedQty } from '../../engine/cargo.ts'
 import { demandQuota, demandRefill, productStatus, quote, quoteBreakdown, saleQuote, shopProducts } from '../../engine/market.ts'
 import type { FreshnessStage, ProductId, Tier } from '../../engine/types.ts'
@@ -100,8 +99,9 @@ function MarketRow({ productId }: MarketRowProps) {
     return qty > 0 ? [`${qty} ${t.market.freshness[stage]}`] : []
   })
   const damaged = lots.reduce((total, lot) => (lot.damaged ? total + lot.qty : total), 0)
-  const oldest = lots.reduce((min, lot) => (freshnessOf(game, lot) ? Math.min(min, lot.boughtDay) : min), Infinity)
-  const rotsIn = Number.isFinite(oldest) ? FRESHNESS.rottenFromAge - (game.day - oldest) : null
+  // Délai avant que le lot le plus ancien pourrisse, équipement compris (caisson cryo, chaîne du froid)
+  const rotDelays = lots.flatMap((lot) => daysBeforeRot(game, lot) ?? [])
+  const rotsIn = rotDelays.length > 0 ? Math.min(...rotDelays) : null
   const conditions = [...stages, ...(damaged > 0 ? [`${damaged} ${t.market.damaged}`] : []), ...(rotsIn !== null ? [t.market.rotsIn(rotsIn)] : [])]
   const iccRestore = PRODUCTS[productId].iccRestore
   const useError = useGameStore((s) => checkUseProduct(s.game, productId))

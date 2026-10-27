@@ -71,6 +71,8 @@ export type EventEffect = { districts?: readonly DistrictId[] } & (
   | { kind: 'halfDay' }
   /** Canicule : fonte d'un produit, vieillissement des périssables, usure des trajets de jour */
   | { kind: 'heat'; melts: ProductId; ageDays: number; dayTripChassis: number; dayTripHealth: number }
+  /** Prix des réparations du garage multiplié */
+  | { kind: 'repair'; factor: number }
 )
 
 export type GameEvent = { effects: readonly EventEffect[] }
@@ -197,7 +199,8 @@ export type District = {
   /** Éjection d'urgence possible (dalle bio-scellée sinon) */
   /** Part des interceptions BRC qui sont des contrôles volants : ni fuite ni éjection (chap. 6) */
   flyingCheckShare: number
-  ejectionAllowed: boolean
+  /** Modes d'éjection autorisés : décharge manuelle, trappe de MOD-07 (le broyeur de VEH-04 passe partout) */
+  ejection: { manual: boolean; trapdoor: boolean }
   /** Produits qui valent la connivence des agents dans une offre de corruption (chap. 6) */
   bribeFavorites: readonly ProductId[]
   /** Produits que les milices prennent en premier au péage en nature, dans l'ordre (chap. 4) */
@@ -213,7 +216,7 @@ export type District = {
 }
 
 /** Services rendus par les lieux spéciaux implémentés (chap. 4 et 7) */
-export type LocationService = 'debt' | 'grinder' | 'offshore'
+export type LocationService = 'debt' | 'grinder' | 'offshore' | 'garage'
 
 export type Location = {
   district: DistrictId
@@ -233,6 +236,14 @@ export type Vehicle = {
   tank: number
   /** Rations consommées par trajet, selon la phase */
   fuelPerTrip: Record<Phase, number>
+  /** Camouflage corporatif : risque × factor tant que le Légal fait au moins minShare de la soute */
+  legalCamouflage?: { minShare: number; factor: number }
+  /** Chaîne du froid : les périssables ne perdent de la fraîcheur qu'un matin sur deux */
+  coldChain?: boolean
+  /** Transpondeur d'urgence : bonus de fuite dans ces districts, sans dégât au succès, perte d'ICC réduite */
+  transponder?: { districts: readonly DistrictId[]; fleeBonus: number; iccLossFactor: number }
+  /** Monstre blindé : péage réduit, passage forcé sans dégât, broyeur acide, risque ajouté */
+  heavy?: { tollFactor: number; crusherChance: number; riskAdd: number }
 }
 
 export type ModuleCategory = 'conservation' | 'camouflage' | 'tactical'
@@ -240,6 +251,22 @@ export type ModuleCategory = 'conservation' | 'camouflage' | 'tactical'
 export type Module = {
   price: number
   category: ModuleCategory
+  /** Jours de retard sur tout le cycle de fraîcheur */
+  freshnessDelay?: number
+  /** Immunité à la canicule : ni fonte, ni vieillissement, ni usure de châssis */
+  heatProof?: boolean
+  /** Facteur sur les effets d'un tag (risque au trajet, détection, malus de bluff) */
+  tagFactor?: { tag: TagId; factor: number }
+  /** Fragiles immunisés à la casse ; usure des trajets de nuit annulée */
+  smoothRide?: boolean
+  /** Une fois par jour, une fuite réussie ne coûte pas d'ICC */
+  rotatingPlate?: boolean
+  /** Fuite et passage forcé : chance ajoutée, dégâts de châssis et perte de Santé multipliés */
+  ram?: { fleeBonus: number; damageFactor: number }
+  /** Trappe de largage : mode d'éjection, cooldown, récupération d'une part tirée entre 0 et maxRecovery */
+  trapdoor?: { chance: number; cooldownDays: number; maxRecovery: number }
+  /** Faux terminal : bonus au bluff, tarif standard de corruption multiplié */
+  fakeTerminal?: { bluffBonus: number; bribeRateFactor: number }
 }
 
 export type Crew = {
@@ -359,6 +386,8 @@ export type MorningBriefing = {
   heat: { melted: number; rotten: number; aged: number } | null
   /** Sas d'un événement local : la journée commence à 20h00 */
   lockedIn: boolean
+  /** Caisses larguées par la trappe : rapportées par les complices, et perdues */
+  recovered: { back: number; lost: number } | null
   /** PV perdus au tabassage de l'échéance de la dette, 0 sinon */
   beating: number
   /** Vrai le matin où la dette passe en retard (taux majoré, embuscades) */
@@ -480,6 +509,14 @@ export type GameState = {
   initialDebtPaid: boolean
   /** Total emprunté en avance de survie, avant que la dette initiale soit soldée */
   advanced: number
+  /** Modules possédés et modules montés sur le véhicule (chap. 5) */
+  modules: { owned: readonly ModuleId[]; mounted: readonly ModuleId[] }
+  /** Dernier jour d'usage de la trappe de largage (cooldown) */
+  trapdoorDay: number | null
+  /** Caisses larguées par la trappe, récupérées en partie à la prochaine routine */
+  dumped: readonly CargoLot[]
+  /** Dernier jour où la plaque rotative a effacé une perte d'ICC */
+  plateDay: number | null
   /** Échéance du retard franchie : taux majoré et embuscades jusqu'à la fin de la partie */
   debtLate: boolean
   offshore: OffshoreAccount

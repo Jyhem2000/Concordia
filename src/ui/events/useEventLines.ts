@@ -33,6 +33,8 @@ export function useEventLines(): (event: GlobalEventId | LocalEventId) => string
         return effect.factor === 0 ? fx.tagOff(t.tag[effect.tag].name) : fx.tag(t.tag[effect.tag].name, multiplier(effect.factor))
       case 'halfDay':
         return fx.halfDay
+      case 'repair':
+        return fx.repair(multiplier(effect.factor))
       case 'heat':
         return fx.heat(t.product[effect.melts].name, effect.ageDays, effect.dayTripChassis, effect.dayTripHealth)
     }

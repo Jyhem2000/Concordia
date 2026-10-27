@@ -102,7 +102,7 @@ Chance = min( plafond,  base + Offre + Connivence − malus × (étoiles du dist
 ### 3. Fuite — *« Pied au plancher ! »*
 * **Barrage fixe uniquement** (impossible en contrôle volant).
 * **Chance de base** et **plafond** dégressif selon les étoiles du district : `FLEE` dans [`balance.ts`](../src/data/balance.ts).
-* **Bonus :** `[MOD-06]`, `[CREW-02]`, `[VEH-03]`. **Malus :** Fiche S, Sédation.
+* **Bonus :** `[MOD-06]`, `[CREW-02]`, `[VEH-03]` (en `[D3]` et `[D5]`). **Malus :** Fiche S, Sédation.
 * **Sacrifices :** 1 largage offensif max (une caisse `[TAG-FLAMMABLE]` **ou** `[TAG-CHEMICAL]` ; si le produit porte les deux tags, le meilleur bonus compte) + dopage `[T2-05]` (cumulable). Les caisses sacrifiées ou bues sont perdues quel que soit le résultat. Le joueur choisit le produit à sacrifier ; l'app montre le bonus de chacun.
 * **Succès :** cargaison sauvée, **+1 niveau de Fiche S**, mais perte de châssis (tirage uniforme entier dans une fourchette ; `[MOD-06]`, `[VEH-03]`), casse `[TAG-FRAGILE]`, et perte d'ICC (caméras de trafic ; `[VEH-03]`, `[MOD-05]`).
 * **Échec :** explosions `[TAG-FLAMMABLE]` d'abord, puis confiscation + saisie d'une part du Cash-Puce + perte d'ICC ; perte de châssis et de Santé (`[MOD-06]`), mortelle si la Santé tombe à 0 ; garde à vue.
@@ -111,7 +111,7 @@ Chance = min( plafond,  base + Offre + Connivence − malus × (étoiles du dist
 
 ### 4. Éjection / broyage d'urgence — *« Se débarrasser de la cargaison avant le barrage »*
 * **Activation :** uniquement au tout début de l'interception, à 300 m d'un barrage fixe (impossible en contrôle volant).
-* **Mode** (par priorité) : `[MOD-07]` s'il est disponible et autorisé ; sinon `[VEH-04]` ; sinon manuel. Restrictions : `[D5]` pour `[MOD-07]` ; en `[D6]`, éjection impossible sauf via `[VEH-04]` (dalle bio-scellée, chap. 4). Le mode manuel reste donc possible en `[D5]`.
+* **Mode** (par priorité, choisi par l'app et annoncé) : `[MOD-07]` s'il est monté, hors cooldown et autorisé dans le district ; sinon `[VEH-04]` ; sinon manuel s'il est autorisé. Autorisations par district (`ejection` dans [`districts.ts`](../src/data/districts.ts)) : en `[D5]`, pas de mode manuel (LiDAR) mais `[MOD-07]` passe par les égouts ; en `[D6]`, ni manuel ni `[MOD-07]` (dalle bio-scellée) ; `[VEH-04]` partout. Chances et dégâts : chez le mode (chap. 5 ; mode manuel : `EJECT` dans [`balance.ts`](../src/data/balance.ts)).
 * **Indisponible** après un bluff raté, comme après toute autre action.
 * **Mode manuel (décharge dans une ruelle) :** chance fixe (`EJECT` dans [`balance.ts`](../src/data/balance.ts)). Succès : soute propre au barrage (0 amende, 0 ICC, 0 temps perdu), toutes les caisses illégales perdues, perte de châssis.
 * **Échec (tous modes)** — un drone LiDAR filme les caisses : sanction de base avec un taux d'amende relevé + une perte d'ICC supplémentaire + garde à vue.

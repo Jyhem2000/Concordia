@@ -10,7 +10,8 @@
            \— [D3] —/
 ```
   Liaisons : `MAP_LINKS` dans [`districts.ts`](../src/data/districts.ts) (le schéma n'est qu'une illustration). *Ex. :* `[D4]` → `[D6]` traverse `[D1]`, `[D2]` et `[D5]` : trois districts traversés.
-* **Pompes :** *officielle* = connectée à Aeterna, **fermée la nuit** si l'ICC est sous 50 % (chap. 2) ; *fixe* = toujours ouverte.
+* **Pompes :** *officielle* = connectée à Aeterna, **fermée la nuit** sous un seuil d'ICC (`PUMP_NIGHT_MIN_ICC` dans [`balance.ts`](../src/data/balance.ts)) ; *fixe* = toujours ouverte.
+* **Lieux spéciaux :** ouverts de jour seulement (06h00 – 20h00, chap. 2). Coûts en ₡ indexés sur l'inflation (chap. 7), sauf mention. **Cooldown :** un service utilisé le jour J redevient disponible le jour J + cooldown. Chiffres : [`locations.ts`](../src/data/locations.ts).
 * **Coefficients de marché** (chap. 7) : chaque district applique un coefficient à ses produits de **Production**, aux produits **Neutres** (1.00) et à ceux en **Forte demande** (plus le bonus de tier).
 
 ## Stats des districts
@@ -37,9 +38,9 @@ Boucherie clandestine de Viktor Varga et de ses « Bouchers ».
 
 ### `[LOC-D1-2]` La Cantine des Chauffeurs (« Chez Borg »)
 Bar enfumé réservé aux routiers, où l'on sert l'eau de l'Exemption Métabolique.
-* **Exemption Métabolique :** chaque passage de jour remet la protection contre la Sédation au maximum (chap. 2).
-* **Synthanol :** **60 ₡** / ration, tarif syndical **fixe** : il n'est **pas indexé** sur l'inflation.
-* **Équipage :** recrutement et remplacement de l'équipier actif (chap. 5).
+* **Exemption Métabolique :** se trouver en `[D1]` de jour (au réveil ou à l'arrivée) suffit : les routiers passent tous à la Cantine. La protection contre la Sédation revient au maximum (chap. 2).
+* **Synthanol au tarif syndical :** en `[D1]`, de jour, le plein se fait au tarif fixe de la Cantine, **non indexé** sur l'inflation (`CANTINE` dans [`locations.ts`](../src/data/locations.ts)) ; la nuit, seule la pompe du district est ouverte.
+* **Équipage :** recrutement, remplacement et renvoi de l'équipier actif (chap. 5).
 
 ---
 
@@ -51,8 +52,8 @@ Bar enfumé réservé aux routiers, où l'on sert l'eau de l'Exemption Métaboli
 
 ### `[LOC-D2-1]` Le Studio de « Karma-Cham » (influenceuse d'État corrompue)
 Icône officielle le jour, mercenaire vénale en coulisses. **Panique Algorithmique sur Commande :**
-* **Coût :** **10 000 ₡**, **+5 000 ₡** par utilisation précédente. **Cooldown :** 5 jours.
-* **Effet :** le joueur choisit **un** tag ; le soir même, une fausse polémique virale force Aeterna à réagir : le lendemain, tous les produits de ce tag valent **×1.5** dans tous les districts (*bonus d'influence*, chap. 7).
+* **Coût :** une base, plus une hausse par utilisation précédente. **Cooldown** en jours. Chiffres : `KARMA` dans [`locations.ts`](../src/data/locations.ts).
+* **Effet :** le joueur choisit **un** tag ; le soir même, une fausse polémique virale force Aeterna à réagir : **le lendemain seulement**, tous les produits de ce tag valent plus cher dans tous les districts (*bonus d'influence*, multiplié par-dessus `Mult_EvtActif`, plafond compris, chap. 7). Le téléscripteur l'annonce.
 * **Options :** A « Cancel Wave Culturelle » `[TAG-CULTURE]` · B « Rumeur de Pénurie Alimentaire » `[TAG-PERISHABLE]` · C « Scandale Chimique & Pharmaceutique » `[TAG-CHEMICAL]`.
 
 ---
@@ -63,11 +64,13 @@ Icône officielle le jour, mercenaire vénale en coulisses. **Panique Algorithmi
 * **Sécurité :** portiques de désinfection obligatoires, bio-scanners IA, agents humains.
 
 ### `[LOC-D3-1]` La Morgue Arrière (Dr. K.)
+Coûts, durées et effets chiffrés : `MORGUE` dans [`locations.ts`](../src/data/locations.ts).
+
 | Service | Coût | Cooldown | Effet |
 | :--- | :--- | :--- | :--- |
-| Laissez-passer sanitaire falsifié | 3 000 ₡ | dure 5 jours | Immunité aux bio-scanners de `[D3]` (annule le malus `[TAG-CHEMICAL]`) et au surcroît de sécurité de `[EVT-G02]` dans ce district. |
-| Chirurgie d'urgence | 3 500 ₡ + 10 % du Cash-Puce | 5 jours | **+35 PV** de Santé, sans dépasser **85 PV**. |
-| Certificat de décontamination | 4 000 ₡, **+2 000 ₡ par utilisation précédente** | 7 jours | **+10 % d'ICC**. |
+| Laissez-passer sanitaire falsifié | fixe | sa durée de validité (jour d'achat compris) | Pendant sa validité : détection `[TAG-CHEMICAL]` annulée en `[D3]` (bio-scanners), et le risque de `[EVT-G02]` ne s'applique pas en `[D3]`. |
+| Chirurgie d'urgence | fixe + une part du Cash-Puce | oui | Gain de Santé, sans dépasser un plafond (refusée si la Santé y est déjà). |
+| Certificat de décontamination | hausse à chaque utilisation | oui | Gain d'ICC **hors plafond** de gains de route (ce n'est pas un gain de route, chap. 2). |
 
 ---
 
@@ -79,7 +82,7 @@ Icône officielle le jour, mercenaire vénale en coulisses. **Panique Algorithmi
 * **Ambiance :** mécanos renégats et Bouchers de la Vieille École vivent en seigneurs libres, de petits élevages clandestins, de `[T1-04]` et de prélèvements sur la charcuterie de passage, mais dépendent des livreurs pour les antibiotiques, les nouilles et l'huile de leurs générateurs.
 * **Crédits sans puce :** les bannis n'ont pas de puce ; les milices encaissent les ₡ sur des puces mortes qu'elles écoulent ensuite via les livreurs, contre une commission.
 * **Zone hors-réseau :** ni caméras, ni BRC. Au calcul du risque, *ce qui dépend d'Aeterna disparaît, ce qui est physique reste* :
-  * s'appliquent : risque de base, trajet de nuit, districts traversés, `[EVT-D4-01]`, `[VEH-01]`, `[CREW-01]`, balise de `[T4-06]`, embuscades de la dette (chap. 7) ;
+  * s'appliquent : risque de base, trajet de nuit, districts traversés, `[EVT-D4-01]`, `[VEH-01]`, `[VEH-04]`, `[CREW-01]`, balise de `[T4-06]`, embuscades de la dette (chap. 7) ;
   * valent 0 : suspicion d'ICC, malus de tags, couverture légale et camouflage de `[VEH-02]`, ronde renforcée, Fiche S, pic suspect, malus d'événements visant la BRC.
 * **Menace — Racket des milices** (remplace l'interception de la BRC : ni bluff, ni corruption, ni éjection, ni garde à vue). Le joueur choisit :
   * **Payer le péage :** **une part de la valeur de la soute** (au prix de base ; `RACKET` dans [`balance.ts`](../src/data/balance.ts)), en ₡ **ou** en caisses choisies par les miliciens : d'abord leurs produits favoris, dans l'ordre (`tollFavorites` dans [`districts.ts`](../src/data/districts.ts)), puis les caisses les plus chères, jusqu'à couvrir le péage à la valeur en paiement (chap. 7). La dernière caisse prise peut dépasser le péage : les milices ne rendent pas la monnaie. L'app montre à l'avance les caisses qui seraient prises.
@@ -90,13 +93,15 @@ Icône officielle le jour, mercenaire vénale en coulisses. **Panique Algorithmi
 * **Production :** le moteur n'en tire chaque jour qu'une partie (`productionDraw` dans [`districts.ts`](../src/data/districts.ts)).
 
 ### `[LOC-D4-1]` Le Garage « Faraday » (Mécano-Mitch)
-Tenu par un ancien ingénieur spatial viré pour avoir refusé de manger des insectes. Seul endroit pour acheter un châssis, acheter des modules et **changer les modules montés** (gratuit, chap. 5), et **réparer le châssis : 40 ₡ par PV manquant** (modificateur : `[EVT-D4-03]`).
+Tenu par un ancien ingénieur spatial viré pour avoir refusé de manger des insectes. Seul endroit pour :
+* acheter un châssis ou des modules, et **monter ou démonter** ses modules (gratuit, chap. 5) ;
+* **réparer le châssis :** un prix par PV rendu (indexé, `GARAGE` dans [`locations.ts`](../src/data/locations.ts)), réduit par `[EVT-D4-03]` ; le joueur choisit combien de PV réparer.
 
 ### `[LOC-D4-2]` Le Bunker de « Cassandre-88 » (l'informateur sous plomb)
 Ancien analyste de données d'Aeterna, terré dans une caravane blindée sous les pylônes haute tension.
-* **Prédiction :** révèle quel événement global frappera à J+2 et **garantit** son déclenchement (il remplace le tirage de ce jour-là). Les événements locaux restent imprévisibles.
-* **Coût :** `3 000 + 1 500 × utilisations précédentes` ₡ (indexé sur l'inflation) **+ 1 caisse de `[T3-03]`**.
-* **Limite :** une seule prédiction active à la fois (jusqu'au jour prédit).
+* **Prédiction :** révèle l'événement global qui frappera **dans deux jours** (J+2) et **garantit** son déclenchement : il est tiré au hasard parmi les événements globaux, et remplace le tirage de ce jour-là. La veille, la rumeur du téléscripteur l'annonce, cette fois sans erreur possible. Les événements locaux restent imprévisibles.
+* **Coût :** une base, plus une hausse par utilisation précédente (indexées) **+ 1 caisse de `[T3-03]`** (`CASSANDRE` dans [`locations.ts`](../src/data/locations.ts)).
+* **Limite :** une seule prédiction active à la fois (jusqu'au jour prédit) ; impossible si J+2 dépasse le Jour 30.
 
 ---
 
@@ -104,24 +109,24 @@ Ancien analyste de données d'Aeterna, terré dans une caravane blindée sous le
 * **Échelon 4 — Catégorie A, haute bureaucratie sous pression.** Appartements de verre à 20 °C, accès occulte au luxe, zéro sédatif pour garder une productivité maximale.
 * **Ambiance :** gratte-ciels où travaillent les bureaucrates du DSC, les superviseurs d'Aeterna et les truqueurs de la Loterie. Totalement lucides mais bloqués par le plafond de verre de `[D6]`, ils survivent sous caféine, nicotine, antidépresseurs et délation entre collègues.
 * **Sécurité :** portiques à rayons X, scanners électromagnétiques, douaniers d'élite et Drones-Juges.
-* **Menace — Urbanisme panoptique** (LiDAR 360°) : l'éjection manuelle est **interdite** ; seuls `[MOD-07]` ou `[VEH-04]` la permettent.
+* **Menace — Urbanisme panoptique** (LiDAR 360°) : l'éjection manuelle est **interdite** (une décharge en ruelle serait filmée) ; seuls `[MOD-07]` (par les égouts) ou `[VEH-04]` la permettent (`ejection` dans [`districts.ts`](../src/data/districts.ts)).
 
 ### `[LOC-D5-1]` La Laverie « Crypto-Clean » (banque offshore ministérielle)
 Les vrais blanchisseurs ne sont pas les punks de `[D4]` mais les hauts fonctionnaires corrompus du Ministère des Finances, seuls à pouvoir créer des comptes fantômes dans le registre central pour y cacher leurs propres pots-de-vin. Ce sont aussi les superviseurs qui alimentent l'algorithme de la Loterie.
 * **Guichet du compte offshore** (chap. 7).
 * **Falsifier un dossier** (`[EVT-L01]`) — c'est Aeterna qui tire au sort : on ne choisit pas le gagnant, on glisse un faux dossier pour que l'algorithme le désigne. C'est un pari.
-  * **Quand :** la veille d'un tirage (chap. 8).
-  * **Coût :** **15 000 ₡, +15 000 ₡ par utilisation précédente** (perdu même en cas d'échec).
-  * **Réussite : 60 %** (bonus : `[CREW-02]`).
-  * **Succès :** la carte choisie impose **un** des deux rôles (l'autre reste tiré au hasard) ; ses effets durent **3 jours** et remplacent ceux du rôle imposé. Ton équipier est protégé de ce tirage. Le district choisi doit être concerné par la Loterie pour ce rôle (chap. 8).
-  * **Échec :** Aeterna détecte l'anomalie et remonte la piste : **−10 % d'ICC** et **+1 niveau de Fiche S**. Le tirage se fait normalement, sans protection. *« Votre contribution à la mobilité sociale a été jugée… trop enthousiaste. »*
+  * **Quand :** la veille d'un tirage (chap. 8), une fois.
+  * **Coût :** une base, plus une hausse par utilisation précédente (indexées), perdu même en cas d'échec. **Réussite :** une chance fixe (bonus : `[CREW-02]`). Chiffres : `FORGERY` dans [`locations.ts`](../src/data/locations.ts).
+  * **Résolution immédiate :** le joueur sait aussitôt si le faux dossier est passé.
+  * **Succès :** la carte choisie impose **un** des deux rôles au tirage du lendemain (l'autre reste tiré au hasard, jamais dans le même district) ; ses effets durent **le jour du tirage et les deux suivants** et remplacent ceux du rôle imposé. Ton équipier est protégé de ce tirage. Le district choisi doit être concerné par la Loterie pour ce rôle (chap. 8).
+  * **Échec :** Aeterna détecte l'anomalie et remonte la piste : perte d'ICC et **+1 niveau de Fiche S**. Le tirage se fait normalement, sans protection. *« Votre contribution à la mobilité sociale a été jugée… trop enthousiaste. »*
 
 | Carte | Rôle imposé | Vérité | Effet |
 | :--- | :--- | :--- | :--- |
-| Un capitaine de la BRC (district au choix) | Promu | Muté « vers le haut »… puis suicidé : il en savait trop. | **−15 %** de risque dans ce district (une recrue le remplace), au lieu de la purge préventive. |
-| Un contrebandier concurrent (district au choix) | Promu | Suicidé, sa clientèle orpheline. | **Quotas de demande ×1.5** dans ce district (cumulable avec `[CREW-03]`). |
-| L'indic qui te suit | Promu | Envoyé « dans un appartement de rêve ». | **Fiche S remise à 0**, **+5 % d'ICC**. |
-| Un cadre (district de départ au choix) | Déclassé | Dénoncé par toi, renvoyé un étage plus bas. | Tu choisis **le vice qu'il emporte** : le produit qui passe en Forte demande en dessous. |
+| Un capitaine de la BRC (district au choix) | Promu | Muté « vers le haut »… puis suicidé : il en savait trop. | Risque réduit dans ce district (une recrue le remplace), au lieu de la purge préventive. |
+| Un contrebandier concurrent (district au choix) | Promu | Suicidé, sa clientèle orpheline. | **Quotas de demande** majorés dans ce district (cumulable avec `[CREW-03]`). |
+| L'indic qui te suit | Promu (district tiré au hasard) | Envoyé « dans un appartement de rêve ». | Au tirage : **Fiche S remise à 0** et gain d'ICC hors plafond ; pas de purge préventive. |
+| Un cadre (district de départ au choix) | Déclassé | Dénoncé par toi, renvoyé un étage plus bas. | Tu choisis **le vice qu'il emporte** parmi les produits possibles (chap. 8). |
 
   *En cas de succès : « Merci pour votre contribution à la mobilité sociale. »*
 
@@ -135,12 +140,12 @@ Les vrais blanchisseurs ne sont pas les punks de `[D4]` mais les hauts fonctionn
 * **Menace — Dalle bio-scellée** (grilles laser, capteurs sismiques) : l'éjection est **impossible**, même avec `[MOD-07]` — **sauf** via `[VEH-04]`.
 
 ### `[LOC-D6-1]` Le « Velvet-Silo » (cabaret sensoriel & sous-sol de débauche)
-Lupanar clandestin et bar à oxygène caché dans les galeries de climatisation sous les villas, accessible par les quais de service. Ouvert de jour seulement : les oligarques festoient en journée climatisée, la nuit appartient aux purges.
+Lupanar clandestin et bar à oxygène caché dans les galeries de climatisation sous les villas, accessible par les quais de service. Ouvert de jour seulement : les oligarques festoient en journée climatisée, la nuit appartient aux purges. Chiffres : `VELVET` dans [`locations.ts`](../src/data/locations.ts).
 
 | Service | Cooldown | Coût | Effet |
 | :--- | :--- | :--- | :--- |
-| Vente aux enchères masquée | 3 jours | — | Vendre **1 caisse** de Tier 3 ou 4 au **double du cours local**. |
-| Chantage sur l'oreiller | 4 jours | 8 000 ₡ **+4 000 ₡ par utilisation précédente**, ou des caisses de `[T3-07]` / `[T3-02]` dont la valeur totale couvre ce montant (paiement en nature, chap. 7) | **+12 % d'ICC** (vidéos compromettantes de juges). Les juges finissent par se méfier. |
-| Commande spéciale VIP | 3 jours après résolution (1 contrat actif max) | — | Livrer **3 caisses** d'un produit précis de Tier 2 ou 3 (absent de la soute à l'offre) avant le lendemain 20h00, racheté **×3.5** du cours local. **Échec :** **−10 % d'ICC** et lieu verrouillé **5 jours**. |
+| Vente aux enchères masquée | oui | — | Vendre **1 caisse** de Tier 3 ou 4 à un multiple du cours local (lot le plus ancien d'abord, état de la caisse compris). |
+| Chantage sur l'oreiller | oui | une base plus une hausse par utilisation précédente, en ₡ **ou** en caisses de `[T3-07]` puis `[T3-02]` (lots les plus anciens d'abord) jusqu'à couvrir le montant à la valeur en paiement, sans rendu de monnaie (chap. 7) | Gain d'ICC **hors plafond** (vidéos compromettantes de juges). Les juges finissent par se méfier. |
+| Commande spéciale VIP | après résolution (1 contrat actif max) | — | Sur demande, un produit précis de Tier 2 ou 3 **absent de la soute**, tiré au hasard : livrer **3 caisses** au Silo le jour même ou le lendemain (avant 20h00), rachetées à un multiple du cours local. **Échec** (constaté à la routine suivant l'échéance) : perte d'ICC et lieu verrouillé plusieurs jours. |
 
-* **Enchères & Commande VIP :** le ×2 / ×3.5 s'applique au cours local ; la commission de puce (×0,90) est prélevée, mais ces ventes sont **hors quota** (elles ne consomment pas la demande et ne déclenchent pas de pic suspect).
+* **Enchères & Commande VIP :** le multiple s'applique au cours local ; la commission de puce est prélevée, ainsi que l'effet de l'état de la caisse (abîmée, fraîcheur), mais pas le savoir-faire ; ces ventes sont **hors quota** (elles ne consomment pas la demande et ne déclenchent pas de pic suspect).
