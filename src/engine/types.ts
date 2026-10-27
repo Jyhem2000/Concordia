@@ -95,6 +95,8 @@ export type District = {
   /** Coefficient de marché des produits en Forte demande, avant bonus de tier */
   coefStrongDemand: number
   production: readonly ProductId[]
+  /** Nombre de produits de la liste Production tirés chaque jour ; absent = toute la liste */
+  productionDraw?: Range
   strongDemand: readonly ProductId[]
 }
 
@@ -127,15 +129,55 @@ export type Crew = {
 /** Service de jour (06h00 – 20h00) ou couvre-feu forcé (chap. 2) */
 export type Phase = 'day' | 'night'
 
+/** `finished` : la partie a passé le Jour 30 (l'audit et les fins viendront avec la dette) */
+export type GameStatus = 'playing' | 'finished'
+
+/** Caisses d'un même produit achetées ensemble */
+export type CargoLot = {
+  productId: ProductId
+  qty: number
+  /** Prix d'achat unitaire, pour le prix moyen d'achat affiché */
+  unitCost: number
+  /** Faux tant que le lot n'a pas quitté son district d'achat (clause anti-arbitrage, chap. 7) */
+  travelled: boolean
+}
+
+/** Marché du jour d'un district, tiré à 06h00 */
+export type DistrictMarket = {
+  /** Bruit du jour par produit : le cours se recalcule à partir de lui (détail affichable) */
+  noise: Record<ProductId, number>
+  /** Boutique du jour : stock restant des produits en vente */
+  stock: Partial<Record<ProductId, number>>
+  /** Demande restante par produit ; absente = illimitée */
+  demand: Partial<Record<ProductId, number>>
+}
+
+/** Derniers cours qu'un joueur a lui-même observés dans un district */
+export type MarketMemory = {
+  day: number
+  quotes: Record<ProductId, number>
+}
+
 /**
  * État minimal et sérialisable d'une partie : c'est lui qui est sauvegardé.
- * Les valeurs dérivées (risque, prix nets…) ne sont jamais stockées, elles se recalculent.
+ * Les valeurs dérivées (cours, risque, prix nets…) ne sont jamais stockées, elles se recalculent.
  */
 export type GameState = {
+  status: GameStatus
   /** Jour 1 à 30 */
   day: number
   phase: Phase
   districtId: DistrictId
+  vehicleId: VehicleId
+  /** Rations de Synthanol dans le réservoir */
+  fuel: number
+  cargo: readonly CargoLot[]
+  markets: Record<DistrictId, DistrictMarket>
+  memory: Partial<Record<DistrictId, MarketMemory>>
+  dayTripDone: boolean
+  nightTripDone: boolean
+  /** Dernier jour où le couvre-feu a été forcé (épuisement nerveux, chap. 2) */
+  lastCurfewDay: number | null
   /** Cash-Puce */
   cash: number
   /** Solde de la dette mafieuse */

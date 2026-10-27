@@ -7,10 +7,10 @@
 * Les événements (globaux et locaux) sont publics : ils passent au téléscripteur dès 06h00 (chap. 8).
 
 ## Boutique du jour (générée à 06h00)
-Chaque district propose **au moins 10 produits** (jusqu'à 12 en `[D4]`, davantage les jours d'événement à apparition) :
+Chaque district propose un **minimum de produits** (`SHOP_MIN_PRODUCTS` dans [`balance.ts`](../src/data/balance.ts) ; davantage en `[D4]` et les jours d'événement à apparition) :
 1. **Socle officiel :** tous les produits de Tier 0, toujours disponibles partout ; aucun district ne les place en Forte demande. *Lore :* même l'élite de `[D6]` en achète pour nourrir ses domestiques et afficher une comptabilité « 100 % Zéro-Carbone ».
 2. **Production locale :** tous les produits de la liste Production du district (exceptions : tirage partiel en `[D4]`, apparition limitée de `[T4-06]`).
-3. **Complément neutre :** si le total est inférieur à 10, tirage aléatoire de produits de Tier 1 à 3 neutres pour ce district.
+3. **Complément neutre :** si le total est inférieur au minimum, tirage aléatoire de produits de Tier 1 à 3 neutres pour ce district.
 
 * **Exclusion :** un district ne vend **jamais** un produit de sa liste Forte demande, sauf événement qui le précise.
 * **Stocks :** par produit et par jour, selon le tier ([`products.ts`](../src/data/products.ts)). Modificateurs : `[EVT-G05]`, `[EVT-D1-01]`, `[EVT-D3-03]`.
@@ -22,7 +22,7 @@ Cours = Arrondi( Prix_Base × Coef_District × Bruit × Mult_Événement )
 ```
 * **Coef_District :** coefficient Production, Neutre (1.00) ou Forte demande du district ([`districts.ts`](../src/data/districts.ts)). En Forte demande, on ajoute le **bonus de tier** ([`products.ts`](../src/data/products.ts)) — plus le produit est dangereux, plus il se paie cher.
   *Ex. :* `[T4-01]` en `[D6]` se paie au coefficient de Forte demande de `[D6]` plus le bonus du Tier 4.
-* **Bruit :** tirage uniforme quotidien entre **0.70** et **1.30**, propre à chaque produit dans chaque district. Un mauvais tirage aux deux bouts peut rendre un trajet perdant.
+* **Bruit :** tirage uniforme quotidien (`QUOTE_NOISE` dans [`balance.ts`](../src/data/balance.ts)), propre à chaque produit dans chaque district. Un mauvais tirage aux deux bouts peut rendre un trajet perdant.
 * **Mult_Événement = min( 4, Mult_EvtActif × Bonus_Influence )**
   * *Mult_EvtActif :* 1.00 par défaut. Si un événement global et un local touchent le même produit, on garde celui dont l'écart `|Mult − 1.00|` est le plus fort (égalité : le local prime).
   * *Bonus_Influence :* `[LOC-D2-1]`, multiplié par-dessus.
@@ -32,31 +32,31 @@ Cours = Arrondi( Prix_Base × Coef_District × Bruit × Mult_Événement )
 ## Quota de demande
 Pendant de la boutique : un district n'achète qu'une quantité limitée de chaque produit.
 * **Quota :** par produit et par district, selon le tier et le statut du produit dans le district ([`products.ts`](../src/data/products.ts)). Modificateurs (multiplicatifs entre eux) : `[CREW-03]`, carte « contrebandier concurrent » de `[LOC-D5-1]`.
-* **Demande restante :** pleine au Jour 1. Chaque vente la consomme, de jour comme de nuit. **Chaque matin à 06h00, elle remonte d'1/3 du quota** (arrondi au supérieur), sans dépasser le quota. Vider un marché le pénalise donc environ 3 jours.
-* **Au-delà de la demande restante, le marché est saturé :** chaque caisse supplémentaire se vend **×0.50** (`Coef_Demande`).
+* **Demande restante :** pleine au Jour 1. Chaque vente la consomme, de jour comme de nuit. **Chaque matin à 06h00, elle remonte d'une fraction du quota** (`DEMAND_REFILL_DIVISOR` dans [`balance.ts`](../src/data/balance.ts), arrondi au supérieur), sans dépasser le quota. Vider un marché le pénalise donc plusieurs jours.
+* **Au-delà de la demande restante, le marché est saturé :** chaque caisse supplémentaire se vend à prix réduit (`Coef_Demande`, `SATURATED_SALE_FACTOR` dans [`balance.ts`](../src/data/balance.ts)).
 * **Pic suspect :** vendre au-delà de la demande restante alerte Aeterna — **le lendemain**, le risque de base de ce district augmente de **+10 %** (icône 👁️ sur la carte).
 * **Affichage :** *« Demande restante : 5 (+2 demain) »* sur chaque ligne du tableau des cours (chap. 9).
 * *Lecture stratégique :* on répartit ses ventes **dans le temps et dans l'espace** (8 caisses en `[D6]` aujourd'hui, le reste en `[D5]` demain, et on laisse `[D6]` se reconstituer), en arbitrant avec la fraîcheur et la collecte de Viktor.
 
 ## Prix de vente
 ```
-Prix_Vente = Arrondi( Cours × 0,90 × Coef_Demande × Coef_Condition × Savoir_Faire )
+Prix_Vente = Arrondi( Cours × Commission × Coef_Demande × Coef_Condition × Savoir_Faire )
 ```
-* **Commission de puce (×0,90) :** chaque vente P2P est ponctionnée par l'infrastructure d'Aeterna. Acheter puis revendre au même endroit coûte donc toujours 10 %.
-* **Coef_Demande :** 1.00 dans la limite de la demande restante, 0.50 au-delà.
+* **Commission de puce** (`SALE_COMMISSION` dans [`balance.ts`](../src/data/balance.ts)) **:** chaque vente P2P est ponctionnée par l'infrastructure d'Aeterna. Acheter puis revendre au même endroit coûte donc toujours la commission.
+* **Coef_Demande :** 1.00 dans la limite de la demande restante, prix saturé au-delà.
 * **Coef_Condition :** `[TAG-FRAGILE]` (chap. 3).
-* **Savoir_Faire = Coef_Fraîcheur × Coef_Nuit × Bonus_Mama**, avec **rendements décroissants** : au-delà de **×1.50**, l'excédent compte pour moitié (`1.50 + (produit − 1.50) / 2`). *Ex. : 1.30 × 1.20 × 1.25 = 1.95 → **1.725**.*
+* **Savoir_Faire = Coef_Fraîcheur × Coef_Nuit × Bonus_Mama**, avec **rendements décroissants** : au-delà d'un seuil, l'excédent ne compte qu'en partie (`KNOW_HOW_SOFT_CAP` et `KNOW_HOW_EXCESS_FACTOR` dans [`balance.ts`](../src/data/balance.ts)).
   * *Coef_Fraîcheur :* `[TAG-PERISHABLE]` (chap. 3).
-  * *Coef_Nuit — profil nocturne* (pendant le couvre-feu) :
+  * *Coef_Nuit — profil nocturne* (pendant le couvre-feu ; coefficients : `NIGHT_PROFILE_FACTOR` dans [`balance.ts`](../src/data/balance.ts)) :
 
-| Profil nuit | Coefficient | Logique |
+| Profil nuit | Effet | Logique |
 | :--- | :---: | :--- |
-| Festif | **×1.20** | Prime de fête clandestine. |
-| Diurne | **×0.80** | Excitants de bureau : leurs clients dorment. |
-| — | ×1.00 | — |
+| Festif | bonus | Prime de fête clandestine. |
+| Diurne | malus | Excitants de bureau : leurs clients dorment. |
+| — | aucun | — |
 
   * *Bonus_Mama :* `[CREW-03]`.
-* **Clause anti-arbitrage :** Savoir_Faire ne peut dépasser **1.00** si la caisse est revendue dans son district d'achat sans avoir voyagé.
+* **Clause anti-arbitrage :** Savoir_Faire est plafonné (`ANTI_ARBITRAGE_CAP` dans [`balance.ts`](../src/data/balance.ts)) si la caisse est revendue dans son district d'achat sans avoir voyagé.
 * *Intention — des builds, pas une recette :* chaque axe de bonus vise une famille de produits différente (équipier, modules, `[LOC-D2-1]`, nuit). Les combinaisons rapportent davantage, mais les plafonds (`Mult_Événement`, `Savoir_Faire`) empêchent une seule combinaison d'écraser les autres.
 
 ## Paiement en nature
@@ -66,7 +66,7 @@ Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est 
 
 ## Indice d'inflation algorithmique
 *« Pour votre sécurité économique, Aeterna ajuste les prix en temps réel. »*
-* **Indice du jour = 1 + (jour − 1) / 15** → ×1.00 au Jour 1, ×2.00 au Jour 16, ×2.93 au Jour 30.
+* **Indice du jour = 1 + (jour − 1) / période** (`INFLATION_PERIOD_DAYS` dans [`balance.ts`](../src/data/balance.ts)) : ×1.00 au Jour 1, puis croissance linéaire.
 * **Tous les montants en ₡ de la doc sont des valeurs de base (Jour 1)**, multipliées par l'indice pour : carburant, réparations, dépannage, salaires et frais d'équipage, services des lieux spéciaux, part fixe du tarif de corruption, montants des aléas routiers.
 * **Non indexés :** prix des produits (ils ont leur propre marché), véhicules, modules, dette et emprunts, seuils de fin, tarif syndical de `[LOC-D1-2]`.
 * *Lore :* le marché noir facture ses services en indice officiel : c'est la seule unité de compte que les puces acceptent sans éveiller l'algorithme.

@@ -1,3 +1,4 @@
+import type { ActionError } from '../engine/actions.ts'
 import type { CrewId, DistrictId, EventId, LocationId, ModuleId, ProductId, TagId, Tier, VehicleId } from '../engine/types.ts'
 
 /*
@@ -58,7 +59,106 @@ export const fr = {
   rule: {
     clamp: 'Plafond',
     round: 'Arrondi',
+    inflation: 'Inflation du jour',
+    production: 'Production locale',
+    'strong-demand': 'Forte demande',
+    'tier-bonus': 'Bonus de tier',
+    noise: 'Fluctuation du jour',
+    quote: 'Cours du jour',
+    commission: 'Commission de puce',
+    saturation: 'Marché saturé',
+    'know-how': 'Savoir-faire',
+    'night-festive': 'Nuit festive',
+    'night-diurnal': 'Nuit (clients endormis)',
+    'diminishing-returns': 'Rendements décroissants',
+    'anti-arbitrage': 'Pas de voyage, pas de bonus',
   } as Record<string, string>,
+
+  // ─── Interface ───
+
+  hud: {
+    inflation: (index: string) => `Inflation ${index}`,
+    cargo: 'Soute',
+    newGame: 'Nouvelle partie',
+    newGameConfirm: 'Abandonner la partie en cours et recommencer au Jour 1 ?',
+  },
+
+  breakdown: {
+    total: 'Total',
+  },
+
+  market: {
+    title: 'Marché noir',
+    streetOnly: 'Couvre-feu : seul le marché de rue est ouvert.',
+    quote: 'Cours',
+    stock: 'Stock',
+    owned: 'En soute',
+    demand: 'Demande',
+    sale: 'Vente nette',
+    notInShop: 'Hors boutique',
+    unlimited: 'Illimitée',
+    demandLeft: (left: number, refill: number) => (refill > 0 ? `${left} (+${refill} demain)` : `${left}`),
+    saturated: (qty: number) => `dont ${qty} à prix saturé`,
+    averageCost: (cost: string) => `acheté ${cost}/u`,
+    buy: 'Acheter',
+    sell: 'Vendre',
+    max: 'MAX',
+    status: {
+      production: 'Production locale',
+      strong: 'Forte demande',
+      neutral: '',
+    },
+  },
+
+  travel: {
+    title: 'Carte',
+    here: 'Vous êtes ici',
+    direct: 'Liaison directe',
+    via: (names: string) => `Via ${names}`,
+    fuel: (rations: number) => `${rations} ration${rations > 1 ? 's' : ''}`,
+    go: { day: 'Rouler de jour', night: 'Rouler de nuit' },
+    memoryNever: 'Cours jamais observés',
+    memoryToday: "Cours vus aujourd'hui",
+    memoryDaysAgo: (days: number) => `Cours vus il y a ${days} jour${days > 1 ? 's' : ''}`,
+  },
+
+  evening: {
+    fuelTitle: 'Synthanol',
+    pricePerRation: (price: string) => `${price} la ration`,
+    refuelOne: '+1 ration',
+    refuelFull: 'Plein',
+    siphon: 'Corvée DSC',
+    siphonHint: "Une ration contre de l'ICC et une demi-journée.",
+    curfewTitle: '20h00 — couvre-feu sanitaire',
+    forceCurfew: 'Forcer le couvre-feu',
+    forceCurfewHint: 'Un second trajet, de nuit. Interdit le lendemain.',
+    sleepRelay: 'Dormir au relais',
+    bivouac: 'Bivouac',
+    nightNotice: 'Couvre-feu forcé : 1 trajet de nuit, puis dormir.',
+  },
+
+  end: {
+    title: "Fin du mois d'août",
+    body: "Le Jour 30 est passé. L'audit et les fins arriveront avec la dette.",
+    finalCash: 'Cash-Puce final',
+  },
+
+  error: {
+    'game-over': 'La partie est terminée.',
+    'invalid-quantity': 'Quantité invalide.',
+    'not-for-sale': "Ce produit n'est pas en boutique ici.",
+    'out-of-stock': 'Stock insuffisant.',
+    'cargo-full': 'Soute pleine.',
+    'not-enough-cash': 'Cash-Puce insuffisant.',
+    'not-enough-cargo': 'Pas assez de caisses en soute.',
+    'tank-full': 'Réservoir plein.',
+    'same-district': 'Vous y êtes déjà.',
+    'trip-done': 'Trajet déjà effectué pour cette phase.',
+    'not-enough-fuel': 'Pas assez de Synthanol.',
+    'not-daytime': 'Possible seulement de jour.',
+    exhausted: "Épuisement nerveux : pas de seconde nuit blanche d'affilée.",
+    'siphon-unavailable': "La corvée DSC n'est possible que bloqué, sans carburant, ni cargaison, ni Cash-Puce.",
+  } satisfies Record<ActionError, string>,
 
   // ─── Données de jeu (chap. 3 à 8) ───
 

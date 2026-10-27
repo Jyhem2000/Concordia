@@ -8,7 +8,7 @@ import type { Crew, CrewId, Module, ModuleId, Vehicle, VehicleId } from '../engi
 /** Véhicule de départ (chap. 5) */
 export const START_VEHICLE: VehicleId = 'VEH-01'
 
-export const VEHICLES = {
+export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
   'VEH-01': {
     price: 0,
     cargo: 10,
@@ -41,9 +41,9 @@ export const VEHICLES = {
     tank: 8,
     fuelPerTrip: { day: 2, night: 3 },
   },
-} as const satisfies Record<VehicleId, Vehicle>
+}
 
-export const MODULES = {
+export const MODULES: Readonly<Record<ModuleId, Module>> = {
   'MOD-01': { price: 18_000, category: 'conservation' },
   'MOD-02': { price: 12_000, category: 'camouflage' },
   'MOD-03': { price: 25_000, category: 'camouflage' },
@@ -52,11 +52,11 @@ export const MODULES = {
   'MOD-06': { price: 15_000, category: 'tactical' },
   'MOD-07': { price: 10_000, category: 'tactical' },
   'MOD-08': { price: 45_000, category: 'tactical' },
-} as const satisfies Record<ModuleId, Module>
+}
 
 /** Salaire de base, indexé sur l'inflation ; tarif réduit de CREW-01 : chap. 5 */
-export const CREW = {
+export const CREW: Readonly<Record<CrewId, Crew>> = {
   'CREW-01': { dailySalary: 800 },
   'CREW-02': { dailySalary: 600 },
   'CREW-03': { dailySalary: 1_000 },
-} as const satisfies Record<CrewId, Crew>
+}

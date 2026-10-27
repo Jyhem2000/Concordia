@@ -1,0 +1,184 @@
+import {
+  ANTI_ARBITRAGE_CAP,
+  DEMAND_REFILL_DIVISOR,
+  KNOW_HOW_EXCESS_FACTOR,
+  KNOW_HOW_SOFT_CAP,
+  NIGHT_PROFILE_FACTOR,
+  QUOTE_NOISE,
+  SALE_COMMISSION,
+  SATURATED_SALE_FACTOR,
+  SHOP_MIN_PRODUCTS,
+} from '../data/balance.ts'
+import { DISTRICT_IDS, DISTRICTS } from '../data/districts.ts'
+import { PRODUCT_IDS, PRODUCTS, TIERS } from '../data/products.ts'
+import { breakdown, type Breakdown } from './breakdown.ts'
+import { takeLots } from './cargo.ts'
+import { indexed } from './inflation.ts'
+import type { Rng } from './rng.ts'
+import type { CargoLot, DistrictId, DistrictMarket, GameState, MarketMemory, ProductId } from './types.ts'
+
+/*
+ * Marché noir (chap. 7) : boutique et cours tirés à 06h00, quotas de demande, prix de vente.
+ */
+
+export type ProductStatus = 'production' | 'neutral' | 'strong'
+
+export function productStatus(districtId: DistrictId, productId: ProductId): ProductStatus {
+  const district = DISTRICTS[districtId]
+  if (district.production.includes(productId)) return 'production'
+  if (district.strongDemand.includes(productId)) return 'strong'
+  return 'neutral'
+}
+
+/** Quota de demande d'un produit dans un district ; null = illimité */
+export function demandQuota(districtId: DistrictId, productId: ProductId): number | null {
+  const quota = TIERS[PRODUCTS[productId].tier].demandQuota
+  if (!quota) return null
+  return productStatus(districtId, productId) === 'strong' ? quota.strong : quota.neutral
+}
+
+/** Demande reconstituée chaque matin */
+export function demandRefill(quota: number): number {
+  return Math.ceil(quota / DEMAND_REFILL_DIVISOR)
+}
+
+// ─── Tirage de 06h00 ───
+
+function drawShop(districtId: DistrictId, rng: Rng): Partial<Record<ProductId, number>> {
+  const district = DISTRICTS[districtId]
+  // Socle officiel : tout le Tier 0, partout
+  const shop = new Set<ProductId>(PRODUCT_IDS.filter((id) => PRODUCTS[id].tier === 0))
+
+  const draw = district.productionDraw
+  const production = draw ? rng.shuffle(district.production).slice(0, rng.int(draw.min, draw.max)) : district.production
+  for (const id of production) {
+    const chance = PRODUCTS[id].appearanceChance
+    if (chance === undefined || rng.chance(chance)) shop.add(id)
+  }
+
+  // Complément neutre de Tier 1 à 3 ; jamais un produit de la Forte demande
+  const neutrals = rng.shuffle(
+    PRODUCT_IDS.filter((id) => {
+      const tier = PRODUCTS[id].tier
+      return tier >= 1 && tier <= 3 && !shop.has(id) && productStatus(districtId, id) === 'neutral'
+    }),
+  )
+  while (shop.size < SHOP_MIN_PRODUCTS && neutrals.length > 0) shop.add(neutrals.pop()!)
+
+  const stock: Partial<Record<ProductId, number>> = {}
+  for (const id of shop) {
+    const product = PRODUCTS[id]
+    const range = product.dailyStock ?? TIERS[product.tier].dailyStock
+    stock[id] = rng.int(range.min, range.max)
+  }
+  return stock
+}
+
+/** Marché du jour d'un district. Sans marché de la veille, la demande est pleine (Jour 1). */
+export function drawMarket(districtId: DistrictId, rng: Rng, previous?: DistrictMarket): DistrictMarket {
+  const noise = {} as Record<ProductId, number>
+  const demand: Partial<Record<ProductId, number>> = {}
+  for (const id of PRODUCT_IDS) {
+    noise[id] = rng.float(QUOTE_NOISE.min, QUOTE_NOISE.max)
+    const quota = demandQuota(districtId, id)
+    if (quota !== null) {
+      const left = previous?.demand[id]
+      demand[id] = left === undefined ? quota : Math.min(quota, left + demandRefill(quota))
+    }
+  }
+  return { noise, stock: drawShop(districtId, rng), demand }
+}
+
+export function drawMarkets(rng: Rng, previous?: Record<DistrictId, DistrictMarket>): Record<DistrictId, DistrictMarket> {
+  const markets = {} as Record<DistrictId, DistrictMarket>
+  for (const id of DISTRICT_IDS) markets[id] = drawMarket(id, rng, previous?.[id])
+  return markets
+}
+
+// ─── Cours et prix ───
+
+/** Cours du jour = Arrondi( Prix_Base × Coef_District × Bruit ) */
+export function quoteBreakdown(state: GameState, districtId: DistrictId, productId: ProductId): Breakdown {
+  const product = PRODUCTS[productId]
+  const district = DISTRICTS[districtId]
+  const quote = breakdown(productId, product.basePrice)
+
+  const status = productStatus(districtId, productId)
+  if (status === 'production') quote.mul('rule.production', district.coefProduction)
+  if (status === 'strong') {
+    const coef = breakdown('rule.strong-demand', district.coefStrongDemand)
+      .add('rule.tier-bonus', TIERS[product.tier].strongDemandBonus, { tier: product.tier })
+      .build()
+    quote.mul('rule.strong-demand', coef)
+  }
+
+  return quote.mul('rule.noise', state.markets[districtId].noise[productId]).round().build()
+}
+
+export function quote(state: GameState, districtId: DistrictId, productId: ProductId): number {
+  return quoteBreakdown(state, districtId, productId).total
+}
+
+/** Cours observés dans un district, pour la mémoire de marché */
+export function observeMarket(state: GameState, districtId: DistrictId): MarketMemory {
+  const quotes = {} as Record<ProductId, number>
+  for (const id of PRODUCT_IDS) quotes[id] = quote(state, districtId, id)
+  return { day: state.day, quotes }
+}
+
+/** Savoir_Faire = produit des bonus de vente, avec rendements décroissants et clause anti-arbitrage */
+function knowHowBreakdown(state: GameState, lot: CargoLot): Breakdown {
+  const knowHow = breakdown('rule.know-how', 1)
+
+  const profile = PRODUCTS[lot.productId].nightProfile
+  if (state.phase === 'night' && profile) knowHow.mul(`rule.night-${profile}`, NIGHT_PROFILE_FACTOR[profile])
+
+  if (knowHow.total > KNOW_HOW_SOFT_CAP) {
+    knowHow.set('rule.diminishing-returns', KNOW_HOW_SOFT_CAP + (knowHow.total - KNOW_HOW_SOFT_CAP) * KNOW_HOW_EXCESS_FACTOR)
+  }
+  if (!lot.travelled) knowHow.clamp(0, ANTI_ARBITRAGE_CAP, 'rule.anti-arbitrage')
+  return knowHow.build()
+}
+
+/** Prix de vente d'une caisse = Arrondi( Cours × Commission × Coef_Demande × Savoir_Faire ) */
+export function unitSaleBreakdown(state: GameState, lot: CargoLot, saturated: boolean): Breakdown {
+  const knowHow = knowHowBreakdown(state, lot)
+  return breakdown('rule.quote', quoteBreakdown(state, state.districtId, lot.productId))
+    .mul('rule.commission', SALE_COMMISSION)
+    .mul('rule.saturation', saturated ? SATURATED_SALE_FACTOR : 1)
+    .mul('rule.know-how', knowHow.total === 1 ? 1 : knowHow)
+    .round()
+    .build()
+}
+
+export type SaleQuote = {
+  total: number
+  /** Caisses vendues au-delà de la demande restante */
+  saturatedQty: number
+  /** Détail du prix de la première caisse vendue */
+  first: Breakdown | null
+}
+
+/** Produit d'une vente de `qty` caisses : lots les plus anciens d'abord, demande restante d'abord */
+export function saleQuote(state: GameState, productId: ProductId, qty: number): SaleQuote {
+  const { taken } = takeLots(state.cargo, productId, qty)
+  const demandLeft = state.markets[state.districtId].demand[productId] ?? Infinity
+
+  let total = 0
+  let sold = 0
+  let first: Breakdown | null = null
+  for (const lot of taken) {
+    for (let i = 0; i < lot.qty; i++) {
+      const unit = unitSaleBreakdown(state, lot, sold >= demandLeft)
+      first ??= unit
+      total += unit.total
+      sold++
+    }
+  }
+  return { total, saturatedQty: Math.max(0, sold - demandLeft), first }
+}
+
+/** Prix d'une ration de Synthanol dans le district actuel, indexé sur l'inflation */
+export function fuelPriceBreakdown(state: GameState): Breakdown {
+  return indexed(state.districtId, DISTRICTS[state.districtId].fuelPrice, state.day)
+}

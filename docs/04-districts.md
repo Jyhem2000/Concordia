@@ -2,14 +2,14 @@
 
 ## Règles géographiques
 * **Accès libre dès le Jour 1.** Le joueur ne circule jamais sur les avenues privées des élites : il emprunte le **Réseau Logistique Souterrain** (sas de maintenance et quais de service). Même les ministères et les milliardaires ont besoin que les Livreurs de Catégorie C approvisionnent leurs cuisines, livrent l'eau des domestiques et évacuent leurs déchets — mais les portiques à l'entrée des tunnels y sont impitoyables.
-* **Carte :** les districts ne sont pas tous voisins. Un trajet vers un district non voisin passe par les districts intermédiaires : **+1 ration et +5 % de risque par district traversé** (le test d'interception n'a lieu qu'à destination). L'app propose l'itinéraire le plus court.
+* **Carte :** les districts ne sont pas tous voisins. Un trajet vers un district non voisin passe par les districts intermédiaires : **un surcoût en rations (`FUEL_PER_CROSSED_DISTRICT` dans [`balance.ts`](../src/data/balance.ts)) et +5 % de risque par district traversé** (le test d'interception n'a lieu qu'à destination). L'app propose l'itinéraire le plus court.
 
 ```
 [D4] — [D1] — [D2] — [D5] — [D6]
           \     |     /
            \— [D3] —/
 ```
-  Liaisons : `MAP_LINKS` dans [`districts.ts`](../src/data/districts.ts) (le schéma n'est qu'une illustration). *Ex. :* `[D4]` → `[D6]` traverse `[D1]`, `[D2]` et `[D5]` (+3 rations, +15 %).
+  Liaisons : `MAP_LINKS` dans [`districts.ts`](../src/data/districts.ts) (le schéma n'est qu'une illustration). *Ex. :* `[D4]` → `[D6]` traverse `[D1]`, `[D2]` et `[D5]` : trois districts traversés.
 * **Pompes :** *officielle* = connectée à Aeterna, **fermée la nuit** si l'ICC est sous 50 % (chap. 2) ; *fixe* = toujours ouverte.
 * **Coefficients de marché** (chap. 7) : chaque district applique un coefficient à ses produits de **Production**, aux produits **Neutres** (1.00) et à ceux en **Forte demande** (plus le bonus de tier).
 
@@ -87,7 +87,7 @@ Icône officielle le jour, mercenaire vénale en coulisses. **Panique Algorithmi
   * **Refuser :** les miliciens pillent **30 % de la soute en commençant par les caisses les plus chères** (`[T4-06]` compris : il finira chez la rébellion), tabassent le joueur (**−20 PV** de Santé) et cabossent le camion (**−25 PV** de châssis).
   * **Modificateur :** `[VEH-04]`.
 * **Nuit :** dormir ici = bivouac (chap. 2).
-* **Production :** parmi sa liste de production, le moteur n'en tire que **6 à 8 par jour**.
+* **Production :** le moteur n'en tire chaque jour qu'une partie (`productionDraw` dans [`districts.ts`](../src/data/districts.ts)).
 
 ### `[LOC-D4-1]` Le Garage « Faraday » (Mécano-Mitch)
 Tenu par un ancien ingénieur spatial viré pour avoir refusé de manger des insectes. Seul endroit pour acheter un châssis, acheter des modules et **changer les modules montés** (gratuit, chap. 5), et **réparer le châssis : 40 ₡ par PV manquant** (modificateur : `[EVT-D4-03]`).

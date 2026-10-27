@@ -6,7 +6,7 @@ import type { District, DistrictId } from '../engine/types.ts'
  * Montants en ₡ : valeurs de base au Jour 1, indexées sur l'inflation (chap. 7).
  */
 
-export const DISTRICTS = {
+export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
   D1: {
     echelon: 1,
     security: 1,
@@ -63,6 +63,8 @@ export const DISTRICTS = {
     droneJudges: false,
     coefProduction: 0.75,
     coefStrongDemand: 1.4,
+    // Le moteur ne tire chaque jour qu'une partie de la liste de production
+    productionDraw: { min: 6, max: 8 },
     production: ['T1-01', 'T1-03', 'T2-01', 'T2-02', 'T3-01', 'T3-02', 'T3-03', 'T3-06', 'T4-01', 'T4-02'],
     strongDemand: ['T1-04', 'T1-06', 'T2-06', 'T2-07', 'T3-04', 'T3-05', 'T4-03', 'T4-04', 'T4-06'],
   },
@@ -100,7 +102,7 @@ export const DISTRICTS = {
     // « Vente jackpot »
     strongDemand: ['T1-03', 'T2-07', 'T3-01', 'T3-02', 'T3-03', 'T3-07', 'T4-01', 'T4-02', 'T4-05', 'T4-06'],
   },
-} as const satisfies Record<DistrictId, District>
+}
 
 /**
  * Liaisons directes du Réseau Logistique Souterrain (non orientées).
@@ -109,7 +111,7 @@ export const DISTRICTS = {
  *          \   |   /
  *           \ D3 /
  */
-export const MAP_LINKS = [
+export const MAP_LINKS: readonly (readonly [DistrictId, DistrictId])[] = [
   ['D4', 'D1'],
   ['D1', 'D2'],
   ['D1', 'D3'],
@@ -117,4 +119,6 @@ export const MAP_LINKS = [
   ['D2', 'D5'],
   ['D3', 'D5'],
   ['D5', 'D6'],
-] as const satisfies readonly (readonly [DistrictId, DistrictId])[]
+]
+
+export const DISTRICT_IDS = Object.keys(DISTRICTS) as DistrictId[]

@@ -5,15 +5,15 @@ import type { Product, ProductId, Tier, TierStats } from '../engine/types.ts'
  * les noms dans src/i18n/fr.ts.
  */
 
-export const TIERS = {
+export const TIERS: Readonly<Record<Tier, TierStats>> = {
   0: { dailyStock: { min: 15, max: 30 }, demandQuota: null, strongDemandBonus: 0 },
   1: { dailyStock: { min: 10, max: 25 }, demandQuota: { neutral: 10, strong: 20 }, strongDemandBonus: -0.1 },
   2: { dailyStock: { min: 6, max: 15 }, demandQuota: { neutral: 6, strong: 12 }, strongDemandBonus: 0 },
   3: { dailyStock: { min: 4, max: 10 }, demandQuota: { neutral: 4, strong: 8 }, strongDemandBonus: 0.1 },
   4: { dailyStock: { min: 3, max: 8 }, demandQuota: { neutral: 2, strong: 5 }, strongDemandBonus: 0.3 },
-} as const satisfies Record<Tier, TierStats>
+}
 
-export const PRODUCTS = {
+export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
   // Tier 0 : marchandises officielles, couverture et masquage
   'T0-01': { tier: 0, basePrice: 10, tags: ['TAG-LEGAL'], masks: 'TAG-ODOROUS' },
   'T0-02': { tier: 0, basePrice: 15, tags: ['TAG-LEGAL'], masks: 'TAG-FLAMMABLE' },
@@ -69,4 +69,6 @@ export const PRODUCTS = {
     dailyStock: { min: 1, max: 2 },
     appearanceChance: 0.15,
   },
-} as const satisfies Record<ProductId, Product>
+}
+
+export const PRODUCT_IDS = Object.keys(PRODUCTS) as ProductId[]

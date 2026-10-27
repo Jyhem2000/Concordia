@@ -39,7 +39,7 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 ### Réservoir de Synthanol
 * **Unité :** la Ration. **Capacité et consommation :** selon le véhicule ([`vehicles.ts`](../src/data/vehicles.ts)) et la distance (chap. 4).
 * **Prix d'une ration :** fixé par district ([`districts.ts`](../src/data/districts.ts)).
-* **Siphonage / Corvée DSC (anti soft-lock) :** bloqué avec 0 ration, une soute vide et pas assez de Cash-Puce pour 1 ration locale → **+1 ration** gratuite contre **−5 % d'ICC** et une **demi-journée** perdue. En `[D4]`, ce sont les milices qui « prêtent » la ration, aux mêmes conditions.
+* **Siphonage / Corvée DSC (anti soft-lock) :** bloqué avec 0 ration, une soute vide et pas assez de Cash-Puce pour 1 ration locale → une ration gratuite contre une perte d'ICC (`SIPHON` dans [`balance.ts`](../src/data/balance.ts)) et une **demi-journée** perdue. En `[D4]`, ce sont les milices qui « prêtent » la ration, aux mêmes conditions.
 
 ### Exemption Métabolique & Sédation
 Seuls les routiers boivent l'eau sans sédatifs de `[LOC-D1-2]` : c'est elle qui leur garde l'esprit clair.
