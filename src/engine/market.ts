@@ -13,9 +13,13 @@ import {
 } from '../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../data/districts.ts'
 import { EVENT_MULT_CAP } from '../data/events.ts'
+import { CANTINE } from '../data/locations.ts'
+import { TAGS } from '../data/tags.ts'
+import { CREW } from '../data/vehicles.ts'
 import { PRODUCT_IDS, PRODUCTS, TIERS } from '../data/products.ts'
 import { breakdown, type Breakdown, type BreakdownBuilder, type RuleSource } from './breakdown.ts'
 import { takeLots } from './cargo.ts'
+import { crewEffect } from './crew.ts'
 import { freshnessFactor, freshnessOf } from './condition.ts'
 import { indexed } from './inflation.ts'
 import { recordOf } from './records.ts'
@@ -38,10 +42,21 @@ export function productStatus(ctx: EventContext, districtId: DistrictId, product
 }
 
 /** Quota de demande d'un produit dans un district ; null = illimité */
-export function demandQuota(ctx: EventContext, districtId: DistrictId, productId: ProductId): number | null {
+export function demandQuota(ctx: MarketContext, districtId: DistrictId, productId: ProductId): number | null {
   const quota = TIERS[PRODUCTS[productId].tier].demandQuota
   if (!quota) return null
-  return productStatus(ctx, districtId, productId) === 'strong' ? quota.strong : quota.neutral
+  const base = productStatus(ctx, districtId, productId) === 'strong' ? quota.strong : quota.neutral
+  return Math.ceil(base * perishableQuotaFactor(ctx, productId))
+}
+
+/** Ce que lisent les tirages du marché : les événements, et l'équipier pour les quotas */
+export type MarketContext = EventContext & Partial<Pick<GameState, 'crew'>>
+
+/** Quotas des périssables majorés par Mama Rosa, si elle travaille aujourd'hui */
+function perishableQuotaFactor(ctx: MarketContext, productId: ProductId): number {
+  const crew = ctx.crew
+  const factor = crew?.active && crew.paidDay === ctx.day ? CREW[crew.active].perishableQuota : undefined
+  return factor && PRODUCTS[productId].tags.some((tag) => TAGS[tag].perishable) ? factor : 1
 }
 
 /** Demande reconstituée chaque matin */
@@ -94,7 +109,7 @@ export function shopProducts(market: DistrictMarket): ProductId[] {
  * Marché du jour d'un district. Sans marché de la veille (Jour 1), la demande est pleine et l'écart de tendance
  * tiré entre ses bornes ; ensuite, l'écart garde une part de celui de la veille, plus un choc (chap. 7).
  */
-export function drawMarket(ctx: EventContext, districtId: DistrictId, rng: Rng, previous?: DistrictMarket): DistrictMarket {
+export function drawMarket(ctx: MarketContext, districtId: DistrictId, rng: Rng, previous?: DistrictMarket): DistrictMarket {
   const { persistence, shock, max } = QUOTE_NOISE
   const noise = recordOf(PRODUCT_IDS, (id) => {
     const before = previous?.noise[id]
@@ -112,7 +127,7 @@ export function drawMarket(ctx: EventContext, districtId: DistrictId, rng: Rng, 
   return { noise, stock: drawShop(ctx, districtId, rng), demand }
 }
 
-export function drawMarkets(ctx: EventContext, rng: Rng, previous?: Record<DistrictId, DistrictMarket>): Record<DistrictId, DistrictMarket> {
+export function drawMarkets(ctx: MarketContext, rng: Rng, previous?: Record<DistrictId, DistrictMarket>): Record<DistrictId, DistrictMarket> {
   return recordOf(DISTRICT_IDS, (id) => drawMarket(ctx, id, rng, previous?.[id]))
 }
 
@@ -169,7 +184,11 @@ function knowHowBreakdown(state: GameState, lot: CargoLot): Breakdown {
 
   // Coef_Fraîcheur des périssables (chap. 3)
   const freshness = freshnessOf(state, lot)
-  if (freshness) knowHow.mul(FRESHNESS_RULES[freshness], freshnessFactor(freshness))
+  // Affinage de Mama Rosa : une caisse Standard se vend au coefficient Extra-Frais
+  if (freshness === 'standard' && crewEffect(state, 'refining')) knowHow.mul('rule.refining', freshnessFactor('extra'))
+  else if (freshness) knowHow.mul(FRESHNESS_RULES[freshness], freshnessFactor(freshness))
+  const perishableKnowHow = crewEffect(state, 'perishableKnowHow')
+  if (freshness && perishableKnowHow) knowHow.mul('CREW-03', perishableKnowHow)
 
   const profile = PRODUCTS[lot.productId].nightProfile
   if (state.phase === 'night' && profile) knowHow.mul(`rule.night-${profile}`, NIGHT_PROFILE_FACTOR[profile])
@@ -241,6 +260,8 @@ export function estimatedUnitSale(quote: number): number {
 
 /** Prix d'une ration de Synthanol dans le district actuel, indexé sur l'inflation */
 export function fuelPriceBreakdown(state: GameState): Breakdown {
+  // Cantine des Chauffeurs : tarif syndical fixe en D1, de jour (non indexé)
+  if (state.districtId === 'D1' && state.phase === 'day' && !state.dayOver) return breakdown('LOC-D1-2', CANTINE.fuelPrice).build()
   return indexed(state.districtId, DISTRICTS[state.districtId].fuelPrice, state.day)
 }
 

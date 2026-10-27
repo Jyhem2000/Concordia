@@ -59,9 +59,18 @@ export const MODULES: Readonly<Record<ModuleId, Module>> = {
   'MOD-08': { price: 45_000, category: 'tactical', fakeTerminal: { bluffBonus: 0.35, bribeRateFactor: 0.5 } },
 }
 
-/** Salaire de base, indexé sur l'inflation ; tarif réduit de CREW-01 : chap. 5 */
+/** Frais de recrutement à la Cantine, indexés (le premier recrutement est gratuit) */
+export const CREW_HIRE_FEE = 1_500
+
+/** Salaires de base, indexés sur l'inflation, et bonus des équipiers (chap. 5) */
 export const CREW: Readonly<Record<CrewId, Crew>> = {
-  'CREW-01': { dailySalary: 800 },
-  'CREW-02': { dailySalary: 600 },
-  'CREW-03': { dailySalary: 1_000 },
+  'CREW-01': {
+    dailySalary: 800,
+    inKindSalary: { amount: 300, tag: 'TAG-ADDICTIVE', minTier: 2 },
+    riskFactor: 0.8,
+    bribeBonus: 0.15,
+    revealsPatrol: true,
+  },
+  'CREW-02': { dailySalary: 600, liveQuotes: true, offshoreBonus: 0.005, fleeBonus: 0.2, forgeryBonus: 0.2 },
+  'CREW-03': { dailySalary: 1_000, perishableKnowHow: 1.25, refining: true, perishableQuota: 1.5 },
 }

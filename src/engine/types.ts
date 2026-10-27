@@ -216,7 +216,7 @@ export type District = {
 }
 
 /** Services rendus par les lieux spéciaux implémentés (chap. 4 et 7) */
-export type LocationService = 'debt' | 'grinder' | 'offshore' | 'garage'
+export type LocationService = 'debt' | 'grinder' | 'offshore' | 'garage' | 'crew'
 
 export type Location = {
   district: DistrictId
@@ -270,7 +270,29 @@ export type Module = {
 }
 
 export type Crew = {
+  /** Salaire quotidien de base, indexé */
   dailySalary: number
+  /** Salaire réduit contre une caisse consommée à 06h00 (tag et tier minimal) */
+  inKindSalary?: { amount: number; tag: TagId; minTier: Tier }
+  /** Coefficient d'équipement sur le risque d'interception, zone hors-réseau comprise */
+  riskFactor?: number
+  bribeBonus?: number
+  /** Révèle chaque matin le district de la ronde renforcée */
+  revealsPatrol?: boolean
+  /** Cours de tous les districts en temps réel */
+  liveQuotes?: boolean
+  /** Taux offshore ajouté sur chaque tranche, sauf les matins en cellule */
+  offshoreBonus?: number
+  /** Bonus de fuite et de passage forcé */
+  fleeBonus?: number
+  /** Bonus à la falsification d'un dossier de Loterie */
+  forgeryBonus?: number
+  /** Savoir-faire des périssables */
+  perishableKnowHow?: number
+  /** Affinage : les caisses Standard se vendent au coefficient Extra-Frais */
+  refining?: boolean
+  /** Facteur des quotas de demande des périssables */
+  perishableQuota?: number
 }
 
 // ─── État de la partie ───
@@ -388,6 +410,10 @@ export type MorningBriefing = {
   lockedIn: boolean
   /** Caisses larguées par la trappe : rapportées par les complices, et perdues */
   recovered: { back: number; lost: number } | null
+  /** Salaire du matin : montant payé (0 en cellule), null s'il n'a pas pu l'être ; caisse consommée */
+  crew: { id: CrewId; paid: number | null; crate: ProductId | null } | null
+  /** Équipier disparu au tirage de la Loterie */
+  crewLost: CrewId | null
   /** PV perdus au tabassage de l'échéance de la dette, 0 sinon */
   beating: number
   /** Vrai le matin où la dette passe en retard (taux majoré, embuscades) */
@@ -517,6 +543,19 @@ export type GameState = {
   dumped: readonly CargoLot[]
   /** Dernier jour où la plaque rotative a effacé une perte d'ICC */
   plateDay: number | null
+  /** Équipage (chap. 5) : équipier actif, jour payé (il travaille), recrutements, disparus */
+  crew: {
+    active: CrewId | null
+    paidDay: number | null
+    hires: number
+    lost: readonly CrewId[]
+    /** Prochain recrutement gratuit (après une disparition) */
+    freeHire: boolean
+    /** Le joueur permet de payer un salaire réduit en caisses (réglage) */
+    payInKind: boolean
+  }
+  /** Jours de protection de l'Exemption Métabolique ; 0 = Sédation (chap. 2) */
+  exemption: number
   /** Échéance du retard franchie : taux majoré et embuscades jusqu'à la fin de la partie */
   debtLate: boolean
   offshore: OffshoreAccount

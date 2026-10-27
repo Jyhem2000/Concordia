@@ -1,0 +1,120 @@
+import { describe, expect, it } from 'vitest'
+import { FRESHNESS, PUMP_NIGHT_MIN_ICC, SEDATION } from '../data/balance.ts'
+import { CANTINE } from '../data/locations.ts'
+import { CREW, CREW_HIRE_FEE } from '../data/vehicles.ts'
+import { fuelPrice } from './actions.ts'
+import { hireFee, isMemoryBlurred, isSedated, salary } from './crew.ts'
+import { NO_EVENTS } from './events.ts'
+import { offshoreInterestBreakdown } from './finance.ts'
+import { indexed } from './inflation.ts'
+import { bluffChance, bribeChance, NO_OFFER } from './interception.ts'
+import { demandQuota, saleQuote } from './market.ts'
+import { riskBreakdown } from './risk.ts'
+import { sleep } from './routine.ts'
+import { defined, errorOf, gameAt, run } from './test-helpers.ts'
+import type { CargoLot, CrewId, GameState, Interception, ProductId } from './types.ts'
+
+const lot = (productId: ProductId, qty: number, boughtDay = 3): CargoLot => ({
+  productId,
+  qty,
+  unitCost: 10,
+  travelled: true,
+  boughtDay,
+  damaged: false,
+})
+const withCrew = (active: CrewId, patch: Partial<GameState> = {}): GameState => {
+  const base = gameAt(3, patch)
+  return { ...base, crew: { ...base.crew, active, paidDay: 3, hires: 1 } }
+}
+const brc: Interception = { kind: 'brc', acted: false, bluffFailed: false }
+
+describe('recrutement à la Cantine', () => {
+  it('recrute gratuitement la première fois, salaire du jour payé d’avance, puis avec des frais', () => {
+    const first = run(gameAt(3, { cash: 10_000 }), { type: 'hireCrew', crewId: 'CREW-02' })
+    expect(first.cash).toBe(10_000 - salary(first, 'CREW-02'))
+    expect(first.crew).toMatchObject({ active: 'CREW-02', paidDay: 3, hires: 1 })
+    expect(hireFee(first)).toBe(indexed('LOC-D1-2', CREW_HIRE_FEE, 3).total)
+    const second = run(first, { type: 'hireCrew', crewId: 'CREW-03' })
+    expect(second.cash).toBe(first.cash - hireFee(first) - salary(first, 'CREW-03'))
+    expect(errorOf(gameAt(3, { districtId: 'D2' }), { type: 'hireCrew', crewId: 'CREW-01' })).toBe('not-at-location')
+  })
+
+  it('refuse un équipier disparu à la Loterie', () => {
+    const base = gameAt(3)
+    expect(errorOf({ ...base, crew: { ...base.crew, lost: ['CREW-01'] } }, { type: 'hireCrew', crewId: 'CREW-01' })).toBe('crew-lost')
+  })
+})
+
+describe('salaire du matin', () => {
+  it('paie d’avance, ou laisse l’équipier sans travail faute de cash', () => {
+    const paid = sleep(withCrew('CREW-02', { cash: 5_000 }))
+    expect(paid.crew.paidDay).toBe(4)
+    expect(paid.briefing?.crew?.paid).toBe(salary(paid, 'CREW-02'))
+    const broke = sleep(withCrew('CREW-02', { cash: 0 }))
+    expect(broke.crew.paidDay).toBe(3)
+    expect(broke.briefing?.crew?.paid).toBeNull()
+  })
+
+  it('paie Vance en partie avec la caisse addictive éligible la moins chère', () => {
+    const state = sleep(withCrew('CREW-01', { cash: 5_000, cargo: [lot('T1-05', 2), lot('T2-05', 1), lot('T3-02', 1)] }))
+    const inKind = defined(CREW['CREW-01'].inKindSalary)
+    expect(state.briefing?.crew).toMatchObject({ crate: 'T2-05', paid: salary(state, 'CREW-01', inKind.amount) })
+    expect(state.cargo.some((entry) => entry.productId === 'T2-05')).toBe(false)
+  })
+})
+
+describe('bonus des équipiers', () => {
+  it('Vance réduit le risque partout et aide la corruption', () => {
+    const vance = withCrew('CREW-01')
+    expect(riskBreakdown(vance, 'D4', { includePatrol: false }).lines.some((line) => line.source === 'CREW-01')).toBe(true)
+    const stopped = { ...vance, districtId: 'D2' as const, interception: brc, cargo: [lot('T2-03', 2)] }
+    const alone = { ...stopped, crew: { ...stopped.crew, active: null } }
+    expect(bribeChance(stopped, NO_OFFER).total).toBeGreaterThan(bribeChance(alone, NO_OFFER).total)
+  })
+
+  it('Glitch relève tous les districts et majore le rendement offshore', () => {
+    const glitch = run(gameAt(3, { cash: 10_000 }), { type: 'hireCrew', crewId: 'CREW-02' })
+    expect(Object.keys(glitch.memory)).toHaveLength(6)
+    const account = { deposited: 10_000, interest: 0 }
+    const bonus = defined(CREW['CREW-02'].offshoreBonus)
+    expect(defined(offshoreInterestBreakdown(account, bonus)).total).toBe(defined(offshoreInterestBreakdown(account)).total + 10_000 * bonus)
+  })
+
+  it('Mama Rosa affine le Standard au prix Extra-Frais et majore les quotas des périssables', () => {
+    const butter = [lot('T1-03', 1, 2)]
+    const rosa = withCrew('CREW-03', { districtId: 'D2', cargo: butter })
+    const alone = gameAt(3, { districtId: 'D2', cargo: butter })
+    const line = defined(defined(saleQuote(rosa, 'T1-03', 1).first).lines.find((entry) => entry.source === 'rule.know-how')?.detail)
+    expect(line.lines.find((entry) => entry.source === 'rule.refining')?.value).toBe(FRESHNESS.extra)
+    expect(saleQuote(rosa, 'T1-03', 1).total).toBeGreaterThan(saleQuote(alone, 'T1-03', 1).total)
+    expect(demandQuota(rosa, 'D2', 'T1-03')).toBeGreaterThan(defined(demandQuota({ day: 3, phase: 'day', events: NO_EVENTS }, 'D2', 'T1-03')))
+  })
+})
+
+describe('Exemption Métabolique et Sédation', () => {
+  it('perd un jour de protection par matin hors de D1, et revient au maximum en D1', () => {
+    const away = sleep(gameAt(3, { districtId: 'D2', exemption: 1 }))
+    expect(away.exemption).toBe(0)
+    expect(isSedated(away)).toBe(true)
+    expect(sleep(gameAt(3, { exemption: 1 })).exemption).toBe(SEDATION.protectionDays)
+  })
+
+  it('réduit le bluff et brouille la mémoire, sauf avec le flux de Glitch', () => {
+    const sedated = gameAt(3, { districtId: 'D2', exemption: 0, interception: brc, cargo: [lot('T2-03', 2)] })
+    const clear = { ...sedated, exemption: 2 }
+    expect(bluffChance(sedated).total).toBeCloseTo(bluffChance(clear).total - SEDATION.penalty)
+    expect(isMemoryBlurred(sedated, 'D5')).toBe(true)
+    expect(isMemoryBlurred(sedated, 'D2')).toBe(false)
+    expect(isMemoryBlurred({ ...sedated, crew: { ...sedated.crew, active: 'CREW-02', paidDay: 3 } }, 'D5')).toBe(false)
+  })
+})
+
+describe('carburant', () => {
+  it('vend au tarif syndical de la Cantine en D1 de jour, et ferme les pompes officielles la nuit sous le seuil d’ICC', () => {
+    expect(fuelPrice(gameAt(9))).toBe(CANTINE.fuelPrice)
+    const night = gameAt(3, { districtId: 'D2', phase: 'night', fuel: 0, icc: PUMP_NIGHT_MIN_ICC - 1 })
+    expect(errorOf(night, { type: 'refuel', qty: 1 })).toBe('pump-closed')
+    expect(errorOf({ ...night, icc: PUMP_NIGHT_MIN_ICC }, { type: 'refuel', qty: 1 })).toBeNull()
+    expect(errorOf({ ...night, districtId: 'D4' }, { type: 'refuel', qty: 1 })).toBeNull()
+  })
+})

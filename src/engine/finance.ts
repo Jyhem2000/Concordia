@@ -69,7 +69,7 @@ export function offshoreBalance(account: OffshoreAccount): number {
 export const OFFSHORE_TRANCHE_SOURCES: readonly RuleSource[] = ['rule.offshore-tranche-1', 'rule.offshore-tranche-2', 'rule.offshore-tranche-3']
 
 /** Intérêts simples du jour, tranche par tranche, sur les seuls dépôts ; null sans dépôt */
-export function offshoreInterestBreakdown(account: OffshoreAccount): Breakdown | null {
+export function offshoreInterestBreakdown(account: OffshoreAccount, crewBonus = 0): Breakdown | null {
   const terms = OFFSHORE_TRANCHES.map(({ upTo, dailyRate }, i) => {
     const from = i === 0 ? 0 : (OFFSHORE_TRANCHES[i - 1].upTo ?? Infinity)
     const portion = Math.max(0, Math.min(account.deposited, upTo ?? Infinity) - from)
@@ -78,15 +78,17 @@ export function offshoreInterestBreakdown(account: OffshoreAccount): Breakdown |
 
   const [first, ...others] = terms
   if (!first) return null
-  return others
-    .reduce((builder, { source, interest }) => builder.add(source, interest), breakdown(first.source, first.interest))
+  const interest = others.reduce((builder, { source, interest }) => builder.add(source, interest), breakdown(first.source, first.interest))
+  // Flux pirate de Glitch : le même taux ajouté sur chaque tranche
+  return interest
+    .add('CREW-02', account.deposited * crewBonus)
     .round()
     .build()
 }
 
 /** Taux du jour effectivement servi sur les dépôts (taux de la 1re tranche sans dépôt) */
-export function effectiveOffshoreRate(account: OffshoreAccount): number {
-  const interest = offshoreInterestBreakdown(account)
+export function effectiveOffshoreRate(account: OffshoreAccount, crewBonus = 0): number {
+  const interest = offshoreInterestBreakdown(account, crewBonus)
   return interest ? interest.total / account.deposited : OFFSHORE_TRANCHES[0].dailyRate
 }
 

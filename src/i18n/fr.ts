@@ -135,6 +135,9 @@ export const fr = {
     'rule.emergency-tow': "Dépannage d'urgence",
     'rule.aftershock': 'Contrecoup',
     'rule.repair': 'Réparation (par PV)',
+    'rule.refining': 'Affinage de Mama Rosa (Standard vendu Extra-Frais)',
+    'rule.sedation': 'Sédation',
+    'rule.cantine': 'Tarif syndical',
   } satisfies Record<RuleSource, string>,
 
   // ─── Interface ───
@@ -148,6 +151,12 @@ export const fr = {
     debtLate: 'en retard',
     nextBeating: (day: number) => `échéance J${day}`,
     nextProtection: (day: number, amount: string) => `Collecte de Viktor J${day} : ≈ ${amount}`,
+    exemption: (days: number) => `Exemption ${days} j`,
+    sedationTomorrow: 'Sédation demain : passez en Hives de jour',
+    sedated: 'Sédation : bluff, corruption et fuite réduits, mémoire de marché brouillée',
+    crew: (name: string) => name,
+    crewUnpaid: 'non payé, ne travaille pas',
+    patrol: (district: string) => `Ronde renforcée : ${district}`,
     countdown: 'Audit le Jour 30 à minuit : dernier remboursement et dernier dépôt offshore possibles le J30 avant 20h00.',
   },
 
@@ -188,6 +197,11 @@ export const fr = {
     rotten: (crates: number) => `${crates} caisse${crates > 1 ? 's' : ''} pourrie${crates > 1 ? 's' : ''}, détruite${crates > 1 ? 's' : ''} à 06h00.`,
     heat: (product: string, melted: number, aged: number, rotten: number) =>
       `Canicule : ${melted} × ${product} fondu en soute, ${aged} caisse${aged > 1 ? 's' : ''} périssable${aged > 1 ? 's' : ''} vieillie${aged > 1 ? 's' : ''}, ${rotten} pourrie${rotten > 1 ? 's' : ''} et détruite${rotten > 1 ? 's' : ''}.`,
+    salary: (name: string, amount: string) => `Salaire de ${name} : ${amount}.`,
+    salaryInKind: (name: string, amount: string, product: string) => `Salaire de ${name} : ${amount} et 1 × ${product}.`,
+    salaryCell: (name: string) => `${name} reste à son poste pendant votre garde à vue (pas de salaire).`,
+    unpaid: (name: string) => `Cash-Puce insuffisant : ${name} ne travaille pas aujourd'hui.`,
+    crewLost: (name: string) => `Loterie : ${name} a été « promu ». Vous ne le reverrez plus ; le prochain recrutement est gratuit.`,
     recovered: (back: number, lost: number) =>
       `Trappe de largage : les complices rapportent ${back} caisse${back > 1 ? 's' : ''}, ${lost} perdue${lost > 1 ? 's' : ''}.`,
     lockedIn: (district: string) => `Complexe bouclé : vous restez au sas de ${district}, la journée commence à 20h00.`,
@@ -292,6 +306,31 @@ export const fr = {
       'EVT-R14': { situation: "Péage caritatif : autocollants « J'aime Maman Aeterna ».", a: 'Acheter', b: 'Refuser' },
       'EVT-R15': { situation: 'Un autre contrebandier propose un échange dans un angle mort.', a: 'Troc aveugle', b: 'Refuser' },
     } satisfies Record<RoadEventId, RoadTexts>,
+  },
+
+  crewDesk: {
+    title: 'Équipage',
+    rule: (fee: string) =>
+      `Un seul équipier à la fois, salaire payé d'avance chaque matin. Prochain recrutement : ${fee} de frais, plus le salaire du jour.`,
+    active: (name: string) => `Équipier : ${name}`,
+    working: "payé, il travaille aujourd'hui",
+    unpaid: 'non payé, il ne travaille pas',
+    inKind: (amount: string, product: string) => `Payer ${amount} et une caisse au lieu du plein salaire (prochaine : ${product})`,
+    noCrate: 'aucune en soute',
+    dismiss: 'Renvoyer',
+    hire: 'Recruter',
+    salary: (amount: string) => `${amount}/jour`,
+    risk: (factor: string) => `risque de contrôle ${factor} partout`,
+    bribe: (bonus: string) => `corruption ${bonus}`,
+    patrol: 'révèle la ronde renforcée',
+    liveQuotes: 'cours de tous les districts en temps réel',
+    offshore: (bonus: string) => `rendement offshore ${bonus} par tranche`,
+    flee: (bonus: string) => `fuite ${bonus}`,
+    forgery: (bonus: string) => `falsification de la Loterie ${bonus}`,
+    knowHow: (factor: string) => `périssables vendus ${factor}`,
+    refining: 'affinage : Standard vendu au prix Extra-Frais',
+    quota: (factor: string) => `quotas des périssables ${factor}`,
+    inKindRule: (amount: string, tier: number) => `salaire réduit à ${amount} contre une caisse addictive de Tier ${tier} ou plus`,
   },
 
   garage: {
@@ -554,6 +593,7 @@ export const fr = {
     risk: "Risque d'interception",
     flyingShare: (share: string) => `dont ${share} de contrôles volants (ni fuite ni éjection)`,
     riskHint: 'La ronde renforcée du jour reste cachée.',
+    riskHintRevealed: 'Ronde renforcée comprise : Vance la révèle chaque matin.',
     peak: "Pic suspect : risque accru aujourd'hui",
     lastTrip: 'Dernier trajet',
     exposed: (crates: number, cost: string) =>
@@ -561,6 +601,8 @@ export const fr = {
     exposedSanction: (fine: string, high: boolean) =>
       `Une saisie les confisque, avec une amende de ${fine} du Cash-Puce${high ? ' et une garde à vue (haut tier à bord)' : ''}.`,
     neverSeen: 'jamais vu',
+    blurred: (low: string, high: string) => `${low} – ${high}`,
+    patrol: 'Ronde renforcée (révélée par Vance)',
     wear: (pv: number) => `usure du châssis −${pv}`,
     cooled: (crates: number, product: string) => `moteur refroidi : ${crates} × ${product} consommées`,
     heatStroke: (health: number) => `coup de chaleur, Santé −${health}`,
@@ -668,6 +710,9 @@ export const fr = {
     'already-owned': 'Déjà possédé.',
     'not-owned': 'Module non possédé ou non monté.',
     'no-free-slot': 'Plus de slot libre sur ce châssis : démontez un module.',
+    'crew-lost': 'Disparu à la Loterie : il ne reviendra pas.',
+    'no-crew': 'Aucun équipier engagé.',
+    'pump-closed': "Pompe officielle fermée la nuit pour votre niveau d'ICC.",
   } satisfies Record<ActionError, string>,
 
   // ─── Données de jeu (chap. 3 à 8) ───

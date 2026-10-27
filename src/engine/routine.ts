@@ -1,11 +1,13 @@
 import { CUSTODY, DEBT_BEATING, DEBT_LATE, ENDINGS, GAME_LENGTH_DAYS, PROTECTION, RELAY_SLEEP } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
+import { LOTTERY } from '../data/events.ts'
 import { MODULES } from '../data/vehicles.ts'
 import { ownedQty } from './cargo.ts'
 import { debtInterestBreakdown, offshoreBalance, offshoreInterestBreakdown, protectionBreakdown } from './finance.ts'
 import { isPerishable, removeRotten } from './condition.ts'
 import { mountedEffect, recoverDumped } from './equipment.ts'
 import { changeHealth, gainRouteIcc, iccTier } from './gauges.ts'
+import { crewEffect, payCrew, refreshExemption } from './crew.ts'
 import { drawEvents, hasEffect, heatWave } from './events.ts'
 import { drawMarkets } from './market.ts'
 import { drawPatrol } from './risk.ts'
@@ -92,6 +94,8 @@ function morningRoutine(state: GameState, night: Night): GameState {
     heat: null,
     lockedIn: false,
     recovered: null,
+    crew: null,
+    crewLost: null,
     debtInterest: null,
     beating: 0,
     debtLate: false,
@@ -100,6 +104,12 @@ function morningRoutine(state: GameState, night: Night): GameState {
   }
 
   // 1. L'indice d'inflation se déduit du jour (inflation.ts)
+
+  // 2. Salaire de l'équipier, payé d'avance (rien en cellule)
+  const crewId = s.crew.active
+  const payroll = payCrew(s, night === 'cell')
+  s = payroll.state
+  if (crewId) briefing.crew = { id: crewId, paid: payroll.paid, crate: payroll.crate }
 
   // 3. Intérêts et échéances de la dette
   briefing.debtInterest = debtInterestBreakdown(s)
@@ -124,7 +134,8 @@ function morningRoutine(state: GameState, night: Night): GameState {
   }
 
   // 4. Intérêts simples du compte offshore
-  briefing.offshoreInterest = offshoreInterestBreakdown(s.offshore)
+  // Glitch majore le rendement, sauf les matins en cellule
+  briefing.offshoreInterest = offshoreInterestBreakdown(s.offshore, night === 'cell' ? 0 : (crewEffect(s, 'offshoreBonus') ?? 0))
   if (briefing.offshoreInterest) s = { ...s, offshore: { ...s.offshore, interest: s.offshore.interest + briefing.offshoreInterest.total } }
 
   // 6. Les complices de la trappe rapportent une part des caisses larguées la veille
@@ -146,6 +157,11 @@ function morningRoutine(state: GameState, night: Night): GameState {
   const patrolDistrict = drawPatrol(rng)
   const events = drawEvents(s.events, day, rng)
   s = { ...s, patrolDistrict, events }
+  // La Loterie peut désigner l'équipier actif : il disparaît pour de bon (chap. 8)
+  if (events.lottery?.day === day && s.crew.active && rng.chance(LOTTERY.crewLossChance)) {
+    briefing.crewLost = s.crew.active
+    s = { ...s, crew: { ...s.crew, active: null, paidDay: null, lost: [...s.crew.lost, s.crew.active], freeHire: true } }
+  }
   s = { ...s, markets: drawMarkets(s, rng, s.markets), rng: rng.state }
 
   // 8. Effets du matin des événements : canicule, sas (chap. 8)
@@ -160,6 +176,10 @@ function morningRoutine(state: GameState, night: Night): GameState {
     s = loseHalfDay(s)
     briefing.lockedIn = true
   }
+
+  // Exemption Métabolique : un jour de protection en moins, rendu au maximum en D1 de jour
+  s = { ...s, exemption: Math.max(0, s.exemption - 1) }
+  if (night !== 'cell') s = refreshExemption(s)
 
   return remember({ ...s, briefing }, s.districtId)
 }

@@ -17,6 +17,7 @@ import { TAGS } from '../data/tags.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import { breakdown, type Breakdown, type BreakdownBuilder } from './breakdown.ts'
 import { cargoUsed, ownedQty, tagShare } from './cargo.ts'
+import { crewEffect, workingCrew } from './crew.ts'
 import { moduleTagFactor } from './equipment.ts'
 import { activeEffects, isPurged, tagFactor } from './events.ts'
 import { iccTier } from './gauges.ts'
@@ -68,6 +69,9 @@ export function riskBreakdown(state: GameState, to: DistrictId, { includePatrol 
   if (vehicle.heavy) risk.add(state.vehicleId, vehicle.heavy.riskAdd)
 
   if (vehicle.riskFactor !== undefined) risk.mul(state.vehicleId, vehicle.riskFactor)
+  const crewFactor = crewEffect(state, 'riskFactor')
+  const crewId = workingCrew(state)
+  if (crewFactor !== undefined && crewId) risk.mul(crewId, crewFactor)
   // Camouflage corporatif : assez de Légal en soute (une soute vide n'a rien à cacher)
   const camouflage = vehicle.legalCamouflage
   if (!offGrid && camouflage && (cargoUsed(state.cargo) === 0 || tagShare(state.cargo, 'TAG-LEGAL') >= camouflage.minShare)) {

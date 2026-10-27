@@ -1,4 +1,5 @@
-import { FUEL_PER_CROSSED_DISTRICT, GRINDER, ICC_MAX, NIGHT_TRIP_CHASSIS_WEAR, SIPHON } from '../data/balance.ts'
+import { FUEL_PER_CROSSED_DISTRICT, GRINDER, ICC_MAX, NIGHT_TRIP_CHASSIS_WEAR, PUMP_NIGHT_MIN_ICC, SIPHON } from '../data/balance.ts'
+import { DISTRICTS } from '../data/districts.ts'
 import { LOCATIONS } from '../data/locations.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
@@ -6,6 +7,7 @@ import { cargoUsed, giveCrates, ownedQty, takeLots } from './cargo.ts'
 import { depositBreakdown, loanRoom, offshoreBalance, withdrawFrom } from './finance.ts'
 import { checkMove, drawInterception, emergencyTow, resolveMove } from './interception.ts'
 import { crossedDistricts, shortestRoute } from './map.ts'
+import { dismiss, hire } from './crew.ts'
 import { buyModule, buyVehicle, mountedEffect, mountModule, repair } from './equipment.ts'
 import { arrive, drawRoadEvent, heatWave } from './events.ts'
 import { changeHealth } from './gauges.ts'
@@ -18,6 +20,7 @@ import { sleep } from './routine.ts'
 import { remember } from './state.ts'
 import type {
   CargoLot,
+  CrewId,
   DistrictId,
   GameState,
   InterceptionMove,
@@ -58,6 +61,10 @@ export type Action =
   /** Monter (`mount` vrai) ou démonter un module possédé */
   | { type: 'mountModule'; moduleId: ModuleId; mount: boolean }
   | { type: 'repair'; pv: number }
+  | { type: 'hireCrew'; crewId: CrewId }
+  | { type: 'dismissCrew' }
+  /** Salaire réduit payé en caisses (Vance) : réglage du joueur */
+  | { type: 'setPayInKind'; enabled: boolean }
   /** Option d'un aléa routier ; `pay` : index du paiement choisi quand l'option en propose plusieurs */
   | { type: 'road'; choice: RoadChoiceId; pay?: number }
 
@@ -99,6 +106,9 @@ export type ActionError =
   | 'already-owned'
   | 'not-owned'
   | 'no-free-slot'
+  | 'crew-lost'
+  | 'no-crew'
+  | 'pump-closed'
 
 export type ActionResult = { ok: true; state: GameState } | { ok: false; error: ActionError }
 
@@ -175,7 +185,13 @@ export function maxRefuel(state: GameState): number {
   return Math.max(0, Math.min(space, Math.floor(state.cash / fuelPrice(state))))
 }
 
+/** Pompe officielle fermée la nuit sous un seuil d'ICC (chap. 4) */
+export function pumpClosed(state: GameState): boolean {
+  return state.phase === 'night' && DISTRICTS[state.districtId].pump === 'official' && state.icc < PUMP_NIGHT_MIN_ICC
+}
+
 function refuel(state: GameState, qty: number): ActionResult {
+  if (pumpClosed(state)) return fail('pump-closed')
   if (state.fuel + qty > VEHICLES[state.vehicleId].tank) return fail('tank-full')
   const cost = fuelPrice(state) * qty
   if (cost > state.cash) return fail('not-enough-cash')
@@ -430,6 +446,19 @@ export function applyAction(state: GameState, action: Action): ActionResult {
       return garage(state, () => mountModule(state, action.moduleId, action.mount))
     case 'repair':
       return isQuantity(action.pv) ? garage(state, () => repair(state, action.pv)) : fail('invalid-amount')
+    case 'hireCrew': {
+      const closed = checkService(state, 'crew')
+      if (closed) return fail(closed)
+      const hired = hire(state, action.crewId)
+      // Glitch branche son flux dès l'embauche
+      return hired.ok ? { ok: true, state: remember(hired.state, hired.state.districtId) } : hired
+    }
+    case 'dismissCrew': {
+      const closed = checkService(state, 'crew')
+      return closed ? fail(closed) : dismiss(state)
+    }
+    case 'setPayInKind':
+      return { ok: true, state: { ...state, crew: { ...state.crew, payInKind: action.enabled } } }
     case 'buy':
       return isQuantity(action.qty) ? buy(state, action.productId, action.qty) : fail('invalid-quantity')
     case 'sell':

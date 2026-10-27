@@ -1,5 +1,7 @@
-import { START_CASH, START_DEBT, START_DISTRICT, START_HEALTH, START_ICC } from '../data/balance.ts'
+import { SEDATION, START_CASH, START_DEBT, START_DISTRICT, START_HEALTH, START_ICC } from '../data/balance.ts'
 import { START_VEHICLE, VEHICLES } from '../data/vehicles.ts'
+import { DISTRICT_IDS } from '../data/districts.ts'
+import { crewEffect } from './crew.ts'
 import { drawEvents, NO_EVENTS } from './events.ts'
 import { drawMarkets, observeMarket } from './market.ts'
 import { drawPatrol } from './risk.ts'
@@ -37,6 +39,8 @@ export function createInitialState(seed: number): GameState {
     trapdoorDay: null,
     dumped: [],
     plateDay: null,
+    crew: { active: null, paidDay: null, hires: 0, lost: [], freeHire: false, payInKind: true },
+    exemption: SEDATION.protectionDays,
     debtLate: false,
     offshore: { deposited: 0, interest: 0 },
     icc: START_ICC,
@@ -66,6 +70,9 @@ export function createInitialState(seed: number): GameState {
 
 /** Mémorise les cours d'un district où se trouve le joueur : un relevé par jour, le dernier du jour l'emporte (chap. 7) */
 export function remember(state: GameState, districtId: DistrictId): GameState {
-  const history = (state.memory[districtId] ?? []).filter((seen) => seen.day !== state.day)
-  return { ...state, memory: { ...state.memory, [districtId]: [...history, observeMarket(state, districtId)] } }
+  // Flux pirate de Glitch : tous les districts sont relevés en temps réel
+  const seen = crewEffect(state, 'liveQuotes') ? DISTRICT_IDS : [districtId]
+  const memory = { ...state.memory }
+  for (const id of seen) memory[id] = [...(memory[id] ?? []).filter((entry) => entry.day !== state.day), observeMarket(state, id)]
+  return { ...state, memory }
 }

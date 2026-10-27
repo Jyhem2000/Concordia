@@ -49,22 +49,21 @@ Les docs décrivent le jeu complet ; tout n'est pas encore en jeu. Ce tableau di
 
 | Chap. | En jeu | À venir |
 | :---: | :--- | :--- |
-| 2 | Jauges (ICC, Santé, châssis, carburant), journée, couvre-feu, épuisement, demi-journée perdue, dépannage, audit et fins | Exemption Métabolique et Sédation, pompes officielles fermées la nuit |
+| 2 | Jauges (ICC, Santé, châssis, carburant), journée, couvre-feu, épuisement, demi-journée perdue, dépannage, audit et fins, Exemption Métabolique et Sédation, pompes officielles fermées la nuit | — |
 | 3 | Tags, masquage, fraîcheur, casse, explosions, actions des produits | — |
-| 4 | Carte, districts, racket et portique de `[D4]`, `[LOC-D1-1]` (dette, Hachoir), `[LOC-D4-1]` (garage), `[LOC-D5-1]` (compte offshore) | `[LOC-D1-2]`, `[LOC-D2-1]`, `[LOC-D3-1]`, `[LOC-D4-2]`, `[LOC-D6-1]`, falsification de la Loterie |
-| 5 | Véhicules et modules | Équipage et salaires |
-| 6 | Risque, Fiche S, barrage fixe et contrôle volant, toutes les options et modes d'éjection, garde à vue, bonus des véhicules et modules | Bonus des équipiers |
-| 7 | Boutique, cours et tendance, quotas, prix de vente, paiement en nature, inflation, dette, avance de survie, collecte, compte offshore | Bonus d'influence (`[LOC-D2-1]`), flux de `[CREW-02]` |
+| 4 | Carte, districts, racket et portique de `[D4]`, `[LOC-D1-1]` (dette, Hachoir), `[LOC-D1-2]` (Cantine), `[LOC-D4-1]` (garage), `[LOC-D5-1]` (compte offshore) | `[LOC-D2-1]`, `[LOC-D3-1]`, `[LOC-D4-2]`, `[LOC-D6-1]`, falsification de la Loterie |
+| 5 | Véhicules, modules, équipage et salaires | — |
+| 6 | Risque, Fiche S, barrage fixe et contrôle volant, toutes les options et modes d'éjection, garde à vue, bonus des véhicules, modules et équipiers | — |
+| 7 | Boutique, cours et tendance, quotas, prix de vente, paiement en nature, inflation, dette, avance de survie, collecte, compte offshore, flux et bonus de `[CREW-02]` | Bonus d'influence (`[LOC-D2-1]`) |
 | 8 | Événements globaux et locaux, rumeurs, contrecoups, Loterie, aléas routiers | Effets liés aux modules, à l'équipage et aux lieux à venir (chap. 8, règles communes) |
 | 9 | — | Simulations, une fois le jeu complet |
 | 10 | Bandeau, téléscripteur, marché et fiche produit, carte, lieux, soir, briefing, barrage, aléa routier, objectifs | Vue véhicule et soute, filtres du marché, dégradation de l'interface selon l'ICC, manuel en jeu |
 
 ## Feuille de route
 Étapes restantes, dans l'ordre des dépendances :
-1. **Équipement et lieux** — chap. 5 (véhicules, modules, équipage, salaires) et lieux spéciaux restants du chap. 4, avec les effets d'événements qui en dépendent (chap. 8).
-2. **Restes du chap. 2** — Exemption Métabolique et Sédation, pompes officielles fermées la nuit.
-3. **Habillage et manuel du jeu** — interface restante (chap. 10), manuel du joueur en jeu, et refonte des docs à cette occasion : répartir le contenu de `07-economie.md` (marché, vente, argent) dans les autres chapitres, renommer et renuméroter les fichiers, puis mettre à jour par script tous les renvois « chap. N » (docs et commentaires du code).
-4. **Simulations** — campagnes du chap. 9 sur le jeu complet, sans interface, puis équilibrage.
+1. **Équipement et lieux** — chap. 5 (véhicules, modules, équipage, salaires) et lieux spéciaux restants du chap. 4, avec les effets d'événements qui en dépendent (chap. 8), plus les restes du chap. 2 (Exemption Métabolique et Sédation, pompes officielles).
+2. **Habillage et manuel du jeu** — interface restante (chap. 10), manuel du joueur en jeu, et refonte des docs à cette occasion : répartir le contenu de `07-economie.md` (marché, vente, argent) dans les autres chapitres, renommer et renuméroter les fichiers, puis mettre à jour par script tous les renvois « chap. N » (docs et commentaires du code).
+3. **Simulations** — campagnes du chap. 9 sur le jeu complet, sans interface, puis équilibrage.
 
 ## Règles de rédaction
 1. **Un chiffre, un seul endroit.** Une valeur (prix, %, durée…) n'est écrite que là où la donnée est définie. Un bonus est écrit chez ce qui le produit (le module, le véhicule, l'événement…) ; les formules ne font que citer la source.

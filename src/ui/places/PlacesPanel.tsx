@@ -4,6 +4,7 @@ import { GRINDER, SURVIVAL_ADVANCE } from '../../data/balance.ts'
 import { LOCATIONS } from '../../data/locations.ts'
 import { PRODUCT_IDS } from '../../data/products.ts'
 import { maxRepay } from '../../engine/actions.ts'
+import { crewEffect } from '../../engine/crew.ts'
 import { keysOf } from '../../engine/records.ts'
 import { grindableQty, grinderPrice, isGrindable } from '../../engine/market.ts'
 import { depositBreakdown, effectiveOffshoreRate, loanRoom, offshoreBalance, offshoreInterestBreakdown } from '../../engine/finance.ts'
@@ -12,6 +13,7 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import AmountForm from '../shared/AmountForm.tsx'
 import Detailed from '../shared/Detailed.tsx'
+import CrewDesk from './CrewDesk.tsx'
 import GarageDesk from './GarageDesk.tsx'
 
 type PlaceProps = {
@@ -76,6 +78,8 @@ function ServiceDesk({ service }: ServiceDeskProps) {
       return <OffshoreDesk />
     case 'garage':
       return <GarageDesk />
+    case 'crew':
+      return <CrewDesk />
   }
 }
 
@@ -138,7 +142,7 @@ function OffshoreDesk() {
   const dispatch = useGameStore((s) => s.dispatch)
   const { t, credits, percent } = useI18n()
   const balance = offshoreBalance(game.offshore)
-  const interest = offshoreInterestBreakdown(game.offshore)
+  const interest = offshoreInterestBreakdown(game.offshore, crewEffect(game, 'offshoreBonus') ?? 0)
 
   return (
     <>
@@ -149,7 +153,7 @@ function OffshoreDesk() {
       </p>
       <div className="flex flex-wrap gap-1.5">
         <span className="text-zinc-400">{t.place.rate}</span>
-        <span>{percent(effectiveOffshoreRate(game.offshore), 2)}</span>
+        <span>{percent(effectiveOffshoreRate(game.offshore, crewEffect(game, 'offshoreBonus') ?? 0), 2)}</span>
         {interest && (
           <div className="flex gap-1">
             ·

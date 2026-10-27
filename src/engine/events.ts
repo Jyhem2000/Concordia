@@ -4,6 +4,7 @@ import { PRODUCTS } from '../data/products.ts'
 import type { BreakdownSource } from './breakdown.ts'
 import { keysOf } from './records.ts'
 import type { Rng } from './rng.ts'
+import { refreshExemption } from './crew.ts'
 import { loseHalfDay } from './time.ts'
 import type {
   DistrictId,
@@ -180,7 +181,9 @@ export function heatWave(ctx: EventContext): Extract<EventEffect, { kind: 'heat'
 
 /** Arrivée dans un district (chap. 2) : effets d'arrivée des événements locaux, comme le sas de `[EVT-D3-01]` */
 export function arrive(state: GameState): GameState {
-  return hasEffect(state, state.districtId, 'halfDay') ? loseHalfDay(state) : state
+  const arrived = hasEffect(state, state.districtId, 'halfDay') ? loseHalfDay(state) : state
+  // Arriver en D1 de jour, c'est passer à la Cantine : l'Exemption Métabolique revient au maximum
+  return refreshExemption(arrived)
 }
 
 // ─── Loterie ───

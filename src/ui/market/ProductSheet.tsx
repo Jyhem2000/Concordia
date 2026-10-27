@@ -1,7 +1,8 @@
-import { DAMAGED_FACTOR, FRESHNESS, HIGH_TIER, SEARCH } from '../../data/balance.ts'
+import { DAMAGED_FACTOR, FRESHNESS, HIGH_TIER, SEARCH, SEDATION } from '../../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
+import { isMemoryBlurred } from '../../engine/crew.ts'
 import { lastSeen, productStatus } from '../../engine/market.ts'
 import type { District, DistrictId, ProductId, TagId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
@@ -85,7 +86,15 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
     ...(tolls.length > 0 ? [t.sheet.tollFavorite(names(tolls))] : []),
     t.sheet.strong(strong.length > 0 ? names(strong) : t.sheet.nowhere),
     ...(produced.length > 0 ? [t.sheet.produced(names(produced))] : []),
-    best ? t.sheet.best(credits(best.quote), t.district[best.id].name, best.age) : t.sheet.noMemory,
+    best
+      ? t.sheet.best(
+          isMemoryBlurred(game, best.id)
+            ? t.travel.blurred(credits(best.quote * (1 - SEDATION.memoryBlur)), credits(best.quote * (1 + SEDATION.memoryBlur)))
+            : credits(best.quote),
+          t.district[best.id].name,
+          best.age,
+        )
+      : t.sheet.noMemory,
   ]
 
   return (

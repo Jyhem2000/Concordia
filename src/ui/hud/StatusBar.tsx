@@ -1,6 +1,7 @@
 import {
   Coins,
   Crosshair,
+  Droplet,
   Fuel,
   HandCoins,
   HeartPulse,
@@ -12,12 +13,14 @@ import {
   Package,
   ShieldCheck,
   Sun,
+  UserRound,
   Wrench,
   type LucideIcon,
 } from 'lucide-react'
 import { AUDIT_COUNTDOWN_DAY, GAME_LENGTH_DAYS, ICC_MAX, WANTED } from '../../data/balance.ts'
 import { VEHICLES } from '../../data/vehicles.ts'
 import { cargoUsed } from '../../engine/cargo.ts'
+import { crewEffect } from '../../engine/crew.ts'
 import { effectiveOffshoreRate, nextDebtDeadline, nextProtectionDay, offshoreBalance, protectionBreakdown } from '../../engine/finance.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -70,7 +73,7 @@ export default function StatusBar() {
           icon={Lock}
           label={t.gauge.offshore}
           value={credits(offshoreBalance(game.offshore))}
-          note={t.hud.offshoreRate(percent(effectiveOffshoreRate(game.offshore), 2))}
+          note={t.hud.offshoreRate(percent(effectiveOffshoreRate(game.offshore, crewEffect(game, 'offshoreBonus') ?? 0), 2))}
           className="text-cyan-300"
         />
         <Stat
@@ -86,6 +89,21 @@ export default function StatusBar() {
         {game.wanted > 0 && <Stat icon={Crosshair} label={t.hud.wanted(game.wanted, WANTED.maxLevel)} className="text-red-300" />}
         <Stat icon={Fuel} label={t.gauge.fuel} value={`${game.fuel}/${vehicle.tank}`} />
         <Stat icon={Package} label={t.hud.cargo} value={`${cargoUsed(game.cargo)}/${vehicle.cargo}`} />
+        {/* Exemption Métabolique : jours de protection, alerte la veille, Sédation à 0 (chap. 2) */}
+        <Stat
+          icon={Droplet}
+          label={t.hud.exemption(game.exemption)}
+          note={game.exemption === 0 ? t.hud.sedated : game.exemption === 1 ? t.hud.sedationTomorrow : undefined}
+          className={game.exemption <= 1 ? 'text-red-300' : 'text-sky-300'}
+        />
+        {game.crew.active && (
+          <Stat
+            icon={UserRound}
+            label={t.hud.crew(t.crew[game.crew.active].name)}
+            note={game.crew.paidDay === game.day ? undefined : t.hud.crewUnpaid}
+            className={game.crew.paidDay === game.day ? 'text-zinc-200' : 'text-red-300'}
+          />
+        )}
         {protectionDay !== null && (
           <Stat icon={HandCoins} label={t.hud.nextProtection(protectionDay, credits(protectionBreakdown(game).total))} className="text-orange-300" />
         )}

@@ -1,9 +1,10 @@
-import { Eye, MapPin } from 'lucide-react'
-import { HIGH_TIER, SEARCH } from '../../data/balance.ts'
+import { Eye, MapPin, Siren } from 'lucide-react'
+import { HIGH_TIER, SEARCH, SEDATION } from '../../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { planTravel } from '../../engine/actions.ts'
 import { averageCost, isIllegal } from '../../engine/cargo.ts'
+import { crewEffect, isMemoryBlurred } from '../../engine/crew.ts'
 import { estimatedUnitSale, lastSeen, productStatus } from '../../engine/market.ts'
 import { flyingCheckShare } from '../../engine/interception.ts'
 import { riskBreakdown } from '../../engine/risk.ts'
@@ -86,6 +87,9 @@ function DistrictRow({ districtId }: DistrictRowProps) {
   const day = useGameStore((s) => s.game.day)
   const cargo = useGameStore((s) => s.game.cargo)
   const memory = useGameStore((s) => lastSeen(s.game, districtId))
+  const blurred = useGameStore((s) => isMemoryBlurred(s.game, districtId))
+  // Vance révèle chaque matin le district de la ronde renforcée
+  const patrolled = useGameStore((s) => Boolean(crewEffect(s.game, 'revealsPatrol')) && s.game.patrolDistrict === districtId)
   const events = useGameStore((s) => s.game.events)
   const phase = useGameStore((s) => s.game.phase)
   const peak = useGameStore((s) => s.game.suspiciousPeaks.includes(districtId))
@@ -107,6 +111,12 @@ function DistrictRow({ districtId }: DistrictRowProps) {
               {'★'.repeat(security)}
             </span>
             <span className="sr-only">{t.travel.security(security)}</span>
+            {patrolled && (
+              <span className="ml-2 inline-flex text-sky-300" title={t.travel.patrol}>
+                <Siren size={14} aria-hidden="true" />
+                <span className="sr-only">{t.travel.patrol}</span>
+              </span>
+            )}
             {peak && (
               <span className="ml-2 inline-flex text-red-300" title={t.travel.peak}>
                 <Eye size={14} aria-hidden="true" />
@@ -144,7 +154,14 @@ function DistrictRow({ districtId }: DistrictRowProps) {
                         <span className={`ml-1.5 ${status === 'strong' ? 'text-orange-300' : 'text-green-300'}`}>{t.market.status[status]}</span>
                       )}
                     </span>
-                    {memory ? (
+                    {memory && blurred ? (
+                      <span>
+                        {t.travel.blurred(
+                          credits(memory.quotes[id] * (1 - SEDATION.memoryBlur)),
+                          credits(memory.quotes[id] * (1 + SEDATION.memoryBlur)),
+                        )}
+                      </span>
+                    ) : memory ? (
                       <span className="flex items-center gap-1.5">
                         <Margin revenue={estimatedUnitSale(memory.quotes[id])} cost={averageCost(cargo, id) ?? 0} showAmount={false} />
                         {credits(memory.quotes[id])}
@@ -170,7 +187,8 @@ function TravelButton({ to }: TravelButtonProps) {
   const { t, percent } = useI18n()
   const plan = planTravel(game, to)
   // Ronde renforcée cachée : la part affichée est celle du district
-  const flying = flyingCheckShare(game, to, false)
+  const revealed = Boolean(crewEffect(game, 'revealsPatrol'))
+  const flying = flyingCheckShare(game, to, revealed)
   const route = plan.crossed.length === 0 ? t.travel.direct : t.travel.via(plan.crossed.map((id) => t.district[id].name).join(', '))
 
   return (
@@ -181,9 +199,9 @@ function TravelButton({ to }: TravelButtonProps) {
       <div className="mt-0.5 text-xs text-zinc-400">
         {route} · {t.travel.fuel(plan.fuelCost)}
       </div>
-      <div className="flex justify-end gap-1.5 text-xs" title={t.travel.riskHint}>
+      <div className="flex justify-end gap-1.5 text-xs" title={revealed ? t.travel.riskHintRevealed : t.travel.riskHint}>
         <span className="text-zinc-400">{t.travel.risk}</span>
-        <Detailed breakdown={riskBreakdown(game, to, { includePatrol: false })} format={(risk) => percent(risk, 0)} align="right" />
+        <Detailed breakdown={riskBreakdown(game, to, { includePatrol: revealed })} format={(risk) => percent(risk, 0)} align="right" />
       </div>
       {flying > 0 && <div className="text-xs text-zinc-400">{t.travel.flyingShare(percent(flying, 0))}</div>}
       {plan.error && plan.error !== 'trip-done' && <div className="text-xs text-red-300">{t.error[plan.error]}</div>}

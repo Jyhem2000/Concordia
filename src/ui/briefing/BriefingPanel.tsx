@@ -56,11 +56,26 @@ function isEmpty(briefing: MorningBriefing): boolean {
     !briefing.heat &&
     !briefing.lockedIn &&
     !briefing.recovered &&
+    !briefing.crew &&
+    !briefing.crewLost &&
     !briefing.debtInterest &&
     briefing.beating === 0 &&
     !briefing.debtLate &&
     !briefing.protection &&
     !briefing.offshoreInterest
+  )
+}
+
+/** Salaire du matin : payé (en caisses ou non), dispensé en cellule, ou impayé */
+function CrewLine({ crew }: { crew: NonNullable<MorningBriefing['crew']> }) {
+  const { t, credits } = useI18n()
+  const name = t.crew[crew.id].name
+  if (crew.paid === null) return <li className="text-red-300">{t.briefing.unpaid(name)}</li>
+  if (crew.paid === 0) return <li>{t.briefing.salaryCell(name)}</li>
+  return (
+    <li>
+      {crew.crate ? t.briefing.salaryInKind(name, credits(crew.paid), t.product[crew.crate].name) : t.briefing.salary(name, credits(crew.paid))}
+    </li>
   )
 }
 
@@ -83,6 +98,8 @@ function BriefingLines({ briefing }: BriefingLinesProps) {
         </li>
       )}
       {briefing.lockedIn && <li className="text-red-300">{t.briefing.lockedIn(t.district[districtId].name)}</li>}
+      {briefing.crew && <CrewLine crew={briefing.crew} />}
+      {briefing.crewLost && <li className="text-red-300">{t.briefing.crewLost(t.crew[briefing.crewLost].name)}</li>}
       {briefing.recovered && <li>{t.briefing.recovered(briefing.recovered.back, briefing.recovered.lost)}</li>}
       {debtInterest && (
         <li>

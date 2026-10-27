@@ -1,4 +1,4 @@
-import { BLUFF, BRIBE, EJECT, EMERGENCY_TOW, FLEE, FLYING_CHECK, HIGH_TIER, RACKET, SEARCH, WANTED } from '../data/balance.ts'
+import { BLUFF, BRIBE, EJECT, EMERGENCY_TOW, FLEE, FLYING_CHECK, HIGH_TIER, RACKET, SEARCH, SEDATION, WANTED } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
 import { PRODUCTS } from '../data/products.ts'
 import { TAGS } from '../data/tags.ts'
@@ -7,6 +7,7 @@ import type { ActionError } from './actions.ts'
 import { breakdown, type Breakdown } from './breakdown.ts'
 import { baseValue, cargoUsed, giveCrates, isIllegal, maskedQty, ownedQty, ownsCrates, tagShare, tierShare } from './cargo.ts'
 import { breakOnFlee, breakOnShock, crateValue, explodeFlammable, paymentValue } from './condition.ts'
+import { crewEffect, isSedated, workingCrew } from './crew.ts'
 import { ejectMode, moduleTagFactor, mountedEffect, mountedWith } from './equipment.ts'
 import { arrive, tagFactor } from './events.ts'
 import { changeHealth, gainRouteIcc } from './gauges.ts'
@@ -134,6 +135,7 @@ export function bluffChance(state: GameState, { bluffAids = [] }: Tactics = NO_T
   for (const id of bluffAids) chance.add(id, PRODUCTS[id].bluffAid?.bonus ?? 0)
   const terminal = mountedWith(state, 'fakeTerminal')
   if (terminal) chance.add(terminal, MODULES[terminal].fakeTerminal?.bluffBonus ?? 0)
+  chance.add('rule.sedation', sedation(state))
   return chance.clamp(0, BLUFF.cap).build()
 }
 
@@ -172,6 +174,8 @@ export function bribeChance(state: GameState, offer: Offer): Breakdown {
     .add('rule.connivance', hasConnivance(state, offer) ? BRIBE.connivance : 0)
     .add('rule.security-stars', -BRIBE.perExtraStar * (stars(state) - 1))
     .add('rule.bluff-failed', followUp(state.interception))
+    .add(workingCrew(state) ?? 'rule.sedation', crewEffect(state, 'bribeBonus') ?? 0)
+    .add('rule.sedation', sedation(state))
     .clamp(0, BRIBE.cap)
   // Les Drones-Juges sont incorruptibles : il faut d'abord tomber sur un douanier
   if (DISTRICTS[state.districtId].droneJudges) chance.mul('rule.drone-judges', 1 - BRIBE.droneCriticalFailure)
@@ -191,6 +195,8 @@ export function fleeChance(state: GameState, { drop, dope }: Tactics = NO_TACTIC
   if (ram) chance.add(ram, MODULES[ram].ram?.fleeBonus ?? 0)
   const transponder = activeTransponder(state)
   if (transponder) chance.add(state.vehicleId, transponder.fleeBonus)
+  chance.add(workingCrew(state) ?? 'rule.sedation', crewEffect(state, 'fleeBonus') ?? 0)
+  chance.add('rule.sedation', sedation(state))
   return chance.clamp(0, cap, 'rule.flee-cap').build()
 }
 
@@ -212,6 +218,9 @@ export function fleeConsequences(state: GameState): {
     failHealth: Math.floor(FLEE.fail.healthLoss * ram),
   }
 }
+
+/** Malus de Sédation (chap. 2), 0 sous protection */
+const sedation = (state: GameState) => (isSedated(state) ? -SEDATION.penalty : 0)
 
 /** Transpondeur d'urgence du véhicule, s'il agit dans le district actuel */
 function activeTransponder(state: GameState) {
