@@ -1,7 +1,8 @@
 # 4. Districts & lieux spéciaux
 
 ## Règles géographiques
-* **Accès libre dès le Jour 1.** Le joueur ne circule jamais sur les avenues privées des élites : il emprunte le **Réseau Logistique Souterrain** (sas de maintenance et quais de service). Même les ministères et les milliardaires ont besoin que les Livreurs de Catégorie C approvisionnent leurs cuisines, livrent l'eau des domestiques et évacuent leurs déchets — mais les portiques à l'entrée des tunnels y sont impitoyables.
+* **Circulation des citoyens :** vers le bas, libre ; vers le haut, sur laissez-passer accordé selon l'ICC (chap. 1). C'est le verrou qui rend crédibles les promotions de la Loterie (chap. 8).
+* **Accès libre dès le Jour 1 pour le joueur.** En tant que livreur de Catégorie C, il passe partout, mais ne circule jamais sur les avenues privées des élites : il emprunte le **Réseau Logistique Souterrain** (sas de maintenance et quais de service). Même les ministères et les milliardaires ont besoin que les Livreurs de Catégorie C approvisionnent leurs cuisines, livrent l'eau des domestiques et évacuent leurs déchets — mais les portiques à l'entrée des tunnels y sont impitoyables.
 * **Carte :** les districts ne sont pas tous voisins. Un trajet vers un district non voisin passe par les districts intermédiaires : **un surcoût en rations (`FUEL_PER_CROSSED_DISTRICT` dans [`balance.ts`](../src/data/balance.ts)) et un malus de risque par district traversé (`CROSSED_DISTRICT_RISK`)** (le test d'interception n'a lieu qu'à destination). L'app propose l'itinéraire le plus court.
 
 ```
@@ -126,7 +127,7 @@ Les vrais blanchisseurs ne sont pas les punks de `[D4]` mais les hauts fonctionn
 | Un capitaine de la BRC (district au choix) | Promu | Muté « vers le haut »… puis suicidé : il en savait trop. | Risque réduit dans ce district (une recrue le remplace), au lieu de la purge préventive. |
 | Un contrebandier concurrent (district au choix) | Promu | Suicidé, sa clientèle orpheline. | **Quotas de demande** majorés dans ce district (cumulable avec `[CREW-03]`). |
 | L'indic qui te suit | Promu (district tiré au hasard) | Envoyé « dans un appartement de rêve ». | Au tirage : **Fiche S remise à 0** et gain d'ICC hors plafond ; pas de purge préventive. |
-| Un cadre (district de départ au choix) | Déclassé | Dénoncé par toi, renvoyé un étage plus bas. | Tu choisis **le vice qu'il emporte** parmi les produits possibles (chap. 8). |
+| Un cadre (district de départ au choix) | Déclassé | Dénoncé par toi, renvoyé un étage plus bas. | **Garantit un déclassement** à ce tirage (sans dossier, il n'a lieu qu'une fois sur deux, chap. 8), et tu choisis **le vice qu'il emporte** parmi les produits possibles. |
 
   *En cas de succès : « Merci pour votre contribution à la mobilité sociale. »*
 

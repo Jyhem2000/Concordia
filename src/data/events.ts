@@ -33,6 +33,8 @@ export const LOTTERY = {
   viceDays: 3,
   /** Chance que le promu soit l'équipier actif (équipage, chap. 5) */
   crewLossChance: 0.1,
+  /** Chance qu'un tirage désigne aussi un déclassé (garanti par un faux dossier « cadre ») */
+  demotionChance: 0.5,
 }
 
 /** District hors zone hors-réseau : cible des alertes d'Aeterna */

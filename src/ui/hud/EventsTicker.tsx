@@ -24,10 +24,11 @@ export default function EventsTicker() {
   const influence = useGameStore((s) => (s.game.influence?.day === s.game.day ? s.game.influence : null))
   const foretold = events.prophecy?.day === day + 1
   const drawToday = lottery !== null && lottery.day === day
-  const vicesLive = lottery !== null && day <= lottery.viceUntil
+  // Déclassement du dernier tirage (s'il y en a eu un) et durée de ses vices
+  const demotion = lottery?.demoted && lottery.viceDistrict && day <= lottery.viceUntil ? { from: lottery.demoted, to: lottery.viceDistrict } : null
   const name = (index: number) => t.events.names[index % t.events.names.length]
 
-  if (!events.global && locals.length === 0 && aftershocks.length === 0 && !drawToday && !vicesLive && !events.rumor && !influence) return null
+  if (!events.global && locals.length === 0 && aftershocks.length === 0 && !drawToday && !demotion && !events.rumor && !influence) return null
 
   return (
     <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-zinc-800 px-4 py-1 text-xs text-zinc-300">
@@ -47,10 +48,10 @@ export default function EventsTicker() {
         </li>
       ))}
       {lottery && drawToday && <li>{t.events.promoted(name(lottery.names.promoted), t.district[lottery.promoted].name)}</li>}
-      {lottery && vicesLive && (
+      {lottery && demotion && (
         <li>
-          {t.events.demoted(name(lottery.names.demoted), t.district[lottery.demoted].name, t.district[lottery.viceDistrict].name)}
-          {lottery.vice && <> {t.events.vice(t.product[lottery.vice].name, t.district[lottery.viceDistrict].name, lottery.viceUntil)}</>}
+          {t.events.demoted(name(lottery.names.demoted), t.district[demotion.from].name, t.district[demotion.to].name)}
+          {lottery.vice && <> {t.events.vice(t.product[lottery.vice].name, t.district[demotion.to].name, lottery.viceUntil)}</>}
         </li>
       )}
       {influence && <li className="text-amber-200">{t.events.influence(t.tag[influence.tag].name, multiplier(KARMA.factor))}</li>}

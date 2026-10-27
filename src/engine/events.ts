@@ -222,20 +222,20 @@ export function viceChoices(district: DistrictId): ProductId[] {
 }
 
 /** Tirage de la Loterie ; un faux dossier accepté impose un rôle, l'autre reste tiré au hasard (chap. 4) */
-function drawLottery(day: number, rng: Rng, card: ForgeryCard | null): Lottery | null {
+function drawLottery(day: number, rng: Rng, card: ForgeryCard | null): Lottery {
   const cadre = card?.kind === 'cadre' ? card : null
   const imposedPromotion = card?.kind === 'captain' || card?.kind === 'competitor' ? card.district : null
   const promoted = imposedPromotion ?? rng.pick(LOTTERY.promotedFrom.filter((id) => id !== cadre?.district))
-  const demoted = cadre?.district ?? rng.pick(LOTTERY.demotedFrom.filter((id) => id !== promoted))
-  const viceDistrict = LOTTERY.lower[demoted]
-  if (!viceDistrict) return null
-  const vices = viceChoices(demoted)
+  // Un déclassement est réel et public : Aeterna n'en fait qu'une fois sur deux, sauf dénonciation (carte « cadre »)
+  const demotes = cadre !== null || rng.chance(LOTTERY.demotionChance)
+  const demoted = demotes ? (cadre?.district ?? rng.pick(LOTTERY.demotedFrom.filter((id) => id !== promoted))) : null
+  const vices = demoted ? viceChoices(demoted) : []
   return {
     day,
     promoted,
     demoted,
     vice: cadre ? cadre.vice : vices.length > 0 ? rng.pick(vices) : null,
-    viceDistrict,
+    viceDistrict: demoted ? (LOTTERY.lower[demoted] ?? null) : null,
     viceUntil: day + LOTTERY.viceDays - 1,
     names: { promoted: rng.int(0, 999), demoted: rng.int(0, 999) },
     card: card?.kind ?? null,

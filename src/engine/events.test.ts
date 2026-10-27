@@ -4,7 +4,7 @@ import { DISTRICTS } from '../data/districts.ts'
 import { AFTERSHOCK, EVENT_COOLDOWNS, EVENT_MULT_CAP, GLOBAL_EVENTS, LOCAL_EVENTS, LOTTERY, ROAD_EVENTS } from '../data/events.ts'
 import { PRODUCT_IDS } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
-import { drawEvents, eventMultiplier, localEventsOf, NO_EVENTS, rumorReliability, tagFactor, type EventContext } from './events.ts'
+import { drawEvents, eventMultiplier, localEventsOf, NO_EVENTS, rumorReliability, tagFactor, viceChoices, type EventContext } from './events.ts'
 import { drawMarket, productStatus, quote, quoteBreakdown, shopProducts } from './market.ts'
 import { keysOf } from './records.ts'
 import { riskBreakdown } from './risk.ts'
@@ -63,17 +63,36 @@ describe('tirages de 06h00', () => {
     }
   })
 
-  it('tirent la Loterie aux jours fixes : un déclassé autre que le promu, un vice ni produit ni déjà demandé en bas', () => {
-    for (let seed = 1; seed <= 20; seed++) {
+  it('tirent la Loterie aux jours fixes : un promu toujours, un déclassé une fois sur deux, autre que le promu', () => {
+    let demotions = 0
+    for (let seed = 1; seed <= 200; seed++) {
       const lottery = defined(drawEvents(NO_EVENTS, LOTTERY.days[0], createRng(seedRng(seed))).lottery)
-      expect(lottery.demoted).not.toBe(lottery.promoted)
-      expect(lottery.viceDistrict).toBe(LOTTERY.lower[lottery.demoted])
-      const lower = DISTRICTS[lottery.viceDistrict]
-      if (lottery.vice) {
-        expect(DISTRICTS[lottery.demoted].strongDemand).toContain(lottery.vice)
-        expect(lower.production).not.toContain(lottery.vice)
-        expect(lower.strongDemand).not.toContain(lottery.vice)
+      expect(LOTTERY.promotedFrom).toContain(lottery.promoted)
+      const demoted = lottery.demoted
+      if (!demoted) {
+        expect(lottery).toMatchObject({ viceDistrict: null, vice: null })
+        continue
       }
+      demotions++
+      expect(demoted).not.toBe(lottery.promoted)
+      const viceDistrict = defined(lottery.viceDistrict)
+      expect(viceDistrict).toBe(LOTTERY.lower[demoted])
+      if (lottery.vice) {
+        expect(DISTRICTS[demoted].strongDemand).toContain(lottery.vice)
+        expect(DISTRICTS[viceDistrict].production).not.toContain(lottery.vice)
+        expect(DISTRICTS[viceDistrict].strongDemand).not.toContain(lottery.vice)
+      }
+    }
+    // Une fois sur deux en moyenne : bornes larges pour 200 tirages
+    expect(demotions).toBeGreaterThan(70)
+    expect(demotions).toBeLessThan(130)
+  })
+
+  it('garantit le déclassement dénoncé par un faux dossier « cadre »', () => {
+    const vice = defined(viceChoices('D5')[0])
+    for (let seed = 1; seed <= 20; seed++) {
+      const forged = { ...NO_EVENTS, forgery: { day: LOTTERY.days[0], card: { kind: 'cadre' as const, district: 'D5' as const, vice } } }
+      expect(drawEvents(forged, LOTTERY.days[0], createRng(seedRng(seed))).lottery).toMatchObject({ demoted: 'D5', vice, card: 'cadre' })
     }
   })
 

@@ -459,10 +459,11 @@ export type EventsState = {
 export type Lottery = {
   day: number
   promoted: DistrictId
-  demoted: DistrictId
+  /** District du déclassé ; null quand Aeterna n'a pas fait d'exemple à ce tirage */
+  demoted: DistrictId | null
   /** Produit qui passe en Forte demande dans `viceDistrict` jusqu'à `viceUntil` inclus */
   vice: ProductId | null
-  viceDistrict: DistrictId
+  viceDistrict: DistrictId | null
   viceUntil: number
   /** Index des noms tirés (lore) */
   names: { promoted: number; demoted: number }

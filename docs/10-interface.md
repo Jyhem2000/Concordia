@@ -7,7 +7,7 @@
   * *Ex. (risque, valeurs indicatives) :* « Base D5 40 % · Suspicion +10 % · Tech (4/12) +16,7 % · Couverture légale −10 % = 56,7 % · Zéro-C ×0,85 = **48 %** ».
 
 ## Bandeau supérieur permanent & briefing de 06h00
-* **Téléscripteur d'Aeterna (Flash Info TV) :** sous les barres d'état, un message passif-agressif par jour, **l'indice d'inflation du jour** et sa hausse depuis la veille, l'événement global et les événements locaux du jour, les contrecoups, le tirage de la Loterie et ses vices en cours, et la **rumeur** du lendemain avec sa fiabilité. Chaque événement se déplie sur ses effets exacts (produits et facteurs, risque, tags, stocks).
+* **Téléscripteur d'Aeterna (Flash Info TV) :** sous les barres d'état, un message passif-agressif par jour, **l'indice d'inflation du jour** et sa hausse depuis la veille, l'événement global et les événements locaux du jour, les contrecoups, le tirage de la Loterie (le promu, et le déclassé seulement s'il y en a un) et ses vices en cours, et la **rumeur** du lendemain avec sa fiabilité. Chaque événement se déplie sur ses effets exacts (produits et facteurs, risque, tags, stocks).
 * **Barres d'état (toujours visibles) :**
   * Jour X / 30 + ☀️ ou 🌙, et le moment de la journée (Journée, 20h00, Nuit, chap. 2) avec l'état du trajet du moment (disponible ou effectué) ;
   * Cash-Puce (jaune) · Compte offshore (cyan, cadenas, taux effectif) · Dette (rouge, prochaine échéance : tabassage, puis retard si la dette initiale n'a jamais été soldée, puis audit ; mention « en retard » une fois le retard acquis) ;
