@@ -1,6 +1,6 @@
 # Analyse — étape 1 des simulations
 
-Rapports bruts : [controle.md](controle.md) (200 parties par bot) et [plans.md](plans.md) (100 parties par bot, 8 plans × 3 tempéraments). Mêmes graines pour tous les bots. Bots : marchand de `src/sim/bots/trader.ts`, réglages dans `src/sim/plans.ts`.
+Rapports bruts : [controle.md](controle.md) (200 parties par bot) et [plans.md](plans.md) (100 parties par bot, 8 plans × 3 tempéraments). Mêmes graines pour tous les bots. Bots : marchand de `sim/bots/trader.ts`, réglages dans `sim/plans.ts`.
 
 ## Robustesse
 * **Aucun bug moteur trouvé** : ni invariant violé, ni blocage, ni action refusée, y compris pour l'Aléatoire (400 parties).
@@ -29,3 +29,28 @@ Rapports bruts : [controle.md](controle.md) (200 parties par bot) et [plans.md](
 * **Risque :** baisser le risque de base des districts (environ ×0,6) ; les malus de cargaison (tags, haut tier, nuit hors mission) suffisent à faire payer les cargaisons dangereuses.
 * **Équipement :** revoir le prix des véhicules après ces deux changements (mesure à refaire : ils sont aujourd'hui hors de portée).
 * **Bots :** le marchand reste une heuristique ; un meilleur bot (étape 4, optimiseur) pourrait gagner plus. Les écarts relatifs entre réglages sont plus fiables que les valeurs absolues.
+
+---
+
+## Second passage — réglages appliqués
+Changements : intérêts de la dette **10 % → 5 % par jour** (le retard du Jour 20 reste à 20 %), **risque de base des districts ×0,6** (et le risque de base imposé par l'audit du Comité de Pureté, `[EVT-D5-02]`, dans la même proportion). Rapports : [controle.md](controle.md), [plans.md](plans.md).
+
+| Bot | Survie avant | Survie après |
+| :--- | ---: | ---: |
+| Novice | 41 % | **63 %** |
+| Sans build (prudent / équilibré / casse-cou) | 25 / 56 / 44 % | **58 / 63 / 61 %** |
+| Couverture légale (prudent / équilibré / casse-cou) | 32 / 70 / 53 % | **71 / 79 / 62 %** |
+| Pire plan, meilleur plan (équilibré) | 50 / 70 % | **62 / 79 %** |
+
+* **Critère du contrôle tenu** : le Novice atteint l'audit sans dette dans la majorité des parties. L'Aléatoire reste sans défaut.
+* **Le prudent est redevenu jouable** (53 à 71 % de survie selon le plan, au lieu de 24 à 32 %).
+* **Interceptions** : 16 à 18 % des trajets en prudent, 23 à 27 % en équilibré, 30 à 33 % en casse-cou. Le reste du risque vient de la cargaison (tags, haut tier), du portique de Rust Valley et de la nuit hors mission, comme voulu.
+* **Le casse-cou est une loterie** : 90e centile de 140 000 à 260 000 ₡, mais score médian des survivants de 100 à 500 ₡. Ils soldent la dette puis perdent tout en saisies. Le critère « casse-cou plus dispersé » est tenu ; « plus de Game Over que le prudent » ne l'est pas (37 à 46 % contre 29 à 47 %) : à revoir quand le bot jouera mieux la fin de partie.
+* **Le hasard pèse lourd** : même plan, mêmes réglages, du score nul au jackpot selon la graine (campagne 3 à mener).
+
+### Prix des véhicules : mesuré, pas changé
+Avec des véhicules ×0,6, le marchand les achète plus souvent (navette 53 → 73 %, compacteur 18 → 25 % en casse-cou), sans gain net de survie ni de score médian : une soute plus grande expose aussi plus de marchandise aux saisies. Les prix restent tels quels ; les tests par retrait (campagne 4) diront ce que vaut chaque équipement.
+
+### Signaux pour la suite
+* **Chaîne du froid** est le plan le plus faible (score moyen 3 700 à 10 600 ₡ contre 15 400 à 36 800 ₡ pour Sans build) : le salaire de Mama Rosa (1 000 ₡ par jour, indexé) pèse plus que l'affinage ne rapporte. À confirmer en campagne 4 avant de toucher au salaire.
+* **Couverture légale** reste le meilleur plan : la dilution en Tier 0 est forte. À surveiller pour qu'elle ne devienne pas la seule bonne réponse.

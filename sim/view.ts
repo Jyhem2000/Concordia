@@ -1,8 +1,8 @@
-import { DISTRICT_IDS } from '../data/districts.ts'
-import { PRODUCT_IDS } from '../data/products.ts'
-import { crewEffect } from '../engine/crew.ts'
-import { recordOf } from '../engine/records.ts'
-import type { DistrictMarket, GameState } from '../engine/types.ts'
+import { DISTRICT_IDS } from '../src/data/districts.ts'
+import { PRODUCT_IDS } from '../src/data/products.ts'
+import { crewEffect } from '../src/engine/crew.ts'
+import { recordOf } from '../src/engine/records.ts'
+import type { DistrictMarket, GameState } from '../src/engine/types.ts'
 
 /*
  * Information honnête (chap. 9) : ce que voit le joueur. Les bots décident sur cette vue, où l'état caché

@@ -1,12 +1,12 @@
-import { DISTRICT_IDS } from '../data/districts.ts'
-import { KARMA } from '../data/locations.ts'
-import { PRODUCT_IDS } from '../data/products.ts'
-import { CREW, MODULES, VEHICLES } from '../data/vehicles.ts'
-import { applyAction, maxBuy, type Action } from '../engine/actions.ts'
-import { ownedQty } from '../engine/cargo.ts'
-import { minimumOffer } from '../engine/interception.ts'
-import { keysOf } from '../engine/records.ts'
-import type { GameState, InterceptionMove } from '../engine/types.ts'
+import { DISTRICT_IDS } from '../src/data/districts.ts'
+import { KARMA } from '../src/data/locations.ts'
+import { PRODUCT_IDS } from '../src/data/products.ts'
+import { CREW, MODULES, VEHICLES } from '../src/data/vehicles.ts'
+import { applyAction, maxBuy, type Action } from '../src/engine/actions.ts'
+import { ownedQty } from '../src/engine/cargo.ts'
+import { minimumOffer } from '../src/engine/interception.ts'
+import { keysOf } from '../src/engine/records.ts'
+import type { GameState, InterceptionMove } from '../src/engine/types.ts'
 
 /*
  * Actions candidates d'une partie (chap. 9) : un large échantillon de ce que le joueur peut tenter,

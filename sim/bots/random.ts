@@ -1,4 +1,4 @@
-import { createRng, seedRng } from '../../engine/rng.ts'
+import { createRng, seedRng } from '../../src/engine/rng.ts'
 import { legalActions } from '../legal.ts'
 import type { Bot } from '../runner.ts'
 

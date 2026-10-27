@@ -6,4 +6,4 @@ package-lock.json
 docs
 
 # Rapports de simulation : générés, puis commentés à la main
-reports
+sim/reports

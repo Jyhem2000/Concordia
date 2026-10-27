@@ -1,15 +1,15 @@
-import { GRINDER, HIGH_TIER, SALE_COMMISSION, SURVIVAL_ADVANCE } from '../../data/balance.ts'
-import { DISTRICT_IDS } from '../../data/districts.ts'
-import { ROAD_EVENTS } from '../../data/events.ts'
-import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
-import { MODULES, VEHICLES } from '../../data/vehicles.ts'
-import { canSiphon, checkForceCurfew, checkService, fuelPrice, maxBuy, planTravel, pumpClosed, type Action } from '../../engine/actions.ts'
-import { cargoUsed, isIllegal, ownedQty } from '../../engine/cargo.ts'
-import { daysBeforeRot } from '../../engine/condition.ts'
-import { checkHire, crewEffect, hireFee, salary } from '../../engine/crew.ts'
-import { checkBuyModule, checkBuyVehicle, missingChassis, repairPrice } from '../../engine/equipment.ts'
-import { loanRoom } from '../../engine/finance.ts'
-import { indexed } from '../../engine/inflation.ts'
+import { GRINDER, HIGH_TIER, SALE_COMMISSION, SURVIVAL_ADVANCE } from '../../src/data/balance.ts'
+import { DISTRICT_IDS } from '../../src/data/districts.ts'
+import { ROAD_EVENTS } from '../../src/data/events.ts'
+import { PRODUCT_IDS, PRODUCTS } from '../../src/data/products.ts'
+import { MODULES, VEHICLES } from '../../src/data/vehicles.ts'
+import { canSiphon, checkForceCurfew, checkService, fuelPrice, maxBuy, planTravel, pumpClosed, type Action } from '../../src/engine/actions.ts'
+import { cargoUsed, isIllegal, ownedQty } from '../../src/engine/cargo.ts'
+import { daysBeforeRot } from '../../src/engine/condition.ts'
+import { checkHire, crewEffect, hireFee, salary } from '../../src/engine/crew.ts'
+import { checkBuyModule, checkBuyVehicle, missingChassis, repairPrice } from '../../src/engine/equipment.ts'
+import { loanRoom } from '../../src/engine/finance.ts'
+import { indexed } from '../../src/engine/inflation.ts'
 import {
   bluffChance,
   bribeChance,
@@ -20,11 +20,11 @@ import {
   minimumOffer,
   searchSanction,
   toll,
-} from '../../engine/interception.ts'
-import { demandQuota, grindableQty, lastSeen, normalQuote, productStatus, quote, saleQuote, shopProducts } from '../../engine/market.ts'
-import { checkMission, missionOffer } from '../../engine/night.ts'
-import { checkRoadChoice, roadCash } from '../../engine/road.ts'
-import { risk } from '../../engine/risk.ts'
+} from '../../src/engine/interception.ts'
+import { demandQuota, grindableQty, lastSeen, normalQuote, productStatus, quote, saleQuote, shopProducts } from '../../src/engine/market.ts'
+import { checkMission, missionOffer } from '../../src/engine/night.ts'
+import { checkRoadChoice, roadCash } from '../../src/engine/road.ts'
+import { risk } from '../../src/engine/risk.ts'
 import type {
   CrateCount,
   CrewId,
@@ -37,7 +37,7 @@ import type {
   TagId,
   Tier,
   VehicleId,
-} from '../../engine/types.ts'
+} from '../../src/engine/types.ts'
 import type { Bot } from '../runner.ts'
 
 /*

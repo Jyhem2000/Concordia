@@ -190,7 +190,8 @@ describe('risque', () => {
 
   it('impose un risque de base, divise le risque final, et purge le district du promu', () => {
     const audit = riskBreakdown(withEvents({ local: { D5: 'EVT-D5-02' } }), 'D5', { includePatrol: false })
-    expect(audit.lines.find((line) => line.op === 'set')?.value).toBe(0.6)
+    const imposed = LOCAL_EVENTS['EVT-D5-02'].effects.find((effect) => effect.kind === 'baseRisk')
+    expect(audit.lines.find((line) => line.op === 'set')?.value).toBe(imposed?.kind === 'baseRisk' ? imposed.value : undefined)
     const calm = riskBreakdown(gameAt(3), 'D3', { includePatrol: false }).total
     expect(riskBreakdown(withEvents({ local: { D3: 'EVT-D3-02' } }), 'D3', { includePatrol: false }).total).toBeCloseTo(Math.max(0.05, calm / 2))
     const lottery = {

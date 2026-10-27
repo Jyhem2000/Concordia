@@ -20,6 +20,7 @@ Simulation économique satirique (Drug Wars-like). Game design : [docs/](docs/RE
 | `src/stores/` | Stores Zustand : état de la partie sauvegardé, réglages                                  |
 | `src/i18n/`   | Textes traduits, clés dérivées des IDs                                                   |
 | `src/ui/`     | Composants React, découpés comme le chap. 10 (bandeau, marché, soute, carte…)            |
+| `sim/`        | Simulations (chap. 9) : bots, campagnes, rapports ; utilise `src/`, jamais l'inverse     |
 
 Données de jeu :
 
@@ -107,14 +108,20 @@ Elles s'appliquent à tout le code, sans exception non justifiée. **Toute nouve
 
 - LF partout (`.gitattributes`, `.editorconfig`, Prettier).
 
+### Simulations
+
+- Tout le code de simulation vit dans `sim/` (bots, campagnes, rapports, commande). Le jeu (`src/`) ne l'importe jamais ; `sim/` n'appelle le moteur que par ses fonctions publiques et `applyAction`, sans réécrire de règle.
+- Un bot décide sur la vue publique (`sim/view.ts`), jamais sur l'état complet ; le test d'information honnête doit rester vert.
+
 ## Scripts
 
-| Commande               | Rôle                                 |
-| :--------------------- | :----------------------------------- |
-| `npm run dev`          | Serveur de dev                       |
-| `npm run build`        | Vérification TypeScript + build      |
-| `npm run lint`         | ESLint                               |
-| `npm test`             | Tests Vitest (une passe)             |
-| `npm run test:watch`   | Tests Vitest en continu              |
-| `npm run format`       | Formate tout le projet avec Prettier |
-| `npm run format:check` | Vérifie le formatage sans modifier   |
+| Commande                                   | Rôle                                                         |
+| :----------------------------------------- | :----------------------------------------------------------- |
+| `npm run dev`                              | Serveur de dev                                               |
+| `npm run build`                            | Vérification TypeScript + build                              |
+| `npm run lint`                             | ESLint                                                       |
+| `npm test`                                 | Tests Vitest (une passe)                                     |
+| `npm run test:watch`                       | Tests Vitest en continu                                      |
+| `npm run format`                           | Formate tout le projet avec Prettier                         |
+| `npm run format:check`                     | Vérifie le formatage sans modifier                           |
+| `npm run simulate -- <campagne> [parties]` | Joue une campagne de simulation, rapport dans `sim/reports/` |

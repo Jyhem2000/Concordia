@@ -28,7 +28,7 @@ Le résultat est **borné, après** tous les multiplicateurs (`RISK_BOUNDS` dans
 **Part de la cargaison :** (caisses du tag non masquées + poids d'une caisse masquée × caisses du tag masquées) ÷ caisses transportées (`MASKED_CRATE_WEIGHT` dans [`balance.ts`](../src/data/balance.ts)) (masquage, chap. 3). Une soute « diluée » dans du légal est donc moins suspecte, quelle que soit la taille du camion.
 
 **Exemple affiché au joueur** *(valeurs indicatives)* : `[VEH-02]` vers `[D5]` de jour, ICC 80 %, 12 caisses dont 4 `[TAG-TECH]` et 6 `[TAG-LEGAL]`.
-`( 40 (base) + 10 (suspicion) + 50 × 4/12 (Tech) − 20 × 6/12 (couverture) ) × 0,85 (Zéro-C) = 56,7 × 0,85 = 48,2 % → 48 %`
+`( 24 (base) + 10 (suspicion) + 50 × 4/12 (Tech) − 20 × 6/12 (couverture) ) × 0,85 (Zéro-C) = 40,7 × 0,85 = 34,6 % → 35 %`
 
 **Ronde renforcée :** chaque matin (et dès le Jour 1), Aeterna tire **1 district** hors zone hors-réseau : malus de risque pour la journée (`PATROL_RISK` dans [`balance.ts`](../src/data/balance.ts)). Caché au joueur, sauf avec `[CREW-01]`.
 

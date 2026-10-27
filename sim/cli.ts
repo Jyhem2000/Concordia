@@ -1,8 +1,8 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
-import { CAMPAIGNS, runCampaign } from '../src/sim/campaigns.ts'
+import { CAMPAIGNS, runCampaign } from './campaigns.ts'
 
 /*
- * Lance une campagne de simulation (chap. 9) et écrit son rapport dans reports/<campagne>.md.
+ * Lance une campagne de simulation (chap. 9) et écrit son rapport dans sim/reports/<campagne>.md.
  * Usage : npm run simulate -- <campagne> [parties par bot]
  */
 
@@ -18,6 +18,8 @@ const started = Date.now()
 const report = runCampaign(campaign, games, (done, total) => {
   if (done % 50 === 0 || done === total) process.stdout.write(`\r${done}/${total} parties`)
 })
-mkdirSync('reports', { recursive: true })
-writeFileSync(`reports/${name}.md`, report)
-console.log(`\nRapport écrit dans reports/${name}.md (${((Date.now() - started) / 1000).toFixed(0)} s)`)
+// Rapports à côté du code de simulation, quel que soit le dossier d'où l'on lance la commande
+const reports = new URL('./reports/', import.meta.url)
+mkdirSync(reports, { recursive: true })
+writeFileSync(new URL(`${name}.md`, reports), report)
+console.log(`\nRapport écrit dans sim/reports/${name}.md (${((Date.now() - started) / 1000).toFixed(0)} s)`)

@@ -1,7 +1,7 @@
-import { HEALTH_MAX, ICC_MAX, WANTED } from '../data/balance.ts'
-import { VEHICLES } from '../data/vehicles.ts'
-import { cargoUsed } from '../engine/cargo.ts'
-import type { GameState } from '../engine/types.ts'
+import { HEALTH_MAX, ICC_MAX, WANTED } from '../src/data/balance.ts'
+import { VEHICLES } from '../src/data/vehicles.ts'
+import { cargoUsed } from '../src/engine/cargo.ts'
+import type { GameState } from '../src/engine/types.ts'
 
 /*
  * Invariants de la partie (chap. 9) : vérifiés après chaque action simulée. Une violation est un bug du moteur.

@@ -107,7 +107,7 @@ export const ANTI_ARBITRAGE_CAP = 1
 // ─── Dette mafieuse (chap. 7) ───
 
 /** Intérêts composés par jour, à chaque routine matinale (pas le Jour 1) */
-export const DEBT_DAILY_RATE = 0.1
+export const DEBT_DAILY_RATE = 0.05
 
 /** Échéance du tabassage : au-delà du solde seuil, perte de Santé sans descendre sous le plancher */
 export const DEBT_BEATING = { day: 10, threshold: 10_000, healthLoss: 30, healthFloor: 5 }

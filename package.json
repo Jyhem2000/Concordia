@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "simulate": "node scripts/simulate.ts",
+    "simulate": "node sim/cli.ts",
     "test:watch": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

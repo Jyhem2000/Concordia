@@ -73,10 +73,10 @@ L'objectif change surtout les décisions de fin de partie et quelques contrainte
 ---
 
 ## Mise en œuvre
-* **Où :** le moteur de simulation et les bots vivent dans `src/sim/`, sans aucune dépendance à l'interface ; le script `scripts/simulate.ts` lance une campagne (`npm run simulate -- <campagne> [parties]`) et écrit son rapport dans `reports/<campagne>.md`, versionné. Les données brutes par partie restent hors du dépôt.
+* **Où :** tout ce qui concerne la simulation est regroupé dans le dossier `sim/`, à part du jeu (`src/`), qu'il utilise sans jamais le modifier : moteur de parties, bots, campagnes, rapports (`sim/reports/`, versionnés) et commande `npm run simulate -- <campagne> [parties]` (`sim/cli.ts`). Le jeu ne dépend jamais de `sim/`. Les données brutes par partie restent hors du dépôt.
 * **Une partie :** une graine, un bot, puis une boucle « le bot choisit une action, le moteur l'applique » jusqu'à la fin. Un bot est sans mémoire de la partie : il décide à partir de la vue publique seule (l'Aléatoire tire en plus avec son propre générateur, jamais avec celui de la partie). Une action refusée par le moteur est comptée (c'est un défaut du bot) ; au-delà d'un plafond d'actions dans une même journée, la partie force le sommeil et le note.
 * **Robustesse :** après chaque action de l'Aléatoire, des **invariants** sont vérifiés (Cash-Puce et dette jamais négatifs, soute dans sa capacité, jauges dans leurs bornes, réservoir plein au plus, une seule interception à la fois…). Une violation est un bug du moteur, rejoué depuis sa graine.
-* **Paramètres des bots :** plans, tempéraments et seuils dans `src/sim/plans.ts` et `src/sim/bots/trader.ts` ; chaque rapport les cite.
+* **Paramètres des bots :** plans, tempéraments et seuils dans `sim/plans.ts` et `sim/bots/trader.ts` ; chaque rapport les cite.
 * **Le bot de plan :** un seul « marchand » paramétré par le plan, le tempérament et l'objectif. Chaque jour, dans l'ordre : réponse au barrage ou à l'aléa en cours ; fin de partie (rembourser, rejoindre la Laverie, tout déposer avant l'audit) ; dette et échéances ; ventes rentables ; équipement du plan quand il est abordable sans entamer la réserve ; achats aux meilleures marges espérées (cours mémorisés, sinon profil public du district) pondérées par le risque que le tempérament accepte ; plein ; trajet vers la destination de meilleure espérance sous le risque maximal du tempérament ; enfin le soir (relais, ou tournée de nuit selon le tempérament et la mission). Le barrage se joue à l'espérance : pertes probables de chaque option (caisses, amende, garde à vue, ICC, châssis) pour sa chance affichée.
 * **Par étapes :**
   1. moteur, invariants, Novice et Aléatoire (contrôle), marchand avec les plans qui ne demandent qu'un réglage (Sans build, Chaîne du froid, Couverture légale, Électronique, Nuit festive, Corruption, Rentier, Haut tier), objectifs « score maximal » et « survivre » : campagnes Contrôle et 1 ;
@@ -120,6 +120,6 @@ Cibles de départ, à recaler avec les premières mesures.
 | 5 | L'optimiseur ne dépasse pas de loin le meilleur plan conçu ; sinon, la stratégie trouvée est documentée puis corrigée ou assumée comme build. |
 
 ## Lecture des résultats
-* Rapports et analyses : dossier `reports/` (un rapport généré par campagne, plus une analyse rédigée par étape).
+* Rapports et analyses : dossier `sim/reports/` (un rapport généré par campagne, plus une analyse rédigée par étape).
 * Un écart à une cible se corrige d'abord dans les données (`src/data/`), puis, si besoin, dans une règle : toute règle modifiée l'est d'abord dans le chapitre concerné (règle 7 de [README.md](README.md)).
 * Chaque campagne note la version d'équilibrage, les bots joués (plan, tempérament, objectif, paramètres), le nombre de parties et les écarts constatés.

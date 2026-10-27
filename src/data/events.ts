@@ -137,7 +137,7 @@ export const LOCAL_EVENTS: Readonly<Record<LocalEventId, GameEvent>> = {
   'EVT-D5-02': {
     effects: [
       { kind: 'appear', products: ['T2-06', 'T3-02', 'T3-07', 'T4-03'], factor: 0.5 },
-      { kind: 'baseRisk', value: 0.6 },
+      { kind: 'baseRisk', value: 0.36 },
     ],
   },
   'EVT-D5-03': {

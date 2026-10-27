@@ -11,7 +11,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
   D1: {
     echelon: 1,
     security: 1,
-    baseRisk: 0.1,
+    baseRisk: 0.06,
     fuelPrice: 80,
     pump: 'official',
     relay: true,
@@ -42,7 +42,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
   D2: {
     echelon: 2,
     security: 2,
-    baseRisk: 0.2,
+    baseRisk: 0.12,
     fuelPrice: 120,
     pump: 'official',
     relay: true,
@@ -66,7 +66,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
   D3: {
     echelon: 3,
     security: 3,
-    baseRisk: 0.35,
+    baseRisk: 0.21,
     fuelPrice: 150,
     pump: 'official',
     relay: true,
@@ -90,7 +90,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
   D4: {
     echelon: 0,
     security: 2,
-    baseRisk: 0.2,
+    baseRisk: 0.12,
     fuelPrice: 80,
     pump: 'fixed', // pompe pirate
     relay: false, // pas de relais du DSC : bivouac
@@ -116,7 +116,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
   D5: {
     echelon: 4,
     security: 4,
-    baseRisk: 0.4,
+    baseRisk: 0.24,
     fuelPrice: 200,
     pump: 'official',
     relay: true,
@@ -146,7 +146,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
   D6: {
     echelon: 5,
     security: 5,
-    baseRisk: 0.55,
+    baseRisk: 0.33,
     fuelPrice: 300,
     pump: 'official',
     relay: true,
