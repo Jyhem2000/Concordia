@@ -6,7 +6,7 @@
 - **Ton :** Satire mordante, humour noir, paranoïa bureaucratique, dystopie algorithmique (Brazil, Papers Please, South Park, Black Mirror, Demolition Man).
 
 ## Chapitres
-Les chapitres 1 à 8 décrivent le jeu : univers, règles, données. Les chapitres 9 et 10 décrivent sa production : l'équilibrage par simulation et l'interface.
+Les chapitres 1 à 8 décrivent le jeu : univers, règles, données. Les deux derniers décrivent comment on le fabrique : le chap. 9 l'équilibrage par simulation, le chap. 10 l'interface.
 
 | # | Fichier | Contenu |
 | :---: | :--- | :--- |
@@ -22,20 +22,27 @@ Les chapitres 1 à 8 décrivent le jeu : univers, règles, données. Les chapitr
 | 10 | [10-interface.md](10-interface.md) | Écrans et feedback |
 
 ## Où trouver une règle
-Une mécanique touche souvent plusieurs chapitres : chacun écrit la part qui le concerne et renvoie aux autres. Ce tableau donne le chemin, dans l'ordre de lecture.
+Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la décrivent, dans l'ordre de lecture (le premier porte la règle, les suivants ses modificateurs). Une mécanique ajoutée aux docs s'ajoute ici dans le même changement (règle 10).
 
-| Question | Où lire |
-| :--- | :--- |
-| Comment gagner, comment perdre ? | chap. 2 (audit, défaites, grandes fins) → chap. 7 (dette, compte offshore) |
-| Comment se déroule une journée ? | chap. 2 (moments, routine de 06h00, dilemme de 20h00, demi-journée perdue) |
-| Que se passe-t-il pendant un trajet ? | chap. 2 (ordre de résolution) → chap. 4 (carte, districts traversés, zone hors-réseau) → chap. 6 (risque, barrage fixe ou contrôle volant) → chap. 8 (aléas routiers, effets d'arrivée) |
-| Comment se résout un contrôle ? | chap. 6 (options, sanctions, garde à vue) → chap. 3 (tags, masquage, actions des produits) → chap. 4 (racket des milices) |
-| D'où vient un cours, un prix de vente ? | chap. 7 (cours, tendance, quota, prix de vente, savoir-faire) → chap. 8 (événements, contrecoups, vices de la Loterie) → chap. 3 (fraîcheur, casse) |
-| Que vaut une caisse donnée en paiement ? | chap. 7 (paiement en nature) → chap. 3 (état des caisses) |
-| Que coûte et que rapporte un produit ? | chap. 3 (tags, actions) ; fiche produit en jeu (chap. 10) |
-| Où emprunter, déposer, revendre ? | chap. 4 (lieux spéciaux) → chap. 7 (portefeuilles) |
-| Comment évoluent ICC, Santé, châssis, carburant ? | chap. 2 (jauges) → chap. 5 (véhicule) |
-| Qu'est-ce qui est prévisible ? | chap. 7 (mémoire de marché, tendance) → chap. 8 (rumeurs, contrecoups, Loterie) → chap. 6 (ronde renforcée, cachée) |
+| Thème | Mécaniques | Où lire |
+| :--- | :--- | :--- |
+| **Partie** | objectif, audit du Jour 30, défaites (hachoir, mort, exécution), grandes fins, score | chap. 2 → chap. 7 (dette, compte offshore) |
+| **Jauges** | ICC (paliers, suspicion, gains de route et plafond), Santé, châssis, carburant, Exemption Métabolique et Sédation | chap. 2 → chap. 5 (capacités du véhicule) |
+| **Journée** | moments (Journée, 20h00, Nuit), routine de 06h00, service de jour, dilemme de 20h00 (relais, bivouac, couvre-feu forcé), épuisement, demi-journée perdue, immobilisation, dépannage d'urgence | chap. 2 |
+| **Trajet** | ordre de résolution, consommation, usure de nuit et canicule, carte et districts traversés, zone hors-réseau | chap. 2 → chap. 4 → chap. 8 (canicule) |
+| **Risque d'interception** | formule, risque de base, suspicion, tags détectés, contexte (nuit, traversée, portique, balise, ronde renforcée, Fiche S, pic suspect, embuscades), couverture légale, bonus d'équipement, multiplicateurs finaux | chap. 6 → chap. 3 (tags, masquage) → chap. 4 (détection des districts) → chap. 8 (effets d'événements) |
+| **Contrôle** | barrage fixe ou contrôle volant, fouille et sanctions, bluff (aides), corruption (offre, connivence, Drones-Juges), fuite (largage, dopage, casse, explosions), éjection, exécution sommaire, garde à vue | chap. 6 → chap. 3 (actions des produits, état des caisses) |
+| **Racket des milices** | péage en ₡ ou en caisses, passage forcé, refus | chap. 4 → chap. 6 |
+| **Produits** | tags, masquage 1:1, tiers, catalogue, actions (aide au bluff, largage, dopage, nuit blanche, refroidissement, pass d'identité, balise) | chap. 3 |
+| **État des caisses** | fraîcheur (Extra-Frais à Pourri), casse des fragiles, explosion des inflammables, valeur d'une caisse abîmée ou défraîchie | chap. 3 → chap. 7 (vente, paiement en nature) |
+| **Marché** | information (mémoire, historique, profil public des districts), boutique du jour, exclusion, cours (coefficient du district, tendance, Mult_Événement), quota de demande, saturation, pic suspect | chap. 7 → chap. 8 (événements, contrecoups, vices de la Loterie) |
+| **Vente** | prix de vente, commission, savoir-faire (fraîcheur, nuit, rendements décroissants), clause anti-arbitrage, lots les plus anciens d'abord | chap. 7 → chap. 3 (fraîcheur) |
+| **Argent** | Cash-Puce, paiement en nature, inflation et indexation, dette (intérêts, tabassage, retard, avance de survie, emprunt tactique), collecte de protection, compte offshore | chap. 7 → chap. 4 (guichets des lieux spéciaux) |
+| **Lieux spéciaux** | services, horaires, effets de chaque lieu | chap. 4 → chap. 7 (dette, offshore) |
+| **Équipement** | véhicules, modules, équipage, salaires | chap. 5 |
+| **Événements** | globaux, locaux, rumeurs, contrecoups, Loterie, aléas routiers | chap. 8 |
+| **Prévisibilité** | ce que le joueur sait ou peut deviner (cours, rumeurs, contrecoups, Loterie) et ce qui reste caché (ronde renforcée) | chap. 7 → chap. 8 → chap. 6 |
+| **Affichage** | où chaque règle est montrée et détaillée au joueur | chap. 10 |
 
 ## État d'implémentation
 Les docs décrivent le jeu complet ; tout n'est pas encore en jeu. Ce tableau dit ce qui l'est, chapitre par chapitre, et se met à jour à chaque étape.
@@ -51,6 +58,13 @@ Les docs décrivent le jeu complet ; tout n'est pas encore en jeu. Ce tableau di
 | 8 | Événements globaux et locaux, rumeurs, contrecoups, Loterie, aléas routiers | Effets liés aux modules, à l'équipage et aux lieux à venir (chap. 8, règles communes) |
 | 9 | — | Simulations, une fois le jeu complet |
 | 10 | Bandeau, téléscripteur, marché et fiche produit, carte, lieux, soir, briefing, barrage, aléa routier, objectifs | Vue véhicule et soute, filtres du marché, dégradation de l'interface selon l'ICC, manuel en jeu |
+
+## Feuille de route
+Étapes restantes, dans l'ordre des dépendances :
+1. **Équipement et lieux** — chap. 5 (véhicules, modules, équipage, salaires) et lieux spéciaux restants du chap. 4, avec les effets d'événements qui en dépendent (chap. 8).
+2. **Restes du chap. 2** — Exemption Métabolique et Sédation, pompes officielles fermées la nuit.
+3. **Habillage et manuel du jeu** — interface restante (chap. 10), manuel du joueur en jeu, et refonte des docs à cette occasion : répartir le contenu de `07-economie.md` (marché, vente, argent) dans les autres chapitres, renommer et renuméroter les fichiers, puis mettre à jour par script tous les renvois « chap. N » (docs et commentaires du code).
+4. **Simulations** — campagnes du chap. 9 sur le jeu complet, sans interface, puis équilibrage.
 
 ## Règles de rédaction
 1. **Un chiffre, un seul endroit.** Une valeur (prix, %, durée…) n'est écrite que là où la donnée est définie. Un bonus est écrit chez ce qui le produit (le module, le véhicule, l'événement…) ; les formules ne font que citer la source.
@@ -78,3 +92,4 @@ Constantes globales (valeurs de départ…) : [`balance.ts`](../src/data/balance
 7. **Les docs décrivent toutes les règles.** Développeur ou joueur, on doit comprendre le jeu sans lire le code. Toute décision prise en codant (ordre de résolution, arrondi, cas limite, interprétation d'une règle ambiguë) est écrite dans le chapitre concerné, dans le même changement. Seuls les chiffres vivent dans le code (règle 1).
 8. **Relecture critique avant chaque étape.** Avant d'implémenter un chapitre, on le relit et on le remet en cause : mécanique impossible ou bugguée, gameplay sans intérêt, lore incohérent, règle déjà contredite par le code. Les corrections sont tranchées et écrites avant de coder.
 9. **L'état d'implémentation** (plus haut) se met à jour dans le même changement que le code qui fait entrer une mécanique en jeu.
+10. **L'index « Où trouver une règle »** est complet : une mécanique ajoutée ou déplacée y est reportée dans le même changement.
