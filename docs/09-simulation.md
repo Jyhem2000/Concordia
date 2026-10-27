@@ -81,9 +81,16 @@ L'objectif change surtout les décisions de fin de partie et quelques contrainte
 * **Par étapes :**
   1. moteur, invariants, Novice et Aléatoire (contrôle), marchand avec les plans qui ne demandent qu'un réglage (Sans build, Chaîne du froid, Couverture légale, Électronique, Nuit festive, Corruption, Rentier, Haut tier), objectifs « score maximal » et « survivre » : campagnes Contrôle et 1 ;
   2. plans à logique propre (Fuite au sommet, Citoyen modèle, Opportuniste, Saboteur), objectifs de grande fin : campagnes 2 et 3 ;
-  3. tests par retrait (campagne 4) ;
+  3. tests par retrait (campagne 4), avant l'étape 2 si l'équilibrage des équipements l'exige ;
   4. optimiseur et recherche d'exploits (campagne 5).
   Chaque étape corrige d'abord les données qu'elle désigne avant de passer à la suivante.
+
+### Méthode des tests par retrait (campagne 4)
+* **Paires :** chaque élément est mesuré dans le plan qui le vise, joué deux fois **sur les mêmes graines** : avec l'élément, puis sans (retiré du plan). La différence se lit partie par partie : un retrait ne change pas le hasard, seulement le jeu.
+* **Écart et incertitude :** pour la survie et le score, écart moyen avec son intervalle de confiance à 95 % (sur les différences appariées). Un élément est jugé **positif** ou **négatif** si l'intervalle exclut zéro, **neutre** sinon.
+* **Usage :** chaque ligne indique la part des parties où l'élément a été acheté ou utilisé. L'écart mesuré est celui du plan tel qu'il est joué : un élément trop cher, rarement acheté, pèse peu, et c'est déjà une information.
+* **Lieux spéciaux :** le marchand utilise un lieu quand il s'y trouve et que le plan le prévoit (chirurgie sous un seuil de Santé, certificat et chantage sous un seuil d'ICC, laissez-passer de la Morgue, panique de Karma-Cham sur le tag le plus présent en soute, enchères des caisses de Tier 3–4). Le Hachoir et l'avance de survie sont mesurés en les retirant du plan de référence.
+* **Hors de portée à cette étape :** la prédiction de Cassandre-88, le faux dossier de Loterie et la commande VIP demandent d'anticiper (acheter pour l'événement prédit, viser un tirage, revenir livrer) ; ils seront mesurés avec le plan Opportuniste (étape 2).
 
 ## Campagnes
 Croiser tous les plans, tempéraments et objectifs donnerait plus d'une centaine de configurations dont beaucoup n'ont pas de sens (un plan Saboteur qui vise seulement de survivre ne teste rien). On mène plutôt des campagnes ciblées, chacune avec sa question.

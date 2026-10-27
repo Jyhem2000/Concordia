@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { applyAction } from '../src/engine/actions.ts'
 import { createInitialState } from '../src/engine/state.ts'
 import type { GameState } from '../src/engine/types.ts'
+import { ABLATIONS, runAblation } from './ablation.ts'
 import { randomBot } from './bots/random.ts'
 import { traderBot } from './bots/trader.ts'
 import { violations } from './invariants.ts'
@@ -64,5 +65,37 @@ describe('parties simulées', () => {
   it('vérifient les invariants d’un état sain', () => {
     expect(violations(createInitialState(1))).toEqual([])
     expect(violations({ ...createInitialState(1), cash: -1 })).toHaveLength(1)
+  })
+})
+
+describe('tests par retrait', () => {
+  it('comparent sur les mêmes graines : sans écart possible quand l’élément ne change rien', () => {
+    // Le même bot des deux côtés : l'appariement par graine doit donner un écart nul, sans bruit
+    const result = runAblation({ ...ABLATIONS[0], with: ABLATIONS[0].without }, 3)
+    expect(result.survival).toMatchObject({ delta: 0, margin: 0 })
+    expect(result.score).toMatchObject({ delta: 0, margin: 0 })
+  })
+
+  it('ont un retrait pour chaque véhicule acheté, module et équipier', () => {
+    const elements = ABLATIONS.map((ablation) => ablation.element)
+    for (const id of [
+      'VEH-02',
+      'VEH-03',
+      'VEH-04',
+      'MOD-01',
+      'MOD-02',
+      'MOD-03',
+      'MOD-04',
+      'MOD-05',
+      'MOD-06',
+      'MOD-07',
+      'MOD-08',
+      'MOD-09',
+      'CREW-01',
+      'CREW-02',
+      'CREW-03',
+    ]) {
+      expect(elements).toContain(id)
+    }
   })
 })

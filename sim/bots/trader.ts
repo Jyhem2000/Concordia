@@ -1,10 +1,11 @@
 import { GRINDER, HIGH_TIER, SALE_COMMISSION, SURVIVAL_ADVANCE } from '../../src/data/balance.ts'
 import { DISTRICT_IDS } from '../../src/data/districts.ts'
+import { KARMA } from '../../src/data/locations.ts'
 import { ROAD_EVENTS } from '../../src/data/events.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../src/data/products.ts'
 import { MODULES, VEHICLES } from '../../src/data/vehicles.ts'
 import { canSiphon, checkForceCurfew, checkService, fuelPrice, maxBuy, planTravel, pumpClosed, type Action } from '../../src/engine/actions.ts'
-import { cargoUsed, isIllegal, ownedQty } from '../../src/engine/cargo.ts'
+import { cargoUsed, isIllegal, ownedQty, taggedQty } from '../../src/engine/cargo.ts'
 import { daysBeforeRot } from '../../src/engine/condition.ts'
 import { checkHire, crewEffect, hireFee, salary } from '../../src/engine/crew.ts'
 import { checkBuyModule, checkBuyVehicle, missingChassis, repairPrice } from '../../src/engine/equipment.ts'
@@ -24,6 +25,7 @@ import {
 import { demandQuota, grindableQty, lastSeen, normalQuote, productStatus, quote, saleQuote, shopProducts } from '../../src/engine/market.ts'
 import { checkMission, missionOffer } from '../../src/engine/night.ts'
 import { checkRoadChoice, roadCash } from '../../src/engine/road.ts'
+import { blackmailCost, checkAuction, checkBlackmail, checkInfluence, checkMorgue, karmaCost, morgueCost } from '../../src/engine/services.ts'
 import { risk } from '../../src/engine/risk.ts'
 import type {
   CrateCount,
@@ -62,7 +64,17 @@ export type Plan = {
   offshoreFromDay?: number
   /** Novice : n'achète que la production locale, accepte toujours la fouille, ne s'équipe pas, ne roule pas la nuit */
   novice?: boolean
+  /** Lieux spéciaux utilisés quand le bot s'y trouve ; par défaut le Hachoir et l'avance de survie */
+  places?: readonly PlaceUse[]
 }
+
+/** Usages des lieux spéciaux que sait faire le marchand (chap. 9, tests par retrait) */
+export type PlaceUse = 'grinder' | 'advance' | 'surgery' | 'certificate' | 'pass' | 'influence' | 'auction' | 'blackmail'
+
+const DEFAULT_PLACES: readonly PlaceUse[] = ['grinder', 'advance']
+
+/** Seuils d'usage des lieux : chirurgie sous cette Santé, certificat et chantage sous cet ICC */
+const PLACE_THRESHOLDS = { surgeryBelowHealth: 50, iccBelow: 60 }
 
 export type Temperament = {
   name: string
@@ -204,9 +216,11 @@ function sell(view: GameState, endgame: boolean): Action | null {
 
 function services(view: GameState, plan: Plan, temperament: Temperament, objective: Objective, endgame: boolean): Action | null {
   const reserve = reserveOf(view, temperament)
+  const places = plan.places ?? DEFAULT_PLACES
+  const uses = (place: PlaceUse) => places.includes(place)
 
   // Hachoir de Viktor : les périssables dégradés plutôt que perdus
-  if (!checkService(view, 'grinder')) {
+  if (uses('grinder') && !checkService(view, 'grinder')) {
     const left = GRINDER.dailyLimit - view.grinderToday
     const degraded = PRODUCT_IDS.find((id) => grindableQty(view, id) > 0)
     if (degraded && left > 0) return { type: 'grind', productId: degraded, qty: Math.min(left, grindableQty(view, degraded)) }
@@ -218,7 +232,7 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
     const amount = Math.min(view.debt, view.cash - working)
     if (amount > 0) return { type: 'repay', amount }
     // Avance de survie : seulement pour ne pas rester bloqué
-    if (isBroke(view) && loanRoom(view) > 0 && !endgame) {
+    if (uses('advance') && isBroke(view) && loanRoom(view) > 0 && !endgame) {
       return { type: 'borrow', amount: Math.min(loanRoom(view), indexed('rule.inflation', SURVIVAL_ADVANCE, view.day).total) }
     }
   }
@@ -226,6 +240,8 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
   if (!plan.novice && !endgame) {
     const equipment = equip(view, plan, reserve)
     if (equipment) return equipment
+    const place = specialPlaces(view, uses, reserve)
+    if (place) return place
   }
 
   // Laverie : mettre à l'abri ce qui dépasse le fonds de roulement, dette soldée ; tout en fin de partie
@@ -233,6 +249,33 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
     const working = reserve + indexed('rule.inflation', CAPITAL, view.day).total * 2
     const amount = endgame ? view.cash : view.day >= (plan.offshoreFromDay ?? 15) ? view.cash - working : 0
     if (amount > 0) return { type: 'deposit', amount }
+  }
+  return null
+}
+
+/** Lieux spéciaux du district, quand le plan les prévoit et que le seuil est atteint */
+function specialPlaces(view: GameState, uses: (place: PlaceUse) => boolean, reserve: number): Action | null {
+  const spare = (cost: number) => view.cash - cost >= reserve + indexed('rule.inflation', CAPITAL, view.day).total
+  if (!checkService(view, 'morgue')) {
+    if (uses('surgery') && view.health < PLACE_THRESHOLDS.surgeryBelowHealth && !checkMorgue(view, 'surgery') && spare(morgueCost(view, 'surgery'))) {
+      return { type: 'morgue', service: 'surgery' }
+    }
+    if (uses('certificate') && view.icc < PLACE_THRESHOLDS.iccBelow && !checkMorgue(view, 'certificate') && spare(morgueCost(view, 'certificate'))) {
+      return { type: 'morgue', service: 'certificate' }
+    }
+    if (uses('pass') && !checkMorgue(view, 'pass') && spare(morgueCost(view, 'pass'))) return { type: 'morgue', service: 'pass' }
+  }
+  if (uses('influence') && !checkService(view, 'influence')) {
+    // Panique sur le tag le plus présent en soute : il se vendra plus cher demain
+    const tag = [...KARMA.tags].sort((a, b) => taggedQty(view.cargo, b) - taggedQty(view.cargo, a))[0]
+    if (tag && taggedQty(view.cargo, tag) > 0 && !checkInfluence(view, tag) && spare(karmaCost(view))) return { type: 'influence', tag }
+  }
+  if (!checkService(view, 'velvet')) {
+    const lot = PRODUCT_IDS.find((id) => uses('auction') && !checkAuction(view, id))
+    if (lot) return { type: 'auction', productId: lot }
+    if (uses('blackmail') && view.icc < PLACE_THRESHOLDS.iccBelow && !checkBlackmail(view, false) && spare(blackmailCost(view))) {
+      return { type: 'blackmail', inKind: false }
+    }
   }
   return null
 }

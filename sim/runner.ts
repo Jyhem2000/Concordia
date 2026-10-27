@@ -36,6 +36,8 @@ export type GameRecord = {
   custodyDays: number
   roadEvents: number
   nightTrips: number
+  /** Services des lieux spéciaux utilisés (par type d'action) */
+  services: Record<string, number>
   /** Achats d'équipement, avec leur jour */
   purchases: { item: string; day: number }[]
   /** Actions refusées par le moteur : défauts du bot */
@@ -47,6 +49,21 @@ export type GameRecord = {
   /** Fin de chaque journée : Cash-Puce, offshore, dette, ICC */
   daily: { day: number; cash: number; offshore: number; debt: number; icc: number }[]
 }
+
+/** Actions des lieux spéciaux comptées dans les mesures */
+const SERVICE_ACTIONS: readonly Action['type'][] = [
+  'grind',
+  'borrow',
+  'morgue',
+  'influence',
+  'auction',
+  'blackmail',
+  'prophecy',
+  'forge',
+  'vipRequest',
+  'vipDeliver',
+  'repair',
+]
 
 /** Plafond d'actions dans une même journée avant de forcer le sommeil */
 const ACTIONS_PER_DAY = 300
@@ -68,6 +85,7 @@ export function playGame(bot: Bot, seed: number): GameRecord {
     custodyDays: 0,
     roadEvents: 0,
     nightTrips: 0,
+    services: {},
     purchases: [],
     refused: 0,
     forcedSleeps: 0,
@@ -125,6 +143,10 @@ function observe(record: GameRecord, before: GameState, after: GameState, action
     const stats = record.moves[move] ?? { played: 0, won: 0 }
     record.moves[move] = { played: stats.played + 1, won: stats.won + (success ? 1 : 0) }
     if (over) record.custodyDays += custodyDays
+  }
+  if (SERVICE_ACTIONS.includes(action.type)) {
+    const key = action.type === 'morgue' ? `morgue:${action.service}` : action.type
+    record.services[key] = (record.services[key] ?? 0) + 1
   }
   if (after.vehicleId !== before.vehicleId) record.purchases.push({ item: after.vehicleId, day: after.day })
   for (const id of after.modules.owned) if (!before.modules.owned.includes(id)) record.purchases.push({ item: id, day: after.day })
