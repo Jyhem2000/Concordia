@@ -99,7 +99,7 @@ export default function InterceptionScreen() {
             label={t.interception.moves.bluff}
             outcomes={[
               t.interception.bluffSuccess(icc(BLUFF.successIccGain)),
-              t.interception.bluffFailure(icc(-BLUFF.failIccLoss), pct(failedFine), signedPercent(-BLUFF.followUpPenalty, 0)),
+              t.interception.bluffFailure(icc(-BLUFF.failIccLoss), pct(failedFine), signedPercent(-BLUFF.followUpPenalty, 0), available('flee')),
             ]}
           />
         )}

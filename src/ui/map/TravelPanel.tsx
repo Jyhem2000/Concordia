@@ -5,6 +5,7 @@ import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { planTravel } from '../../engine/actions.ts'
 import { averageCost, isIllegal } from '../../engine/cargo.ts'
 import { estimatedUnitSale, lastSeen, productStatus } from '../../engine/market.ts'
+import { flyingCheckShare } from '../../engine/interception.ts'
 import { riskBreakdown } from '../../engine/risk.ts'
 import type { DistrictId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
@@ -168,6 +169,8 @@ function TravelButton({ to }: TravelButtonProps) {
   const dispatch = useGameStore((s) => s.dispatch)
   const { t, percent } = useI18n()
   const plan = planTravel(game, to)
+  // Ronde renforcée cachée : la part affichée est celle du district
+  const flying = flyingCheckShare(game, to, false)
   const route = plan.crossed.length === 0 ? t.travel.direct : t.travel.via(plan.crossed.map((id) => t.district[id].name).join(', '))
 
   return (
@@ -182,6 +185,7 @@ function TravelButton({ to }: TravelButtonProps) {
         <span className="text-zinc-400">{t.travel.risk}</span>
         <Detailed breakdown={riskBreakdown(game, to, { includePatrol: false })} format={(risk) => percent(risk, 0)} align="right" />
       </div>
+      {flying > 0 && <div className="text-xs text-zinc-400">{t.travel.flyingShare(percent(flying, 0))}</div>}
       {plan.error && plan.error !== 'trip-done' && <div className="text-xs text-red-300">{t.error[plan.error]}</div>}
     </div>
   )

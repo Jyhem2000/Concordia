@@ -242,6 +242,9 @@ export const FLEE = {
   fail: { cashSeizure: 0.4, iccLoss: 25, chassisLoss: 35, healthLoss: 15, custodyDays: 1 },
 }
 
+/** Contrôles volants (ni fuite ni éjection) : part ajoutée dans le district de la ronde renforcée, faite d'unités mobiles */
+export const FLYING_CHECK = { patrolBonus: 0.25 }
+
 /** Éjection manuelle (décharge dans une ruelle) ; un échec aggrave la fouille */
 export const EJECT = {
   manualChance: 0.45,

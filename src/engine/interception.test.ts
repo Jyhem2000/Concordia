@@ -6,6 +6,7 @@ import {
   EJECT,
   EMERGENCY_TOW,
   FLEE,
+  FLYING_CHECK,
   GAME_LENGTH_DAYS,
   NIGHT_TRIP_CHASSIS_WEAR,
   RACKET,
@@ -17,7 +18,19 @@ import { PRODUCTS } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import { cargoUsed, ownedQty } from './cargo.ts'
 import { paymentValue } from './condition.ts'
-import { bluffChance, bribeChance, bribeRate, fleeChance, minimumOffer, offerValue, toll, tollInKind } from './interception.ts'
+import {
+  bluffChance,
+  bribeChance,
+  bribeRate,
+  drawInterception,
+  fleeChance,
+  flyingCheckShare,
+  minimumOffer,
+  offerValue,
+  toll,
+  tollInKind,
+} from './interception.ts'
+import { createRng } from './rng.ts'
 import { sleep } from './routine.ts'
 import { defined, errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
 import type { CargoLot, GameState, Interception, Offer, ProductId } from './types.ts'
@@ -34,7 +47,7 @@ describe('arrivée au barrage', () => {
   it('arrête le joueur à destination sur un tirage bas, et bloque toute autre action', () => {
     const state = run(gameAt(2, { rng: LOW_ROLL_RNG }), { type: 'travel', to: 'D2' })
     expect(state.districtId).toBe('D2')
-    expect(state.interception).toEqual(brc)
+    expect(['brc', 'flying']).toContain(state.interception?.kind)
     expect(errorOf(state, { type: 'sleep' })).toBe('intercepted')
   })
 
@@ -279,5 +292,29 @@ describe('tactiques de barrage (chap. 3)', () => {
     const report = defined(failed.interceptionReport)
     expect(report.exploded).toBeGreaterThanOrEqual(0)
     expect(report.crates).toBe(-4)
+  })
+})
+
+describe('contrôle volant', () => {
+  const flying: Interception = { kind: 'flying', acted: false, bluffFailed: false }
+
+  it('ferme la fuite et l’éjection, pas le bluff ni la corruption', () => {
+    const state = stopped([lot('T2-03', 2)], { interception: flying })
+    expect(errorOf(state, { type: 'intercept', move: 'flee' })).toBe('move-unavailable')
+    expect(errorOf(state, { type: 'intercept', move: 'eject' })).toBe('move-unavailable')
+    expect(errorOf(state, { type: 'intercept', move: 'bluff' })).toBeNull()
+  })
+
+  it('reste un contrôle volant après un bluff raté', () => {
+    const failed = run(stopped([lot('T2-03', 2)], { interception: flying, rng: HIGH_ROLL_RNG }), { type: 'intercept', move: 'bluff' })
+    expect(failed.interception?.kind).toBe('flying')
+  })
+
+  it('dépend du district, majoré par la ronde renforcée, jamais chez les milices', () => {
+    const state = gameAt(3, { patrolDistrict: 'D5' })
+    expect(flyingCheckShare(state, 'D5', false)).toBe(DISTRICTS.D5.flyingCheckShare)
+    expect(flyingCheckShare(state, 'D5', true)).toBeCloseTo(DISTRICTS.D5.flyingCheckShare + FLYING_CHECK.patrolBonus)
+    expect(flyingCheckShare(state, 'D4', true)).toBe(0)
+    expect(drawInterception(createRng(LOW_ROLL_RNG), 1, state, 'D4')?.kind).toBe('racket')
   })
 })

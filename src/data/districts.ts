@@ -22,6 +22,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     odorFactor: 1,
     goldFastLane: false,
     iccScanners: false,
+    flyingCheckShare: 0.15,
     ejectionAllowed: true,
     bribeFavorites: ['T1-02', 'T1-05', 'T3-03'], // agents humains
     tollFavorites: [],
@@ -51,6 +52,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     odorFactor: 1,
     goldFastLane: false,
     iccScanners: false,
+    flyingCheckShare: 0.25,
     ejectionAllowed: true,
     bribeFavorites: ['T1-02', 'T1-05', 'T3-03'], // agents humains
     tollFavorites: [],
@@ -73,6 +75,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     odorFactor: 1,
     goldFastLane: false,
     iccScanners: false,
+    flyingCheckShare: 0.3,
     ejectionAllowed: true,
     bribeFavorites: ['T1-02', 'T1-05', 'T3-03'], // agents humains
     tollFavorites: [],
@@ -95,6 +98,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     odorFactor: 1,
     goldFastLane: false,
     iccScanners: false,
+    flyingCheckShare: 0,
     ejectionAllowed: true,
     bribeFavorites: [], // pas de BRC
     tollFavorites: ['T1-06', 'T3-03', 'T3-04'], // ce qui manque aux bannis
@@ -119,6 +123,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     odorFactor: 1,
     goldFastLane: true,
     iccScanners: false,
+    flyingCheckShare: 0.4,
     ejectionAllowed: true,
     bribeFavorites: ['T3-02', 'T3-03'], // douaniers d'élite
     tollFavorites: [],
@@ -147,6 +152,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     odorFactor: 2, // chiens-robots militaires
     goldFastLane: true,
     iccScanners: true,
+    flyingCheckShare: 0.5,
     ejectionAllowed: false, // dalle bio-scellée
     bribeFavorites: ['T3-02', 'T3-03'], // douaniers d'élite
     tollFavorites: [],

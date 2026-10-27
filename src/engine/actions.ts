@@ -1,5 +1,4 @@
 import { FUEL_PER_CROSSED_DISTRICT, GRINDER, ICC_MAX, NIGHT_TRIP_CHASSIS_WEAR, SIPHON } from '../data/balance.ts'
-import { DISTRICTS } from '../data/districts.ts'
 import { LOCATIONS } from '../data/locations.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
@@ -213,7 +212,7 @@ function travel(state: GameState, to: DistrictId): ActionResult {
   // Le risque se calcule au départ (phase, soute, district quitté), ronde renforcée comprise
   const tripRisk = risk(state, to, { includePatrol: true })
   const rng = createRng(state.rng)
-  const interception = drawInterception(rng, tripRisk, DISTRICTS[to].offGrid)
+  const interception = drawInterception(rng, tripRisk, state, to)
   // Sans barrage ni racket, un aléa routier peut survenir (chap. 8)
   const roadEvent = interception ? null : drawRoadEvent(state, rng)
 

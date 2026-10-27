@@ -195,6 +195,8 @@ export type District = {
   /** Détecteurs biométriques d'ICC : un Déviant notoire y est intercepté à coup sûr (chap. 2) */
   iccScanners: boolean
   /** Éjection d'urgence possible (dalle bio-scellée sinon) */
+  /** Part des interceptions BRC qui sont des contrôles volants : ni fuite ni éjection (chap. 6) */
+  flyingCheckShare: number
   ejectionAllowed: boolean
   /** Produits qui valent la connivence des agents dans une offre de corruption (chap. 6) */
   bribeFavorites: readonly ProductId[]
@@ -274,7 +276,8 @@ export type OffshoreAccount = {
 
 /** Barrage en cours, à résoudre avant toute autre action (chap. 6) ; `racket` en zone hors-réseau (chap. 4) */
 export type Interception = {
-  kind: 'brc' | 'racket'
+  /** Barrage fixe de la BRC, contrôle volant (ni fuite ni éjection), ou racket des milices */
+  kind: 'brc' | 'flying' | 'racket'
   /** Une action a déjà été tentée : l'éjection n'est plus possible */
   acted: boolean
   /** Bluff raté : bluff et éjection fermés, amende relevée, malus à la corruption et à la fuite */

@@ -38,10 +38,18 @@ Le résultat est **borné, après** tous les multiplicateurs (`RISK_BOUNDS` dans
 * **−1 niveau** par nuit passée au relais routier (le bivouac ne compte pas).
 * Affichée en permanence dans le bandeau (chap. 10) : *« Votre profil suscite l'intérêt bienveillant d'Aeterna. »*
 
+### Barrage fixe ou contrôle volant
+Une interception de la BRC prend l'une de deux formes, tirée au moment où elle se déclenche :
+* **Barrage fixe** — un checkpoint au sas du district, **visible à 300 m** : toutes les options sont ouvertes, éjection et fuite comprises.
+* **Contrôle volant** — un drone a repéré le véhicule et une moto de la BRC le coince contre le trottoir ; l'agent a déjà la main sur la portière. **Ni éjection ni fuite** : trop tard pour vider la soute ou démarrer. Restent la fouille, le bluff et la corruption.
+* **Part des contrôles volants :** propre à chaque district (`flyingCheckShare` dans [`districts.ts`](../src/data/districts.ts) : rare dans les ruches où la BRC manque de drones, fréquente au sommet), majorée dans le district de la ronde renforcée, faite d'unités mobiles (`FLYING_CHECK` dans [`balance.ts`](../src/data/balance.ts)). En zone hors-réseau, les milices tiennent toujours une barricade visible (chap. 4).
+* *Intention :* sans contrôle volant, la fuite (avec largage et dopage) devient le repli universel dès que la cargaison vaut cher. Le contrôle volant oblige à préparer aussi le bluff (masquage, Tier 0, aides) ou la corruption (cash de réserve, caisses appréciées des agents) : chaque build garde ses failles.
+* L'app annonce la forme du contrôle dès l'écran d'interception, et le panneau de prévision affiche la part de contrôles volants du district de destination (chap. 10).
+
 ---
 
 ## L'écran d'interception
-Le joueur accepte la fouille (**0**) ou tente une action : **1** Bluff, **2** Corruption, **3** Fuite, **4** Éjection (uniquement en tout premier).
+Le joueur accepte la fouille (**0**) ou tente une action : **1** Bluff, **2** Corruption, **3** Fuite, **4** Éjection (uniquement en tout premier). Fuite et éjection n'existent pas en contrôle volant.
 **Ordre de résolution d'une option :** exécution sommaire (fouille effective avec `[T4-06]`, jugée sur la soute *avant* confiscation) → mort si la Santé tombe à 0 → dépannage d'urgence si le châssis tombe à 0 → garde à vue. Les gardes à vue ne se cumulent pas : la plus longue s'applique.
 **Amendes et saisies :** un pourcentage du Cash-Puce au moment de la sanction (après paiement d'une offre de corruption perdue, par exemple), arrondi au ₡.
 **Compte rendu :** après chaque option, l'app détaille ce qui a été perdu ou gagné (₡, caisses dont celles sacrifiées par une tactique, ICC, Santé, châssis, Fiche S, garde à vue, dépannage).
@@ -92,6 +100,7 @@ Chance = min( plafond,  base + Offre + Connivence − malus × (étoiles du dist
 * **Échec :** confiscation + lourde amende + perte d'ICC + garde à vue, quel que soit le tier.
 
 ### 3. Fuite — *« Pied au plancher ! »*
+* **Barrage fixe uniquement** (impossible en contrôle volant).
 * **Chance de base** et **plafond** dégressif selon les étoiles du district : `FLEE` dans [`balance.ts`](../src/data/balance.ts).
 * **Bonus :** `[MOD-06]`, `[CREW-02]`, `[VEH-03]`. **Malus :** Fiche S, Sédation.
 * **Sacrifices :** 1 largage offensif max (une caisse `[TAG-FLAMMABLE]` **ou** `[TAG-CHEMICAL]` ; si le produit porte les deux tags, le meilleur bonus compte) + dopage `[T2-05]` (cumulable). Les caisses sacrifiées ou bues sont perdues quel que soit le résultat. Le joueur choisit le produit à sacrifier ; l'app montre le bonus de chacun.
@@ -101,7 +110,7 @@ Chance = min( plafond,  base + Offre + Connivence − malus × (étoiles du dist
 * *Le largage n'est pas une éjection :* on ne cache rien, on jette une caisse derrière soi pendant la fuite (nuage chimique, nappe enflammée) pour aveugler les poursuivants. Se débarrasser de l'illégal, c'est l'éjection, avant le barrage.
 
 ### 4. Éjection / broyage d'urgence — *« Se débarrasser de la cargaison avant le barrage »*
-* **Activation :** uniquement au tout début de l'interception, à 300 m du barrage.
+* **Activation :** uniquement au tout début de l'interception, à 300 m d'un barrage fixe (impossible en contrôle volant).
 * **Mode** (par priorité) : `[MOD-07]` s'il est disponible et autorisé ; sinon `[VEH-04]` ; sinon manuel. Restrictions : `[D5]` pour `[MOD-07]` ; en `[D6]`, éjection impossible sauf via `[VEH-04]` (dalle bio-scellée, chap. 4). Le mode manuel reste donc possible en `[D5]`.
 * **Indisponible** après un bluff raté, comme après toute autre action.
 * **Mode manuel (décharge dans une ruelle) :** chance fixe (`EJECT` dans [`balance.ts`](../src/data/balance.ts)). Succès : soute propre au barrage (0 amende, 0 ICC, 0 temps perdu), toutes les caisses illégales perdues, perte de châssis.

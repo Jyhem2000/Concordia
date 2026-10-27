@@ -1,4 +1,4 @@
-import { BLUFF, BRIBE, EJECT, EMERGENCY_TOW, FLEE, HIGH_TIER, RACKET, SEARCH, WANTED } from '../data/balance.ts'
+import { BLUFF, BRIBE, EJECT, EMERGENCY_TOW, FLEE, FLYING_CHECK, HIGH_TIER, RACKET, SEARCH, WANTED } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
 import { PRODUCTS } from '../data/products.ts'
 import { TAGS } from '../data/tags.ts'
@@ -14,7 +14,18 @@ import { keysOf } from './records.ts'
 import { createRng, type Rng } from './rng.ts'
 import { serveCustody } from './routine.ts'
 import { loseHalfDay } from './time.ts'
-import type { CargoLot, CrateCount, GameState, Interception, InterceptionMove, InterceptionReport, Offer, ProductId, Tactics } from './types.ts'
+import type {
+  CargoLot,
+  CrateCount,
+  DistrictId,
+  GameState,
+  Interception,
+  InterceptionMove,
+  InterceptionReport,
+  Offer,
+  ProductId,
+  Tactics,
+} from './types.ts'
 
 /*
  * Barrage de la BRC (chap. 6) et racket des milices en zone hors-réseau (chap. 4).
@@ -46,9 +57,16 @@ export function checkMove(state: GameState, move: InterceptionMove, offer: Offer
       if (!ownsCrates(state.cargo, offer.crates)) return 'not-enough-cargo'
       return offerValue(state, offer) < minimumOffer(state) ? 'offer-too-low' : null
     case 'flee':
-      return checkFleeTactics(state, tactics)
+      // Contrôle volant : l'agent tient déjà la portière
+      return interception.kind === 'flying' ? 'move-unavailable' : checkFleeTactics(state, tactics)
     case 'eject':
-      return racket || interception.acted || interception.bluffFailed || !DISTRICTS[state.districtId].ejectionAllowed ? 'move-unavailable' : null
+      return racket ||
+        interception.kind === 'flying' ||
+        interception.acted ||
+        interception.bluffFailed ||
+        !DISTRICTS[state.districtId].ejectionAllowed
+        ? 'move-unavailable'
+        : null
     case 'payToll':
       if (!racket) return 'move-unavailable'
       return toll(state) > state.cash ? 'not-enough-cash' : null
@@ -255,7 +273,13 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
       const caught = loseIcc(aided, ledger, BLUFF.failIccLoss)
       // Soute légale : la fausse déclaration ne coûte que l'ICC
       if (legalOnly(caught)) return report(caught, chance, false, true, true)
-      return report({ ...caught, interception: { kind: 'brc', acted: true, bluffFailed: true } }, chance, false, false, true)
+      return report(
+        { ...caught, interception: { kind: state.interception?.kind ?? 'brc', acted: true, bluffFailed: true } },
+        chance,
+        false,
+        false,
+        true,
+      )
     }
 
     case 'bribe': {
@@ -490,8 +514,17 @@ export function emergencyTow(state: GameState): { state: GameState; bill: number
   return { state: loseHalfDay(towed), bill }
 }
 
+/** Part des contrôles volants dans un district : celle du district, majorée par la ronde renforcée (chap. 6) */
+export function flyingCheckShare(state: GameState, districtId: DistrictId, includePatrol: boolean): number {
+  const share = DISTRICTS[districtId].flyingCheckShare
+  if (share === 0) return 0
+  return Math.min(1, share + (includePatrol && state.patrolDistrict === districtId ? FLYING_CHECK.patrolBonus : 0))
+}
+
 /** Tirage du barrage à l'arrivée d'un trajet : renvoie l'interception qui commence, ou null */
-export function drawInterception(rng: Rng, risk: number, offGrid: boolean): Interception | null {
+export function drawInterception(rng: Rng, risk: number, state: GameState, to: DistrictId): Interception | null {
   if (!rng.chance(risk)) return null
-  return { kind: offGrid ? 'racket' : 'brc', acted: false, bluffFailed: false }
+  if (DISTRICTS[to].offGrid) return { kind: 'racket', acted: false, bluffFailed: false }
+  const flying = rng.chance(flyingCheckShare(state, to, true))
+  return { kind: flying ? 'flying' : 'brc', acted: false, bluffFailed: false }
 }

@@ -17,7 +17,7 @@
 Les stats de chaque district sont dans [`districts.ts`](../src/data/districts.ts), qui fait foi :
 * *Échelon :* place dans la pyramide sociale, du pire (0) au meilleur (5).
 * *Sécurité :* le nombre d'étoiles entre dans le bluff, la corruption et le plafond de fuite (chap. 6).
-* *Risque de base* (chap. 6), *prix du Synthanol*, type de *pompe*, *détection spéciale* (tag ciblé, chap. 3) et présence de *Drones-Juges* (chap. 6).
+* *Risque de base* (chap. 6), *prix du Synthanol*, type de *pompe*, *détection spéciale* (tag ciblé, chap. 3) et présence de *Drones-Juges* (chap. 6), *part de contrôles volants* (chap. 6).
 * *Coefficients de marché :* la Forte demande est échelonnée sur le danger — plus le district est risqué, mieux il paie.
 * *Production* et *Forte demande :* produits fabriqués sur place et produits les plus recherchés (chap. 7).
 

@@ -410,10 +410,12 @@ export const fr = {
   },
 
   interception: {
-    title: { brc: 'Barrage de la BRC', racket: 'Racket des milices' },
+    title: { brc: 'Barrage de la BRC', flying: 'Contrôle volant de la BRC', racket: 'Racket des milices' },
     intro: {
       brc: (district: string) =>
         `Barrage de la BRC à 300 m, à l'entrée de ${district}. Un agent vous fait signe de vous ranger : il est encore temps de vider la soute ou de tourner les talons.`,
+      flying: (district: string) =>
+        `Un drone vous a repéré à ${district} : une moto de la BRC vous coince contre le trottoir et l'agent a déjà la main sur la portière. Trop tard pour fuir ou vider la soute.`,
       racket: (district: string) => `Une barricade des milices barre l'entrée de ${district}. Les miliciens réclament leur dû.`,
     },
     chance: 'Chance',
@@ -433,8 +435,8 @@ export const fr = {
     sanction: (fine: string, icc: string) => `Confiscation de l'illégal, amende de ${fine} du Cash-Puce, ICC ${icc}.`,
     custody: (days: number) => `Garde à vue : ${days} jour${days > 1 ? 's' : ''}.`,
     bluffSuccess: (icc: string) => `Succès : tout passe, ICC ${icc}.`,
-    bluffFailure: (icc: string, fine: string, penalty: string) =>
-      `Échec : ICC ${icc}, amende portée à ${fine}, chance de corruption et de fuite ${penalty}.`,
+    bluffFailure: (icc: string, fine: string, penalty: string, canFlee: boolean) =>
+      `Échec : ICC ${icc}, amende portée à ${fine}, chance de corruption${canFlee ? ' et de fuite' : ''} ${penalty}.`,
     bribeRate: 'Tarif standard',
     offer: 'Offre',
     offerCash: 'Cash-Puce offert',
@@ -503,6 +505,7 @@ export const fr = {
     memoryDaysAgo: (days: number) => `Cours vus il y a ${days} jour${days > 1 ? 's' : ''}`,
     security: (stars: number) => `Sécurité ${stars} sur 5`,
     risk: "Risque d'interception",
+    flyingShare: (share: string) => `dont ${share} de contrôles volants (ni fuite ni éjection)`,
     riskHint: 'La ronde renforcée du jour reste cachée.',
     peak: "Pic suspect : risque accru aujourd'hui",
     lastTrip: 'Dernier trajet',
