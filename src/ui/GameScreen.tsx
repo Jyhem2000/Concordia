@@ -10,7 +10,7 @@ import MarketPanel from './market/MarketPanel.tsx'
 import ObjectivesPanel from './objectives/ObjectivesPanel.tsx'
 import PlacesPanel from './places/PlacesPanel.tsx'
 
-/** Écran unique : bandeau en haut, marché à gauche ; briefing, guichets, fin de journée et carte à droite (chap. 9). Un barrage prend tout l'écran. */
+/** Écran unique : bandeau en haut, marché à gauche ; briefing, guichets, fin de journée et carte à droite (chap. 10). Un barrage prend tout l'écran. */
 export default function GameScreen() {
   const finished = useGameStore((s) => s.game.status === 'finished')
   const intercepted = useGameStore((s) => s.game.interception !== null)

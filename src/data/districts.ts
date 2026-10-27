@@ -23,6 +23,8 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     goldFastLane: false,
     iccScanners: false,
     ejectionAllowed: true,
+    bribeFavorites: ['T1-02', 'T1-05', 'T3-03'], // agents humains
+    tollFavorites: [],
     coefProduction: 0.75,
     coefStrongDemand: 1.5,
     production: [
@@ -50,6 +52,8 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     goldFastLane: false,
     iccScanners: false,
     ejectionAllowed: true,
+    bribeFavorites: ['T1-02', 'T1-05', 'T3-03'], // agents humains
+    tollFavorites: [],
     coefProduction: 0.75,
     coefStrongDemand: 1.6,
     production: ['T0-01', 'T0-04', 'T1-02', 'T2-06', 'T2-07', 'T3-05', 'T3-07'],
@@ -70,6 +74,8 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     goldFastLane: false,
     iccScanners: false,
     ejectionAllowed: true,
+    bribeFavorites: ['T1-02', 'T1-05', 'T3-03'], // agents humains
+    tollFavorites: [],
     coefProduction: 0.75,
     coefStrongDemand: 1.75,
     production: ['T0-02', 'T0-03', 'T1-05', 'T2-05', 'T3-04', 'T4-04', 'T4-05'],
@@ -90,6 +96,8 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     goldFastLane: false,
     iccScanners: false,
     ejectionAllowed: true,
+    bribeFavorites: [], // pas de BRC
+    tollFavorites: ['T1-06', 'T3-03', 'T3-04'], // ce qui manque aux bannis
     coefProduction: 0.75,
     coefStrongDemand: 1.4,
     // Le moteur ne tire chaque jour qu'une partie de la liste de production
@@ -112,6 +120,8 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     goldFastLane: true,
     iccScanners: false,
     ejectionAllowed: true,
+    bribeFavorites: ['T3-02', 'T3-03'], // douaniers d'élite
+    tollFavorites: [],
     coefProduction: 0.75,
     coefStrongDemand: 1.9,
     production: [
@@ -138,6 +148,8 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     goldFastLane: true,
     iccScanners: true,
     ejectionAllowed: false, // dalle bio-scellée
+    bribeFavorites: ['T3-02', 'T3-03'], // douaniers d'élite
+    tollFavorites: [],
     coefProduction: 0.85,
     coefStrongDemand: 2.3,
     // Réserves VIP, stocks très restreints

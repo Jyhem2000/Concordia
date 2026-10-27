@@ -102,6 +102,7 @@ export const fr = {
     'rule.bribe-cargo-share': 'Tarif standard (caisses illégales)',
     'rule.bribe-base': 'Corruption : chance de base',
     'rule.offer': "Valeur de l'offre",
+    'rule.connivance': 'Connivence',
     'rule.bluff-failed': 'Bluff raté',
     'rule.drone-judges': 'Drones-Juges (incorruptibles)',
     'rule.flee-base': 'Fuite : chance de base',
@@ -113,7 +114,6 @@ export const fr = {
   // ─── Interface ───
 
   hud: {
-    inflation: (index: string) => `Inflation ${index}`,
     cargo: 'Soute',
     newGame: 'Nouvelle partie',
     newGameConfirm: 'Abandonner la partie en cours et recommencer au Jour 1 ?',
@@ -123,6 +123,35 @@ export const fr = {
     nextBeating: (day: number) => `échéance J${day}`,
     nextProtection: (day: number, amount: string) => `Collecte de Viktor J${day} : ≈ ${amount}`,
     countdown: 'Audit le Jour 30 à minuit : dernier remboursement et dernier dépôt offshore possibles le J30 avant 20h00.',
+  },
+
+  ticker: {
+    label: 'Flash Info Aeterna',
+    index: (index: string) => `Indice d'inflation du jour ${index}`,
+    sinceYesterday: (change: string) => `(${change} depuis hier)`,
+    messages: [
+      'Aeterna rappelle que la sobriété est la plus belle des libertés.',
+      "Votre consommation d'eau a été jugée exemplaire. Presque.",
+      'Le Comité de Pureté remercie les citoyens qui signalent leurs voisins.',
+      "La canicule est une opinion. L'algorithme, lui, est un fait.",
+      'Un Citoyen-Livreur sourit, un Citoyen-Livreur produit.',
+      'Les prix montent pour votre sécurité. Merci de votre compréhension.',
+      'Rappel : toute émotion non déclarée est soumise à cotisation.',
+      'Le couvre-feu sanitaire protège ceux qui dorment. Dormez.',
+    ],
+  },
+
+  inflation: {
+    title: "Indice d'inflation algorithmique",
+    rule: (period: number) =>
+      `Indice du jour = 1 + (jour − 1) / ${period} : il monte chaque matin, de la même hauteur. Les montants de base (valeurs du Jour 1) sont multipliés par l'indice.`,
+    readout: (day: number, index: string) => `Jour ${day} : ${index}`,
+    projected: '(projection)',
+    chartLabel: (index: string, day: number) => `Indice d'inflation : ${index} au Jour ${day}, en hausse linéaire jusqu'au Jour 30.`,
+    dayTick: (day: number) => `J${day}`,
+    indexed:
+      "Indexés : carburant, réparations, dépannage, salaires et frais d'équipage, services des lieux spéciaux, part fixe du tarif de corruption, aléas routiers.",
+    notIndexed: 'Non indexés : prix des produits, véhicules, modules, dette et emprunts, seuils de fin, tarif syndical de la Cantine.',
   },
 
   briefing: {
@@ -220,6 +249,7 @@ export const fr = {
       flee: 'Fuite',
       eject: "Éjection d'urgence",
       payToll: 'Payer le péage',
+      payTollInKind: 'Payer en caisses',
       refuseToll: 'Refuser',
     },
     forceThrough: 'Forcer le passage',
@@ -232,6 +262,15 @@ export const fr = {
       `Échec : ICC ${icc}, amende portée à ${fine}, chance de corruption et de fuite ${penalty}.`,
     bribeRate: 'Tarif standard',
     offer: 'Offre',
+    offerCash: 'Cash-Puce offert',
+    offerCrates: 'Caisses offertes (valeur en paiement : prix de base)',
+    offerTotal: (amount: string) => `Valeur totale de l'offre : ${amount}`,
+    crateValue: (value: string, cost: string) => `${value}/u en paiement, acheté ${cost}/u`,
+    crateGain: (gain: string) => `${gain}/u face au cash`,
+    favorite: 'appréciée des agents : connivence',
+    addCrate: (product: string) => `Offrir une caisse de plus : ${product}`,
+    removeCrate: (product: string) => `Offrir une caisse de moins : ${product}`,
+    tollInKind: (crates: string, value: string) => `Les miliciens prendraient : ${crates} (valeur ${value}, sans rendre la monnaie).`,
     bribe: 'Proposer',
     bribeFailure: (fine: string, icc: string) => `Échec : l'offre est perdue, confiscation, amende de ${fine}, ICC ${icc}.`,
     fleeSuccess: (chassis: string, icc: string) => `Succès : la cargaison est sauvée, châssis ${chassis}, ICC ${icc}, +1 niveau de Fiche S.`,

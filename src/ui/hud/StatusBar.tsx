@@ -12,7 +12,6 @@ import {
   Package,
   ShieldCheck,
   Sun,
-  TrendingUp,
   Wrench,
   type LucideIcon,
 } from 'lucide-react'
@@ -20,10 +19,10 @@ import { AUDIT_COUNTDOWN_DAY, GAME_LENGTH_DAYS, ICC_MAX, WANTED } from '../../da
 import { VEHICLES } from '../../data/vehicles.ts'
 import { cargoUsed } from '../../engine/cargo.ts'
 import { effectiveOffshoreRate, nextDebtDeadline, nextProtectionDay, offshoreBalance, protectionBreakdown } from '../../engine/finance.ts'
-import { inflationIndex } from '../../engine/inflation.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
+import Ticker from './Ticker.tsx'
 
 type StatProps = {
   icon: LucideIcon
@@ -34,13 +33,13 @@ type StatProps = {
   className?: string
 }
 
-/** Bandeau supérieur permanent : jour, portefeuilles, jauges (chap. 9) */
+/** Bandeau supérieur permanent : jour, portefeuilles, jauges (chap. 10) */
 export default function StatusBar() {
   // Les échéances et la collecte se calculent sur l'état entier de la partie
   const game = useGameStore((s) => s.game)
   const lastError = useGameStore((s) => s.lastError)
   const newGame = useGameStore((s) => s.newGame)
-  const { t, credits, multiplier, number, percent } = useI18n()
+  const { t, credits, number, percent } = useI18n()
   const vehicle = VEHICLES[game.vehicleId]
   const deadline = nextDebtDeadline(game)
   const protectionDay = nextProtectionDay(game)
@@ -80,7 +79,6 @@ export default function StatusBar() {
         {game.wanted > 0 && <Stat icon={Crosshair} label={t.hud.wanted(game.wanted, WANTED.maxLevel)} className="text-red-300" />}
         <Stat icon={Fuel} label={t.gauge.fuel} value={`${game.fuel}/${vehicle.tank}`} />
         <Stat icon={Package} label={t.hud.cargo} value={`${cargoUsed(game.cargo)}/${vehicle.cargo}`} />
-        <Stat icon={TrendingUp} label={t.hud.inflation(multiplier(inflationIndex(game.day)))} />
         {protectionDay !== null && (
           <Stat icon={HandCoins} label={t.hud.nextProtection(protectionDay, credits(protectionBreakdown(game).total))} className="text-orange-300" />
         )}
@@ -88,6 +86,7 @@ export default function StatusBar() {
           {t.hud.newGame}
         </Button>
       </div>
+      <Ticker />
       {game.day >= AUDIT_COUNTDOWN_DAY && (
         <p className="flex items-center justify-center gap-1.5 border-t border-amber-900 bg-amber-950/40 px-4 py-1 text-center text-xs text-amber-200">
           <Hourglass size={12} aria-hidden="true" />

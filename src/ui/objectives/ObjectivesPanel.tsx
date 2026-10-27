@@ -13,7 +13,7 @@ type Condition = {
   met: boolean
 }
 
-/** « Objectifs du Jour 30 » : les grandes fins et la progression vers chacune, une fois la dette initiale soldée (chap. 9) */
+/** « Objectifs du Jour 30 » : les grandes fins et la progression vers chacune, une fois la dette initiale soldée (chap. 10) */
 export default function ObjectivesPanel() {
   const unlocked = useGameStore((s) => s.game.initialDebtPaid)
   const score = useGameStore((s) => offshoreBalance(s.game.offshore))

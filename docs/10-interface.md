@@ -1,12 +1,13 @@
-# 9. Interface (UI / UX)
+# 10. Interface (UI / UX)
 
 * **Single-Page Application** réactive, écran unique responsive : mobile-first en portrait (onglets rapides en bas d'écran), panneaux côte à côte sur desktop / paysage.
 * **Aucun chiffre codé en dur :** boutons et panneaux affichent les valeurs calculées depuis les règles du jour (inflation comprise).
 * **Principe de transparence — « zéro calculatrice, zéro boîte noire » :** chaque probabilité, prix ou coût affiché peut être touché pour révéler son **détail ligne par ligne**, avec la source de chaque ligne (district, tag, module, équipier, événement…). Le joueur occasionnel lit le total ; le joueur optimisateur lit le détail et ajuste son build.
+  * **Toutes les règles sont accessibles en jeu.** Aucune mécanique n'est cachée au joueur (seuls des tirages le sont, comme la ronde renforcée). Chaque calcul se détaille, et chaque règle qui pèse sur un choix est expliquée à l'endroit du choix, en une ou deux phrases. Un **manuel en jeu**, consultable à tout moment et organisé comme ces docs, rassemble l'ensemble (prévu avec l'habillage).
   * *Ex. (risque, valeurs indicatives) :* « Base D5 40 % · Suspicion +10 % · Tech (4/12) +16,7 % · Couverture légale −10 % = 56,7 % · Zéro-C ×0,85 = **48 %** ».
 
 ## Bandeau supérieur permanent & briefing de 06h00
-* **Téléscripteur d'Aeterna (Flash Info TV) :** messages passifs-agressifs, **indice d'inflation du jour**, événement global, événements locaux du jour.
+* **Téléscripteur d'Aeterna (Flash Info TV) :** sous les barres d'état, un message passif-agressif par jour, **l'indice d'inflation du jour** et sa hausse depuis la veille, l'événement global et les événements locaux du jour.
 * **Barres d'état (toujours visibles) :**
   * Jour X / 30 + ☀️ ou 🌙 ;
   * Cash-Puce (jaune) · Compte offshore (cyan, cadenas, taux effectif) · Dette (rouge, prochaine échéance : tabassage, puis retard si la dette initiale n'a jamais été soldée, puis audit ; mention « en retard » une fois le retard acquis) ;
@@ -18,7 +19,7 @@
   * **Prochaine collecte de Viktor** (date et montant estimé ; apparaît une fois la dette initiale soldée).
 * **Briefing de 06h00 :** chaque matin, un encadré refermable récapitule la nuit et la routine : gains de sommeil, PV perdus en cellule, dette après intérêts, tabassage, passage en retard, collecte de Viktor (et reliquat ajouté à la dette), intérêts offshore. Chaque montant est détaillable.
 * **Compte à rebours de l'audit** (à partir de `AUDIT_COUNTDOWN_DAY`, [`balance.ts`](../src/data/balance.ts)) : *« Dernier dépôt offshore possible : J30, 19h59 »* et *« Dernier remboursement possible : J30, 19h59 »*.
-* **Graphique d'inflation :** au toucher de l'indice, courbe de l'historique depuis le Jour 1 et projection jusqu'au Jour 30.
+* **Graphique d'inflation :** au toucher de l'indice, la règle de calcul, la courbe de l'historique depuis le Jour 1 et sa projection (atténuée) jusqu'au Jour 30, la valeur de chaque jour au survol, et la liste de ce qui est indexé ou non (chap. 7).
 
 ### Dégradation de l'UI selon l'ICC
 Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne définit aucun seuil propre.
@@ -55,7 +56,7 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
 * **Boutons de départ :** « Rouler de jour » ; à 20h00, « Dormir au relais » (ou « Bivouac » en `[D4]`) face à « Forcer le couvre-feu », chacun affichant coûts et effets calculés.
 
 ## Écran d'interception
-Options numérotées **0** Fouille · **1** Bluff · **2** Corruption · **3** Fuite · **4** Éjection (masquée dès qu'une autre action a été tentée). Le barrage occupe tout l'écran : aucune autre action n'est possible avant de l'avoir réglé. Face aux milices de `[D4]` : Payer le péage · Forcer le passage · Refuser. Si la fouille effective serait fatale (`[T4-06]` en soute), l'écran l'annonce. Chaque option affiche sa **probabilité détaillable** et ses **conséquences en cas d'échec** (*« Aeterna estime vos chances de survie fiscale à 35 % »*). Pour la corruption, un curseur d'offre (du minimum accepté par l'agent jusqu'au dernier palier de bonus, et au-delà) montre la chance en temps réel.
+Options numérotées **0** Fouille · **1** Bluff · **2** Corruption · **3** Fuite · **4** Éjection (masquée dès qu'une autre action a été tentée). Le barrage occupe tout l'écran : aucune autre action n'est possible avant de l'avoir réglé. Face aux milices de `[D4]` : Payer le péage · Forcer le passage · Refuser. Si la fouille effective serait fatale (`[T4-06]` en soute), l'écran l'annonce. Chaque option affiche sa **probabilité détaillable** et ses **conséquences en cas d'échec** (*« Aeterna estime vos chances de survie fiscale à 35 % »*). Pour la corruption, l'offre se compose de Cash-Puce (raccourcis aux paliers de bonus, du minimum accepté au dernier palier) et de caisses de la soute. Pour chaque produit en soute : la valeur en paiement d'une caisse, son prix d'achat, le gain ou la perte face au cash, et la mention « connivence » si les agents l'apprécient. La valeur totale de l'offre et la chance détaillée se mettent à jour en temps réel. Face aux milices, l'option « Payer en caisses » annonce à l'avance les caisses qui seraient prises et leur valeur.
 
 ## Modale « Objectifs du Jour 30 »
 Accessible une fois la dette initiale soldée : les quatre grandes fins et la progression vers chacune (score, statut Citoyen Or, `[T4-06]` en soute, position en `[D4]` à minuit).

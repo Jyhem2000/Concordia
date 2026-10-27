@@ -16,7 +16,8 @@
 | 6 | [06-interception.md](06-interception.md) | Risque, choix tactiques, garde à vue |
 | 7 | [07-economie.md](07-economie.md) | Boutique, cours, vente, portefeuilles, routes |
 | 8 | [08-evenements.md](08-evenements.md) | Événements globaux, locaux, aléas routiers |
-| 9 | [09-interface.md](09-interface.md) | Écrans et feedback |
+| 9 | [09-simulation.md](09-simulation.md) | Bots de test (plan × tempérament × objectif), campagnes, critères d'équilibrage |
+| 10 | [10-interface.md](10-interface.md) | Écrans et feedback |
 
 ## Règles de rédaction
 1. **Un chiffre, un seul endroit.** Une valeur (prix, %, durée…) n'est écrite que là où la donnée est définie. Un bonus est écrit chez ce qui le produit (le module, le véhicule, l'événement…) ; les formules ne font que citer la source.
@@ -39,7 +40,7 @@ Constantes globales (valeurs de départ…) : [`balance.ts`](../src/data/balance
 
 3. Hors de son chapitre, une donnée à ID est citée **par son ID seul** (pas de libellé ni de stat recopiés).
 4. Les montants en ₡ des services et frais sont des **valeurs de base au Jour 1**, indexées sur l'inflation (chap. 7).
-5. Toute mécanique chiffrée doit être **affichée et détaillable** dans l'app (chap. 9) : le joueur ne calcule jamais, mais peut toujours comprendre.
+5. Toute mécanique chiffrée doit être **affichée et détaillable** dans l'app (chap. 10) : le joueur ne calcule jamais, mais peut toujours comprendre.
 6. Le lore, les factions (Aeterna, DSC, BRC…), les monnaies et les règles (garde à vue, couvre-feu…) s'écrivent en clair, sans ID.
 7. **Les docs décrivent toutes les règles.** Développeur ou joueur, on doit comprendre le jeu sans lire le code. Toute décision prise en codant (ordre de résolution, arrondi, cas limite, interprétation d'une règle ambiguë) est écrite dans le chapitre concerné, dans le même changement. Seuls les chiffres vivent dans le code (règle 1).
 8. **Relecture critique avant chaque étape.** Avant d'implémenter un chapitre, on le relit et on le remet en cause : mécanique impossible ou bugguée, gameplay sans intérêt, lore incohérent, règle déjà contredite par le code. Les corrections sont tranchées et écrites avant de coder.

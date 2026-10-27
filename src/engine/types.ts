@@ -123,6 +123,10 @@ export type District = {
   iccScanners: boolean
   /** Éjection d'urgence possible (dalle bio-scellée sinon) */
   ejectionAllowed: boolean
+  /** Produits qui valent la connivence des agents dans une offre de corruption (chap. 6) */
+  bribeFavorites: readonly ProductId[]
+  /** Produits que les milices prennent en premier au péage en nature, dans l'ordre (chap. 4) */
+  tollFavorites: readonly ProductId[]
   /** Coefficient de marché des produits de la liste Production */
   coefProduction: number
   /** Coefficient de marché des produits en Forte demande, avant bonus de tier */
@@ -205,7 +209,19 @@ export type Interception = {
 }
 
 /** Options de l'écran d'interception (BRC) et du racket des milices */
-export type InterceptionMove = 'search' | 'bluff' | 'bribe' | 'flee' | 'eject' | 'payToll' | 'refuseToll'
+export type InterceptionMove = 'search' | 'bluff' | 'bribe' | 'flee' | 'eject' | 'payToll' | 'payTollInKind' | 'refuseToll'
+
+/** Caisses d'un produit, pour un paiement en nature */
+export type CrateCount = {
+  productId: ProductId
+  qty: number
+}
+
+/** Offre de corruption : Cash-Puce et caisses de la soute, cumulables (chap. 6) */
+export type Offer = {
+  cash: number
+  crates: readonly CrateCount[]
+}
 
 /** Ce qu'une option a coûté ou rapporté, pour le compte rendu affiché au joueur */
 export type InterceptionReport = {
@@ -227,7 +243,7 @@ export type InterceptionReport = {
   towBill: number
 }
 
-/** Ce que la nuit et la routine de 06h00 ont changé, pour le briefing du matin (chap. 2 et 9) */
+/** Ce que la nuit et la routine de 06h00 ont changé, pour le briefing du matin (chap. 2 et 10) */
 export type MorningBriefing = {
   day: number
   /** Gains de la nuit au relais routier (après plafond d'ICC) ; null au bivouac */

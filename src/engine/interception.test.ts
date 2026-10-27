@@ -12,12 +12,14 @@ import {
   SEARCH,
   WANTED,
 } from '../data/balance.ts'
+import { DISTRICTS } from '../data/districts.ts'
+import { PRODUCTS } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
-import { cargoUsed, ownedQty } from './cargo.ts'
-import { bribeChance, bribeRate, fleeChance, minimumOffer, toll } from './interception.ts'
+import { cargoUsed, ownedQty, paymentValue } from './cargo.ts'
+import { bribeChance, bribeRate, fleeChance, minimumOffer, offerValue, toll, tollInKind } from './interception.ts'
 import { sleep } from './routine.ts'
 import { defined, errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
-import type { CargoLot, GameState, Interception, ProductId } from './types.ts'
+import type { CargoLot, GameState, Interception, Offer, ProductId } from './types.ts'
 
 const lot = (productId: ProductId, qty: number): CargoLot => ({ productId, qty, unitCost: 1, travelled: true })
 const brc: Interception = { kind: 'brc', acted: false, bluffFailed: false }
@@ -106,11 +108,13 @@ describe('bluff', () => {
 })
 
 describe('corruption', () => {
+  const cash = (amount: number): Offer => ({ cash: amount, crates: [] })
+
   it('refuse une offre sous le minimum, et l’offre est perdue même en cas d’échec', () => {
     const state = stopped([lot('T2-01', 3)], { rng: HIGH_ROLL_RNG })
-    expect(errorOf(state, { type: 'intercept', move: 'bribe', amount: minimumOffer(state) - 1 })).toBe('offer-too-low')
+    expect(errorOf(state, { type: 'intercept', move: 'bribe', offer: cash(minimumOffer(state) - 1) })).toBe('offer-too-low')
     const offer = bribeRate(state).total
-    const failed = run(state, { type: 'intercept', move: 'bribe', amount: offer })
+    const failed = run(state, { type: 'intercept', move: 'bribe', offer: cash(offer) })
     expect(failed.cash).toBe(Math.round((10_000 - offer) * (1 - BRIBE.fail.fine)))
     expect(failed.icc).toBe(100 - BRIBE.fail.iccLoss)
   })
@@ -118,16 +122,36 @@ describe('corruption', () => {
   it('monte avec la valeur de l’offre, par paliers, et compte les Drones-Juges', () => {
     const state = stopped([lot('T2-01', 3)])
     const rate = bribeRate(state).total
-    expect(bribeChance(state, rate * 2).total).toBeGreaterThan(bribeChance(state, rate).total)
+    expect(bribeChance(state, cash(rate * 2)).total).toBeGreaterThan(bribeChance(state, cash(rate)).total)
     const guarded = { ...state, districtId: 'D5' as const }
-    expect(bribeChance(guarded, rate).lines.at(-1)?.source).toBe('rule.drone-judges')
+    expect(bribeChance(guarded, cash(rate)).lines.at(-1)?.source).toBe('rule.drone-judges')
   })
 
   it('laisse passer en cas de succès', () => {
     const state = stopped([lot('T2-01', 3)], { rng: LOW_ROLL_RNG })
-    const passed = run(state, { type: 'intercept', move: 'bribe', amount: minimumOffer(state) })
+    const passed = run(state, { type: 'intercept', move: 'bribe', offer: cash(minimumOffer(state)) })
     expect(passed.interception).toBeNull()
     expect(ownedQty(passed.cargo, 'T2-01')).toBe(3)
+  })
+
+  it('accepte des caisses à leur prix de base, et récompense un produit apprécié par la connivence', () => {
+    const favorite = DISTRICTS.D2.bribeFavorites[0]
+    const state = stopped([lot('T2-01', 3), lot(favorite, 2)])
+    const inKind: Offer = { cash: 0, crates: [{ productId: favorite, qty: 2 }] }
+    expect(offerValue(inKind)).toBe(2 * PRODUCTS[favorite].basePrice)
+    const plain: Offer = { cash: offerValue(inKind), crates: [] }
+    expect(bribeChance(state, inKind).total).toBeCloseTo(bribeChance(state, plain).total + BRIBE.connivance)
+  })
+
+  it('retire les caisses offertes de la soute, même en cas d’échec', () => {
+    const favorite = DISTRICTS.D2.bribeFavorites[0]
+    const state = stopped([lot(favorite, 30)], { rng: HIGH_ROLL_RNG })
+    const offer: Offer = { cash: 0, crates: [{ productId: favorite, qty: 25 }] }
+    expect(errorOf(state, { type: 'intercept', move: 'bribe', offer: { cash: 0, crates: [{ productId: favorite, qty: 31 }] } })).toBe(
+      'not-enough-cargo',
+    )
+    const failed = run(state, { type: 'intercept', move: 'bribe', offer })
+    expect(defined(failed.interceptionReport).crates).toBeLessThanOrEqual(-25)
   })
 })
 
@@ -183,6 +207,16 @@ describe('racket des milices', () => {
     const paid = run(state, { type: 'intercept', move: 'payToll' })
     expect(paid.cash).toBe(10_000 - toll(state))
     expect(cargoUsed(paid.cargo)).toBe(6)
+  })
+
+  it('prend en nature les favoris des milices d’abord, sans rendre la monnaie', () => {
+    const state = stopped([lot('T3-01', 2), lot('T1-06', 1), lot('T1-01', 4)], { districtId: 'D4', interception: racket })
+    const taken = tollInKind(state)
+    expect(taken[0].productId).toBe('T1-06')
+    expect(paymentValue(taken)).toBeGreaterThanOrEqual(toll(state))
+    const paid = run(state, { type: 'intercept', move: 'payTollInKind' })
+    expect(paid.cash).toBe(10_000)
+    expect(paid.interception).toBeNull()
   })
 
   it('pille les caisses les plus chères en cas de refus', () => {

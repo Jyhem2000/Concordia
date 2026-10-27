@@ -1,7 +1,7 @@
 # 6. Interception par la BRC
 
 > Ce chapitre porte les formules et les issues. Les bonus apportés par un district, un tag, un véhicule, un module, un équipier ou un événement sont chiffrés **chez cette donnée**.
-> **Transparence :** toutes ces probabilités sont calculées par l'app et affichées avec leur détail ligne par ligne (chap. 9). Le joueur n'a jamais à calculer, mais peut toujours comprendre et optimiser.
+> **Transparence :** toutes ces probabilités sont calculées par l'app et affichées avec leur détail ligne par ligne (chap. 10). Le joueur n'a jamais à calculer, mais peut toujours comprendre et optimiser.
 
 ## Risque d'interception
 À chaque trajet, le moteur calcule la probabilité de tomber sur un barrage de la BRC dans le district de destination. En `[D4]`, règle propre (chap. 4).
@@ -36,7 +36,7 @@ Le résultat est **borné, après** tous les multiplicateurs (`RISK_BOUNDS` dans
 * Chaque **fuite réussie** ajoute **1 niveau**, jusqu'à un maximum.
 * Par niveau : malus aux prochaines fuites et au risque d'interception partout (`WANTED` dans [`balance.ts`](../src/data/balance.ts)).
 * **−1 niveau** par nuit passée au relais routier (le bivouac ne compte pas).
-* Affichée en permanence dans le bandeau (chap. 9) : *« Votre profil suscite l'intérêt bienveillant d'Aeterna. »*
+* Affichée en permanence dans le bandeau (chap. 10) : *« Votre profil suscite l'intérêt bienveillant d'Aeterna. »*
 
 ---
 
@@ -83,10 +83,10 @@ Valeurs : `BRIBE` dans [`balance.ts`](../src/data/balance.ts).
 Chance = min( plafond,  base + Offre + Connivence − malus × (étoiles du district − 1) − Sédation + bonus ([CREW-01]) )
 ```
 * **Tarif standard :** le plus élevé entre **une part fixe par étoile du district** (indexée) et **une part de la valeur des caisses illégales en soute** (au prix de base). L'agent évalue ce qu'il laisse passer. Réduit par `[MOD-08]`.
-* **Offre** — sa valeur est comparée au tarif standard, payée en ₡ ou en caisses (paiement en nature, chap. 7). Elle est perdue même en cas d'échec. **En dessous d'une fraction du tarif, l'agent refuse** : le curseur d'offre démarre à ce minimum.
+* **Offre** — Cash-Puce et caisses de la soute, au choix et cumulables ; les caisses comptent à leur valeur en paiement (paiement en nature, chap. 7). Sa valeur totale est comparée au tarif standard. Elle est perdue même en cas d'échec (les caisses offertes ne sont pas confisquées une seconde fois, elles sont déjà parties). **En dessous d'une fraction du tarif, l'agent refuse** : le curseur d'offre démarre à ce minimum.
 * **Bonus d'offre par paliers :** plus l'offre dépasse le tarif standard, plus la chance monte, jusqu'à un plafond (`offerBonuses`).
 
-* **Connivence (+10 %)** si l'offre contient un produit apprécié des agents : `[T1-02]`, `[T1-05]`, `[T3-03]` en `[D1]`, `[D2]`, `[D3]` (agents humains) ; `[T3-02]`, `[T3-03]` en `[D5]`, `[D6]` (douaniers d'élite).
+* **Connivence** (bonus `BRIBE.connivance` dans [`balance.ts`](../src/data/balance.ts)) si l'offre contient au moins une caisse d'un produit apprécié des agents du district (`bribeFavorites` dans [`districts.ts`](../src/data/districts.ts)) : les agents humains de `[D1]` à `[D3]` et les douaniers d'élite de `[D5]` et `[D6]` n'apprécient pas les mêmes produits. L'app signale les caisses qui la déclenchent.
 * **Drones-Juges** (districts équipés, [`districts.ts`](../src/data/districts.ts)) : un échec critique incompressible (`droneCriticalFailure`), tiré avant le jet (ils sont incorruptibles : il faut tomber sur un douanier).
 * **Succès :** l'agent coupe sa caméra-piéton ; passage garanti, ICC inchangé.
 * **Échec :** confiscation + lourde amende + perte d'ICC + garde à vue, quel que soit le tier.

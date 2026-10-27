@@ -35,7 +35,7 @@ Pendant de la boutique : un district n'achète qu'une quantité limitée de chaq
 * **Demande restante :** pleine au Jour 1. Chaque vente la consomme, de jour comme de nuit. **Chaque matin à 06h00, elle remonte d'une fraction du quota** (`DEMAND_REFILL_DIVISOR` dans [`balance.ts`](../src/data/balance.ts), arrondi au supérieur), sans dépasser le quota. Vider un marché le pénalise donc plusieurs jours.
 * **Au-delà de la demande restante, le marché est saturé :** chaque caisse supplémentaire se vend à prix réduit (`Coef_Demande`, `SATURATED_SALE_FACTOR` dans [`balance.ts`](../src/data/balance.ts)).
 * **Pic suspect :** vendre au-delà de la demande restante alerte Aeterna — **le lendemain**, le risque de base de ce district augmente pour toute la journée (un seul pic par district, quel que soit le nombre de ventes saturées ; `SUSPICIOUS_PEAK_RISK` dans [`balance.ts`](../src/data/balance.ts) ; icône 👁️ sur la carte).
-* **Affichage :** *« Demande restante : 5 (+2 demain) »* sur chaque ligne du tableau des cours (chap. 9).
+* **Affichage :** *« Demande restante : 5 (+2 demain) »* sur chaque ligne du tableau des cours (chap. 10).
 * *Lecture stratégique :* on répartit ses ventes **dans le temps et dans l'espace** (8 caisses en `[D6]` aujourd'hui, le reste en `[D5]` demain, et on laisse `[D6]` se reconstituer), en arbitrant avec la fraîcheur et la collecte de Viktor.
 
 ## Prix de vente
@@ -44,7 +44,7 @@ Pendant de la boutique : un district n'achète qu'une quantité limitée de chaq
 ```
 Prix_Vente = Arrondi( Cours × Commission × Coef_Demande × Coef_Condition × Savoir_Faire )
 ```
-* **Commission de puce** (`SALE_COMMISSION` dans [`balance.ts`](../src/data/balance.ts)) **:** chaque vente P2P est ponctionnée par l'infrastructure d'Aeterna. Acheter puis revendre au même endroit coûte donc toujours la commission.
+* **Commission de puce** (`SALE_COMMISSION` dans [`balance.ts`](../src/data/balance.ts)) **:** chaque vente P2P est ponctionnée par l'infrastructure d'Aeterna, à l'aveugle : le relais prélève sa part sans rien enregistrer (voir *Cash-Puce*). Acheter puis revendre au même endroit coûte donc toujours la commission.
 * **Coef_Demande :** 1.00 dans la limite de la demande restante, prix saturé au-delà.
 * **Coef_Condition :** `[TAG-FRAGILE]` (chap. 3).
 * **Savoir_Faire = Coef_Fraîcheur × Coef_Nuit × Bonus_Mama**, avec **rendements décroissants** : au-delà d'un seuil, l'excédent ne compte qu'en partie (`KNOW_HOW_SOFT_CAP` et `KNOW_HOW_EXCESS_FACTOR` dans [`balance.ts`](../src/data/balance.ts)).
@@ -62,7 +62,12 @@ Prix_Vente = Arrondi( Cours × Commission × Coef_Demande × Coef_Condition × S
 * *Intention — des builds, pas une recette :* chaque axe de bonus vise une famille de produits différente (équipier, modules, `[LOC-D2-1]`, nuit). Les combinaisons rapportent davantage, mais les plafonds (`Mult_Événement`, `Savoir_Faire`) empêchent une seule combinaison d'écraser les autres.
 
 ## Paiement en nature
-Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est valorisée à son **prix de base** ([`products.ts`](../src/data/products.ts)), jamais au cours local. Les caisses restent utiles (connivence, pas de cash exposé), mais ne sont pas une monnaie au rabais.
+Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est valorisée à son **prix de base** ([`products.ts`](../src/data/products.ts)), jamais au cours local ni à son prix d'achat. C'est un barème officieux, le même partout, que les agents et les milices appliquent sans discuter.
+* **Pourquoi payer en caisses :**
+  1. **Une économie réelle** sur les caisses achetées sous leur prix de base (production locale, bonne fluctuation) : elles paient plus qu'elles n'ont coûté. À l'inverse, une caisse achetée cher (forte demande, mauvais tirage) paie moins qu'elle n'a coûté.
+  2. **La connivence** en corruption (chap. 6) : certains produits rendent l'agent plus conciliant.
+  3. **Le Cash-Puce reste intact** : utile quand il manque pour une offre, ou pour garder de quoi payer le plein.
+* **Affichage :** pour chaque caisse proposée, l'app montre sa valeur en paiement et son prix d'achat, donc ce que le paiement en nature fait gagner ou perdre par rapport au cash (chap. 10).
 
 ---
 
@@ -72,7 +77,7 @@ Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est 
 * **Tous les montants en ₡ de la doc sont des valeurs de base (Jour 1)**, multipliées par l'indice pour : carburant, réparations, dépannage, salaires et frais d'équipage, services des lieux spéciaux, part fixe du tarif de corruption, montants des aléas routiers.
 * **Non indexés :** prix des produits (ils ont leur propre marché), véhicules, modules, dette et emprunts, seuils de fin, tarif syndical de `[LOC-D1-2]`.
 * *Lore :* le marché noir facture ses services en indice officiel : c'est la seule unité de compte que les puces acceptent sans éveiller l'algorithme.
-* **Affichage :** valeur du jour au téléscripteur dès le Jour 1, avec un graphique d'historique (chap. 9).
+* **Affichage :** valeur du jour au téléscripteur dès le Jour 1, avec un graphique d'historique (chap. 10).
 * *Lecture stratégique :* les services coûtent de plus en plus cher ; les équipements, eux, ne sont pas indexés et rapportent d'autant plus qu'on les achète tôt.
 
 ---
@@ -100,7 +105,7 @@ Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est 
 * **Quand :** une fois la dette initiale soldée, à 06h00 des jours de collecte (`PROTECTION` dans [`balance.ts`](../src/data/balance.ts)).
 * **Montant :** **une part de ta richesse visible** = Cash-Puce + valeur de la soute (au prix de base). Le compte offshore est invisible pour Viktor.
 * **Paiement :** prélevé automatiquement sur le Cash-Puce ; le reliquat éventuel s'ajoute à la dette.
-* **Affichage :** date et estimation de la prochaine collecte en permanence (chap. 9). *Lecture stratégique :* arriver léger au matin de la collecte, ou blanchir avant.
+* **Affichage :** date et estimation de la prochaine collecte en permanence (chap. 10). *Lecture stratégique :* arriver léger au matin de la collecte, ou blanchir avant.
 
 ### Compte offshore
 * **Guichet :** `[LOC-D5-1]`, de jour uniquement.

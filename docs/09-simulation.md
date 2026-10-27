@@ -1,0 +1,102 @@
+# 9. Simulation & équilibrage
+
+> Ce chapitre décrit **comment on vérifie que le jeu tient** : des parties jouées automatiquement par des bots, sur le moteur seul (sans interface), en grand nombre. Il fixe la façon de composer les bots, les campagnes à mener, les mesures relevées et les critères d'équilibrage.
+> **Quand :** une fois toutes les mécaniques implémentées (chap. 2 à 8). Simuler un jeu incomplet mesurerait un autre jeu.
+
+## Principes
+* **Le moteur est la seule référence.** Les bots appellent les mêmes actions que l'interface (`applyAction`), avec les mêmes refus : aucune règle n'est réécrite pour la simulation.
+* **Reproductible :** chaque partie part d'une graine. Une partie suspecte se rejoue à l'identique, action par action.
+* **Information honnête :** un bot ne voit que ce que voit le joueur (cours du district actuel, mémoire de marché, risque affiché sans la ronde renforcée, événements publics). Il ne lit jamais l'état caché ni les tirages à venir.
+* **Volume :** assez de parties par configuration pour que les écarts mesurés dépassent le bruit des tirages (plusieurs milliers pour une configuration qu'on compare finement).
+* **Une mécanique jamais utilisée avec profit est suspecte** : inutile, mal équilibrée, ou oubliée par les bots.
+
+---
+
+## Composer un bot : trois axes
+Un bot est la combinaison d'un **plan**, d'un **tempérament** et d'un **objectif**. Les trois axes sont indépendants : un même plan se joue prudemment ou en casse-cou, pour survivre ou pour viser une grande fin.
+
+### Axe 1 — Le plan (comment on joue)
+Le cœur de la stratégie : l'équipement visé, la famille de produits, les mécaniques privilégiées. Chaque plan correspond à un **build** que le design veut rendre viable (chap. 7, *des builds, pas une recette*) ; la simulation vérifie qu'il l'est.
+
+| Plan | Équipement visé | Produits et mécaniques | Question posée |
+| :--- | :--- | :--- | :--- |
+| **Sans build** | véhicule de départ, rien d'autre | Tier 1–2 en Production, revente là où le cours mémorisé est le meilleur | Le jeu de base suffit-il à survivre ? |
+| **Chaîne du froid** | `[VEH-03]`, `[MOD-01]`, `[CREW-03]` | `[TAG-PERISHABLE]`, fraîcheur, savoir-faire | Le build périssable rapporte-t-il assez pour son coût ? |
+| **Couverture légale** | `[VEH-02]`, `[MOD-02]` | soute diluée de Tier 0, masquage, produits odorants | La dilution vaut-elle la place perdue en soute ? |
+| **Électronique** | `[MOD-03]` | `[TAG-TECH]` vers `[D5]` et `[D6]` | Le blindage rend-il la Tech rentable ? |
+| **Nuit festive** | `[MOD-04]`, `[MOD-06]` | couvre-feu forcé, profil festif, fuite | La nuit paie-t-elle son risque et son usure ? |
+| **Corruption** | `[CREW-01]`, `[MOD-08]` | paiement en nature, connivence, `[TAG-ADDICTIVE]` | Payer les agents est-il une stratégie, pas un dernier recours ? |
+| **Citoyen modèle** | `[VEH-02]`, `[MOD-08]` | ICC au palier Or, bluff, coupe-file, services qui rendent de l'ICC | Garder l'ICC haut est-il tenable et rentable ? |
+| **Rentier** | `[CREW-02]` | cours en temps réel, dépôts offshore précoces | Les intérêts suffisent-ils à porter une partie ? |
+| **Haut tier** | `[VEH-04]`, `[MOD-07]`, emprunt tactique | Tier 3–4, racket de `[D4]`, éjection | Le haut tier est-il jouable avant la fin de partie ? |
+| **Opportuniste** | aucun imposé | événements du téléscripteur, `[LOC-D4-2]`, `[LOC-D2-1]`, Loterie | Les événements créent-ils des coups à jouer ? |
+| **Saboteur** | `[VEH-04]`, `[MOD-03]` | pactole puis `[T4-06]`, fin à Rust Valley | La fin ultime est-elle atteignable sans chance extrême ? |
+
+Un plan est une politique : quand acheter l'équipement (et s'il faut emprunter), quels produits acheter, où les vendre, quel lieu spécial utiliser. Il ne fixe ni le risque accepté (tempérament) ni la fin visée (objectif).
+
+### Axe 2 — Le tempérament (combien de risque)
+Quelques réglages qui s'appliquent à n'importe quel plan :
+
+| Tempérament | Risque d'interception max. par trajet | Réserve de Cash-Puce | Couvre-feu forcé | Réponse au barrage |
+| :--- | :--- | :--- | :--- | :--- |
+| **Prudent** | bas | gardée (plein + amende possible) | jamais | fouille ou corruption sûre |
+| **Équilibré** | moyen | minimale | si la marge nocturne le justifie | l'option de meilleure espérance |
+| **Casse-cou** | élevé | aucune | dès que possible | fuite ou bluff dès qu'ils ont une chance |
+
+Les seuils exacts sont des paramètres de bot, fixés et notés à chaque campagne.
+
+### Axe 3 — L'objectif (pour quoi on joue)
+L'objectif change surtout les décisions de fin de partie et quelques contraintes :
+
+| Objectif | Ce qu'il change |
+| :--- | :--- |
+| **Survivre** | Solder la dette au plus tôt, ne jamais risquer la Santé ni la garde à vue près du Jour 30. |
+| **Score maximal** | Tout pour le solde offshore à l'audit, sans condition de fin. |
+| **Baron** | Atteindre le seuil, puis sécuriser plutôt que maximiser. |
+| **Élite** | Score, plus le palier Or à l'audit : arbitre en permanence ICC contre marge. |
+| **Saboteur** | Score, plus `[T4-06]` en soute et la nuit du Jour 30 à Rust Valley. |
+
+### Bots de référence (hors matrice)
+* **Novice :** achète ce qui est en Production, revend au meilleur cours mémorisé, accepte toujours la fouille. Sert d'étalon : le jeu doit lui laisser une chance de survivre.
+* **Aléatoire :** actions légales tirées au hasard. Ne mesure rien d'équilibre ; vérifie la robustesse (aucun blocage, aucun état incohérent, aucune erreur).
+* **Optimiseur :** ne suit aucun plan ; il cherche lui-même la meilleure suite d'actions (recherche gloutonne, puis plus profonde), sous les mêmes règles d'information. C'est lui qui trouve les **stratégies dominantes que personne n'avait prévues** : s'il fait nettement mieux que tous les plans, on a un exploit à comprendre.
+
+---
+
+## Campagnes
+Croiser tous les plans, tempéraments et objectifs donnerait plus d'une centaine de configurations dont beaucoup n'ont pas de sens (un plan Saboteur qui vise seulement de survivre ne teste rien). On mène plutôt des campagnes ciblées, chacune avec sa question.
+
+| Campagne | Configurations jouées | Question |
+| :--- | :--- | :--- |
+| **1. Viabilité des plans** | chaque plan × les 3 tempéraments, objectif « score maximal » | Chaque build marche-t-il, et pour quel tempérament ? |
+| **2. Atteignabilité des fins** | pour chaque grande fin, les 2 ou 3 plans qui la visent naturellement, tempérament équilibré | Chaque fin est-elle atteignable, à quel prix (Game Over, jours de garde à vue) ? |
+| **3. Poids du hasard** | les meilleurs plans des campagnes 1 et 2, sur un grand nombre de graines | Le résultat dépend-il plus du joueur que des tirages ? |
+| **4. Tests par retrait** | un plan joué avec puis sans l'un de ses éléments (un module, un équipier, une mécanique) | Que rapporte vraiment cet élément ? |
+| **5. Recherche d'exploits** | l'optimiseur, puis l'étude de ses meilleures parties | Existe-t-il une stratégie dominante imprévue ? |
+| **Contrôle** | Novice et Aléatoire, à chaque version d'équilibrage | Le jeu reste-t-il jouable et robuste ? |
+
+## Mesures relevées par partie
+* Fin obtenue et score offshore ; jour de la mort ou du Game Over le cas échéant.
+* Jour où la dette initiale est soldée ; dette maximale atteinte ; emprunts tactiques.
+* Nombre d'interceptions, option choisie, issue, pertes (₡, caisses, ICC, Santé, châssis), jours de garde à vue.
+* Marge nette par trajet, ventes saturées, pics suspects déclenchés, caisses perdues (fraîcheur, casse, explosions).
+* Équipements achetés et jour d'achat ; services des lieux spéciaux utilisés.
+* Courbes journalières : Cash-Puce, offshore, dette, ICC, Santé, châssis.
+
+## Critères d'équilibrage
+Cibles de départ, à recaler avec les premières mesures.
+
+| Campagne | Critère |
+| :--- | :--- |
+| Contrôle | Le Novice atteint l'audit sans dette dans la majorité des parties. L'Aléatoire ne bloque jamais le moteur. |
+| 1 | Chaque plan bat le plan « Sans build » en score moyen pour au moins un tempérament. Aucun plan ne domine tous les autres à la fois en score moyen et en taux de survie. |
+| 1 | Le tempérament compte : pour un même plan, le casse-cou a un score plus dispersé et un taux de Game Over plus élevé que le prudent. |
+| 2 | Chaque grande fin est obtenue dans une part significative des parties qui la visent. Taux de réussite décroissant de Baron à Élite à Saboteur, taux de Game Over croissant dans le même ordre. |
+| 2 | La fin de partie reste tendue : la dette et l'audit pèsent encore dans les derniers jours. |
+| 3 | Pour un même bot, l'écart de score entre graines reste inférieur à l'écart entre plans. |
+| 4 | Chaque équipement, équipier et lieu spécial améliore le plan qui le vise ; un élément sans effet mesurable est à revoir. |
+| 5 | L'optimiseur ne dépasse pas de loin le meilleur plan conçu ; sinon, la stratégie trouvée est documentée puis corrigée ou assumée comme build. |
+
+## Lecture des résultats
+* Un écart à une cible se corrige d'abord dans les données (`src/data/`), puis, si besoin, dans une règle : toute règle modifiée l'est d'abord dans le chapitre concerné (règle 7 de [README.md](README.md)).
+* Chaque campagne note la version d'équilibrage, les bots joués (plan, tempérament, objectif, paramètres), le nombre de parties et les écarts constatés.

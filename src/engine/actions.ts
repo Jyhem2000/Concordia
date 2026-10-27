@@ -12,7 +12,7 @@ import { risk } from './risk.ts'
 import { createRng } from './rng.ts'
 import { sleep } from './routine.ts'
 import { remember } from './state.ts'
-import type { DistrictId, GameState, InterceptionMove, LocationId, LocationService, ProductId } from './types.ts'
+import type { DistrictId, GameState, InterceptionMove, LocationId, LocationService, Offer, ProductId } from './types.ts'
 
 /*
  * Actions du joueur : chaque action produit un nouvel état, ou une erreur sans rien changer.
@@ -31,8 +31,8 @@ export type Action =
   | { type: 'borrow'; amount: number }
   | { type: 'deposit'; amount: number }
   | { type: 'withdraw'; amount: number }
-  /** Option de l'écran d'interception ; `amount` = offre de corruption */
-  | { type: 'intercept'; move: InterceptionMove; amount?: number }
+  /** Option de l'écran d'interception ; `offer` pour la corruption */
+  | { type: 'intercept'; move: InterceptionMove; offer?: Offer }
 
 export type ActionError =
   | 'game-over'
@@ -294,9 +294,8 @@ export function applyAction(state: GameState, action: Action): ActionResult {
 
   switch (action.type) {
     case 'intercept': {
-      if (action.move === 'bribe' && !isQuantity(action.amount ?? 0)) return fail('invalid-amount')
-      const error = checkMove(state, action.move, action.amount)
-      return error ? fail(error) : { ok: true, state: resolveMove(state, action.move, action.amount) }
+      const error = checkMove(state, action.move, action.offer)
+      return error ? fail(error) : { ok: true, state: resolveMove(state, action.move, action.offer) }
     }
     case 'buy':
       return isQuantity(action.qty) ? buy(state, action.productId, action.qty) : fail('invalid-quantity')

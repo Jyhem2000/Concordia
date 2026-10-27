@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { breakdown } from './breakdown.ts'
 
 describe('breakdown', () => {
-  it("reproduit l'exemple de risque du chap. 9", () => {
+  it("reproduit l'exemple de risque du chap. 10", () => {
     const risk = breakdown('D5', 0.4)
       .add('EVT-G02', 0.1)
       .add('TAG-TECH', 0.167, { count: 4, cargo: 12 })

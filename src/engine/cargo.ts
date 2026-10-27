@@ -1,6 +1,6 @@
 import { MASKED_CRATE_WEIGHT } from '../data/balance.ts'
 import { PRODUCTS } from '../data/products.ts'
-import type { CargoLot, ProductId, TagId, Tier } from './types.ts'
+import type { CargoLot, CrateCount, ProductId, TagId, Tier } from './types.ts'
 
 /** Emplacements de soute occupés (1 caisse = 1 emplacement) */
 export function cargoUsed(cargo: readonly CargoLot[]): number {
@@ -74,4 +74,24 @@ export function isIllegal(lot: CargoLot): boolean {
 /** Valeur des caisses au prix de base (collecte, péage, tarif de corruption) */
 export function baseValue(cargo: readonly CargoLot[]): number {
   return cargo.reduce((total, lot) => total + PRODUCTS[lot.productId].basePrice * lot.qty, 0)
+}
+
+/** Valeur en paiement de caisses données (corruption, péage…) : toujours au prix de base (chap. 7) */
+export function paymentValue(crates: readonly CrateCount[]): number {
+  return crates.reduce((total, { productId, qty }) => total + PRODUCTS[productId].basePrice * qty, 0)
+}
+
+/** Retire des caisses données en paiement, lots les plus anciens d'abord */
+export function giveCrates(cargo: readonly CargoLot[], crates: readonly CrateCount[]): CargoLot[] {
+  return crates.reduce<CargoLot[]>((remaining, { productId, qty }) => takeLots(remaining, productId, qty).remaining, [...cargo])
+}
+
+/** Vrai si la soute contient toutes ces caisses, en quantités entières positives */
+export function ownsCrates(cargo: readonly CargoLot[], crates: readonly CrateCount[]): boolean {
+  const wanted = new Map<ProductId, number>()
+  for (const { productId, qty } of crates) {
+    if (!Number.isInteger(qty) || qty <= 0) return false
+    wanted.set(productId, (wanted.get(productId) ?? 0) + qty)
+  }
+  return [...wanted].every(([productId, qty]) => ownedQty(cargo, productId) >= qty)
 }

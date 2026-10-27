@@ -22,7 +22,7 @@ type TravelButtonProps = {
 /** Ordre d'affichage : de la périphérie au sommet de la pyramide (carte du chap. 4) */
 const order = [...DISTRICT_IDS].sort((a, b) => DISTRICTS[a].echelon - DISTRICTS[b].echelon)
 
-/** Carte tactique : destinations, coût du trajet et mémoire de marché (chap. 9) */
+/** Carte tactique : destinations, coût du trajet et mémoire de marché (chap. 10) */
 export default function TravelPanel() {
   const tripDone = useGameStore((s) => (s.game.phase === 'day' ? s.game.dayTripDone : s.game.nightTripDone))
   const { t } = useI18n()

@@ -12,7 +12,7 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 ### ICC — Indice de Conformité Civique
 * **Échelle :** 0 % à 100 %. **Départ :** [`balance.ts`](../src/data/balance.ts). S'érode facilement, lent et coûteux à restaurer.
 * **Suspicion :** ajoute au risque d'interception un malus par point d'ICC manquant (`SUSPICION_PER_ICC_POINT` dans [`balance.ts`](../src/data/balance.ts)).
-* **Paliers de crédit social** (seule échelle de référence, reprise par l'interface, chap. 9 ; seuils : `ICC_TIERS` dans [`balance.ts`](../src/data/balance.ts)), du plus haut au plus bas :
+* **Paliers de crédit social** (seule échelle de référence, reprise par l'interface, chap. 10 ; seuils : `ICC_TIERS` dans [`balance.ts`](../src/data/balance.ts)), du plus haut au plus bas :
 
 | Palier | Statut | Effet |
 | :--- | :--- | :--- |
@@ -21,7 +21,7 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 | 3 | Citoyen sous réserve | Pompes officielles **fermées la nuit**. `[LOC-D6-1]` inaccessible. |
 | 4 | Déviant notoire | Effets du palier précédent, et toute entrée en `[D6]` déclenche **automatiquement** une interception. |
 
-* **Gains de route :** sommeil au relais routier, contrôle avec soute légale, bluff réussi, certains aléas routiers. **Plafond quotidien** (`ICC_DAILY_ROUTE_GAIN_CAP` dans [`balance.ts`](../src/data/balance.ts), de 06h00 à 06h00), au-delà les gains de route sont perdus. Le reste du plafond du jour est affiché dans le bandeau (chap. 9).
+* **Gains de route :** sommeil au relais routier, contrôle avec soute légale, bluff réussi, certains aléas routiers. **Plafond quotidien** (`ICC_DAILY_ROUTE_GAIN_CAP` dans [`balance.ts`](../src/data/balance.ts), de 06h00 à 06h00), au-delà les gains de route sont perdus. Le reste du plafond du jour est affiché dans le bandeau (chap. 10).
 * **Gains hors plafond** (le chemin cher) : `[LOC-D3-1]`, `[LOC-D5-1]`, `[LOC-D6-1]`, `[T4-03]`.
 * **Atténuateurs de pertes :** `[MOD-05]`, `[VEH-03]` (inutiles en `[D4]`, où la fuite ne coûte pas d'ICC).
 
@@ -45,7 +45,7 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 Seuls les routiers boivent l'eau sans sédatifs de `[LOC-D1-2]` : c'est elle qui leur garde l'esprit clair.
 * **Protection :** chaque passage à `[LOC-D1-2]` (de jour) remet la protection à **4 jours**. Elle baisse de 1 à chaque routine matinale. **Départ :** 4 jours.
 * **Sédation** (protection à 0, jusqu'au prochain passage à `[LOC-D1-2]`) : **−10 %** au bluff, à la corruption et à la fuite (racket de `[D4]` compris), et la mémoire de marché des autres districts est **brouillée** : les cours mémorisés s'affichent en fourchette **±20 %**. Le flux de `[CREW-02]` reste exact.
-* L'app affiche les jours de protection restants et prévient la veille de la Sédation (chap. 9).
+* L'app affiche les jours de protection restants et prévient la veille de la Sédation (chap. 10).
 
 ---
 
@@ -99,7 +99,7 @@ Minuit sonne quand le joueur se couche le Jour 30, après un éventuel trajet de
 2. Sinon, **Formatage Brutal** : le Cash-Puce est remis à 0 et la soute ne peut plus être vendue.
 3. **Score final = solde du compte offshore.** Les fins sont évaluées de la plus prestigieuse à la plus modeste ; la première dont toutes les conditions sont remplies se déclenche.
 
-> **Attention :** la dette se rembourse à `[LOC-D1-1]` et le compte offshore s'alimente à `[LOC-D5-1]`, tous deux **de jour uniquement**. Un compte à rebours s'affiche les derniers jours (`AUDIT_COUNTDOWN_DAY` dans [`balance.ts`](../src/data/balance.ts) ; chap. 9).
+> **Attention :** la dette se rembourse à `[LOC-D1-1]` et le compte offshore s'alimente à `[LOC-D5-1]`, tous deux **de jour uniquement**. Un compte à rebours s'affiche les derniers jours (`AUDIT_COUNTDOWN_DAY` dans [`balance.ts`](../src/data/balance.ts) ; chap. 10).
 
 ### Défaites (Game Over)
 * **Mort biologique :** Santé à 0 PV.

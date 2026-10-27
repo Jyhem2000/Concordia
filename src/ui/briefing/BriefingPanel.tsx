@@ -17,7 +17,7 @@ type BriefingRowProps = {
   children: ReactNode
 }
 
-/** Briefing de 06h00 : ce que la nuit et la routine matinale ont changé (chap. 2 et 9) */
+/** Briefing de 06h00 : ce que la nuit et la routine matinale ont changé (chap. 2 et 10) */
 export default function BriefingPanel() {
   const briefing = useGameStore((s) => s.game.briefing)
   const day = useGameStore((s) => s.game.day)

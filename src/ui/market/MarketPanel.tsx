@@ -29,7 +29,7 @@ type QuantityButtonsProps = {
   variant: 'primary' | 'danger'
 }
 
-/** Couleur de chaque tier (chap. 9) */
+/** Couleur de chaque tier (chap. 10) */
 const tierColors: Record<Tier, string> = {
   0: 'border-green-500 text-green-300',
   1: 'border-yellow-500 text-yellow-300',
@@ -38,7 +38,7 @@ const tierColors: Record<Tier, string> = {
   4: 'border-violet-500 text-violet-300',
 }
 
-/** Tableau des cours : la boutique du jour, plus tous les produits en soute (chap. 9) */
+/** Tableau des cours : la boutique du jour, plus tous les produits en soute (chap. 10) */
 export default function MarketPanel() {
   const game = useGameStore((s) => s.game)
   const { t } = useI18n()
@@ -145,7 +145,7 @@ function Field({ label, wide = false, children }: FieldProps) {
   )
 }
 
-/** Curseurs d'achat / vente : +1, +5, MAX (chap. 9) */
+/** Curseurs d'achat / vente : +1, +5, MAX (chap. 10) */
 function QuantityButtons({ label, max, maxLabel, onPick, variant }: QuantityButtonsProps) {
   return (
     <span className="flex items-center gap-1">

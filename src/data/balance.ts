@@ -41,7 +41,7 @@ export const ICC_DAILY_ROUTE_GAIN_CAP = 4
 /** Nuit au relais routier du DSC (pas au bivouac de [D4]) */
 export const RELAY_SLEEP = { icc: 2, health: 5 }
 
-/** Le compte à rebours de l'audit s'affiche à partir de ce jour (chap. 9) */
+/** Le compte à rebours de l'audit s'affiche à partir de ce jour (chap. 10) */
 export const AUDIT_COUNTDOWN_DAY = 28
 
 type EndingRules = {
@@ -201,6 +201,8 @@ export const BRIBE = {
     { ratio: 3, bonus: 0.4 },
   ],
   droneCriticalFailure: 0.2,
+  /** Bonus si l'offre contient un produit apprécié des agents du district */
+  connivance: 0.1,
   fail: { fine: 0.5, iccLoss: 15, custodyDays: 1 },
 }
 

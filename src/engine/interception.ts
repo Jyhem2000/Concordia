@@ -5,13 +5,13 @@ import { TAGS } from '../data/tags.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import type { ActionError } from './actions.ts'
 import { breakdown, type Breakdown } from './breakdown.ts'
-import { baseValue, cargoUsed, isIllegal, maskedQty, tagShare, tierShare } from './cargo.ts'
+import { baseValue, cargoUsed, giveCrates, isIllegal, maskedQty, ownsCrates, paymentValue, tagShare, tierShare } from './cargo.ts'
 import { changeHealth, gainRouteIcc } from './gauges.ts'
 import { indexed } from './inflation.ts'
 import { keysOf } from './records.ts'
 import { createRng, type Rng } from './rng.ts'
 import { serveCustody } from './routine.ts'
-import type { CargoLot, GameState, Interception, InterceptionMove, InterceptionReport } from './types.ts'
+import type { CargoLot, CrateCount, GameState, Interception, InterceptionMove, InterceptionReport, Offer } from './types.ts'
 
 /*
  * Barrage de la BRC (chap. 6) et racket des milices en zone hors-réseau (chap. 4).
@@ -21,8 +21,10 @@ import type { CargoLot, GameState, Interception, InterceptionMove, InterceptionR
 
 // ─── Options disponibles ───
 
+export const NO_OFFER: Offer = { cash: 0, crates: [] }
+
 /** Raison pour laquelle une option n'est pas jouable maintenant, ou null */
-export function checkMove(state: GameState, move: InterceptionMove, offer = 0): ActionError | null {
+export function checkMove(state: GameState, move: InterceptionMove, offer: Offer = NO_OFFER): ActionError | null {
   const interception = state.interception
   if (!interception) return 'not-intercepted'
   const racket = interception.kind === 'racket'
@@ -34,8 +36,10 @@ export function checkMove(state: GameState, move: InterceptionMove, offer = 0): 
       return racket || interception.bluffFailed ? 'move-unavailable' : null
     case 'bribe':
       if (racket) return 'move-unavailable'
-      if (offer > state.cash) return 'not-enough-cash'
-      return offer < minimumOffer(state) ? 'offer-too-low' : null
+      if (!Number.isInteger(offer.cash) || offer.cash < 0) return 'invalid-amount'
+      if (offer.cash > state.cash) return 'not-enough-cash'
+      if (!ownsCrates(state.cargo, offer.crates)) return 'not-enough-cargo'
+      return offerValue(offer) < minimumOffer(state) ? 'offer-too-low' : null
     case 'flee':
       return null
     case 'eject':
@@ -43,12 +47,14 @@ export function checkMove(state: GameState, move: InterceptionMove, offer = 0): 
     case 'payToll':
       if (!racket) return 'move-unavailable'
       return toll(state) > state.cash ? 'not-enough-cash' : null
+    case 'payTollInKind':
+      return racket ? null : 'move-unavailable'
     case 'refuseToll':
       return racket ? null : 'move-unavailable'
   }
 }
 
-// ─── Chances (détaillables, chap. 9) ───
+// ─── Chances (détaillables, chap. 10) ───
 
 const stars = (state: GameState) => DISTRICTS[state.districtId].security
 
@@ -81,11 +87,23 @@ export function minimumOffer(state: GameState): number {
   return Math.ceil(bribeRate(state).total * BRIBE.minOfferRatio)
 }
 
-export function bribeChance(state: GameState, offer: number): Breakdown {
-  const ratio = offer / bribeRate(state).total
+/** Valeur d'une offre : Cash-Puce plus caisses à leur valeur en paiement */
+export function offerValue(offer: Offer): number {
+  return offer.cash + paymentValue(offer.crates)
+}
+
+/** L'offre contient un produit apprécié des agents de ce district */
+export function hasConnivance(state: GameState, offer: Offer): boolean {
+  const favorites = DISTRICTS[state.districtId].bribeFavorites
+  return offer.crates.some(({ productId, qty }) => qty > 0 && favorites.includes(productId))
+}
+
+export function bribeChance(state: GameState, offer: Offer): Breakdown {
+  const ratio = offerValue(offer) / bribeRate(state).total
   const offerBonus = BRIBE.offerBonuses.reduce((bonus, step) => (ratio >= step.ratio ? step.bonus : bonus), 0)
   const chance = breakdown('rule.bribe-base', BRIBE.base)
     .add('rule.offer', offerBonus)
+    .add('rule.connivance', hasConnivance(state, offer) ? BRIBE.connivance : 0)
     .add('rule.security-stars', -BRIBE.perExtraStar * (stars(state) - 1))
     .add('rule.bluff-failed', followUp(state.interception))
     .clamp(0, BRIBE.cap)
@@ -116,6 +134,30 @@ export function toll(state: GameState): number {
   return Math.round(RACKET.tollRate * baseValue(state.cargo))
 }
 
+/**
+ * Péage en nature : les milices prennent d'abord leurs produits favoris (dans l'ordre), puis les caisses
+ * les plus chères, jusqu'à couvrir le péage ; elles ne rendent pas la monnaie (chap. 4)
+ */
+export function tollInKind(state: GameState): CrateCount[] {
+  const due = toll(state)
+  const favorites = DISTRICTS[state.districtId].tollFavorites
+  const rank = (lot: CargoLot) => {
+    const favorite = favorites.indexOf(lot.productId)
+    return favorite === -1 ? favorites.length : favorite
+  }
+  const order = [...state.cargo].sort((a, b) => rank(a) - rank(b) || PRODUCTS[b.productId].basePrice - PRODUCTS[a.productId].basePrice)
+
+  const taken = new Map<CrateCount['productId'], number>()
+  let covered = 0
+  for (const lot of order) {
+    for (let crate = 0; crate < lot.qty && covered < due; crate++) {
+      taken.set(lot.productId, (taken.get(lot.productId) ?? 0) + 1)
+      covered += PRODUCTS[lot.productId].basePrice
+    }
+  }
+  return [...taken].map(([productId, qty]) => ({ productId, qty }))
+}
+
 /** Soute uniquement légale (ou vide) : la fouille n'est qu'une formalité */
 export function legalOnly(state: GameState): boolean {
   return !state.cargo.some(isIllegal)
@@ -134,7 +176,7 @@ type Ledger = Omit<InterceptionReport, 'move' | 'chance' | 'success' | 'over'>
 const emptyLedger = (): Ledger => ({ cash: 0, crates: 0, icc: 0, health: 0, chassis: 0, wanted: 0, custodyDays: 0, towBill: 0 })
 
 /** Joue une option déjà validée par `checkMove` */
-export function resolveMove(state: GameState, move: InterceptionMove, offer = 0): GameState {
+export function resolveMove(state: GameState, move: InterceptionMove, offer: Offer = NO_OFFER): GameState {
   const rng = createRng(state.rng)
   const ledger = emptyLedger()
   const roll = (chance: Breakdown) => rng.chance(chance.total)
@@ -159,7 +201,7 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer = 0)
     case 'bribe': {
       const chance = bribeChance(state, offer)
       // L'offre est perdue même en cas d'échec
-      const paid = pay(state, ledger, offer)
+      const paid = give(pay(state, ledger, offer.cash), ledger, offer.crates)
       if (roll(chance)) return report(paid, chance, true, true, false)
       const { fine, iccLoss, custodyDays } = BRIBE.fail
       return report(sanction(paid, ledger, fine, iccLoss, custodyDays), chance, false, true, true)
@@ -197,6 +239,9 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer = 0)
 
     case 'payToll':
       return report(pay(state, ledger, toll(state)), null, null, true, false)
+
+    case 'payTollInKind':
+      return report(give(state, ledger, tollInKind(state)), null, null, true, false)
 
     case 'refuseToll':
       return report(refuseToll(state, ledger), null, null, true, false)
@@ -258,6 +303,13 @@ function loot(cargo: readonly CargoLot[], qty: number): CargoLot[] {
     if (taken < lot.qty) kept.push({ ...lot, qty: lot.qty - taken })
   }
   return kept
+}
+
+/** Caisses données en paiement : elles quittent la soute */
+function give(state: GameState, ledger: Ledger, crates: readonly CrateCount[]): GameState {
+  const cargo = giveCrates(state.cargo, crates)
+  ledger.crates -= cargoUsed(state.cargo) - cargoUsed(cargo)
+  return { ...state, cargo }
 }
 
 function pay(state: GameState, ledger: Ledger, amount: number): GameState {
