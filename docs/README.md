@@ -56,13 +56,13 @@ Les docs décrivent le jeu complet ; tout n'est pas encore en jeu. Ce tableau di
 | 6 | Risque, Fiche S, barrage fixe et contrôle volant, toutes les options et modes d'éjection, garde à vue, bonus des véhicules, modules et équipiers | — |
 | 7 | Boutique, cours et tendance, quotas, prix de vente, paiement en nature, inflation, dette, avance de survie, collecte, compte offshore, flux et bonus de `[CREW-02]`, bonus d'influence de `[LOC-D2-1]` | — |
 | 8 | Événements globaux et locaux, rumeurs, contrecoups, Loterie (faux dossiers compris), aléas routiers, prédictions de Cassandre-88 | — |
-| 9 | — | Simulations, une fois le jeu complet |
+| 9 | Moteur de simulation, invariants, Novice, Aléatoire, marchand (8 plans × 3 tempéraments) ; campagnes Contrôle et 1 (`reports/`) | Plans à logique propre, objectifs de grande fin, campagnes 2 à 5, optimiseur |
 | 10 | Bandeau, téléscripteur, marché et fiche produit, carte, lieux, soir, briefing, barrage, aléa routier, objectifs | Vue véhicule et soute, filtres du marché, dégradation de l'interface selon l'ICC, manuel en jeu |
 
 ## Feuille de route
 Étapes restantes, dans l'ordre des dépendances :
-1. **Habillage et manuel du jeu** — interface restante (chap. 10), manuel du joueur en jeu, et refonte des docs à cette occasion : répartir le contenu de `07-economie.md` (marché, vente, argent) dans les autres chapitres, renommer et renuméroter les fichiers, puis mettre à jour par script tous les renvois « chap. N » (docs et commentaires du code).
-2. **Simulations** — campagnes du chap. 9 sur le jeu complet, sans interface, puis équilibrage.
+1. **Simulations** — campagnes du chap. 9 sur le jeu complet, sans interface, puis équilibrage. L'équilibrage peut changer des règles : l'habillage et le manuel viennent après.
+2. **Habillage et manuel du jeu** — interface restante (chap. 10), manuel du joueur en jeu, et refonte des docs à cette occasion : répartir le contenu de `07-economie.md` (marché, vente, argent) dans les autres chapitres, renommer et renuméroter les fichiers, puis mettre à jour par script tous les renvois « chap. N » (docs et commentaires du code).
 
 ## Règles de rédaction
 1. **Un chiffre, un seul endroit.** Une valeur (prix, %, durée…) n'est écrite que là où la donnée est définie. Un bonus est écrit chez ce qui le produit (le module, le véhicule, l'événement…) ; les formules ne font que citer la source.

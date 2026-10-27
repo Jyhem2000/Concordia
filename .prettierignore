@@ -4,3 +4,6 @@ package-lock.json
 
 # Docs de game design : formatage manuel
 docs
+
+# Rapports de simulation : générés, puis commentés à la main
+reports
