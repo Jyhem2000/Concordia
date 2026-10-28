@@ -1,6 +1,6 @@
 import { ShieldAlert, Skull } from 'lucide-react'
 import { useState } from 'react'
-import { BLUFF, BRIBE, DAMAGED_FACTOR, EJECT, FLEE, ICC_MAX, RACKET, SEARCH, WANTED } from '../../data/balance.ts'
+import { BLUFF, BRIBE, DAMAGED_FACTOR, EJECT, FINE, FLEE, ICC_MAX, RACKET, SEARCH, WANTED } from '../../data/balance.ts'
 import { DISTRICTS } from '../../data/districts.ts'
 import { TAGS } from '../../data/tags.ts'
 import { keysOf } from '../../engine/records.ts'
@@ -16,6 +16,7 @@ import {
   checkMove,
   compartmentDetection,
   ejectChance,
+  fineAmount,
   fleeConsequences,
   hiddenCargo,
   isLethalSearch,
@@ -69,11 +70,14 @@ export default function InterceptionScreen() {
   const custody = (days: number) => (days > 0 ? [t.interception.custody(days)] : [])
   const available = (move: InterceptionMove) => checkMove(game, move) !== 'move-unavailable'
 
+  // Amende : une part de la valeur des caisses saisies ; impayée faute de Cash-Puce, la garde à vue s'allonge
+  const fine = (rate: number) => t.interception.fine(pct(rate), credits(fineAmount(game, rate)))
+  const unpaid = (rate: number) => (fineAmount(game, rate) > game.cash ? [t.interception.unpaid(FINE.unpaidCustodyDays)] : [])
   const searchOutcome = sanction
-    ? [t.interception.sanction(pct(sanction.fine), icc(-sanction.iccLoss)), ...custody(sanction.custodyDays)]
+    ? [t.interception.sanction(fine(sanction.fineRate), icc(-sanction.iccLoss)), ...custody(sanction.custodyDays), ...unpaid(sanction.fineRate)]
     : [t.interception.formality(icc(SEARCH.legalIccGain))]
   // Amende de la fouille si le bluff échoue : le moteur la relève
-  const failedFine = searchSanction({ ...game, interception: { ...interception, bluffFailed: true } })?.fine ?? 0
+  const failedFine = searchSanction({ ...game, interception: { ...interception, bluffFailed: true } })?.fineRate ?? 0
   const { fail: caught } = FLEE
   // Dégâts et pertes annoncés avec l'équipement actuel (pare-buffles, transpondeur, plaque rotative)
   const fled = fleeConsequences(game)
@@ -122,7 +126,7 @@ export default function InterceptionScreen() {
             label={t.interception.moves.bluff}
             outcomes={[
               t.interception.bluffSuccess(icc(BLUFF.successIccGain)),
-              t.interception.bluffFailure(icc(-BLUFF.failIccLoss), pct(failedFine), signedPercent(-BLUFF.followUpPenalty, 0), available('flee')),
+              t.interception.bluffFailure(icc(-BLUFF.failIccLoss), fine(failedFine), signedPercent(-BLUFF.followUpPenalty, 0), available('flee')),
             ]}
           />
         )}
@@ -132,7 +136,11 @@ export default function InterceptionScreen() {
             label={t.interception.moves.bribe}
             chance={null}
             customAction
-            outcomes={[t.interception.bribeFailure(pct(BRIBE.fail.fine), icc(-BRIBE.fail.iccLoss)), ...custody(BRIBE.fail.custodyDays)]}
+            outcomes={[
+              t.interception.bribeFailure(fine(BRIBE.fail.fineRate), icc(-BRIBE.fail.iccLoss)),
+              ...custody(BRIBE.fail.custodyDays),
+              ...unpaid(BRIBE.fail.fineRate),
+            ]}
           >
             <BribeForm label={t.interception.bribe} />
           </MoveCard>
@@ -167,7 +175,7 @@ export default function InterceptionScreen() {
                       icc(-fled.iccLoss),
                       t.hud.wantedGain(WANTED.perOffense),
                     ),
-                    t.interception.fleeFailure(pct(caught.cashSeizure), icc(-caught.iccLoss), pv(fled.failChassis), pv(fled.failHealth)),
+                    t.interception.fleeFailure(fine(caught.fineRate), icc(-caught.iccLoss), pv(fled.failChassis), pv(fled.failHealth)),
                     ...custody(caught.custodyDays),
                   ]),
               ...cargoRisks,

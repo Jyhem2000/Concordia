@@ -1,4 +1,18 @@
-import { BLUFF, BRIBE, COMPARTMENT, EJECT, EMERGENCY_TOW, FLEE, FLYING_CHECK, HIGH_TIER, RACKET, SEARCH, SEDATION, WANTED } from '../data/balance.ts'
+import {
+  BLUFF,
+  BRIBE,
+  COMPARTMENT,
+  EJECT,
+  EMERGENCY_TOW,
+  FINE,
+  FLEE,
+  FLYING_CHECK,
+  HIGH_TIER,
+  RACKET,
+  SEARCH,
+  SEDATION,
+  WANTED,
+} from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
 import { PRODUCTS } from '../data/products.ts'
 import { TAGS } from '../data/tags.ts'
@@ -335,6 +349,7 @@ const emptyLedger = (): Ledger => ({
   jammerSeized: false,
   compartment: null,
   hiddenCrates: 0,
+  unpaidFine: 0,
 })
 
 /** Joue une option déjà validée par `checkMove` */
@@ -391,9 +406,9 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
       // L'offre est perdue même en cas d'échec
       const paid = give(pay(state, ledger, offer.cash), ledger, offer.crates)
       if (roll(chance)) return report(paid, chance, true, true, false)
-      const { fine, iccLoss, custodyDays } = BRIBE.fail
+      const { fineRate, iccLoss, custodyDays } = BRIBE.fail
       return report(
-        frisk(paid, (s) => sanction(s, ledger, fine, iccLoss, custodyDays)),
+        frisk(paid, (s) => sanction(s, ledger, fineRate, iccLoss, custodyDays)),
         chance,
         false,
         true,
@@ -419,12 +434,8 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
       // Le véhicule part en tête-à-queue : les inflammables non masqués peuvent exploser
       const blown = explode(prepared, ledger, rng)
       if (racket) return report(refuseToll(blown, ledger, rng), chance, false, true, false)
-      const { cashSeizure, iccLoss, chassisLoss, healthLoss, custodyDays } = FLEE.fail
-      const seized = pay(
-        frisk(blown, (s) => confiscate(s, ledger)),
-        ledger,
-        Math.round(blown.cash * cashSeizure),
-      )
+      const { fineRate, iccLoss, chassisLoss, healthLoss, custodyDays } = FLEE.fail
+      const seized = frisk(blown, (s) => seize(s, ledger, fineRate))
       const ram = ramFactor(state)
       const wrecked = loseHealth(
         loseChassis(loseIcc(seized, ledger, iccLoss), ledger, Math.floor(chassisLoss * ram)),
@@ -471,28 +482,40 @@ export function isLethalSearch(state: GameState): boolean {
 }
 
 /** Sanction de base d'une fouille effective, ou null si la soute est légale (simple formalité) */
-export function searchSanction(state: GameState): { fine: number; iccLoss: number; custodyDays: number } | null {
+export function searchSanction(state: GameState): { fineRate: number; iccLoss: number; custodyDays: number } | null {
   if (legalOnly(state)) return null
   const high = hasHighTier(state)
-  const { fine, iccLoss, custodyDays } = high ? SEARCH.high : SEARCH.low
+  const { fineRate, iccLoss, custodyDays } = high ? SEARCH.high : SEARCH.low
   // Après un bluff raté, l'amende de la fouille est relevée
   const failedFine = high ? BLUFF.failedFine.high : BLUFF.failedFine.low
-  return { fine: state.interception?.bluffFailed ? failedFine : fine, iccLoss, custodyDays }
+  return { fineRate: state.interception?.bluffFailed ? failedFine : fineRate, iccLoss, custodyDays }
+}
+
+/** Amende d'un taux donné si toute la soute illégale est saisie (double fond trouvé) : part de sa valeur au prix de base */
+export function fineAmount(state: GameState, rate: number): number {
+  return Math.round(rate * baseValue(state.cargo.filter(isIllegal)))
 }
 
 /** Fouille effective : formalité si la soute est légale, sinon sanction de base selon le tier */
 function search(state: GameState, ledger: Ledger, fineRaise: number): GameState {
   const base = searchSanction(state)
   if (!base) return gainIcc(state, ledger, SEARCH.legalIccGain)
-  return sanction(state, ledger, base.fine + fineRaise, base.iccLoss, base.custodyDays)
+  return sanction(state, ledger, base.fineRate + fineRaise, base.iccLoss, base.custodyDays)
 }
 
-/** Confiscation des caisses illégales, amende sur le Cash-Puce, perte d'ICC, garde à vue éventuelle */
+/** Confiscation des caisses illégales, amende sur leur valeur, perte d'ICC, garde à vue éventuelle */
 function sanction(state: GameState, ledger: Ledger, fineRate: number, iccLoss: number, custodyDays: number): GameState {
-  const confiscated = confiscate(state, ledger)
-  const fined = pay(confiscated, ledger, Math.round(confiscated.cash * fineRate))
+  const fined = seize(state, ledger, fineRate)
   noteCustody(ledger, custodyDays)
   return loseIcc(fined, ledger, iccLoss)
+}
+
+/** Saisie : confiscation de l'illégal et amende d'une part de sa valeur (prix de base), payée sur le Cash-Puce ; le reste est noté impayé */
+function seize(state: GameState, ledger: Ledger, fineRate: number): GameState {
+  const due = fineAmount(state, fineRate)
+  const paid = Math.min(due, state.cash)
+  ledger.unpaidFine += due - paid
+  return pay(confiscate(state, ledger), ledger, paid)
 }
 
 function confiscate(state: GameState, ledger: Ledger): GameState {
@@ -651,7 +674,9 @@ function finish(state: GameState, report: InterceptionReport, executed: boolean,
 
   // Brouilleur de drones découvert à la fouille : sabotage d'infrastructure, saisi, garde à vue (chap. 5)
   const jammer = searched ? mountedWith(towed.state, 'droneJammer') : undefined
-  const custodyDays = jammer ? Math.max(1, report.custodyDays) : report.custodyDays
+  // Amende impayée : la garde à vue s'allonge
+  const unpaid = report.unpaidFine > 0 ? FINE.unpaidCustodyDays : 0
+  const custodyDays = (jammer ? Math.max(1, report.custodyDays) : report.custodyDays) + unpaid
   const seized = jammer
     ? {
         ...towed.state,

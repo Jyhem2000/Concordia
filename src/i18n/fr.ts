@@ -175,11 +175,11 @@ export const fr = {
     index: (index: string) => `Indice d'inflation du jour ${index}`,
     sinceYesterday: (change: string) => `(${change} depuis hier)`,
     messages: [
-      // ─── Hygiène mentale, sédation & « Maman Aeterna » ───
+      // ─── Hygiène mentale, sédation & IA Aeterna ───
       'Un Citoyen-Livreur sourit, un Citoyen-Livreur produit.',
       'Toute émotion non déclarée est soumise à cotisation.',
-      'Le couvre-feu sanitaire protège ceux qui dorment. Fermez les yeux : Maman Aeterna veille.',
-      'Maman Aeterna ne vous punit jamais : elle optimise votre potentiel civique.',
+      'Le couvre-feu sanitaire protège ceux qui dorment. Fermez les yeux : Aeterna veille.',
+      'Aeterna ne vous punit jamais : elle optimise votre potentiel civique.',
       "Le sarcasme est une micro-agression envers l'harmonie collective. Choisissez la bienveillance.",
       'Vous semblez tendu, Citoyen. Avez-vous pris votre comprimé de Sourire+ ce matin ?',
       "Le libre arbitre est la première cause d'anxiété évitable.",
@@ -364,7 +364,7 @@ export const fr = {
       'EVT-R11': { situation: 'Nuage de désinfection aérienne : javel et sédatifs.', a: 'Apnée', b: "Arroser l'habitacle" },
       'EVT-R12': { situation: "Un drone-livreur s'est crashé sur la chaussée, batterie intacte.", a: 'Signaler (déposition au poste)', b: 'Piller' },
       'EVT-R13': { situation: 'Une citerne du DSC en panne, son chauffeur novice en larmes.', a: 'Aider', b: 'Passer' },
-      'EVT-R14': { situation: "Péage caritatif : autocollants « J'aime Maman Aeterna ».", a: 'Acheter', b: 'Refuser' },
+      'EVT-R14': { situation: "Péage caritatif : autocollants « J'aime Aeterna ».", a: 'Acheter', b: 'Refuser' },
       'EVT-R15': { situation: 'Un autre contrebandier propose un échange dans un angle mort.', a: 'Troc aveugle', b: 'Refuser' },
     } satisfies Record<RoadEventId, RoadTexts>,
   },
@@ -599,7 +599,7 @@ export const fr = {
     night: { festive: 'Se vend mieux la nuit', diurnal: 'Se vend moins bien la nuit' },
     legal: 'Fouille : rien à craindre, simple formalité',
     seizure: (fine: string, icc: number, custodyDays: number, high: boolean) =>
-      `Saisie : confiscation, amende de ${fine} du Cash-Puce, ICC −${icc}${high ? `, garde à vue ${custodyDays} jour${custodyDays > 1 ? 's' : ''} (haut tier)` : ''}`,
+      `Saisie : confiscation, amende de ${fine} de leur valeur (prix de base), ICC −${icc}${high ? `, garde à vue ${custodyDays} jour${custodyDays > 1 ? 's' : ''} (haut tier)` : ''}`,
     bribeFavorite: (districts: string) => `Apprécié des agents de ${districts} : connivence à la corruption`,
     tollFavorite: (districts: string) => `Pris en premier par les milices de ${districts}`,
     strong: (districts: string) => `Forte demande : ${districts}`,
@@ -653,7 +653,10 @@ export const fr = {
     forceThrough: 'Forcer le passage',
     lethal: (product: string) => `La fouille trouvera « ${product} » : exécution sommaire.`,
     formality: (icc: string) => `Soute légale : simple formalité, ICC ${icc}.`,
-    sanction: (fine: string, icc: string) => `Confiscation de l'illégal, amende de ${fine} du Cash-Puce, ICC ${icc}.`,
+    sanction: (fine: string, icc: string) => `Confiscation de l'illégal, amende de ${fine}, ICC ${icc}.`,
+    fine: (rate: string, amount: string) => `${rate} de la valeur saisie (≈ ${amount} si tout est saisi)`,
+    unpaid: (days: number) =>
+      `Cash-Puce insuffisant pour l'amende : il part en entier, et la garde à vue s'allonge de ${days} jour${days > 1 ? 's' : ''}.`,
     custody: (days: number) => `Garde à vue : ${days} jour${days > 1 ? 's' : ''}.`,
     bluffSuccess: (icc: string) => `Succès : tout passe, ICC ${icc}.`,
     bluffFailure: (icc: string, fine: string, penalty: string, canFlee: boolean) =>
@@ -685,7 +688,7 @@ export const fr = {
     fleeSuccess: (chassis: string, icc: string, wanted: string) => `Succès : la cargaison est sauvée, châssis ${chassis}, ICC ${icc}, ${wanted}.`,
     fleeSuccessRacket: (chassis: string) => `Succès : passage, châssis ${chassis}.`,
     fleeFailure: (seizure: string, icc: string, chassis: string, health: string) =>
-      `Échec : confiscation, saisie de ${seizure} du Cash-Puce, ICC ${icc}, châssis ${chassis}, Santé ${health}.`,
+      `Échec : confiscation, amende de ${seizure}, ICC ${icc}, châssis ${chassis}, Santé ${health}.`,
     fleeFailureRacket: 'Échec : les miliciens appliquent la sanction du refus.',
     ejectMode: {
       trapdoor: 'Trappe de largage (égouts)',
@@ -696,7 +699,7 @@ export const fr = {
       `Succès : l'illégal file aux égouts, sans dégât ; demain à 06h00, des complices en rapportent entre 0 et ${recovery}. Trappe indisponible ${cooldown} jours.`,
     ejectCrusher: 'Succès : la contrebande est dissoute dans la benne, sans dégât ni récupération.',
     ejectSuccess: (chassis: string) => `Succès : l'illégal finit dans une ruelle, la fouille ne trouve rien. Châssis ${chassis}.`,
-    ejectFailure: (raise: string, icc: string) => `Échec : sanction de base, amende +${raise}, ICC ${icc} de plus.`,
+    ejectFailure: (raise: string, icc: string) => `Échec : sanction de base, amende relevée de ${raise} de la valeur saisie, ICC ${icc} de plus.`,
     toll: (amount: string) => `Péage : ${amount}.`,
     refuse: (share: string, health: string, chassis: string) =>
       `Pillage de ${share} de la soute (les caisses les plus chères), Santé ${health}, châssis ${chassis}.`,
@@ -722,6 +725,7 @@ export const fr = {
     sacrificed: 'dont caisses sacrifiées',
     custody: (days: number) => `Garde à vue : ${days} jour${days > 1 ? 's' : ''}, sortie à 20h00.`,
     tow: (bill: string) => `Châssis à 0 : dépannage d'urgence facturé ${bill}.`,
+    unpaidFine: (amount: string, days: number) => `Amende impayée (${amount}) : garde à vue prolongée de ${days} jour${days > 1 ? 's' : ''}.`,
     dismiss: 'Compris',
   },
 
@@ -745,7 +749,7 @@ export const fr = {
     exposed: (crates: number, cost: string, hidden: number) =>
       `Soute exposée : ${crates} caisse${crates > 1 ? 's' : ''} illégale${crates > 1 ? 's' : ''}, payée${crates > 1 ? 's' : ''} ${cost}${hidden > 0 ? `, dont ${hidden} au double fond` : ''}.`,
     exposedSanction: (fine: string, custodyDays: number) =>
-      `Une saisie les confisque, avec une amende de ${fine} du Cash-Puce${custodyDays > 0 ? ` et une garde à vue (haut tier à bord)` : ''}.`,
+      `Une saisie les confisque, avec une amende de ${fine}${custodyDays > 0 ? ` et une garde à vue (haut tier à bord)` : ''}.`,
     neverSeen: 'jamais vu',
     blurred: (low: string, high: string) => `${low} – ${high}`,
     patrol: 'Ronde renforcée (révélée par Vance)',

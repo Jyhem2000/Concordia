@@ -6,7 +6,7 @@ import { planTravel } from '../../engine/actions.ts'
 import { averageCost } from '../../engine/cargo.ts'
 import { crewEffect, isMemoryBlurred } from '../../engine/crew.ts'
 import { blurredQuote, estimatedUnitSale, lastSeen, productStatus } from '../../engine/market.ts'
-import { exposure, flyingCheckShare } from '../../engine/interception.ts'
+import { exposure, fineAmount, flyingCheckShare } from '../../engine/interception.ts'
 import { checkDelivery, deliveryCrates, deliveryFee, deliveryOffer } from '../../engine/delivery.ts'
 import { riskBreakdown } from '../../engine/risk.ts'
 import type { DistrictId } from '../../engine/types.ts'
@@ -90,7 +90,11 @@ function Exposure() {
   if (crates === 0 || !sanction) return null
   return (
     <p className="px-3 pt-2 text-xs text-amber-200">
-      {t.travel.exposed(crates, credits(cost), hidden)} {t.travel.exposedSanction(percent(sanction.fine, 0), sanction.custodyDays)}
+      {t.travel.exposed(crates, credits(cost), hidden)}{' '}
+      {t.travel.exposedSanction(
+        t.interception.fine(percent(sanction.fineRate, 0), credits(fineAmount(game, sanction.fineRate))),
+        sanction.custodyDays,
+      )}
     </p>
   )
 }

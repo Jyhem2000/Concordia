@@ -393,6 +393,8 @@ export type InterceptionReport = {
   towBill: number
   /** Brouilleur de drones découvert à la fouille et saisi */
   jammerSeized: boolean
+  /** Part de l'amende restée impayée faute de Cash-Puce : garde à vue prolongée */
+  unpaidFine: number
   /** Double fond : gardé (non trouvé à la fouille, ou éjection), trouvé, ou sans objet */
   compartment: 'kept' | 'found' | null
   /** Caisses sauvées par le double fond */

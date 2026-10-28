@@ -1,11 +1,21 @@
-import { DEBT_DAILY_RATE, DEBT_LATE, GAME_LENGTH_DAYS, GRINDER, HIGH_TIER, SALE_COMMISSION, SURVIVAL_ADVANCE } from '../../src/data/balance.ts'
+import {
+  DEBT_DAILY_RATE,
+  DEBT_LATE,
+  FLEE,
+  GAME_LENGTH_DAYS,
+  GRINDER,
+  HIGH_TIER,
+  SALE_COMMISSION,
+  SEARCH,
+  SURVIVAL_ADVANCE,
+} from '../../src/data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../src/data/districts.ts'
 import { KARMA } from '../../src/data/locations.ts'
 import { ROAD_EVENTS } from '../../src/data/events.ts'
 import { PRODUCT_IDS, PRODUCTS, SEALED_PRODUCT } from '../../src/data/products.ts'
 import { MODULES, VEHICLES } from '../../src/data/vehicles.ts'
 import { canSiphon, checkForceCurfew, checkService, fuelPrice, maxBuy, planTravel, pumpClosed, type Action } from '../../src/engine/actions.ts'
-import { cargoUsed, isIllegal, ownedQty, taggedQty } from '../../src/engine/cargo.ts'
+import { baseValue, cargoUsed, isIllegal, ownedQty, taggedQty } from '../../src/engine/cargo.ts'
 import { daysBeforeRot, paymentValue } from '../../src/engine/condition.ts'
 import { checkHire, crewEffect, hireFee, salary } from '../../src/engine/crew.ts'
 import { checkBuyModule, checkBuyVehicle, ejectMode, missingChassis, mountedEffect, repairPrice } from '../../src/engine/equipment.ts'
@@ -19,6 +29,7 @@ import {
   compartmentDetection,
   ejectChance,
   fleeChance,
+  fineAmount,
   fleeConsequences,
   hiddenCargo,
   minimumOffer,
@@ -248,8 +259,9 @@ function debtVisit(view: GameState, reserve: number): number {
 }
 
 /** Perte espérée si un barrage tourne mal, pour une soute dont l'illégal vaut `illegal` */
-function exposure(view: GameState, illegal: number): number {
-  return illegal === 0 ? 0 : illegal + view.cash * 0.25 + VALUE.custodyDay
+function exposure(cargo: GameState['cargo']): number {
+  const illegal = illegalValue(cargo)
+  return illegal === 0 ? 0 : illegal + SEARCH.low.fineRate * baseValue(cargo.filter(isIllegal)) + VALUE.custodyDay
 }
 
 // ─── Ventes ───
@@ -480,7 +492,7 @@ function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route
           (total, lot) => total + lot.qty * Math.max(0, estimatedSale(view, to, lot.productId) * saleFactor(view, lot) - lot.unitCost),
           0,
         )
-        let value = carried + margin - tripRisk * exposure(view, illegal) - fuelCost
+        let value = carried + margin - tripRisk * exposure(planned) - fuelCost
         // Marchandise déjà en soute et trajet trop risqué : seulement en dernier recours
         if (tooRisky) value -= 1_000_000
         if (night && !view.mission) value -= VALUE.wantedLevel
@@ -554,7 +566,10 @@ function barrage(view: GameState, plan: Plan, temperament: Temperament): Action 
   // Double fond : ses caisses échappent à la fouille quand les agents ne le trouvent pas, et à l'éjection
   const hidden = illegalValue(hiddenCargo(view).hidden)
   const seized = illegal - hidden * (1 - compartmentDetection(view).total)
-  const searchLoss = seized + (sanction ? sanction.fine * view.cash + sanction.iccLoss * VALUE.iccPoint + custody(sanction.custodyDays) : 0)
+  // Amende : une part de la valeur saisie (prix de base) ; on l'estime sur la part que la fouille prendrait
+  const seizedShare = illegal > 0 ? seized / illegal : 0
+  const fineOf = (rate: number) => fineAmount(view, rate) * seizedShare
+  const searchLoss = seized + (sanction ? fineOf(sanction.fineRate) + sanction.iccLoss * VALUE.iccPoint + custody(sanction.custodyDays) : 0)
   const options: { action: Action; loss: number }[] = []
   if (!checkMove(view, 'search')) options.push({ action: { type: 'intercept', move: 'search' }, loss: searchLoss })
 
@@ -569,7 +584,12 @@ function barrage(view: GameState, plan: Plan, temperament: Temperament): Action 
   if (view.health > flight.failHealth + 10) {
     const success = ((flight.chassis.min + flight.chassis.max) / 2) * VALUE.chassisPoint + VALUE.wantedLevel + flight.iccLoss * VALUE.iccPoint
     const failure =
-      seized + view.cash * 0.4 + custody(1) + flight.failHealth * VALUE.healthPoint + flight.failChassis * VALUE.chassisPoint + 25 * VALUE.iccPoint
+      seized +
+      fineOf(FLEE.fail.fineRate) +
+      custody(1) +
+      flight.failHealth * VALUE.healthPoint +
+      flight.failChassis * VALUE.chassisPoint +
+      25 * VALUE.iccPoint
     const runnerBias = plan.runner ? 0.8 : 1
     const chance = fleeChance(view).total
     if (!checkMove(view, 'flee')) {

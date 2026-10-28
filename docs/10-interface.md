@@ -30,8 +30,8 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
 | Palier (chap. 2) | Rendu | Exemple de message |
 | :--- | :--- | :--- |
 | Citoyen Or | Interface nette et dorée, couleurs apaisantes, ton maternel. Jauge **verte**. | *« Bonne route, Citoyen-Livreur ! Pensez à vous hydrater. »* |
-| Citoyen ordinaire | Interface standard, ton faussement enjoué. Jauge **jaune**. | *« Maman Aeterna est fière de vous. Presque. »* |
-| Citoyen sous réserve | Légères scanlines, ton passif-agressif. Jauge **orange**. | *« Votre rythme cardiaque suggère une déviance fiscale, Maman Aeterna vous observe. »* |
+| Citoyen ordinaire | Interface standard, ton faussement enjoué. Jauge **jaune**. | *« Aeterna est fière de vous. Presque. »* |
+| Citoyen sous réserve | Légères scanlines, ton passif-agressif. Jauge **orange**. | *« Votre rythme cardiaque suggère une déviance fiscale, Aeterna vous observe. »* |
 | Déviant notoire | Glitchs chromatiques, ● REC rouge clignotant, bip sonar aux changements d'onglet, ton froid. Jauge **rouge clignotante**. | *« Anomalie civique confirmée. Les unités de la BRC convergent vers votre secteur. »* |
 
 ## Vue « Véhicule, soute & équipage »
@@ -54,7 +54,7 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
 * **Fiche produit :** sous le nom, les tags du produit en pastilles ; une fiche dépliable détaille, sans rien cacher :
   * l'effet de chaque tag (risque ajouté ou retiré et où, malus de bluff, fraîcheur, casse, explosion, largage), le masquage d'un Tier 0 ;
   * les actions du produit (aide au bluff, dopage, nuit blanche, refroidissement, pass d'identité, balise) ;
-  * la sanction en cas de saisie (formalité, amende, ou garde à vue pour le haut tier) ;
+  * la sanction en cas de saisie (formalité, amende sur la valeur saisie, ou garde à vue pour le haut tier) ;
   * les agents qui l'apprécient (connivence) et les milices qui le prennent en premier ;
   * où le vendre : districts en Forte demande et districts producteurs (profil public, chap. 7, vices de la Loterie compris), et le meilleur cours mémorisé ailleurs avec son ancienneté ;
   * l'**historique des cours** observés dans le district actuel, en courbe, avec le cours normal (sans tendance ni événement) en repère ; la valeur de chaque jour au survol, et le tableau des valeurs pour les lecteurs d'écran.

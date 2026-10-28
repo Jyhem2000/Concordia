@@ -4,6 +4,7 @@ import {
   BRIBE,
   COMPARTMENT,
   CUSTODY,
+  FINE,
   EJECT,
   EMERGENCY_TOW,
   FLEE,
@@ -77,7 +78,8 @@ describe('fouille', () => {
   it('confisque l’illégal de bas tier et met une amende', () => {
     const state = run(stopped([lot('T0-01', 2), lot('T2-01', 3)], { rng: LOW_ROLL_RNG }), { type: 'intercept', move: 'search' })
     expect(state.cargo).toEqual([lot('T0-01', 2)])
-    expect(state.cash).toBe(10_000 * (1 - SEARCH.low.fine))
+    // Amende : une part de la valeur des caisses saisies, au prix de base
+    expect(state.cash).toBe(10_000 - Math.round(SEARCH.low.fineRate * 3 * PRODUCTS['T2-01'].basePrice))
     expect(state.icc).toBe(100 - SEARCH.low.iccLoss - COMPARTMENT.foundIccLoss)
     expect(state.day).toBe(5)
     expect(defined(state.interceptionReport)).toMatchObject({ compartment: 'found', hiddenCrates: 0 })
@@ -94,6 +96,13 @@ describe('fouille', () => {
     const state = run(stopped([lot('T3-01', 1)], { day: GAME_LENGTH_DAYS, rng: LOW_ROLL_RNG }), { type: 'intercept', move: 'search' })
     expect(state.status).toBe('finished')
     expect(state.ending?.id).toBe('bio-bricks')
+  })
+
+  it('prolonge la garde à vue quand le Cash-Puce ne couvre pas l’amende', () => {
+    const state = run(stopped([lot('T2-01', 5)], { cash: 100, rng: LOW_ROLL_RNG }), { type: 'intercept', move: 'search' })
+    expect(state.cash).toBe(0)
+    expect(defined(state.interceptionReport)).toMatchObject({ unpaidFine: Math.round(SEARCH.low.fineRate * 5 * PRODUCTS['T2-01'].basePrice) - 100 })
+    expect(state.interceptionReport?.custodyDays).toBe(SEARCH.low.custodyDays + FINE.unpaidCustodyDays)
   })
 
   it('exécute le joueur si la fouille trouve le produit fatal', () => {
@@ -121,7 +130,8 @@ describe('double fond (chap. 5)', () => {
   it('non trouvé, juge la sanction sur la soute visible', () => {
     // Le haut tier est caché : sanction de bas tier, pas de garde à vue
     const mixed = run(stopped([lot('T1-01', 3), lot('T3-01', 1)], { rng: HIGH_ROLL_RNG }), { type: 'intercept', move: 'search' })
-    expect(mixed).toMatchObject({ day: 5, icc: 100 - SEARCH.low.iccLoss, cash: 10_000 * (1 - SEARCH.low.fine) })
+    const visible = (3 - (hidden - 1)) * PRODUCTS['T1-01'].basePrice
+    expect(mixed).toMatchObject({ day: 5, icc: 100 - SEARCH.low.iccLoss, cash: 10_000 - Math.round(SEARCH.low.fineRate * visible) })
     // Tout l'illégal est caché : simple formalité
     const clean = run(stopped([lot('T0-01', 2), lot('T2-01', hidden)], { icc: 80, rng: HIGH_ROLL_RNG }), { type: 'intercept', move: 'search' })
     expect(clean).toMatchObject({ cash: 10_000, icc: 80 + SEARCH.legalIccGain })
@@ -152,7 +162,9 @@ describe('bluff', () => {
     expect(fleeChance(state).total).toBeCloseTo(fleeChance(before).total - BLUFF.followUpPenalty)
 
     const searched = run(state, { type: 'intercept', move: 'search' })
-    expect(searched.cash).toBe(10_000 * (1 - BLUFF.failedFine.low))
+    // Tirage haut : le double fond n'est pas trouvé, l'amende porte sur les caisses visibles
+    const visible = 3 - VEHICLES['VEH-01'].hiddenCompartment
+    expect(searched.cash).toBe(10_000 - Math.round(BLUFF.failedFine.low * visible * PRODUCTS['T2-01'].basePrice))
   })
 })
 
@@ -164,7 +176,8 @@ describe('corruption', () => {
     expect(errorOf(state, { type: 'intercept', move: 'bribe', offer: cash(minimumOffer(state) - 1) })).toBe('offer-too-low')
     const offer = bribeRate(state).total
     const failed = run(state, { type: 'intercept', move: 'bribe', offer: cash(offer) })
-    expect(failed.cash).toBe(Math.round((10_000 - offer) * (1 - BRIBE.fail.fine)))
+    const visible = 3 - VEHICLES['VEH-01'].hiddenCompartment
+    expect(failed.cash).toBe(10_000 - offer - Math.round(BRIBE.fail.fineRate * visible * PRODUCTS['T2-01'].basePrice))
     expect(failed.icc).toBe(100 - BRIBE.fail.iccLoss)
   })
 

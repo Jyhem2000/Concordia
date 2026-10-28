@@ -1,6 +1,6 @@
 import { ClipboardList } from 'lucide-react'
 import { useState } from 'react'
-import { ICC_MAX } from '../../data/balance.ts'
+import { FINE, ICC_MAX } from '../../data/balance.ts'
 import type { InterceptionReport } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -67,6 +67,7 @@ function ReportLines({ report }: ReportLinesProps) {
       ))}
       {report.custodyDays > 0 && <li className="text-red-300">{t.report.custody(report.custodyDays)}</li>}
       {report.towBill > 0 && <li className="text-red-300">{t.report.tow(credits(report.towBill))}</li>}
+      {report.unpaidFine > 0 && <li className="text-red-300">{t.report.unpaidFine(credits(report.unpaidFine), FINE.unpaidCustodyDays)}</li>}
       {report.jammerSeized && <li className="text-red-300">{t.report.jammerSeized}</li>}
       {report.compartment === 'kept' && <li className="text-green-400">{t.report.compartmentKept(report.hiddenCrates)}</li>}
       {report.compartment === 'found' && <li className="text-red-300">{t.report.compartmentFound}</li>}

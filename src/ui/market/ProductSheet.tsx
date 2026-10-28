@@ -67,7 +67,7 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
     cargo: [{ productId, qty: 1, unitCost: 0, travelled: true, boughtDay: game.day, damaged: false }],
   })
   const seizure = sanction
-    ? t.sheet.seizure(percent(sanction.fine, 0), sanction.iccLoss, sanction.custodyDays, sanction.custodyDays > 0)
+    ? t.sheet.seizure(percent(sanction.fineRate, 0), sanction.iccLoss, sanction.custodyDays, sanction.custodyDays > 0)
     : t.sheet.legal
 
   // Qui l'apprécie : connivence des agents, priorité des milices (chap. 6 et 7)

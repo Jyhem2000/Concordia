@@ -122,5 +122,5 @@
 | `[EVT-R12]` | **Drone-livreur crashé**, batterie intacte. | Signaler (déposition au poste) : 1 ration, petit gain d'ICC | Piller : des ₡, perte d'ICC |
 | **Rencontres louches** | | | |
 | `[EVT-R13]` | **Citerne du DSC en panne**, chauffeur novice en larmes. | Aider : perte de Santé, des rations | Passer : aucun effet |
-| `[EVT-R14]` | **Péage caritatif** : autocollants « J'aime Maman Aeterna ». | Acheter : des ₡, gain d'ICC | Refuser : perte d'ICC |
+| `[EVT-R14]` | **Péage caritatif** : autocollants « J'aime Aeterna ». | Acheter : des ₡, gain d'ICC | Refuser : perte d'ICC |
 | `[EVT-R15]` | **Échange d'angle mort** avec un autre contrebandier. | Troc aveugle : des ₡ contre 1 caisse aléatoire de Tier 2 (place libre requise) | Refuser : aucun effet |
