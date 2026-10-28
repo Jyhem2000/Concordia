@@ -6,27 +6,27 @@
 
 | Élément | Plan de référence | Usage | Survie sans → avec (écart) | Effet sur la survie | Score moyen sans → avec (écart) | Effet sur le score |
 | :--- | :--- | ---: | ---: | :--- | ---: | :--- |
-| VEH-02 | Couverture légale · Équilibré | 45 % | 86 % → 85 % (−1 pts ± 1) | neutre | 33 497 ₡ → 43 299 ₡ (+9 803 ₡ ± 5 345 ₡) | positif |
-| VEH-03 | Chaîne du froid · Équilibré | 4 % | 81 % → 80 % (−1 pts ± 1) | négatif | 11 532 ₡ → 9 224 ₡ (−2 308 ₡ ± 1 470 ₡) | négatif |
-| VEH-04 | Haut tier · Casse-cou | 19 % | 65 % → 65 % (+0 pts ± 1) | neutre | 55 550 ₡ → 50 676 ₡ (−4 874 ₡ ± 8 282 ₡) | neutre |
-| MOD-01 | Chaîne du froid · Équilibré | 35 % | 81 % → 80 % (−1 pts ± 1) | neutre | 14 124 ₡ → 9 224 ₡ (−4 900 ₡ ± 2 153 ₡) | négatif |
-| MOD-02 | Couverture légale · Équilibré | 58 % | 86 % → 85 % (−1 pts ± 1) | neutre | 45 419 ₡ → 43 299 ₡ (−2 120 ₡ ± 5 463 ₡) | neutre |
-| MOD-03 | Électronique · Équilibré | 39 % | 85 % → 85 % (+0 pts ± 1) | neutre | 30 909 ₡ → 27 180 ₡ (−3 729 ₡ ± 3 170 ₡) | négatif |
-| MOD-04 | Nuit festive · Équilibré | 71 % | 82 % → 82 % (−0 pts ± 2) | neutre | 24 033 ₡ → 20 542 ₡ (−3 491 ₡ ± 3 388 ₡) | négatif |
-| MOD-05 | Nuit festive + plaque · Casse-cou | 34 % | 62 % → 62 % (−0 pts ± 2) | neutre | 32 506 ₡ → 25 045 ₡ (−7 462 ₡ ± 5 572 ₡) | négatif |
-| MOD-06 | Nuit festive · Équilibré | 44 % | 82 % → 82 % (+0 pts ± 1) | neutre | 25 373 ₡ → 20 542 ₡ (−4 831 ₡ ± 3 013 ₡) | négatif |
-| MOD-07 | Haut tier · Équilibré | 60 % | 84 % → 83 % (−1 pts ± 1) | neutre | 29 231 ₡ → 31 806 ₡ (+2 575 ₡ ± 3 797 ₡) | neutre |
-| MOD-08 | Corruption · Équilibré | 17 % | 81 % → 81 % (+0 pts ± 0) | neutre | 23 462 ₡ → 20 196 ₡ (−3 266 ₡ ± 2 500 ₡) | négatif |
-| MOD-09 | Fuite au sommet · Casse-cou | 41 % | 67 % → 66 % (−1 pts ± 2) | neutre | 75 220 ₡ → 62 119 ₡ (−13 101 ₡ ± 8 965 ₡) | négatif |
-| CREW-01 | Corruption · Équilibré | 65 % | 82 % → 81 % (−1 pts ± 1) | neutre | 25 197 ₡ → 20 196 ₡ (−5 000 ₡ ± 3 675 ₡) | négatif |
-| CREW-02 | Rentier · Équilibré | 71 % | 84 % → 82 % (−2 pts ± 1) | négatif | 33 793 ₡ → 39 833 ₡ (+6 040 ₡ ± 5 024 ₡) | positif |
-| CREW-03 | Chaîne du froid · Équilibré | 59 % | 81 % → 80 % (−1 pts ± 2) | neutre | 22 751 ₡ → 9 224 ₡ (−13 527 ₡ ± 3 100 ₡) | négatif |
-| Hachoir de Viktor | Chaîne du froid · Équilibré | 1 % | 80 % → 80 % (+0 pts ± 0) | neutre | 9 158 ₡ → 9 224 ₡ (+66 ₡ ± 128 ₡) | neutre |
-| Avance de survie | Sans build · Équilibré | 25 % | 74 % → 84 % (+9 pts ± 3) | positif | 24 983 ₡ → 27 129 ₡ (+2 146 ₡ ± 1 315 ₡) | positif |
-| Morgue : chirurgie | Sans build · Casse-cou | 5 % | 66 % → 66 % (+0 pts ± 1) | neutre | 45 218 ₡ → 45 691 ₡ (+473 ₡ ± 1 723 ₡) | neutre |
-| Morgue : certificat | Sans build · Équilibré | 2 % | 84 % → 83 % (−0 pts ± 0) | neutre | 27 129 ₡ → 26 924 ₡ (−205 ₡ ± 301 ₡) | neutre |
-| Morgue : laissez-passer | Sans build · Équilibré | 34 % | 84 % → 83 % (−0 pts ± 1) | neutre | 27 129 ₡ → 24 987 ₡ (−2 142 ₡ ± 1 361 ₡) | négatif |
-| Karma-Cham | Sans build · Équilibré | 23 % | 84 % → 84 % (+0 pts ± 1) | neutre | 27 129 ₡ → 25 137 ₡ (−1 992 ₡ ± 1 690 ₡) | négatif |
-| Velvet-Silo : enchères | Haut tier · Casse-cou | 43 % | 65 % → 68 % (+2 pts ± 2) | positif | 50 676 ₡ → 58 634 ₡ (+7 957 ₡ ± 10 574 ₡) | neutre |
-| Velvet-Silo : chantage | Sans build · Équilibré | 0 % | 84 % → 83 % (−0 pts ± 0) | neutre | 27 129 ₡ → 27 066 ₡ (−63 ₡ ± 124 ₡) | neutre |
-| Dilution en Tier 0 | Couverture légale · Équilibré | 100 % | 82 % → 85 % (+4 pts ± 4) | neutre | 27 534 ₡ → 43 299 ₡ (+15 765 ₡ ± 6 835 ₡) | positif |
+| VEH-02 | Couverture légale · Équilibré | 44 % | 88 % → 89 % (+0 pts ± 1) | neutre | 38 338 ₡ → 47 309 ₡ (+8 971 ₡ ± 5 328 ₡) | positif |
+| VEH-03 | Chaîne du froid · Équilibré | 2 % | 83 % → 83 % (−0 pts ± 1) | neutre | 12 125 ₡ → 11 528 ₡ (−597 ₡ ± 1 309 ₡) | neutre |
+| VEH-04 | Haut tier · Casse-cou | 20 % | 74 % → 74 % (+0 pts ± 2) | neutre | 77 009 ₡ → 71 072 ₡ (−5 937 ₡ ± 13 587 ₡) | neutre |
+| MOD-01 | Chaîne du froid · Équilibré | 31 % | 83 % → 83 % (+0 pts ± 1) | neutre | 14 268 ₡ → 11 528 ₡ (−2 740 ₡ ± 1 920 ₡) | négatif |
+| MOD-02 | Couverture légale · Équilibré | 55 % | 89 % → 89 % (−0 pts ± 1) | neutre | 43 785 ₡ → 47 309 ₡ (+3 525 ₡ ± 5 287 ₡) | neutre |
+| MOD-03 | Électronique · Équilibré | 37 % | 84 % → 84 % (+0 pts ± 1) | neutre | 34 195 ₡ → 27 064 ₡ (−7 132 ₡ ± 3 539 ₡) | négatif |
+| MOD-04 | Nuit festive · Équilibré | 70 % | 83 % → 83 % (−0 pts ± 2) | neutre | 28 495 ₡ → 25 535 ₡ (−2 960 ₡ ± 3 713 ₡) | neutre |
+| MOD-05 | Nuit festive + plaque · Casse-cou | 33 % | 70 % → 71 % (+1 pts ± 2) | neutre | 46 968 ₡ → 42 086 ₡ (−4 882 ₡ ± 6 225 ₡) | neutre |
+| MOD-06 | Nuit festive · Équilibré | 45 % | 83 % → 83 % (−0 pts ± 1) | neutre | 31 887 ₡ → 25 535 ₡ (−6 352 ₡ ± 2 709 ₡) | négatif |
+| MOD-07 | Haut tier · Équilibré | 61 % | 85 % → 85 % (+1 pts ± 1) | neutre | 33 594 ₡ → 32 310 ₡ (−1 283 ₡ ± 3 725 ₡) | neutre |
+| MOD-08 | Corruption · Équilibré | 14 % | 84 % → 85 % (+1 pts ± 1) | neutre | 25 302 ₡ → 22 948 ₡ (−2 354 ₡ ± 2 119 ₡) | négatif |
+| MOD-09 | Fuite au sommet · Casse-cou | 40 % | 74 % → 73 % (−1 pts ± 1) | neutre | 99 410 ₡ → 93 742 ₡ (−5 668 ₡ ± 10 361 ₡) | neutre |
+| CREW-01 | Corruption · Équilibré | 69 % | 85 % → 85 % (−1 pts ± 2) | neutre | 30 440 ₡ → 22 948 ₡ (−7 492 ₡ ± 3 353 ₡) | négatif |
+| CREW-02 | Rentier · Équilibré | 70 % | 82 % → 82 % (+1 pts ± 2) | neutre | 35 373 ₡ → 37 215 ₡ (+1 842 ₡ ± 5 060 ₡) | neutre |
+| CREW-03 | Chaîne du froid · Équilibré | 64 % | 84 % → 83 % (−1 pts ± 1) | neutre | 24 290 ₡ → 11 528 ₡ (−12 763 ₡ ± 2 878 ₡) | négatif |
+| Hachoir de Viktor | Chaîne du froid · Équilibré | 2 % | 83 % → 83 % (+0 pts ± 0) | neutre | 11 363 ₡ → 11 528 ₡ (+164 ₡ ± 373 ₡) | neutre |
+| Avance de survie | Sans build · Équilibré | 26 % | 74 % → 82 % (+9 pts ± 3) | positif | 28 264 ₡ → 31 616 ₡ (+3 351 ₡ ± 1 405 ₡) | positif |
+| Morgue : chirurgie | Sans build · Casse-cou | 5 % | 76 % → 76 % (+0 pts ± 0) | neutre | 72 553 ₡ → 69 857 ₡ (−2 696 ₡ ± 2 893 ₡) | neutre |
+| Morgue : certificat | Sans build · Équilibré | 1 % | 82 % → 82 % (+0 pts ± 0) | neutre | 31 616 ₡ → 31 688 ₡ (+72 ₡ ± 107 ₡) | neutre |
+| Morgue : laissez-passer | Sans build · Équilibré | 34 % | 82 % → 83 % (+1 pts ± 1) | neutre | 31 616 ₡ → 29 654 ₡ (−1 962 ₡ ± 1 668 ₡) | négatif |
+| Karma-Cham | Sans build · Équilibré | 27 % | 82 % → 83 % (+0 pts ± 1) | neutre | 31 616 ₡ → 27 882 ₡ (−3 733 ₡ ± 2 116 ₡) | négatif |
+| Velvet-Silo : enchères | Haut tier · Casse-cou | 43 % | 74 % → 73 % (−1 pts ± 2) | neutre | 71 072 ₡ → 71 426 ₡ (+354 ₡ ± 11 769 ₡) | neutre |
+| Velvet-Silo : chantage | Sans build · Équilibré | 1 % | 82 % → 82 % (+0 pts ± 0) | neutre | 31 616 ₡ → 31 726 ₡ (+110 ₡ ± 169 ₡) | neutre |
+| Dilution en Tier 0 | Couverture légale · Équilibré | 100 % | 83 % → 89 % (+6 pts ± 4) | positif | 28 026 ₡ → 47 309 ₡ (+19 284 ₡ ± 7 371 ₡) | positif |

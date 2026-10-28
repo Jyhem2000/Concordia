@@ -96,3 +96,34 @@ Novice : survie 63 → 72 %. Le Prudent bouge peu : il transporte peu d'illégal
 **Lecture :** le double fond règle la loterie (une saisie ne ruine plus la partie), pas l'échelle de l'économie. Restent à trancher :
 1. le niveau de difficulté visé, la survie de l'Équilibré passant de ~60 à ~82 % (curseurs : capacité du double fond, chance par étoile) ;
 2. le prix ou l'effet des modules et des salaires, désormais mesurables sur des parties qui durent.
+
+## Prudent : marchand corrigé et livraison officielle du jour
+Le Prudent survivait moins que l'Équilibré (60 % contre 84 %, plan Sans build). Ses parties perdues montraient un bot garé des jours entiers, pas des saisies :
+- trajets entiers écartés quand ses achats dépassaient son risque ;
+- aucune exploration quand rien n'était rentable ;
+- réserve gardée alors qu'il était à sec ;
+- échéance du retard (Jour 20) ignorée ;
+- avance de survie remboursée aussitôt empruntée.
+
+Ces défauts sont corrigés (chap. 9). La livraison officielle du jour (chap. 2) lui donne en plus un revenu sûr.
+
+| Campagne 1 | Survie avant → après | Score moyen avant → après |
+| :--- | :--- | :--- |
+| Prudent | 60 à 80 % → **83 à 90 %** | 3 200 à 9 200 ₡ → 5 000 à 13 600 ₡ |
+| Équilibré | 78 à 84 % → 81 à 88 % | 8 900 à 45 200 ₡ → 10 900 à 45 300 ₡ |
+| Casse-cou | 64 à 74 % → 72 à 79 % | 28 200 à 118 100 ₡ → 46 000 à 140 800 ₡ |
+
+L'ordre voulu est atteint : **le Prudent survit le plus et gagne le moins, le Casse-cou survit le moins et gagne le plus** (médiane presque nulle, p90 très haut). Novice : 72 → 88 %.
+
+Campagne 4 inchangée sur le fond : l'avance de survie (+9 pts), la dilution (+19 300 ₡) et `[VEH-02]` (+9 000 ₡) paient ; Mama Rosa (−12 800 ₡), Vance (−7 500 ₡), `[MOD-03]` et `[MOD-06]` coûtent plus qu'ils ne rapportent.
+
+## Essai : sans amende à la fouille
+Amendes de la fouille, du bluff raté, de la corruption ratée et de l'éjection ratée à 0 (la saisie de Cash-Puce d'une fuite ratée est gardée), 200 parties, données remises à l'identique ensuite.
+
+| Bot (Sans build) | Survie | Score moyen | Score médian |
+| :--- | :--- | :--- | :--- |
+| Prudent | 87 → 92 % | 12 400 → 16 000 ₡ | 10 900 → 16 500 ₡ |
+| Équilibré | 82 → 86 % | 31 200 → 47 700 ₡ | 20 400 → 40 800 ₡ |
+| Casse-cou | 79 → 79 % | 73 500 → 118 200 ₡ | 700 → 800 ₡ |
+
+L'amende n'est pas décorative : elle prend un tiers du score de l'Équilibré. C'est elle qui fait du Cash-Puce transporté un risque, et donc de la Laverie un abri.
