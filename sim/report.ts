@@ -12,6 +12,8 @@ export type BotSummary = {
   defeats: Record<string, number>
   endings: Record<string, number>
   meanScore: number
+  /** Écart-type du score entre graines */
+  scoreSpread: number
   medianScore: number
   p10: number
   p90: number
@@ -45,6 +47,7 @@ export function summarize(records: readonly GameRecord[]): BotSummary {
     defeats: count(records.filter((record) => record.defeat).map((record) => record.ending)),
     endings: count(records.filter((record) => !record.defeat).map((record) => record.ending)),
     meanScore: mean(scores),
+    scoreSpread: Math.sqrt(mean(scores.map((score) => (score - mean(scores)) ** 2))),
     medianScore: quantile(scores, 0.5),
     p10: quantile(scores, 0.1),
     p90: quantile(scores, 0.9),
@@ -80,11 +83,35 @@ const tally = (counts: Record<string, number>, games: number) =>
     .map(([key, value]) => `${key} ${pct(value / Math.max(1, games))}`)
     .join(', ') || '—'
 
+/**
+ * Poids du hasard (campagne 3) : écart-type du score entre graines pour chaque bot, comparé à l'écart entre bots
+ * (écart-type des scores moyens). Si le premier domine, le résultat dépend plus des tirages que du jeu.
+ */
+export function renderSpread(summaries: readonly BotSummary[]): string {
+  const means = summaries.map((s) => s.meanScore)
+  const average = mean(means)
+  const between = Math.sqrt(mean(means.map((value) => (value - average) ** 2)))
+  const within = mean(summaries.map((s) => s.scoreSpread))
+  return [
+    '## Poids du hasard',
+    '',
+    '| Bot | Score moyen | Écart-type entre graines | p10 / p90 |',
+    '| :--- | ---: | ---: | ---: |',
+    ...summaries.map((s) => `| ${s.bot} | ${credits(s.meanScore)} | ${credits(s.scoreSpread)} | ${credits(s.p10)} / ${credits(s.p90)} |`),
+    '',
+    `Écart entre bots (écart-type des scores moyens) : **${credits(between)}** ; écart moyen entre graines : **${credits(within)}**.`,
+    within > between
+      ? 'Le hasard des graines pèse plus que le choix du plan et du tempérament.'
+      : 'Le choix du plan et du tempérament pèse plus que le hasard des graines.',
+    '',
+  ].join('\n')
+}
+
 /** Tableau Markdown d'une campagne */
 export function renderReport(title: string, notes: readonly string[], summaries: readonly BotSummary[]): string {
   const rows = summaries.map(
     (s) =>
-      `| ${s.bot} | ${s.games} | ${pct(s.survival)} | ${tally(s.defeats, s.games)} | ${credits(s.meanScore)} | ${credits(s.p10)} / ${credits(s.medianScore)} / ${credits(s.p90)} | ${credits(s.survivorMedian)} | ${pct(s.debtPaidShare)} (J${s.medianDebtPaidDay ?? '—'}) | ${s.meanInterceptions.toFixed(1)} (${pct(s.interceptionRate)} des trajets) | ${s.meanCustodyDays.toFixed(1)} | ${tally(s.purchases, s.games)} |`,
+      `| ${s.bot} | ${s.games} | ${pct(s.survival)} | ${tally(s.defeats, s.games)} | ${tally(s.endings, s.games)} | ${credits(s.meanScore)} | ${credits(s.p10)} / ${credits(s.medianScore)} / ${credits(s.p90)} | ${credits(s.survivorMedian)} | ${pct(s.debtPaidShare)} (J${s.medianDebtPaidDay ?? '—'}) | ${s.meanInterceptions.toFixed(1)} (${pct(s.interceptionRate)} des trajets) | ${s.meanCustodyDays.toFixed(1)} | ${tally(s.purchases, s.games)} |`,
   )
   const defects = summaries.flatMap((s) =>
     s.refused + s.forcedSleeps + s.violations.length === 0
@@ -98,8 +125,8 @@ export function renderReport(title: string, notes: readonly string[], summaries:
     '',
     ...notes.map((note) => `* ${note}`),
     '',
-    '| Bot | Parties | Survie | Défaites | Score moyen | Score p10 / médiane / p90 | Score médian des survivants | Dette soldée (jour médian) | Interceptions | Jours de garde à vue | Équipement acheté |',
-    '| :--- | ---: | ---: | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |',
+    '| Bot | Parties | Survie | Défaites | Fins | Score moyen | Score p10 / médiane / p90 | Score médian des survivants | Dette soldée (jour médian) | Interceptions | Jours de garde à vue | Équipement acheté |',
+    '| :--- | ---: | ---: | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |',
     ...rows,
     '',
     '## Défauts relevés',

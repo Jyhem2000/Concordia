@@ -58,13 +58,13 @@ describe('fraîcheur et équipement', () => {
   it('suit l’exemple du chap. 3 avec le caisson cryo et la chaîne du froid', () => {
     const base = gameAt(5, { vehicleId: 'VEH-03', modules: { owned: ['MOD-01'], mounted: ['MOD-01'] } })
     const at = (day: number) => freshnessOf({ ...base, day }, lot('T1-03', 1, 5))
-    expect(at(6)).toBe('extra')
-    expect(at(8)).toBe('standard')
-    expect(at(9)).toBe('gamey')
+    expect(at(7)).toBe('extra')
+    expect(at(9)).toBe('standard')
     expect(at(10)).toBe('gamey')
-    expect(at(11)).toBe('spoiled')
+    expect(at(11)).toBe('gamey')
     expect(at(12)).toBe('spoiled')
-    expect(sleep({ ...base, day: 12, cargo: [lot('T1-03', 1, 5)] }).cargo).toHaveLength(0)
+    expect(at(13)).toBe('spoiled')
+    expect(sleep({ ...base, day: 13, cargo: [lot('T1-03', 1, 5)] }).cargo).toHaveLength(0)
   })
 })
 

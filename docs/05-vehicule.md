@@ -38,7 +38,7 @@ Chaque châssis a un **double fond** d'origine, soudé par Mécano-Mitch : quelq
 
 | ID | Nom | Effet |
 | :--- | :--- | :--- |
-| `[MOD-01]` | Caisson Cryo à l'Azote Volé | **Un jour de retard** sur tout le cycle de fraîcheur des `[TAG-PERISHABLE]` : Extra-Frais jusqu'à 20h00 le lendemain de l'achat, et chaque état suivant un jour plus tard (chap. 3). Protège soute **et** moteur contre `[EVT-G01]` (ni fonte, ni vieillissement, ni usure de châssis ; le coup de chaleur du pilote reste). |
+| `[MOD-01]` | Caisson Cryo à l'Azote Volé | **Retard** sur tout le cycle de fraîcheur des `[TAG-PERISHABLE]` (`freshnessDelay`, en jours) : Extra-Frais jusqu'à 20h00 autant de jours après l'achat, et chaque état suivant d'autant plus tard (chap. 3). Protège soute **et** moteur contre `[EVT-G01]` (ni fonte, ni vieillissement, ni usure de châssis ; le coup de chaleur du pilote reste). |
 | `[MOD-02]` | Diffuseur d'Échappement « Pin Sylvestre & Javel » | Réduit fortement les malus de `[TAG-ODOROUS]` (risque au trajet et malus de bluff), après les doublements de district ou d'événement. |
 | `[MOD-03]` | Doublure en Plomb & Cage de Faraday | Annule la détection de `[TAG-TECH]`. |
 | `[MOD-04]` | Suspensions & Silentblocs « Velours » | Immunise `[TAG-FRAGILE]` à la casse (fuite et chocs). Annule l'usure de châssis des trajets de nuit (aucune caisse de refroidissement n'est alors consommée). |

@@ -13,8 +13,8 @@ export const GARAGE = { repairPerPv: 40 }
 
 /** Karma-Cham : panique algorithmique (coût indexé, hausse par usage), bonus d'influence le lendemain */
 export const KARMA = {
-  cost: 10_000,
-  costStep: 5_000,
+  cost: 5_000,
+  costStep: 2_500,
   cooldownDays: 5,
   factor: 1.5,
   tags: ['TAG-CULTURE', 'TAG-PERISHABLE', 'TAG-CHEMICAL'] as readonly TagId[],
@@ -22,7 +22,7 @@ export const KARMA = {
 
 /** Morgue du Dr. K. : laissez-passer, chirurgie, certificat (coûts indexés) */
 export const MORGUE = {
-  pass: { cost: 3_000, days: 5, district: 'D3' as DistrictId, tag: 'TAG-CHEMICAL' as TagId, cancels: 'EVT-G02' as GlobalEventId },
+  pass: { cost: 1_500, days: 5, district: 'D3' as DistrictId, tag: 'TAG-CHEMICAL' as TagId, cancels: 'EVT-G02' as GlobalEventId },
   surgery: { cost: 3_500, cashShare: 0.1, cooldownDays: 5, health: 35, healthCap: 85 },
   certificate: { cost: 4_000, costStep: 2_000, cooldownDays: 7, icc: 10 },
 }

@@ -1,16 +1,18 @@
 import {
   DEBT_DAILY_RATE,
   DEBT_LATE,
+  ENDINGS,
   FLEE,
   GAME_LENGTH_DAYS,
   GRINDER,
   HIGH_TIER,
+  ICC_TIERS,
   SALE_COMMISSION,
   SEARCH,
   SURVIVAL_ADVANCE,
 } from '../../src/data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../src/data/districts.ts'
-import { KARMA } from '../../src/data/locations.ts'
+import { KARMA, LOCATIONS, VELVET } from '../../src/data/locations.ts'
 import { ROAD_EVENTS } from '../../src/data/events.ts'
 import { PRODUCT_IDS, PRODUCTS, SEALED_PRODUCT } from '../../src/data/products.ts'
 import { MODULES, VEHICLES } from '../../src/data/vehicles.ts'
@@ -19,7 +21,8 @@ import { baseValue, cargoUsed, isIllegal, ownedQty, taggedQty } from '../../src/
 import { daysBeforeRot, paymentValue } from '../../src/engine/condition.ts'
 import { checkHire, crewEffect, hireFee, salary } from '../../src/engine/crew.ts'
 import { checkBuyModule, checkBuyVehicle, ejectMode, missingChassis, mountedEffect, repairPrice } from '../../src/engine/equipment.ts'
-import { loanRoom } from '../../src/engine/finance.ts'
+import { eventMultiplier } from '../../src/engine/events.ts'
+import { loanRoom, offshoreBalance } from '../../src/engine/finance.ts'
 import { indexed } from '../../src/engine/inflation.ts'
 import {
   bluffChance,
@@ -50,7 +53,18 @@ import {
 import { checkDelivery, deliveryCrates, deliveryFee, deliveryOffer } from '../../src/engine/delivery.ts'
 import { checkMission, missionOffer } from '../../src/engine/night.ts'
 import { checkRoadChoice, roadCash } from '../../src/engine/road.ts'
-import { blackmailCost, checkAuction, checkBlackmail, checkInfluence, checkMorgue, karmaCost, morgueCost } from '../../src/engine/services.ts'
+import {
+  blackmailCost,
+  checkAuction,
+  checkBlackmail,
+  checkInfluence,
+  checkMorgue,
+  checkVipDelivery,
+  checkVipRequest,
+  karmaCost,
+  morgueCost,
+  vipValue,
+} from '../../src/engine/services.ts'
 import { risk } from '../../src/engine/risk.ts'
 import type {
   CargoLot,
@@ -96,10 +110,12 @@ export type Plan = {
   nightOwl?: boolean
   /** Fuite préférée à espérance égale (pare-buffles, brouilleur, transpondeur) */
   runner?: boolean
+  /** ICC à défendre : certificat et chantage sous ce seuil, pertes d'ICC pesées plus lourd au barrage */
+  iccFloor?: number
 }
 
 /** Usages des lieux spéciaux que sait faire le marchand (chap. 9, tests par retrait) */
-export type PlaceUse = 'grinder' | 'advance' | 'surgery' | 'certificate' | 'pass' | 'influence' | 'auction' | 'blackmail'
+export type PlaceUse = 'grinder' | 'advance' | 'surgery' | 'certificate' | 'pass' | 'influence' | 'auction' | 'blackmail' | 'vip'
 
 const DEFAULT_PLACES: readonly PlaceUse[] = ['grinder', 'advance']
 
@@ -120,7 +136,16 @@ export type Temperament = {
   boldness: number
 }
 
-export type Objective = 'score' | 'survive'
+/** Objectif (chap. 9, axe 3) : survivre, score maximal, ou une grande fin (Baron, Élite, Saboteur) */
+export type Objective = 'score' | 'survive' | 'mafia' | 'elite' | 'saboteur'
+
+const OBJECTIVE_NAMES: Record<Objective, string> = { score: 'score', survive: 'survie', mafia: 'Baron', elite: 'Élite', saboteur: 'Saboteur' }
+
+/** Élite : ICC défendu avec une marge au-dessus du palier Or */
+const ELITE_ICC_MARGIN = 5
+
+/** Saboteur : à partir de ce jour, score assuré, il part chercher le serveur */
+const SABOTEUR_HUNT_DAY = 25
 
 /** Valeurs de référence pour comparer des pertes de nature différente (₡ de base) */
 const VALUE = { custodyDay: 1_200, iccPoint: 60, healthPoint: 40, wantedLevel: 400, chassisPoint: 40 }
@@ -139,9 +164,57 @@ const ENDGAME_DAY = 28
 
 export function traderBot(plan: Plan, temperament: Temperament, objective: Objective): Bot {
   return {
-    name: `${plan.name} · ${temperament.name} · ${objective === 'score' ? 'score' : 'survie'}`,
-    decide: (view) => decide(view, plan, temperament, objective),
+    name: `${plan.name} · ${temperament.name} · ${OBJECTIVE_NAMES[objective]}`,
+    decide: (view) => decide(view, goalPlan(plan, objective), goalTemperament(view, temperament, objective), objective),
   }
+}
+
+/** Score que vise l'objectif : le seuil de sa fin, ou rien */
+function targetScore(objective: Objective): number | null {
+  return objective === 'mafia' || objective === 'elite' || objective === 'saboteur' ? ENDINGS[objective].minScore : null
+}
+
+/** Seuil atteint : l'argent (offshore et Cash-Puce) couvre le score de la fin visée */
+function secured(view: GameState, objective: Objective): boolean {
+  const target = targetScore(objective)
+  return target !== null && offshoreBalance(view.offshore) + view.cash >= target
+}
+
+/** L'Élite défend son ICC au-dessus du palier Or (certificat, chantage, prudence au barrage) */
+function goalPlan(plan: Plan, objective: Objective): Plan {
+  if (objective !== 'elite') return plan
+  const gold = ICC_TIERS.find((tier) => tier.tier === ENDINGS.elite.iccTier)?.min ?? 0
+  return { ...plan, places: [...(plan.places ?? DEFAULT_PLACES), 'certificate', 'blackmail'], iccFloor: gold + ELITE_ICC_MARGIN }
+}
+
+/** Seuil atteint : on sécurise plutôt que maximiser, plus aucun illégal (livraisons et légal seulement) */
+function goalTemperament(view: GameState, temperament: Temperament, objective: Objective): Temperament {
+  return secured(view, objective) && objective !== 'saboteur' ? { ...temperament, maxRisk: 0, night: 'mission' } : temperament
+}
+
+/** Saboteur assuré en fin de partie : le serveur [T4-06] à se procurer puis à porter à Rust Valley à minuit */
+function saboteurHunt(view: GameState, objective: Objective): boolean {
+  return objective === 'saboteur' && view.day >= SABOTEUR_HUNT_DAY && secured(view, objective)
+}
+
+/** Saboteur : acheter le serveur là où il apparaît, puis rejoindre Rust Valley la nuit du dernier jour (racket, pas de fouille) */
+function sabotage(view: GameState): Action | null {
+  const { requiredProduct: server, district: harbor } = ENDINGS.saboteur
+  const owned = ownedQty(view.cargo, server) > 0
+  const producer = DISTRICT_IDS.find((id) => DISTRICTS[id].production.includes(server)) ?? 'D5'
+  if (!owned) {
+    if (view.districtId === producer && view.phase === 'day' && !view.dayOver && maxBuy(view, server) > 0)
+      return { type: 'buy', productId: server, qty: 1 }
+    return null
+  }
+  const lastNight = view.day === GAME_LENGTH_DAYS && view.phase === 'night'
+  if (lastNight && view.districtId !== harbor && !view.nightTripDone) {
+    const trip = planTravel(view, harbor)
+    if (trip.error === 'not-enough-fuel') return refuelFor(view, trip.fuelCost)
+    if (!trip.error) return { type: 'travel', to: harbor }
+  }
+  if (view.day === GAME_LENGTH_DAYS && view.phase === 'day' && view.dayOver && !checkForceCurfew(view)) return { type: 'forceCurfew' }
+  return null
 }
 
 function decide(view: GameState, plan: Plan, temperament: Temperament, objective: Objective): Action {
@@ -154,7 +227,8 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
   const tripLeft = night ? !view.nightTripDone : !view.dayTripDone && !view.dayOver
   const endgame = view.day >= ENDGAME_DAY
 
-  const sale = sell(view, endgame)
+  const hunt = saboteurHunt(view, objective)
+  const sale = sell(view, endgame, hunt)
   if (sale) return sale
 
   if (open) {
@@ -162,11 +236,18 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
     if (service) return service
   }
 
+  if (hunt) {
+    const move = sabotage(view)
+    if (move) return move
+  }
+
   if (tripLeft) {
     // À sec, sans marchandise : rentrer à Hives prendre l'avance de survie de Viktor
     const rescue: Route | null =
       isBroke(view) && loanRoom(view) > 0 && view.districtId !== 'D1' && !night && !endgame ? { to: 'D1' as const, buys: [], value: 0 } : null
-    const route = rescue ?? (endgame && objective === 'score' ? endgameRoute(view) : bestRoute(view, plan, temperament))
+    // Fin de partie, ou serveur à bord : solder la dette puis rester à la Laverie
+    const banking = objective !== 'survive' && (endgame || (hunt && ownedQty(view.cargo, ENDINGS.saboteur.requiredProduct) > 0))
+    const route = rescue ?? (banking ? endgameRoute(view) : bestRoute(view, plan, temperament))
     if (route) {
       if (route.accept) return { type: 'acceptDelivery' }
       const [next] = route.buys
@@ -197,10 +278,12 @@ function isBroke(view: GameState): boolean {
 
 /** Prix net espéré d'une caisse dans un district : cours du jour ici, cours mémorisé ailleurs, sinon profil public */
 function estimatedSale(view: GameState, districtId: DistrictId, productId: ProductId): number {
+  if (districtId === view.districtId) return quote(view, districtId, productId) * SALE_COMMISSION
   const seen = lastSeen(view, districtId)
-  const quoted =
-    districtId === view.districtId ? quote(view, districtId, productId) : (seen?.quotes[productId] ?? normalQuote(view, districtId, productId))
-  return quoted * SALE_COMMISSION
+  // Cours vu aujourd'hui : il compte les événements du jour ; sinon, cours vu (ou normal) corrigé des événements publics du jour
+  if (seen?.day === view.day && seen.quotes[productId] !== undefined) return seen.quotes[productId] * SALE_COMMISSION
+  const event = eventMultiplier(view, districtId, productId)?.factor ?? 1
+  return (seen?.quotes[productId] ?? normalQuote(view, districtId, productId)) * event * SALE_COMMISSION
 }
 
 /**
@@ -266,10 +349,12 @@ function exposure(cargo: GameState['cargo']): number {
 
 // ─── Ventes ───
 
-function sell(view: GameState, endgame: boolean): Action | null {
+function sell(view: GameState, endgame: boolean, hunt: boolean): Action | null {
   for (const productId of PRODUCT_IDS) {
     const owned = ownedQty(tradable(view), productId)
     if (owned === 0) continue
+    if (hunt && productId === ENDINGS.saboteur.requiredProduct) continue
+    if (view.vip?.productId === productId && !endgame && ownedQty(view.cargo, productId) <= VELVET.vip.crates) continue
     const first = saleQuote(view, productId, 1)
     const lot = view.cargo.find((entry) => entry.productId === productId)
     const rotting = lot ? (daysBeforeRot(view, lot) ?? Infinity) <= 1 : false
@@ -317,27 +402,28 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
   if (!plan.novice && !endgame && view.day <= LAST_EQUIPMENT_DAY) {
     const equipment = equip(view, plan, reserve)
     if (equipment) return equipment
-    const place = specialPlaces(view, uses, reserve)
+    const place = specialPlaces(view, uses, reserve, plan.iccFloor ?? PLACE_THRESHOLDS.iccBelow)
     if (place) return place
   }
 
   // Laverie : mettre à l'abri ce qui dépasse le fonds de roulement, dette soldée ; tout en fin de partie
-  if (!checkService(view, 'offshore') && view.debt === 0 && objective === 'score') {
-    const working = reserve + indexed('rule.inflation', CAPITAL, view.day).total * 2
-    const amount = endgame ? view.cash : view.day >= (plan.offshoreFromDay ?? 15) ? view.cash - working : 0
+  if (!checkService(view, 'offshore') && view.debt === 0 && objective !== 'survive') {
+    // Seuil de la fin visée atteint : tout à l'abri, sauf le carburant
+    const working = secured(view, objective) ? fuelPrice(view) * 2 : reserve + indexed('rule.inflation', CAPITAL, view.day).total * 2
+    const amount = endgame ? view.cash : view.day >= (plan.offshoreFromDay ?? 15) || secured(view, objective) ? view.cash - working : 0
     if (amount > 0) return { type: 'deposit', amount }
   }
   return null
 }
 
 /** Lieux spéciaux du district, quand le plan les prévoit et que le seuil est atteint */
-function specialPlaces(view: GameState, uses: (place: PlaceUse) => boolean, reserve: number): Action | null {
+function specialPlaces(view: GameState, uses: (place: PlaceUse) => boolean, reserve: number, iccFloor: number): Action | null {
   const spare = (cost: number) => view.cash - cost >= reserve + indexed('rule.inflation', CAPITAL, view.day).total
   if (!checkService(view, 'morgue')) {
     if (uses('surgery') && view.health < PLACE_THRESHOLDS.surgeryBelowHealth && !checkMorgue(view, 'surgery') && spare(morgueCost(view, 'surgery'))) {
       return { type: 'morgue', service: 'surgery' }
     }
-    if (uses('certificate') && view.icc < PLACE_THRESHOLDS.iccBelow && !checkMorgue(view, 'certificate') && spare(morgueCost(view, 'certificate'))) {
+    if (uses('certificate') && view.icc < iccFloor && !checkMorgue(view, 'certificate') && spare(morgueCost(view, 'certificate'))) {
       return { type: 'morgue', service: 'certificate' }
     }
     // Laissez-passer : seulement avec du chimique illégal à faire passer par les bio-scanners
@@ -349,10 +435,14 @@ function specialPlaces(view: GameState, uses: (place: PlaceUse) => boolean, rese
     const tag = [...KARMA.tags].sort((a, b) => taggedQty(view.cargo, b) - taggedQty(view.cargo, a))[0]
     if (tag && taggedQty(view.cargo, tag) > 0 && !checkInfluence(view, tag) && spare(karmaCost(view))) return { type: 'influence', tag }
   }
+  if (!checkService(view, 'velvet') && uses('vip')) {
+    if (view.vip && !checkVipDelivery(view)) return { type: 'vipDeliver' }
+    if (!view.vip && !checkVipRequest(view)) return { type: 'vipRequest' }
+  }
   if (!checkService(view, 'velvet')) {
     const lot = PRODUCT_IDS.find((id) => uses('auction') && !checkAuction(view, id))
     if (lot) return { type: 'auction', productId: lot }
-    if (uses('blackmail') && view.icc < PLACE_THRESHOLDS.iccBelow && !checkBlackmail(view, false) && spare(blackmailCost(view))) {
+    if (uses('blackmail') && view.icc < iccFloor && !checkBlackmail(view, false) && spare(blackmailCost(view))) {
       return { type: 'blackmail', inKind: false }
     }
   }
@@ -413,13 +503,19 @@ function buysFor(
     if (plan.avoidTags?.some((tag) => product.tags.includes(tag))) return []
     if (plan.novice && productStatus(view, view.districtId, productId) !== 'production') return []
     const price = quote(view, view.districtId, productId)
-    const margin = estimatedSale(view, to, productId) * saleFactor(view, freshLot(view, productId)) - price
+    const today = estimatedSale(view, to, productId) * saleFactor(view, freshLot(view, productId))
+    // Commande VIP en cours : les caisses demandées valent le multiple du Velvet-Silo
+    const vip = view.vip?.productId === productId ? normalQuote(view, velvetDistrict(), productId) * VELVET.vip.factor : 0
+    const margin = Math.max(today, vip) - price
     if (margin < price * MIN_MARGIN) return []
     const favored = plan.favorTags?.some((tag) => product.tags.includes(tag)) ? 1.3 : 1
     // Le haut tier coûte une garde à vue s'il est saisi : marge exigée plus forte
     const caution = product.tier >= HIGH_TIER ? 0.8 : 1
     // Pas plus que la demande d'un district (le reste se vendrait saturé)
-    const cap = Math.min(maxBuy(view, productId), demandQuota(view, to, productId) ?? Infinity)
+    const cap =
+      vip > 0
+        ? Math.min(maxBuy(view, productId), VELVET.vip.crates - ownedQty(view.cargo, productId))
+        : Math.min(maxBuy(view, productId), demandQuota(view, to, productId) ?? Infinity)
     return [{ productId, price, margin, cap, rank: (margin / Math.max(1, price)) * favored * caution }]
   })
   offers.sort((a, b) => b.rank - a.rank)
@@ -499,6 +595,7 @@ function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route
         // Raisons d'aller quelque part : dette à solder, équipement à acheter
         if (to === 'D1') value += debtVisit(view, reserveOf(view, temperament))
         if (to === 'D4' && pendingEquipment(view, plan)) value += 2_000
+        if (to === velvetDistrict() && view.vip && ownedQty(view.cargo, view.vip.productId) >= VELVET.vip.crates) value += vipValue(view) ?? 0
         if (contract) value += deliveryFee(view)
         if (!best || value > best.value) best = { to, buys: [...legalBuys.filter((buy) => buy.qty > 0), ...buys], value, accept: contract }
         break
@@ -522,6 +619,9 @@ function explore(view: GameState): Route | null {
   const [to] = affordable.sort((a, b) => age(b) - age(a))
   return to && age(to) > 1 ? { to, buys: [], value: 0 } : null
 }
+
+/** District du Velvet-Silo (commandes VIP) */
+const velvetDistrict = (): DistrictId => LOCATIONS['LOC-D6-1'].district
 
 /** Fin de partie : solder la dette à Hives, puis tout déposer à la Laverie */
 function endgameRoute(view: GameState): Route | null {
@@ -563,13 +663,15 @@ function barrage(view: GameState, plan: Plan, temperament: Temperament): Action 
 
   const sanction = searchSanction(view)
   const custody = (days: number) => days * VALUE.custodyDay
+  // Qui défend son ICC (Élite, Citoyen modèle) pèse ses pertes d'ICC plus lourd
+  const iccPoint = VALUE.iccPoint * (plan.iccFloor ? 4 : 1)
   // Double fond : ses caisses échappent à la fouille quand les agents ne le trouvent pas, et à l'éjection
   const hidden = illegalValue(hiddenCargo(view).hidden)
   const seized = illegal - hidden * (1 - compartmentDetection(view).total)
   // Amende : une part de la valeur saisie (prix de base) ; on l'estime sur la part que la fouille prendrait
   const seizedShare = illegal > 0 ? seized / illegal : 0
   const fineOf = (rate: number) => fineAmount(view, rate) * seizedShare
-  const searchLoss = seized + (sanction ? fineOf(sanction.fineRate) + sanction.iccLoss * VALUE.iccPoint + custody(sanction.custodyDays) : 0)
+  const searchLoss = seized + (sanction ? fineOf(sanction.fineRate) + sanction.iccLoss * iccPoint + custody(sanction.custodyDays) : 0)
   const options: { action: Action; loss: number }[] = []
   if (!checkMove(view, 'search')) options.push({ action: { type: 'intercept', move: 'search' }, loss: searchLoss })
 
@@ -578,18 +680,18 @@ function barrage(view: GameState, plan: Plan, temperament: Temperament): Action 
     const loss = (chance * successLoss + (1 - chance) * failLoss) * (bold ? temperament.boldness : 1)
     options.push({ action: { type: 'intercept', move }, loss })
   }
-  consider('bluff', bluffChance(view).total, -3 * VALUE.iccPoint, searchLoss * 1.2, true)
+  consider('bluff', bluffChance(view).total, -3 * iccPoint, searchLoss * 1.2, true)
   // Une fuite ratée coûte de la Santé : pas quand elle est déjà basse. Conséquences réelles (pare-buffles, transpondeur, plaque)
   const flight = fleeConsequences(view)
   if (view.health > flight.failHealth + 10) {
-    const success = ((flight.chassis.min + flight.chassis.max) / 2) * VALUE.chassisPoint + VALUE.wantedLevel + flight.iccLoss * VALUE.iccPoint
+    const success = ((flight.chassis.min + flight.chassis.max) / 2) * VALUE.chassisPoint + VALUE.wantedLevel + flight.iccLoss * iccPoint
     const failure =
       seized +
       fineOf(FLEE.fail.fineRate) +
       custody(1) +
       flight.failHealth * VALUE.healthPoint +
       flight.failChassis * VALUE.chassisPoint +
-      25 * VALUE.iccPoint
+      25 * iccPoint
     const runnerBias = plan.runner ? 0.8 : 1
     const chance = fleeChance(view).total
     if (!checkMove(view, 'flee')) {
@@ -611,7 +713,7 @@ function barrage(view: GameState, plan: Plan, temperament: Temperament): Action 
     const offer = { cash, crates }
     if (!checkMove(view, 'bribe', offer)) {
       const chance = bribeChance(view, offer).total
-      const loss = cash + (1 - chance) * (illegal + 0.5 * (view.cash - cash) + custody(1) + 15 * VALUE.iccPoint)
+      const loss = cash + (1 - chance) * (illegal + 0.5 * (view.cash - cash) + custody(1) + 15 * iccPoint)
       options.push({ action: { type: 'intercept', move: 'bribe', offer }, loss })
     }
   }

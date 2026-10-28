@@ -30,7 +30,7 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
     legalCamouflage: { minShare: 0.2, factor: 0.85 },
   },
   'VEH-03': {
-    price: 65_000,
+    price: 45_000,
     cargo: 30,
     hiddenCompartment: 4,
     moduleSlots: 3,
@@ -41,7 +41,7 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
     transponder: { districts: ['D3', 'D5'], fleeBonus: 0.25, iccLossFactor: 0.5 },
   },
   'VEH-04': {
-    price: 150_000,
+    price: 100_000,
     cargo: 50,
     hiddenCompartment: 6,
     moduleSlots: 4,
@@ -53,15 +53,15 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
 }
 
 export const MODULES: Readonly<Record<ModuleId, Module>> = {
-  'MOD-01': { price: 18_000, category: 'conservation', freshnessDelay: 1, heatProof: true },
-  'MOD-02': { price: 12_000, category: 'camouflage', tagFactor: { tag: 'TAG-ODOROUS', factor: 0.25 } },
-  'MOD-03': { price: 25_000, category: 'camouflage', tagFactor: { tag: 'TAG-TECH', factor: 0 } },
-  'MOD-04': { price: 6_000, category: 'conservation', smoothRide: true },
-  'MOD-05': { price: 18_000, category: 'tactical', rotatingPlate: true },
-  'MOD-06': { price: 15_000, category: 'tactical', ram: { fleeBonus: 0.3, damageFactor: 0.5 } },
-  'MOD-07': { price: 10_000, category: 'tactical', trapdoor: { chance: 0.75, cooldownDays: 3, maxRecovery: 0.75 } },
-  'MOD-08': { price: 45_000, category: 'tactical', fakeTerminal: { bluffBonus: 0.35, bribeRateFactor: 0.5 } },
-  'MOD-09': { price: 20_000, category: 'tactical', droneJammer: true },
+  'MOD-01': { price: 8_000, category: 'conservation', freshnessDelay: 2, heatProof: true },
+  'MOD-02': { price: 6_000, category: 'camouflage', tagFactor: { tag: 'TAG-ODOROUS', factor: 0.1 } },
+  'MOD-03': { price: 12_000, category: 'camouflage', tagFactor: { tag: 'TAG-TECH', factor: 0 } },
+  'MOD-04': { price: 3_000, category: 'conservation', smoothRide: true },
+  'MOD-05': { price: 8_000, category: 'tactical', rotatingPlate: true },
+  'MOD-06': { price: 7_000, category: 'tactical', ram: { fleeBonus: 0.4, damageFactor: 0.5 } },
+  'MOD-07': { price: 7_000, category: 'tactical', trapdoor: { chance: 0.75, cooldownDays: 3, maxRecovery: 0.75 } },
+  'MOD-08': { price: 25_000, category: 'tactical', fakeTerminal: { bluffBonus: 0.35, bribeRateFactor: 0.5 } },
+  'MOD-09': { price: 10_000, category: 'tactical', droneJammer: true },
 }
 
 /** Frais de recrutement à la Cantine, indexés (le premier recrutement est gratuit) */
@@ -70,12 +70,12 @@ export const CREW_HIRE_FEE = 1_500
 /** Salaires de base, indexés sur l'inflation, et bonus des équipiers (chap. 5) */
 export const CREW: Readonly<Record<CrewId, Crew>> = {
   'CREW-01': {
-    dailySalary: 800,
+    dailySalary: 400,
     inKindSalary: { amount: 300, tag: 'TAG-ADDICTIVE', minTier: 2 },
     riskFactor: 0.8,
     bribeBonus: 0.15,
     revealsPatrol: true,
   },
   'CREW-02': { dailySalary: 600, liveQuotes: true, offshoreBonus: 0.005, fleeBonus: 0.2, forgeryBonus: 0.2 },
-  'CREW-03': { dailySalary: 1_000, perishableKnowHow: 1.25, refining: true, perishableQuota: 1.5 },
+  'CREW-03': { dailySalary: 500, perishableKnowHow: 1.25, refining: true, perishableQuota: 1.5 },
 }

@@ -7,7 +7,7 @@ import type { Plan, Temperament } from './bots/trader.ts'
 
 export const NOVICE: Plan = { name: 'Novice', modules: [], novice: true }
 
-/** Plans de l'étape 1 : ceux qui ne demandent qu'un réglage du marchand */
+/** Plans des étapes 1 et 2 (chap. 9, axe 1) */
 export const PLANS: readonly Plan[] = [
   { name: 'Sans build', modules: [] },
   { name: 'Chaîne du froid', vehicle: 'VEH-03', modules: ['MOD-01'], crew: 'CREW-03', favorTags: ['TAG-PERISHABLE'] },
@@ -17,6 +17,18 @@ export const PLANS: readonly Plan[] = [
   { name: 'Corruption', modules: ['MOD-08'], crew: 'CREW-01', favorTags: ['TAG-ADDICTIVE'] },
   { name: 'Rentier', modules: [], crew: 'CREW-02', offshoreFromDay: 6 },
   { name: 'Haut tier', vehicle: 'VEH-04', modules: ['MOD-07'], favorTags: ['TAG-FLAMMABLE'] },
+  // Étape 2 : plans à logique propre
+  { name: 'Fuite au sommet', modules: ['MOD-06', 'MOD-09'], crew: 'CREW-02', runner: true, favorTags: ['TAG-CULTURE'] },
+  {
+    name: 'Citoyen modèle',
+    vehicle: 'VEH-02',
+    modules: ['MOD-08'],
+    legalShare: 0.3,
+    places: ['grinder', 'advance', 'certificate', 'blackmail'],
+    iccFloor: 90,
+  },
+  { name: 'Opportuniste', modules: [], places: ['grinder', 'advance', 'influence', 'vip'] },
+  { name: 'Saboteur', vehicle: 'VEH-04', modules: ['MOD-03'], favorTags: ['TAG-TECH'] },
 ]
 
 export const TEMPERAMENTS: readonly Temperament[] = [

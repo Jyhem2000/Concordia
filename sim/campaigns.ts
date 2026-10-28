@@ -1,7 +1,7 @@
 import { randomBot } from './bots/random.ts'
 import { traderBot } from './bots/trader.ts'
 import { NOVICE, NOVICE_TEMPERAMENT, PLANS, TEMPERAMENTS } from './plans.ts'
-import { renderReport, summarize } from './report.ts'
+import { renderReport, renderSpread, summarize } from './report.ts'
 import { playGame, type Bot } from './runner.ts'
 
 /*
@@ -13,7 +13,12 @@ export type Campaign = {
   notes: readonly string[]
   /** Fabrique des bots ; `seed` sert aux bots qui tirent leur propre hasard */
   bots: readonly ((seed: number) => Bot)[]
+  /** Ajoute la comparaison hasard / choix du joueur (campagne 3) */
+  spread?: boolean
 }
+
+const plan = (name: string) => PLANS.find((entry) => entry.name === name) ?? PLANS[0]
+const balanced = TEMPERAMENTS[1]
 
 export const CAMPAIGNS: Readonly<Record<string, Campaign>> = {
   controle: {
@@ -24,9 +29,32 @@ export const CAMPAIGNS: Readonly<Record<string, Campaign>> = {
     bots: [() => traderBot(NOVICE, NOVICE_TEMPERAMENT, 'survive'), (seed) => randomBot(seed)],
   },
   plans: {
-    title: 'Campagne 1 — Viabilité des plans (étape 1)',
-    notes: ['Chaque plan × les 3 tempéraments, objectif « score maximal ». Plans de l’étape 1 seulement (chap. 9, Mise en œuvre).'],
+    title: 'Campagne 1 — Viabilité des plans',
+    notes: ['Chaque plan × les 3 tempéraments, objectif « score maximal » (chap. 9, Mise en œuvre).'],
     bots: PLANS.flatMap((plan) => TEMPERAMENTS.map((temperament) => () => traderBot(plan, temperament, 'score'))),
+  },
+  fins: {
+    title: 'Campagne 2 — Atteignabilité des grandes fins',
+    notes: [
+      'Pour chaque grande fin, les plans qui la visent naturellement, tempérament équilibré, objectif de la fin : sécuriser une fois le seuil atteint (Baron, Élite), défendre l’ICC au palier Or (Élite), se procurer [T4-06] et rejoindre Rust Valley la dernière nuit (Saboteur).',
+    ],
+    bots: [
+      ...['Couverture légale', 'Haut tier', 'Rentier'].map((name) => () => traderBot(plan(name), balanced, 'mafia')),
+      ...['Citoyen modèle', 'Couverture légale', 'Rentier'].map((name) => () => traderBot(plan(name), balanced, 'elite')),
+      ...['Saboteur', 'Haut tier'].map((name) => () => traderBot(plan(name), balanced, 'saboteur')),
+    ],
+  },
+  hasard: {
+    title: 'Campagne 3 — Poids du hasard',
+    notes: ['Les plans de référence des campagnes 1 et 2 sur un grand nombre de graines : le score dépend-il plus du joueur que des tirages ?'],
+    bots: [
+      () => traderBot(plan('Sans build'), TEMPERAMENTS[0], 'score'),
+      () => traderBot(plan('Couverture légale'), balanced, 'score'),
+      () => traderBot(plan('Rentier'), balanced, 'score'),
+      () => traderBot(plan('Haut tier'), TEMPERAMENTS[2], 'score'),
+      () => traderBot(plan('Couverture légale'), balanced, 'mafia'),
+    ],
+    spread: true,
   },
 }
 
@@ -42,5 +70,6 @@ export function runCampaign(campaign: Campaign, games: number, onProgress?: (don
     })
     return summarize(records)
   })
-  return renderReport(campaign.title, [...campaign.notes, `${games} parties par bot, graines 1 à ${games}.`], summaries)
+  const report = renderReport(campaign.title, [...campaign.notes, `${games} parties par bot, graines 1 à ${games}.`], summaries)
+  return campaign.spread ? `${report}\n${renderSpread(summaries)}` : report
 }
