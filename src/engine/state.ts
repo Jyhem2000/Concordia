@@ -50,6 +50,7 @@ export function createInitialState(seed: number): GameState {
     velvetLock: null,
     dayOffer: drawDayOffer(rng),
     delivery: null,
+    progress: { controlsPassed: 0, tagSales: {}, flagged: false, deliveries: 0 },
     nightOffer: drawNightOffer(rng),
     mission: null,
     jammerDay: null,

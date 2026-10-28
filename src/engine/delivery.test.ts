@@ -4,12 +4,12 @@ import { SEALED_PRODUCT } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import { deliveryCrates, deliveryFee } from './delivery.ts'
 import { sleep } from './routine.ts'
-import { errorOf, gameAt, HIGH_ROLL_RNG, run } from './test-helpers.ts'
+import { EARNED, errorOf, gameAt, HIGH_ROLL_RNG, run } from './test-helpers.ts'
 import type { CargoLot, GameState, ProductId } from './types.ts'
 
 const lot = (productId: ProductId, qty: number): CargoLot => ({ productId, qty, unitCost: 10, travelled: true, boughtDay: 3, damaged: false })
 // Tirage haut : ni barrage ni aléa sur le trajet
-const morning = (patch: Partial<GameState> = {}) => gameAt(3, { districtId: 'D1', dayOffer: 'D2', rng: HIGH_ROLL_RNG, ...patch })
+const morning = (patch: Partial<GameState> = {}) => gameAt(3, { districtId: 'D1', dayOffer: 'D2', rng: HIGH_ROLL_RNG, progress: EARNED, ...patch })
 
 describe('livraison officielle du jour', () => {
   it('charge des caisses scellées en proportion de la soute, avant le trajet de jour et avec la place', () => {

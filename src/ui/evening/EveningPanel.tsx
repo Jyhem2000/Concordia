@@ -6,6 +6,7 @@ import { ownedQty } from '../../engine/cargo.ts'
 import { canSiphon, checkForceCurfew, maxRefuel } from '../../engine/actions.ts'
 import { fuelPriceBreakdown } from '../../engine/market.ts'
 import { checkMission, missionFee, missionOffer, sealedCount } from '../../engine/night.ts'
+import { nightUnlock } from '../../engine/progress.ts'
 import { sleepsAtRelay } from '../../engine/routine.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -27,6 +28,8 @@ export default function EveningPanel() {
   const refuelMax = maxRefuel(game)
   // Trois choix le soir (chap. 2) : dormir, livraison de nuit autorisée (mission), ou tournée clandestine
   const offer = missionOffer(game)
+  // Mission de nuit : seulement après quelques commandes livrées (confiance du DSC)
+  const night = nightUnlock(game)
   // Épuisé : une boisson pour une nuit blanche malgré tout, si le joueur en a (chap. 3)
   const exhausted = checkForceCurfew(game) === 'exhausted'
   const drink = exhausted ? PRODUCT_IDS.find((id) => ownedQty(game.cargo, id) > 0 && !checkForceCurfew(game, id)) : undefined
@@ -77,11 +80,13 @@ export default function EveningPanel() {
             </h2>
             <div className={curfewCollapsed ? 'hidden' : ''}>
               <p className="mt-1 text-xs text-sky-300">
-                {offer
-                  ? t.evening.missionOffer(t.district[offer].name, sealedCount(game), credits(missionFee(game)))
-                  : game.nightOffer
-                    ? t.evening.missionHere(t.district[game.nightOffer].name)
-                    : t.evening.noMission}
+                {!night.unlocked
+                  ? t.evening.missionLocked(night.done, night.needed)
+                  : offer
+                    ? t.evening.missionOffer(t.district[offer].name, sealedCount(game), credits(missionFee(game)))
+                    : game.nightOffer
+                      ? t.evening.missionHere(t.district[game.nightOffer].name)
+                      : t.evening.noMission}
               </p>
               <p className="mt-1 text-xs text-zinc-400">{t.evening.nightRule}</p>
               <ul className="mt-2 flex flex-col gap-2">

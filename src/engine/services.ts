@@ -1,4 +1,4 @@
-import { DAMAGED_FACTOR, GAME_LENGTH_DAYS, HEALTH_MAX, ICC_MAX, SALE_COMMISSION, WANTED } from '../data/balance.ts'
+import { DAMAGED_FACTOR, GAME_LENGTH_DAYS, HEALTH_MAX, ICC_MAX, SALE_COMMISSION } from '../data/balance.ts'
 import { LOTTERY } from '../data/events.ts'
 import { CASSANDRE, FORGERY, KARMA, MORGUE, VELVET } from '../data/locations.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
@@ -8,6 +8,7 @@ import { crateValue, freshnessFactor, freshnessOf, paymentValue } from './condit
 import { crewEffect } from './crew.ts'
 import { GLOBAL_EVENT_IDS, viceChoices } from './events.ts'
 import { indexed } from './inflation.ts'
+import { raiseWanted } from './progress.ts'
 import { quote } from './market.ts'
 import { createRng } from './rng.ts'
 import type { CargoLot, CrateCount, ForgeryCard, GameState, ProductId, ServiceKey, TagId } from './types.ts'
@@ -171,10 +172,9 @@ export function forge(state: GameState, card: ForgeryCard): ServiceResult {
   return {
     ok: true,
     state: {
-      ...paid,
+      ...raiseWanted(paid),
       rng: rng.state,
       icc: Math.max(0, paid.icc - FORGERY.failIccLoss),
-      wanted: Math.min(WANTED.maxLevel, paid.wanted + WANTED.perOffense),
     },
   }
 }

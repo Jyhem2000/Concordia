@@ -392,6 +392,13 @@ export const fr = {
     refining: 'affinage : Standard vendu au prix Extra-Frais',
     quota: (factor: string) => `quotas des périssables ${factor}`,
     inKindRule: (amount: string, tier: number) => `salaire réduit à ${amount} contre une caisse addictive de Tier ${tier} ou plus`,
+    locked: {
+      controls: (done: number, needed: number) =>
+        `Vous rejoindra après ${needed} contrôle${needed > 1 ? 's' : ''} de la BRC franchi${needed > 1 ? 's' : ''} sans garde à vue (${done}/${needed}) : il repère le sang-froid au barrage.`,
+      sales: (tag: string, done: number, needed: number) =>
+        `Vous rejoindra après ${needed} caisses ${tag} vendues (${done}/${needed}) : elle ne travaille qu'avec qui connaît la marchandise.`,
+      wanted: "Vous contactera quand votre nom entrera dans les fichiers d'Aeterna (première Fiche S).",
+    },
   },
 
   desks: {
@@ -763,6 +770,8 @@ export const fr = {
     delivered: (fee: string) => `commande du DSC livrée, prime ${fee}`,
     deviated: (wanted: string) => `écart de mission enregistré, ${wanted}`,
     mission: 'Mission de nuit',
+    trust: (deliveries: number, factor: string) =>
+      `Confiance du DSC : ${deliveries} commande${deliveries > 1 ? 's' : ''} livrée${deliveries > 1 ? 's' : ''}, prime ${factor}.`,
     cargoTitle: (used: number, capacity: number) => `Soute ${used}/${capacity}`,
     cargoEmpty: 'vide',
     cargoLine: (qty: number, name: string, hidden: number) => `${qty} × ${name}${hidden > 0 ? ` (dont ${hidden} au double fond)` : ''}`,
@@ -791,6 +800,8 @@ export const fr = {
     clandestineTour: 'Tournée clandestine',
     clandestineHint: (wanted: string) => `Hors mission, vers le district de votre choix : risque accru, et ${wanted} si le trajet passe.`,
     withDrink: (product: string, health: number) => ` — nuit blanche : boire 1 × ${product} (Santé −${health})`,
+    missionLocked: (done: number, needed: number) =>
+      `La plateforme ne vous confie pas encore la nuit : ${done}/${needed} commandes livrées (livraisons officielles du jour). Seule la tournée clandestine reste possible.`,
     missionOffer: (district: string, crates: number, fee: string) =>
       `Mission de ce soir : livrer ${crates} caisses scellées à ${district}, prime ${fee}.`,
     missionHere: (district: string) => `Mission de ce soir vers ${district} : vous y êtes déjà, rien à livrer.`,
@@ -889,6 +900,8 @@ export const fr = {
     'crew-lost': 'Disparu à la Loterie : il ne reviendra pas.',
     'no-crew': 'Aucun équipier engagé.',
     'no-mission': 'Aucune mission de nuit valable ce soir.',
+    'mission-locked': 'La plateforme ne vous confie pas encore la nuit : livrez d’abord quelques commandes.',
+    'crew-locked': 'Pas encore : il faut d’abord vous faire remarquer (voir sa condition).',
     'nothing-to-sell': 'Rien à vendre.',
     'no-delivery': "Aucune livraison officielle valable aujourd'hui.",
     'delivery-pending': 'Livraison du jour encore à bord : la plateforme ne confie pas de mission de nuit.',

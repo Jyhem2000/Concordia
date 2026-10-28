@@ -156,6 +156,8 @@ Verrous simulés en cachant au marchand ce qui n'est pas débloqué (sonde `sim/
 - **Ce que les sondes ne mesurent pas :** l'effet sur un joueur humain, le principal argument d'une progression (apprendre, avoir des objectifs). Le marchand n'apprend rien et ne s'ennuie pas.
 
 ## Recommandation
+> **Étape 1 adoptée et en jeu** (équipiers liés à des actes, mission de nuit après quelques livraisons, prime selon la confiance du DSC) : règles aux chap. 2 et 5.
+
 1. **D'abord ce qui ne coûte rien et raconte quelque chose :**
    - équipiers échelonnés et liés à des actes : Vance au premier contrôle franchi, Mama Rosa après des ventes de périssables, Glitch à la première Fiche S ;
    - mission de nuit après quelques livraisons de jour ;

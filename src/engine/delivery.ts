@@ -6,6 +6,7 @@ import type { ActionError } from './actions.ts'
 import { cargoUsed } from './cargo.ts'
 import { indexed } from './inflation.ts'
 import { isSealed } from './night.ts'
+import { noteDelivery, trustFactor } from './progress.ts'
 import type { Rng } from './rng.ts'
 import type { CargoLot, DistrictId, GameState } from './types.ts'
 
@@ -29,8 +30,9 @@ export function deliveryCrates(state: GameState): number {
   return Math.max(1, Math.ceil(VEHICLES[state.vehicleId].cargo * DAY_DELIVERY.sealedShare))
 }
 
+/** Prime de la livraison, indexée et majorée par la confiance du DSC */
 export function deliveryFee(state: GameState): number {
-  return indexed('rule.day-delivery', DAY_DELIVERY.fee, state.day).total
+  return Math.round(indexed('rule.day-delivery', DAY_DELIVERY.fee, state.day).total * trustFactor(state))
 }
 
 /** La livraison se fait par le trajet de jour : à accepter avant de partir, avec la place libre */
@@ -63,7 +65,7 @@ export function deliverDay(state: GameState): GameState {
   if (state.phase !== 'day' || !state.delivery || state.delivery.to !== state.districtId) return state
   const fee = deliveryFee(state)
   return {
-    ...state,
+    ...noteDelivery(state),
     cash: state.cash + fee,
     cargo: state.cargo.filter((lot) => !isSealed(lot)),
     delivery: null,

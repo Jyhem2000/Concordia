@@ -28,6 +28,7 @@ import { changeHealth, gainRouteIcc } from './gauges.ts'
 import { indexed } from './inflation.ts'
 import { keysOf } from './records.ts'
 import { createRng, type Rng } from './rng.ts'
+import { noteControlPassed, raiseWanted } from './progress.ts'
 import { serveCustody } from './routine.ts'
 import { loseHalfDay } from './time.ts'
 import type {
@@ -650,9 +651,9 @@ function loseChassis(state: GameState, ledger: Ledger, pv: number): GameState {
 }
 
 function addWanted(state: GameState, ledger: Ledger): GameState {
-  const wanted = Math.min(WANTED.maxLevel, state.wanted + WANTED.perOffense)
-  ledger.wanted += wanted - state.wanted
-  return { ...state, wanted }
+  const raised = raiseWanted(state)
+  ledger.wanted += raised.wanted - state.wanted
+  return raised
 }
 
 /** Note la garde à vue au compte rendu ; elle est purgée à la fin de la résolution */
@@ -686,7 +687,10 @@ function finish(state: GameState, report: InterceptionReport, executed: boolean,
         },
       }
     : towed.state
-  const passed: GameState = { ...seized, interception: null, interceptionReport: { ...fullReport, custodyDays, jammerSeized: jammer !== undefined } }
+  // Contrôle de la BRC franchi sans garde à vue : noté au carnet (Vance, chap. 5)
+  const brc = state.interception !== null && state.interception.kind !== 'racket'
+  const noted = brc && custodyDays === 0 ? noteControlPassed(seized) : seized
+  const passed: GameState = { ...noted, interception: null, interceptionReport: { ...fullReport, custodyDays, jammerSeized: jammer !== undefined } }
   return custodyDays > 0 ? serveCustody(passed, custodyDays) : arrive(passed)
 }
 

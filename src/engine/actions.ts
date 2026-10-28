@@ -9,6 +9,7 @@ import { checkMove, drawInterception, emergencyTow, resolveMove } from './interc
 import { crossedDistricts, shortestRoute } from './map.ts'
 import { dismiss, hire } from './crew.ts'
 import { acceptDelivery, checkDelivery } from './delivery.ts'
+import { noteSale } from './progress.ts'
 import { acceptMission, checkMission, isOnMission, recordDeviation } from './night.ts'
 import { auction, blackmail, consultCassandre, deliverVip, forge, orderInfluence, requestVip, visitMorgue, type MorgueService } from './services.ts'
 import { buyModule, buyVehicle, mountedEffect, mountModule, repair } from './equipment.ts'
@@ -129,6 +130,8 @@ export type ActionError =
   | 'no-crew'
   | 'pump-closed'
   | 'no-mission'
+  | 'mission-locked'
+  | 'crew-locked'
   | 'nothing-to-sell'
   | 'no-delivery'
   | 'delivery-pending'
@@ -212,7 +215,7 @@ function sell(state: GameState, productId: ProductId, qty: number): ActionResult
   return {
     ok: true,
     state: {
-      ...state,
+      ...noteSale(state, productId, qty),
       cash: state.cash + total,
       oversold,
       cargo: takeLots(state.cargo, productId, qty).remaining,

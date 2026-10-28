@@ -11,7 +11,7 @@ import { bluffChance, bribeChance, NO_OFFER } from './interception.ts'
 import { demandQuota, saleQuote } from './market.ts'
 import { riskBreakdown } from './risk.ts'
 import { sleep } from './routine.ts'
-import { defined, errorOf, gameAt, run } from './test-helpers.ts'
+import { defined, EARNED, errorOf, gameAt, run } from './test-helpers.ts'
 import type { CargoLot, CrewId, GameState, Interception, ProductId } from './types.ts'
 
 const lot = (productId: ProductId, qty: number, boughtDay = 3): CargoLot => ({
@@ -30,7 +30,7 @@ const brc: Interception = { kind: 'brc', acted: false, bluffFailed: false }
 
 describe('recrutement à la Cantine', () => {
   it('recrute gratuitement la première fois, salaire du jour payé d’avance, puis avec des frais', () => {
-    const first = run(gameAt(3, { cash: 10_000 }), { type: 'hireCrew', crewId: 'CREW-02' })
+    const first = run(gameAt(3, { cash: 10_000, progress: EARNED }), { type: 'hireCrew', crewId: 'CREW-02' })
     expect(first.cash).toBe(10_000 - salary(first, 'CREW-02'))
     expect(first.crew).toMatchObject({ active: 'CREW-02', paidDay: 3, hires: 1 })
     expect(hireFee(first)).toBe(indexed('LOC-D1-2', CREW_HIRE_FEE, 3).total)
@@ -73,7 +73,7 @@ describe('bonus des équipiers', () => {
   })
 
   it('Glitch relève tous les districts et majore le rendement offshore', () => {
-    const glitch = run(gameAt(3, { cash: 10_000 }), { type: 'hireCrew', crewId: 'CREW-02' })
+    const glitch = run(gameAt(3, { cash: 10_000, progress: EARNED }), { type: 'hireCrew', crewId: 'CREW-02' })
     expect(Object.keys(glitch.memory)).toHaveLength(6)
     const account = { deposited: 10_000, interest: 0 }
     const bonus = defined(CREW['CREW-02'].offshoreBonus)

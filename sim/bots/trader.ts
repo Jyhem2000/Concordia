@@ -15,7 +15,7 @@ import { DISTRICT_IDS, DISTRICTS } from '../../src/data/districts.ts'
 import { KARMA, LOCATIONS, VELVET } from '../../src/data/locations.ts'
 import { ROAD_EVENTS } from '../../src/data/events.ts'
 import { PRODUCT_IDS, PRODUCTS, SEALED_PRODUCT } from '../../src/data/products.ts'
-import { MODULES, VEHICLES } from '../../src/data/vehicles.ts'
+import { CREW, MODULES, VEHICLES } from '../../src/data/vehicles.ts'
 import { canSiphon, checkForceCurfew, checkService, fuelPrice, maxBuy, planTravel, pumpClosed, type Action } from '../../src/engine/actions.ts'
 import { baseValue, cargoUsed, isIllegal, ownedQty, taggedQty } from '../../src/engine/cargo.ts'
 import { daysBeforeRot, paymentValue } from '../../src/engine/condition.ts'
@@ -560,7 +560,7 @@ function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route
     if (night && view.mission && to !== view.mission.to) continue
     // De jour, une livraison acceptée impose la destination
     if (!night && view.delivery && to !== view.delivery.to) continue
-    if (night && !view.mission && nightMode(plan, temperament) !== 'margin' && nightMode(plan, temperament) !== 'always') continue
+    if (night && !view.mission && nightMode(view, plan, temperament) !== 'margin' && nightMode(view, plan, temperament) !== 'always') continue
     const trip = planTravel(view, to)
     const fuelNeeded = Math.max(0, trip.fuelCost - view.fuel)
     const fuelCost = trip.fuelCost * fuelPrice(view)
@@ -600,7 +600,8 @@ function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route
         let value = carried + margin - tripRisk * exposure(planned) - fuelCost
         // Marchandise déjà en soute et trajet trop risqué : seulement en dernier recours
         if (tooRisky) value -= 1_000_000
-        if (night && !view.mission) value -= VALUE.wantedLevel
+        // Hors mission, l'écart coûte une Fiche S… sauf pour qui la cherche (équipier à débloquer)
+        if (night && !view.mission) value += seeksFlag(view, plan) ? VALUE.wantedLevel : -VALUE.wantedLevel
         // Raisons d'aller quelque part : dette à solder, équipement à acheter
         if (to === 'D1') value += debtVisit(view, reserveOf(view, temperament))
         if (to === 'D4' && pendingEquipment(view, plan)) value += 2_000
@@ -613,7 +614,8 @@ function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route
   }
   // Soute vide et rien à gagner nulle part : rester (le carburant et le risque coûtent).
   // Avec de la marchandise, on part vers la meilleure destination : elle ne se vend pas en restant.
-  if (!best || (best.value <= 0 && goods.length === 0 && best.buys.length === 0 && !(night && view.mission))) return night ? null : explore(view)
+  if (!best || (best.value <= 0 && goods.length === 0 && best.buys.length === 0 && !(night && view.mission)))
+    return night && !seeksFlag(view, plan) ? null : explore(view)
   return best
 }
 
@@ -654,13 +656,20 @@ function refuelFor(view: GameState, needed: number): Action | null {
 }
 
 /** Tournées de nuit : le tempérament, relevé par un plan noctambule */
-function nightMode(plan: Plan, temperament: Temperament): Temperament['night'] {
+function nightMode(view: GameState, plan: Plan, temperament: Temperament): Temperament['night'] {
+  // L'équipier du plan attend une première Fiche S : une tournée clandestine la lui donne
+  if (seeksFlag(view, plan)) return 'always'
   if (!plan.nightOwl || temperament.night === 'always') return temperament.night
   return 'margin'
 }
 
+/** L'équipier du plan ne se présente qu'à la première Fiche S, que le joueur n'a pas encore */
+function seeksFlag(view: GameState, plan: Plan): boolean {
+  return plan.crew !== undefined && CREW[plan.crew].unlock.kind === 'wanted' && !view.progress.flagged && !view.crew.lost.includes(plan.crew)
+}
+
 function eveningTour(view: GameState, plan: Plan, temperament: Temperament): Action | null {
-  const mode = nightMode(plan, temperament)
+  const mode = nightMode(view, plan, temperament)
   if (mode === 'never' || checkForceCurfew(view) || view.day >= ENDGAME_DAY) return null
   if (missionOffer(view) && !checkMission(view)) return { type: 'forceCurfew', mission: true }
   if (mode === 'always' || (mode === 'margin' && tradable(view).length > 0)) return { type: 'forceCurfew' }

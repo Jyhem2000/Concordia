@@ -65,7 +65,7 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
 
 ## Vue « Carte tactique & navigation »
 * **Récapitulatif de la soute :** en haut de la carte, l'occupation (caisses / capacité) et chaque produit avec sa quantité, dont la part cachée dans le double fond, pour choisir la destination sans revenir au marché.
-* **Livraison officielle du jour** (chap. 2) : en haut de la carte, de jour, l'offre de la plateforme (district, caisses scellées, prime) avec son bouton d'acceptation, puis la livraison en cours.
+* **Livraison officielle du jour** (chap. 2) : en haut de la carte, de jour, l'offre de la plateforme (district, caisses scellées, prime) avec son bouton d'acceptation, puis la livraison en cours ; la confiance du DSC (commandes livrées, multiplicateur de prime) l'accompagne.
 * Carte schématique style terminal rétro-futuriste des six districts et de leurs liaisons (chap. 4).
 * **Soute exposée :** en tête de carte, le nombre de caisses illégales en soute (dont celles du double fond), ce qu'elles ont coûté, et la sanction de base d'une saisie (garde à vue si du haut tier est à bord).
 * **Produits en soute par district :** sous chaque district, chaque produit en soute avec son statut public (Forte demande, Production) et son cours mémorisé, ou « jamais vu ».
@@ -74,6 +74,7 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
 * **Bulles d'indices :** événements du jour (nom de l'événement local sous le district, effets au toucher), ronde renforcée révélée par `[CREW-01]` (🚓), pic suspect de la veille (👁️).
 * **Panneau de prévision (au clic sur un district) :** itinéraire et districts traversés, rations nécessaires, étoiles de sécurité, prix local du Synthanol, lieux spéciaux, et le **risque d'interception** pour la soute actuelle (détaillable), avec la part de contrôles volants du district (fuite impossible), avant validation. La ronde renforcée, cachée, n'y figure pas ; tout le reste est exact. Les districts en pic suspect portent l'icône 👁️.
 * **Dernier trajet :** ce que le dernier trajet a coûté hors barrage (usure du châssis ou caisses consommées pour refroidir le moteur).
+* **Verrous de progression :** tout ce qui n'est pas encore débloqué s'affiche quand même, avec sa condition et la progression vers elle (équipiers à la Cantine, mission de nuit au panneau du soir).
 * **Boutons de départ :** « Rouler de jour » ; à 20h00, trois choix explicites, chacun avec ses effets : « Dormir au relais » (ou « Bivouac » en `[D4]`), « Livraison de nuit autorisée vers … (prime) » quand une mission est proposée (caisses scellées chargées, trajet couvert, la marchandise du joueur peut voyager avec), et « Tournée clandestine » (hors mission : risque accru, Fiche S). Épuisé, chaque tournée propose la nuit blanche forcée si le joueur a de quoi boire.
 * **Mission de nuit :** le panneau du soir affiche dès le matin la mission proposée (destination, caisses scellées, prime) ou son absence, et le bouton qui l'accepte en partant ; la nuit, la carte marque le district de la mission, et le risque des autres destinations montre le malus hors mission. Les caisses scellées apparaissent dans la soute, sans vente possible. Le dernier trajet dit si la mission a été livrée ou si l'écart a été enregistré.
 

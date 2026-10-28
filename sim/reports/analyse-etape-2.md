@@ -127,3 +127,22 @@ Le critère devient : *à graine égale, un choix meilleur en moyenne gagne au m
 - **Essayé, non retenu :** relever le malus Tech pour valoriser `[MOD-03]` pénalisait tout le monde sans aider l'Électronique.
 
 **Critère non atteint.** Un build joué comme une politique fixe (produits favorisés, achats imposés) ne bat pas le jeu libre partie par partie : son coût pèse tôt, son effet arrive trop tard ou trop peu. Le remède est structurel, et c'est l'objet de l'analyse de progression ([docs/propositions/progression.md](../../docs/propositions/progression.md)) : un équipement qui arrive à son heure, à un prix et un effet calibrés pour cette étape de la partie.
+
+## Progression, étape 1 (équipiers liés à des actes, nuit après deux livraisons, confiance du DSC)
+Campagnes Contrôle et 1 à 4 remesurées.
+
+| Tempérament | Survie avant → après | Score moyen |
+| :--- | :--- | :--- |
+| Prudent | 82 à 89 % → **84 à 93 %** | en hausse (+1 000 à +5 000 ₡) : les livraisons paient mieux avec la confiance |
+| Équilibré | 76 à 84 % → 76 à 82 % | stable, de −10 000 à +14 000 ₡ selon le plan |
+| Casse-cou | 64 à 71 % → 64 à 76 % | en baisse de 10 à 20 % : moins de tournées de nuit au début |
+
+- **Les équipiers arrivent** entre le Jour 4 et le Jour 12 selon le jeu :
+  - Glitch au J4–J7 (première Fiche S) ;
+  - Vance au J7–J10 (premier contrôle franchi) ;
+  - Mama Rosa au J9–J12, et dans 31 à 41 % des parties seulement (dix périssables à vendre d'abord).
+- **Plans :**
+  - gagnent : Couverture légale (+14 000 ₡), Haut tier (+13 000 ₡), Citoyen modèle (+7 500 ₡ en Équilibré) ;
+  - perdent : Chaîne du froid (−10 000 ₡, Mama Rosa arrive tard) et Fuite au sommet (−10 000 ₡, Glitch demande une tournée clandestine).
+- **Campagne 4 :** même tableau qu'avant. L'avance de survie (+12 pts) et la dilution (+18 900 ₡) paient ; Mama Rosa, `[MOD-01]`, `[MOD-04]` et `[MOD-09]` restent négatifs.
+- **À graine égale :** pas de changement de fond (Couverture légale bat le Prudent sur 58 % des parties, le Casse-cou 37 à 55 %).

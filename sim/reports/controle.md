@@ -5,8 +5,8 @@
 
 | Bot | Parties | Survie | Défaites | Fins | Score moyen | Score p10 / médiane / p90 | Score médian des survivants | Dette soldée (jour médian) | Interceptions | Jours de garde à vue | Équipement acheté |
 | :--- | ---: | ---: | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |
-| Novice · Novice · survie | 200 | 85 % | bio-bricks 15 % | standard 85 % | 0 ₡ | 0 ₡ / 0 ₡ / 0 ₡ | 0 ₡ | 87 % (J5) | 6.1 (22 % des trajets) | 0.7 | — |
-| Aléatoire | 200 | 0 % | bio-bricks 100 % | — | 0 ₡ | 0 ₡ / 0 ₡ / 0 ₡ | 0 ₡ | 0 % (J—) | 3.1 (30 % des trajets) | 0.9 | CREW-01 26 %, CREW-03 25 %, CREW-02 13 %, MOD-09 1 %, MOD-04 1 % |
+| Novice · Novice · survie | 200 | 85 % | bio-bricks 15 % | standard 85 % | 0 ₡ | 0 ₡ / 0 ₡ / 0 ₡ | 0 ₡ | 86 % (J5) | 6.2 (22 % des trajets) | 0.7 | — |
+| Aléatoire | 200 | 0 % | bio-bricks 100 % | — | 0 ₡ | 0 ₡ / 0 ₡ / 0 ₡ | 0 ₡ | 0 % (J—) | 3.7 (34 % des trajets) | 1.2 | CREW-01 14 %, CREW-02 11 %, CREW-03 2 %, MOD-04 1 %, MOD-06 1 %, MOD-02 1 % |
 
 ## Défauts relevés
 Aucun : pas d’action refusée, pas de sommeil forcé, aucun invariant violé.

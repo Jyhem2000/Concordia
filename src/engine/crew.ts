@@ -5,6 +5,7 @@ import { CREW, CREW_HIRE_FEE } from '../data/vehicles.ts'
 import type { ActionError } from './actions.ts'
 import { giveCrates, ownedQty } from './cargo.ts'
 import { indexed } from './inflation.ts'
+import { crewUnlock } from './progress.ts'
 import { keysOf } from './records.ts'
 import type { Crew, CrewId, DistrictId, GameState, ProductId } from './types.ts'
 
@@ -41,6 +42,7 @@ export function hireFee(state: GameState): number {
 
 export function checkHire(state: GameState, crewId: CrewId): ActionError | null {
   if (state.crew.lost.includes(crewId)) return 'crew-lost'
+  if (!crewUnlock(state, crewId).unlocked) return 'crew-locked'
   if (state.crew.active === crewId) return 'already-owned'
   return hireFee(state) + salary(state, crewId) > state.cash ? 'not-enough-cash' : null
 }

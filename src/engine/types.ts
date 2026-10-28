@@ -286,7 +286,12 @@ export type Module = {
   droneJammer?: boolean
 }
 
+/** Acte qui fait se présenter un équipier (chap. 5) : contrôles franchis sans garde à vue, caisses d'un tag vendues, première Fiche S */
+export type CrewUnlock = { kind: 'controls'; count: number } | { kind: 'sales'; tag: TagId; count: number } | { kind: 'wanted' }
+
 export type Crew = {
+  /** Condition pour qu'il se présente à la Cantine */
+  unlock: CrewUnlock
   /** Salaire quotidien de base, indexé */
   dailySalary: number
   /** Salaire réduit contre une caisse consommée à 06h00 (tag et tier minimal) */
@@ -614,6 +619,17 @@ export type GameState = {
   velvetLock: number | null
   /** Livraison officielle proposée ce matin (district), jusqu'à son acceptation */
   dayOffer: DistrictId | null
+  /** Carnet de progression (chap. 2 et 5) : actes qui débloquent équipiers, nuit et confiance du DSC */
+  progress: {
+    /** Contrôles de la BRC franchis sans garde à vue */
+    controlsPassed: number
+    /** Caisses vendues, par tag */
+    tagSales: Partial<Record<TagId, number>>
+    /** Le joueur a déjà eu une Fiche S */
+    flagged: boolean
+    /** Commandes du DSC livrées (jour et nuit) */
+    deliveries: number
+  }
   /** Livraison officielle acceptée, jusqu'à sa livraison ou à 06h00 */
   delivery: { to: DistrictId } | null
   /** Mission de nuit proposée pour ce soir (district), tirée le matin */

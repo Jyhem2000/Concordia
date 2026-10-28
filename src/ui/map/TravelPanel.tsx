@@ -9,6 +9,7 @@ import { crewEffect, isMemoryBlurred } from '../../engine/crew.ts'
 import { blurredQuote, estimatedUnitSale, lastSeen, productStatus } from '../../engine/market.ts'
 import { exposure, fineAmount, flyingCheckShare, hiddenCargo } from '../../engine/interception.ts'
 import { checkDelivery, deliveryCrates, deliveryFee, deliveryOffer } from '../../engine/delivery.ts'
+import { trustFactor } from '../../engine/progress.ts'
 import { riskBreakdown } from '../../engine/risk.ts'
 import type { DistrictId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
@@ -81,9 +82,15 @@ function DayDelivery() {
   // L'offre, la place et la prime se calculent sur l'état entier de la partie
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
-  const { t, credits } = useI18n()
+  const { t, credits, multiplier } = useI18n()
+  const trust = t.travel.trust(game.progress.deliveries, multiplier(trustFactor(game)))
   if (game.phase !== 'day') return null
-  if (game.delivery) return <p className="px-3 pt-2 text-xs text-sky-300">{t.travel.deliveryActive(t.district[game.delivery.to].name)}</p>
+  if (game.delivery)
+    return (
+      <p className="px-3 pt-2 text-xs text-sky-300">
+        {t.travel.deliveryActive(t.district[game.delivery.to].name)} {trust}
+      </p>
+    )
   const to = deliveryOffer(game)
   if (!to || game.dayTripDone) return null
   const error = checkDelivery(game)
@@ -91,6 +98,7 @@ function DayDelivery() {
     <div className="px-3 pt-2 text-xs">
       <p className="font-bold text-sky-300">{t.travel.deliveryTitle}</p>
       <p className="text-zinc-300">{t.travel.deliveryOffer(t.district[to].name, deliveryCrates(game), credits(deliveryFee(game)))}</p>
+      <p className="text-zinc-400">{trust}</p>
       <Button className="mt-1" disabled={error !== null} onClick={() => dispatch({ type: 'acceptDelivery' })}>
         {t.travel.acceptDelivery}
       </Button>

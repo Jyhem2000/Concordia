@@ -1,5 +1,6 @@
 import { CREW } from '../../data/vehicles.ts'
 import { checkHire, CREW_IDS, hireFee, inKindCrate, salary } from '../../engine/crew.ts'
+import { crewUnlock } from '../../engine/progress.ts'
 import type { CrewId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -62,6 +63,14 @@ function CrewOffer({ crewId }: CrewOfferProps) {
   const { t, credits, multiplier, signedPercent } = useI18n()
   const error = checkHire(game, crewId)
   const crew = CREW[crewId]
+  // Verrou de progression : condition et avancement, affichés tant qu'il ne s'est pas présenté (chap. 5)
+  const unlock = crewUnlock(game, crewId)
+  const condition =
+    crew.unlock.kind === 'controls'
+      ? t.crewDesk.locked.controls(unlock.done, unlock.needed)
+      : crew.unlock.kind === 'sales'
+        ? t.crewDesk.locked.sales(t.tag[crew.unlock.tag].name, unlock.done, unlock.needed)
+        : t.crewDesk.locked.wanted
   const bonuses = [
     ...(crew.riskFactor !== undefined ? [t.crewDesk.risk(multiplier(crew.riskFactor))] : []),
     ...(crew.bribeBonus ? [t.crewDesk.bribe(signedPercent(crew.bribeBonus, 0))] : []),
@@ -84,11 +93,12 @@ function CrewOffer({ crewId }: CrewOfferProps) {
       </p>
       <p className="text-zinc-400">{t.crew[crewId].subtitle}</p>
       <p className="text-zinc-300">{bonuses.join(' · ')}</p>
+      {!unlock.unlocked && <p className="text-amber-300">{condition}</p>}
       <div className="mt-1 flex items-center gap-2">
         <Button variant="primary" disabled={error !== null} onClick={() => dispatch({ type: 'hireCrew', crewId })}>
           {t.crewDesk.hire}
         </Button>
-        {error && <span className="text-red-300">{t.error[error]}</span>}
+        {error && error !== 'crew-locked' && <span className="text-red-300">{t.error[error]}</span>}
       </div>
     </li>
   )

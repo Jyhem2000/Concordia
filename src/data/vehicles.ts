@@ -70,12 +70,19 @@ export const CREW_HIRE_FEE = 1_500
 /** Salaires de base, indexés sur l'inflation, et bonus des équipiers (chap. 5) */
 export const CREW: Readonly<Record<CrewId, Crew>> = {
   'CREW-01': {
+    unlock: { kind: 'controls', count: 1 },
     dailySalary: 400,
     inKindSalary: { amount: 300, tag: 'TAG-ADDICTIVE', minTier: 2 },
     riskFactor: 0.8,
     bribeBonus: 0.15,
     revealsPatrol: true,
   },
-  'CREW-02': { dailySalary: 600, liveQuotes: true, offshoreBonus: 0.005, fleeBonus: 0.2, forgeryBonus: 0.2 },
-  'CREW-03': { dailySalary: 500, perishableKnowHow: 1.5, refining: true, perishableQuota: 2.5 },
+  'CREW-02': { unlock: { kind: 'wanted' }, dailySalary: 600, liveQuotes: true, offshoreBonus: 0.005, fleeBonus: 0.2, forgeryBonus: 0.2 },
+  'CREW-03': {
+    unlock: { kind: 'sales', tag: 'TAG-PERISHABLE', count: 10 },
+    dailySalary: 500,
+    perishableKnowHow: 1.5,
+    refining: true,
+    perishableQuota: 2.5,
+  },
 }

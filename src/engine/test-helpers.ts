@@ -46,6 +46,9 @@ function findRng(accept: (draw: number) => boolean): RngState {
  * étant bornés (au moins 5 %, au plus 95 %), ces deux graines fixent l'issue du prochain jet :
  */
 
+/** Carnet où tout est débloqué : équipiers et mission de nuit (chap. 2 et 5) */
+export const EARNED: GameState['progress'] = { controlsPassed: 1, tagSales: { 'TAG-PERISHABLE': 10 }, flagged: true, deliveries: 2 }
+
 /** Tirage haut : aucun barrage au prochain trajet, échec de la prochaine option tentée */
 export const HIGH_ROLL_RNG = findRng((draw) => draw >= 0.99)
 

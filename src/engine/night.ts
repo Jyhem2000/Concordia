@@ -1,10 +1,11 @@
-import { DAY_DELIVERY, NIGHT_MISSION, WANTED } from '../data/balance.ts'
+import { DAY_DELIVERY, NIGHT_MISSION } from '../data/balance.ts'
 import { DISTRICT_IDS } from '../data/districts.ts'
 import { PRODUCTS, SEALED_PRODUCT } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import type { ActionError } from './actions.ts'
 import { cargoUsed } from './cargo.ts'
 import { indexed } from './inflation.ts'
+import { nightUnlock, noteDelivery, raiseWanted, trustFactor } from './progress.ts'
 import type { Rng } from './rng.ts'
 import type { CargoLot, DistrictId, GameState } from './types.ts'
 
@@ -20,8 +21,9 @@ export function drawNightOffer(rng: Rng): DistrictId | null {
   return rng.chance(NIGHT_MISSION.chance) ? rng.pick(DISTRICT_IDS) : null
 }
 
-/** Mission valable ce soir : proposée, et pas vers le district où se trouve déjà le joueur */
+/** Mission valable ce soir : proposée, débloquée (confiance du DSC), et pas vers le district où se trouve déjà le joueur */
 export function missionOffer(state: GameState): DistrictId | null {
+  if (!nightUnlock(state).unlocked) return null
   return state.nightOffer && state.nightOffer !== state.districtId ? state.nightOffer : null
 }
 
@@ -30,11 +32,13 @@ export function sealedCount(state: GameState): number {
   return Math.max(1, Math.ceil(VEHICLES[state.vehicleId].cargo * NIGHT_MISSION.sealedShare))
 }
 
+/** Prime de la mission, indexée et majorée par la confiance du DSC */
 export function missionFee(state: GameState): number {
-  return indexed('rule.night-mission', NIGHT_MISSION.fee, state.day).total
+  return Math.round(indexed('rule.night-mission', NIGHT_MISSION.fee, state.day).total * trustFactor(state))
 }
 
 export function checkMission(state: GameState): ActionError | null {
+  if (!nightUnlock(state).unlocked) return 'mission-locked'
   if (!missionOffer(state)) return 'no-mission'
   // Une seule commande scellée à bord : la livraison du jour non faite bloque la mission du soir
   if (state.delivery) return 'delivery-pending'
@@ -59,7 +63,7 @@ export function deliverMission(state: GameState): GameState {
   if (state.phase !== 'night' || !state.mission || state.mission.to !== state.districtId) return state
   const fee = missionFee(state)
   return {
-    ...state,
+    ...noteDelivery(state),
     cash: state.cash + fee,
     cargo: state.cargo.filter((lot) => !isSealed(lot)),
     mission: null,
@@ -71,7 +75,7 @@ export function deliverMission(state: GameState): GameState {
 export function recordDeviation(state: GameState): GameState {
   return {
     ...state,
-    wanted: Math.min(WANTED.maxLevel, state.wanted + WANTED.perOffense),
+    ...raiseWanted(state),
     tripReport: state.tripReport ? { ...state.tripReport, mission: 'deviated' } : state.tripReport,
   }
 }
