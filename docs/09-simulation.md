@@ -137,7 +137,7 @@ Cibles de départ, à recaler avec les premières mesures.
 | 1 | Le tempérament compte : pour un même plan, le casse-cou a un score plus dispersé et un taux de Game Over plus élevé que le prudent. |
 | 2 | Chaque grande fin est obtenue dans une part significative des parties qui la visent. Taux de réussite décroissant de Baron à Élite à Saboteur, taux de Game Over croissant dans le même ordre. |
 | 2 | La fin de partie reste tendue : la dette et l'audit pèsent encore dans les derniers jours. |
-| 3 | Pour un même bot, l'écart de score entre graines reste inférieur à l'écart entre plans. |
+| 3 | À graine égale (mêmes tirages), un choix meilleur en moyenne gagne au moins 60 % des parties départagées : l'Équilibré contre le Prudent, chaque plan équipé contre le Sans build. L'écart entre graines d'un même bot, lui, peut rester grand : c'est l'effet boule de neige d'un jeu de négoce. |
 | 4 | Chaque équipement, équipier et lieu spécial améliore le plan qui le vise ; un élément sans effet mesurable est à revoir. |
 | 5 | L'optimiseur ne dépasse pas de loin le meilleur plan conçu ; sinon, la stratégie trouvée est documentée puis corrigée ou assumée comme build. |
 

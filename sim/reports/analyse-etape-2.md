@@ -97,3 +97,33 @@ Mesures complémentaires (200 à 400 parties par bot, sondes temporaires, donné
    Réduire la perte par contrôle resserre l'écart, mais rend aussi le jeu plus facile.
 
 **Tempérament Équilibré** resserré (risque maximal 55 %, audace 0,85) : survie 77 à 84 %, entre le Prudent (80 à 88 %) et le Casse-cou (66 à 71 %).
+
+## Critère 3 revu : à graine égale
+Le critère devient : *à graine égale, un choix meilleur en moyenne gagne au moins 60 % des parties départagées* (chap. 9). Mesure, tempérament Équilibré, 300 graines, part des parties départagées où le plan bat le Sans build :
+
+| Plan | Prix actuels | Prix ×0,5 | Prix ×0,25 | Équipement gratuit |
+| :--- | :--- | :--- | :--- | :--- |
+| Couverture légale | 55 % | 60 % | 66 % | 69 % |
+| Citoyen modèle | 52 % | 61 % | 66 % | 78 % |
+| Rentier | 46 % | 56 % | 60 % | 62 % |
+| Fuite au sommet | 45 % | 53 % | 61 % | 73 % |
+| Corruption | 46 % | 54 % | 56 % | 69 % |
+| Haut tier | 42 % | 45 % | 51 % | 66 % |
+| Électronique | 42 % | 45 % | 52 % | 50 % |
+| Saboteur | 40 % | 37 % | 49 % | 61 % |
+| Nuit festive | 36 % | 41 % | 42 % | 55 % |
+| Chaîne du froid | 32 % | 43 % | 46 % | 62 % |
+| Opportuniste (sans équipement) | 44 % | — | — | — |
+
+- **Les effets existent :** gratuits, presque tous les builds passent 60 %. Payés, aucun.
+- **Le moment d'achat n'y est pour rien :** n'acheter qu'avec deux ou quatre fois le prix en caisse donne les mêmes taux.
+- **Le prix seul ne suffit pas :** même divisé par quatre, la moitié des builds reste sous 60 %.
+- **Effets renforcés appliqués** (gain modeste, sans effet de bord) :
+  - Mama Rosa (savoir-faire ×1,5, quotas des périssables ×2,5) ;
+  - profil festif ×1,5 la nuit ;
+  - risque ajouté par `[VEH-04]` ramené à +5 points ;
+  - trappe de `[MOD-07]` jusqu'à 100 % de récupération.
+  - Effet : Chaîne du froid 32 → 38 %, Nuit festive 36 → 44 %.
+- **Essayé, non retenu :** relever le malus Tech pour valoriser `[MOD-03]` pénalisait tout le monde sans aider l'Électronique.
+
+**Critère non atteint.** Un build joué comme une politique fixe (produits favorisés, achats imposés) ne bat pas le jeu libre partie par partie : son coût pèse tôt, son effet arrive trop tard ou trop peu. Le remède est structurel, et c'est l'objet de l'analyse de progression ([docs/propositions/progression.md](../../docs/propositions/progression.md)) : un équipement qui arrive à son heure, à un prix et un effet calibrés pour cette étape de la partie.

@@ -59,6 +59,10 @@ Les docs décrivent le jeu complet ; tout n'est pas encore en jeu. Ce tableau di
 | 9 | Moteur de simulation, invariants, Novice, Aléatoire, marchand (12 plans × 3 tempéraments, lieux spéciaux, commande VIP), objectifs de grande fin ; campagnes Contrôle, 1 à 4 (`sim/reports/`) | Spéculation sur l'événement de demain (Cassandre-88, rumeur), faux dossier de Loterie, optimiseur et campagne 5 |
 | 10 | Bandeau, téléscripteur, marché et fiche produit, carte, lieux, soir, briefing, barrage, aléa routier, objectifs | Vue véhicule et soute (dont le choix du contenu du double fond), filtres du marché, dégradation de l'interface selon l'ICC, manuel en jeu |
 
+## Propositions en cours
+Analyses de conception pas encore tranchées ; les règles retenues rejoindront leurs chapitres.
+* [Mini-progression : débloquer les mécaniques au fil de la partie](propositions/progression.md)
+
 ## Feuille de route
 Étapes restantes, dans l'ordre des dépendances :
 1. **Simulations** — campagnes du chap. 9 sur le jeu complet, sans interface, puis équilibrage. L'équilibrage peut changer des règles : l'habillage et le manuel viennent après.
