@@ -63,8 +63,9 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
   * *Hachoir de `[LOC-D1-1]`* : caisses rachetables, prix par caisse détaillable, limite du jour restante.
 
 ## Vue « Carte tactique & navigation »
+* **Livraison officielle du jour** (chap. 2) : en haut de la carte, de jour, l'offre de la plateforme (district, caisses scellées, prime) avec son bouton d'acceptation, puis la livraison en cours.
 * Carte schématique style terminal rétro-futuriste des six districts et de leurs liaisons (chap. 4).
-* **Soute exposée :** en tête de carte, le nombre de caisses illégales en soute, ce qu'elles ont coûté, et la sanction de base d'une saisie (garde à vue si du haut tier est à bord).
+* **Soute exposée :** en tête de carte, le nombre de caisses illégales en soute (dont celles du double fond), ce qu'elles ont coûté, et la sanction de base d'une saisie (garde à vue si du haut tier est à bord).
 * **Produits en soute par district :** sous chaque district, chaque produit en soute avec son statut public (Forte demande, Production) et son cours mémorisé, ou « jamais vu ».
 * **Marge estimée :** sous chaque district, les cours mémorisés des produits en soute portent la même icône de marge, estimée sur le cours vu moins la commission de puce (sans savoir-faire ni saturation).
 * **Mémoire de marché :** au toucher d'un district, derniers cours observés avec leur ancienneté (*« vu il y a 3 jours »*), en fourchette en cas de Sédation ; cours en temps réel avec `[CREW-02]`.

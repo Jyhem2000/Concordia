@@ -8,6 +8,7 @@ import { depositBreakdown, loanRoom, offshoreBalance, withdrawFrom } from './fin
 import { checkMove, drawInterception, emergencyTow, resolveMove } from './interception.ts'
 import { crossedDistricts, shortestRoute } from './map.ts'
 import { dismiss, hire } from './crew.ts'
+import { acceptDelivery, checkDelivery } from './delivery.ts'
 import { acceptMission, checkMission, isOnMission, recordDeviation } from './night.ts'
 import { auction, blackmail, consultCassandre, deliverVip, forge, orderInfluence, requestVip, visitMorgue, type MorgueService } from './services.ts'
 import { buyModule, buyVehicle, mountedEffect, mountModule, repair } from './equipment.ts'
@@ -47,6 +48,8 @@ export type Action =
   | { type: 'sell'; productId: ProductId; qty: number }
   | { type: 'refuel'; qty: number }
   | { type: 'travel'; to: DistrictId }
+  /** Livraison officielle du jour, à accepter avant le trajet de jour */
+  | { type: 'acceptDelivery' }
   /** Tournée de nuit ; `drink` : boisson pour une nuit blanche malgré l'épuisement ; `mission` : accepter la mission du soir */
   | { type: 'forceCurfew'; drink?: ProductId; mission?: boolean }
   | { type: 'useProduct'; productId: ProductId }
@@ -123,6 +126,8 @@ export type ActionError =
   | 'no-crew'
   | 'pump-closed'
   | 'no-mission'
+  | 'no-delivery'
+  | 'delivery-pending'
   | 'not-eligible'
   | 'cooldown'
   | 'already-healthy'
@@ -524,6 +529,10 @@ export function applyAction(state: GameState, action: Action): ActionResult {
       return isQuantity(action.qty) ? refuel(state, action.qty) : fail('invalid-quantity')
     case 'travel':
       return travel(state, action.to)
+    case 'acceptDelivery': {
+      const error = checkDelivery(state)
+      return error ? fail(error) : { ok: true, state: acceptDelivery(state) }
+    }
     case 'forceCurfew':
       return forceCurfew(state, action.drink, action.mission)
     case 'useProduct':

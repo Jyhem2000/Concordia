@@ -79,6 +79,7 @@ export type RuleId =
   | 'aftershock'
   | 'repair'
   | 'night-mission'
+  | 'day-delivery'
   | 'refining'
   | 'sedation'
   | 'cantine'

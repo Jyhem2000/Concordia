@@ -62,21 +62,29 @@ Le bandeau affiche la date, le moment et si le trajet du moment est encore dispo
 ### Routine matinale (06h00), dans l'ordre
 Le Jour 1 commence sans routine : pas d'intérêts, inflation à ×1,00, boutiques et événements tirés une première fois.
 1. Publication de l'**indice d'inflation** du jour (chap. 7).
-2. Paiement d'avance du salaire de l'équipier actif (chap. 5) — sauf si le joueur était en garde à vue cette nuit-là ; consommation éventuelle d'une caisse par `[CREW-01]`. Reprise des caisses scellées d'une mission de nuit non livrée (voir *Tournée de nuit*).
+2. Paiement d'avance du salaire de l'équipier actif (chap. 5) — sauf si le joueur était en garde à vue cette nuit-là ; consommation éventuelle d'une caisse par `[CREW-01]`. Reprise des caisses scellées d'une commande du DSC non livrée, livraison du jour ou mission de nuit (voir *Livraison officielle du jour* et *Tournée de nuit*).
 3. Intérêts et échéances de la dette ; **collecte de protection** (chap. 7).
 4. Intérêts du compte offshore.
 5. Dégradation de fraîcheur des caisses `[TAG-PERISHABLE]` (chap. 3). Protection de l'Exemption Métabolique **−1 jour**.
 6. Récupération des caisses larguées la veille via `[MOD-07]` ; échéance d'une commande VIP de `[LOC-D6-1]` dépassée (chap. 4).
-7. Tirage de la mission de nuit proposée pour ce soir ; tirage de la ronde renforcée ; entrée en vigueur de l'événement global tiré la veille, tirage des événements locaux, de la Loterie les jours de tirage, de l'événement global du lendemain et de sa rumeur ; contrecoups (chap. 8). Puis, parce que les événements les modifient : reconstitution des quotas de demande, cours et boutiques (chap. 7).
+7. Tirage de la livraison officielle du jour et de la mission de nuit proposée pour ce soir ; tirage de la ronde renforcée ; entrée en vigueur de l'événement global tiré la veille, tirage des événements locaux, de la Loterie les jours de tirage, de l'événement global du lendemain et de sa rumeur ; contrecoups (chap. 8). Puis, parce que les événements les modifient : reconstitution des quotas de demande, cours et boutiques (chap. 7).
 8. Effets du matin des événements : canicule sur les périssables, sas de `[EVT-D3-01]` si le joueur se trouve en `[D3]` (chap. 8).
 
 ### Service de jour (06h00 – 20h00)
-Acheter / vendre au marché, faire le plein, utiliser les lieux spéciaux du district, et effectuer **1 trajet de jour**. Une fois arrivé, on peut à nouveau commercer avant 20h00.
+Acheter / vendre au marché, faire le plein, utiliser les lieux spéciaux du district, accepter la livraison officielle du jour, et effectuer **1 trajet de jour**. Une fois arrivé, on peut à nouveau commercer avant 20h00.
+
+### Livraison officielle du jour
+Le joueur est officiellement livreur de Catégorie C : la plateforme logistique du DSC lui confie parfois une commande légale. C'est le revenu sûr de celui qui ne veut pas risquer gros. Chiffres : `DAY_DELIVERY` dans [`balance.ts`](../src/data/balance.ts).
+* **L'offre :** chaque matin, la plateforme propose ou non une livraison (une chance), vers un district tiré au hasard. Elle n'est valable que si le joueur n'est pas déjà dans ce district, et s'accepte avant le trajet de jour.
+* **Accepter :** la plateforme charge des **caisses scellées du DSC**, une part de la capacité du camion (arrondie au supérieur, au moins une caisse), qui doit être libre. Comme celles de la mission de nuit, elles sont légales (couverture, Tier 0 pour le bluff), ne se vendent ni ne se donnent.
+* **Livrer :** à l'arrivée de jour dans le district demandé, barrage franchi compris, les caisses sont remises contre une **prime** (indexée). Le trajet n'a rien de particulier : même risque, mêmes aléas.
+* **Non livrée** (autre destination, garde à vue…) : à 06h00, la plateforme reprend les caisses et note le retard (perte d'ICC). Tant qu'elles sont à bord, elle ne confie pas de mission de nuit (une seule commande scellée à la fois).
+* *Le choix :* une prime sûre contre de la place en soute et une destination imposée pour la journée ; en échange, la soute est mieux couverte.
 
 ### Trajet
 * **Maximum 2 par jour :** 1 de jour, 1 de nuit. Un trajet = **une destination**, quelle que soit la distance : les districts traversés sont de simples passages (aucun arrêt, aucun commerce, aucun test d'interception), ils ne coûtent que du carburant et du risque (chap. 4). Tous les districts sont accessibles dès le Jour 1, mais pas tous voisins (carte au chap. 4).
 * **Coût :** consommation du véhicule selon la phase ([`vehicles.ts`](../src/data/vehicles.ts)), plus le surcoût des districts traversés (chap. 4).
-* **Résolution :** consommation (et usure du châssis de nuit, ou de jour pendant la canicule `[EVT-G01]`) → test d'interception dans le district de destination (chap. 6), ou racket en `[D4]` → de nuit, sans interception : livraison de la mission ou écart enregistré (voir *Tournée de nuit*) ; de jour, sans interception : tirage d'un aléa routier, en suspens jusqu'au choix (chap. 8) → dépannage d'urgence si le châssis est à 0 → arrivée (effets d'arrivée des événements locaux actifs, ex. `[EVT-D3-01]`, sauf garde à vue).
+* **Résolution :** consommation (et usure du châssis de nuit, ou de jour pendant la canicule `[EVT-G01]`) → test d'interception dans le district de destination (chap. 6), ou racket en `[D4]` → de nuit, sans interception : écart enregistré hors mission (voir *Tournée de nuit*) ; de jour, sans interception : tirage d'un aléa routier, en suspens jusqu'au choix (chap. 8) → dépannage d'urgence si le châssis est à 0 → arrivée, sauf garde à vue : effets d'arrivée des événements locaux actifs (ex. `[EVT-D3-01]`), puis livraison de la commande du DSC si c'est sa destination (livraison du jour de jour, mission de nuit de nuit, barrage franchi compris).
 * **Où l'on roule** (chap. 4) : de jour sur les voies logistiques de surface, de nuit dans les galeries de service, et toujours par les quais de service pour entrer à `[D5]` et `[D6]`.
   * Le risque est celui **du départ** : phase, soute et district quitté au moment de partir, c'est-à-dire celui affiché par le panneau de prévision (ronde renforcée en plus).
   * Le joueur arrêté est déjà dans le district de destination : il y reste en cas de garde à vue.
@@ -91,7 +99,7 @@ Les sirènes d'Aeterna annoncent le couvre-feu sanitaire : les citoyens rentrent
 ### Tournée de nuit
 Tout est filmé : un camion la nuit n'est légitime que sur **ordre de mission** de la plateforme logistique du DSC. Chiffres : `NIGHT_MISSION` dans [`balance.ts`](../src/data/balance.ts).
 * **La mission du soir :** chaque matin, la plateforme propose ou non une mission pour le soir (une chance), vers un district tiré au hasard ; elle est affichée toute la journée. Elle n'est valable que si le joueur n'est pas déjà dans ce district à 20h00.
-* **Accepter la mission :** au départ en tournée, la plateforme charge des **caisses scellées du DSC** : une part de la capacité du camion (arrondie au supérieur, au moins une caisse), qui doit être libre. Elles sont légales (couverture, Tier 0 pour le bluff), ne se vendent ni ne se donnent, et sont livrées d'office à l'arrivée dans le district de la mission, contre une **prime** (indexée).
+* **Accepter la mission :** au départ en tournée, la plateforme charge des **caisses scellées du DSC** : une part de la capacité du camion (arrondie au supérieur, au moins une caisse), qui doit être libre. Impossible tant qu'une livraison du jour non faite est à bord. Elles sont légales (couverture, Tier 0 pour le bluff), ne se vendent ni ne se donnent, et sont livrées d'office à l'arrivée dans le district de la mission, contre une **prime** (indexée).
 * **Sur mission** (trajet vers le district de la mission) : trajet couvert, sans malus de nuit.
 * **Hors mission** (autre destination, ou pas de mission acceptée) : c'est une **anomalie**. Malus au risque d'interception (`NIGHT_TRIP_RISK`, milices de `[D4]` comprises) ; si le trajet passe sans interception, Aeterna enregistre l'écart : **+1 niveau de Fiche S** (chap. 6).
 * **Mission non livrée** (écart, garde à vue, caisses pillées…) : à 06h00, la plateforme reprend les caisses scellées restantes et note le retard (perte d'ICC).

@@ -1,4 +1,4 @@
-import { NIGHT_MISSION, WANTED } from '../data/balance.ts'
+import { DAY_DELIVERY, NIGHT_MISSION, WANTED } from '../data/balance.ts'
 import { DISTRICT_IDS } from '../data/districts.ts'
 import { PRODUCTS, SEALED_PRODUCT } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
@@ -36,6 +36,8 @@ export function missionFee(state: GameState): number {
 
 export function checkMission(state: GameState): ActionError | null {
   if (!missionOffer(state)) return 'no-mission'
+  // Une seule commande scellée à bord : la livraison du jour non faite bloque la mission du soir
+  if (state.delivery) return 'delivery-pending'
   return cargoUsed(state.cargo) + sealedCount(state) > VEHICLES[state.vehicleId].cargo ? 'cargo-full' : null
 }
 
@@ -74,10 +76,14 @@ export function recordDeviation(state: GameState): GameState {
   }
 }
 
-/** Routine de 06h00 : la plateforme reprend les caisses scellées non livrées et note le retard */
+/** Routine de 06h00 : la plateforme reprend les caisses scellées non livrées (livraison du jour ou mission de nuit) et note le retard */
 export function reclaimSealed(state: GameState): { state: GameState; crates: number } {
   const crates = state.cargo.reduce((total, lot) => (isSealed(lot) ? total + lot.qty : total), 0)
-  if (crates === 0 && !state.mission) return { state, crates: 0 }
-  const late = crates > 0 ? NIGHT_MISSION.undeliveredIccLoss : 0
-  return { state: { ...state, cargo: state.cargo.filter((lot) => !isSealed(lot)), mission: null, icc: Math.max(0, state.icc - late) }, crates }
+  if (crates === 0 && !state.mission && !state.delivery) return { state, crates: 0 }
+  const loss = state.delivery ? DAY_DELIVERY.undeliveredIccLoss : NIGHT_MISSION.undeliveredIccLoss
+  const late = crates > 0 ? loss : 0
+  return {
+    state: { ...state, cargo: state.cargo.filter((lot) => !isSealed(lot)), mission: null, delivery: null, icc: Math.max(0, state.icc - late) },
+    crates,
+  }
 }

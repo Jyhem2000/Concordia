@@ -5,6 +5,7 @@ import type { BreakdownSource } from './breakdown.ts'
 import { keysOf } from './records.ts'
 import type { Rng } from './rng.ts'
 import { refreshExemption } from './crew.ts'
+import { deliverDay } from './delivery.ts'
 import { deliverMission } from './night.ts'
 import { loseHalfDay } from './time.ts'
 import type {
@@ -187,8 +188,8 @@ export function heatWave(ctx: EventContext): Extract<EventEffect, { kind: 'heat'
 export function arrive(state: GameState): GameState {
   const arrived = hasEffect(state, state.districtId, 'halfDay') ? loseHalfDay(state) : state
   // Arriver en D1 de jour, c'est passer à la Cantine : l'Exemption Métabolique revient au maximum ;
-  // arriver de nuit dans le district de la mission, c'est livrer les caisses scellées
-  return refreshExemption(deliverMission(arrived))
+  // arriver dans le district d'une commande du DSC (livraison du jour, mission de nuit), c'est livrer les caisses scellées
+  return refreshExemption(deliverDay(deliverMission(arrived)))
 }
 
 // ─── Loterie ───

@@ -45,6 +45,7 @@ function candidates(state: GameState): Action[] {
     ...DISTRICT_IDS.map((to): Action => ({ type: 'travel', to })),
     { type: 'refuel', qty: 1 },
     { type: 'sleep' },
+    { type: 'acceptDelivery' },
     { type: 'forceCurfew' },
     { type: 'forceCurfew', mission: true },
     ...owned.map((drink): Action => ({ type: 'forceCurfew', drink })),

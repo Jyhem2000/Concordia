@@ -7,6 +7,7 @@ import { ownedQty } from './cargo.ts'
 import { debtInterestBreakdown, offshoreBalance, offshoreInterestBreakdown, protectionBreakdown } from './finance.ts'
 import { isPerishable, removeRotten } from './condition.ts'
 import { expireVip } from './services.ts'
+import { drawDayOffer } from './delivery.ts'
 import { drawNightOffer, reclaimSealed } from './night.ts'
 import { mountedEffect, recoverDumped } from './equipment.ts'
 import { changeHealth, gainRouteIcc, iccTier } from './gauges.ts'
@@ -117,7 +118,7 @@ function morningRoutine(state: GameState, night: Night): GameState {
   s = payroll.state
   if (crewId) briefing.crew = { id: crewId, paid: payroll.paid, crate: payroll.crate }
 
-  // Mission de nuit non livrée : la plateforme reprend ses caisses scellées et note le retard
+  // Commande du DSC non livrée (livraison du jour, mission de nuit) : la plateforme reprend ses caisses scellées et note le retard
   const reclaimed = reclaimSealed(s)
   s = reclaimed.state
   briefing.missionReclaimed = reclaimed.crates
@@ -172,7 +173,7 @@ function morningRoutine(state: GameState, night: Night): GameState {
   const rng = createRng(s.rng)
   const patrolDistrict = drawPatrol(rng)
   const events = drawEvents(s.events, day, rng)
-  s = { ...s, patrolDistrict, events, nightOffer: drawNightOffer(rng) }
+  s = { ...s, patrolDistrict, events, dayOffer: drawDayOffer(rng), nightOffer: drawNightOffer(rng) }
   // La Loterie peut désigner l'équipier actif : il disparaît pour de bon (chap. 8)
   // Un faux dossier accepté protège l'équipier de ce tirage ; celui de l'indic efface la Fiche S
   const forged = events.lottery?.day === day && events.lottery.card !== null

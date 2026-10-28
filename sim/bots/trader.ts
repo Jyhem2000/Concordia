@@ -1,8 +1,8 @@
-import { GRINDER, HIGH_TIER, SALE_COMMISSION, SURVIVAL_ADVANCE } from '../../src/data/balance.ts'
+import { DEBT_DAILY_RATE, DEBT_LATE, GAME_LENGTH_DAYS, GRINDER, HIGH_TIER, SALE_COMMISSION, SURVIVAL_ADVANCE } from '../../src/data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../src/data/districts.ts'
 import { KARMA } from '../../src/data/locations.ts'
 import { ROAD_EVENTS } from '../../src/data/events.ts'
-import { PRODUCT_IDS, PRODUCTS } from '../../src/data/products.ts'
+import { PRODUCT_IDS, PRODUCTS, SEALED_PRODUCT } from '../../src/data/products.ts'
 import { MODULES, VEHICLES } from '../../src/data/vehicles.ts'
 import { canSiphon, checkForceCurfew, checkService, fuelPrice, maxBuy, planTravel, pumpClosed, type Action } from '../../src/engine/actions.ts'
 import { cargoUsed, isIllegal, ownedQty, taggedQty } from '../../src/engine/cargo.ts'
@@ -36,6 +36,7 @@ import {
   shopProducts,
   unitSaleBreakdown,
 } from '../../src/engine/market.ts'
+import { checkDelivery, deliveryCrates, deliveryFee, deliveryOffer } from '../../src/engine/delivery.ts'
 import { checkMission, missionOffer } from '../../src/engine/night.ts'
 import { checkRoadChoice, roadCash } from '../../src/engine/road.ts'
 import { blackmailCost, checkAuction, checkBlackmail, checkInfluence, checkMorgue, karmaCost, morgueCost } from '../../src/engine/services.ts'
@@ -152,10 +153,11 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
 
   if (tripLeft) {
     // À sec, sans marchandise : rentrer à Hives prendre l'avance de survie de Viktor
-    const rescue =
+    const rescue: Route | null =
       isBroke(view) && loanRoom(view) > 0 && view.districtId !== 'D1' && !night && !endgame ? { to: 'D1' as const, buys: [], value: 0 } : null
     const route = rescue ?? (endgame && objective === 'score' ? endgameRoute(view) : bestRoute(view, plan, temperament))
     if (route) {
+      if (route.accept) return { type: 'acceptDelivery' }
       const [next] = route.buys
       if (next) return { type: 'buy', productId: next.productId, qty: next.qty }
       const trip = planTravel(view, route.to)
@@ -222,9 +224,27 @@ function illegalValue(cargo: GameState['cargo']): number {
 
 const tradable = (view: GameState) => view.cargo.filter((lot) => !PRODUCTS[lot.productId].sealed)
 
-/** Fonds à garder : carburant d'un trajet et réserve du tempérament */
+/** Fonds à garder : carburant d'un trajet et réserve du tempérament ; à sec, le carburant seulement (rester garé ne rapporte rien) */
 function reserveOf(view: GameState, temperament: Temperament): number {
-  return fuelPrice(view) * 2 + indexed('rule.inflation', temperament.reserve, view.day).total
+  const fuel = fuelPrice(view) * 2
+  return isBroke(view) ? fuel : fuel + indexed('rule.inflation', temperament.reserve, view.day).total
+}
+
+/** Fonds de roulement gardés en remboursant ; tout part s'il solde la dette initiale juste avant l'échéance du retard (taux majoré ensuite) */
+function workingCapital(view: GameState, reserve: number): number {
+  const fuel = fuelPrice(view) * 2
+  const clearsBeforeLate = !view.initialDebtPaid && view.day >= DEBT_LATE.day - 2 && view.cash - fuel >= view.debt
+  return clearsBeforeLate ? fuel : reserve + indexed('rule.inflation', CAPITAL, view.day).total
+}
+
+/** Ce que rapporte un passage chez Viktor : intérêts évités sur ce qu'on peut rembourser, et l'échéance du retard évitée */
+function debtVisit(view: GameState, reserve: number): number {
+  const repayable = Math.min(view.debt, view.cash - workingCapital(view, reserve))
+  if (repayable <= 0) return 0
+  const daysLeft = GAME_LENGTH_DAYS - view.day
+  const clearsInitial = !view.initialDebtPaid && repayable >= view.debt && view.day < DEBT_LATE.day
+  const lateDays = GAME_LENGTH_DAYS - DEBT_LATE.day
+  return repayable * DEBT_DAILY_RATE * daysLeft + (clearsInitial ? view.debt * (DEBT_LATE.dailyRate - DEBT_DAILY_RATE) * lateDays : 0)
 }
 
 /** Perte espérée si un barrage tourne mal, pour une soute dont l'illégal vaut `illegal` */
@@ -273,7 +293,7 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
 
   // Dette : à intérêts quotidiens, la rembourser passe avant tout, en gardant de quoi travailler
   if (!checkService(view, 'debt') && view.debt > 0) {
-    const working = endgame ? fuelPrice(view) * 2 : reserve + indexed('rule.inflation', CAPITAL, view.day).total
+    const working = endgame ? fuelPrice(view) * 2 : workingCapital(view, reserve)
     const amount = Math.min(view.debt, view.cash - working)
     if (amount > 0) return { type: 'repay', amount }
     // Avance de survie : seulement pour ne pas rester bloqué
@@ -363,7 +383,8 @@ function pendingEquipment(view: GameState, plan: Plan): boolean {
 
 // ─── Planification d'un trajet ───
 
-type Route = { to: DistrictId; buys: CrateCount[]; value: number }
+/** Trajet choisi ; `accept` : accepter d'abord la livraison officielle du jour vers cette destination */
+type Route = { to: DistrictId; buys: CrateCount[]; value: number; accept?: boolean }
 
 /** Achats d'ici pour une destination : meilleures marges d'abord, dans le budget et la place */
 function buysFor(
@@ -413,53 +434,81 @@ function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route
   const free = capacity - cargoUsed(view.cargo) - legalNeed
   const goods = tradable(view)
   const night = view.phase === 'night'
+  const offer = !night && !checkDelivery(view) ? deliveryOffer(view) : null
 
   let best: Route | null = null
   for (const to of DISTRICT_IDS) {
     if (to === view.districtId) continue
     // La nuit, sur mission, la destination est imposée ; hors mission, seulement si le tempérament l'accepte
     if (night && view.mission && to !== view.mission.to) continue
+    // De jour, une livraison acceptée impose la destination
+    if (!night && view.delivery && to !== view.delivery.to) continue
     if (night && !view.mission && nightMode(plan, temperament) !== 'margin' && nightMode(plan, temperament) !== 'always') continue
     const trip = planTravel(view, to)
     const fuelNeeded = Math.max(0, trip.fuelCost - view.fuel)
     const fuelCost = trip.fuelCost * fuelPrice(view)
     const budget = view.cash - reserveOf(view, temperament) - fuelNeeded * fuelPrice(view)
-    const { buys, margin } = budget > 0 && free > 0 ? buysFor(view, to, plan, temperament, budget, free) : { buys: [], margin: 0 }
-    const legalBuys = legalNeed > 0 && budget > 0 ? [{ productId: 'T0-01' as const, qty: Math.min(legalNeed, maxBuy(view, 'T0-01')) }] : []
+    // Livraison officielle proposée vers cette destination : avec (prime, caisses légales, moins de place) ou sans
+    for (const contract of to === offer ? [true, false] : [false]) {
+      const room = contract ? free - deliveryCrates(view) : free
+      for (const shopping of [true, false]) {
+        const { buys, margin } = shopping && budget > 0 && room > 0 ? buysFor(view, to, plan, temperament, budget, room) : { buys: [], margin: 0 }
+        const legalBuys =
+          shopping && legalNeed > 0 && budget > 0 ? [{ productId: 'T0-01' as const, qty: Math.min(legalNeed, maxBuy(view, 'T0-01')) }] : []
 
-    // Risque et exposition avec la soute prévue (après les achats d'ici)
-    const planned = [
-      ...view.cargo,
-      ...[...legalBuys, ...buys].map((buy) => ({
-        ...buy,
-        unitCost: quote(view, view.districtId, buy.productId),
-        travelled: false,
-        boughtDay: view.day,
-        damaged: false,
-      })),
-    ]
-    const tripRisk = risk({ ...view, cargo: planned }, to, { includePatrol: revealed })
-    const illegal = illegalValue(planned)
-    const tooRisky = illegal > 0 && tripRisk > temperament.maxRisk
-    if (tooRisky && buys.length > 0) continue
+        // Risque et exposition avec la soute prévue (après les achats d'ici)
+        const planned = [
+          ...view.cargo,
+          ...(contract
+            ? [{ productId: SEALED_PRODUCT, qty: deliveryCrates(view), unitCost: 0, travelled: true, boughtDay: view.day, damaged: false }]
+            : []),
+          ...[...legalBuys, ...buys].map((buy) => ({
+            ...buy,
+            unitCost: quote(view, view.districtId, buy.productId),
+            travelled: false,
+            boughtDay: view.day,
+            damaged: false,
+          })),
+        ]
+        const tripRisk = risk({ ...view, cargo: planned }, to, { includePatrol: revealed })
+        const illegal = illegalValue(planned)
+        const tooRisky = illegal > 0 && tripRisk > temperament.maxRisk
+        // Achats trop risqués pour le tempérament : le même trajet, sans rien acheter
+        if (tooRisky && buys.length > 0) continue
 
-    const carried = goods.reduce(
-      (total, lot) => total + lot.qty * Math.max(0, estimatedSale(view, to, lot.productId) * saleFactor(view, lot) - lot.unitCost),
-      0,
-    )
-    let value = carried + margin - tripRisk * exposure(view, illegal) - fuelCost
-    // Marchandise déjà en soute et trajet trop risqué : seulement en dernier recours
-    if (tooRisky) value -= 1_000_000
-    if (night && !view.mission) value -= VALUE.wantedLevel
-    // Raisons d'aller quelque part : dette à solder, équipement à acheter
-    if (view.debt > 0 && to === 'D1' && view.cash > view.debt * 0.6) value += view.debt * 0.5
-    if (to === 'D4' && pendingEquipment(view, plan)) value += 2_000
-    if (!best || value > best.value) best = { to, buys: [...legalBuys.filter((buy) => buy.qty > 0), ...buys], value }
+        const carried = goods.reduce(
+          (total, lot) => total + lot.qty * Math.max(0, estimatedSale(view, to, lot.productId) * saleFactor(view, lot) - lot.unitCost),
+          0,
+        )
+        let value = carried + margin - tripRisk * exposure(view, illegal) - fuelCost
+        // Marchandise déjà en soute et trajet trop risqué : seulement en dernier recours
+        if (tooRisky) value -= 1_000_000
+        if (night && !view.mission) value -= VALUE.wantedLevel
+        // Raisons d'aller quelque part : dette à solder, équipement à acheter
+        if (to === 'D1') value += debtVisit(view, reserveOf(view, temperament))
+        if (to === 'D4' && pendingEquipment(view, plan)) value += 2_000
+        if (contract) value += deliveryFee(view)
+        if (!best || value > best.value) best = { to, buys: [...legalBuys.filter((buy) => buy.qty > 0), ...buys], value, accept: contract }
+        break
+      }
+    }
   }
   // Soute vide et rien à gagner nulle part : rester (le carburant et le risque coûtent).
   // Avec de la marchandise, on part vers la meilleure destination : elle ne se vend pas en restant.
-  if (best && best.value <= 0 && goods.length === 0 && best.buys.length === 0 && !(night && view.mission)) return null
+  if (!best || (best.value <= 0 && goods.length === 0 && best.buys.length === 0 && !(night && view.mission))) return night ? null : explore(view)
   return best
+}
+
+/** Rien de rentable sous le risque accepté : aller relever les cours du district vu le moins récemment, soute vide, plutôt que rester garé */
+function explore(view: GameState): Route | null {
+  const age = (id: DistrictId) => view.day - (lastSeen(view, id)?.day ?? 0)
+  const affordable = DISTRICT_IDS.filter((id) => {
+    if (id === view.districtId) return false
+    const trip = planTravel(view, id)
+    return Math.max(0, trip.fuelCost - view.fuel) * fuelPrice(view) <= view.cash
+  })
+  const [to] = affordable.sort((a, b) => age(b) - age(a))
+  return to && age(to) > 1 ? { to, buys: [], value: 0 } : null
 }
 
 /** Fin de partie : solder la dette à Hives, puis tout déposer à la Laverie */

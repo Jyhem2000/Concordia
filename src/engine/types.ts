@@ -417,9 +417,9 @@ export type TripReport = {
   chassisWear: number
   /** Caisses consommées pour refroidir le moteur à la place de l'usure */
   coolingCrates: number
-  /** Trajet de nuit : mission livrée, ou écart enregistré ; null de jour ou sous barrage */
+  /** Commande du DSC livrée (livraison du jour, mission de nuit), ou écart de nuit enregistré */
   mission: 'delivered' | 'deviated' | null
-  /** Prime de la mission livrée */
+  /** Prime de la commande livrée */
   missionFee: number
 }
 
@@ -610,6 +610,10 @@ export type GameState = {
   vip: { productId: ProductId; day: number } | null
   /** Velvet-Silo verrouillé jusqu'à ce jour inclus (commande VIP manquée) */
   velvetLock: number | null
+  /** Livraison officielle proposée ce matin (district), jusqu'à son acceptation */
+  dayOffer: DistrictId | null
+  /** Livraison officielle acceptée, jusqu'à sa livraison ou à 06h00 */
+  delivery: { to: DistrictId } | null
   /** Mission de nuit proposée pour ce soir (district), tirée le matin */
   nightOffer: DistrictId | null
   /** Mission de nuit acceptée, jusqu'à sa livraison ou à 06h00 */

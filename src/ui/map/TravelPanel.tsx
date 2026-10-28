@@ -7,6 +7,7 @@ import { averageCost } from '../../engine/cargo.ts'
 import { crewEffect, isMemoryBlurred } from '../../engine/crew.ts'
 import { blurredQuote, estimatedUnitSale, lastSeen, productStatus } from '../../engine/market.ts'
 import { exposure, flyingCheckShare } from '../../engine/interception.ts'
+import { checkDelivery, deliveryCrates, deliveryFee, deliveryOffer } from '../../engine/delivery.ts'
 import { riskBreakdown } from '../../engine/risk.ts'
 import type { DistrictId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
@@ -44,6 +45,7 @@ export default function TravelPanel() {
           {/* Raison commune à toutes les destinations : dite une fois plutôt que sous chaque bouton */}
           {tripDone && <p className="px-3 pt-2 text-xs text-zinc-400">{t.error['trip-done']}</p>}
           <LastTrip />
+          <DayDelivery />
           <Exposure />
           <ul className="divide-y divide-zinc-800">
             {order.map((id) => (
@@ -53,6 +55,29 @@ export default function TravelPanel() {
         </>
       )}
     </section>
+  )
+}
+
+/** Livraison officielle du jour (chap. 2) : offre de la plateforme, ou livraison en cours */
+function DayDelivery() {
+  // L'offre, la place et la prime se calculent sur l'état entier de la partie
+  const game = useGameStore((s) => s.game)
+  const dispatch = useGameStore((s) => s.dispatch)
+  const { t, credits } = useI18n()
+  if (game.phase !== 'day') return null
+  if (game.delivery) return <p className="px-3 pt-2 text-xs text-sky-300">{t.travel.deliveryActive(t.district[game.delivery.to].name)}</p>
+  const to = deliveryOffer(game)
+  if (!to || game.dayTripDone) return null
+  const error = checkDelivery(game)
+  return (
+    <div className="px-3 pt-2 text-xs">
+      <p className="font-bold text-sky-300">{t.travel.deliveryTitle}</p>
+      <p className="text-zinc-300">{t.travel.deliveryOffer(t.district[to].name, deliveryCrates(game), credits(deliveryFee(game)))}</p>
+      <Button className="mt-1" disabled={error !== null} onClick={() => dispatch({ type: 'acceptDelivery' })}>
+        {t.travel.acceptDelivery}
+      </Button>
+      {error && <p className="mt-1 text-zinc-400">{t.error[error]}</p>}
+    </div>
   )
 }
 
