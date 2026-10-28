@@ -5,15 +5,17 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import { FOCUS_RING } from '../shared/focus.ts'
 import InflationChart from './InflationChart.tsx'
+import { tickerSlot } from './tickerSlot.ts'
 
 /** Téléscripteur d'Aeterna (chap. 10) : indice d'inflation du jour, détaillable, et message du jour */
 export default function Ticker() {
   const day = useGameStore((s) => s.game.day)
+  const phase = useGameStore((s) => s.game.phase)
   const { t, multiplier, signedPercent } = useI18n()
   const index = inflationIndex(day)
   const change = day > 1 ? index / inflationIndex(day - 1) - 1 : 0
-  // Un message par jour, dans l'ordre du catalogue : le téléscripteur change chaque matin
-  const message = t.ticker.messages[(day - 1) % t.ticker.messages.length]
+  // Un message par demi-journée, d'un thème à l'autre
+  const message = t.ticker.messages[tickerSlot(day, phase, t.ticker.messages.length)]
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-zinc-800 px-4 py-1 text-xs text-zinc-300">
