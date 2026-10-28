@@ -87,7 +87,7 @@ const tally = (counts: Record<string, number>, games: number) =>
  * Poids du hasard (campagne 3) : écart-type du score entre graines pour chaque bot, comparé à l'écart entre bots
  * (écart-type des scores moyens). Si le premier domine, le résultat dépend plus des tirages que du jeu.
  */
-export function renderSpread(summaries: readonly BotSummary[]): string {
+export function renderSpread(summaries: readonly BotSummary[], scores: readonly (readonly number[])[]): string {
   const means = summaries.map((s) => s.meanScore)
   const average = mean(means)
   const between = Math.sqrt(mean(means.map((value) => (value - average) ** 2)))
@@ -104,7 +104,22 @@ export function renderSpread(summaries: readonly BotSummary[]): string {
       ? 'Le hasard des graines pèse plus que le choix du plan et du tempérament.'
       : 'Le choix du plan et du tempérament pèse plus que le hasard des graines.',
     '',
+    '### À graine égale',
+    '',
+    'Part des graines où le bot de la ligne fait un meilleur score que celui de la colonne : mêmes tirages, seul le jeu change.',
+    '',
+    `| Bot | ${summaries.map((_, i) => `${i + 1}`).join(' | ')} |`,
+    `| :--- | ${summaries.map(() => '---:').join(' | ')} |`,
+    ...summaries.map(
+      (s, row) => `| ${row + 1}. ${s.bot} | ${scores.map((other, column) => (column === row ? '—' : pct(beats(scores[row], other)))).join(' | ')} |`,
+    ),
+    '',
   ].join('\n')
+}
+
+/** Part des graines où `a` fait strictement mieux que `b` */
+function beats(a: readonly number[], b: readonly number[]): number {
+  return a.filter((score, i) => score > (b[i] ?? 0)).length / Math.max(1, a.length)
 }
 
 /** Tableau Markdown d'une campagne */

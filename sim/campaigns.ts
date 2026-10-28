@@ -62,14 +62,15 @@ export const CAMPAIGNS: Readonly<Record<string, Campaign>> = {
 export function runCampaign(campaign: Campaign, games: number, onProgress?: (done: number, total: number) => void): string {
   const total = campaign.bots.length * games
   let done = 0
-  const summaries = campaign.bots.map((makeBot) => {
-    const records = Array.from({ length: games }, (_, i) => {
+  const played = campaign.bots.map((makeBot) =>
+    Array.from({ length: games }, (_, i) => {
       const record = playGame(makeBot(i + 1), i + 1)
       onProgress?.(++done, total)
       return record
-    })
-    return summarize(records)
-  })
+    }),
+  )
+  const summaries = played.map(summarize)
   const report = renderReport(campaign.title, [...campaign.notes, `${games} parties par bot, graines 1 à ${games}.`], summaries)
-  return campaign.spread ? `${report}\n${renderSpread(summaries)}` : report
+  const scores = played.map((records) => records.map((record) => record.score))
+  return campaign.spread ? `${report}\n${renderSpread(summaries, scores)}` : report
 }

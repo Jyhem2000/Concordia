@@ -5,11 +5,11 @@
 
 | Bot | Parties | Survie | Défaites | Fins | Score moyen | Score p10 / médiane / p90 | Score médian des survivants | Dette soldée (jour médian) | Interceptions | Jours de garde à vue | Équipement acheté |
 | :--- | ---: | ---: | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |
-| Sans build · Prudent · score | 1000 | 84 % | bio-bricks 16 % | standard 84 % | 16 388 ₡ | 0 ₡ / 13 821 ₡ / 38 270 ₡ | 17 738 ₡ | 86 % (J5) | 6.7 (21 % des trajets) | 1.2 | — |
-| Couverture légale · Équilibré · score | 1000 | 74 % | bio-bricks 27 % | standard 64 %, mafia 9 %, elite 0 % | 69 251 ₡ | 0 ₡ / 25 210 ₡ / 194 288 ₡ | 73 544 ₡ | 89 % (J3) | 8.0 (29 % des trajets) | 2.4 | MOD-02 74 %, VEH-02 61 % |
-| Rentier · Équilibré · score | 1000 | 79 % | bio-bricks 21 % | standard 77 %, mafia 2 % | 49 965 ₡ | 0 ₡ / 28 904 ₡ / 133 800 ₡ | 50 718 ₡ | 88 % (J4) | 7.4 (29 % des trajets) | 2.3 | CREW-02 76 % |
-| Haut tier · Casse-cou · score | 1000 | 65 % | bio-bricks 33 %, execution 2 % | standard 42 %, mafia 23 %, elite 0 % | 133 307 ₡ | 0 ₡ / 232 ₡ / 519 537 ₡ | 51 300 ₡ | 74 % (J4) | 9.2 (43 % des trajets) | 3.3 | MOD-07 56 %, VEH-04 35 % |
-| Couverture légale · Équilibré · Baron | 1000 | 75 % | bio-bricks 26 % | standard 63 %, mafia 11 % | 67 989 ₡ | 0 ₡ / 28 287 ₡ / 211 523 ₡ | 75 383 ₡ | 89 % (J3) | 7.8 (29 % des trajets) | 2.3 | MOD-02 74 %, VEH-02 61 % |
+| Sans build · Prudent · score | 1000 | 84 % | bio-bricks 16 % | standard 84 % | 16 483 ₡ | 0 ₡ / 13 838 ₡ / 38 270 ₡ | 17 738 ₡ | 86 % (J5) | 7.0 (21 % des trajets) | 1.2 | — |
+| Couverture légale · Équilibré · score | 1000 | 78 % | bio-bricks 22 % | standard 68 %, mafia 10 % | 67 427 ₡ | 0 ₡ / 23 138 ₡ / 201 563 ₡ | 49 568 ₡ | 90 % (J3) | 9.7 (33 % des trajets) | 2.9 | MOD-02 70 %, VEH-02 57 % |
+| Rentier · Équilibré · score | 1000 | 84 % | bio-bricks 16 % | standard 80 %, mafia 4 % | 52 380 ₡ | 0 ₡ / 29 236 ₡ / 148 503 ₡ | 43 063 ₡ | 88 % (J4) | 9.6 (34 % des trajets) | 2.4 | CREW-02 72 % |
+| Haut tier · Casse-cou · score | 1000 | 70 % | bio-bricks 28 %, execution 2 % | standard 47 %, mafia 24 %, elite 0 % | 138 995 ₡ | 0 ₡ / 269 ₡ / 520 117 ₡ | 60 484 ₡ | 78 % (J4) | 11.3 (43 % des trajets) | 3.6 | MOD-07 59 %, VEH-04 36 % |
+| Couverture légale · Équilibré · Baron | 1000 | 79 % | bio-bricks 21 % | standard 67 %, mafia 12 % | 67 071 ₡ | 0 ₡ / 24 319 ₡ / 214 192 ₡ | 51 622 ₡ | 90 % (J3) | 9.5 (33 % des trajets) | 2.7 | MOD-02 70 %, VEH-02 57 % |
 
 ## Défauts relevés
 Aucun : pas d’action refusée, pas de sommeil forcé, aucun invariant violé.
@@ -18,11 +18,23 @@ Aucun : pas d’action refusée, pas de sommeil forcé, aucun invariant violé.
 
 | Bot | Score moyen | Écart-type entre graines | p10 / p90 |
 | :--- | ---: | ---: | ---: |
-| Sans build · Prudent · score | 16 388 ₡ | 15 861 ₡ | 0 ₡ / 38 270 ₡ |
-| Couverture légale · Équilibré · score | 69 251 ₡ | 92 478 ₡ | 0 ₡ / 194 288 ₡ |
-| Rentier · Équilibré · score | 49 965 ₡ | 59 611 ₡ | 0 ₡ / 133 800 ₡ |
-| Haut tier · Casse-cou · score | 133 307 ₡ | 247 714 ₡ | 0 ₡ / 519 537 ₡ |
-| Couverture légale · Équilibré · Baron | 67 989 ₡ | 83 210 ₡ | 0 ₡ / 211 523 ₡ |
+| Sans build · Prudent · score | 16 483 ₡ | 15 827 ₡ | 0 ₡ / 38 270 ₡ |
+| Couverture légale · Équilibré · score | 67 427 ₡ | 91 223 ₡ | 0 ₡ / 201 563 ₡ |
+| Rentier · Équilibré · score | 52 380 ₡ | 64 893 ₡ | 0 ₡ / 148 503 ₡ |
+| Haut tier · Casse-cou · score | 138 995 ₡ | 247 521 ₡ | 0 ₡ / 520 117 ₡ |
+| Couverture légale · Équilibré · Baron | 67 071 ₡ | 85 537 ₡ | 0 ₡ / 214 192 ₡ |
 
-Écart entre bots (écart-type des scores moyens) : **38 089 ₡** ; écart moyen entre graines : **99 775 ₡**.
+Écart entre bots (écart-type des scores moyens) : **39 845 ₡** ; écart moyen entre graines : **101 000 ₡**.
 Le hasard des graines pèse plus que le choix du plan et du tempérament.
+
+### À graine égale
+
+Part des graines où le bot de la ligne fait un meilleur score que celui de la colonne : mêmes tirages, seul le jeu change.
+
+| Bot | 1 | 2 | 3 | 4 | 5 |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| 1. Sans build · Prudent · score | — | 40 % | 36 % | 49 % | 39 % |
+| 2. Couverture légale · Équilibré · score | 55 % | — | 47 % | 47 % | 7 % |
+| 3. Rentier · Équilibré · score | 59 % | 46 % | — | 48 % | 46 % |
+| 4. Haut tier · Casse-cou · score | 43 % | 41 % | 42 % | — | 41 % |
+| 5. Couverture légale · Équilibré · Baron | 56 % | 4 % | 48 % | 47 % | — |

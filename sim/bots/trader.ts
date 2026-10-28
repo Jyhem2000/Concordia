@@ -243,8 +243,11 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
 
   if (tripLeft) {
     // À sec, sans marchandise : rentrer à Hives prendre l'avance de survie de Viktor
+    // Hors de portée faute de carburant : chercher d'abord un district plus proche (exploration)
     const rescue: Route | null =
-      isBroke(view) && loanRoom(view) > 0 && view.districtId !== 'D1' && !night && !endgame ? { to: 'D1' as const, buys: [], value: 0 } : null
+      isBroke(view) && loanRoom(view) > 0 && view.districtId !== 'D1' && !night && !endgame && reachable(view, 'D1')
+        ? { to: 'D1' as const, buys: [], value: 0 }
+        : null
     // Fin de partie, ou serveur à bord : solder la dette puis rester à la Laverie
     const banking = objective !== 'survive' && (endgame || (hunt && ownedQty(view.cargo, ENDINGS.saboteur.requiredProduct) > 0))
     const route = rescue ?? (banking ? endgameRoute(view) : bestRoute(view, plan, temperament))
@@ -404,6 +407,12 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
     if (equipment) return equipment
     const place = specialPlaces(view, uses, reserve, plan.iccFloor ?? PLACE_THRESHOLDS.iccBelow)
     if (place) return place
+  }
+
+  // Fin de partie avec une dette (collecte de Viktor sur un Cash-Puce vide…) : retirer de la Laverie de quoi la solder
+  if (!checkService(view, 'offshore') && endgame && view.debt > 0) {
+    const missing = Math.min(offshoreBalance(view.offshore), view.debt + fuelPrice(view) * 2 - view.cash)
+    if (missing > 0) return { type: 'withdraw', amount: Math.ceil(missing) }
   }
 
   // Laverie : mettre à l'abri ce qui dépasse le fonds de roulement, dette soldée ; tout en fin de partie
@@ -620,11 +629,19 @@ function explore(view: GameState): Route | null {
   return to && age(to) > 1 ? { to, buys: [], value: 0 } : null
 }
 
+/** Assez de carburant, ou de quoi l'acheter ici, pour ce trajet */
+function reachable(view: GameState, to: DistrictId): boolean {
+  const trip = planTravel(view, to)
+  return Math.max(0, trip.fuelCost - view.fuel) * fuelPrice(view) <= view.cash
+}
+
 /** District du Velvet-Silo (commandes VIP) */
 const velvetDistrict = (): DistrictId => LOCATIONS['LOC-D6-1'].district
 
-/** Fin de partie : solder la dette à Hives, puis tout déposer à la Laverie */
+/** Fin de partie : solder la dette à Hives (en retirant d'abord de la Laverie ce qui manque), puis tout déposer à la Laverie */
 function endgameRoute(view: GameState): Route | null {
+  const short = view.debt > view.cash && offshoreBalance(view.offshore) > 0
+  if (view.debt > 0 && short) return view.districtId === 'D5' ? null : { to: 'D5', buys: [], value: 0 }
   if (view.debt > 0) return view.districtId === 'D1' ? null : { to: 'D1', buys: [], value: 0 }
   return view.districtId === 'D5' ? null : { to: 'D5', buys: [], value: 0 }
 }
