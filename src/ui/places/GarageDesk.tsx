@@ -168,14 +168,28 @@ function useEquipmentTexts() {
   }
 
   const module = (id: ModuleId): string => {
-    const { freshnessDelay, heatProof, tagFactor, smoothRide, rotatingPlate, ram, trapdoor, fakeTerminal, droneJammer } = MODULES[id]
+    const {
+      freshnessDelay,
+      heatProof,
+      tagFactor,
+      smoothRide,
+      nightRiskFactor,
+      flyingCheckFactor,
+      rotatingPlate,
+      ram,
+      trapdoor,
+      fakeTerminal,
+      droneJammer,
+    } = MODULES[id]
     return [
       ...(freshnessDelay ? [g.freshnessDelay(freshnessDelay)] : []),
       ...(heatProof ? [g.heatProof] : []),
       ...(tagFactor
         ? [tagFactor.factor === 0 ? g.tagOff(t.tag[tagFactor.tag].name) : g.tagFactor(t.tag[tagFactor.tag].name, multiplier(tagFactor.factor))]
         : []),
+      ...(flyingCheckFactor !== undefined ? [g.flyingChecks(multiplier(flyingCheckFactor))] : []),
       ...(smoothRide ? [g.smoothRide] : []),
+      ...(nightRiskFactor !== undefined ? [g.nightRisk(multiplier(nightRiskFactor))] : []),
       ...(rotatingPlate ? [g.rotatingPlate] : []),
       ...(ram ? [g.ram(signedPercent(ram.fleeBonus, 0), multiplier(ram.damageFactor))] : []),
       ...(trapdoor

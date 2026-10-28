@@ -165,3 +165,30 @@ Campagnes Contrôle et 1 à 4 remesurées. Le marchand compte la confiance du DS
   - restent négatifs `[MOD-01]`, `[MOD-03]` (rayon solvable), `[MOD-04]` et `[MOD-09]`, et Mama Rosa.
 - **À graine égale :** la Couverture légale bat désormais le Prudent sur 61 % des parties, au-dessus du critère pour la première fois.
 - **Prix des rayons :** non recalés à cette étape. Les éléments du rayon solvable restent négatifs à leur prix actuel, et les monter (ils arrivent quand le joueur est plus riche) les rendrait pires. C'est leur effet qui reste à revoir (périssables, nuit, Tech).
+
+## Effets revus : périssables, nuit, Tech
+**Paquet appliqué** (sondes à graine égale, puis campagnes Contrôle et 1 à 4 remesurées) :
+- prime Extra-Frais ×1,3 → ×1,6 ;
+- salaire de Mama Rosa 500 → 250 ₡ ;
+- `[MOD-01]` 8 000 → 3 000 ₡ ;
+- `[MOD-04]` : les silentblocs divisent par deux le malus de risque d'un trajet de nuit hors mission ;
+- `[MOD-03]` : la cage de Faraday divise par deux la part de contrôles volants, prix 12 000 → 8 000 ₡ ;
+- profil festif ×1,5 → ×2 la nuit.
+
+| Plan (Équilibré) | Avant | Après | Le Sans build |
+| :--- | :--- | :--- | :--- |
+| Chaîne du froid | 35 800 ₡ | **60 100 ₡** | 55 200 ₡ |
+| Électronique | 45 900 ₡ | **59 200 ₡** | 55 200 ₡ |
+| Nuit festive | 42 300 ₡ | 47 100 ₡ | 55 200 ₡ |
+
+- **Campagne 4 :**
+  - Mama Rosa passe de −9 600 à **+4 600 ₡** ;
+  - `[VEH-03]` passe à **+10 600 ₡** (positif) ;
+  - `[MOD-01]` (−3 300 ₡), `[MOD-03]` (−3 100 ₡) et `[MOD-09]` (−8 000 ₡ ± 9 300) deviennent neutres ;
+  - Nuit festive gagne +31 000 ₡ en Casse-cou.
+- **Piège de mesure, `[MOD-04]` :** il reste à −13 900 ₡ dans la campagne 4. Sur la fourgonnette de départ, à un seul emplacement, le retirer du plan Nuit festive y laisse monter `[MOD-06]` : la ligne mesure surtout l'écart avec le pare-buffles. Seul face à rien, il passe de −6 000 à −3 000 ₡ avec les silentblocs.
+- **La nuit reste le maillon faible :** même sans module, le plan Nuit festive fait moins que le Sans build.
+  - Essai d'un malus de nuit hors mission à +15 points au lieu de +25 : tout le monde gagne un peu (Sans build Équilibré 58 000 → 62 000 ₡), mais la Nuit festive ne bat toujours le Sans build que sur 37 à 40 % des parties. Non retenu.
+  - Le frein est la mécanique elle-même (Fiche S, missions rares au début), pas un chiffre.
+- **Difficulté :** la survie monte un peu, l'Équilibré passant de 77–83 % à 80–86 %. À surveiller au prochain recalage de difficulté.
+- **À graine égale :** la Couverture légale bat le Prudent sur 64 % des parties (61 % avant).

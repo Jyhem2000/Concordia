@@ -45,6 +45,7 @@ Une interception de la BRC prend l'une de deux formes, tirée au moment où elle
 * **Part des contrôles volants :** propre à chaque district (`flyingCheckShare` dans [`districts.ts`](../src/data/districts.ts) : rare dans les ruches où la BRC manque de drones, fréquente au sommet), majorée dans le district de la ronde renforcée, faite d'unités mobiles (`FLYING_CHECK` dans [`balance.ts`](../src/data/balance.ts)). En zone hors-réseau, les milices tiennent toujours une barricade visible (chap. 4).
 * *Intention :* sans contrôle volant, la fuite (avec largage et dopage) devient le repli universel dès que la cargaison vaut cher. Le contrôle volant oblige à préparer aussi le bluff (masquage, Tier 0, aides) ou la corruption (cash de réserve, caisses appréciées des agents) : chaque build garde ses failles.
 * **Brouilleur de drones** (`[MOD-09]`, chap. 5) : une fois par jour, un contrôle volant devient un barrage fixe.
+* **Cage de Faraday** (`[MOD-03]`, chap. 5) : la part de contrôles volants est réduite (multiplicateur), dans tous les districts.
 * **Lieu du barrage :** le texte suit la couche du réseau (chap. 4) : entrée du district de jour, galerie de service de nuit, sas du quai de service en `[D5]` et `[D6]`.
 * L'app annonce la forme du contrôle dès l'écran d'interception, et le panneau de prévision affiche la part de contrôles volants du district de destination (chap. 10).
 

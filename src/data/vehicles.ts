@@ -56,10 +56,16 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
 }
 
 export const MODULES: Readonly<Record<ModuleId, Module>> = {
-  'MOD-01': { requires: [{ kind: 'debtPaid' }], price: 8_000, category: 'conservation', freshnessDelay: 2, heatProof: true },
+  'MOD-01': { requires: [{ kind: 'debtPaid' }], price: 3_000, category: 'conservation', freshnessDelay: 2, heatProof: true },
   'MOD-02': { price: 6_000, category: 'camouflage', tagFactor: { tag: 'TAG-ODOROUS', factor: 0.1 } },
-  'MOD-03': { requires: [{ kind: 'debtPaid' }], price: 12_000, category: 'camouflage', tagFactor: { tag: 'TAG-TECH', factor: 0 } },
-  'MOD-04': { price: 3_000, category: 'conservation', smoothRide: true },
+  'MOD-03': {
+    requires: [{ kind: 'debtPaid' }],
+    price: 8_000,
+    category: 'camouflage',
+    tagFactor: { tag: 'TAG-TECH', factor: 0 },
+    flyingCheckFactor: 0.5,
+  },
+  'MOD-04': { price: 3_000, category: 'conservation', smoothRide: true, nightRiskFactor: 0.5 },
   'MOD-05': { requires: [{ kind: 'wanted' }], price: 8_000, category: 'tactical', rotatingPlate: true },
   'MOD-06': { requires: [{ kind: 'debtPaid' }], price: 7_000, category: 'tactical', ram: { fleeBonus: 0.4, damageFactor: 0.5 } },
   'MOD-07': { requires: [{ kind: 'debtPaid' }], price: 7_000, category: 'tactical', trapdoor: { chance: 0.75, cooldownDays: 3, maxRecovery: 1 } },
@@ -88,7 +94,7 @@ export const CREW: Readonly<Record<CrewId, Crew>> = {
   'CREW-02': { requires: [{ kind: 'wanted' }], dailySalary: 600, liveQuotes: true, offshoreBonus: 0.005, fleeBonus: 0.2, forgeryBonus: 0.2 },
   'CREW-03': {
     requires: [{ kind: 'tagSales', tag: 'TAG-PERISHABLE', count: 10 }],
-    dailySalary: 500,
+    dailySalary: 250,
     perishableKnowHow: 1.5,
     refining: true,
     perishableQuota: 2.5,

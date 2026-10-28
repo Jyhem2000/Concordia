@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { EJECT, FLEE } from '../data/balance.ts'
+import { EJECT, FLEE, NIGHT_TRIP_RISK } from '../data/balance.ts'
 import { GARAGE } from '../data/locations.ts'
 import { MODULES, VEHICLES } from '../data/vehicles.ts'
 import { freshnessOf } from './condition.ts'
 import { ejectMode, repairPrice } from './equipment.ts'
 import { NO_EVENTS } from './events.ts'
 import { inflationIndex } from './inflation.ts'
-import { bluffChance, bribeRate, fleeChance } from './interception.ts'
+import { bluffChance, bribeRate, fleeChance, flyingCheckShare } from './interception.ts'
 import { riskBreakdown } from './risk.ts'
 import { sleep } from './routine.ts'
 import { defined, EARNED, errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
@@ -71,6 +71,16 @@ describe('fraîcheur et équipement', () => {
 })
 
 describe('risque et équipement', () => {
+  it('fait glisser le camion la nuit avec les silentblocs, et aveugle les drones avec la cage de Faraday', () => {
+    // Une ligne à part, avant les multiplicateurs d'équipement
+    const quiet = riskBreakdown(withModules(['MOD-04'], { phase: 'night' }), 'D2', { includePatrol: false }).lines.find(
+      (line) => line.source === 'MOD-04',
+    )
+    expect(quiet?.value).toBeCloseTo(-NIGHT_TRIP_RISK * (1 - defined(MODULES['MOD-04'].nightRiskFactor)))
+    const share = (mounted: ModuleId[]) => flyingCheckShare(withModules(mounted), 'D6', false)
+    expect(share(['MOD-03'])).toBeCloseTo(share([]) * defined(MODULES['MOD-03'].flyingCheckFactor))
+  })
+
   it('camoufle la navette avec assez de Légal, ou à vide', () => {
     const shuttle = (cargo: CargoLot[]) => riskBreakdown(gameAt(3, { vehicleId: 'VEH-02', cargo }), 'D2', { includePatrol: false })
     const factor = defined(VEHICLES['VEH-02'].legalCamouflage).factor

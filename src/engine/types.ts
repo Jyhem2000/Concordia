@@ -278,6 +278,10 @@ export type Module = {
   tagFactor?: { tag: TagId; factor: number }
   /** Fragiles immunisés à la casse ; usure des trajets de nuit annulée */
   smoothRide?: boolean
+  /** Silentblocs : facteur sur le malus de risque d'un trajet de nuit hors mission */
+  nightRiskFactor?: number
+  /** Cage de Faraday : facteur sur la part de contrôles volants */
+  flyingCheckFactor?: number
   /** Une fois par jour, une fuite réussie ne coûte pas d'ICC */
   rotatingPlate?: boolean
   /** Fuite et passage forcé : chance ajoutée, dégâts de châssis et perte de Santé multipliés */

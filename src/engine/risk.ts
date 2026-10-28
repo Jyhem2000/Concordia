@@ -19,13 +19,14 @@ import { VEHICLES } from '../data/vehicles.ts'
 import { breakdown, type Breakdown, type BreakdownBuilder } from './breakdown.ts'
 import { cargoUsed, ownedQty, tagShare } from './cargo.ts'
 import { crewEffect, workingCrew } from './crew.ts'
-import { moduleTagFactor } from './equipment.ts'
+import { moduleTagFactor, mountedWith } from './equipment.ts'
 import { activeEffects, forgedCard, isPurged, tagFactor } from './events.ts'
 import { passActive } from './services.ts'
 import { iccTier } from './gauges.ts'
 import { isOnMission } from './night.ts'
 import { crossedDistricts, shortestRoute } from './map.ts'
 import { keysOf } from './records.ts'
+import { MODULES } from '../data/vehicles.ts'
 import type { Rng } from './rng.ts'
 import type { DistrictId, GameState } from './types.ts'
 
@@ -62,7 +63,12 @@ export function riskBreakdown(state: GameState, to: DistrictId, { includePatrol 
 
   // Contexte physique : il s'applique partout, zone hors-réseau comprise
   // De nuit, seul un trajet hors mission est une anomalie (chap. 2)
-  if (state.phase === 'night' && !isOnMission(state, to)) risk.add('rule.night-trip', NIGHT_TRIP_RISK)
+  if (state.phase === 'night' && !isOnMission(state, to)) {
+    risk.add('rule.night-trip', NIGHT_TRIP_RISK)
+    // Silentblocs de [MOD-04] : une part du malus de nuit retirée, sur sa propre ligne
+    const quiet = mountedWith(state, 'nightRiskFactor')
+    if (quiet) risk.add(quiet, -NIGHT_TRIP_RISK * (1 - (MODULES[quiet].nightRiskFactor ?? 1)))
+  }
   const crossed = crossedDistricts(shortestRoute(state.districtId, to)).length
   risk.add('rule.crossed-districts', crossed * CROSSED_DISTRICT_RISK, { count: crossed })
   risk.add('rule.exit-gate', DISTRICTS[state.districtId].exitGateRisk)

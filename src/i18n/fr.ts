@@ -506,6 +506,8 @@ export const fr = {
     tagOff: (tag: string) => `Annule la détection ${tag}.`,
     tagFactor: (tag: string, factor: string) => `Malus ${tag} ${factor} (risque et bluff).`,
     smoothRide: "Fragiles immunisés à la casse ; pas d'usure de châssis la nuit.",
+    nightRisk: (factor: string) => `Malus de risque d'un trajet de nuit hors mission ${factor}.`,
+    flyingChecks: (factor: string) => `Contrôles volants ${factor} (les drones perdent le signal).`,
     rotatingPlate: "Une fois par jour, une fuite réussie ne coûte pas d'ICC.",
     ram: (bonus: string, factor: string) => `Fuite et passage forcé ${bonus} ; dégâts de la fuite ${factor}.`,
     trapdoor: (chance: string, cooldown: number, recovery: string, sealed: string) =>

@@ -95,7 +95,7 @@ export const SATURATED_SALE_FACTOR = 0.5
 export const DEMAND_REFILL_DIVISOR = 3
 
 /** Coefficient de vente pendant le couvre-feu, selon le profil nuit du produit */
-export const NIGHT_PROFILE_FACTOR: Readonly<Record<NightProfile, number>> = { festive: 1.5, diurnal: 0.8 }
+export const NIGHT_PROFILE_FACTOR: Readonly<Record<NightProfile, number>> = { festive: 2, diurnal: 0.8 }
 
 /** Savoir-faire : au-delà de ce seuil, l'excédent ne compte que pour KNOW_HOW_EXCESS_FACTOR */
 export const KNOW_HOW_SOFT_CAP = 1.5
@@ -160,7 +160,7 @@ export const SUSPICION_PER_ICC_POINT = 0.005
  * Un lot qui atteint l'âge `rottenFromAge` est détruit à 06h00.
  */
 export const FRESHNESS = {
-  extra: 1.3,
+  extra: 1.6,
   standard: 1,
   gamey: { fromAge: 2, factor: 0.6 },
   spoiled: { fromAge: 3, factor: 0.25 },

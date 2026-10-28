@@ -712,7 +712,9 @@ export function emergencyTow(state: GameState): { state: GameState; bill: number
 export function flyingCheckShare(state: GameState, districtId: DistrictId, includePatrol: boolean): number {
   const share = DISTRICTS[districtId].flyingCheckShare
   if (share === 0) return 0
-  return Math.min(1, share + (includePatrol && state.patrolDistrict === districtId ? FLYING_CHECK.patrolBonus : 0))
+  // Cage de Faraday de [MOD-03] : les drones perdent le signal du camion
+  const faraday = mountedEffect(state, 'flyingCheckFactor') ?? 1
+  return Math.min(1, (share + (includePatrol && state.patrolDistrict === districtId ? FLYING_CHECK.patrolBonus : 0)) * faraday)
 }
 
 /** Tirage du barrage à l'arrivée d'un trajet : renvoie l'interception qui commence, ou null */
