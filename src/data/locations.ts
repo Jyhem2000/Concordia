@@ -1,4 +1,4 @@
-import type { DistrictId, GlobalEventId, Location, LocationId, ProductId, TagId, Tier } from '../engine/types.ts'
+import type { DistrictId, GlobalEventId, Location, LocationId, ProductId, Requirement, ServiceKey, TagId, Tier } from '../engine/types.ts'
 
 /*
  * Lieux spéciaux (chap. 4) : district d'accueil et services implémentés. Le détail des services
@@ -38,6 +38,33 @@ export const VELVET = {
   auction: { cooldownDays: 3, factor: 2, minTier: 3 },
   blackmail: { cooldownDays: 4, cost: 8_000, costStep: 4_000, icc: 12, crates: ['T3-07', 'T3-02'] as readonly ProductId[] },
   vip: { cooldownDays: 3, crates: 3, factor: 3.5, tiers: [2, 3] as readonly Tier[], failIccLoss: 10, lockDays: 5 },
+}
+
+/**
+ * Services réservés (chap. 4) : voie officielle (palier d'ICC, patrimoine), voie pègre (Fiche S), clientèle établie.
+ * Les services absents sont ouverts à tous.
+ */
+export const SERVICE_REQUIREMENTS: Readonly<Partial<Record<ServiceKey, readonly Requirement[]>>> = {
+  influence: [
+    { kind: 'iccTier', tier: 'ordinary' },
+    { kind: 'wealth', amount: 20_000 },
+  ],
+  certificate: [{ kind: 'debtPaid' }],
+  pass: [{ kind: 'tagSales', tag: 'TAG-CHEMICAL', count: 10 }],
+  prophecy: [{ kind: 'wanted' }],
+  forgery: [{ kind: 'wealth', amount: 50_000 }],
+  auction: [
+    { kind: 'iccTier', tier: 'ordinary' },
+    { kind: 'wealth', amount: 40_000 },
+  ],
+  blackmail: [
+    { kind: 'iccTier', tier: 'ordinary' },
+    { kind: 'wealth', amount: 40_000 },
+  ],
+  vip: [
+    { kind: 'iccTier', tier: 'ordinary' },
+    { kind: 'wealth', amount: 40_000 },
+  ],
 }
 
 export const LOCATIONS: Readonly<Record<LocationId, Location>> = {

@@ -8,6 +8,7 @@ import AmountForm from '../shared/AmountForm.tsx'
 import Button from '../shared/Button.tsx'
 import CollapseToggle from '../shared/CollapseToggle.tsx'
 import Detailed from '../shared/Detailed.tsx'
+import Locked from '../shared/Locked.tsx'
 import { useCollapsed } from '../shared/useCollapsed.ts'
 
 type VehicleOfferProps = {
@@ -93,11 +94,12 @@ function VehicleOffer({ vehicleId }: VehicleOfferProps) {
         )}
       </p>
       <p className="text-zinc-300">{describe.vehicle(vehicleId)}</p>
+      <Locked requires={vehicle.requires} />
       <div className="mt-1 flex items-center gap-2">
         <Button variant="primary" disabled={error !== null} onClick={() => dispatch({ type: 'buyVehicle', vehicleId })}>
           {t.garage.buy}
         </Button>
-        {error && <span className="text-red-300">{t.error[error]}</span>}
+        {error && error !== 'locked' && <span className="text-red-300">{t.error[error]}</span>}
       </div>
     </li>
   )
@@ -122,6 +124,7 @@ function ModuleRow({ moduleId }: ModuleRowProps) {
         </span>
       </p>
       <p className="text-zinc-300">{describe.module(moduleId)}</p>
+      {!owned && <Locked requires={MODULES[moduleId].requires} />}
       <div className="mt-1 flex items-center gap-2">
         {owned ? (
           <Button disabled={mountError !== null} onClick={() => dispatch({ type: 'mountModule', moduleId, mount: !mounted })}>
@@ -133,7 +136,7 @@ function ModuleRow({ moduleId }: ModuleRowProps) {
           </Button>
         )}
         {owned && mountError && !mounted && <span className="text-zinc-400">{t.error[mountError]}</span>}
-        {!owned && buyError && <span className="text-red-300">{t.error[buyError]}</span>}
+        {!owned && buyError && buyError !== 'locked' && <span className="text-red-300">{t.error[buyError]}</span>}
       </div>
     </li>
   )

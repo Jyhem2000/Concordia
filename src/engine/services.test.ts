@@ -8,7 +8,7 @@ import { riskBreakdown } from './risk.ts'
 import { createRng, seedRng } from './rng.ts'
 import { sleep } from './routine.ts'
 import { auctionPrice, blackmailCost, forgeryCost, karmaCost, morgueCost } from './services.ts'
-import { defined, errorOf, gameAt, LOW_ROLL_RNG, HIGH_ROLL_RNG, run } from './test-helpers.ts'
+import { defined, EARNED, errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
 import type { CargoLot, GameState, ProductId } from './types.ts'
 
 const lot = (productId: ProductId, qty: number, boughtDay = 3): CargoLot => ({
@@ -19,7 +19,9 @@ const lot = (productId: ProductId, qty: number, boughtDay = 3): CargoLot => ({
   boughtDay,
   damaged: false,
 })
-const at = (districtId: GameState['districtId'], patch: Partial<GameState> = {}) => gameAt(3, { districtId, cash: 200_000, ...patch })
+// Joueur établi : carnet complet, dette soldée, patrimoine à l'abri (services réservés, chap. 4)
+const at = (districtId: GameState['districtId'], patch: Partial<GameState> = {}) =>
+  gameAt(3, { districtId, cash: 200_000, progress: EARNED, initialDebtPaid: true, debt: 0, offshore: { deposited: 100_000, interest: 0 }, ...patch })
 
 describe('Karma-Cham', () => {
   it('dope un tag le lendemain seulement, puis entre en recharge avec un prix en hausse', () => {

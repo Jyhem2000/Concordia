@@ -51,8 +51,8 @@ Les docs décrivent le jeu complet ; tout n'est pas encore en jeu. Ce tableau di
 | :---: | :--- | :--- |
 | 2 | Jauges (ICC, Santé, châssis, carburant), journée, couvre-feu, épuisement, demi-journée perdue, dépannage, audit et fins, Exemption Métabolique et Sédation, pompes officielles fermées la nuit, livraison officielle du jour, confiance du DSC et mission de nuit débloquée | — |
 | 3 | Tags, masquage, fraîcheur, casse, explosions, actions des produits | — |
-| 4 | Carte, districts, racket et portique de `[D4]`, tous les lieux spéciaux et leurs services | — |
-| 5 | Véhicules, modules, double fond, équipage (débloqué par des actes) et salaires | — |
+| 4 | Carte, districts, racket et portique de `[D4]`, tous les lieux spéciaux et leurs services, services réservés (voies officielle et pègre) | — |
+| 5 | Véhicules, modules, catalogue du garage en rayons, double fond, équipage (débloqué par des actes) et salaires | — |
 | 6 | Risque, Fiche S, barrage fixe et contrôle volant, toutes les options et modes d'éjection, garde à vue, bonus des véhicules, modules et équipiers | — |
 | 7 | Boutique, cours et tendance, quotas, prix de vente, paiement en nature, inflation, dette, avance de survie, collecte, compte offshore, flux et bonus de `[CREW-02]`, bonus d'influence de `[LOC-D2-1]` | — |
 | 8 | Événements globaux et locaux, rumeurs, contrecoups, Loterie (faux dossiers compris), aléas routiers, prédictions de Cassandre-88 | — |

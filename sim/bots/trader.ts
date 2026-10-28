@@ -148,7 +148,7 @@ const ELITE_ICC_MARGIN = 5
 const SABOTEUR_HUNT_DAY = 25
 
 /** Valeurs de référence pour comparer des pertes de nature différente (₡ de base) */
-const VALUE = { custodyDay: 1_200, iccPoint: 60, healthPoint: 40, wantedLevel: 400, chassisPoint: 40 }
+const VALUE = { custodyDay: 1_200, iccPoint: 60, healthPoint: 40, wantedLevel: 400, chassisPoint: 40, trustDelivery: 1_500 }
 
 /** Marge minimale espérée pour acheter, en part du prix d'achat */
 const MIN_MARGIN = 0.15
@@ -606,7 +606,8 @@ function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route
         if (to === 'D1') value += debtVisit(view, reserveOf(view, temperament))
         if (to === 'D4' && pendingEquipment(view, plan)) value += 2_000
         if (to === velvetDistrict() && view.vip && ownedQty(view.cargo, view.vip.productId) >= VELVET.vip.crates) value += vipValue(view) ?? 0
-        if (contract) value += deliveryFee(view)
+        // Livraison : la prime, plus la confiance du DSC qu'attend l'équipement de la voie officielle
+        if (contract) value += deliveryFee(view) + (trustWanted(view, plan) ? VALUE.trustDelivery : 0)
         if (!best || value > best.value) best = { to, buys: [...legalBuys.filter((buy) => buy.qty > 0), ...buys], value, accept: contract }
         break
       }
@@ -663,9 +664,19 @@ function nightMode(view: GameState, plan: Plan, temperament: Temperament): Tempe
   return 'margin'
 }
 
+/** L'équipement du plan (voie officielle) attend encore des commandes du DSC livrées */
+function trustWanted(view: GameState, plan: Plan): boolean {
+  const gear = [...(plan.vehicle ? [VEHICLES[plan.vehicle].requires ?? []] : []), ...plan.modules.map((id) => MODULES[id].requires ?? [])]
+  return gear.flat().some((r) => r.kind === 'deliveries' && view.progress.deliveries < r.count)
+}
+
 /** L'équipier du plan ne se présente qu'à la première Fiche S, que le joueur n'a pas encore */
 function seeksFlag(view: GameState, plan: Plan): boolean {
-  return plan.crew !== undefined && CREW[plan.crew].unlock.kind === 'wanted' && !view.progress.flagged && !view.crew.lost.includes(plan.crew)
+  if (view.progress.flagged) return false
+  const crewWaits = plan.crew !== undefined && !view.crew.lost.includes(plan.crew) && CREW[plan.crew].requires.some((r) => r.kind === 'wanted')
+  // Modules de la voie pègre (plaque rotative, brouilleur) : réservés aux fichés
+  const gearWaits = plan.modules.some((id) => MODULES[id].requires?.some((r) => r.kind === 'wanted'))
+  return crewWaits || gearWaits
 }
 
 function eveningTour(view: GameState, plan: Plan, temperament: Temperament): Action | null {

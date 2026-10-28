@@ -1,30 +1,57 @@
-import { DSC_TRUST, WANTED } from '../data/balance.ts'
+import { DSC_TRUST, ICC_TIERS, WANTED } from '../data/balance.ts'
 import { PRODUCTS } from '../data/products.ts'
 import { CREW } from '../data/vehicles.ts'
-import type { CrewId, GameState, ProductId } from './types.ts'
+import type { ActionError } from './actions.ts'
+import { offshoreBalance } from './finance.ts'
+import type { CrewId, GameState, ProductId, Requirement } from './types.ts'
 
 /*
- * Progression (chap. 2 et 5) : le carnet des actes du joueur, qui débloque les équipiers, la mission de nuit,
- * et fait monter la confiance du DSC. Chaque verrou rend sa condition et la progression vers elle.
+ * Progression (chap. 2, 4 et 5) : le carnet des actes du joueur, qui débloque les équipiers, la mission de nuit,
+ * le garage en rayons et les services réservés, et fait monter la confiance du DSC. Chaque verrou rend sa condition et la progression vers elle.
  */
 
 /** Progression vers un déblocage : acquis, et où en est le joueur */
 export type Unlock = { unlocked: boolean; done: number; needed: number }
 
-/** Un équipier se présente après l'acte qui le fait remarquer (contrôle franchi, ventes, Fiche S) */
-export function crewUnlock(state: GameState, crewId: CrewId): Unlock {
-  const unlock = CREW[crewId].unlock
-  const { controlsPassed, tagSales, flagged } = state.progress
-  switch (unlock.kind) {
-    case 'controls':
-      return { unlocked: controlsPassed >= unlock.count, done: Math.min(controlsPassed, unlock.count), needed: unlock.count }
-    case 'sales': {
-      const sold = tagSales[unlock.tag] ?? 0
-      return { unlocked: sold >= unlock.count, done: Math.min(sold, unlock.count), needed: unlock.count }
-    }
+/** Progression vers une condition (chap. 2, 4 et 5) */
+export function requirementProgress(state: GameState, requirement: Requirement): Unlock {
+  const { controlsPassed, tagSales, flagged, deliveries } = state.progress
+  const count = (done: number, needed: number): Unlock => ({ unlocked: done >= needed, done: Math.min(done, needed), needed })
+  switch (requirement.kind) {
+    case 'debtPaid':
+      return count(state.initialDebtPaid ? 1 : 0, 1)
+    case 'deliveries':
+      return count(deliveries, requirement.count)
     case 'wanted':
-      return { unlocked: flagged, done: flagged ? 1 : 0, needed: 1 }
+      return count(flagged ? 1 : 0, 1)
+    case 'iccTier': {
+      const min = ICC_TIERS.find((entry) => entry.tier === requirement.tier)?.min ?? 0
+      return { unlocked: state.icc >= min, done: Math.round(state.icc), needed: min }
+    }
+    case 'wealth': {
+      const wealth = state.cash + offshoreBalance(state.offshore)
+      return { unlocked: wealth >= requirement.amount, done: Math.round(wealth), needed: requirement.amount }
+    }
+    case 'tagSales':
+      return count(tagSales[requirement.tag] ?? 0, requirement.count)
+    case 'controls':
+      return count(controlsPassed, requirement.count)
   }
+}
+
+/** Toutes les conditions remplies (aucune condition : ouvert) */
+export function meets(state: GameState, requirements: readonly Requirement[] = []): boolean {
+  return requirements.every((requirement) => requirementProgress(state, requirement).unlocked)
+}
+
+/** Refus d'un élément pas encore débloqué */
+export function checkRequirements(state: GameState, requirements?: readonly Requirement[]): ActionError | null {
+  return meets(state, requirements) ? null : 'locked'
+}
+
+/** Un équipier se présente après l'acte qui le fait remarquer (contrôle franchi, ventes, Fiche S) */
+export function crewUnlocked(state: GameState, crewId: CrewId): boolean {
+  return meets(state, CREW[crewId].requires)
 }
 
 /** La plateforme ne confie la nuit qu'après quelques commandes livrées */

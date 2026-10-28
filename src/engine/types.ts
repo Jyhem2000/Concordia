@@ -237,6 +237,8 @@ export type Location = {
 }
 
 export type Vehicle = {
+  /** Conditions pour que Mitch le vende (catalogue en rayons, chap. 5) */
+  requires?: readonly Requirement[]
   price: number
   /** Emplacements de soute (1 caisse = 1 emplacement) */
   cargo: number
@@ -264,6 +266,8 @@ export type Vehicle = {
 export type ModuleCategory = 'conservation' | 'camouflage' | 'tactical'
 
 export type Module = {
+  /** Conditions pour que Mitch le vende (catalogue en rayons, chap. 5) */
+  requires?: readonly Requirement[]
   price: number
   category: ModuleCategory
   /** Jours de retard sur tout le cycle de fraîcheur */
@@ -287,11 +291,23 @@ export type Module = {
 }
 
 /** Acte qui fait se présenter un équipier (chap. 5) : contrôles franchis sans garde à vue, caisses d'un tag vendues, première Fiche S */
-export type CrewUnlock = { kind: 'controls'; count: number } | { kind: 'sales'; tag: TagId; count: number } | { kind: 'wanted' }
+/**
+ * Condition de progression (chap. 2, 4 et 5) : dette initiale soldée, commandes du DSC livrées, première Fiche S,
+ * palier d'ICC actuel, patrimoine actuel (Cash-Puce et offshore, ₡ non indexés), caisses d'un tag vendues,
+ * contrôles de la BRC franchis sans garde à vue
+ */
+export type Requirement =
+  | { kind: 'debtPaid' }
+  | { kind: 'deliveries'; count: number }
+  | { kind: 'wanted' }
+  | { kind: 'iccTier'; tier: IccTier }
+  | { kind: 'wealth'; amount: number }
+  | { kind: 'tagSales'; tag: TagId; count: number }
+  | { kind: 'controls'; count: number }
 
 export type Crew = {
-  /** Condition pour qu'il se présente à la Cantine */
-  unlock: CrewUnlock
+  /** Conditions pour qu'il se présente à la Cantine */
+  requires: readonly Requirement[]
   /** Salaire quotidien de base, indexé */
   dailySalary: number
   /** Salaire réduit contre une caisse consommée à 06h00 (tag et tier minimal) */

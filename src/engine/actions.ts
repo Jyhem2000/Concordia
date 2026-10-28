@@ -131,7 +131,7 @@ export type ActionError =
   | 'pump-closed'
   | 'no-mission'
   | 'mission-locked'
-  | 'crew-locked'
+  | 'locked'
   | 'nothing-to-sell'
   | 'no-delivery'
   | 'delivery-pending'

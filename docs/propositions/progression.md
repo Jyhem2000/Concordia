@@ -157,6 +157,7 @@ Verrous simulés en cachant au marchand ce qui n'est pas débloqué (sonde `sim/
 
 ## Recommandation
 > **Étape 1 adoptée et en jeu** (équipiers liés à des actes, mission de nuit après quelques livraisons, prime selon la confiance du DSC) : règles aux chap. 2 et 5.
+> **Étape 2 adoptée et en jeu** (services réservés par voie, catalogue du garage en rayons) : règles aux chap. 4 et 5.
 
 1. **D'abord ce qui ne coûte rien et raconte quelque chose :**
    - équipiers échelonnés et liés à des actes : Vance au premier contrôle franchi, Mama Rosa après des ventes de périssables, Glitch à la première Fiche S ;

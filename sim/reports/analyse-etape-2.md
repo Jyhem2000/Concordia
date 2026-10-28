@@ -146,3 +146,22 @@ Campagnes Contrôle et 1 à 4 remesurées.
   - perdent : Chaîne du froid (−10 000 ₡, Mama Rosa arrive tard) et Fuite au sommet (−10 000 ₡, Glitch demande une tournée clandestine).
 - **Campagne 4 :** même tableau qu'avant. L'avance de survie (+12 pts) et la dilution (+18 900 ₡) paient ; Mama Rosa, `[MOD-01]`, `[MOD-04]` et `[MOD-09]` restent négatifs.
 - **À graine égale :** pas de changement de fond (Couverture légale bat le Prudent sur 58 % des parties, le Casse-cou 37 à 55 %).
+
+## Progression, étape 2 (services réservés par voie, garage en rayons)
+Campagnes Contrôle et 1 à 4 remesurées. Le marchand compte la confiance du DSC tant que l'équipement de son plan l'attend, et va chercher une Fiche S pour les modules de la voie pègre.
+
+- **Difficulté inchangée :** Prudent 84 à 92 %, Équilibré 77 à 83 %, Casse-cou 65 à 76 %.
+- **Les rayons déplacent les achats :**
+  - `[VEH-02]` passe de 46 à 31 % des parties en Équilibré, et `[MOD-08]` de 53 à 34 % : il faut trois commandes du DSC ;
+  - `[MOD-09]` reste à 54 % (la Fiche S vient vite) ;
+  - les enchères du Velvet-Silo tombent de 43 à 19 % (patrimoine exigé).
+- **Plans :**
+  - Opportuniste +7 000 ₡ en Équilibré ;
+  - Corruption +3 500 ₡ en Équilibré ;
+  - les Casse-cou de la voie officielle perdent : Citoyen modèle −91 000 ₡, Corruption −64 000 ₡. Ils ne font pas de livraisons et n'obtiennent plus leur faux terminal : la voie officielle demande de jouer officiel.
+- **Campagne 4 :**
+  - Karma-Cham devient neutre (−3 200 ₡ ± 3 500, contre −5 900 ₡) : il arrive quand la soute vaut une panique ;
+  - `[MOD-07]` gagne 2 points de survie ;
+  - restent négatifs `[MOD-01]`, `[MOD-03]` (rayon solvable), `[MOD-04]` et `[MOD-09]`, et Mama Rosa.
+- **À graine égale :** la Couverture légale bat désormais le Prudent sur 61 % des parties, au-dessus du critère pour la première fois.
+- **Prix des rayons :** non recalés à cette étape. Les éléments du rayon solvable restent négatifs à leur prix actuel, et les monter (ils arrivent quand le joueur est plus riche) les rendrait pires. C'est leur effet qui reste à revoir (périssables, nuit, Tech).

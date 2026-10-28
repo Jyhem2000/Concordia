@@ -18,7 +18,7 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 | :--- | :--- | :--- |
 | 1 | Citoyen Or | **Coupe-file :** risque réduit aux portiques des districts qui en ont un (`goldFastLane` dans [`districts.ts`](../src/data/districts.ts), `GOLD_FAST_LANE_FACTOR` dans [`balance.ts`](../src/data/balance.ts)). Requis pour la fin Élite. |
 | 2 | Citoyen ordinaire | — |
-| 3 | Citoyen sous réserve | Pompes officielles **fermées la nuit**. `[LOC-D6-1]` inaccessible. |
+| 3 | Citoyen sous réserve | Pompes officielles **fermées la nuit**. `[LOC-D6-1]` inaccessible (services réservés, chap. 4). |
 | 4 | Déviant notoire | Effets du palier précédent, et toute entrée en `[D6]` déclenche **automatiquement** une interception. |
 
 * **Gains de route :** sommeil au relais routier, contrôle avec soute légale, bluff réussi, certains aléas routiers. **Plafond quotidien** (`ICC_DAILY_ROUTE_GAIN_CAP` dans [`balance.ts`](../src/data/balance.ts), de 06h00 à 06h00), au-delà les gains de route sont perdus. Le reste du plafond du jour est affiché dans le bandeau (chap. 10).

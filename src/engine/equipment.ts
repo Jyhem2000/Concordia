@@ -1,6 +1,7 @@
 import { DISTRICTS } from '../data/districts.ts'
 import { GARAGE } from '../data/locations.ts'
 import { MODULES, VEHICLES } from '../data/vehicles.ts'
+import { meets } from './progress.ts'
 import type { ActionError } from './actions.ts'
 import { breakdown, type Breakdown } from './breakdown.ts'
 import { cargoUsed } from './cargo.ts'
@@ -89,6 +90,7 @@ export function repair(state: GameState, pv: number): EquipmentResult {
 export function checkBuyVehicle(state: GameState, vehicleId: VehicleId): ActionError | null {
   const vehicle = VEHICLES[vehicleId]
   if (vehicleId === state.vehicleId) return 'already-owned'
+  if (!meets(state, vehicle.requires)) return 'locked'
   if (vehicle.price > state.cash) return 'not-enough-cash'
   if (cargoUsed(state.cargo) > vehicle.cargo) return 'cargo-full'
   return null
@@ -115,6 +117,7 @@ export function buyVehicle(state: GameState, vehicleId: VehicleId): EquipmentRes
 
 export function checkBuyModule(state: GameState, moduleId: ModuleId): ActionError | null {
   if (state.modules.owned.includes(moduleId)) return 'already-owned'
+  if (!meets(state, MODULES[moduleId].requires)) return 'locked'
   return MODULES[moduleId].price > state.cash ? 'not-enough-cash' : null
 }
 

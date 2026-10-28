@@ -1,6 +1,6 @@
 import { DAMAGED_FACTOR, GAME_LENGTH_DAYS, HEALTH_MAX, ICC_MAX, SALE_COMMISSION } from '../data/balance.ts'
 import { LOTTERY } from '../data/events.ts'
-import { CASSANDRE, FORGERY, KARMA, MORGUE, VELVET } from '../data/locations.ts'
+import { CASSANDRE, FORGERY, KARMA, MORGUE, SERVICE_REQUIREMENTS, VELVET } from '../data/locations.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import type { ActionError } from './actions.ts'
 import { giveCrates, ownedQty, takeLots } from './cargo.ts'
@@ -8,7 +8,7 @@ import { crateValue, freshnessFactor, freshnessOf, paymentValue } from './condit
 import { crewEffect } from './crew.ts'
 import { GLOBAL_EVENT_IDS, viceChoices } from './events.ts'
 import { indexed } from './inflation.ts'
-import { raiseWanted } from './progress.ts'
+import { checkRequirements, raiseWanted } from './progress.ts'
 import { quote } from './market.ts'
 import { createRng } from './rng.ts'
 import type { CargoLot, CrateCount, ForgeryCard, GameState, ProductId, ServiceKey, TagId } from './types.ts'
@@ -54,6 +54,7 @@ export function karmaCost(state: GameState): number {
 
 export function checkInfluence(state: GameState, tag: TagId): ActionError | null {
   if (!KARMA.tags.includes(tag)) return 'not-eligible'
+  if (checkRequirements(state, SERVICE_REQUIREMENTS.influence)) return 'locked'
   if (availableFrom(state, 'influence', KARMA.cooldownDays) !== null) return 'cooldown'
   return karmaCost(state) > state.cash ? 'not-enough-cash' : null
 }
@@ -91,6 +92,7 @@ export function passActive(state: GameState): boolean {
 }
 
 export function checkMorgue(state: GameState, service: MorgueService): ActionError | null {
+  if (checkRequirements(state, SERVICE_REQUIREMENTS[service])) return 'locked'
   if (service === 'pass' && passActive(state)) return 'cooldown'
   if (service === 'surgery') {
     if (availableFrom(state, 'surgery', MORGUE.surgery.cooldownDays) !== null) return 'cooldown'
@@ -124,6 +126,7 @@ export function prophecyCost(state: GameState): number {
 }
 
 export function checkProphecy(state: GameState): ActionError | null {
+  if (checkRequirements(state, SERVICE_REQUIREMENTS.prophecy)) return 'locked'
   const prophecy = state.events.prophecy
   if (prophecy && prophecy.day >= state.day) return 'prophecy-active'
   if (state.day + CASSANDRE.aheadDays > GAME_LENGTH_DAYS) return 'too-late'
@@ -153,6 +156,7 @@ export function forgeryChance(state: GameState): number {
 }
 
 export function checkForgery(state: GameState, card: ForgeryCard): ActionError | null {
+  if (checkRequirements(state, SERVICE_REQUIREMENTS.forgery)) return 'locked'
   if (!LOTTERY.days.includes(state.day + 1)) return 'not-eligible'
   if (state.events.forgery?.day === state.day + 1 || state.services.lastDay.forgery === state.day) return 'already-used'
   if ((card.kind === 'captain' || card.kind === 'competitor') && !LOTTERY.promotedFrom.includes(card.district)) return 'not-eligible'
@@ -195,6 +199,7 @@ const oldestLot = (state: GameState, productId: ProductId) => takeLots(state.car
 
 export function checkAuction(state: GameState, productId: ProductId): ActionError | null {
   if (velvetLocked(state)) return 'location-locked'
+  if (checkRequirements(state, SERVICE_REQUIREMENTS.auction)) return 'locked'
   if (PRODUCTS[productId].tier < VELVET.auction.minTier) return 'not-eligible'
   if (ownedQty(state.cargo, productId) < 1) return 'not-enough-cargo'
   return availableFrom(state, 'auction', VELVET.auction.cooldownDays) !== null ? 'cooldown' : null
@@ -241,6 +246,7 @@ export function blackmailCrates(state: GameState): CrateCount[] | null {
 
 export function checkBlackmail(state: GameState, inKind: boolean): ActionError | null {
   if (velvetLocked(state)) return 'location-locked'
+  if (checkRequirements(state, SERVICE_REQUIREMENTS.blackmail)) return 'locked'
   if (availableFrom(state, 'blackmail', VELVET.blackmail.cooldownDays) !== null) return 'cooldown'
   if (inKind) return blackmailCrates(state) ? null : 'not-enough-cargo'
   return blackmailCost(state) > state.cash ? 'not-enough-cash' : null
@@ -258,6 +264,7 @@ export function blackmail(state: GameState, inKind: boolean): ServiceResult {
 
 export function checkVipRequest(state: GameState): ActionError | null {
   if (velvetLocked(state)) return 'location-locked'
+  if (checkRequirements(state, SERVICE_REQUIREMENTS.vip)) return 'locked'
   if (state.vip) return 'contract-active'
   return availableFrom(state, 'vip', VELVET.vip.cooldownDays) !== null ? 'cooldown' : null
 }

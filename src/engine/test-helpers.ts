@@ -46,8 +46,13 @@ function findRng(accept: (draw: number) => boolean): RngState {
  * étant bornés (au moins 5 %, au plus 95 %), ces deux graines fixent l'issue du prochain jet :
  */
 
-/** Carnet où tout est débloqué : équipiers et mission de nuit (chap. 2 et 5) */
-export const EARNED: GameState['progress'] = { controlsPassed: 1, tagSales: { 'TAG-PERISHABLE': 10 }, flagged: true, deliveries: 2 }
+/** Carnet où tout est débloqué : équipiers, mission de nuit, rayons du garage, services réservés (chap. 2, 4 et 5) */
+export const EARNED: GameState['progress'] = {
+  controlsPassed: 1,
+  tagSales: { 'TAG-PERISHABLE': 10, 'TAG-CHEMICAL': 10 },
+  flagged: true,
+  deliveries: 3,
+}
 
 /** Tirage haut : aucun barrage au prochain trajet, échec de la prochaine option tentée */
 export const HIGH_ROLL_RNG = findRng((draw) => draw >= 0.99)

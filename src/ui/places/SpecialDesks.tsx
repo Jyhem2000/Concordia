@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { WANTED } from '../../data/balance.ts'
 import { LOTTERY } from '../../data/events.ts'
-import { CASSANDRE, FORGERY, KARMA, MORGUE, VELVET } from '../../data/locations.ts'
+import { CASSANDRE, FORGERY, KARMA, MORGUE, SERVICE_REQUIREMENTS, VELVET } from '../../data/locations.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { ownedQty } from '../../engine/cargo.ts'
 import { viceChoices } from '../../engine/events.ts'
@@ -29,17 +29,20 @@ import {
   type MorgueService,
 } from '../../engine/services.ts'
 import type { ActionError } from '../../engine/actions.ts'
-import type { DistrictId, ForgeryCard, ProductId } from '../../engine/types.ts'
+import type { DistrictId, ForgeryCard, ProductId, Requirement } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import { FOCUS_RING } from '../shared/focus.ts'
+import Locked from '../shared/Locked.tsx'
 
 type DeskRowProps = {
   label: string
   detail: string
   error: ActionError | null
   onClick: () => void
+  /** Conditions du service réservé (chap. 4), affichées tant qu'elles manquent */
+  requires?: readonly Requirement[]
 }
 
 type CardKind = ForgeryCard['kind']
@@ -49,7 +52,7 @@ const CARD_KINDS: readonly CardKind[] = ['captain', 'competitor', 'informant', '
 const SELECT = `rounded border border-zinc-700 bg-zinc-950 px-1 py-0.5 ${FOCUS_RING}`
 
 /** Une ligne de guichet : bouton, détail du coût et de l'effet, raison d'un refus */
-function DeskRow({ label, detail, error, onClick }: DeskRowProps) {
+function DeskRow({ label, detail, error, onClick, requires }: DeskRowProps) {
   const { t } = useI18n()
   return (
     <li className="text-xs">
@@ -59,7 +62,8 @@ function DeskRow({ label, detail, error, onClick }: DeskRowProps) {
         </Button>
         <span className="text-zinc-300">{detail}</span>
       </div>
-      {error && <p className="mt-0.5 text-red-300">{t.error[error]}</p>}
+      {error && error !== 'locked' && <p className="mt-0.5 text-red-300">{t.error[error]}</p>}
+      <Locked requires={requires} />
     </li>
   )
 }
@@ -76,6 +80,7 @@ export function KarmaDesk() {
     <div className="border-t border-zinc-800 pt-2">
       <p className="font-bold">{d.title}</p>
       <p className="text-xs text-zinc-400">{d.rule(credits(karmaCost(game)), multiplier(KARMA.factor), KARMA.cooldownDays)}</p>
+      <Locked requires={SERVICE_REQUIREMENTS.influence} />
       {game.influence && game.influence.day >= game.day && (
         <p className="text-xs text-amber-200">{d.pending(t.tag[game.influence.tag].name, game.influence.day)}</p>
       )}
@@ -119,6 +124,7 @@ export function MorgueDesk() {
             detail={`${credits(morgueCost(game, service))} · ${effect[service]}`}
             error={checkMorgue(game, service)}
             onClick={() => dispatch({ type: 'morgue', service })}
+            requires={SERVICE_REQUIREMENTS[service]}
           />
         ))}
       </ul>
@@ -144,6 +150,7 @@ export function CassandreDesk() {
           detail={d.cost(credits(prophecyCost(game)), t.product[CASSANDRE.crate].name, CASSANDRE.aheadDays)}
           error={checkProphecy(game)}
           onClick={() => dispatch({ type: 'prophecy' })}
+          requires={SERVICE_REQUIREMENTS.prophecy}
         />
       </ul>
     </div>
@@ -181,6 +188,7 @@ export function ForgeryDesk() {
   return (
     <div className="border-t border-zinc-800 pt-2">
       <p className="font-bold">{d.title}</p>
+      <Locked requires={SERVICE_REQUIREMENTS.forgery} />
       <p className="text-xs text-zinc-400">{nextDraw ? d.nextDraw(nextDraw) : d.noDraw}</p>
       {accepted && <p className="text-xs text-green-400">{d.accepted}</p>}
       {rejected && <p className="text-xs text-red-300">{d.rejected(FORGERY.failIccLoss, t.hud.wantedGain(WANTED.perOffense))}</p>}
@@ -257,6 +265,7 @@ export function VelvetDesk() {
   return (
     <>
       <div className="border-t border-zinc-800 pt-2">
+        <Locked requires={SERVICE_REQUIREMENTS.auction} />
         <p className="font-bold">{d.auctionTitle}</p>
         <p className="text-xs text-zinc-400">
           {d.auctionRule(VELVET.auction.minTier, multiplier(VELVET.auction.factor), VELVET.auction.cooldownDays)}

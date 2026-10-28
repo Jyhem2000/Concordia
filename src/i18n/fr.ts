@@ -369,6 +369,18 @@ export const fr = {
     } satisfies Record<RoadEventId, RoadTexts>,
   },
 
+  /** Conditions de progression (chap. 2, 4 et 5) : ce qui manque, et où en est le joueur */
+  requirement: {
+    debtPaid: 'Après la dette initiale soldée.',
+    deliveries: (done: number, needed: number) => `Après ${needed} commandes du DSC livrées (${done}/${needed}).`,
+    wanted: "Réservé aux fichés : après une première Fiche S (votre nom dans les fichiers d'Aeterna).",
+    iccTier: (tier: string, icc: string) => `ICC au palier ${tier} ou mieux (actuellement ${icc}).`,
+    wealth: (needed: string, current: string) => `Patrimoine d'au moins ${needed} (Cash-Puce et offshore : ${current}).`,
+    tagSales: (tag: string, done: number, needed: number) => `Après ${needed} caisses ${tag} vendues (${done}/${needed}).`,
+    controls: (done: number, needed: number) =>
+      `Après ${needed} contrôle${needed > 1 ? 's' : ''} de la BRC franchi${needed > 1 ? 's' : ''} sans garde à vue (${done}/${needed}).`,
+  },
+
   crewDesk: {
     title: 'Équipage',
     rule: (fee: string) =>
@@ -392,13 +404,6 @@ export const fr = {
     refining: 'affinage : Standard vendu au prix Extra-Frais',
     quota: (factor: string) => `quotas des périssables ${factor}`,
     inKindRule: (amount: string, tier: number) => `salaire réduit à ${amount} contre une caisse addictive de Tier ${tier} ou plus`,
-    locked: {
-      controls: (done: number, needed: number) =>
-        `Vous rejoindra après ${needed} contrôle${needed > 1 ? 's' : ''} de la BRC franchi${needed > 1 ? 's' : ''} sans garde à vue (${done}/${needed}) : il repère le sang-froid au barrage.`,
-      sales: (tag: string, done: number, needed: number) =>
-        `Vous rejoindra après ${needed} caisses ${tag} vendues (${done}/${needed}) : elle ne travaille qu'avec qui connaît la marchandise.`,
-      wanted: "Vous contactera quand votre nom entrera dans les fichiers d'Aeterna (première Fiche S).",
-    },
   },
 
   desks: {
@@ -901,7 +906,7 @@ export const fr = {
     'no-crew': 'Aucun équipier engagé.',
     'no-mission': 'Aucune mission de nuit valable ce soir.',
     'mission-locked': 'La plateforme ne vous confie pas encore la nuit : livrez d’abord quelques commandes.',
-    'crew-locked': 'Pas encore : il faut d’abord vous faire remarquer (voir sa condition).',
+    locked: 'Pas encore débloqué : voir sa condition.',
     'nothing-to-sell': 'Rien à vendre.',
     'no-delivery': "Aucune livraison officielle valable aujourd'hui.",
     'delivery-pending': 'Livraison du jour encore à bord : la plateforme ne confie pas de mission de nuit.',

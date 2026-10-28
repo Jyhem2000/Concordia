@@ -16,6 +16,12 @@
   Liaisons : `MAP_LINKS` dans [`districts.ts`](../src/data/districts.ts) (le schéma n'est qu'une illustration). *Ex. :* `[D4]` → `[D6]` traverse `[D1]`, `[D2]` et `[D5]` : trois districts traversés.
 * **Pompes :** *officielle* = connectée à Aeterna, **fermée la nuit** sous un seuil d'ICC (`PUMP_NIGHT_MIN_ICC` dans [`balance.ts`](../src/data/balance.ts)) ; *fixe* = toujours ouverte.
 * **Lieux spéciaux :** ouverts de jour seulement (06h00 – 20h00, chap. 2). Coûts en ₡ indexés sur l'inflation (chap. 7), sauf mention. **Cooldown :** un service utilisé le jour J redevient disponible le jour J + cooldown. Chiffres : [`locations.ts`](../src/data/locations.ts).
+* **Services réservés (deux voies) :** certains services ne s'ouvrent qu'à qui s'est fait une place (`SERVICE_REQUIREMENTS` dans [`locations.ts`](../src/data/locations.ts)). Le lieu les affiche quand même, avec leur condition et la progression vers elle.
+  * **Voie officielle**, pour les citoyens présentables et solvables : panique de Karma-Cham (palier d'ICC et patrimoine), faux dossier de la Laverie (patrimoine), Velvet-Silo sur invitation (palier d'ICC et patrimoine).
+  * **Voie pègre**, pour les fichés : Cassandre-88 ne parle qu'à qui a déjà une Fiche S.
+  * **Clientèle établie :** à la Morgue, le certificat après la dette initiale soldée, le laissez-passer après des ventes de chimique ; la chirurgie reste ouverte à tous.
+  * Les conditions d'ICC et de patrimoine valent **au moment de la demande** : qui retombe sous le seuil perd l'accès jusqu'à y remonter. Les autres sont acquises pour la partie.
+  * *Patrimoine :* Cash-Puce plus compte offshore.
 * **Coefficients de marché** (chap. 7) : chaque district applique un coefficient à ses produits de **Production**, aux produits **Neutres** (1.00) et à ceux en **Forte demande** (plus le bonus de tier).
 
 ## Stats des districts

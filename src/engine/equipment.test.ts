@@ -9,7 +9,7 @@ import { inflationIndex } from './inflation.ts'
 import { bluffChance, bribeRate, fleeChance } from './interception.ts'
 import { riskBreakdown } from './risk.ts'
 import { sleep } from './routine.ts'
-import { defined, errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
+import { defined, EARNED, errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
 import type { CargoLot, GameState, Interception, ModuleId, ProductId } from './types.ts'
 
 const lot = (productId: ProductId, qty: number, boughtDay = 3): CargoLot => ({
@@ -20,7 +20,9 @@ const lot = (productId: ProductId, qty: number, boughtDay = 3): CargoLot => ({
   boughtDay,
   damaged: false,
 })
-const atGarage = (patch: Partial<GameState> = {}) => gameAt(3, { districtId: 'D4', cash: 500_000, ...patch })
+// Client établi : carnet complet et dette soldée (catalogue en rayons, chap. 5)
+const atGarage = (patch: Partial<GameState> = {}) =>
+  gameAt(3, { districtId: 'D4', cash: 500_000, progress: EARNED, initialDebtPaid: true, debt: 0, ...patch })
 const withModules = (mounted: ModuleId[], patch: Partial<GameState> = {}) => gameAt(3, { modules: { owned: mounted, mounted }, ...patch })
 const brc: Interception = { kind: 'brc', acted: false, bluffFailed: false }
 
