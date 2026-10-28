@@ -2,11 +2,12 @@ import { Eye, MapPin, Siren } from 'lucide-react'
 import { WANTED } from '../../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
+import { VEHICLES } from '../../data/vehicles.ts'
 import { planTravel } from '../../engine/actions.ts'
-import { averageCost } from '../../engine/cargo.ts'
+import { averageCost, cargoUsed, ownedQty } from '../../engine/cargo.ts'
 import { crewEffect, isMemoryBlurred } from '../../engine/crew.ts'
 import { blurredQuote, estimatedUnitSale, lastSeen, productStatus } from '../../engine/market.ts'
-import { exposure, fineAmount, flyingCheckShare } from '../../engine/interception.ts'
+import { exposure, fineAmount, flyingCheckShare, hiddenCargo } from '../../engine/interception.ts'
 import { checkDelivery, deliveryCrates, deliveryFee, deliveryOffer } from '../../engine/delivery.ts'
 import { riskBreakdown } from '../../engine/risk.ts'
 import type { DistrictId } from '../../engine/types.ts'
@@ -45,6 +46,7 @@ export default function TravelPanel() {
           {/* Raison commune à toutes les destinations : dite une fois plutôt que sous chaque bouton */}
           {tripDone && <p className="px-3 pt-2 text-xs text-zinc-400">{t.error['trip-done']}</p>}
           <LastTrip />
+          <CargoSummary />
           <DayDelivery />
           <Exposure />
           <ul className="divide-y divide-zinc-800">
@@ -55,6 +57,22 @@ export default function TravelPanel() {
         </>
       )}
     </section>
+  )
+}
+
+/** Récapitulatif de la soute pour choisir la destination : produits, quantités, part du double fond (chap. 10) */
+function CargoSummary() {
+  // Le double fond dépend du véhicule et de la soute : état entier
+  const game = useGameStore((s) => s.game)
+  const { t } = useI18n()
+  const { hidden } = hiddenCargo(game)
+  const products = [...new Set(game.cargo.map((lot) => lot.productId))]
+  const lines = products.map((id) => t.travel.cargoLine(ownedQty(game.cargo, id), t.product[id].name, ownedQty(hidden, id)))
+  return (
+    <p className="px-3 pt-2 text-xs text-zinc-300">
+      <span className="font-bold text-amber-300">{t.travel.cargoTitle(cargoUsed(game.cargo), VEHICLES[game.vehicleId].cargo)}</span>{' '}
+      {lines.length > 0 ? lines.join(' · ') : t.travel.cargoEmpty}
+    </p>
   )
 }
 

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { PRODUCTS } from '../../data/products.ts'
-import { checkUseProduct, maxBuy } from '../../engine/actions.ts'
+import { bulkSales, checkUseProduct, maxBuy } from '../../engine/actions.ts'
 import { daysBeforeRot, freshnessOf } from '../../engine/condition.ts'
 import { averageCost, ownedQty } from '../../engine/cargo.ts'
 import { demandQuota, demandRefill, productStatus, quote, quoteBreakdown, saleQuote, shopProducts } from '../../engine/market.ts'
@@ -73,6 +73,7 @@ export default function MarketPanel() {
           {sealed > 0 && game.mission && (
             <p className="px-3 pt-2 text-sm text-sky-300">{t.travel.sealed(sealed, t.district[game.mission.to].name)}</p>
           )}
+          <BulkSales />
           <ul className="divide-y divide-zinc-800">
             {rows.map((id) => (
               <MarketRow key={id} productId={id} />
@@ -81,6 +82,29 @@ export default function MarketPanel() {
         </>
       )}
     </section>
+  )
+}
+
+/** Ventes groupées : tout vendre, ou seulement ce qui marge, avec le produit annoncé (chap. 10) */
+function BulkSales() {
+  // Les ventes se calculent sur l'état entier de la partie (lots, demande, fraîcheur)
+  const game = useGameStore((s) => s.game)
+  const dispatch = useGameStore((s) => s.dispatch)
+  const { t, credits } = useI18n()
+  const revenue = (profitableOnly: boolean) =>
+    bulkSales(game, profitableOnly).reduce((total, { productId, qty }) => total + saleQuote(game, productId, qty).total, 0)
+  const all = bulkSales(game, false)
+  if (all.length === 0) return null
+  const profitable = bulkSales(game, true)
+  return (
+    <div className="flex flex-wrap gap-2 px-3 pt-2">
+      <Button variant="primary" disabled={profitable.length === 0} onClick={() => dispatch({ type: 'sellAll', profitableOnly: true })}>
+        {t.market.sellProfitable(credits(revenue(true)))}
+      </Button>
+      <Button variant="danger" onClick={() => dispatch({ type: 'sellAll', profitableOnly: false })}>
+        {t.market.sellAll(credits(revenue(false)))}
+      </Button>
+    </div>
   )
 }
 

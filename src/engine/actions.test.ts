@@ -59,6 +59,20 @@ describe('achat et vente', () => {
   })
 })
 
+describe('ventes groupées', () => {
+  const lotAt = (productId: ProductId, qty: number, unitCost: number) => ({ productId, qty, unitCost, travelled: true, boughtDay: 2, damaged: false })
+
+  it('vendent tout, ou seulement ce qui marge, jamais les caisses scellées', () => {
+    const cargo = [lotAt('T1-01', 2, 1), lotAt('T1-04', 2, 1_000_000), lotAt('T0-05', 3, 0)]
+    const profitable = run(gameAt(3, { cargo }), { type: 'sellAll', profitableOnly: true })
+    expect(ownedQty(profitable.cargo, 'T1-01')).toBe(0)
+    expect(ownedQty(profitable.cargo, 'T1-04')).toBe(2)
+    const all = run(gameAt(3, { cargo }), { type: 'sellAll', profitableOnly: false })
+    expect(all.cargo.map((lot) => lot.productId)).toEqual(['T0-05'])
+    expect(errorOf(gameAt(3, { cargo: [lotAt('T1-04', 2, 1_000_000)] }), { type: 'sellAll', profitableOnly: true })).toBe('nothing-to-sell')
+  })
+})
+
 describe('trajets', () => {
   it('consomme le carburant, marque la soute comme ayant voyagé et mémorise les cours', () => {
     const id = cheapest(start)

@@ -41,6 +41,7 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
 * **Modules & équipage :** slots du châssis (modifiables seulement au garage de `[D4]`), canal radio / portrait de l'équipier actif.
 
 ## Vue « Marché noir & lieux spéciaux »
+* **Ventes groupées :** « Vendre tout ce qui marge » (chaque produit dont la vente entière, saturation comprise, rapporte plus que son prix d'achat) et « Vendre tout », chacun avec le produit annoncé ; les caisses scellées n'en font pas partie.
 * **Tableau des cours :** la boutique du jour, plus, en haut de liste, tous les produits en soute (vente toujours possible). Le prix de vente affiché est le **prix net** (commission, fraîcheur, nuit… comprises), détaillable.
 * **Indicateurs :**
   * 📉 vert (prix très bas / production locale) · 🔥 orange (forte demande) · 🚀 rouge clignotant (explosion liée à un événement) ;
@@ -63,6 +64,7 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
   * *Hachoir de `[LOC-D1-1]`* : caisses rachetables, prix par caisse détaillable, limite du jour restante.
 
 ## Vue « Carte tactique & navigation »
+* **Récapitulatif de la soute :** en haut de la carte, l'occupation (caisses / capacité) et chaque produit avec sa quantité, dont la part cachée dans le double fond, pour choisir la destination sans revenir au marché.
 * **Livraison officielle du jour** (chap. 2) : en haut de la carte, de jour, l'offre de la plateforme (district, caisses scellées, prime) avec son bouton d'acceptation, puis la livraison en cours.
 * Carte schématique style terminal rétro-futuriste des six districts et de leurs liaisons (chap. 4).
 * **Soute exposée :** en tête de carte, le nombre de caisses illégales en soute (dont celles du double fond), ce qu'elles ont coûté, et la sanction de base d'une saisie (garde à vue si du haut tier est à bord).

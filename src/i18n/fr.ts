@@ -545,6 +545,8 @@ export const fr = {
   market: {
     title: 'Marché noir',
     streetOnly: 'Passé 20h00 : seul le marché de rue est ouvert.',
+    sellAll: (amount: string) => `Vendre tout (${amount})`,
+    sellProfitable: (amount: string) => `Vendre tout ce qui marge (${amount})`,
     quote: 'Cours',
     stock: 'Stock',
     owned: 'En soute',
@@ -759,6 +761,9 @@ export const fr = {
     delivered: (fee: string) => `commande du DSC livrée, prime ${fee}`,
     deviated: (wanted: string) => `écart de mission enregistré, ${wanted}`,
     mission: 'Mission de nuit',
+    cargoTitle: (used: number, capacity: number) => `Soute ${used}/${capacity}`,
+    cargoEmpty: 'vide',
+    cargoLine: (qty: number, name: string, hidden: number) => `${qty} × ${name}${hidden > 0 ? ` (dont ${hidden} au double fond)` : ''}`,
     deliveryTitle: 'Livraison officielle du jour',
     deliveryOffer: (district: string, crates: number, fee: string) =>
       `La plateforme du DSC propose ${crates} caisses scellées à livrer à ${district} par le trajet de jour, prime ${fee}. Légales, elles couvrent la soute ; non livrées, elles sont reprises à 06h00 (ICC en baisse).`,
@@ -879,6 +884,7 @@ export const fr = {
     'crew-lost': 'Disparu à la Loterie : il ne reviendra pas.',
     'no-crew': 'Aucun équipier engagé.',
     'no-mission': 'Aucune mission de nuit valable ce soir.',
+    'nothing-to-sell': 'Rien à vendre.',
     'no-delivery': "Aucune livraison officielle valable aujourd'hui.",
     'delivery-pending': 'Livraison du jour encore à bord : la plateforme ne confie pas de mission de nuit.',
     'pump-closed': "Pompe officielle fermée la nuit pour votre niveau d'ICC.",
