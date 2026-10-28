@@ -1,11 +1,12 @@
 import { SEDATION } from '../data/balance.ts'
+import { LOCATIONS } from '../data/locations.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import { CREW, CREW_HIRE_FEE } from '../data/vehicles.ts'
 import type { ActionError } from './actions.ts'
 import { giveCrates, ownedQty } from './cargo.ts'
 import { indexed } from './inflation.ts'
 import { keysOf } from './records.ts'
-import type { Crew, CrewId, GameState, ProductId } from './types.ts'
+import type { Crew, CrewId, DistrictId, GameState, ProductId } from './types.ts'
 
 /*
  * Équipage (chap. 5) et Exemption Métabolique (chap. 2) : recrutement à la Cantine, salaires
@@ -98,9 +99,12 @@ export function isSedated(state: GameState): boolean {
   return state.exemption === 0
 }
 
-/** Se trouver en D1 de jour remet la protection au maximum (Cantine des Chauffeurs) */
+/** District de la Cantine des Chauffeurs, où l'Exemption Métabolique se recharge */
+export const cantineDistrict = (): DistrictId => LOCATIONS['LOC-D1-2'].district
+
+/** Se trouver au district de la Cantine de jour remet la protection au maximum */
 export function refreshExemption(state: GameState): GameState {
-  const atCantine = state.districtId === 'D1' && state.phase === 'day' && !state.dayOver
+  const atCantine = state.districtId === cantineDistrict() && state.phase === 'day' && !state.dayOver
   return atCantine ? { ...state, exemption: SEDATION.protectionDays } : state
 }
 

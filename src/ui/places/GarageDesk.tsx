@@ -1,3 +1,4 @@
+import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { MODULES, VEHICLES } from '../../data/vehicles.ts'
 import { checkBuyModule, checkBuyVehicle, checkMount, MODULE_IDS, missingChassis, repairPrice, VEHICLE_IDS } from '../../engine/equipment.ts'
 import type { ModuleId, VehicleId } from '../../engine/types.ts'
@@ -174,7 +175,18 @@ function useEquipmentTexts() {
       ...(smoothRide ? [g.smoothRide] : []),
       ...(rotatingPlate ? [g.rotatingPlate] : []),
       ...(ram ? [g.ram(signedPercent(ram.fleeBonus, 0), multiplier(ram.damageFactor))] : []),
-      ...(trapdoor ? [g.trapdoor(percent(trapdoor.chance, 0), trapdoor.cooldownDays, percent(trapdoor.maxRecovery, 0))] : []),
+      ...(trapdoor
+        ? [
+            g.trapdoor(
+              percent(trapdoor.chance, 0),
+              trapdoor.cooldownDays,
+              percent(trapdoor.maxRecovery, 0),
+              DISTRICT_IDS.filter((id) => !DISTRICTS[id].ejection.trapdoor)
+                .map((id) => t.district[id].name)
+                .join(', '),
+            ),
+          ]
+        : []),
       ...(fakeTerminal ? [g.fakeTerminal(signedPercent(fakeTerminal.bluffBonus, 0), multiplier(fakeTerminal.bribeRateFactor))] : []),
       ...(droneJammer ? [g.droneJammer] : []),
     ].join(' ')

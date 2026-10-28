@@ -1,9 +1,10 @@
-import { DAMAGED_FACTOR, FRESHNESS, HIGH_TIER, SEARCH, SEDATION } from '../../data/balance.ts'
+import { DAMAGED_FACTOR, FRESHNESS } from '../../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
 import { isMemoryBlurred } from '../../engine/crew.ts'
-import { lastSeen, productStatus } from '../../engine/market.ts'
+import { searchSanction } from '../../engine/interception.ts'
+import { blurredQuote, lastSeen, productStatus } from '../../engine/market.ts'
 import type { District, DistrictId, ProductId, TagId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -59,11 +60,15 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
   ]
 
   // Sanction de base d'une saisie (chap. 6)
-  const legal = product.tags.includes('TAG-LEGAL')
-  const sanction = product.tier >= HIGH_TIER ? SEARCH.high : SEARCH.low
-  const seizure = legal
-    ? t.sheet.legal
-    : t.sheet.seizure(percent(sanction.fine, 0), sanction.iccLoss, sanction.custodyDays, product.tier >= HIGH_TIER)
+  // Celle du moteur, pour une soute qui ne contiendrait que ce produit
+  const sanction = searchSanction({
+    ...game,
+    interception: null,
+    cargo: [{ productId, qty: 1, unitCost: 0, travelled: true, boughtDay: game.day, damaged: false }],
+  })
+  const seizure = sanction
+    ? t.sheet.seizure(percent(sanction.fine, 0), sanction.iccLoss, sanction.custodyDays, sanction.custodyDays > 0)
+    : t.sheet.legal
 
   // Qui l'apprécie : connivence des agents, priorité des milices (chap. 6 et 7)
   const bribes = where((district) => district.bribeFavorites.includes(productId))
@@ -89,7 +94,7 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
     best
       ? t.sheet.best(
           isMemoryBlurred(game, best.id)
-            ? t.travel.blurred(credits(best.quote * (1 - SEDATION.memoryBlur)), credits(best.quote * (1 + SEDATION.memoryBlur)))
+            ? t.travel.blurred(credits(blurredQuote(best.quote).low), credits(blurredQuote(best.quote).high))
             : credits(best.quote),
           t.district[best.id].name,
           best.age,

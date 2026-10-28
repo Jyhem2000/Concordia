@@ -1,5 +1,5 @@
 import { Check, Target, X } from 'lucide-react'
-import { ENDINGS } from '../../data/balance.ts'
+import { ENDINGS, GAME_LENGTH_DAYS } from '../../data/balance.ts'
 import { ownedQty } from '../../engine/cargo.ts'
 import { offshoreBalance } from '../../engine/finance.ts'
 import { iccTier } from '../../engine/gauges.ts'
@@ -47,7 +47,7 @@ export default function ObjectivesPanel() {
     <details className="rounded border border-zinc-800 bg-zinc-900/40 p-3 text-sm">
       <summary className={`flex cursor-pointer items-center gap-1.5 rounded font-bold text-amber-300 uppercase ${FOCUS_RING}`}>
         <Target size={14} aria-hidden="true" />
-        {t.objectives.title}
+        {t.objectives.title(GAME_LENGTH_DAYS)}
         <span className="ml-auto font-normal text-cyan-300 normal-case">{credits(score)}</span>
       </summary>
       <ul className="mt-2 space-y-2">

@@ -191,7 +191,7 @@ export const PATROL_RISK = 0.2
 export const GOLD_FAST_LANE_FACTOR = 0.9
 
 /** Fiche S algorithmique : niveau max, risque ajouté et chance de fuite retirée par niveau */
-export const WANTED = { maxLevel: 3, riskPerLevel: 0.05, fleePenaltyPerLevel: 0.1 }
+export const WANTED = { maxLevel: 3, perOffense: 1, riskPerLevel: 0.05, fleePenaltyPerLevel: 0.1 }
 
 // ─── Interception (chap. 6) ───
 

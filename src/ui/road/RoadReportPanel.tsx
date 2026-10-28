@@ -22,6 +22,7 @@ export default function RoadReportPanel() {
     { key: 'chassis', label: t.report.chassis, value: report.chassis, text: signed(report.chassis) },
     { key: 'fuel', label: t.road.fuelGain, value: report.fuel, text: signed(report.fuel) },
     { key: 'crates', label: t.report.crates, value: report.crates, text: signed(report.crates) },
+    { key: 'damaged', label: t.report.damaged, value: -report.damaged, text: number(report.damaged) },
   ].filter(({ value }) => value !== 0)
 
   return (

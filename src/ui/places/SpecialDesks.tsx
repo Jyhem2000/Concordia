@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { WANTED } from '../../data/balance.ts'
 import { LOTTERY } from '../../data/events.ts'
 import { CASSANDRE, FORGERY, KARMA, MORGUE, VELVET } from '../../data/locations.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
@@ -101,7 +102,7 @@ export function MorgueDesk() {
   const { t, credits } = useI18n()
   const d = t.desks.morgue
   const effect: Record<MorgueService, string> = {
-    pass: d.passEffect(MORGUE.pass.days),
+    pass: d.passEffect(MORGUE.pass.days, t.district[MORGUE.pass.district].name, t.tag[MORGUE.pass.tag].name, t.event[MORGUE.pass.cancels].name),
     surgery: d.surgeryEffect(MORGUE.surgery.health, MORGUE.surgery.healthCap),
     certificate: d.certificateEffect(MORGUE.certificate.icc),
   }
@@ -182,7 +183,7 @@ export function ForgeryDesk() {
       <p className="font-bold">{d.title}</p>
       <p className="text-xs text-zinc-400">{nextDraw ? d.nextDraw(nextDraw) : d.noDraw}</p>
       {accepted && <p className="text-xs text-green-400">{d.accepted}</p>}
-      {rejected && <p className="text-xs text-red-300">{d.rejected(FORGERY.failIccLoss)}</p>}
+      {rejected && <p className="text-xs text-red-300">{d.rejected(FORGERY.failIccLoss, t.hud.wantedGain(WANTED.perOffense))}</p>}
       {LOTTERY.days.includes(drawDay) && !accepted && !rejected && (
         <div className="mt-1 flex flex-col gap-1 text-xs">
           <p className="text-zinc-300">{d.rule(credits(forgeryCost(game)), percent(forgeryChance(game), 0))}</p>
@@ -196,7 +197,7 @@ export function ForgeryDesk() {
               ))}
             </select>
           </label>
-          <p className="text-zinc-400">{d.effects[kind]}</p>
+          <p className="text-zinc-400">{typeof d.effects[kind] === 'function' ? d.effects[kind](LOTTERY.viceDays) : d.effects[kind]}</p>
           {kind !== 'informant' && (
             <label className="flex flex-wrap items-center gap-1.5">
               {d.district}
@@ -228,7 +229,7 @@ export function ForgeryDesk() {
           <ul>
             <DeskRow
               label={d.submit}
-              detail={d.failure(FORGERY.failIccLoss)}
+              detail={d.failure(FORGERY.failIccLoss, t.hud.wantedGain(WANTED.perOffense))}
               error={card ? checkForgery(game, card) : 'not-eligible'}
               onClick={() => card && dispatch({ type: 'forge', card })}
             />
@@ -257,8 +258,10 @@ export function VelvetDesk() {
     <>
       <div className="border-t border-zinc-800 pt-2">
         <p className="font-bold">{d.auctionTitle}</p>
-        <p className="text-xs text-zinc-400">{d.auctionRule(multiplier(VELVET.auction.factor), VELVET.auction.cooldownDays)}</p>
-        {lots.length === 0 && <p className="text-xs text-zinc-500">{d.nothingToAuction}</p>}
+        <p className="text-xs text-zinc-400">
+          {d.auctionRule(VELVET.auction.minTier, multiplier(VELVET.auction.factor), VELVET.auction.cooldownDays)}
+        </p>
+        {lots.length === 0 && <p className="text-xs text-zinc-500">{d.nothingToAuction(VELVET.auction.minTier)}</p>}
         <ul className="mt-1 space-y-1">
           {lots.map((id) => (
             <DeskRow
@@ -305,7 +308,12 @@ export function VelvetDesk() {
               onClick={() => dispatch({ type: 'vipDeliver' })}
             />
           ) : (
-            <DeskRow label={d.request} detail={d.requestDetail} error={checkVipRequest(game)} onClick={() => dispatch({ type: 'vipRequest' })} />
+            <DeskRow
+              label={d.request}
+              detail={d.requestDetail(VELVET.vip.tiers.join(' ou '))}
+              error={checkVipRequest(game)}
+              onClick={() => dispatch({ type: 'vipRequest' })}
+            />
           )}
         </ul>
       </div>

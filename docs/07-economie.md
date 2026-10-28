@@ -83,7 +83,7 @@ Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est 
 ## Indice d'inflation algorithmique
 *« Pour votre sécurité économique, Aeterna ajuste les prix en temps réel. »*
 * **Indice du jour = 1 + (jour − 1) / période** (`INFLATION_PERIOD_DAYS` dans [`balance.ts`](../src/data/balance.ts)) : ×1.00 au Jour 1, puis croissance linéaire.
-* **Tous les montants en ₡ de la doc sont des valeurs de base (Jour 1)**, multipliées par l'indice pour : carburant, réparations, dépannage, salaires et frais d'équipage, services des lieux spéciaux, part fixe du tarif de corruption, montants des aléas routiers.
+* **Tous les montants en ₡ de la doc sont des valeurs de base (Jour 1)**, multipliées par l'indice pour : carburant, réparations, dépannage, salaires et frais d'équipage, services des lieux spéciaux, part fixe du tarif de corruption, montants des aléas routiers, prime des missions de nuit.
 * **Non indexés :** prix des produits (ils ont leur propre marché), véhicules, modules, dette et emprunts, seuils de fin, tarif syndical de `[LOC-D1-2]`.
 * *Lore :* le marché noir facture ses services en indice officiel : c'est la seule unité de compte que les puces acceptent sans éveiller l'algorithme.
 * **Affichage :** valeur du jour au téléscripteur dès le Jour 1, avec un graphique d'historique (chap. 10).

@@ -1,12 +1,12 @@
 import { Eye, MapPin, Siren } from 'lucide-react'
-import { HIGH_TIER, SEARCH, SEDATION } from '../../data/balance.ts'
+import { WANTED } from '../../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { planTravel } from '../../engine/actions.ts'
-import { averageCost, isIllegal } from '../../engine/cargo.ts'
+import { averageCost } from '../../engine/cargo.ts'
 import { crewEffect, isMemoryBlurred } from '../../engine/crew.ts'
-import { estimatedUnitSale, lastSeen, productStatus } from '../../engine/market.ts'
-import { flyingCheckShare } from '../../engine/interception.ts'
+import { blurredQuote, estimatedUnitSale, lastSeen, productStatus } from '../../engine/market.ts'
+import { exposure, flyingCheckShare } from '../../engine/interception.ts'
 import { riskBreakdown } from '../../engine/risk.ts'
 import type { DistrictId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
@@ -58,16 +58,14 @@ export default function TravelPanel() {
 
 /** Ce qu'un barrage raté coûterait : caisses illégales en soute et sanction de base d'une saisie (chap. 6) */
 function Exposure() {
-  const cargo = useGameStore((s) => s.game.cargo)
+  // La sanction et le double fond se calculent sur l'état entier de la partie (véhicule, district)
+  const game = useGameStore((s) => s.game)
   const { t, credits, percent } = useI18n()
-  const illegal = cargo.filter(isIllegal)
-  const crates = illegal.reduce((total, lot) => total + lot.qty, 0)
-  if (crates === 0) return null
-  const cost = illegal.reduce((total, lot) => total + lot.qty * lot.unitCost, 0)
-  const high = illegal.some((lot) => PRODUCTS[lot.productId].tier >= HIGH_TIER)
+  const { crates, hidden, cost, sanction } = exposure(game)
+  if (crates === 0 || !sanction) return null
   return (
     <p className="px-3 pt-2 text-xs text-amber-200">
-      {t.travel.exposed(crates, credits(cost))} {t.travel.exposedSanction(percent((high ? SEARCH.high : SEARCH.low).fine, 0), high)}
+      {t.travel.exposed(crates, credits(cost), hidden)} {t.travel.exposedSanction(percent(sanction.fine, 0), sanction.custodyDays)}
     </p>
   )
 }
@@ -83,7 +81,7 @@ function LastTrip() {
     ...(report.chassisWear > 0 ? [t.travel.wear(report.chassisWear)] : []),
     ...(report.heatHealth > 0 ? [t.travel.heatStroke(report.heatHealth)] : []),
     ...(report.mission === 'delivered' ? [t.travel.delivered(credits(report.missionFee))] : []),
-    ...(report.mission === 'deviated' ? [t.travel.deviated] : []),
+    ...(report.mission === 'deviated' ? [t.travel.deviated(t.hud.wantedGain(WANTED.perOffense))] : []),
   ]
   if (parts.length === 0) return null
   return (
@@ -169,12 +167,7 @@ function DistrictRow({ districtId }: DistrictRowProps) {
                       )}
                     </span>
                     {memory && blurred ? (
-                      <span>
-                        {t.travel.blurred(
-                          credits(memory.quotes[id] * (1 - SEDATION.memoryBlur)),
-                          credits(memory.quotes[id] * (1 + SEDATION.memoryBlur)),
-                        )}
-                      </span>
+                      <span>{t.travel.blurred(credits(blurredQuote(memory.quotes[id]).low), credits(blurredQuote(memory.quotes[id]).high))}</span>
                     ) : memory ? (
                       <span className="flex items-center gap-1.5">
                         <Margin revenue={estimatedUnitSale(memory.quotes[id])} cost={averageCost(cargo, id) ?? 0} showAmount={false} />

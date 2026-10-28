@@ -507,6 +507,8 @@ export type RoadReport = {
   chassis: number
   fuel: number
   crates: number
+  /** Caisses fragiles endommagées par le choc */
+  damaged: number
   /** Facture du dépannage d'urgence si le châssis est tombé à 0 */
   towBill: number
 }

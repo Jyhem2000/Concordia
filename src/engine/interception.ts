@@ -253,6 +253,20 @@ export function hiddenCargo(state: GameState): { hidden: CargoLot[]; visible: Ca
   return splitHidden(state.cargo, VEHICLES[state.vehicleId].hiddenCompartment)
 }
 
+/**
+ * Ce qu'une saisie coûterait avec la soute actuelle (panneau de trajet) : caisses illégales visibles et cachées,
+ * prix payé, et sanction de base si les agents trouvent tout
+ */
+export function exposure(state: GameState): { crates: number; hidden: number; cost: number; sanction: ReturnType<typeof searchSanction> } {
+  const illegal = state.cargo.filter(isIllegal)
+  return {
+    crates: cargoUsed(illegal),
+    hidden: cargoUsed(hiddenCargo(state).hidden),
+    cost: illegal.reduce((total, lot) => total + lot.qty * lot.unitCost, 0),
+    sanction: searchSanction({ ...state, interception: null }),
+  }
+}
+
 /** Chance que les agents trouvent le double fond à une fouille effective, selon la sécurité du district */
 export function compartmentDetection(state: GameState): Breakdown {
   return breakdown('rule.security-stars', COMPARTMENT.detectionPerStar * stars(state)).build()
@@ -613,7 +627,7 @@ function loseChassis(state: GameState, ledger: Ledger, pv: number): GameState {
 }
 
 function addWanted(state: GameState, ledger: Ledger): GameState {
-  const wanted = Math.min(WANTED.maxLevel, state.wanted + 1)
+  const wanted = Math.min(WANTED.maxLevel, state.wanted + WANTED.perOffense)
   ledger.wanted += wanted - state.wanted
   return { ...state, wanted }
 }

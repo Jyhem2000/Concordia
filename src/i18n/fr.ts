@@ -156,16 +156,17 @@ export const fr = {
     newGameConfirm: 'Abandonner la partie en cours et recommencer au Jour 1 ?',
     offshoreRate: (rate: string) => `${rate}/j`,
     wanted: (level: number, max: number) => `Fiche S ${level}/${max}`,
+    wantedGain: (levels: number) => `+${levels} niveau${levels > 1 ? 'x' : ''} de Fiche S`,
     debtLate: 'en retard',
     nextBeating: (day: number) => `échéance J${day}`,
     nextProtection: (day: number, amount: string) => `Collecte de Viktor J${day} : ≈ ${amount}`,
     exemption: (days: number) => `Exemption ${days} j`,
-    sedationTomorrow: 'Sédation demain : passez en Hives de jour',
+    sedationTomorrow: (district: string) => `Sédation demain : passez à ${district} de jour`,
     sedated: 'Sédation : bluff, corruption et fuite réduits, mémoire de marché brouillée',
     crew: (name: string) => name,
     crewUnpaid: 'non payé, ne travaille pas',
     patrol: (district: string) => `Ronde renforcée : ${district}`,
-    countdown: 'Audit le Jour 30 à minuit : dernier remboursement et dernier dépôt offshore possibles le J30 avant 20h00.',
+    countdown: (day: number) => `Audit le Jour ${day} à minuit : dernier remboursement et dernier dépôt offshore possibles le J${day} avant 20h00.`,
   },
 
   ticker: {
@@ -234,10 +235,11 @@ export const fr = {
       `Indice du jour = 1 + (jour − 1) / ${period} : il monte chaque matin, de la même hauteur. Les montants de base (valeurs du Jour 1) sont multipliés par l'indice.`,
     readout: (day: number, index: string) => `Jour ${day} : ${index}`,
     projected: '(projection)',
-    chartLabel: (index: string, day: number) => `Indice d'inflation : ${index} au Jour ${day}, en hausse linéaire jusqu'au Jour 30.`,
+    chartLabel: (index: string, day: number, last: number) =>
+      `Indice d'inflation : ${index} au Jour ${day}, en hausse linéaire jusqu'au Jour ${last}.`,
     dayTick: (day: number) => `J${day}`,
     indexed:
-      "Indexés : carburant, réparations, dépannage, salaires et frais d'équipage, services des lieux spéciaux, part fixe du tarif de corruption, aléas routiers.",
+      "Indexés : carburant, réparations, dépannage, salaires et frais d'équipage, services des lieux spéciaux, part fixe du tarif de corruption, aléas routiers, prime des missions de nuit.",
     notIndexed: 'Non indexés : prix des produits, véhicules, modules, dette et emprunts, seuils de fin, tarif syndical de la Cantine.',
   },
 
@@ -403,7 +405,8 @@ export const fr = {
     morgue: {
       title: 'Services du Dr. K.',
       services: { pass: 'Laissez-passer sanitaire', surgery: "Chirurgie d'urgence", certificate: 'Certificat de décontamination' },
-      passEffect: (days: number) => `${days} jours : bio-scanners de Panacea aveugles au chimique, alerte sanitaire sans effet à Panacea`,
+      passEffect: (days: number, district: string, tag: string, event: string) =>
+        `${days} jours : bio-scanners de ${district} aveugles au ${tag}, « ${event} » sans effet à ${district}`,
       surgeryEffect: (health: number, cap: number) => `Santé +${health}, jusqu'à ${cap} PV`,
       certificateEffect: (icc: number) => `ICC +${icc} %, hors plafond`,
       passValid: (day: number) => `Laissez-passer valable jusqu'au J${day}.`,
@@ -429,21 +432,22 @@ export const fr = {
         cadre: 'Un cadre à dénoncer',
       },
       effects: {
-        captain: 'Promu : risque réduit dans ce district pendant 3 jours, sans purge.',
-        competitor: 'Promu : quotas de demande majorés dans ce district pendant 3 jours, sans purge.',
+        captain: (days: number) => `Promu : risque réduit dans ce district pendant ${days} jours, sans purge.`,
+        competitor: (days: number) => `Promu : quotas de demande majorés dans ce district pendant ${days} jours, sans purge.`,
         informant: 'Promu au hasard : Fiche S effacée et ICC en hausse au tirage, sans purge.',
         cadre: "Déclassé : tu choisis le vice qu'il emporte un étage plus bas.",
       },
       submit: 'Glisser le dossier',
-      failure: (icc: number) => `Échec : ICC −${icc} % et +1 niveau de Fiche S.`,
+      failure: (icc: number, wanted: string) => `Échec : ICC −${icc} % et ${wanted}.`,
       accepted: 'Dossier accepté : « Merci pour votre contribution à la mobilité sociale. » Ton équipier est protégé du tirage.',
-      rejected: (icc: number) => `Dossier rejeté : « trop enthousiaste ». ICC −${icc} %, +1 niveau de Fiche S.`,
+      rejected: (icc: number, wanted: string) => `Dossier rejeté : « trop enthousiaste ». ICC −${icc} %, ${wanted}.`,
     },
     velvet: {
       locked: (day: number) => `Commande VIP manquée : le Silo vous est fermé jusqu'au J${day}.`,
       auctionTitle: 'Vente aux enchères masquée',
-      auctionRule: (factor: string, cooldown: number) => `1 caisse de Tier 3 ou 4 au cours local ${factor}, hors quota. Recharge ${cooldown} jours.`,
-      nothingToAuction: 'Aucune caisse de Tier 3 ou 4 en soute.',
+      auctionRule: (tier: number, factor: string, cooldown: number) =>
+        `1 caisse de Tier ${tier} ou plus au cours local ${factor}, hors quota. Recharge ${cooldown} jours.`,
+      nothingToAuction: (tier: number) => `Aucune caisse de Tier ${tier} ou plus en soute.`,
       auction: (product: string) => `Vendre 1 × ${product}`,
       blackmailTitle: "Chantage sur l'oreiller",
       blackmailRule: (icc: number, cooldown: number) => `ICC +${icc} %, hors plafond. Recharge ${cooldown} jours, prix en hausse à chaque fois.`,
@@ -454,7 +458,7 @@ export const fr = {
       vipRule: (crates: number, factor: string, icc: number, lock: number) =>
         `${crates} caisses d'un produit tiré au hasard, absent de la soute, à livrer avant 20h00 le lendemain, au cours local ${factor}, hors quota. Échec : ICC −${icc} % et Silo fermé ${lock} jours.`,
       request: 'Demander une commande',
-      requestDetail: 'Produit de Tier 2 ou 3',
+      requestDetail: (tiers: string) => `Produit de Tier ${tiers}`,
       deliver: 'Livrer',
       contract: (crates: number, product: string, deadline: number, value: string) =>
         `${crates} × ${product}, avant le J${deadline} à 20h00 (valeur : ${value})`,
@@ -491,8 +495,8 @@ export const fr = {
     smoothRide: "Fragiles immunisés à la casse ; pas d'usure de châssis la nuit.",
     rotatingPlate: "Une fois par jour, une fuite réussie ne coûte pas d'ICC.",
     ram: (bonus: string, factor: string) => `Fuite et passage forcé ${bonus} ; dégâts de la fuite ${factor}.`,
-    trapdoor: (chance: string, cooldown: number, recovery: string) =>
-      `Éjection par les égouts (${chance}, sans dégât, sauf Olympus-Green), recharge ${cooldown} jours ; le lendemain, 0 à ${recovery} des caisses rapportées.`,
+    trapdoor: (chance: string, cooldown: number, recovery: string, sealed: string) =>
+      `Éjection par les égouts (${chance}, sans dégât, sauf ${sealed}), recharge ${cooldown} jours ; le lendemain, 0 à ${recovery} des caisses rapportées.`,
     fakeTerminal: (bonus: string, factor: string) => `Bluff ${bonus} ; tarif standard de corruption ${factor}.`,
     droneJammer: 'Une fois par jour, un contrôle volant devient un barrage fixe. Découvert à la fouille : saisi, garde à vue.',
   },
@@ -523,7 +527,7 @@ export const fr = {
   },
 
   objectives: {
-    title: 'Objectifs du Jour 30',
+    title: (day: number) => `Objectifs du Jour ${day}`,
     score: 'Score (compte offshore)',
     threshold: (amount: string) => `≥ ${amount}`,
     goldStatus: 'Statut Citoyen Or',
@@ -677,7 +681,7 @@ export const fr = {
     tollInKind: (crates: string, value: string) => `Les miliciens prendraient : ${crates} (valeur ${value}, sans rendre la monnaie).`,
     bribe: 'Proposer',
     bribeFailure: (fine: string, icc: string) => `Échec : l'offre est perdue, confiscation, amende de ${fine}, ICC ${icc}.`,
-    fleeSuccess: (chassis: string, icc: string) => `Succès : la cargaison est sauvée, châssis ${chassis}, ICC ${icc}, +1 niveau de Fiche S.`,
+    fleeSuccess: (chassis: string, icc: string, wanted: string) => `Succès : la cargaison est sauvée, châssis ${chassis}, ICC ${icc}, ${wanted}.`,
     fleeSuccessRacket: (chassis: string) => `Succès : passage, châssis ${chassis}.`,
     fleeFailure: (seizure: string, icc: string, chassis: string, health: string) =>
       `Échec : confiscation, saisie de ${seizure} du Cash-Puce, ICC ${icc}, châssis ${chassis}, Santé ${health}.`,
@@ -737,10 +741,10 @@ export const fr = {
     riskHintRevealed: 'Ronde renforcée comprise : Vance la révèle chaque matin.',
     peak: "Pic suspect : risque accru aujourd'hui",
     lastTrip: 'Dernier trajet',
-    exposed: (crates: number, cost: string) =>
-      `Soute exposée : ${crates} caisse${crates > 1 ? 's' : ''} illégale${crates > 1 ? 's' : ''}, payée${crates > 1 ? 's' : ''} ${cost}.`,
-    exposedSanction: (fine: string, high: boolean) =>
-      `Une saisie les confisque, avec une amende de ${fine} du Cash-Puce${high ? ' et une garde à vue (haut tier à bord)' : ''}.`,
+    exposed: (crates: number, cost: string, hidden: number) =>
+      `Soute exposée : ${crates} caisse${crates > 1 ? 's' : ''} illégale${crates > 1 ? 's' : ''}, payée${crates > 1 ? 's' : ''} ${cost}${hidden > 0 ? `, dont ${hidden} au double fond` : ''}.`,
+    exposedSanction: (fine: string, custodyDays: number) =>
+      `Une saisie les confisque, avec une amende de ${fine} du Cash-Puce${custodyDays > 0 ? ` et une garde à vue (haut tier à bord)` : ''}.`,
     neverSeen: 'jamais vu',
     blurred: (low: string, high: string) => `${low} – ${high}`,
     patrol: 'Ronde renforcée (révélée par Vance)',
@@ -748,7 +752,7 @@ export const fr = {
     cooled: (crates: number, product: string) => `moteur refroidi : ${crates} × ${product} consommées`,
     heatStroke: (health: number) => `coup de chaleur, Santé −${health}`,
     delivered: (fee: string) => `mission livrée, prime ${fee}`,
-    deviated: 'écart de mission enregistré, +1 niveau de Fiche S',
+    deviated: (wanted: string) => `écart de mission enregistré, ${wanted}`,
     mission: 'Mission de nuit',
     sealed: (crates: number, district: string) => `${crates} caisses scellées du DSC à livrer à ${district}`,
     estimateHint: 'Marge estimée sur le cours vu, commission déduite (hors savoir-faire et saturation)',
@@ -763,8 +767,8 @@ export const fr = {
     siphonHint: "Une ration contre de l'ICC et une demi-journée.",
     curfewTitle: '20h00 — couvre-feu sanitaire',
     forceCurfew: 'Tournée de nuit',
-    forceCurfewHint:
-      "Un second trajet, dans les galeries de service : tout y est filmé. Sur mission, le trajet est couvert ; hors mission, c'est un écart (risque accru, +1 niveau de Fiche S). Interdit le lendemain.",
+    forceCurfewHint: (wanted: string) =>
+      `Un second trajet, dans les galeries de service : tout y est filmé. Sur mission, le trajet est couvert ; hors mission, c'est un écart (risque accru, ${wanted}). Interdit le lendemain, sauf nuit blanche forcée.`,
     missionOffer: (district: string, crates: number, fee: string) =>
       `Mission de ce soir : livrer ${crates} caisses scellées à ${district}, prime ${fee}.`,
     missionHere: (district: string) => `Mission de ce soir vers ${district} : vous y êtes déjà, rien à livrer.`,
@@ -853,7 +857,7 @@ export const fr = {
     'doping-used': "Dopage déjà utilisé aujourd'hui.",
     'not-usable': 'Ce produit ne peut pas servir ainsi.',
     'already-used': 'Déjà utilisé : une seule fois par partie.',
-    'third-night': "Une 3e nuit blanche d'affilée est impossible, même dopé.",
+    'third-night': 'Encore une nuit blanche ? Impossible, même dopé : le corps ne suit plus.',
     'too-weak': 'Santé trop basse pour une nuit blanche de plus.',
     'grinder-full': 'Le Hachoir a atteint sa limite du jour.',
     'not-grindable': 'Viktor ne rachète que les périssables Faisandés ou Avariés.',

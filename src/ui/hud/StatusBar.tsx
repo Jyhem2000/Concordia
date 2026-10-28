@@ -20,7 +20,7 @@ import {
 import { AUDIT_COUNTDOWN_DAY, GAME_LENGTH_DAYS, ICC_MAX, WANTED } from '../../data/balance.ts'
 import { VEHICLES } from '../../data/vehicles.ts'
 import { cargoUsed } from '../../engine/cargo.ts'
-import { crewEffect } from '../../engine/crew.ts'
+import { cantineDistrict, crewEffect } from '../../engine/crew.ts'
 import { effectiveOffshoreRate, nextDebtDeadline, nextProtectionDay, offshoreBalance, protectionBreakdown } from '../../engine/finance.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -93,7 +93,7 @@ export default function StatusBar() {
         <Stat
           icon={Droplet}
           label={t.hud.exemption(game.exemption)}
-          note={game.exemption === 0 ? t.hud.sedated : game.exemption === 1 ? t.hud.sedationTomorrow : undefined}
+          note={game.exemption === 0 ? t.hud.sedated : game.exemption === 1 ? t.hud.sedationTomorrow(t.district[cantineDistrict()].name) : undefined}
           className={game.exemption <= 1 ? 'text-red-300' : 'text-sky-300'}
         />
         {game.crew.active && (
@@ -116,7 +116,7 @@ export default function StatusBar() {
       {game.day >= AUDIT_COUNTDOWN_DAY && (
         <p className="flex items-center justify-center gap-1.5 border-t border-amber-900 bg-amber-950/40 px-4 py-1 text-center text-xs text-amber-200">
           <Hourglass size={12} aria-hidden="true" />
-          {t.hud.countdown}
+          {t.hud.countdown(GAME_LENGTH_DAYS)}
         </p>
       )}
       {lastError && (

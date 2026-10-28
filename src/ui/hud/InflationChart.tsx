@@ -36,7 +36,12 @@ export default function InflationChart({ day }: InflationChartProps) {
         {t.inflation.readout(shown, multiplier(inflationIndex(shown)))}
         {shown > day && <span className="ml-1 text-zinc-500">{t.inflation.projected}</span>}
       </figcaption>
-      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full" role="img" aria-label={t.inflation.chartLabel(multiplier(inflationIndex(day)), day)}>
+      <svg
+        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+        className="w-full"
+        role="img"
+        aria-label={t.inflation.chartLabel(multiplier(inflationIndex(day)), day, GAME_LENGTH_DAYS)}
+      >
         {/* Axes recessifs : traits fins, gris un cran au-dessus du fond */}
         {[1, MAX_INDEX].map((index) => (
           <g key={index}>

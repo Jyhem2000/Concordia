@@ -3,6 +3,7 @@ import { GAME_LENGTH_DAYS } from '../data/balance.ts'
 import { tickerSlot, TICKER_STRIDE } from '../ui/hud/tickerSlot.ts'
 import { getI18n } from './index.ts'
 import { fr } from './fr.ts'
+import frSource from './fr.ts?raw'
 
 // Intl insère des espaces insécables (U+00A0, U+202F) : on les normalise pour comparer
 const plain = (text: string) => text.replace(/\s/g, ' ')
@@ -43,6 +44,39 @@ describe('i18n (fr)', () => {
     expect(count).toBeLessThanOrEqual(GAME_LENGTH_DAYS * 2)
     const shown = new Set(Array.from({ length: count }, (_, slot) => tickerSlot(Math.floor(slot / 2) + 1, slot % 2 ? 'night' : 'day', count)))
     expect(shown.size).toBe(count)
+  })
+
+  it('ne contient aucun chiffre de règle en dur : les valeurs viennent de src/data en paramètres', () => {
+    // Chiffres permis : structure du jeu (horaires, une unité, zéro, échelle des étoiles) et lore sans effet de jeu
+    const allowed = [
+      /\d{2}h\d{2}/g, // horaires fixes : 06h00, 20h00
+      /\b1 (×|caisse|trajet|ration)/g, // une unité
+      /\b[123](re|e) tranche/g, // libellés des tranches offshore
+      /Tier 0/g, // nom de la règle de bluff
+      /Jour 1\b/g, // début de partie
+      /1 \+ \(jour − 1\)/g, // formule de l'indice, affichée telle quelle
+      /\b0 (à|et) |à 0\b/g, // zéro
+      /sur 5\b/g, // échelle des étoiles de sécurité
+      /Cassandre-88|300 m|90 décibels|3 balles|400 ml|8 secondes|70 km\/h|15 km\/h/g, // lore
+    ]
+    const ids = /'?\b(T\d-\d\d|EVT-[A-Z0-9-]+|MOD-\d\d|VEH-\d\d|CREW-\d\d|LOC-D\d-\d|D\d|rule\.[a-z0-9-]+)\b'?/g
+    // Textes d'interface seulement : les noms des données de jeu, plus bas, sont du lore
+    const body = frSource.slice(frSource.indexOf('export const fr = {'), frSource.indexOf('// ─── Données de jeu'))
+    // Le catalogue du téléscripteur est du lore pur
+    const lines = body.replace(/ {4}messages: \[[\s\S]*?\n {4}\],/, '').split('\n')
+    const offending = lines.flatMap((line) => {
+      if (/^\s*(\/\/|\/\*|\*)/.test(line)) return []
+      // Clés numériques et comparaisons du code (accords) ne sont pas du texte
+      let text = line
+        .replace(/^\s*\d+:/, '')
+        .replace(ids, '')
+        .replace(/[<>]=? \d+/g, '')
+      // Expressions des gabarits (accords, paramètres), de l'intérieur vers l'extérieur
+      while (/\$\{[^{}]*\}/.test(text)) text = text.replace(/\$\{[^{}]*\}/g, '')
+      for (const pattern of allowed) text = text.replace(pattern, '')
+      return /\d/.test(text) ? [line.trim()] : []
+    })
+    expect(offending).toEqual([])
   })
 
   it('réutilise la même instance par langue', () => {

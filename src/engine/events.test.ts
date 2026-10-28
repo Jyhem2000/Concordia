@@ -11,7 +11,7 @@ import { riskBreakdown } from './risk.ts'
 import { createRng, seedRng } from './rng.ts'
 import { sleep } from './routine.ts'
 import { remember } from './state.ts'
-import { defined, errorOf, gameAt, HIGH_ROLL_RNG, run } from './test-helpers.ts'
+import { defined, errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
 import type { CargoLot, EventsState, GameState, ProductId } from './types.ts'
 
 const withEvents = (events: Partial<EventsState>, patch: Partial<GameState> = {}): GameState =>
@@ -265,6 +265,17 @@ describe('aléas routiers', () => {
     const tank = VEHICLES['VEH-01'].tank
     const helped = run(gameAt(3, { roadEvent: 'EVT-R13', fuel: tank }), { type: 'road', choice: 'a' })
     expect(helped.fuel).toBe(tank)
+  })
+
+  it('cassent les fragiles sur un choc de châssis, sauf avec les suspensions (chap. 3)', () => {
+    const shaken = run(gameAt(3, { roadEvent: 'EVT-R10', cargo: [lot('T1-01', 2)], rng: LOW_ROLL_RNG }), { type: 'road', choice: 'b' })
+    // Tirage bas : au moins la première caisse casse ; le compte rendu compte ce que la soute a perdu
+    const damaged = shaken.cargo.filter((entry) => entry.damaged).reduce((total, entry) => total + entry.qty, 0)
+    expect(damaged).toBeGreaterThan(0)
+    expect(shaken.roadReport?.damaged).toBe(damaged)
+    const modules = { owned: ['MOD-04' as const], mounted: ['MOD-04' as const] }
+    const smooth = run(gameAt(3, { roadEvent: 'EVT-R10', cargo: [lot('T1-01', 2)], rng: LOW_ROLL_RNG, modules }), { type: 'road', choice: 'b' })
+    expect(smooth.roadReport?.damaged).toBe(0)
   })
 
   it('donnent une caisse du tier promis au troc aveugle', () => {

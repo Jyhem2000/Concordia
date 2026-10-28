@@ -170,7 +170,12 @@ export function forge(state: GameState, card: ForgeryCard): ServiceResult {
   }
   return {
     ok: true,
-    state: { ...paid, rng: rng.state, icc: Math.max(0, paid.icc - FORGERY.failIccLoss), wanted: Math.min(WANTED.maxLevel, paid.wanted + 1) },
+    state: {
+      ...paid,
+      rng: rng.state,
+      icc: Math.max(0, paid.icc - FORGERY.failIccLoss),
+      wanted: Math.min(WANTED.maxLevel, paid.wanted + WANTED.perOffense),
+    },
   }
 }
 

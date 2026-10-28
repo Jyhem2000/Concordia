@@ -58,6 +58,12 @@ Elles s'appliquent à tout le code, sans exception non justifiée. **Toute nouve
 - `src/data/*.ts` (hors `balance.ts`) : les tables de contenu, une par famille d'entités (produits, tags, districts, lieux, véhicules).
 - Aucun ID de donnée ni chiffre de règle en dur dans `src/engine/` ou `src/ui/` : une propriété de district, de lieu ou de produit se lit dans sa table. Seules exceptions : les constantes de présentation sans effet de jeu (couleurs, seuil visuel de marge), déclarées en tête du composant.
 
+**Formules, docs et textes : un seul endroit, liés**
+
+- Une formule n'existe qu'une fois, dans `src/engine/`. L'interface appelle la fonction du moteur (sanction d'une saisie, fourchette de cours brouillé, exposition de la soute…) et ne la recopie jamais, même simplifiée.
+- Un texte de `src/i18n/` qui explique une règle reçoit ses valeurs en paramètres, lues dans `src/data/` : aucun chiffre de règle en dur. Un test (`i18n.test.ts`) refuse tout chiffre des textes d'interface hors liste blanche (horaires fixes, une unité, zéro, lore).
+- Changer une formule ou une règle, c'est mettre à jour dans le même commit le code, le chapitre de `docs/` qui la décrit et les textes de `src/i18n/` qui l'expliquent (rechercher ses constantes et ses fonctions dans `src/ui/` donne les textes concernés).
+
 **TypeScript**
 
 - Mode strict, ni `any` ni `unknown` non vérifié, ni assertion `!`.

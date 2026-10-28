@@ -1,6 +1,6 @@
 import { ShieldAlert, Skull } from 'lucide-react'
 import { useState } from 'react'
-import { BLUFF, BRIBE, DAMAGED_FACTOR, EJECT, FLEE, ICC_MAX, RACKET, SEARCH } from '../../data/balance.ts'
+import { BLUFF, BRIBE, DAMAGED_FACTOR, EJECT, FLEE, ICC_MAX, RACKET, SEARCH, WANTED } from '../../data/balance.ts'
 import { DISTRICTS } from '../../data/districts.ts'
 import { TAGS } from '../../data/tags.ts'
 import { keysOf } from '../../engine/records.ts'
@@ -162,7 +162,11 @@ export default function InterceptionScreen() {
               ...(racket
                 ? [t.interception.fleeSuccessRacket(`${pv(fled.chassis.min)} / ${pv(fled.chassis.max)}`), t.interception.fleeFailureRacket]
                 : [
-                    t.interception.fleeSuccess(`${pv(fled.chassis.min)} / ${pv(fled.chassis.max)}`, icc(-fled.iccLoss)),
+                    t.interception.fleeSuccess(
+                      `${pv(fled.chassis.min)} / ${pv(fled.chassis.max)}`,
+                      icc(-fled.iccLoss),
+                      t.hud.wantedGain(WANTED.perOffense),
+                    ),
                     t.interception.fleeFailure(pct(caught.cashSeizure), icc(-caught.iccLoss), pv(fled.failChassis), pv(fled.failHealth)),
                     ...custody(caught.custodyDays),
                   ]),

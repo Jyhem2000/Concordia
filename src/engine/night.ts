@@ -69,7 +69,7 @@ export function deliverMission(state: GameState): GameState {
 export function recordDeviation(state: GameState): GameState {
   return {
     ...state,
-    wanted: Math.min(WANTED.maxLevel, state.wanted + 1),
+    wanted: Math.min(WANTED.maxLevel, state.wanted + WANTED.perOffense),
     tripReport: state.tripReport ? { ...state.tripReport, mission: 'deviated' } : state.tripReport,
   }
 }

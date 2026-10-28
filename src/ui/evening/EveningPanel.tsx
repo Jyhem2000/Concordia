@@ -1,5 +1,6 @@
 import { BedDouble, Fuel, Siren } from 'lucide-react'
 import { useState } from 'react'
+import { WANTED } from '../../data/balance.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { VEHICLES } from '../../data/vehicles.ts'
 import { ownedQty } from '../../engine/cargo.ts'
@@ -96,7 +97,9 @@ export default function EveningPanel() {
                   {t.evening.forceCurfew}
                 </Button>
               </div>
-              <p className="mt-1 text-xs text-zinc-400">{curfewError ? t.error[curfewError] : t.evening.forceCurfewHint}</p>
+              <p className="mt-1 text-xs text-zinc-400">
+                {curfewError ? t.error[curfewError] : t.evening.forceCurfewHint(t.hud.wantedGain(WANTED.perOffense))}
+              </p>
               {curfewError === 'exhausted' &&
                 drinks.map((id) => {
                   const sleepless = PRODUCTS[id].sleeplessNight
