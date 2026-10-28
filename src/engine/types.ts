@@ -148,6 +148,8 @@ export type Product = {
   beaconRisk?: number
   /** Une fouille effective avec ce produit en soute est fatale (exécution sommaire, chap. 2) */
   lethalOnSearch?: boolean
+  /** Trop encombrant pour le double fond (chap. 5) */
+  bulky?: boolean
   /** Caisses scellées du DSC (mission de nuit) : hors commerce, ni vendues ni données (chap. 2) */
   sealed?: boolean
   /** Refroidissement moteur : caisses consommées pour annuler l'usure d'un trajet de nuit */
@@ -238,6 +240,8 @@ export type Vehicle = {
   price: number
   /** Emplacements de soute (1 caisse = 1 emplacement) */
   cargo: number
+  /** Emplacements du double fond, compris dans la soute (chap. 5) */
+  hiddenCompartment: number
   moduleSlots: number
   /** PV max du châssis */
   maxChassis: number
@@ -389,6 +393,10 @@ export type InterceptionReport = {
   towBill: number
   /** Brouilleur de drones découvert à la fouille et saisi */
   jammerSeized: boolean
+  /** Double fond : gardé (non trouvé à la fouille, ou éjection), trouvé, ou sans objet */
+  compartment: 'kept' | 'found' | null
+  /** Caisses sauvées par le double fond */
+  hiddenCrates: number
 }
 
 /** Tactiques d'une option de barrage : aides au bluff, sacrifices et dopage en fuite (chap. 3 et 6) */

@@ -71,6 +71,32 @@ export function isIllegal(lot: CargoLot): boolean {
   return !PRODUCTS[lot.productId].tags.includes('TAG-LEGAL')
 }
 
+/**
+ * Double fond (chap. 5) : les caisses illégales les plus chères au prix de base, sans les encombrantes,
+ * dans la capacité donnée. Les deux parts gardent l'ordre des lots de la soute.
+ */
+export function splitHidden(cargo: readonly CargoLot[], capacity: number): { hidden: CargoLot[]; visible: CargoLot[] } {
+  const hiddenQty = new Map<number, number>()
+  let left = capacity
+  const candidates = cargo
+    .map((lot, index) => ({ lot, index }))
+    .filter(({ lot }) => isIllegal(lot) && !PRODUCTS[lot.productId].bulky)
+    .sort((a, b) => PRODUCTS[b.lot.productId].basePrice - PRODUCTS[a.lot.productId].basePrice)
+  for (const { lot, index } of candidates) {
+    const qty = Math.min(lot.qty, left)
+    if (qty > 0) hiddenQty.set(index, qty)
+    left -= qty
+  }
+  const hidden: CargoLot[] = []
+  const visible: CargoLot[] = []
+  cargo.forEach((lot, index) => {
+    const qty = hiddenQty.get(index) ?? 0
+    if (qty > 0) hidden.push({ ...lot, qty })
+    if (qty < lot.qty) visible.push({ ...lot, qty: lot.qty - qty })
+  })
+  return { hidden, visible }
+}
+
 /** Valeur des caisses au prix de base (collecte, péage, tarif de corruption) */
 export function baseValue(cargo: readonly CargoLot[]): number {
   return cargo.reduce((total, lot) => total + PRODUCTS[lot.productId].basePrice * lot.qty, 0)

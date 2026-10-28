@@ -79,6 +79,7 @@ export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
     appearanceChance: 0.15,
     beaconRisk: 0.1,
     lethalOnSearch: true,
+    bulky: true, // une baie de serveur : pas de double fond
   },
 }
 

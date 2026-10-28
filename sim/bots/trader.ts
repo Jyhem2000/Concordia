@@ -16,9 +16,11 @@ import {
   bribeChance,
   bribeRate,
   checkMove,
+  compartmentDetection,
   ejectChance,
   fleeChance,
   fleeConsequences,
+  hiddenCargo,
   minimumOffer,
   searchSanction,
   toll,
@@ -500,7 +502,10 @@ function barrage(view: GameState, plan: Plan, temperament: Temperament): Action 
 
   const sanction = searchSanction(view)
   const custody = (days: number) => days * VALUE.custodyDay
-  const searchLoss = illegal + (sanction ? sanction.fine * view.cash + sanction.iccLoss * VALUE.iccPoint + custody(sanction.custodyDays) : 0)
+  // Double fond : ses caisses échappent à la fouille quand les agents ne le trouvent pas, et à l'éjection
+  const hidden = illegalValue(hiddenCargo(view).hidden)
+  const seized = illegal - hidden * (1 - compartmentDetection(view).total)
+  const searchLoss = seized + (sanction ? sanction.fine * view.cash + sanction.iccLoss * VALUE.iccPoint + custody(sanction.custodyDays) : 0)
   const options: { action: Action; loss: number }[] = []
   if (!checkMove(view, 'search')) options.push({ action: { type: 'intercept', move: 'search' }, loss: searchLoss })
 
@@ -515,7 +520,7 @@ function barrage(view: GameState, plan: Plan, temperament: Temperament): Action 
   if (view.health > flight.failHealth + 10) {
     const success = ((flight.chassis.min + flight.chassis.max) / 2) * VALUE.chassisPoint + VALUE.wantedLevel + flight.iccLoss * VALUE.iccPoint
     const failure =
-      illegal + view.cash * 0.4 + custody(1) + flight.failHealth * VALUE.healthPoint + flight.failChassis * VALUE.chassisPoint + 25 * VALUE.iccPoint
+      seized + view.cash * 0.4 + custody(1) + flight.failHealth * VALUE.healthPoint + flight.failChassis * VALUE.chassisPoint + 25 * VALUE.iccPoint
     const runnerBias = plan.runner ? 0.8 : 1
     const chance = fleeChance(view).total
     if (!checkMove(view, 'flee')) {
@@ -527,7 +532,7 @@ function barrage(view: GameState, plan: Plan, temperament: Temperament): Action 
   }
   // Éjection : la trappe rapporte en moyenne une partie des caisses larguées le lendemain
   const trapdoor = ejectMode(view) === 'trapdoor' ? (mountedEffect(view, 'trapdoor')?.maxRecovery ?? 0) / 2 : 0
-  consider('eject', ejectChance(view).total, illegal * (1 - trapdoor), searchLoss * 1.3, false)
+  consider('eject', ejectChance(view).total, (illegal - hidden) * (1 - trapdoor), searchLoss * 1.3, false)
 
   // Corruption : une caisse appréciée des agents (connivence) remplace une part du cash
   const favorite = DISTRICTS[view.districtId].bribeFavorites.find((id) => ownedQty(view.cargo, id) > 0)

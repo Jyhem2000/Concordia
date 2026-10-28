@@ -19,6 +19,17 @@
 | `[VEH-03]` | Fourgon Bio-Médical « Panacea-V8 » | **Chaîne du froid médicale :** les périssables ne perdent de la fraîcheur qu'**un matin sur deux** (chap. 3). **Transpondeur d'urgence :** en `[D3]` et `[D5]`, lors d'une fuite : chance en plus, **aucun dégât** de châssis en cas de succès, perte d'ICC du succès réduite (arrondie en faveur du joueur). |
 | `[VEH-04]` | Compacteur Sanitaire « Bunker-Lourd » | **Monstre blindé & benne acide :** au racket de `[D4]`, péage réduit, et un passage forcé réussi ne coûte **aucun dégât** de châssis. **Broyeur acide :** mode d'éjection utilisable **partout** (`[D5]` et `[D6]` compris), sans cooldown, sans dégât, contrebande dissoute sans récupération (`[MOD-07]` reste prioritaire s'il est disponible). *Contrepartie :* risque accru partout, zone hors-réseau comprise (tonnage hors-norme, c'est physique). |
 
+### Double fond
+Chaque châssis a un **double fond** d'origine, soudé par Mécano-Mitch : quelques emplacements cachés sous le plancher, sans slot de module (`hiddenCompartment` dans [`vehicles.ts`](../src/data/vehicles.ts) ; il fait partie de la soute, il ne l'agrandit pas).
+* **Remplissage automatique :** il contient toujours les caisses illégales les plus chères (prix de base), jusqu'à sa capacité. Les caisses légales n'y vont jamais (rien à cacher).
+* **Trop encombrant :** `[T4-06]` n'y entre pas (une baie de serveur, chap. 3). La règle d'exécution sommaire et la fin « Saboteur » ne changent donc pas.
+* **À la fouille effective de la BRC** (chap. 6) : un second jet décide si les agents trouvent le double fond. Chance de le trouver : par étoile de sécurité du district (`COMPARTMENT` dans [`balance.ts`](../src/data/balance.ts)), du simple coup d'œil des ruches aux scanners du sommet.
+  * **Non trouvé :** ses caisses sont gardées. La sanction est jugée sur la soute visible seulement (formalité si elle est légale, sanction de bas tier si le haut tier était caché).
+  * **Trouvé :** tout est confisqué comme sans double fond, la sanction est jugée sur toute la soute, plus une perte d'ICC pour dissimulation.
+* **Ne cache pas l'odeur :** le risque d'interception, le bluff et le tarif de corruption se calculent sur toute la soute. Le double fond protège la marchandise, pas le chauffeur.
+* **Éjection réussie :** seules les caisses visibles sont larguées ; le double fond reste fermé (pas de fouille). Le racket des milices l'ignore : elles pillent ce qui leur plaît.
+* *Intention :* une saisie ne doit plus ruiner toute une partie d'un coup. Quelques caisses de valeur survivent souvent à un contrôle, sans rendre un convoi sûr : plus la soute est grosse, plus la part cachée est petite.
+
 ---
 
 ## Modules

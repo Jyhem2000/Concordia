@@ -57,6 +57,7 @@ Le joueur accepte la fouille (**0**) ou tente une action : **1** Bluff, **2** Co
 **Compte rendu :** après chaque option, l'app détaille ce qui a été perdu ou gagné (₡, caisses dont celles sacrifiées par une tactique, ICC, Santé, châssis, Fiche S, garde à vue, dépannage).
 
 **Fouille effective :** fouille acceptée, ou échec d'un bluff, d'une corruption, d'une fuite ou d'une éjection — déclencheur de la règle de mort de `[T4-06]` et de la saisie du brouilleur `[MOD-09]` (garde à vue d'au moins un jour).
+**Double fond** (chap. 5) : à chaque fouille effective qui confisque, un second jet décide si les agents le trouvent. Non trouvé, ses caisses sont gardées et la sanction se juge sur la soute visible ; trouvé, tout est confisqué, avec une perte d'ICC en plus. L'écran annonce les caisses cachées et la chance qu'il soit trouvé ici.
 **Sédation** (chap. 2) : **−10 %** au bluff, à la corruption et à la fuite.
 
 ### 0. Accepter la fouille (sanction de base)
@@ -115,6 +116,7 @@ Chance = min( plafond,  base + Offre + Connivence − malus × (étoiles du dist
 * **Activation :** uniquement au tout début de l'interception, à 300 m d'un barrage fixe (impossible en contrôle volant).
 * **Mode** (par priorité, choisi par l'app et annoncé) : `[MOD-07]` s'il est monté, hors cooldown et autorisé dans le district ; sinon `[VEH-04]` ; sinon manuel s'il est autorisé. Autorisations par district (`ejection` dans [`districts.ts`](../src/data/districts.ts)) : en `[D5]`, pas de mode manuel (LiDAR) mais `[MOD-07]` passe par les égouts ; en `[D6]`, ni manuel ni `[MOD-07]` (dalle bio-scellée) ; `[VEH-04]` partout. Chances et dégâts : chez le mode (chap. 5 ; mode manuel : `EJECT` dans [`balance.ts`](../src/data/balance.ts)).
 * **Indisponible** après un bluff raté, comme après toute autre action.
+* **Double fond :** une éjection réussie ne largue que les caisses visibles ; celles du double fond restent à bord (chap. 5).
 * **Mode manuel (décharge dans une ruelle) :** chance fixe (`EJECT` dans [`balance.ts`](../src/data/balance.ts)). Succès : soute propre au barrage (0 amende, 0 ICC, 0 temps perdu), toutes les caisses illégales perdues, perte de châssis.
 * **Échec (tous modes)** — un drone LiDAR filme les caisses : sanction de base avec un taux d'amende relevé + une perte d'ICC supplémentaire + garde à vue.
 * Un succès a lieu **avant** la fouille : il protège de `[T4-06]`.

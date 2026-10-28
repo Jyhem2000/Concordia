@@ -254,6 +254,9 @@ export const FLEE = {
 /** Contrôles volants (ni fuite ni éjection) : part ajoutée dans le district de la ronde renforcée, faite d'unités mobiles */
 export const FLYING_CHECK = { patrolBonus: 0.25 }
 
+/** Double fond (chap. 5) : chance que les agents le trouvent, par étoile de sécurité ; perte d'ICC pour dissimulation s'il est trouvé */
+export const COMPARTMENT = { detectionPerStar: 0.12, foundIccLoss: 5 }
+
 /** Éjection manuelle (décharge dans une ruelle) ; un échec aggrave la fouille */
 export const EJECT = {
   manualChance: 0.45,

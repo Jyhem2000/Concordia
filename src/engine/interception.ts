@@ -1,11 +1,11 @@
-import { BLUFF, BRIBE, EJECT, EMERGENCY_TOW, FLEE, FLYING_CHECK, HIGH_TIER, RACKET, SEARCH, SEDATION, WANTED } from '../data/balance.ts'
+import { BLUFF, BRIBE, COMPARTMENT, EJECT, EMERGENCY_TOW, FLEE, FLYING_CHECK, HIGH_TIER, RACKET, SEARCH, SEDATION, WANTED } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
 import { PRODUCTS } from '../data/products.ts'
 import { TAGS } from '../data/tags.ts'
 import { MODULES, VEHICLES } from '../data/vehicles.ts'
 import type { ActionError } from './actions.ts'
 import { breakdown, type Breakdown } from './breakdown.ts'
-import { baseValue, cargoUsed, giveCrates, isIllegal, maskedQty, ownedQty, ownsCrates, tagShare, tierShare } from './cargo.ts'
+import { baseValue, cargoUsed, giveCrates, isIllegal, maskedQty, ownedQty, ownsCrates, splitHidden, tagShare, tierShare } from './cargo.ts'
 import { breakOnFlee, breakOnShock, crateValue, explodeFlammable, paymentValue } from './condition.ts'
 import { crewEffect, isSedated, workingCrew } from './crew.ts'
 import { ejectMode, moduleTagFactor, mountedEffect, mountedWith } from './equipment.ts'
@@ -248,6 +248,16 @@ export function ejectChance(state: GameState): Breakdown {
   }
 }
 
+/** Caisses du double fond du véhicule et reste de la soute (chap. 5) */
+export function hiddenCargo(state: GameState): { hidden: CargoLot[]; visible: CargoLot[] } {
+  return splitHidden(state.cargo, VEHICLES[state.vehicleId].hiddenCompartment)
+}
+
+/** Chance que les agents trouvent le double fond à une fouille effective, selon la sécurité du district */
+export function compartmentDetection(state: GameState): Breakdown {
+  return breakdown('rule.security-stars', COMPARTMENT.detectionPerStar * stars(state)).build()
+}
+
 /** Péage des milices : part de la valeur de la soute au prix de base, réduite pour un monstre blindé */
 export function toll(state: GameState): number {
   return Math.round(RACKET.tollRate * baseValue(state.cargo) * (VEHICLES[state.vehicleId].heavy?.tollFactor ?? 1))
@@ -309,6 +319,8 @@ const emptyLedger = (): Ledger => ({
   sacrificed: 0,
   towBill: 0,
   jammerSeized: false,
+  compartment: null,
+  hiddenCrates: 0,
 })
 
 /** Joue une option déjà validée par `checkMove` */
@@ -322,10 +334,26 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
   const searchedBefore = state.interception?.bluffFailed === true
   const report = (s: GameState, chance: Breakdown | null, success: boolean | null, over: boolean, effectiveSearch: boolean): GameState =>
     finish({ ...s, rng: rng.state }, { move, chance, success, over, ...ledger }, effectiveSearch && lethalCargo, effectiveSearch || searchedBefore)
+  // Double fond : à la fouille qui confisque, second jet ; non trouvé, la sanction se juge sur la soute visible (chap. 5)
+  const frisk = (s: GameState, sanctionOf: (searched: GameState) => GameState): GameState => {
+    const { hidden, visible } = hiddenCargo(s)
+    if (hidden.length === 0) return sanctionOf(s)
+    if (roll(compartmentDetection(s))) {
+      ledger.compartment = 'found'
+      return loseIcc(sanctionOf(s), ledger, COMPARTMENT.foundIccLoss)
+    }
+    return keepHidden(sanctionOf({ ...s, cargo: visible }), ledger, hidden)
+  }
 
   switch (move) {
     case 'search':
-      return report(search(state, ledger, 0), null, null, true, true)
+      return report(
+        frisk(state, (s) => search(s, ledger, 0)),
+        null,
+        null,
+        true,
+        true,
+      )
 
     case 'bluff': {
       const chance = bluffChance(state, tactics)
@@ -350,7 +378,13 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
       const paid = give(pay(state, ledger, offer.cash), ledger, offer.crates)
       if (roll(chance)) return report(paid, chance, true, true, false)
       const { fine, iccLoss, custodyDays } = BRIBE.fail
-      return report(sanction(paid, ledger, fine, iccLoss, custodyDays), chance, false, true, true)
+      return report(
+        frisk(paid, (s) => sanction(s, ledger, fine, iccLoss, custodyDays)),
+        chance,
+        false,
+        true,
+        true,
+      )
     }
 
     case 'flee': {
@@ -372,7 +406,11 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
       const blown = explode(prepared, ledger, rng)
       if (racket) return report(refuseToll(blown, ledger, rng), chance, false, true, false)
       const { cashSeizure, iccLoss, chassisLoss, healthLoss, custodyDays } = FLEE.fail
-      const seized = pay(confiscate(blown, ledger), ledger, Math.round(blown.cash * cashSeizure))
+      const seized = pay(
+        frisk(blown, (s) => confiscate(s, ledger)),
+        ledger,
+        Math.round(blown.cash * cashSeizure),
+      )
       const ram = ramFactor(state)
       const wrecked = loseHealth(
         loseChassis(loseIcc(seized, ledger, iccLoss), ledger, Math.floor(chassisLoss * ram)),
@@ -389,14 +427,15 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
       // La trappe entre en cooldown à l'usage, réussi ou non
       const used = mode === 'trapdoor' ? { ...state, trapdoorDay: state.day } : state
       if (roll(chance)) {
-        // Soute vidée avant le barrage : la fouille ne trouve rien, balise comprise
-        const dumped = confiscate(used, ledger)
-        if (mode === 'trapdoor') return report({ ...dumped, dumped: used.cargo.filter(isIllegal) }, chance, true, true, false)
+        // Soute vidée avant le barrage : la fouille ne trouve rien, balise comprise ; le double fond reste fermé
+        const { hidden, visible } = hiddenCargo(used)
+        const dumped = keepHidden(confiscate({ ...used, cargo: visible }, ledger), ledger, hidden)
+        if (mode === 'trapdoor') return report({ ...dumped, dumped: visible.filter(isIllegal) }, chance, true, true, false)
         if (mode === 'crusher') return report(dumped, chance, true, true, false)
         return report(hitChassis(dumped, ledger, EJECT.chassisLoss, rng), chance, true, true, false)
       }
       const filmed = loseIcc(used, ledger, EJECT.fail.iccLoss)
-      const sanctioned = search(filmed, ledger, EJECT.fail.fineRaise)
+      const sanctioned = frisk(filmed, (s) => search(s, ledger, EJECT.fail.fineRaise))
       noteCustody(ledger, EJECT.fail.custodyDays)
       return report(sanctioned, chance, false, true, true)
     }
@@ -446,6 +485,14 @@ function confiscate(state: GameState, ledger: Ledger): GameState {
   const cargo = state.cargo.filter((lot) => !isIllegal(lot))
   ledger.crates -= cargoUsed(state.cargo) - cargoUsed(cargo)
   return { ...state, cargo }
+}
+
+/** Remet à bord les caisses du double fond, après la fouille ou l'éjection de la soute visible */
+function keepHidden(state: GameState, ledger: Ledger, hidden: readonly CargoLot[]): GameState {
+  if (hidden.length === 0) return state
+  ledger.compartment = 'kept'
+  ledger.hiddenCrates = cargoUsed(hidden)
+  return { ...state, cargo: [...state.cargo, ...hidden] }
 }
 
 /** Refus du péage : pillage des caisses les plus chères, tabassage, châssis cabossé (chap. 4) */

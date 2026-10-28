@@ -14,8 +14,10 @@ import {
   checkpointPlace,
   bribeRate,
   checkMove,
+  compartmentDetection,
   ejectChance,
   fleeConsequences,
+  hiddenCargo,
   isLethalSearch,
   minimumOffer,
   offerValue,
@@ -59,6 +61,11 @@ export default function InterceptionScreen() {
     ? PRODUCT_IDS.find((id) => PRODUCTS[id].lethalOnSearch && game.cargo.some((lot) => lot.productId === id))
     : undefined
   const sanction = searchSanction(game)
+  // Double fond (chap. 5) : caisses cachées, regroupées par produit
+  const hidden = PRODUCT_IDS.flatMap((id) => {
+    const qty = ownedQty(hiddenCargo(game).hidden, id)
+    return qty > 0 ? [`${qty} × ${t.product[id].name}`] : []
+  })
   const custody = (days: number) => (days > 0 ? [t.interception.custody(days)] : [])
   const available = (move: InterceptionMove) => checkMove(game, move) !== 'move-unavailable'
 
@@ -92,6 +99,12 @@ export default function InterceptionScreen() {
           {t.interception.intro[interception.kind](t.interception.place[checkpointPlace(game)](t.district[game.districtId].name))}
         </p>
         {interception.jammed && <p className="mt-1 text-sky-300">{t.interception.jammed}</p>}
+        {!racket && hidden.length > 0 && (
+          <p className="mt-1 flex flex-wrap gap-1.5 text-sky-300">
+            {t.interception.compartment(hidden.join(', '))}
+            <Detailed breakdown={compartmentDetection(game)} format={pct} />
+          </p>
+        )}
         {lethalProduct && !racket && (
           <p role="alert" className="mt-2 flex items-center gap-1.5 font-bold text-red-400">
             <Skull size={16} aria-hidden="true" />

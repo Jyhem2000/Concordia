@@ -424,8 +424,8 @@ export const fr = {
     modulesTitle: (mounted: number, slots: number) => `Modules (${mounted}/${slots} slots montés)`,
     vehiclesTitle: 'Châssis',
     vehicleRule: "Le nouveau châssis reprend la marchandise, le carburant et les modules ; l'ancien est perdu, sans reprise.",
-    vehicleStats: (cargo: number, slots: number, chassis: number, tank: number, day: number, night: number) =>
-      `Soute ${cargo} · ${slots} slot${slots > 1 ? 's' : ''} · châssis ${chassis} PV · réservoir ${tank} · ${day} ration${day > 1 ? 's' : ''} de jour, ${night} de nuit`,
+    vehicleStats: (cargo: number, hidden: number, slots: number, chassis: number, tank: number, day: number, night: number) =>
+      `Soute ${cargo} (double fond ${hidden}) · ${slots} slot${slots > 1 ? 's' : ''} · châssis ${chassis} PV · réservoir ${tank} · ${day} ration${day > 1 ? 's' : ''} de jour, ${night} de nuit`,
     buy: 'Acheter',
     mount: 'Monter',
     unmount: 'Démonter',
@@ -587,6 +587,7 @@ export const fr = {
         `Un drone vous a repéré ${place} : une unité de la BRC vous coince et l'agent a déjà la main sur la portière. Trop tard pour fuir ou vider la soute.`,
       racket: (place: string) => `Une barricade des milices barre le passage, ${place}. Les miliciens réclament leur dû.`,
     },
+    compartment: (crates: string) => `Double fond : ${crates}. À la fouille, chance que les agents le trouvent :`,
     jammed:
       'Votre brouilleur a fait décrocher le drone : la BRC a dû dresser ce barrage plus loin. Attention : découvert à la fouille, il vaut une garde à vue.',
     chance: 'Chance',
@@ -667,6 +668,8 @@ export const fr = {
     damaged: 'Caisses endommagées',
     exploded: 'Caisses explosées',
     jammerSeized: "Brouilleur de drones découvert et saisi : sabotage d'infrastructure.",
+    compartmentKept: (crates: number) => `Double fond non trouvé : ${crates} caisse${crates > 1 ? 's' : ''} sauvée${crates > 1 ? 's' : ''}.`,
+    compartmentFound: 'Double fond découvert : tout est confisqué, ICC en moins pour dissimulation.',
     sacrificed: 'dont caisses sacrifiées',
     custody: (days: number) => `Garde à vue : ${days} jour${days > 1 ? 's' : ''}, sortie à 20h00.`,
     tow: (bill: string) => `Châssis à 0 : dépannage d'urgence facturé ${bill}.`,

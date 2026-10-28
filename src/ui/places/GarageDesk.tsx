@@ -83,6 +83,7 @@ function VehicleOffer({ vehicleId }: VehicleOfferProps) {
       <p className="text-zinc-400">
         {t.garage.vehicleStats(
           vehicle.cargo,
+          vehicle.hiddenCompartment,
           vehicle.moduleSlots,
           vehicle.maxChassis,
           vehicle.tank,

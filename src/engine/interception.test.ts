@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   BLUFF,
   BRIBE,
+  COMPARTMENT,
   CUSTODY,
   EJECT,
   EMERGENCY_TOW,
@@ -22,6 +23,7 @@ import {
   bluffChance,
   bribeChance,
   bribeRate,
+  compartmentDetection,
   drawInterception,
   fleeChance,
   flyingCheckShare,
@@ -71,23 +73,25 @@ describe('fouille', () => {
     expect(ownedQty(state.cargo, 'T0-01')).toBe(3)
   })
 
+  // Tirage bas : les agents trouvent le double fond, toute la soute est jugée
   it('confisque l’illégal de bas tier et met une amende', () => {
-    const state = run(stopped([lot('T0-01', 2), lot('T2-01', 3)]), { type: 'intercept', move: 'search' })
+    const state = run(stopped([lot('T0-01', 2), lot('T2-01', 3)], { rng: LOW_ROLL_RNG }), { type: 'intercept', move: 'search' })
     expect(state.cargo).toEqual([lot('T0-01', 2)])
     expect(state.cash).toBe(10_000 * (1 - SEARCH.low.fine))
-    expect(state.icc).toBe(100 - SEARCH.low.iccLoss)
+    expect(state.icc).toBe(100 - SEARCH.low.iccLoss - COMPARTMENT.foundIccLoss)
     expect(state.day).toBe(5)
+    expect(defined(state.interceptionReport)).toMatchObject({ compartment: 'found', hiddenCrates: 0 })
   })
 
   it('envoie en garde à vue pour du haut tier : routine en cellule, sortie à 20h00 le lendemain', () => {
-    const state = run(stopped([lot('T3-01', 1)]), { type: 'intercept', move: 'search' })
+    const state = run(stopped([lot('T3-01', 1)], { rng: LOW_ROLL_RNG }), { type: 'intercept', move: 'search' })
     expect(state).toMatchObject({ day: 6, phase: 'day', dayTripDone: true, dayOver: true, districtId: 'D2', interception: null })
     expect(state.health).toBe(100 - CUSTODY.healthLossPerMorning)
     expect(state.briefing?.custodyHealth).toBe(CUSTODY.healthLossPerMorning)
   })
 
   it('déclenche l’audit si la garde à vue franchit le Jour 30 à minuit', () => {
-    const state = run(stopped([lot('T3-01', 1)], { day: GAME_LENGTH_DAYS }), { type: 'intercept', move: 'search' })
+    const state = run(stopped([lot('T3-01', 1)], { day: GAME_LENGTH_DAYS, rng: LOW_ROLL_RNG }), { type: 'intercept', move: 'search' })
     expect(state.status).toBe('finished')
     expect(state.ending?.id).toBe('bio-bricks')
   })
@@ -96,6 +100,37 @@ describe('fouille', () => {
     const state = run(stopped([lot('T4-06', 1)]), { type: 'intercept', move: 'search' })
     expect(state.status).toBe('finished')
     expect(state.ending?.id).toBe('execution')
+  })
+})
+
+describe('double fond (chap. 5)', () => {
+  const hidden = VEHICLES['VEH-01'].hiddenCompartment
+
+  it('cache les caisses illégales les plus chères, jamais le serveur Aeterna ni le légal', () => {
+    const state = run(stopped([lot('T0-01', 4), lot('T4-06', 1), lot('T1-01', 3), lot('T2-03', 1)], { rng: HIGH_ROLL_RNG }), {
+      type: 'intercept',
+      move: 'search',
+    })
+    // Le serveur reste visible : la fouille est fatale, double fond ou non
+    expect(state.ending?.id).toBe('execution')
+    const kept = run(stopped([lot('T0-01', 4), lot('T1-01', 3), lot('T2-03', 1)], { rng: HIGH_ROLL_RNG }), { type: 'intercept', move: 'search' })
+    expect(kept.cargo).toEqual([lot('T0-01', 4), lot('T1-01', hidden - 1), lot('T2-03', 1)])
+    expect(defined(kept.interceptionReport)).toMatchObject({ compartment: 'kept', hiddenCrates: hidden, crates: -(4 - hidden) })
+  })
+
+  it('non trouvé, juge la sanction sur la soute visible', () => {
+    // Le haut tier est caché : sanction de bas tier, pas de garde à vue
+    const mixed = run(stopped([lot('T1-01', 3), lot('T3-01', 1)], { rng: HIGH_ROLL_RNG }), { type: 'intercept', move: 'search' })
+    expect(mixed).toMatchObject({ day: 5, icc: 100 - SEARCH.low.iccLoss, cash: 10_000 * (1 - SEARCH.low.fine) })
+    // Tout l'illégal est caché : simple formalité
+    const clean = run(stopped([lot('T0-01', 2), lot('T2-01', hidden)], { icc: 80, rng: HIGH_ROLL_RNG }), { type: 'intercept', move: 'search' })
+    expect(clean).toMatchObject({ cash: 10_000, icc: 80 + SEARCH.legalIccGain })
+    expect(ownedQty(clean.cargo, 'T2-01')).toBe(hidden)
+  })
+
+  it('est plus souvent trouvé dans les districts les mieux gardés', () => {
+    expect(compartmentDetection(stopped([], { districtId: 'D1' })).total).toBeCloseTo(COMPARTMENT.detectionPerStar)
+    expect(compartmentDetection(stopped([], { districtId: 'D6' })).total).toBeCloseTo(COMPARTMENT.detectionPerStar * DISTRICTS.D6.security)
   })
 })
 
@@ -186,7 +221,8 @@ describe('fuite', () => {
 
   it('coûte cher en cas d’échec, jusqu’à la mort si la Santé tombe à 0', () => {
     const state = run(stopped([lot('T2-01', 3)], { rng: HIGH_ROLL_RNG }), { type: 'intercept', move: 'flee' })
-    expect(state.cargo).toEqual([])
+    // Le double fond n'est pas trouvé (tirage haut) : ses caisses restent
+    expect(state.cargo).toEqual([lot('T2-01', VEHICLES['VEH-01'].hiddenCompartment)])
     expect(state.day).toBe(6)
     const dead = run(stopped([lot('T2-01', 3)], { rng: HIGH_ROLL_RNG, health: FLEE.fail.healthLoss }), { type: 'intercept', move: 'flee' })
     expect(dead.ending?.id).toBe('death')
@@ -291,7 +327,7 @@ describe('tactiques de barrage (chap. 3)', () => {
     const failed = run(stopped([lot('T1-06', 4)], { rng: HIGH_ROLL_RNG }), { type: 'intercept', move: 'flee' })
     const report = defined(failed.interceptionReport)
     expect(report.exploded).toBeGreaterThanOrEqual(0)
-    expect(report.crates).toBe(-4)
+    expect(report.crates).toBe(-4 + VEHICLES['VEH-01'].hiddenCompartment)
   })
 })
 

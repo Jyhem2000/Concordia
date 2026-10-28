@@ -77,3 +77,22 @@ Campagne 1 (24 bots, 200 parties chacun), données remises à l'identique ensuit
 | Score p90 | référence | jusqu'à ×2 |
 
 Les limites de stock **ne décident pas de la survie** : elles brident seulement les parties qui gagnent déjà, et les retirer étire la queue haute de la distribution sans aider la partie médiane. Ce qui ruine la partie médiane, c'est la saisie totale (une interception sur quatre trajets, toute la soute illégale perdue).
+
+## Double fond (chap. 5)
+Chaque châssis a un double fond d'origine (2 à 6 caisses). Il garde les caisses illégales les plus chères quand les agents ne le trouvent pas à la fouille (12 % par étoile de sécurité). Le marchand en tient compte dans l'espérance de chaque option du barrage. Campagne 1 (200 parties par bot) et campagne 4 (400 parties par variante) remesurées.
+
+**Campagne 1 : la partie médiane n'est plus ruinée.**
+
+| Tempérament | Survie avant → après | Score médian avant → après | Score médian des survivants |
+| :--- | :--- | :--- | :--- |
+| Prudent | 56 à 72 % → 60 à 80 % | 100 à 6 300 ₡ → 120 à 7 800 ₡ | à peu près inchangé |
+| Équilibré | 58 à 78 % → **78 à 84 %** | ≈ 0 ₡ → **190 à 19 400 ₡** | 230 à 14 700 ₡ → 730 à 31 400 ₡ |
+| Casse-cou | 42 à 56 % → **64 à 74 %** | 0 ₡ → 30 à 800 ₡ | 130 à 480 ₡ → 540 à 71 000 ₡ |
+
+Novice : survie 63 → 72 %. Le Prudent bouge peu : il transporte peu d'illégal. Les Game Over restent tous l'audit avec dette.
+
+**Campagne 4 : l'équipement ne devient pas rentable pour autant.** Seuls `[VEH-02]` (+9 800 ₡), Glitch (+6 000 ₡) et la dilution (+15 800 ₡) sont positifs en score ; l'avance de survie reste positive (+9 pts de survie). La dilution ne pèse plus sur la survie (+13 → +4 pts, neutre) : le double fond protège déjà la marchandise. Mama Rosa (−13 500 ₡), `[MOD-09]` (−13 100 ₡), `[MOD-05]` (−7 500 ₡) et `[MOD-01]` (−4 900 ₡) s'aggravent : le marchand survit plus longtemps et les achète plus souvent, sans qu'ils rapportent leur prix.
+
+**Lecture :** le double fond règle la loterie (une saisie ne ruine plus la partie), pas l'échelle de l'économie. Restent à trancher :
+1. le niveau de difficulté visé, la survie de l'Équilibré passant de ~60 à ~82 % (curseurs : capacité du double fond, chance par étoile) ;
+2. le prix ou l'effet des modules et des salaires, désormais mesurables sur des parties qui durent.

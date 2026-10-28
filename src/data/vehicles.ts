@@ -12,6 +12,7 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
   'VEH-01': {
     price: 0,
     cargo: 10,
+    hiddenCompartment: 2,
     moduleSlots: 1,
     maxChassis: 100,
     riskFactor: 0.9, // profil bas, zone hors-réseau comprise
@@ -21,6 +22,7 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
   'VEH-02': {
     price: 22_000,
     cargo: 20,
+    hiddenCompartment: 3,
     moduleSlots: 2,
     maxChassis: 150,
     tank: 6,
@@ -30,6 +32,7 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
   'VEH-03': {
     price: 65_000,
     cargo: 30,
+    hiddenCompartment: 4,
     moduleSlots: 3,
     maxChassis: 200,
     tank: 6,
@@ -40,6 +43,7 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
   'VEH-04': {
     price: 150_000,
     cargo: 50,
+    hiddenCompartment: 6,
     moduleSlots: 4,
     maxChassis: 300,
     tank: 8,

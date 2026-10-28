@@ -117,11 +117,14 @@ describe('barrage et équipement', () => {
     const state = withModules(['MOD-07'], { districtId: 'D2', interception: brc, cargo: [lot('T2-03', 6), lot('T0-01', 2)], rng: LOW_ROLL_RNG })
     const dumped = run(state, { type: 'intercept', move: 'eject' })
     expect(dumped).toMatchObject({ trapdoorDay: 3, chassis: VEHICLES['VEH-01'].maxChassis })
-    expect(dumped.dumped).toEqual([lot('T2-03', 6)])
+    // Le double fond reste fermé : seules les caisses visibles sont larguées
+    const hidden = VEHICLES['VEH-01'].hiddenCompartment
+    expect(dumped.dumped).toEqual([lot('T2-03', 6 - hidden)])
+    expect(dumped.cargo).toEqual([lot('T0-01', 2), lot('T2-03', hidden)])
     const morning = sleep({ ...dumped, interception: null })
     const recovered = defined(morning.briefing?.recovered)
-    expect(recovered.back + recovered.lost).toBe(6)
-    expect(recovered.back).toBeLessThanOrEqual(Math.floor(6 * defined(MODULES['MOD-07'].trapdoor).maxRecovery))
+    expect(recovered.back + recovered.lost).toBe(6 - hidden)
+    expect(recovered.back).toBeLessThanOrEqual(Math.floor((6 - hidden) * defined(MODULES['MOD-07'].trapdoor).maxRecovery))
     expect(morning.dumped).toEqual([])
   })
 
