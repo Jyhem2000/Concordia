@@ -37,7 +37,7 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
 ## Vue « Véhicule, soute & équipage »
 * **Grille de soute :** une case par emplacement. Chaque caisse : couleur du tier (**vert** 0, **jaune** 1, **orange** 2, **rouge** 3, **violet** 4), icône du produit, badge d'état (bouclier si masquée, goutte/chrono si sa fraîcheur a baissé, fêlure si endommagée).
 * **Profil de la cargaison :** jauges de part odorante, Tech, chimique, culturelle et légale (ce sont elles qui pilotent le risque), avec les masquages actifs.
-* **Double fond :** capacité du châssis, affichée avec ses stats au garage.
+* **Double fond :** capacité du châssis, affichée avec ses stats au garage. *À venir avec cette vue :* choisir les caisses qu'on y cache ; d'ici là, ce sont automatiquement les illégales les plus chères (chap. 5).
 * **Modules & équipage :** slots du châssis (modifiables seulement au garage de `[D4]`), canal radio / portrait de l'équipier actif.
 
 ## Vue « Marché noir & lieux spéciaux »
@@ -46,7 +46,7 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
 * **Indicateurs :**
   * 📉 vert (prix très bas / production locale) · 🔥 orange (forte demande) · 🚀 rouge clignotant (explosion liée à un événement) ;
   * profil nuit à côté du prix (🌙 + / 🌙 −) ;
-  * **demande restante** sur chaque ligne, avec sa reconstitution du lendemain (*« Demande restante : 5 (+2 demain) »*), le prix saturé s'affichant au-delà ;
+  * **demande ici** sur chaque ligne : les caisses que ce district rachète aujourd'hui au plein prix (côté acheteurs, indépendant du stock de la boutique), avec sa reconstitution du lendemain (*« 5 (+2 demain) »*) et une explication au survol ; au-delà, le prix saturé s'affiche ;
   * **PMA** sur chaque ligne possédée, ex. *« En soute : 8 (acheté à 410 ₡/u) »*.
   * **État** sur chaque ligne possédée : caisses par état de fraîcheur, caisses abîmées, et délai avant que le lot le plus ancien pourrisse.
   * **Tendance** : variation du cours depuis la dernière observation dans ce district, si elle date de la veille.
@@ -74,8 +74,8 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
 * **Bulles d'indices :** événements du jour (nom de l'événement local sous le district, effets au toucher), ronde renforcée révélée par `[CREW-01]` (🚓), pic suspect de la veille (👁️).
 * **Panneau de prévision (au clic sur un district) :** itinéraire et districts traversés, rations nécessaires, étoiles de sécurité, prix local du Synthanol, lieux spéciaux, et le **risque d'interception** pour la soute actuelle (détaillable), avec la part de contrôles volants du district (fuite impossible), avant validation. La ronde renforcée, cachée, n'y figure pas ; tout le reste est exact. Les districts en pic suspect portent l'icône 👁️.
 * **Dernier trajet :** ce que le dernier trajet a coûté hors barrage (usure du châssis ou caisses consommées pour refroidir le moteur).
-* **Boutons de départ :** « Rouler de jour » ; à 20h00, « Dormir au relais » (ou « Bivouac » en `[D4]`) face à « Tournée de nuit », chacun affichant coûts et effets calculés.
-* **Mission de nuit :** le panneau du soir affiche dès le matin la mission proposée (destination, caisses scellées, prime) ou son absence, et la case « accepter la mission » ; la nuit, la carte marque le district de la mission, et le risque des autres destinations montre le malus hors mission. Les caisses scellées apparaissent dans la soute, sans vente possible. Le dernier trajet dit si la mission a été livrée ou si l'écart a été enregistré.
+* **Boutons de départ :** « Rouler de jour » ; à 20h00, trois choix explicites, chacun avec ses effets : « Dormir au relais » (ou « Bivouac » en `[D4]`), « Livraison de nuit autorisée vers … (prime) » quand une mission est proposée (caisses scellées chargées, trajet couvert, la marchandise du joueur peut voyager avec), et « Tournée clandestine » (hors mission : risque accru, Fiche S). Épuisé, chaque tournée propose la nuit blanche forcée si le joueur a de quoi boire.
+* **Mission de nuit :** le panneau du soir affiche dès le matin la mission proposée (destination, caisses scellées, prime) ou son absence, et le bouton qui l'accepte en partant ; la nuit, la carte marque le district de la mission, et le risque des autres destinations montre le malus hors mission. Les caisses scellées apparaissent dans la soute, sans vente possible. Le dernier trajet dit si la mission a été livrée ou si l'écart a été enregistré.
 
 ## Écran d'aléa routier
 Comme le barrage, il occupe tout l'écran jusqu'au choix : la situation, puis les deux options avec leurs coûts et effets exacts (₡ indexés, ICC, Santé, châssis, rations, caisse demandée), la chance d'un pari, et la raison d'une option indisponible. Après le choix, un compte rendu détaille ce qui a changé.

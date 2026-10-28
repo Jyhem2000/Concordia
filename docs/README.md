@@ -57,7 +57,7 @@ Les docs décrivent le jeu complet ; tout n'est pas encore en jeu. Ce tableau di
 | 7 | Boutique, cours et tendance, quotas, prix de vente, paiement en nature, inflation, dette, avance de survie, collecte, compte offshore, flux et bonus de `[CREW-02]`, bonus d'influence de `[LOC-D2-1]` | — |
 | 8 | Événements globaux et locaux, rumeurs, contrecoups, Loterie (faux dossiers compris), aléas routiers, prédictions de Cassandre-88 | — |
 | 9 | Moteur de simulation, invariants, Novice, Aléatoire, marchand (12 plans × 3 tempéraments, lieux spéciaux, commande VIP), objectifs de grande fin ; campagnes Contrôle, 1 à 4 (`sim/reports/`) | Spéculation sur l'événement de demain (Cassandre-88, rumeur), faux dossier de Loterie, optimiseur et campagne 5 |
-| 10 | Bandeau, téléscripteur, marché et fiche produit, carte, lieux, soir, briefing, barrage, aléa routier, objectifs | Vue véhicule et soute, filtres du marché, dégradation de l'interface selon l'ICC, manuel en jeu |
+| 10 | Bandeau, téléscripteur, marché et fiche produit, carte, lieux, soir, briefing, barrage, aléa routier, objectifs | Vue véhicule et soute (dont le choix du contenu du double fond), filtres du marché, dégradation de l'interface selon l'ICC, manuel en jeu |
 
 ## Feuille de route
 Étapes restantes, dans l'ordre des dépendances :

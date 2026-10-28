@@ -20,6 +20,8 @@ type MarketRowProps = {
 
 type FieldProps = {
   label: string
+  /** Explication au survol */
+  hint?: string
   /** Occupe deux colonnes de la grille */
   wide?: boolean
   children: ReactNode
@@ -170,7 +172,7 @@ function MarketRow({ productId }: MarketRowProps) {
           )}
         </Field>
         <Field label={t.market.stock}>{stock === undefined ? <span className="text-zinc-500">{t.market.notInShop}</span> : stock}</Field>
-        <Field label={t.market.demand}>
+        <Field label={t.market.demand} hint={t.market.demandHint}>
           {quota === null || demandLeft === undefined
             ? t.market.unlimited
             : t.market.demandLeft(demandLeft, Math.min(quota - demandLeft, demandRefill(quota)))}
@@ -221,9 +223,9 @@ function MarketRow({ productId }: MarketRowProps) {
   )
 }
 
-function Field({ label, wide = false, children }: FieldProps) {
+function Field({ label, hint, wide = false, children }: FieldProps) {
   return (
-    <div className={`flex gap-1.5 ${wide ? 'col-span-2' : ''}`}>
+    <div className={`flex gap-1.5 ${wide ? 'col-span-2' : ''}`} title={hint}>
       <dt className="text-zinc-500">{label}</dt>
       <dd className="flex flex-wrap items-baseline">{children}</dd>
     </div>

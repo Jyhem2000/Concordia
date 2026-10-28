@@ -1,5 +1,4 @@
 import { BedDouble, Fuel, Siren } from 'lucide-react'
-import { useState } from 'react'
 import { WANTED } from '../../data/balance.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { VEHICLES } from '../../data/vehicles.ts'
@@ -26,15 +25,17 @@ export default function EveningPanel() {
   const fuelCollapsed = useCollapsed('fuel')
   const curfewCollapsed = useCollapsed('curfew')
   const refuelMax = maxRefuel(game)
-  // Mission de nuit du soir : acceptée par défaut quand elle est valable (chap. 2)
-  const [accept, setAccept] = useState(true)
+  // Trois choix le soir (chap. 2) : dormir, livraison de nuit autorisée (mission), ou tournée clandestine
   const offer = missionOffer(game)
-  const withMission = accept && offer !== null
-  const missionError = withMission ? checkMission(game) : null
-  const curfewError = checkForceCurfew(game) ?? missionError
+  // Épuisé : une boisson pour une nuit blanche malgré tout, si le joueur en a (chap. 3)
+  const exhausted = checkForceCurfew(game) === 'exhausted'
+  const drink = exhausted ? PRODUCT_IDS.find((id) => ownedQty(game.cargo, id) > 0 && !checkForceCurfew(game, id)) : undefined
+  const sleepless = drink ? PRODUCTS[drink].sleeplessNight : undefined
+  const drinkLabel = drink && sleepless ? t.evening.withDrink(t.product[drink].name, sleepless.healthLoss) : ''
+  const curfewError = checkForceCurfew(game, drink)
+  const missionError = curfewError ?? (offer ? checkMission(game) : 'no-mission')
   const sleepLabel = sleepsAtRelay(game) ? t.evening.sleepRelay : t.evening.bivouac
-  // Produits qui changent la nuit : boisson pour une nuit blanche, eau pour refroidir le moteur (chap. 3)
-  const drinks = PRODUCT_IDS.filter((id) => PRODUCTS[id].sleeplessNight && ownedQty(game.cargo, id) > 0)
+  // Eau qui refroidit le moteur la nuit (chap. 3)
   const coolants = PRODUCT_IDS.filter((id) => PRODUCTS[id].cooling && ownedQty(game.cargo, id) > 0)
 
   return (
@@ -82,41 +83,33 @@ export default function EveningPanel() {
                     ? t.evening.missionHere(t.district[game.nightOffer].name)
                     : t.evening.noMission}
               </p>
-              {offer && (
-                <label className="mt-1 flex items-center gap-1.5 text-xs text-zinc-300">
-                  <input type="checkbox" checked={accept} onChange={(event) => setAccept(event.target.checked)} className={FOCUS_RING} />
-                  {t.evening.acceptMission}
-                </label>
-              )}
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Button variant="primary" onClick={() => dispatch({ type: 'sleep' })}>
-                  <BedDouble size={14} className="mr-1 inline" aria-hidden="true" />
-                  {sleepLabel}
-                </Button>
-                <Button variant="danger" disabled={curfewError !== null} onClick={() => dispatch({ type: 'forceCurfew', mission: withMission })}>
-                  {t.evening.forceCurfew}
-                </Button>
-              </div>
-              <p className="mt-1 text-xs text-zinc-400">
-                {curfewError ? t.error[curfewError] : t.evening.forceCurfewHint(t.hud.wantedGain(WANTED.perOffense))}
-              </p>
-              {curfewError === 'exhausted' &&
-                drinks.map((id) => {
-                  const sleepless = PRODUCTS[id].sleeplessNight
-                  const error = checkForceCurfew(game, id) ?? missionError
-                  return sleepless ? (
-                    <div key={id} className="mt-1">
-                      <Button
-                        variant="danger"
-                        disabled={error !== null}
-                        onClick={() => dispatch({ type: 'forceCurfew', drink: id, mission: withMission })}
-                      >
-                        {t.evening.sleepless(t.product[id].name, sleepless.healthLoss)}
-                      </Button>
-                      {error && <p className="text-xs text-zinc-400">{t.error[error]}</p>}
-                    </div>
-                  ) : null
-                })}
+              <p className="mt-1 text-xs text-zinc-400">{t.evening.nightRule}</p>
+              <ul className="mt-2 flex flex-col gap-2">
+                <li>
+                  <Button variant="primary" onClick={() => dispatch({ type: 'sleep' })}>
+                    <BedDouble size={14} className="mr-1 inline" aria-hidden="true" />
+                    {sleepLabel}
+                  </Button>
+                </li>
+                {offer && (
+                  <li>
+                    <Button disabled={missionError !== null} onClick={() => dispatch({ type: 'forceCurfew', mission: true, drink })}>
+                      {t.evening.missionTour(t.district[offer].name, credits(missionFee(game)))}
+                      {drinkLabel}
+                    </Button>
+                    <p className="text-xs text-zinc-400">{missionError ? t.error[missionError] : t.evening.missionTourHint(sealedCount(game))}</p>
+                  </li>
+                )}
+                <li>
+                  <Button variant="danger" disabled={curfewError !== null} onClick={() => dispatch({ type: 'forceCurfew', drink })}>
+                    {t.evening.clandestineTour}
+                    {drinkLabel}
+                  </Button>
+                  <p className="text-xs text-zinc-400">
+                    {curfewError ? t.error[curfewError] : t.evening.clandestineHint(t.hud.wantedGain(WANTED.perOffense))}
+                  </p>
+                </li>
+              </ul>
               {coolants.map((id) => (
                 <label key={id} className="mt-2 flex items-center gap-1.5 text-xs text-zinc-300">
                   <input

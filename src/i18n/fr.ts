@@ -550,7 +550,9 @@ export const fr = {
     quote: 'Cours',
     stock: 'Stock',
     owned: 'En soute',
-    demand: 'Demande',
+    demand: 'Demande ici',
+    demandHint:
+      "Caisses que ce district rachète aujourd'hui au plein prix. Au-delà, le prix est saturé et Aeterna note un pic suspect. Elle remonte chaque matin.",
     sale: 'Vente nette',
     notInShop: 'Hors boutique',
     unlimited: 'Illimitée',
@@ -781,20 +783,23 @@ export const fr = {
     siphon: 'Corvée DSC',
     siphonHint: "Une ration contre de l'ICC et une demi-journée.",
     curfewTitle: '20h00 — couvre-feu sanitaire',
-    forceCurfew: 'Tournée de nuit',
-    forceCurfewHint: (wanted: string) =>
-      `Un second trajet, dans les galeries de service : tout y est filmé. Sur mission, le trajet est couvert ; hors mission, c'est un écart (risque accru, ${wanted}). Interdit le lendemain, sauf nuit blanche forcée.`,
+    nightRule:
+      'Ce soir : dormir, ou un second trajet dans les galeries de service, où tout est filmé. Une tournée interdit la suivante le lendemain, sauf nuit blanche forcée.',
+    missionTour: (district: string, fee: string) => `Livraison de nuit autorisée vers ${district} (prime ${fee})`,
+    missionTourHint: (crates: number) =>
+      `La plateforme charge ${crates} caisses scellées (place libre requise) : le trajet vers ce district est couvert, et votre marchandise peut voyager avec.`,
+    clandestineTour: 'Tournée clandestine',
+    clandestineHint: (wanted: string) => `Hors mission, vers le district de votre choix : risque accru, et ${wanted} si le trajet passe.`,
+    withDrink: (product: string, health: number) => ` — nuit blanche : boire 1 × ${product} (Santé −${health})`,
     missionOffer: (district: string, crates: number, fee: string) =>
       `Mission de ce soir : livrer ${crates} caisses scellées à ${district}, prime ${fee}.`,
     missionHere: (district: string) => `Mission de ce soir vers ${district} : vous y êtes déjà, rien à livrer.`,
     noMission: 'Pas de mission de nuit ce soir : toute tournée sera hors mission.',
-    acceptMission: 'Accepter la mission',
     missionActive: (district: string) => `Tournée de nuit sur mission : livrer à ${district}.`,
     offMission: 'Tournée de nuit hors mission : tout trajet sera un écart enregistré.',
     sleepRelay: 'Dormir au relais',
     bivouac: 'Bivouac',
     nightNotice: 'Tournée de nuit : 1 trajet, puis dormir.',
-    sleepless: (product: string, health: number) => `Nuit blanche quand même : boire 1 × ${product} (Santé −${health})`,
     cooling: (crates: number, product: string) => `Refroidir le moteur la nuit avec ${crates} × ${product} au lieu d'user le châssis`,
   },
 
