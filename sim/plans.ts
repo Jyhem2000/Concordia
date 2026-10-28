@@ -13,10 +13,10 @@ export const PLANS: readonly Plan[] = [
   { name: 'Chaîne du froid', vehicle: 'VEH-03', modules: ['MOD-01'], crew: 'CREW-03', favorTags: ['TAG-PERISHABLE'] },
   { name: 'Couverture légale', vehicle: 'VEH-02', modules: ['MOD-02'], legalShare: 0.25, favorTags: ['TAG-ODOROUS'] },
   { name: 'Électronique', modules: ['MOD-03'], favorTags: ['TAG-TECH'] },
-  { name: 'Nuit festive', modules: ['MOD-04', 'MOD-06'] },
+  { name: 'Nuit festive', modules: ['MOD-04', 'MOD-06'], nightOwl: true, runner: true },
   { name: 'Corruption', modules: ['MOD-08'], crew: 'CREW-01', favorTags: ['TAG-ADDICTIVE'] },
   { name: 'Rentier', modules: [], crew: 'CREW-02', offshoreFromDay: 6 },
-  { name: 'Haut tier', vehicle: 'VEH-04', modules: ['MOD-07'] },
+  { name: 'Haut tier', vehicle: 'VEH-04', modules: ['MOD-07'], favorTags: ['TAG-FLAMMABLE'] },
 ]
 
 export const TEMPERAMENTS: readonly Temperament[] = [

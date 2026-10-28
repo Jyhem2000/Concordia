@@ -9,7 +9,9 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import Detailed from '../shared/Detailed.tsx'
+import CollapseToggle from '../shared/CollapseToggle.tsx'
 import Margin from '../shared/Margin.tsx'
+import { useCollapsed } from '../shared/useCollapsed.ts'
 import ProductSheet from './ProductSheet.tsx'
 
 type MarketRowProps = {
@@ -46,6 +48,7 @@ const tierColors: Record<Tier, string> = {
 /** Tableau des cours : la boutique du jour, plus tous les produits en soute (chap. 10) */
 export default function MarketPanel() {
   const game = useGameStore((s) => s.game)
+  const collapsed = useCollapsed('market')
   const { t } = useI18n()
 
   const shop = shopProducts(game.markets[game.districtId])
@@ -59,16 +62,24 @@ export default function MarketPanel() {
 
   return (
     <section className="rounded border border-zinc-800 bg-zinc-900/40">
-      <h2 className="border-b border-zinc-800 px-3 py-2 font-bold tracking-wide text-amber-300 uppercase">
-        {t.market.title} — {t.district[game.districtId].name}
+      <h2 className="border-b border-zinc-800 px-3 py-2 tracking-wide text-amber-300">
+        <CollapseToggle id="market">
+          {t.market.title} — {t.district[game.districtId].name}
+        </CollapseToggle>
       </h2>
-      {(game.phase === 'night' || game.dayOver) && <p className="px-3 pt-2 text-sm text-indigo-300">{t.market.streetOnly}</p>}
-      {sealed > 0 && game.mission && <p className="px-3 pt-2 text-sm text-sky-300">{t.travel.sealed(sealed, t.district[game.mission.to].name)}</p>}
-      <ul className="divide-y divide-zinc-800">
-        {rows.map((id) => (
-          <MarketRow key={id} productId={id} />
-        ))}
-      </ul>
+      {!collapsed && (
+        <>
+          {(game.phase === 'night' || game.dayOver) && <p className="px-3 pt-2 text-sm text-indigo-300">{t.market.streetOnly}</p>}
+          {sealed > 0 && game.mission && (
+            <p className="px-3 pt-2 text-sm text-sky-300">{t.travel.sealed(sealed, t.district[game.mission.to].name)}</p>
+          )}
+          <ul className="divide-y divide-zinc-800">
+            {rows.map((id) => (
+              <MarketRow key={id} productId={id} />
+            ))}
+          </ul>
+        </>
+      )}
     </section>
   )
 }

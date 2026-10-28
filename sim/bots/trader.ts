@@ -1,14 +1,14 @@
 import { GRINDER, HIGH_TIER, SALE_COMMISSION, SURVIVAL_ADVANCE } from '../../src/data/balance.ts'
-import { DISTRICT_IDS } from '../../src/data/districts.ts'
+import { DISTRICT_IDS, DISTRICTS } from '../../src/data/districts.ts'
 import { KARMA } from '../../src/data/locations.ts'
 import { ROAD_EVENTS } from '../../src/data/events.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../src/data/products.ts'
 import { MODULES, VEHICLES } from '../../src/data/vehicles.ts'
 import { canSiphon, checkForceCurfew, checkService, fuelPrice, maxBuy, planTravel, pumpClosed, type Action } from '../../src/engine/actions.ts'
 import { cargoUsed, isIllegal, ownedQty, taggedQty } from '../../src/engine/cargo.ts'
-import { daysBeforeRot } from '../../src/engine/condition.ts'
+import { daysBeforeRot, paymentValue } from '../../src/engine/condition.ts'
 import { checkHire, crewEffect, hireFee, salary } from '../../src/engine/crew.ts'
-import { checkBuyModule, checkBuyVehicle, missingChassis, repairPrice } from '../../src/engine/equipment.ts'
+import { checkBuyModule, checkBuyVehicle, ejectMode, missingChassis, mountedEffect, repairPrice } from '../../src/engine/equipment.ts'
 import { loanRoom } from '../../src/engine/finance.ts'
 import { indexed } from '../../src/engine/inflation.ts'
 import {
@@ -18,16 +18,28 @@ import {
   checkMove,
   ejectChance,
   fleeChance,
+  fleeConsequences,
   minimumOffer,
   searchSanction,
   toll,
 } from '../../src/engine/interception.ts'
-import { demandQuota, grindableQty, lastSeen, normalQuote, productStatus, quote, saleQuote, shopProducts } from '../../src/engine/market.ts'
+import {
+  demandQuota,
+  grindableQty,
+  lastSeen,
+  normalQuote,
+  productStatus,
+  quote,
+  saleQuote,
+  shopProducts,
+  unitSaleBreakdown,
+} from '../../src/engine/market.ts'
 import { checkMission, missionOffer } from '../../src/engine/night.ts'
 import { checkRoadChoice, roadCash } from '../../src/engine/road.ts'
 import { blackmailCost, checkAuction, checkBlackmail, checkInfluence, checkMorgue, karmaCost, morgueCost } from '../../src/engine/services.ts'
 import { risk } from '../../src/engine/risk.ts'
 import type {
+  CargoLot,
   CrateCount,
   CrewId,
   DistrictId,
@@ -66,6 +78,10 @@ export type Plan = {
   novice?: boolean
   /** Lieux spéciaux utilisés quand le bot s'y trouve ; par défaut le Hachoir et l'avance de survie */
   places?: readonly PlaceUse[]
+  /** Tournées de nuit au moins quand la soute le justifie, quel que soit le tempérament (suspensions, profil festif) */
+  nightOwl?: boolean
+  /** Fuite préférée à espérance égale (pare-buffles, brouilleur, transpondeur) */
+  runner?: boolean
 }
 
 /** Usages des lieux spéciaux que sait faire le marchand (chap. 9, tests par retrait) */
@@ -100,6 +116,9 @@ const MIN_MARGIN = 0.15
 
 /** Fonds de roulement gardé avant de rembourser la dette (₡ de base, indexés) */
 const CAPITAL = 2_000
+
+/** Dernier jour d'achat d'équipement : au-delà, il ne serait plus rentabilisé avant l'audit */
+const LAST_EQUIPMENT_DAY = 18
 
 /** Fin de partie : on vend tout, on solde la dette et on dépose tout à la Laverie */
 const ENDGAME_DAY = 28
@@ -148,7 +167,7 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
   }
 
   if (!night) {
-    const tour = eveningTour(view, temperament)
+    const tour = eveningTour(view, plan, temperament)
     if (tour) return tour
   }
   return { type: 'sleep' }
@@ -169,9 +188,29 @@ function estimatedSale(view: GameState, districtId: DistrictId, productId: Produ
   return quoted * SALE_COMMISSION
 }
 
-/** Meilleur prix net espéré ailleurs */
-function bestElsewhere(view: GameState, productId: ProductId): number {
-  return Math.max(0, ...DISTRICT_IDS.filter((id) => id !== view.districtId).map((id) => estimatedSale(view, id, productId)))
+/**
+ * Facteur de vente d'une caisse au-delà du cours net : fraîcheur, savoir-faire (Mama Rosa), profil de nuit, casse.
+ * Calculé par le moteur ici et maintenant : un trajet de jour arrive le jour même, un trajet de nuit la nuit même.
+ */
+function saleFactor(view: GameState, lot: CargoLot): number {
+  const net = quote(view, view.districtId, lot.productId) * SALE_COMMISSION
+  return net > 0 ? unitSaleBreakdown(view, { ...lot, travelled: true }, false).total / net : 1
+}
+
+/** Caisse achetée ici aujourd'hui, pour estimer sa revente */
+const freshLot = (view: GameState, productId: ProductId): CargoLot => ({
+  productId,
+  qty: 1,
+  unitCost: 0,
+  travelled: true,
+  boughtDay: view.day,
+  damaged: false,
+})
+
+/** Meilleur prix net espéré ailleurs, pour une caisse dans l'état de `lot` */
+function bestElsewhere(view: GameState, productId: ProductId, lot: CargoLot = freshLot(view, productId)): number {
+  const factor = saleFactor(view, lot)
+  return Math.max(0, ...DISTRICT_IDS.filter((id) => id !== view.districtId).map((id) => estimatedSale(view, id, productId) * factor))
 }
 
 /** Valeur d'achat des caisses illégales : ce qu'une saisie ferait perdre */
@@ -202,7 +241,11 @@ function sell(view: GameState, endgame: boolean): Action | null {
     const rotting = lot ? (daysBeforeRot(view, lot) ?? Infinity) <= 1 : false
     // Jamais revendre sur place ce qu'on vient d'acheter (clause anti-arbitrage) : c'est une boucle sans gain
     if (lot && !lot.travelled && !endgame && !rotting) continue
-    const worth = endgame || rotting || first.total >= first.cost * (1 + MIN_MARGIN) || first.total >= bestElsewhere(view, productId) * 0.9
+    const worth =
+      endgame ||
+      rotting ||
+      first.total >= first.cost * (1 + MIN_MARGIN) ||
+      (lot !== undefined && first.total >= bestElsewhere(view, productId, lot) * 0.9)
     if (!worth) continue
     // Sans saturer le marché, sauf en fin de partie ou si la caisse pourrit
     const demand = view.markets[view.districtId].demand[productId] ?? owned
@@ -237,7 +280,7 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
     }
   }
 
-  if (!plan.novice && !endgame) {
+  if (!plan.novice && !endgame && view.day <= LAST_EQUIPMENT_DAY) {
     const equipment = equip(view, plan, reserve)
     if (equipment) return equipment
     const place = specialPlaces(view, uses, reserve)
@@ -263,7 +306,9 @@ function specialPlaces(view: GameState, uses: (place: PlaceUse) => boolean, rese
     if (uses('certificate') && view.icc < PLACE_THRESHOLDS.iccBelow && !checkMorgue(view, 'certificate') && spare(morgueCost(view, 'certificate'))) {
       return { type: 'morgue', service: 'certificate' }
     }
-    if (uses('pass') && !checkMorgue(view, 'pass') && spare(morgueCost(view, 'pass'))) return { type: 'morgue', service: 'pass' }
+    // Laissez-passer : seulement avec du chimique illégal à faire passer par les bio-scanners
+    const chemical = view.cargo.some((lot) => isIllegal(lot) && PRODUCTS[lot.productId].tags.includes('TAG-CHEMICAL'))
+    if (uses('pass') && chemical && !checkMorgue(view, 'pass') && spare(morgueCost(view, 'pass'))) return { type: 'morgue', service: 'pass' }
   }
   if (uses('influence') && !checkService(view, 'influence')) {
     // Panique sur le tag le plus présent en soute : il se vendra plus cher demain
@@ -333,7 +378,7 @@ function buysFor(
     if (plan.avoidTags?.some((tag) => product.tags.includes(tag))) return []
     if (plan.novice && productStatus(view, view.districtId, productId) !== 'production') return []
     const price = quote(view, view.districtId, productId)
-    const margin = estimatedSale(view, to, productId) - price
+    const margin = estimatedSale(view, to, productId) * saleFactor(view, freshLot(view, productId)) - price
     if (margin < price * MIN_MARGIN) return []
     const favored = plan.favorTags?.some((tag) => product.tags.includes(tag)) ? 1.3 : 1
     // Le haut tier coûte une garde à vue s'il est saisi : marge exigée plus forte
@@ -372,7 +417,7 @@ function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route
     if (to === view.districtId) continue
     // La nuit, sur mission, la destination est imposée ; hors mission, seulement si le tempérament l'accepte
     if (night && view.mission && to !== view.mission.to) continue
-    if (night && !view.mission && (temperament.night === 'mission' || temperament.night === 'never')) continue
+    if (night && !view.mission && nightMode(plan, temperament) !== 'margin' && nightMode(plan, temperament) !== 'always') continue
     const trip = planTravel(view, to)
     const fuelNeeded = Math.max(0, trip.fuelCost - view.fuel)
     const fuelCost = trip.fuelCost * fuelPrice(view)
@@ -396,7 +441,10 @@ function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route
     const tooRisky = illegal > 0 && tripRisk > temperament.maxRisk
     if (tooRisky && buys.length > 0) continue
 
-    const carried = goods.reduce((total, lot) => total + lot.qty * Math.max(0, estimatedSale(view, to, lot.productId) - lot.unitCost), 0)
+    const carried = goods.reduce(
+      (total, lot) => total + lot.qty * Math.max(0, estimatedSale(view, to, lot.productId) * saleFactor(view, lot) - lot.unitCost),
+      0,
+    )
     let value = carried + margin - tripRisk * exposure(view, illegal) - fuelCost
     // Marchandise déjà en soute et trajet trop risqué : seulement en dernier recours
     if (tooRisky) value -= 1_000_000
@@ -425,10 +473,17 @@ function refuelFor(view: GameState, needed: number): Action | null {
   return qty > 0 && view.cash >= fuelPrice(view) * qty ? { type: 'refuel', qty } : null
 }
 
-function eveningTour(view: GameState, temperament: Temperament): Action | null {
-  if (temperament.night === 'never' || checkForceCurfew(view) || view.day >= ENDGAME_DAY) return null
+/** Tournées de nuit : le tempérament, relevé par un plan noctambule */
+function nightMode(plan: Plan, temperament: Temperament): Temperament['night'] {
+  if (!plan.nightOwl || temperament.night === 'always') return temperament.night
+  return 'margin'
+}
+
+function eveningTour(view: GameState, plan: Plan, temperament: Temperament): Action | null {
+  const mode = nightMode(plan, temperament)
+  if (mode === 'never' || checkForceCurfew(view) || view.day >= ENDGAME_DAY) return null
   if (missionOffer(view) && !checkMission(view)) return { type: 'forceCurfew', mission: true }
-  if (temperament.night === 'always' || (temperament.night === 'margin' && tradable(view).length > 0)) return { type: 'forceCurfew' }
+  if (mode === 'always' || (mode === 'margin' && tradable(view).length > 0)) return { type: 'forceCurfew' }
   return null
 }
 
@@ -455,17 +510,31 @@ function barrage(view: GameState, plan: Plan, temperament: Temperament): Action 
     options.push({ action: { type: 'intercept', move }, loss })
   }
   consider('bluff', bluffChance(view).total, -3 * VALUE.iccPoint, searchLoss * 1.2, true)
-  // Une fuite ratée coûte de la Santé : pas quand elle est déjà basse
-  if (view.health > 25) {
-    const success = 22 * VALUE.chassisPoint + VALUE.wantedLevel + 15 * VALUE.iccPoint
-    const failure = illegal + view.cash * 0.4 + custody(1) + 15 * VALUE.healthPoint + 25 * VALUE.iccPoint
-    consider('flee', fleeChance(view).total, success, failure, true)
+  // Une fuite ratée coûte de la Santé : pas quand elle est déjà basse. Conséquences réelles (pare-buffles, transpondeur, plaque)
+  const flight = fleeConsequences(view)
+  if (view.health > flight.failHealth + 10) {
+    const success = ((flight.chassis.min + flight.chassis.max) / 2) * VALUE.chassisPoint + VALUE.wantedLevel + flight.iccLoss * VALUE.iccPoint
+    const failure =
+      illegal + view.cash * 0.4 + custody(1) + flight.failHealth * VALUE.healthPoint + flight.failChassis * VALUE.chassisPoint + 25 * VALUE.iccPoint
+    const runnerBias = plan.runner ? 0.8 : 1
+    const chance = fleeChance(view).total
+    if (!checkMove(view, 'flee')) {
+      options.push({
+        action: { type: 'intercept', move: 'flee' },
+        loss: (chance * success + (1 - chance) * failure) * temperament.boldness * runnerBias,
+      })
+    }
   }
-  consider('eject', ejectChance(view).total, illegal, searchLoss * 1.3, false)
+  // Éjection : la trappe rapporte en moyenne une partie des caisses larguées le lendemain
+  const trapdoor = ejectMode(view) === 'trapdoor' ? (mountedEffect(view, 'trapdoor')?.maxRecovery ?? 0) / 2 : 0
+  consider('eject', ejectChance(view).total, illegal * (1 - trapdoor), searchLoss * 1.3, false)
 
-  const cash = Math.max(minimumOffer(view), bribeRate(view).total)
+  // Corruption : une caisse appréciée des agents (connivence) remplace une part du cash
+  const favorite = DISTRICTS[view.districtId].bribeFavorites.find((id) => ownedQty(view.cargo, id) > 0)
+  const crates = favorite ? [{ productId: favorite, qty: 1 }] : []
+  const cash = Math.max(0, Math.max(minimumOffer(view), bribeRate(view).total) - paymentValue(view, crates))
   if (cash <= view.cash) {
-    const offer = { cash, crates: [] }
+    const offer = { cash, crates }
     if (!checkMove(view, 'bribe', offer)) {
       const chance = bribeChance(view, offer).total
       const loss = cash + (1 - chance) * (illegal + 0.5 * (view.cash - cash) + custody(1) + 15 * VALUE.iccPoint)

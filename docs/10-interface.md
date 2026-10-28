@@ -6,6 +6,9 @@
   * **Toutes les règles sont accessibles en jeu.** Aucune mécanique n'est cachée au joueur (seuls des tirages le sont, comme la ronde renforcée). Chaque calcul se détaille, et chaque règle qui pèse sur un choix est expliquée à l'endroit du choix, en une ou deux phrases. Un **manuel en jeu**, consultable à tout moment et organisé comme ces docs, rassemble l'ensemble (prévu avec l'habillage).
   * *Ex. (risque, valeurs indicatives) :* « Base D5 40 % · Suspicion +10 % · Tech (4/12) +16,7 % · Couverture légale −10 % = 56,7 % · Zéro-C ×0,85 = **48 %** ».
 
+## Panneaux repliables
+Chaque panneau (marché, carte, lieux spéciaux, plein, couvre-feu, objectifs) et les longues sous-parties du garage (modules, châssis) se replient d'un clic sur leur titre, pour faire de la place. Le choix est mémorisé dans les réglages du joueur, d'une partie à l'autre.
+
 ## Bandeau supérieur permanent & briefing de 06h00
 * **Téléscripteur d'Aeterna (Flash Info TV) :** sous les barres d'état, un message passif-agressif par jour, **l'indice d'inflation du jour** et sa hausse depuis la veille, l'événement global et les événements locaux du jour, les contrecoups, le tirage de la Loterie (le promu, et le déclassé seulement s'il y en a un) et ses vices en cours, et la **rumeur** du lendemain avec sa fiabilité. Chaque événement se déplie sur ses effets exacts (produits et facteurs, risque, tags, stocks).
 * **Barres d'état (toujours visibles) :**

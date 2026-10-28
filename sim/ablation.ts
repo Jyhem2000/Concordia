@@ -55,9 +55,9 @@ const withoutModule = (base: Plan, id: ModuleId): Plan => ({ ...base, modules: b
 const withPlaces = (base: Plan, extra: readonly PlaceUse[]): Plan => ({ ...base, places: ['grinder', 'advance', ...extra] })
 
 /** Plan dédié au brouilleur de drones : fuite au sommet (chap. 9, étape 2 pour ses autres réglages) */
-const FLIGHT: Plan = { name: 'Fuite au sommet', modules: ['MOD-06', 'MOD-09'], crew: 'CREW-02' }
+const FLIGHT: Plan = { name: 'Fuite au sommet', modules: ['MOD-06', 'MOD-09'], crew: 'CREW-02', runner: true }
 /** Plan de nuit avec la plaque rotative */
-const NIGHT_PLATE: Plan = { name: 'Nuit festive + plaque', modules: ['MOD-04', 'MOD-06', 'MOD-05'] }
+const NIGHT_PLATE: Plan = { name: 'Nuit festive + plaque', modules: ['MOD-04', 'MOD-06', 'MOD-05'], nightOwl: true, runner: true }
 
 export const ABLATIONS: readonly Ablation[] = [
   // Véhicules

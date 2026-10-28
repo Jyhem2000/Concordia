@@ -47,3 +47,33 @@ Baisser les prix ramène la plupart des éléments à neutre, **sans les rendre 
    * Karma-Cham est un outil de grosse cargaison : son prix doit suivre (baisser la base, ou faire dépendre l'effet de la taille de la cargaison) ;
    * l'économie d'une partie (score moyen de 15 000 à 25 000 ₡) est petite devant le prix des véhicules et des modules haut de gamme : soit l'équipement descend, soit les marges montent avec la taille de la soute.
 3. **Mesures à ajouter :** le Hachoir, la chirurgie, le certificat et le chantage demandent des comportements que le bot n'a pas encore (garder des périssables, laisser descendre l'ICC) ; à reprendre avec l'optimiseur.
+
+## Remesure après les synergies du marchand
+Le marchand joue désormais les synergies de son équipement (chap. 9, Mise en œuvre). Pour cela, il estime la revente comme le moteur la calcule (fraîcheur, Mama Rosa, profil de nuit), offre des caisses appréciées à la corruption, estime la fuite avec ses conséquences réelles et l'éjection avec la trappe. Il fait aussi des tournées de nuit pour Nuit festive, préfère la fuite pour les plans « coureurs », n'achète le laissez-passer qu'avec du chimique, et n'achète plus d'équipement après le Jour 18. 400 parties par variante.
+
+| Élément | Avant | Après les synergies | Lecture |
+| :--- | :--- | :--- | :--- |
+| `[MOD-01]` | −3 300 ₡, survie −2 pts | −800 ₡ (neutre) | La fraîcheur comptée à sa valeur : il ne perd plus d'argent, il n'en gagne pas. |
+| Laissez-passer | −3 700 ₡, survie −3 pts | −1 750 ₡, survie neutre (usage 53 % → 26 %) | Le défaut du bot est corrigé ; reste un coût net. |
+| Certificat | −660 ₡ | neutre | — |
+| `[MOD-04]` | −4 100 ₡ | −5 300 ₡, **survie −3 pts** | Plus de tournées de nuit = plus de risque : **la nuit elle-même ne paie pas** à ce stade (malus de risque + Fiche S), les suspensions n'y changent rien. |
+| `[MOD-06]`, `[MOD-09]` | −4 400 ₡, −11 000 ₡ | −5 500 ₡, −7 800 ₡ (survie −2 pts) | Préférer la fuite ne la rend pas rentable. |
+| `[MOD-03]` | neutre | −6 200 ₡, survie −2 pts | Le brouillage Tech pousse à charger plus de Tech, donc à perdre plus à chaque saisie. |
+| `[MOD-08]`, Vance | −5 500 ₡, −4 500 ₡ | −3 000 ₡, −4 100 ₡ | Les caisses appréciées aident un peu, sans compenser le prix et le salaire. |
+| Mama Rosa | −6 600 ₡ | −6 500 ₡ | Inchangé : 1 000 ₡/j, soit 30 000 ₡ sur une partie, pour un bonus sur quelques caisses par jour. |
+| Glitch | +7 200 ₡ | +4 100 ₡ (neutre, ± 4 400) | Toujours le meilleur équipier, mais plus significatif. |
+| Avance de survie, dilution | +12 pts ; +10 300 ₡ | +12 pts ; **+13 pts et +13 700 ₡** | Confirmés : les deux seules décisions qui pèsent vraiment. |
+
+**Conclusion :** même bien joué, presque aucun équipement ne paie. Ce n'est plus le bot : c'est l'échelle. Une partie rapporte 15 000 à 30 000 ₡ en moyenne, et le **survivant médian finit avec quelques centaines de ₡** (campagne 1). Chaque saisie confisque toute la soute illégale, et le volume d'achat est plafonné par les stocks. Un module à 15 000 ₡ ou un salaire de 30 000 ₡ sur la partie ne peut pas se rentabiliser dans cette économie.
+
+## Essai : stocks et quotas de demande ×5
+Campagne 1 (24 bots, 200 parties chacun), données remises à l'identique ensuite.
+
+| Mesure | Stocks actuels | Stocks ×5 |
+| :--- | :--- | :--- |
+| Survie | 42 à 78 % | 48 à 74 % (+0 à +8 pts pour les Casse-cou, ±3 pts sinon) |
+| Score moyen | 3 000 à 69 000 ₡ (ex. Couverture légale · Équilibré 31 300 ₡, Corruption · Casse-cou 51 000 ₡) | +20 à +70 % (38 000 ₡ et 88 000 ₡) |
+| Score médian | ≈ 0 à 6 000 ₡ | inchangé |
+| Score p90 | référence | jusqu'à ×2 |
+
+Les limites de stock **ne décident pas de la survie** : elles brident seulement les parties qui gagnent déjà, et les retirer étire la queue haute de la distribution sans aider la partie médiane. Ce qui ruine la partie médiane, c'est la saisie totale (une interception sur quatre trajets, toute la soute illégale perdue).

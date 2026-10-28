@@ -13,7 +13,9 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import EventDetails from '../events/EventDetails.tsx'
+import CollapseToggle from '../shared/CollapseToggle.tsx'
 import Detailed from '../shared/Detailed.tsx'
+import { useCollapsed } from '../shared/useCollapsed.ts'
 import Margin from '../shared/Margin.tsx'
 
 type DistrictRowProps = {
@@ -30,19 +32,26 @@ const order = [...DISTRICT_IDS].sort((a, b) => DISTRICTS[a].echelon - DISTRICTS[
 /** Carte tactique : destinations, coût du trajet et mémoire de marché (chap. 10) */
 export default function TravelPanel() {
   const tripDone = useGameStore((s) => (s.game.phase === 'day' ? s.game.dayTripDone : s.game.nightTripDone))
+  const collapsed = useCollapsed('travel')
   const { t } = useI18n()
   return (
     <section className="rounded border border-zinc-800 bg-zinc-900/40">
-      <h2 className="border-b border-zinc-800 px-3 py-2 font-bold tracking-wide text-amber-300 uppercase">{t.travel.title}</h2>
-      {/* Raison commune à toutes les destinations : dite une fois plutôt que sous chaque bouton */}
-      {tripDone && <p className="px-3 pt-2 text-xs text-zinc-400">{t.error['trip-done']}</p>}
-      <LastTrip />
-      <Exposure />
-      <ul className="divide-y divide-zinc-800">
-        {order.map((id) => (
-          <DistrictRow key={id} districtId={id} />
-        ))}
-      </ul>
+      <h2 className="border-b border-zinc-800 px-3 py-2 tracking-wide text-amber-300">
+        <CollapseToggle id="travel">{t.travel.title}</CollapseToggle>
+      </h2>
+      {!collapsed && (
+        <>
+          {/* Raison commune à toutes les destinations : dite une fois plutôt que sous chaque bouton */}
+          {tripDone && <p className="px-3 pt-2 text-xs text-zinc-400">{t.error['trip-done']}</p>}
+          <LastTrip />
+          <Exposure />
+          <ul className="divide-y divide-zinc-800">
+            {order.map((id) => (
+              <DistrictRow key={id} districtId={id} />
+            ))}
+          </ul>
+        </>
+      )}
     </section>
   )
 }

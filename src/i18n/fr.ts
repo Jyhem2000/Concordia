@@ -175,7 +175,7 @@ export const fr = {
     messages: [
       'Aeterna rappelle que la sobriété est la plus belle des libertés.',
       "Votre consommation d'eau a été jugée exemplaire. Presque.",
-      'Le Comité de Pureté remercie les citoyens qui signalent leurs voisins.',
+      'Le Comité de Pureté remercie les citoyens qui signalent les citoyens deviants.',
       "La canicule est une opinion. L'algorithme, lui, est un fait.",
       'Un Citoyen-Livreur sourit, un Citoyen-Livreur produit.',
       'Les prix montent pour votre sécurité. Merci de votre compréhension.',

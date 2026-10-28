@@ -5,7 +5,9 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import AmountForm from '../shared/AmountForm.tsx'
 import Button from '../shared/Button.tsx'
+import CollapseToggle from '../shared/CollapseToggle.tsx'
 import Detailed from '../shared/Detailed.tsx'
+import { useCollapsed } from '../shared/useCollapsed.ts'
 
 type VehicleOfferProps = {
   vehicleId: VehicleId
@@ -24,6 +26,8 @@ export default function GarageDesk() {
   const missing = missingChassis(game)
   const affordable = Math.min(missing, Math.floor(game.cash / price.total))
   const vehicle = VEHICLES[game.vehicleId]
+  const modulesCollapsed = useCollapsed('garage:modules')
+  const vehiclesCollapsed = useCollapsed('garage:vehicles')
 
   return (
     <>
@@ -37,22 +41,28 @@ export default function GarageDesk() {
       </div>
 
       <div className="border-t border-zinc-800 pt-2">
-        <p className="font-bold">{t.garage.modulesTitle(game.modules.mounted.length, vehicle.moduleSlots)}</p>
-        <ul className="mt-1 space-y-2">
-          {MODULE_IDS.map((id) => (
-            <ModuleRow key={id} moduleId={id} />
-          ))}
-        </ul>
+        <CollapseToggle id="garage:modules">{t.garage.modulesTitle(game.modules.mounted.length, vehicle.moduleSlots)}</CollapseToggle>
+        {!modulesCollapsed && (
+          <ul className="mt-1 space-y-2">
+            {MODULE_IDS.map((id) => (
+              <ModuleRow key={id} moduleId={id} />
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="border-t border-zinc-800 pt-2">
-        <p className="font-bold">{t.garage.vehiclesTitle}</p>
-        <p className="text-xs text-zinc-400">{t.garage.vehicleRule}</p>
-        <ul className="mt-1 space-y-2">
-          {VEHICLE_IDS.filter((id) => id !== game.vehicleId).map((id) => (
-            <VehicleOffer key={id} vehicleId={id} />
-          ))}
-        </ul>
+        <CollapseToggle id="garage:vehicles">{t.garage.vehiclesTitle}</CollapseToggle>
+        {!vehiclesCollapsed && (
+          <>
+            <p className="text-xs text-zinc-400">{t.garage.vehicleRule}</p>
+            <ul className="mt-1 space-y-2">
+              {VEHICLE_IDS.filter((id) => id !== game.vehicleId).map((id) => (
+                <VehicleOffer key={id} vehicleId={id} />
+              ))}
+            </ul>
+          </>
+        )}
       </div>
     </>
   )

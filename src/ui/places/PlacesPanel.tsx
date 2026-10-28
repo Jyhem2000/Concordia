@@ -12,7 +12,9 @@ import type { LocationId, LocationService } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import AmountForm from '../shared/AmountForm.tsx'
+import CollapseToggle from '../shared/CollapseToggle.tsx'
 import Detailed from '../shared/Detailed.tsx'
+import { useCollapsed } from '../shared/useCollapsed.ts'
 import CrewDesk from './CrewDesk.tsx'
 import GarageDesk from './GarageDesk.tsx'
 import { CassandreDesk, ForgeryDesk, KarmaDesk, MorgueDesk, VelvetDesk } from './SpecialDesks.tsx'
@@ -48,16 +50,19 @@ export default function PlacesPanel() {
 /** Les lieux spéciaux ouvrent de 06h00 à 20h00 (chap. 2) */
 function Place({ locationId, children }: PlaceProps) {
   const closed = useGameStore((s) => s.game.phase === 'night' || s.game.dayOver)
+  const collapsed = useCollapsed(`place:${locationId}`)
   const { t } = useI18n()
 
   return (
     <section className="rounded border border-zinc-800 bg-zinc-900/40 p-3 text-sm">
-      <h2 className="flex items-center gap-1.5 font-bold text-amber-300 uppercase">
-        <Landmark size={14} aria-hidden="true" />
-        {t.location[locationId].name}
+      <h2 className="text-amber-300">
+        <CollapseToggle id={`place:${locationId}`}>
+          <Landmark size={14} aria-hidden="true" />
+          {t.location[locationId].name}
+        </CollapseToggle>
       </h2>
       <p className="text-xs text-zinc-400">{t.location[locationId].subtitle}</p>
-      {closed ? (
+      {collapsed ? null : closed ? (
         <p className="mt-2 flex items-center gap-1.5 text-indigo-300">
           <Lock size={14} aria-hidden="true" />
           {t.place.closedAtNight}
