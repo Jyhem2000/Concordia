@@ -198,7 +198,7 @@ describe('guichets : dette et compte offshore', () => {
   })
 })
 
-describe('produits utilisables et Hachoir', () => {
+describe('produits utilisables', () => {
   const crates = (productId: ProductId, qty: number, boughtDay = 1): GameState['cargo'][number] => ({
     productId,
     qty,

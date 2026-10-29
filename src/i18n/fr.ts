@@ -822,11 +822,11 @@ export const fr = {
       standard: {
         title: "Survivant du Mois d'Août",
         epilogue:
-          'Tu as échappé au hachoir, mais ton pécule ne rachète pas ta liberté. Demain 06h00, septembre commence et tu remontes dans ta fourgonnette…',
+          'Tu as échappé au recyclage, mais ton pécule ne rachète pas ta liberté. Demain 06h00, septembre commence et tu remontes dans ta fourgonnette…',
       },
       'bio-bricks': {
         title: 'Recyclé en Bio-Briques',
-        epilogue: "L'audit tombe, la dette court toujours. Viktor ne rachète pas, il recycle : direction le hachoir.",
+        epilogue: "L'audit tombe, la dette court toujours. Viktor ne rachète pas, il recycle : direction l'usine de Bio-Briques.",
       },
       death: {
         title: 'Mort biologique',

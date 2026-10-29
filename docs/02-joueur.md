@@ -129,7 +129,7 @@ Minuit sonne quand le joueur se couche le Jour 30, après un éventuel trajet de
 ### Défaites (Game Over)
 * **Mort biologique :** Santé à 0 PV.
 * **Exécution sommaire :** fouille effective avec `[T4-06]` en soute — *« Suicidé de 3 balles dans le dos »*.
-* **Recyclé en Bio-Briques :** dette non soldée à l'audit ; `[LOC-D1-1]` fait passer le joueur au hachoir.
+* **Recyclé en Bio-Briques :** dette non soldée à l'audit ; les Bouchers de `[LOC-D1-1]` livrent le joueur à l'usine de Bio-Briques.
 
 ### Les grandes fins
 L'écran « Objectifs du Jour 30 » les affiche une fois la dette initiale soldée (chap. 7).
@@ -139,6 +139,6 @@ L'écran « Objectifs du Jour 30 » les affiche une fois la dette initiale sold�
 | **Ultime — « Le Saboteur du Monde d'Avant »** | Score ≥ seuil Ultime + au moins **1 caisse de `[T4-06]`** en soute + être **en `[D4]`** à minuit | Tu achètes le passage sur le chalutier blindé des cartels à l'écluse de `[D4]`. En franchissant le mur vers les îles libres, tu diffuses les preuves sur le Fil Rose : Concordia s'embrase derrière toi pendant que tu sirotes un vrai whisky au soleil. |
 | **Élite — « Nouvel Oligarque d'Olympus-Green »** | Score ≥ seuil Élite + statut **Citoyen Or** (sinon, dossier rejeté : fin suivante) | Tu rachètes en sous-main le fauteuil d'un Haut-Commissaire éliminé lors d'une purge et emménages sous la verrière de `[D6]` : c'est toi qui commandes de la vraie viande aux petits livreurs. |
 | **Mafieuse — « Baron de Rust Valley »** | Score ≥ seuil Mafieuse (aucun prérequis d'ICC) | Ton casier est trop grillé pour la haute société, mais tu rachètes la boucherie de `[LOC-D1-1]` et les quais de `[D4]` : tu es le nouveau parrain de la contrebande. |
-| **Standard — « Survivant du Mois d'Août »** | Aucune autre fin atteinte | Tu as échappé au hachoir, mais ton pécule ne rachète pas ta liberté. Demain 06h00, septembre commence et tu remontes dans ta fourgonnette… |
+| **Standard — « Survivant du Mois d'Août »** | Aucune autre fin atteinte | Tu as échappé au recyclage, mais ton pécule ne rachète pas ta liberté. Demain 06h00, septembre commence et tu remontes dans ta fourgonnette… |
 
 *Seuils de score : `ENDINGS` dans [`balance.ts`](../src/data/balance.ts), à recaler en jouant.*

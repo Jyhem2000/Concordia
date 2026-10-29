@@ -6,7 +6,11 @@
 > * « Demande ici » renommé « Rachat au cours », origine de chaque produit en boutique affichée ;
 > * Hachoir de Viktor, tabassage du Jour 10 et emprunt tactique retirés.
 >
-> **Encore ouvert :** chantage du Velvet-Silo, laissez-passer de la Morgue, Karma-Cham, collecte de protection, pompes fermées la nuit, rendements décroissants, plafond des événements, tranches du compte offshore.
+> **Conservés :** Karma-Cham et les pompes fermées la nuit (elles forcent à anticiper).
+>
+> **Recommandé de garder, à confirmer :** chantage du Velvet-Silo, laissez-passer de la Morgue, collecte de protection, rendements décroissants, plafond des événements, tranches du compte offshore (voir le tableau plus bas).
+>
+> **Nouvelle question :** le filet de sécurité après la dette initiale (voir *Avance de survie* plus bas).
 
 Analyse de conception. Chaque mécanique est revue sous trois angles : **ce qu'elle apporte au joueur**, **ce qu'elle coûte** (règles à apprendre, chiffres à l'écran, code), **ce que disent les mesures** (`sim/reports/`). Les propositions retenues rejoindront leurs chapitres ; les chiffres seront mesurés au simulateur avant d'être fixés.
 
@@ -66,8 +70,13 @@ Repérées en relisant les docs, le code et la campagne 4 (retraits). Chaque lig
 | **Karma-Cham** | négatif (−9 300 ₡) depuis que la nuit rapporte | revoir le prix, ou vérifier que le bot l'utilise bien |
 | **Collecte de protection** | ne change pas la survie (même à 20 %), retire du score : le joueur averti dépose avant | garder (elle donne une raison de déposer) ou retirer avec l'inflation |
 | **Pompes fermées la nuit sous 50 d'ICC** | règle de niche, jamais mesurée | à mesurer, sinon retirer |
-| **Rendements décroissants du savoir-faire** | règle invisible : le joueur ne sait pas pourquoi son bonus ne s'additionne pas | garder mais l'afficher, ou remplacer par un plafond simple |
+| **Rendements décroissants du savoir-faire** | au-delà d'un seuil, le bonus ne compte qu'à moitié ; déjà affiché dans le détail du prix de vente | garder |
 | **Plafond et choix du plus fort écart des événements** | trois règles empilées (plafond, plus fort écart, influence par-dessus) | garder le plafond seul |
+
+### Avance de survie après la dette initiale
+* **Le besoin d'origine :** un joueur qui a tout dépensé et se fait arrêter n'a plus rien. C'est l'**avance de survie** qui y répond (toujours en jeu), pas l'emprunt tactique retiré.
+* **Le trou :** l'avance se ferme dès que la dette initiale est soldée. Ensuite, un joueur ruiné n'a plus que le siphonnage (une ration gratuite) et les livraisons du DSC (prime sans capital) pour repartir : c'est lent.
+* **Piste :** ouvrir l'avance **toute la partie**, toujours avec le même total sur la partie. Le filet reste le même, la règle devient plus simple (plus de condition), et un joueur qui s'en sert tard remet une dette en jeu avant l'audit : de la tension de fin de partie, qui manque aujourd'hui.
 
 **Restent utiles** malgré leur coût : la clause anti-arbitrage (sans elle, acheter de jour et revendre au même endroit la nuit au profil festif ×2 serait un gain sans trajet), l'avance de survie (+16 points de survie), la saturation et le pic suspect (ils répartissent les ventes dans l'espace).
 

@@ -26,7 +26,7 @@ Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la dé
 
 | Thème | Mécaniques | Où lire |
 | :--- | :--- | :--- |
-| **Partie** | objectif, audit du Jour 30, défaites (hachoir, mort, exécution), grandes fins, score | chap. 2 → chap. 7 (dette, compte offshore) |
+| **Partie** | objectif, audit du Jour 30, défaites (Bio-Briques, mort, exécution), grandes fins, score | chap. 2 → chap. 7 (dette, compte offshore) |
 | **Jauges** | ICC (paliers, suspicion, gains de route et plafond), Santé, châssis, carburant, Exemption Métabolique et Sédation | chap. 2 → chap. 5 (capacités du véhicule) |
 | **Journée** | moments (Journée, 20h00, Nuit), routine de 06h00, service de jour, dilemme de 20h00 (relais, bivouac, tournée de nuit), livraison officielle du jour, missions de nuit et caisses scellées, épuisement, demi-journée perdue, immobilisation, dépannage d'urgence | chap. 2 |
 | **Trajet** | ordre de résolution, consommation, usure de nuit et canicule, carte et districts traversés, couches du réseau (surface, galeries, quais), zone hors-réseau, mission de nuit | chap. 2 → chap. 4 → chap. 8 (canicule, aléas de jour) |
@@ -62,8 +62,8 @@ Les docs décrivent le jeu complet ; tout n'est pas encore en jeu. Ce tableau di
 ## Propositions en cours
 Analyses de conception pas encore tranchées ; les règles retenues rejoindront leurs chapitres.
 * [Mini-progression : débloquer les mécaniques au fil de la partie](propositions/progression.md)
-* [Mécaniques à simplifier](propositions/simplification.md) : premier lot adopté (inflation, Laverie, rachat, hachoir, tabassage, emprunt tactique), le reste ouvert
-* [Fin « Le Fantôme d'Olympus-Green » : le serveur et Glitch en `[D6]`](propositions/fin-fantome.md)
+* [Mécaniques à simplifier](propositions/simplification.md) : premier lot adopté (inflation, Laverie, rachat, Hachoir de Viktor, tabassage, emprunt tactique), le reste ouvert
+* [Deux chemins vers Olympus-Green : l'Élite par cooptation et le Résident Réécrit](propositions/fins-olympus.md)
 
 ## Feuille de route
 Étapes restantes, dans l'ordre des dépendances :

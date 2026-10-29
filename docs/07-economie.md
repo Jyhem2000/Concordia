@@ -89,7 +89,7 @@ Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est 
 * *Lore :* les transactions du marché noir se font de puce à puce, en local. Pour économiser ses serveurs, Aeterna n'analyse jamais l'historique P2P : à l'audit, elle formate brutalement toutes les puces. Personne n'est démasqué, mais tout crédit non transféré offshore est vaporisé.
 
 ### Dette mafieuse
-* **Créancier :** `[LOC-D1-1]`. **Solde unique :** la dette de départ, les emprunts et les reliquats (dépannage, collecte) s'ajoutent au même solde. **Départ :** [`balance.ts`](../src/data/balance.ts).
+* **Créancier :** `[LOC-D1-1]`. **Solde unique :** la dette de départ, l'avance de survie et les reliquats (dépannage, collecte) s'ajoutent au même solde. **Départ :** [`balance.ts`](../src/data/balance.ts).
 * **Dette initiale soldée :** statut acquis **définitivement** la première fois que le solde atteint 0. Il ferme l'avance de survie et débloque la collecte de protection et la modale « Objectifs du Jour 30 ».
 * **Taux :** un taux quotidien, arrondi au ₡ chaque matin (`DEBT_DAILY_RATE` dans [`balance.ts`](../src/data/balance.ts)) sur tout le solde, composés à chaque routine matinale (pas le Jour 1).
 * **Échéances :**

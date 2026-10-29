@@ -232,7 +232,7 @@ export function endingFor(state: GameState): Ending {
   return { id: 'standard', score }
 }
 
-/** Audit du Jour 30 à minuit : hachoir si la dette n'est pas soldée, sinon Formatage Brutal du Cash-Puce */
+/** Audit du Jour 30 à minuit : Bio-Briques si la dette n'est pas soldée, sinon Formatage Brutal du Cash-Puce */
 function audit(state: GameState): GameState {
   const ending = endingFor(state)
   return { ...state, status: 'finished', ending, cash: ending.id === 'bio-bricks' ? state.cash : 0 }

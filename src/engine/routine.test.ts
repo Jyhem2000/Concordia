@@ -62,7 +62,7 @@ describe('audit du Jour 30', () => {
   const offshore = (score: number) => ({ deposited: score, interest: 0 })
   const solvent = (patch: Partial<GameState>) => gameAt(GAME_LENGTH_DAYS, { debt: 0, initialDebtPaid: true, ...patch })
 
-  it('envoie au hachoir avec une dette non soldée', () => {
+  it('recycle en Bio-Briques avec une dette non soldée', () => {
     const state = sleep(gameAt(GAME_LENGTH_DAYS))
     expect(state.status).toBe('finished')
     expect(state.ending).toEqual({ id: 'bio-bricks', score: 0 })
