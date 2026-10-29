@@ -95,8 +95,15 @@ export const SATURATED_SALE_FACTOR = 0.5
 /** Chaque matin, la demande restante remonte de quota / DEMAND_REFILL_DIVISOR (arrondi au supérieur) */
 export const DEMAND_REFILL_DIVISOR = 3
 
-/** Coefficient de vente pendant le couvre-feu, selon le profil nuit du produit */
-export const NIGHT_PROFILE_FACTOR: Readonly<Record<NightProfile, number>> = { festive: 2, diurnal: 0.8 }
+/** Coefficient de vente pendant le couvre-feu, selon le profil nuit du produit (hors after) */
+export const NIGHT_PROFILE_FACTOR: Readonly<Record<NightProfile, number>> = { festive: 1.5, diurnal: 0.8 }
+
+/**
+ * Afters du couvre-feu (chap. 2) : chaque soir, une fête clandestine dans un de ces districts, annoncée dès 06h00.
+ * Là, le profil festif vaut `festiveFactor` (au lieu de NIGHT_PROFILE_FACTOR) et la foule réduit le malus de nuit
+ * hors mission à `nightRiskFactor`.
+ */
+export const AFTER = { districts: ['D1', 'D2', 'D4', 'D6'] as readonly DistrictId[], festiveFactor: 3.5, nightRiskFactor: 0.5 }
 
 /** Savoir-faire : au-delà de ce seuil, l'excédent ne compte que pour KNOW_HOW_EXCESS_FACTOR */
 export const KNOW_HOW_SOFT_CAP = 1.5

@@ -1,4 +1,4 @@
-import { Eye, MapPin, Siren } from 'lucide-react'
+import { Eye, MapPin, PartyPopper, Siren } from 'lucide-react'
 import { ENDINGS, WANTED } from '../../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
@@ -160,6 +160,8 @@ function DistrictRow({ districtId }: DistrictRowProps) {
   const events = useGameStore((s) => s.game.events)
   const phase = useGameStore((s) => s.game.phase)
   const peak = useGameStore((s) => s.game.suspiciousPeaks.includes(districtId))
+  // After du couvre-feu de ce soir, annoncée dès 06h00
+  const after = useGameStore((s) => s.game.after === districtId)
   const { t, credits } = useI18n()
 
   const memoryLabel = !memory ? t.travel.memoryNever : memory.day === day ? t.travel.memoryToday : t.travel.memoryDaysAgo(day - memory.day)
@@ -183,6 +185,12 @@ function DistrictRow({ districtId }: DistrictRowProps) {
               <span className="ml-2 inline-flex text-sky-300" title={t.travel.patrol}>
                 <Siren size={14} aria-hidden="true" />
                 <span className="sr-only">{t.travel.patrol}</span>
+              </span>
+            )}
+            {after && (
+              <span className="ml-2 inline-flex text-fuchsia-300" title={t.travel.after}>
+                <PartyPopper size={14} aria-hidden="true" />
+                <span className="sr-only">{t.travel.after}</span>
               </span>
             )}
             {peak && (

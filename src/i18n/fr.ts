@@ -94,6 +94,7 @@ export const fr = {
     'rule.saturation': 'Marché saturé',
     'rule.know-how': 'Savoir-faire',
     'rule.night-festive': 'Nuit festive',
+    'rule.after': 'After du couvre-feu',
     'rule.night-diurnal': 'Nuit (clients endormis)',
     'rule.diminishing-returns': 'Rendements décroissants',
     'rule.anti-arbitrage': 'Pas de voyage, pas de bonus',
@@ -641,6 +642,7 @@ export const fr = {
       racket: (place: string) => `Une barricade des milices barre le passage, ${place}. Les miliciens réclament leur dû.`,
     },
     compartment: (crates: string) => `Double fond : ${crates}. À la fouille, chance que les agents le trouvent :`,
+    sponsorCovered: (crates: string) => `Commande du Velvet-Silo : ${crates}, sous la protection de ton parrain. Les agents ne les verront pas.`,
     jammed:
       'Votre brouilleur a fait décrocher le drone : la BRC a dû dresser ce barrage plus loin. Attention : découvert à la fouille, il vaut une garde à vue.',
     chance: 'Chance',
@@ -764,6 +766,7 @@ export const fr = {
     deviated: (wanted: string) => `écart de mission enregistré, ${wanted}`,
     injected: (done: number, needed: number) => `Glitch a injecté un morceau de ton dossier dans Aeterna (${done}/${needed})`,
     mission: 'Mission de nuit',
+    after: 'After du couvre-feu ce soir',
     trust: (deliveries: number, factor: string) =>
       `Confiance du DSC : ${deliveries} commande${deliveries > 1 ? 's' : ''} livrée${deliveries > 1 ? 's' : ''}, prime ${factor}.`,
     cargoTitle: (used: number, capacity: number) => `Soute ${used}/${capacity}`,
@@ -802,6 +805,8 @@ export const fr = {
       `Mission de ce soir : livrer ${crates} caisses scellées à ${district}, prime ${fee}.`,
     missionHere: (district: string) => `Mission de ce soir vers ${district} : vous y êtes déjà, rien à livrer.`,
     noMission: 'Pas de mission de nuit ce soir : toute tournée sera hors mission.',
+    after: (district: string, festive: string, elsewhere: string, cover: string) =>
+      `After du couvre-feu ce soir à ${district} : la fête paie le festif ${festive} (${elsewhere} ailleurs la nuit), et la foule retire ${cover} du malus d'une tournée hors mission.`,
     missionActive: (district: string) => `Tournée de nuit sur mission : livrer à ${district}.`,
     offMission: 'Tournée de nuit hors mission : tout trajet sera un écart enregistré.',
     sleepRelay: 'Dormir au relais',

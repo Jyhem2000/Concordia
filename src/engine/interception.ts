@@ -393,7 +393,7 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
       // Soute légale : la fausse déclaration ne coûte que l'ICC
       if (legalOnly(caught)) return report(caught, chance, false, true, true)
       return report(
-        { ...caught, interception: { kind: state.interception?.kind ?? 'brc', acted: true, bluffFailed: true } },
+        { ...caught, interception: { ...(state.interception ?? { kind: 'brc' }), acted: true, bluffFailed: true } },
         chance,
         false,
         false,
@@ -689,7 +689,14 @@ function finish(state: GameState, report: InterceptionReport, executed: boolean,
   // Contrôle de la BRC franchi sans garde à vue : noté au carnet (Vance, chap. 5)
   const brc = state.interception !== null && state.interception.kind !== 'racket'
   const noted = brc && custodyDays === 0 ? noteControlPassed(seized) : seized
-  const passed: GameState = { ...noted, interception: null, interceptionReport: { ...fullReport, custodyDays, jammerSeized: jammer !== undefined } }
+  // Les caisses sous la protection du parrain reviennent à bord
+  const covered = state.interception?.covered ?? []
+  const passed: GameState = {
+    ...noted,
+    cargo: [...noted.cargo, ...covered],
+    interception: null,
+    interceptionReport: { ...fullReport, custodyDays, jammerSeized: jammer !== undefined },
+  }
   return custodyDays > 0 ? serveCustody(passed, custodyDays) : arrive(passed)
 }
 

@@ -60,6 +60,8 @@ Le joueur accepte la fouille (**0**) ou tente une action : **1** Bluff, **2** Co
 
 **Fouille effective :** fouille acceptée, ou échec d'un bluff, d'une corruption, d'une fuite ou d'une éjection — déclencheur de la règle de mort de `[T4-06]` et de la saisie du brouilleur `[MOD-09]` (garde à vue d'au moins un jour).
 **Double fond** (chap. 5) : à chaque fouille effective qui confisque, un second jet décide si les agents le trouvent. Non trouvé, ses caisses sont gardées et la sanction se juge sur la soute visible ; trouvé, tout est confisqué, avec une perte d'ICC en plus. L'écran annonce les caisses cachées et la chance qu'il soit trouvé ici.
+
+**Protection du parrain** (chap. 4) : dans le district du Velvet-Silo, les caisses d'une commande VIP en cours (au plus le nombre commandé, échéance non passée) sont hors de vue des agents. Elles ne comptent pas dans le risque du trajet, et au barrage elles sont mises de côté : ni fouille, ni saisie, ni amende, ni éjection ; elles reviennent à bord à la fin du contrôle. L'écran les annonce.
 **Sédation** (chap. 2) : **−10 %** au bluff, à la corruption et à la fuite.
 
 ### 0. Accepter la fouille (sanction de base)

@@ -30,6 +30,7 @@ export type RuleId =
   | 'saturation'
   | 'know-how'
   | 'night-festive'
+  | 'after'
   | 'night-diurnal'
   | 'diminishing-returns'
   | 'anti-arbitrage'

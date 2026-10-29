@@ -67,6 +67,8 @@ export default function InterceptionScreen() {
     const qty = ownedQty(hiddenCargo(game).hidden, id)
     return qty > 0 ? [`${qty} × ${t.product[id].name}`] : []
   })
+  // Protection du parrain (chap. 4) : caisses de la commande VIP mises de côté
+  const covered = (interception.covered ?? []).map((lot) => `${lot.qty} × ${t.product[lot.productId].name}`)
   const custody = (days: number) => (days > 0 ? [t.interception.custody(days)] : [])
   const available = (move: InterceptionMove) => checkMove(game, move) !== 'move-unavailable'
 
@@ -109,6 +111,7 @@ export default function InterceptionScreen() {
             <Detailed breakdown={compartmentDetection(game)} format={pct} />
           </p>
         )}
+        {covered.length > 0 && <p className="mt-1 text-amber-200">{t.interception.sponsorCovered(covered.join(', '))}</p>}
         {lethalProduct && !racket && (
           <p role="alert" className="mt-2 flex items-center gap-1.5 font-bold text-red-400">
             <Skull size={16} aria-hidden="true" />

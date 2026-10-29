@@ -8,7 +8,7 @@ import { debtInterestBreakdown, offshoreBalance, offshoreInterestBreakdown, prot
 import { isPerishable, removeRotten } from './condition.ts'
 import { expireVip } from './services.ts'
 import { drawDayOffer } from './delivery.ts'
-import { drawNightOffer, reclaimSealed } from './night.ts'
+import { drawAfter, drawNightOffer, reclaimSealed } from './night.ts'
 import { mountedEffect, recoverDumped } from './equipment.ts'
 import { changeHealth, gainRouteIcc, iccTier } from './gauges.ts'
 import { crewEffect, payCrew, refreshExemption } from './crew.ts'
@@ -176,7 +176,8 @@ function morningRoutine(state: GameState, night: Night): GameState {
     briefing.crewLost = s.crew.active
     s = { ...s, crew: { ...s.crew, active: null, paidDay: null, lost: [...s.crew.lost, s.crew.active], freeHire: true } }
   }
-  s = { ...s, markets: drawMarkets(s, rng, s.markets), rng: rng.state }
+  // After du couvre-feu de ce soir, annoncée avec les marchés
+  s = { ...s, markets: drawMarkets(s, rng, s.markets), after: drawAfter(rng), rng: rng.state }
 
   // 7. Effets du matin des événements : canicule, sas (chap. 8)
   // Le caisson cryo protège la soute de la canicule

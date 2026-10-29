@@ -49,7 +49,7 @@ Les docs décrivent le jeu complet ; tout n'est pas encore en jeu. Ce tableau di
 
 | Chap. | En jeu | À venir |
 | :---: | :--- | :--- |
-| 2 | Jauges (ICC, Santé, châssis, carburant), journée, couvre-feu, épuisement, demi-journée perdue, dépannage, audit et fins (Résident Réécrit et Élite par cooptation compris), Exemption Métabolique et Sédation, pompes officielles fermées la nuit, livraison officielle du jour, confiance du DSC et mission de nuit débloquée | — |
+| 2 | Jauges (ICC, Santé, châssis, carburant), journée, couvre-feu, épuisement, demi-journée perdue, dépannage, audit et fins (Résident Réécrit et Élite par cooptation compris), Exemption Métabolique et Sédation, pompes officielles fermées la nuit, livraison officielle du jour, confiance du DSC et mission de nuit débloquée, after du couvre-feu | — |
 | 3 | Tags, masquage, fraîcheur, casse, explosions, actions des produits | — |
 | 4 | Carte, districts, racket et portique de `[D4]`, tous les lieux spéciaux et leurs services, services réservés (voies officielle et pègre) | — |
 | 5 | Véhicules, modules, catalogue du garage en rayons, double fond, équipage (débloqué par des actes) et salaires | — |
@@ -64,7 +64,7 @@ Analyses de conception pas encore tranchées ; les règles retenues rejoindront 
 * [Mini-progression : débloquer les mécaniques au fil de la partie](propositions/progression.md)
 * [Mécaniques à simplifier](propositions/simplification.md) : premier lot adopté (inflation, Laverie, rachat, Hachoir de Viktor, tabassage, emprunt tactique), le reste ouvert
 * [Deux chemins vers Olympus-Green](propositions/fins-olympus.md) : adopté (Élite par cooptation, Résident Réécrit), assoupli après remesure
-* [Des nuits qui demandent un choix](propositions/nuits.md) : ouvert (afters du couvre-feu, écrémage des caisses scellées, deux ordres de mission)
+* [Des nuits qui demandent un choix](propositions/nuits.md) : afters du couvre-feu adoptées ; écrémage des caisses scellées et deux ordres de mission ouverts
 
 ## Feuille de route
 Étapes restantes, dans l'ordre des dépendances :

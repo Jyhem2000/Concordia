@@ -1,6 +1,6 @@
 # Proposition — Des nuits qui demandent un choix
 
-> **Ouvert** : à trancher avant tout code. Rien n'est encore écrit dans les chapitres ni dans les données.
+> **A adopté le 29/10/2026** : écrit dans les chap. 2, 7, 9 et 10, et dans le code (`AFTER`). Simplification : pas de quota propre à l'after, la demande restante du district suffit. B et C restent ouverts.
 
 ## Constat
 Aujourd'hui, la nuit se résume à trois règles :

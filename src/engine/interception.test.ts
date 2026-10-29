@@ -16,6 +16,7 @@ import {
   WANTED,
 } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
+import { VELVET } from '../data/locations.ts'
 import { PRODUCTS } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import { cargoUsed, ownedQty } from './cargo.ts'
@@ -33,10 +34,12 @@ import {
   toll,
   tollInKind,
 } from './interception.ts'
+import { risk } from './risk.ts'
 import { createRng } from './rng.ts'
 import { sleep } from './routine.ts'
+import { velvetDistrict } from './services.ts'
 import { defined, errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
-import type { CargoLot, GameState, Interception, Offer, ProductId } from './types.ts'
+import type { CargoLot, DistrictId, GameState, Interception, Offer, ProductId } from './types.ts'
 
 const lot = (productId: ProductId, qty: number): CargoLot => ({ productId, qty, unitCost: 1, travelled: true, boughtDay: 1, damaged: false })
 const brc: Interception = { kind: 'brc', acted: false, bluffFailed: false }
@@ -365,5 +368,39 @@ describe('contrôle volant', () => {
     expect(flyingCheckShare(state, 'D5', true)).toBeCloseTo(DISTRICTS.D5.flyingCheckShare + FLYING_CHECK.patrolBonus)
     expect(flyingCheckShare(state, 'D4', true)).toBe(0)
     expect(drawInterception(createRng(LOW_ROLL_RNG), 1, state, 'D4')?.kind).toBe('racket')
+  })
+})
+
+describe('protection du parrain (chap. 4)', () => {
+  // Commande VIP d'un produit Tech (détecté au Silo), plus des caisses illégales hors commande
+  const hidden = VEHICLES['VEH-01'].hiddenCompartment
+  const ordered = (patch: Partial<GameState> = {}): GameState =>
+    gameAt(5, {
+      districtId: 'D5',
+      cash: 10_000,
+      cargo: [lot('T2-04', VELVET.vip.crates), lot('T2-03', hidden + 3)],
+      vip: { productId: 'T2-04', day: 5 },
+      ...patch,
+    })
+  const without = (state: GameState): GameState => ({ ...state, cargo: state.cargo.filter((l) => l.productId !== 'T2-04') })
+  const tripRisk = (state: GameState, to: DistrictId) => risk(state, to, { includePatrol: false })
+
+  it('rend invisibles au risque les caisses de la commande VIP en cours, dans le district du Silo seulement', () => {
+    const state = ordered()
+    expect(tripRisk(state, velvetDistrict())).toBe(tripRisk(without(state), velvetDistrict()))
+    expect(tripRisk(state, 'D2')).not.toBe(tripRisk(without(state), 'D2'))
+    // Échéance passée : plus de protection
+    const late = ordered({ day: 5 + VELVET.vip.deadlineDays + 1 })
+    expect(tripRisk(late, velvetDistrict())).toBeGreaterThan(tripRisk(without(late), velvetDistrict()))
+  })
+
+  it('met ces caisses de côté au barrage du Silo et les rend après la fouille', () => {
+    const stoppedAtSilo = run(ordered({ rng: LOW_ROLL_RNG }), { type: 'travel', to: velvetDistrict() })
+    expect(stoppedAtSilo.interception?.covered).toEqual([lot('T2-04', VELVET.vip.crates)])
+    expect(ownedQty(stoppedAtSilo.cargo, 'T2-04')).toBe(0)
+    const searched = run(stoppedAtSilo, { type: 'intercept', move: 'search' })
+    expect(ownedQty(searched.cargo, 'T2-04')).toBe(VELVET.vip.crates)
+    // Le reste de l'illégal est saisi (hors double fond)
+    expect(ownedQty(searched.cargo, 'T2-03')).toBeLessThanOrEqual(hidden)
   })
 })

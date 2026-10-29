@@ -340,3 +340,50 @@ Changements :
   - Les exécutions montent à 13–14 %, car le serveur, plus fréquent, est chassé plus souvent.
 - **Saboteur : le serveur plus fréquent ne change rien.** Le verrou est le seuil de 500 000 ₡ (moyenne 60 000 ₡ en Équilibré). C'est voulu pour la fin ultime, mais même à 300 000 ₡ le taux reste à 1–6 %.
 - **Critère 2 toujours non tenu.** L'ordre voulu (Baron > Élite > Résident > Saboteur) n'est pas encore lisible : Élite et Résident sont au même niveau.
+
+## Protection du parrain et afters du couvre-feu
+Changements :
+- **Protection du parrain :**
+  - dans le district du Silo, les caisses d'une commande VIP en cours sont hors de vue des agents (ni risque, ni fouille) ;
+  - elles reviennent à bord à la fin du contrôle.
+- **Afters du couvre-feu :**
+  - chaque soir, une fête clandestine est tirée dans `[D1]`, `[D2]`, `[D4]` ou `[D6]` ;
+  - le profil festif y vaut ×3,5, et ×1,5 ailleurs la nuit (×2 avant) ;
+  - la foule retire 50 % du malus de nuit hors mission.
+- **Bot noctambule :**
+  - il estime la revente au district d'arrivée, after comprise ;
+  - de jour, il garde ou achète le festif pour l'after du soir (revente escomptée de 25 %).
+
+**Lecture des campagnes :** le tirage de l'after décale le générateur. Toutes les parties changent donc, et comme chaque bot joue les mêmes 200 graines, la campagne entière bouge d'un bloc. Par exemple, la survie du Sans build Équilibré passe de 88 à 81 %, sans aucune règle qui le touche. On compare donc les variantes **à graines égales**, dans la même sonde, et non avec les campagnes précédentes.
+
+**Sonde de la nuit** (`sim/probe-difficulte.ts pression … festif= after= foule=`, 200 parties, mêmes graines) :
+
+| Variante | Sans build · Équilibré | Nuit festive · Prudent / Équilibré / Casse-cou | Couverture légale · Équilibré |
+| :--- | :--- | :--- | :--- |
+| Sans after (≈ avant) | 80 %, 63k | 90 / 88 / 74 %, 24k / 75k / 117k | 76 %, 82k |
+| After, festif ×1,25 ailleurs | 80 %, 65k | 92 / 86 / 77 %, 33k / 66k / 139k | 70 %, 82k |
+| **After, festif ×1,5 ailleurs (retenu)** | 81 %, 67k | 94 / 90 / 73 %, 40k / 87k / 122k | 69 %, 76k |
+| After, festif ×2 ailleurs | 79 %, 66k | 96 / 91 / 83 %, 50k / 107k / 132k | 76 %, 78k |
+| After sans foule, festif ×2 | 81 %, 67k | 95 / 93 / 81 %, 45k / 101k / 118k | 76 %, 86k |
+
+- **Retenu : ×1,5 hors after.**
+  - À ×1,25, la nuit redevient plate : la Nuit festive Équilibré fait autant que le Sans build.
+  - À ×2, l'after devient un pur bonus et la Nuit festive écrase le reste (+60 % sur le Sans build).
+  - À ×1,5, la nuit paie en Prudent et en Équilibré (+30 % sur le Sans build, survie 90 %), mais pas en Casse-cou, qui roule déjà toutes les nuits.
+- **La foule** compte peu sur le score (un peu plus de sécurité). Elle est gardée pour le lore et pour le choix mission ou after.
+- **Point ouvert : Couverture légale Équilibré.** Sa survie tombe à 69–70 % dès que le festif baisse hors after (76 % à ×2). Le Prudent reste à 88 % et le Casse-cou à 75 % : l'ordre des tempéraments s'inverse pour ce plan. À regarder avec le réglage de son bot (la dilution occupe la soute que la nuit festive remplissait).
+
+**Campagne Plans** (jeu de graines décalé, voir plus haut) :
+- Nuit festive : 94 / 90 / 73 % de survie, 40 / 87 / 122k.
+- Sans build : 84 / 81 / 77 %, 23 / 67 / 154k.
+- La Nuit festive bat le Sans build en Prudent et en Équilibré.
+
+**Fins de prestige** (fin visée atteinte, Équilibré / Casse-cou) :
+
+| Fin | Taux | Ce qui bloque (part des survivants) |
+| :--- | :--- | :--- |
+| Élite | 5 / 3 % | parrain 9 → 20 % en Équilibré grâce à la protection, mais il faut aussi score ≥ 300k (17 %) et ICC Or (27 %) ; en Casse-cou, l'ICC tombe et le Silo se ferme (parrain 5 %) |
+| Résident | 5 / 12 % | injection 37 / 21 %, score ≥ 150k 11 / 52 % |
+| Saboteur | 0 / 6 % | score (500k) |
+
+- **Le parrain ne bloque plus l'Élite :** ce sont les trois conditions réunies. Prochain levier : le seuil de score (300k, le double du Baron) ou l'ICC Or.

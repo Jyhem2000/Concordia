@@ -12,7 +12,7 @@ import {
   SURVIVAL_ADVANCE,
 } from '../../src/data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../src/data/districts.ts'
-import { KARMA, LOCATIONS, SERVICE_REQUIREMENTS, VELVET } from '../../src/data/locations.ts'
+import { KARMA, SERVICE_REQUIREMENTS, VELVET } from '../../src/data/locations.ts'
 import { ROAD_EVENTS } from '../../src/data/events.ts'
 import { PRODUCT_IDS, PRODUCTS, SEALED_PRODUCT } from '../../src/data/products.ts'
 import { CREW, MODULES, VEHICLES } from '../../src/data/vehicles.ts'
@@ -39,7 +39,17 @@ import {
   searchSanction,
   toll,
 } from '../../src/engine/interception.ts'
-import { demandQuota, lastSeen, normalQuote, productStatus, quote, saleQuote, shopProducts, unitSaleBreakdown } from '../../src/engine/market.ts'
+import {
+  demandQuota,
+  knowHowBreakdown,
+  lastSeen,
+  normalQuote,
+  productStatus,
+  quote,
+  saleQuote,
+  shopProducts,
+  unitSaleBreakdown,
+} from '../../src/engine/market.ts'
 import { checkDelivery, deliveryCrates, deliveryFee, deliveryOffer } from '../../src/engine/delivery.ts'
 import { canInject, checkMission, missionOffer } from '../../src/engine/night.ts'
 import { checkRoadChoice } from '../../src/engine/road.ts'
@@ -53,6 +63,7 @@ import {
   checkVipRequest,
   karmaCost,
   morgueCost,
+  velvetDistrict,
   vipValue,
 } from '../../src/engine/services.ts'
 import { meets } from '../../src/engine/progress.ts'
@@ -174,6 +185,9 @@ const VALUE = {
 
 /** Marge minimale espérée pour acheter, en part du prix d'achat */
 const MIN_MARGIN = 0.15
+
+/** Revente espérée à l'after de ce soir : escomptée du risque de la nuit et du trajet de jour qui précède */
+const AFTER_DISCOUNT = 0.75
 
 /** Fonds de roulement gardé avant de rembourser la dette (₡ de base, indexés) */
 const CAPITAL = 2_000
@@ -315,7 +329,7 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
   const endgame = view.day >= ENDGAME_DAY
 
   const hunt = serverHunt(view, objective)
-  const sale = sell(view, endgame, hunt)
+  const sale = sell(view, plan, endgame, hunt)
   if (sale) return sale
 
   if (open) {
@@ -387,12 +401,27 @@ function estimatedSale(view: GameState, districtId: DistrictId, productId: Produ
 }
 
 /**
- * Facteur de vente d'une caisse au-delà du cours net : fraîcheur, savoir-faire (Mama Rosa), profil de nuit, casse.
- * Calculé par le moteur ici et maintenant : un trajet de jour arrive le jour même, un trajet de nuit la nuit même.
+ * Facteur de vente d'une caisse au-delà du cours net : fraîcheur, savoir-faire (Mama Rosa), profil de nuit
+ * (after du couvre-feu comprise), casse. Calculé par le moteur à l'arrivée dans `to` : un trajet de jour arrive
+ * le jour même, un trajet de nuit la nuit même.
  */
-function saleFactor(view: GameState, lot: CargoLot): number {
+function saleFactor(view: GameState, lot: CargoLot, to: DistrictId = view.districtId): number {
+  const sold = { ...lot, travelled: true }
   const net = quote(view, view.districtId, lot.productId) * SALE_COMMISSION
-  return net > 0 ? unitSaleBreakdown(view, { ...lot, travelled: true }, false).total / net : 1
+  const here = net > 0 ? unitSaleBreakdown(view, sold, false).total / net : 1
+  // Ailleurs, seul le savoir-faire change (after du couvre-feu) : le marché du district d'arrivée reste inconnu
+  const knowHowHere = knowHowBreakdown(view, sold).total
+  return to === view.districtId || knowHowHere === 0 ? here : (here * knowHowBreakdown(view, sold, to).total) / knowHowHere
+}
+
+/**
+ * Noctambule, de jour : une caisse festive peut attendre l'after de ce soir (chap. 2), si la tournée de nuit est permise.
+ * Revente estimée au cours normal de l'after, au profil festif de la fête, un peu escomptée (risque de la nuit).
+ */
+function tonightAtAfter(view: GameState, plan: Plan, productId: ProductId): number {
+  if (!plan.nightOwl || view.phase !== 'day' || PRODUCTS[productId].nightProfile !== 'festive' || checkForceCurfew(view)) return 0
+  const night: GameState = { ...view, phase: 'night' }
+  return normalQuote(view, view.after, productId) * SALE_COMMISSION * saleFactor(night, freshLot(view, productId), view.after) * AFTER_DISCOUNT
 }
 
 /** Caisse achetée ici aujourd'hui, pour estimer sa revente */
@@ -407,8 +436,10 @@ const freshLot = (view: GameState, productId: ProductId): CargoLot => ({
 
 /** Meilleur prix net espéré ailleurs, pour une caisse dans l'état de `lot` */
 function bestElsewhere(view: GameState, productId: ProductId, lot: CargoLot = freshLot(view, productId)): number {
-  const factor = saleFactor(view, lot)
-  return Math.max(0, ...DISTRICT_IDS.filter((id) => id !== view.districtId).map((id) => estimatedSale(view, id, productId) * factor))
+  return Math.max(
+    0,
+    ...DISTRICT_IDS.filter((id) => id !== view.districtId).map((id) => estimatedSale(view, id, productId) * saleFactor(view, lot, id)),
+  )
 }
 
 /** Valeur d'achat des caisses illégales : ce qu'une saisie ferait perdre */
@@ -449,7 +480,7 @@ function exposure(cargo: GameState['cargo']): number {
 
 // ─── Ventes ───
 
-function sell(view: GameState, endgame: boolean, hunt: boolean): Action | null {
+function sell(view: GameState, plan: Plan, endgame: boolean, hunt: boolean): Action | null {
   for (const productId of PRODUCT_IDS) {
     const owned = ownedQty(tradable(view), productId)
     if (owned === 0) continue
@@ -466,6 +497,8 @@ function sell(view: GameState, endgame: boolean, hunt: boolean): Action | null {
       first.total >= first.cost * (1 + MIN_MARGIN) ||
       (lot !== undefined && first.total >= bestElsewhere(view, productId, lot) * 0.9)
     if (!worth) continue
+    // Noctambule : la caisse festive attend l'after de ce soir si elle s'y vendra mieux
+    if (!endgame && !rotting && first.total < tonightAtAfter(view, plan, productId)) continue
     // Sans saturer le marché, sauf en fin de partie ou si la caisse pourrit
     const demand = view.markets[view.districtId].demand[productId] ?? owned
     const qty = endgame || rotting ? owned : Math.min(owned, demand)
@@ -610,10 +643,10 @@ function buysFor(
     if (plan.avoidTags?.some((tag) => product.tags.includes(tag))) return []
     if (plan.novice && productStatus(view, view.districtId, productId) !== 'production') return []
     const price = quote(view, view.districtId, productId)
-    const today = estimatedSale(view, to, productId) * saleFactor(view, freshLot(view, productId))
+    const today = estimatedSale(view, to, productId) * saleFactor(view, freshLot(view, productId), to)
     // Commande VIP en cours : les caisses demandées valent le multiple du Velvet-Silo
     const vip = view.vip?.productId === productId ? normalQuote(view, velvetDistrict(), productId) * VELVET.vip.factor : 0
-    const margin = Math.max(today, vip) - price
+    const margin = Math.max(today, vip, tonightAtAfter(view, plan, productId)) - price
     if (margin < price * MIN_MARGIN) return []
     const favored = plan.favorTags?.some((tag) => product.tags.includes(tag)) ? 1.3 : 1
     // Le haut tier coûte une garde à vue s'il est saisi : marge exigée plus forte
@@ -694,7 +727,7 @@ function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route
         if (tooRisky && buys.length > 0) continue
 
         const carried = goods.reduce(
-          (total, lot) => total + lot.qty * Math.max(0, estimatedSale(view, to, lot.productId) * saleFactor(view, lot) - lot.unitCost),
+          (total, lot) => total + lot.qty * Math.max(0, estimatedSale(view, to, lot.productId) * saleFactor(view, lot, to) - lot.unitCost),
           0,
         )
         let value = carried + margin - tripRisk * exposure(planned) - fuelCost
@@ -742,9 +775,6 @@ function reachable(view: GameState, to: DistrictId): boolean {
   const trip = planTravel(view, to)
   return Math.max(0, trip.fuelCost - view.fuel) * fuelPrice(view) <= view.cash
 }
-
-/** District du Velvet-Silo (commandes VIP) */
-const velvetDistrict = (): DistrictId => LOCATIONS['LOC-D6-1'].district
 
 /** Fin de partie : solder la dette à Hives (en retirant d'abord de la Laverie ce qui manque), puis tout déposer à la Laverie */
 function endgameRoute(view: GameState): Route | null {

@@ -59,11 +59,11 @@ Prix_Vente = Arrondi( Cours × Commission × Coef_Demande × Coef_Condition × S
 * **Coef_Condition :** caisse endommagée (`[TAG-FRAGILE]`, chap. 3 ; `DAMAGED_FACTOR` dans [`balance.ts`](../src/data/balance.ts)).
 * **Savoir_Faire = Coef_Fraîcheur × Coef_Nuit × Bonus_Mama**, avec **rendements décroissants** : au-delà d'un seuil, l'excédent ne compte qu'en partie (`KNOW_HOW_SOFT_CAP` et `KNOW_HOW_EXCESS_FACTOR` dans [`balance.ts`](../src/data/balance.ts)).
   * *Coef_Fraîcheur :* `[TAG-PERISHABLE]` (chap. 3).
-  * *Coef_Nuit — profil nocturne* (pendant le couvre-feu ; coefficients : `NIGHT_PROFILE_FACTOR` dans [`balance.ts`](../src/data/balance.ts)) :
+  * *Coef_Nuit — profil nocturne* (pendant le couvre-feu ; coefficients : `NIGHT_PROFILE_FACTOR` dans [`balance.ts`](../src/data/balance.ts) ; à l'after du couvre-feu, le festif prend le coefficient de la fête, `AFTER`, chap. 2) :
 
 | Profil nuit | Effet | Logique |
 | :--- | :---: | :--- |
-| Festif | bonus | Prime de fête clandestine : la vie nocturne réclame ses vices (produits addictifs, culture interdite, charcuterie). |
+| Festif | léger bonus ; fort à l'after | Prime de fête clandestine : la vie nocturne réclame ses vices (produits addictifs, culture interdite, charcuterie), surtout là où la fête bat son plein. |
 | Diurne | malus | Excitants de bureau : leurs clients dorment. |
 | — | aucun | — |
 

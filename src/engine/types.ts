@@ -377,6 +377,8 @@ export type Interception = {
   bluffFailed: boolean
   /** Le brouilleur de drones a fait décrocher le drone : le contrôle volant est devenu un barrage fixe */
   jammed?: boolean
+  /** Caisses de la commande VIP sous la protection du parrain, hors de portée des agents, rendues à la fin du contrôle */
+  covered?: CargoLot[]
 }
 
 /** Options de l'écran d'interception (BRC) et du racket des milices */
@@ -660,6 +662,8 @@ export type GameState = {
   delivery: { to: DistrictId } | null
   /** Mission de nuit proposée pour ce soir (district), tirée le matin */
   nightOffer: DistrictId | null
+  /** After du couvre-feu de ce soir (district), tirée et annoncée le matin */
+  after: DistrictId
   /** Mission de nuit acceptée, jusqu'à sa livraison ou à 06h00 */
   mission: { to: DistrictId } | null
   /** Dernier jour où le brouilleur de drones a servi (une fois par jour) */

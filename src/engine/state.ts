@@ -5,7 +5,7 @@ import { crewEffect } from './crew.ts'
 import { drawEvents, NO_EVENTS } from './events.ts'
 import { drawMarkets, observeMarket } from './market.ts'
 import { drawDayOffer } from './delivery.ts'
-import { drawNightOffer } from './night.ts'
+import { drawAfter, drawNightOffer } from './night.ts'
 import { drawPatrol } from './risk.ts'
 import { createRng, seedRng } from './rng.ts'
 import type { DistrictId, GameState } from './types.ts'
@@ -52,6 +52,7 @@ export function createInitialState(seed: number): GameState {
     delivery: null,
     progress: { controlsPassed: 0, tagSales: {}, flagged: false, deliveries: 0, vipOrders: 0, injections: 0 },
     nightOffer: drawNightOffer(rng),
+    after: drawAfter(rng),
     mission: null,
     jammerDay: null,
     debtLate: false,

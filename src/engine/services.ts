@@ -1,6 +1,6 @@
 import { DAMAGED_FACTOR, GAME_LENGTH_DAYS, HEALTH_MAX, ICC_MAX, SALE_COMMISSION } from '../data/balance.ts'
 import { LOTTERY } from '../data/events.ts'
-import { CASSANDRE, FORGERY, KARMA, MORGUE, SERVICE_REQUIREMENTS, VELVET } from '../data/locations.ts'
+import { CASSANDRE, FORGERY, KARMA, LOCATIONS, MORGUE, SERVICE_REQUIREMENTS, VELVET } from '../data/locations.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import type { ActionError } from './actions.ts'
 import { giveCrates, ownedQty, takeLots } from './cargo.ts'
@@ -10,7 +10,7 @@ import { GLOBAL_EVENT_IDS, viceChoices } from './events.ts'
 import { checkRequirements, raiseWanted } from './progress.ts'
 import { quote } from './market.ts'
 import { createRng } from './rng.ts'
-import type { CargoLot, CrateCount, ForgeryCard, GameState, ProductId, ServiceKey, TagId } from './types.ts'
+import type { CargoLot, CrateCount, DistrictId, ForgeryCard, GameState, ProductId, ServiceKey, TagId } from './types.ts'
 
 /*
  * Lieux spéciaux (chap. 4) : Karma-Cham, Morgue, Cassandre-88, faux dossier de la Laverie, Velvet-Silo.
@@ -294,6 +294,27 @@ export function deliverVip(state: GameState): ServiceResult {
   // Parrainage de l'Élite : chaque commande livrée compte
   const progress = { ...state.progress, vipOrders: state.progress.vipOrders + 1 }
   return { ok: true, state: used({ ...state, cash: state.cash + total, cargo: remaining, vip: null, progress }, 'vip') }
+}
+
+/** District du Velvet-Silo (commandes VIP) */
+export const velvetDistrict = (): DistrictId => LOCATIONS['LOC-D6-1'].district
+
+/**
+ * Protection du parrain (chap. 4) : dans le district du Silo, les caisses d'une commande VIP en cours
+ * (au plus le nombre commandé) sont hors de vue des agents : ni risque, ni fouille
+ */
+export function sponsorCover(state: GameState, districtId: DistrictId): { covered: CargoLot[]; rest: CargoLot[] } {
+  const { vip } = state
+  if (!vip || districtId !== velvetDistrict() || state.day > vip.day + VELVET.vip.deadlineDays) return { covered: [], rest: [...state.cargo] }
+  const { taken, remaining } = takeLots(state.cargo, vip.productId, VELVET.vip.crates)
+  return { covered: taken, rest: remaining }
+}
+
+/** Barrage dans le district du Silo : les caisses couvertes par le parrain sont mises de côté jusqu'à la fin du contrôle */
+export function shieldSponsored(state: GameState): GameState {
+  if (!state.interception) return state
+  const { covered, rest } = sponsorCover(state, state.districtId)
+  return covered.length === 0 ? state : { ...state, cargo: rest, interception: { ...state.interception, covered } }
 }
 
 /** Échéance de la commande VIP dépassée à la routine : ICC perdu, Silo verrouillé (chap. 4) */

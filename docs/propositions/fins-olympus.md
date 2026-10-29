@@ -4,7 +4,7 @@
 >
 > **Adopté le 29/10/2026** : écrit dans les chap. 2 à 5, 7, 9 et 10, et dans le code. L'avance de survie est ouverte toute la partie dans le même changement.
 >
-> **Assoupli après la remesure** (`sim/reports/analyse-etape-2.md`) : 2 commandes VIP avec 2 jours de délai, seuil du Résident abaissé à celui du Baron, serveur deux fois plus souvent en stock. Mesure : Élite 2–4 %, Résident 6–9 %. Le parrain bute sur la livraison au Silo, en `[D6]`, où les caisses VIP (illégales) sont souvent saisies.
+> **Assoupli après la remesure** (`sim/reports/analyse-etape-2.md`) : 2 commandes VIP avec 2 jours de délai, seuil du Résident abaissé à celui du Baron, serveur deux fois plus souvent en stock. Mesure : Élite 2–4 %, Résident 6–9 %. Le parrain bute sur la livraison au Silo, en `[D6]`, où les caisses VIP (illégales) sont souvent saisies. D'où la **protection du parrain** (chap. 4 et 6) : le parrain passe de 9 à 20 % des survivants en Équilibré, et l'Élite bute désormais sur ses trois conditions réunies (score de 300k, parrain, ICC Or).
 > * **Le Résident Réécrit :** validé sur le principe (ex-« Fantôme »). Ce n'est pas un fantôme : Aeterna le reconnaît comme résident autorisé.
 > * **L'Élite par cooptation :** proposé pour remplacer « Citoyen Or + score », peu crédible dans le lore.
 

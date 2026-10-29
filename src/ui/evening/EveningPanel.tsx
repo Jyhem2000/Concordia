@@ -1,5 +1,5 @@
-import { BedDouble, Fuel, Siren } from 'lucide-react'
-import { ENDINGS, WANTED } from '../../data/balance.ts'
+import { BedDouble, Fuel, PartyPopper, Siren } from 'lucide-react'
+import { AFTER, ENDINGS, NIGHT_PROFILE_FACTOR, WANTED } from '../../data/balance.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { VEHICLES } from '../../data/vehicles.ts'
 import { ownedQty } from '../../engine/cargo.ts'
@@ -20,7 +20,7 @@ import { useCollapsed } from '../shared/useCollapsed.ts'
 export default function EveningPanel() {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
-  const { t, credits } = useI18n()
+  const { t, credits, multiplier, percent } = useI18n()
 
   const tank = VEHICLES[game.vehicleId].tank
   const fuelCollapsed = useCollapsed('fuel')
@@ -40,6 +40,18 @@ export default function EveningPanel() {
   const sleepLabel = sleepsAtRelay(game) ? t.evening.sleepRelay : t.evening.bivouac
   // Eau qui refroidit le moteur la nuit (chap. 3)
   const coolants = PRODUCT_IDS.filter((id) => PRODUCTS[id].cooling && ownedQty(game.cargo, id) > 0)
+  // After du couvre-feu de ce soir, annoncée dès 06h00 (chap. 2)
+  const afterLine = (
+    <p className="mt-1 flex items-start gap-1 text-xs text-fuchsia-300">
+      <PartyPopper size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
+      {t.evening.after(
+        t.district[game.after].name,
+        multiplier(AFTER.festiveFactor),
+        multiplier(NIGHT_PROFILE_FACTOR.festive),
+        percent(1 - AFTER.nightRiskFactor, 0),
+      )}
+    </p>
+  )
 
   return (
     <section className="rounded border border-zinc-800 bg-zinc-900/40 text-sm">
@@ -88,6 +100,7 @@ export default function EveningPanel() {
                       ? t.evening.missionHere(t.district[game.nightOffer].name)
                       : t.evening.noMission}
               </p>
+              {afterLine}
               <p className="mt-1 text-xs text-zinc-400">{t.evening.nightRule}</p>
               <ul className="mt-2 flex flex-col gap-2">
                 <li>
@@ -137,6 +150,7 @@ export default function EveningPanel() {
             <p className="mt-1 text-xs text-sky-300">
               {game.mission ? t.evening.missionActive(t.district[game.mission.to].name) : t.evening.offMission}
             </p>
+            {afterLine}
             {!game.mission && canInject(game) && (
               <p className="mt-1 text-xs text-amber-300">{t.evening.injectionHint(game.progress.injections + 1, ENDINGS.resident.injections)}</p>
             )}

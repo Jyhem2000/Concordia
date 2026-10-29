@@ -11,7 +11,18 @@ import { dismiss, hire } from './crew.ts'
 import { acceptDelivery, checkDelivery } from './delivery.ts'
 import { noteSale } from './progress.ts'
 import { acceptMission, checkMission, isOnMission, recordDeviation } from './night.ts'
-import { auction, blackmail, consultCassandre, deliverVip, forge, orderInfluence, requestVip, visitMorgue, type MorgueService } from './services.ts'
+import {
+  auction,
+  blackmail,
+  consultCassandre,
+  deliverVip,
+  forge,
+  orderInfluence,
+  requestVip,
+  shieldSponsored,
+  visitMorgue,
+  type MorgueService,
+} from './services.ts'
 import { buyModule, buyVehicle, mountedEffect, mountModule, repair } from './equipment.ts'
 import { arrive, drawRoadEvent, heatWave } from './events.ts'
 import { changeHealth } from './gauges.ts'
@@ -341,7 +352,7 @@ function travel(state: GameState, to: DistrictId): ActionResult {
   // Sans barrage ni aléa, le trajet se termine ici ; sinon le dépannage et l'arrivée attendent leur résolution
   // De nuit, un trajet hors mission qui passe sans interception est un écart enregistré (chap. 2)
   const logged = state.phase === 'night' && !interception && !isOnMission(state, to) ? recordDeviation(arrived) : arrived
-  const done = interception || roadEvent ? logged : arrive(emergencyTow(logged).state)
+  const done = interception ? shieldSponsored(logged) : roadEvent ? logged : arrive(emergencyTow(logged).state)
   return { ok: true, state: remember(done, to) }
 }
 

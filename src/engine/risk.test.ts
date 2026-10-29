@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  AFTER,
   CROSSED_DISTRICT_RISK,
   DEBT_LATE,
   GOLD_FAST_LANE_FACTOR,
@@ -54,6 +55,13 @@ describe('risque d’interception', () => {
     expect(termOf({ ...masked, districtId: 'D5' }, 'D6', 'TAG-ODOROUS')).toBeCloseTo(
       defined(TAGS['TAG-ODOROUS'].tripRisk) * share * DISTRICTS.D6.odorFactor,
     )
+  })
+
+  it("réduit le malus de nuit hors mission vers l'after du couvre-feu (la foule couvre)", () => {
+    const state = gameAt(2, { phase: 'night', after: 'D2' })
+    expect(termOf(state, 'D2', 'rule.after')).toBeCloseTo(-NIGHT_TRIP_RISK * (1 - AFTER.nightRiskFactor))
+    expect(termOf(state, 'D5', 'rule.after')).toBe(0)
+    expect(termOf({ ...state, phase: 'day' }, 'D2', 'rule.after')).toBe(0)
   })
 
   it('cumule les malus de contexte', () => {

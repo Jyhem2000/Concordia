@@ -118,4 +118,11 @@ describe('prix de vente', () => {
     expect(saleQuote(withLot(true, 'night'), 'T2-02', 1).total).toBeGreaterThan(day)
     expect(saleQuote(withLot(false, 'night'), 'T2-02', 1).total).toBe(day)
   })
+
+  it("paie le festif bien plus cher à l'after du couvre-feu, la nuit seulement", () => {
+    const night = (after: GameState['after'], phase: GameState['phase'] = 'night') => saleQuote({ ...withLot(true, phase), after }, 'T2-02', 1).total
+    // Le joueur est à Hives (D1)
+    expect(night('D1')).toBeGreaterThan(night('D2'))
+    expect(night('D1', 'day')).toBe(night('D2', 'day'))
+  })
 })

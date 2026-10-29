@@ -1,4 +1,4 @@
-import { DAY_DELIVERY, ENDINGS, NIGHT_MISSION } from '../data/balance.ts'
+import { AFTER, DAY_DELIVERY, ENDINGS, NIGHT_MISSION } from '../data/balance.ts'
 import { DISTRICT_IDS } from '../data/districts.ts'
 import { PRODUCTS, SEALED_PRODUCT } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
@@ -19,6 +19,16 @@ export const isSealed = (lot: CargoLot) => PRODUCTS[lot.productId].sealed === tr
 /** Mission proposée pour ce soir, vers un district tiré au hasard (une chaque soir) */
 export function drawNightOffer(rng: Rng): DistrictId {
   return rng.pick(DISTRICT_IDS)
+}
+
+/** After du couvre-feu de ce soir, dans un des districts qui en accueillent */
+export function drawAfter(rng: Rng): DistrictId {
+  return rng.pick(AFTER.districts)
+}
+
+/** La nuit, dans le district de l'after : prime festive et foule qui couvre */
+export function atAfter(state: GameState, districtId: DistrictId): boolean {
+  return state.phase === 'night' && state.after === districtId
 }
 
 /** Mission valable ce soir : proposée, débloquée (confiance du DSC), et pas vers le district où se trouve déjà le joueur */

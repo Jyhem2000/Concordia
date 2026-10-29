@@ -1,4 +1,5 @@
 import {
+  AFTER,
   ANTI_ARBITRAGE_CAP,
   DAMAGED_FACTOR,
   DEMAND_REFILL_DIVISOR,
@@ -22,6 +23,7 @@ import { takeLots } from './cargo.ts'
 import { crewEffect } from './crew.ts'
 import { freshnessFactor, freshnessOf } from './condition.ts'
 import { recordOf } from './records.ts'
+import { atAfter } from './night.ts'
 import { influenceFactor } from './services.ts'
 import { drawAppearances, eventMultiplier, forgedCard, hasVice, stockFactor, type EventContext } from './events.ts'
 import type { Rng } from './rng.ts'
@@ -184,8 +186,8 @@ export function observeMarket(state: GameState, districtId: DistrictId): MarketM
   return { day: state.day, quotes: recordOf(PRODUCT_IDS, (id) => quote(state, districtId, id)) }
 }
 
-/** Savoir_Faire = produit des bonus de vente, avec rendements décroissants et clause anti-arbitrage */
-function knowHowBreakdown(state: GameState, lot: CargoLot): Breakdown {
+/** Savoir_Faire = produit des bonus de vente, avec rendements décroissants et clause anti-arbitrage (vente dans `districtId`) */
+export function knowHowBreakdown(state: GameState, lot: CargoLot, districtId: DistrictId = state.districtId): Breakdown {
   const knowHow = breakdown('rule.know-how', 1)
 
   // Coef_Fraîcheur des périssables (chap. 3)
@@ -196,8 +198,10 @@ function knowHowBreakdown(state: GameState, lot: CargoLot): Breakdown {
   const perishableKnowHow = crewEffect(state, 'perishableKnowHow')
   if (freshness && perishableKnowHow) knowHow.mul('CREW-03', perishableKnowHow)
 
+  // Profil nuit (chap. 7) ; à l'after du couvre-feu, la fête paie le festif bien plus cher (chap. 2)
   const profile = PRODUCTS[lot.productId].nightProfile
-  if (state.phase === 'night' && profile) knowHow.mul(`rule.night-${profile}`, NIGHT_PROFILE_FACTOR[profile])
+  if (profile === 'festive' && atAfter(state, districtId)) knowHow.mul('rule.after', AFTER.festiveFactor)
+  else if (state.phase === 'night' && profile) knowHow.mul(`rule.night-${profile}`, NIGHT_PROFILE_FACTOR[profile])
 
   if (knowHow.total > KNOW_HOW_SOFT_CAP) {
     knowHow.set('rule.diminishing-returns', KNOW_HOW_SOFT_CAP + (knowHow.total - KNOW_HOW_SOFT_CAP) * KNOW_HOW_EXCESS_FACTOR)

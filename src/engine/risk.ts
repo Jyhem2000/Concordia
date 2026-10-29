@@ -1,4 +1,5 @@
 import {
+  AFTER,
   CROSSED_DISTRICT_RISK,
   DEBT_LATE,
   GOLD_FAST_LANE_FACTOR,
@@ -21,9 +22,9 @@ import { cargoUsed, ownedQty, tagShare } from './cargo.ts'
 import { crewEffect, workingCrew } from './crew.ts'
 import { moduleTagFactor, mountedWith } from './equipment.ts'
 import { activeEffects, forgedCard, isPurged, tagFactor } from './events.ts'
-import { passActive } from './services.ts'
+import { passActive, sponsorCover } from './services.ts'
 import { iccTier } from './gauges.ts'
-import { isOnMission } from './night.ts'
+import { atAfter, isOnMission } from './night.ts'
 import { crossedDistricts, shortestRoute } from './map.ts'
 import { keysOf } from './records.ts'
 import { MODULES } from '../data/vehicles.ts'
@@ -43,7 +44,9 @@ export type RiskOptions = {
 }
 
 /** Risque d'un trajet vers `to` depuis la position actuelle, dans la phase actuelle */
-export function riskBreakdown(state: GameState, to: DistrictId, { includePatrol }: RiskOptions): Breakdown {
+export function riskBreakdown(trip: GameState, to: DistrictId, { includePatrol }: RiskOptions): Breakdown {
+  // Les caisses sous la protection du parrain n'existent pas pour les agents du Silo
+  const state: GameState = { ...trip, cargo: sponsorCover(trip, to).rest }
   const destination = DISTRICTS[to]
   const offGrid = destination.offGrid
 
@@ -68,6 +71,8 @@ export function riskBreakdown(state: GameState, to: DistrictId, { includePatrol 
     // Silentblocs de [MOD-04] : une part du malus de nuit retirée, sur sa propre ligne
     const quiet = mountedWith(state, 'nightRiskFactor')
     if (quiet) risk.add(quiet, -NIGHT_TRIP_RISK * (1 - (MODULES[quiet].nightRiskFactor ?? 1)))
+    // After du couvre-feu : la foule viole le couvre-feu avec toi, Aeterna ne peut pas suivre tout le monde
+    if (atAfter(state, to)) risk.add('rule.after', -NIGHT_TRIP_RISK * (1 - AFTER.nightRiskFactor))
   }
   const crossed = crossedDistricts(shortestRoute(state.districtId, to)).length
   risk.add('rule.crossed-districts', crossed * CROSSED_DISTRICT_RISK, { count: crossed })

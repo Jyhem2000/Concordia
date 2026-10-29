@@ -1,4 +1,4 @@
-import { BLUFF, BRIBE, ENDINGS, FLEE, PROTECTION, SEARCH } from '../src/data/balance.ts'
+import { AFTER, BLUFF, BRIBE, ENDINGS, FLEE, NIGHT_PROFILE_FACTOR, PROTECTION, SEARCH } from '../src/data/balance.ts'
 import { DISTRICTS } from '../src/data/districts.ts'
 import { traderBot, type Objective } from './bots/trader.ts'
 import { PLANS, TEMPERAMENTS } from './plans.ts'
@@ -7,6 +7,7 @@ import { playGame, type GameRecord } from './runner.ts'
 /*
  * Sondes de difficulté : seuils des grandes fins (mutés à l'exécution) et pression de la dette.
  * Usage : node sim/probe-difficulte.ts fins | node sim/probe-difficulte.ts pression <étiquette> [protection=0.2] [risque=0.03] [amende=1.5]
+ *   [festif=1.25] [after=3.5] [foule=0.5] (profil festif hors after, coefficient de l'after, malus de nuit restant sous la foule)
  * Les constantes primitives (START_DEBT, DEBT_DAILY_RATE…) se sondent en modifiant balance.ts le temps d'un passage.
  */
 const n = 200
@@ -64,13 +65,19 @@ if (mode === 'pression') {
   const fine = Number(option('amende') ?? 1)
   for (const rule of [SEARCH.low, SEARCH.high, BRIBE.fail, FLEE.fail]) Object.assign(rule, { fineRate: rule.fineRate * fine })
   Object.assign(BLUFF.failedFine, { low: BLUFF.failedFine.low * fine, high: BLUFF.failedFine.high * fine })
+  // Nuit : profil festif hors after, after du couvre-feu
+  if (option('festif')) Object.assign(NIGHT_PROFILE_FACTOR, { festive: Number(option('festif')) })
+  if (option('after')) Object.assign(AFTER, { festiveFactor: Number(option('after')) })
+  if (option('foule')) Object.assign(AFTER, { nightRiskFactor: Number(option('foule')) })
   console.log(`— ${label}`)
   for (const [planName, t] of [
     ['Sans build', prudent],
     ['Sans build', balanced],
     ['Sans build', bold],
     ['Couverture légale', balanced],
+    ['Nuit festive', prudent],
     ['Nuit festive', balanced],
+    ['Nuit festive', bold],
   ] as const) {
     const r = run(planName, t)
     const paid = r.filter((g) => g.debtPaidDay !== null).map((g) => g.debtPaidDay as number)
