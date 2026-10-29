@@ -24,17 +24,17 @@ import { freshnessFactor, freshnessOf } from './condition.ts'
 import { recordOf } from './records.ts'
 import { atAfter } from './night.ts'
 import { influenceFactor } from './services.ts'
-import { drawAppearances, eventMultiplier, forgedCard, hasVice, stockFactor, type EventContext } from './events.ts'
+import { drawAppearances, eventMultipliers, forgedCard, hasVice, stockFactor, type EventContext } from './events.ts'
 import type { Rng } from './rng.ts'
 import type { CargoLot, DistrictId, DistrictMarket, FreshnessStage, GameState, MarketMemory, ProductId } from './types.ts'
 
 /*
- * Marché noir (chap. 7) : boutique et cours tirés à 06h00, quotas de demande, prix de vente.
+ * Marché noir (chap. 2) : boutique et cours tirés à 06h00, quotas de demande, prix de vente.
  */
 
 export type ProductStatus = 'production' | 'neutral' | 'strong'
 
-/** Statut public d'un produit dans un district ; les vices de la Loterie y ajoutent une Forte demande (chap. 8) */
+/** Statut public d'un produit dans un district ; les vices de la Loterie y ajoutent une Forte demande (chap. 6) */
 export function productStatus(ctx: EventContext, districtId: DistrictId, productId: ProductId): ProductStatus {
   const district = DISTRICTS[districtId]
   if (district.production.includes(productId)) return 'production'
@@ -90,7 +90,7 @@ function drawShop(ctx: EventContext, districtId: DistrictId, rng: Rng): Partial<
   )
   while (shop.size < SHOP_MIN_PRODUCTS && neutrals.length > 0) shop.add(neutrals.pop()!)
 
-  // Apparitions à l'achat des événements : dérogation à l'exclusion (chap. 8)
+  // Apparitions à l'achat des événements : dérogation à l'exclusion (chap. 6)
   for (const id of drawAppearances(ctx, districtId, rng)) shop.add(id)
 
   const stock: Partial<Record<ProductId, number>> = {}
@@ -110,7 +110,7 @@ export function shopProducts(market: DistrictMarket): ProductId[] {
 
 /**
  * Marché du jour d'un district. Sans marché de la veille (Jour 1), la demande est pleine et l'écart de tendance
- * tiré entre ses bornes ; ensuite, l'écart garde une part de celui de la veille, plus un choc (chap. 7).
+ * tiré entre ses bornes ; ensuite, l'écart garde une part de celui de la veille, plus un choc (chap. 2).
  */
 export function drawMarket(ctx: MarketContext, districtId: DistrictId, rng: Rng, previous?: DistrictMarket): DistrictMarket {
   const { persistence, shock, max } = QUOTE_NOISE
@@ -140,13 +140,18 @@ export function drawMarkets(ctx: MarketContext, rng: Rng, previous?: Record<Dist
 export function quoteBreakdown(state: GameState, districtId: DistrictId, productId: ProductId): Breakdown {
   const quote = districtQuote(state, districtId, productId)
   quote.mul('rule.noise', state.markets[districtId].noise[productId])
-  // Mult_Événement : le multiplicateur retenu, plafonné (chap. 7 et 8)
-  const event = eventMultiplier(state, districtId, productId)
-  const eventFactor = event ? Math.min(EVENT_MULT_CAP, event.factor) : 1
-  if (event) quote.mul(event.source, eventFactor)
-  // Bonus d'influence de Karma-Cham, par-dessus, sans dépasser le plafond
+  // Mult_Événement : événements, contrecoups et influence de Karma-Cham se multiplient, le tout plafonné (chap. 2 et 6)
+  let total = 1
+  for (const { source, factor } of eventMultipliers(state, districtId, productId)) {
+    quote.mul(source, factor)
+    total *= factor
+  }
   const influence = influenceFactor(state, productId)
-  if (influence !== 1) quote.mul('LOC-D2-1', Math.min(influence, EVENT_MULT_CAP / eventFactor))
+  if (influence !== 1) {
+    quote.mul('LOC-D2-1', influence)
+    total *= influence
+  }
+  if (total > EVENT_MULT_CAP) quote.mul('rule.event-cap', EVENT_MULT_CAP / total)
   return quote.round().build()
 }
 
@@ -166,7 +171,7 @@ function districtQuote(ctx: EventContext, districtId: DistrictId, productId: Pro
   return quote
 }
 
-/** Cours normal d'un produit dans un district (repère de l'historique, chap. 10) */
+/** Cours normal d'un produit dans un district (repère de l'historique, chap. 7) */
 export function normalQuote(ctx: EventContext, districtId: DistrictId, productId: ProductId): number {
   return districtQuote(ctx, districtId, productId).round().build().total
 }
@@ -189,7 +194,7 @@ export function observeMarket(state: GameState, districtId: DistrictId): MarketM
 export function knowHowBreakdown(state: GameState, lot: CargoLot, districtId: DistrictId = state.districtId): Breakdown {
   const knowHow = breakdown('rule.know-how', 1)
 
-  // Coef_Fraîcheur des périssables (chap. 3)
+  // Coef_Fraîcheur des périssables (chap. 2)
   const freshness = freshnessOf(state, lot)
   // Affinage de Mama Rosa : une caisse Standard se vend au coefficient Extra-Frais
   if (freshness === 'standard' && crewEffect(state, 'refining')) knowHow.mul('rule.refining', freshnessFactor('extra'))
@@ -197,7 +202,7 @@ export function knowHowBreakdown(state: GameState, lot: CargoLot, districtId: Di
   const perishableKnowHow = crewEffect(state, 'perishableKnowHow')
   if (freshness && perishableKnowHow) knowHow.mul('CREW-03', perishableKnowHow)
 
-  // Couvre-feu (chap. 7) : tags de vente de nuit ; à l'after, la fête paie le festif bien plus cher (chap. 2)
+  // Couvre-feu (chap. 2) : tags de vente de nuit ; à l'after, la fête paie le festif bien plus cher (chap. 1)
   if (state.phase === 'night') {
     for (const tag of PRODUCTS[lot.productId].tags) {
       const nightSale = TAGS[tag].nightSale
@@ -227,7 +232,7 @@ export function unitSaleBreakdown(state: GameState, lot: CargoLot, saturated: bo
     breakdown('rule.quote', quoteBreakdown(state, state.districtId, lot.productId))
       .mul('rule.commission', SALE_COMMISSION)
       .mul('rule.saturation', saturated ? SATURATED_SALE_FACTOR : 1)
-      // Coef_Condition : caisse endommagée (casse des fragiles, chap. 3)
+      // Coef_Condition : caisse endommagée (casse des fragiles, chap. 2)
       .mul('rule.damaged', lot.damaged ? DAMAGED_FACTOR : 1)
       .mul('rule.know-how', knowHow.total === 1 ? 1 : knowHow)
       .round()
@@ -266,7 +271,7 @@ export function saleQuote(state: GameState, productId: ProductId, qty: number): 
   return { total, cost, saturatedQty: Math.max(0, sold - demandLeft), first }
 }
 
-/** Fourchette affichée d'un cours mémorisé brouillé par la Sédation (chap. 2) */
+/** Fourchette affichée d'un cours mémorisé brouillé par la Sédation (chap. 1) */
 export function blurredQuote(quote: number): { low: number; high: number } {
   return { low: quote * (1 - SEDATION.memoryBlur), high: quote * (1 + SEDATION.memoryBlur) }
 }

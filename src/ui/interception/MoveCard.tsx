@@ -21,7 +21,7 @@ type MoveCardProps = {
   children?: ReactNode
 }
 
-/** Une option du barrage : chance détaillable, conséquences, réglages et bouton (chap. 10) */
+/** Une option du barrage : chance détaillable, conséquences, réglages et bouton (chap. 7) */
 export default function MoveCard({ move, label, chance, outcomes, tactics, customAction = false, children }: MoveCardProps) {
   const dispatch = useGameStore((s) => s.dispatch)
   const error = useGameStore((s) => checkMove(s.game, move, NO_OFFER, tactics))

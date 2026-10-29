@@ -19,7 +19,7 @@ const lot = (productId: ProductId, qty: number, boughtDay = 3): CargoLot => ({
   boughtDay,
   damaged: false,
 })
-// Joueur établi : carnet complet, dette soldée, patrimoine à l'abri (services réservés, chap. 4)
+// Joueur établi : carnet complet, dette soldée, patrimoine à l'abri (services réservés, chap. 3)
 const at = (districtId: GameState['districtId'], patch: Partial<GameState> = {}) =>
   gameAt(3, { districtId, cash: 200_000, progress: EARNED, initialDebtPaid: true, debt: 0, offshore: { deposited: 100_000, interest: 0 }, ...patch })
 

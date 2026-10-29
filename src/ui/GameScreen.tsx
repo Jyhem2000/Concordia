@@ -13,7 +13,7 @@ import PlacesPanel from './places/PlacesPanel.tsx'
 import RoadEventScreen from './road/RoadEventScreen.tsx'
 import RoadReportPanel from './road/RoadReportPanel.tsx'
 
-/** Écran unique : bandeau en haut, marché à gauche ; briefing, guichets, fin de journée et carte à droite (chap. 10). Un barrage ou un aléa routier prend tout l'écran. */
+/** Écran unique : bandeau en haut, marché à gauche ; briefing, guichets, fin de journée et carte à droite (chap. 7). Un barrage ou un aléa routier prend tout l'écran. */
 export default function GameScreen() {
   const finished = useGameStore((s) => s.game.status === 'finished')
   const intercepted = useGameStore((s) => s.game.interception !== null)

@@ -10,7 +10,7 @@ import { keysOf } from './records.ts'
 import type { CargoLot, GameState, Module, ModuleId, TagId, Vehicle, VehicleId } from './types.ts'
 
 /*
- * Véhicule et modules (chap. 5) : effets du châssis et des modules montés, garage de Mécano-Mitch (chap. 4).
+ * Véhicule et modules (chap. 4) : effets du châssis et des modules montés, garage de Mécano-Mitch (chap. 3).
  */
 
 export type EquipmentResult = { ok: true; state: GameState } | { ok: false; error: ActionError }
@@ -43,7 +43,7 @@ export function moduleTagFactor(state: GameState, tag: TagId): number {
   }, 1)
 }
 
-// ─── Éjection (chap. 6) ───
+// ─── Éjection (chap. 5) ───
 
 export type EjectMode = 'trapdoor' | 'crusher' | 'manual'
 
@@ -62,7 +62,7 @@ export function ejectMode(state: GameState): EjectMode | null {
   return null
 }
 
-// ─── Garage (chap. 4 et 5) ───
+// ─── Garage (chap. 3 et 4) ───
 
 /** Prix d'un PV de châssis réparé, réduit par un événement du district */
 export function repairPrice(state: GameState): Breakdown {

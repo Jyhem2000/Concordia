@@ -8,7 +8,7 @@ import { playGame, type GameRecord } from './runner.ts'
 /*
  * Sondes de difficulté : seuils des grandes fins (mutés à l'exécution) et pression de la dette.
  * Usage : node sim/probe-difficulte.ts fins | node sim/probe-difficulte.ts pression <étiquette> [protection=0.2] [risque=0.03] [amende=1.5]
- *   [festif=1.25] [after=3.5] [foule=0.5] (profil festif hors after, coefficient de l'after, malus de nuit restant sous la foule)
+ *   [festif=1.25] [after=3.5] [foule=0.5] (coefficient Festif hors after, coefficient de l'after, malus de nuit restant sous la foule)
  * Les constantes primitives (START_DEBT, DEBT_DAILY_RATE…) se sondent en modifiant balance.ts le temps d'un passage.
  */
 const n = 200
@@ -66,7 +66,7 @@ if (mode === 'pression') {
   const fine = Number(option('amende') ?? 1)
   for (const rule of [SEARCH.low, SEARCH.high, BRIBE.fail, FLEE.fail]) Object.assign(rule, { fineRate: rule.fineRate * fine })
   Object.assign(BLUFF.failedFine, { low: BLUFF.failedFine.low * fine, high: BLUFF.failedFine.high * fine })
-  // Nuit : profil festif hors after, after du couvre-feu
+  // Nuit : coefficient Festif hors after, after du couvre-feu
   if (option('festif')) Object.assign(TAGS[AFTER.tag], { nightSale: Number(option('festif')) })
   if (option('after')) Object.assign(AFTER, { festiveFactor: Number(option('after')) })
   if (option('foule')) Object.assign(AFTER, { nightRiskFactor: Number(option('foule')) })

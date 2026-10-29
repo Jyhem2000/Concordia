@@ -3,7 +3,7 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 
-/** Écran de fin : la fin débloquée à l'audit du Jour 30, ou la défaite (chap. 2) */
+/** Écran de fin : la fin débloquée à l'audit du Jour 30, ou la défaite (chap. 1) */
 export default function EndScreen() {
   const ending = useGameStore((s) => s.game.ending)
   const newGame = useGameStore((s) => s.newGame)

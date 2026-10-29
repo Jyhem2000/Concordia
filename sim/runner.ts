@@ -8,7 +8,7 @@ import { violations } from './invariants.ts'
 import { publicView } from './view.ts'
 
 /*
- * Une partie simulée (chap. 9) : le bot choisit une action sur la vue publique, le moteur l'applique,
+ * Une partie simulée (chap. 8) : le bot choisit une action sur la vue publique, le moteur l'applique,
  * jusqu'à la fin. Les mesures de la partie sont relevées au fil de l'eau.
  */
 
@@ -126,7 +126,7 @@ export function playGame(bot: Bot, seed: number): GameRecord {
 /** Sortie de secours d'une journée bloquée : régler le barrage ou l'aléa, sinon dormir */
 function forcedEnd(state: GameState): Action {
   if (state.interception) return { type: 'intercept', move: state.interception.kind === 'racket' ? 'refuseToll' : 'search' }
-  // Chaque aléa garde une option sans paiement (chap. 8)
+  // Chaque aléa garde une option sans paiement (chap. 6)
   if (state.roadEvent) return { type: 'road', choice: ROAD_EVENTS[state.roadEvent].a.pay ? 'b' : 'a' }
   return { type: 'sleep' }
 }

@@ -11,7 +11,7 @@ type LinesProps = {
   lines: readonly BreakdownLine[]
 }
 
-/** Détail ligne par ligne d'un calcul : « zéro calculatrice, zéro boîte noire » (chap. 10) */
+/** Détail ligne par ligne d'un calcul : « zéro calculatrice, zéro boîte noire » (chap. 7) */
 export default function BreakdownView({ breakdown, formatTotal }: BreakdownViewProps) {
   const { t } = useI18n()
   return (

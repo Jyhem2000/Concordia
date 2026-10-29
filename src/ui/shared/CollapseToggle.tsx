@@ -10,7 +10,7 @@ type CollapseToggleProps = {
   children: ReactNode
 }
 
-/** Titre de panneau cliquable : replie ou déplie le panneau pour faire de la place (chap. 10) */
+/** Titre de panneau cliquable : replie ou déplie le panneau pour faire de la place (chap. 7) */
 export default function CollapseToggle({ id, children }: CollapseToggleProps) {
   const collapsed = useCollapsed(id)
   const toggle = useSettingsStore((s) => s.toggleCollapsed)

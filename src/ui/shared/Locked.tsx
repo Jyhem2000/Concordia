@@ -8,7 +8,7 @@ type LockedProps = {
   requires?: readonly Requirement[]
 }
 
-/** Conditions pas encore remplies d'un élément verrouillé, avec la progression vers chacune (chap. 10) */
+/** Conditions pas encore remplies d'un élément verrouillé, avec la progression vers chacune (chap. 7) */
 export default function Locked({ requires = [] }: LockedProps) {
   // La progression se lit sur l'état entier de la partie (carnet, dette, ICC, patrimoine)
   const game = useGameStore((s) => s.game)

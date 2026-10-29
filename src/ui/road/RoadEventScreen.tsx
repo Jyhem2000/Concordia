@@ -14,7 +14,7 @@ type RoadOptionProps = {
   choice: RoadChoiceId
 }
 
-/** Aléa routier (chap. 8 et 10) : la situation, puis deux options avec leurs coûts et effets exacts */
+/** Aléa routier (chap. 6 et 7) : la situation, puis deux options avec leurs coûts et effets exacts */
 export default function RoadEventScreen() {
   const eventId = useGameStore((s) => s.game.roadEvent)
   const { t } = useI18n()
@@ -74,7 +74,7 @@ function RoadOption({ eventId, choice }: RoadOptionProps) {
   )
 }
 
-/** Libellés des coûts et des effets d'une option, montants indexés compris */
+/** Libellés des coûts et des effets d'une option */
 function useRoadDescriptions() {
   const game = useGameStore((s) => s.game)
   const { t, credits, signedCredits, signedPercent, number } = useI18n()

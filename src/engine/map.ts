@@ -1,7 +1,7 @@
 import { MAP_LINKS } from '../data/districts.ts'
 import type { DistrictId } from './types.ts'
 
-/** Itinéraire le plus court (en districts) de `from` à `to`, extrémités comprises (chap. 4) */
+/** Itinéraire le plus court (en districts) de `from` à `to`, extrémités comprises (chap. 3) */
 export function shortestRoute(from: DistrictId, to: DistrictId): DistrictId[] {
   const previous = new Map<DistrictId, DistrictId | null>([[from, null]])
   const queue: DistrictId[] = [from]

@@ -20,24 +20,24 @@ import { remember } from './state.ts'
 import { loseHalfDay } from './time.ts'
 import type { Ending, EndingId, GameState, MorningBriefing, ProductId } from './types.ts'
 
-/** Nuit au relais routier du DSC si le district en a un, sinon bivouac sans gain de sommeil (chap. 2) */
+/** Nuit au relais routier du DSC si le district en a un, sinon bivouac sans gain de sommeil (chap. 1) */
 export function sleepsAtRelay(state: GameState): boolean {
   return DISTRICTS[state.districtId].relay
 }
 
-/** Où le joueur passe la nuit : chacune a ses effets à la routine de 06h00 (chap. 2 et 6) */
+/** Où le joueur passe la nuit : chacune a ses effets à la routine de 06h00 (chap. 1 et 5) */
 type Night = 'relay' | 'bivouac' | 'cell'
 
-/** Nuit, puis audit le Jour 30 à minuit ou routine matinale de 06h00 (chap. 2) */
+/** Nuit, puis audit le Jour 30 à minuit ou routine matinale de 06h00 (chap. 1) */
 export function sleep(state: GameState): GameState {
   if (state.day >= GAME_LENGTH_DAYS) return audit(state)
-  // Après une tournée de nuit, la nuit blanche ne rapporte aucun gain de sommeil (chap. 2)
+  // Après une tournée de nuit, la nuit blanche ne rapporte aucun gain de sommeil (chap. 1)
   const night: Night = state.phase === 'day' && sleepsAtRelay(state) ? 'relay' : 'bivouac'
   return morningRoutine({ ...state, interceptionReport: null }, night)
 }
 
 /**
- * Garde à vue (chap. 6) : chaque jour en cellule fait passer une routine matinale, sans gain de sommeil.
+ * Garde à vue (chap. 5) : chaque jour en cellule fait passer une routine matinale, sans gain de sommeil.
  * Le joueur ressort à 20h00, dans le district de l'interception, reposé. Franchir le Jour 30 à minuit
  * en cellule déclenche l'audit.
  */
@@ -69,7 +69,7 @@ function spendNight(state: GameState, night: Night): { state: GameState; sleep: 
   }
 }
 
-/** Routine matinale, dans l'ordre des docs (chap. 2) ; le Jour 1 n'en a pas */
+/** Routine matinale, dans l'ordre des docs (chap. 1) ; le Jour 1 n'en a pas */
 function morningRoutine(state: GameState, night: Night): GameState {
   const spent = spendNight(state, night)
   const day = state.day + 1
@@ -85,7 +85,7 @@ function morningRoutine(state: GameState, night: Night): GameState {
     immobilizedTomorrow: false,
     iccRouteGains: 0,
     tripReport: null,
-    // Les ventes saturées d'hier deviennent les pics suspects du jour (chap. 7)
+    // Les ventes saturées d'hier deviennent les pics suspects du jour (chap. 2)
     suspiciousPeaks: spent.state.oversold,
     oversold: [],
   }
@@ -141,7 +141,7 @@ function morningRoutine(state: GameState, night: Night): GameState {
   briefing.offshoreInterest = offshoreInterestBreakdown(s.offshore, night === 'cell' ? 0 : (crewEffect(s, 'offshoreBonus') ?? 0))
   if (briefing.offshoreInterest) s = { ...s, offshore: { ...s.offshore, interest: s.offshore.interest + briefing.offshoreInterest.total } }
 
-  // 5. Les complices de la trappe rapportent une part des caisses larguées la veille
+  // 4. Les complices de la trappe rapportent une part des caisses larguées la veille
   const trapdoor = MODULES['MOD-07'].trapdoor
   if (s.dumped.length > 0 && trapdoor) {
     const shareRng = createRng(s.rng)
@@ -155,7 +155,7 @@ function morningRoutine(state: GameState, night: Night): GameState {
   s = vip.state
   briefing.vipFailed = vip.failed
 
-  // 4. Fraîcheur : les périssables pourris sont détruits
+  // 5. Fraîcheur : les périssables pourris sont détruits
   const rot = removeRotten(s)
   briefing.rotten = rot.rotten
   s = { ...s, cargo: rot.cargo }
@@ -165,7 +165,7 @@ function morningRoutine(state: GameState, night: Night): GameState {
   const patrolDistrict = drawPatrol(rng)
   const events = drawEvents(s.events, day, rng)
   s = { ...s, patrolDistrict, events, dayOffer: drawDayOffer(rng), nightOffer: drawNightOffer(rng) }
-  // La Loterie peut désigner l'équipier actif : il disparaît pour de bon (chap. 8)
+  // La Loterie peut désigner l'équipier actif : il disparaît pour de bon (chap. 6)
   // Un faux dossier accepté protège l'équipier de ce tirage ; celui de l'indic efface la Fiche S
   const forged = events.lottery?.day === day && events.lottery.card !== null
   if (forged && events.lottery?.card === 'informant') {
@@ -179,7 +179,7 @@ function morningRoutine(state: GameState, night: Night): GameState {
   // After du couvre-feu de ce soir, annoncée avec les marchés
   s = { ...s, markets: drawMarkets(s, rng, s.markets), after: drawAfter(rng), rng: rng.state }
 
-  // 7. Effets du matin des événements : canicule, sas (chap. 8)
+  // 7. Effets du matin des événements : canicule, sas (chap. 6)
   // Le caisson cryo protège la soute de la canicule
   const heat = heatWave(s)
   if (heat && !mountedEffect(s, 'heatProof')) {
@@ -220,7 +220,7 @@ export function isDefeat(ending: EndingId): boolean {
   return DEFEATS.includes(ending)
 }
 
-/** Fin évaluée de la plus prestigieuse à la plus modeste, dette soldée (chap. 2) */
+/** Fin évaluée de la plus prestigieuse à la plus modeste, dette soldée (chap. 1) */
 export function endingFor(state: GameState): Ending {
   if (state.debt > 0) return { id: 'bio-bricks', score: 0 }
   const score = offshoreBalance(state.offshore)

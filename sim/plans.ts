@@ -1,13 +1,13 @@
 import type { Plan, Temperament } from './bots/trader.ts'
 
 /*
- * Plans et tempéraments des bots (chap. 9, axes 1 et 2). Les seuils sont des paramètres de bot,
+ * Plans et tempéraments des bots (chap. 8, axes 1 et 2). Les seuils sont des paramètres de bot,
  * notés dans chaque rapport de campagne.
  */
 
 export const NOVICE: Plan = { name: 'Novice', modules: [], novice: true }
 
-/** Plans des étapes 1 et 2 (chap. 9, axe 1) */
+/** Plans des étapes 1 et 2 (chap. 8, axe 1) */
 export const PLANS: readonly Plan[] = [
   { name: 'Sans build', modules: [] },
   { name: 'Chaîne du froid', vehicle: 'VEH-03', modules: ['MOD-01'], crew: 'CREW-03', favorTags: ['TAG-PERISHABLE'] },

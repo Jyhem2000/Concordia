@@ -9,7 +9,7 @@ import { keysOf } from '../src/engine/records.ts'
 import type { GameState, InterceptionMove } from '../src/engine/types.ts'
 
 /*
- * Actions candidates d'une partie (chap. 9) : un large échantillon de ce que le joueur peut tenter,
+ * Actions candidates d'une partie (chap. 8) : un large échantillon de ce que le joueur peut tenter,
  * filtré par le moteur lui-même. Sert au bot Aléatoire et aux tests de robustesse.
  */
 

@@ -14,7 +14,7 @@ import {
 } from '../../src/data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../src/data/districts.ts'
 import { KARMA, SERVICE_REQUIREMENTS, VELVET } from '../../src/data/locations.ts'
-import { ROAD_EVENTS } from '../../src/data/events.ts'
+import { EVENT_MULT_CAP, ROAD_EVENTS } from '../../src/data/events.ts'
 import { PRODUCT_IDS, PRODUCTS, SEALED_PRODUCT } from '../../src/data/products.ts'
 import { CREW, MODULES, VEHICLES } from '../../src/data/vehicles.ts'
 import { canSiphon, checkForceCurfew, checkService, fuelPrice, maxBuy, planTravel, pumpClosed, type Action } from '../../src/engine/actions.ts'
@@ -22,7 +22,7 @@ import { baseValue, cargoUsed, isIllegal, ownedQty, taggedQty } from '../../src/
 import { daysBeforeRot, paymentValue } from '../../src/engine/condition.ts'
 import { checkHire, crewEffect, hireFee, salary } from '../../src/engine/crew.ts'
 import { checkBuyModule, checkBuyVehicle, ejectMode, missingChassis, mountedEffect, repairPrice } from '../../src/engine/equipment.ts'
-import { eventMultiplier } from '../../src/engine/events.ts'
+import { eventFactor } from '../../src/engine/events.ts'
 import { loanRoom, offshoreBalance } from '../../src/engine/finance.ts'
 import {
   bluffChance,
@@ -86,7 +86,7 @@ import type {
 import type { Bot } from '../runner.ts'
 
 /*
- * Le marchand (chap. 9) : un bot unique paramétré par un plan, un tempérament et un objectif.
+ * Le marchand (chap. 8) : un bot unique paramétré par un plan, un tempérament et un objectif.
  * Il décide à chaque appel une seule action, à partir de la vue publique, par priorités.
  * Le cœur est la planification d'un trajet : pour chaque destination, ce que vaudrait la soute
  * (actuelle et achats d'ici) une fois là-bas, moins le risque et le carburant.
@@ -109,7 +109,7 @@ export type Plan = {
   novice?: boolean
   /** Lieux spéciaux utilisés quand le bot s'y trouve ; par défaut l'avance de survie */
   places?: readonly PlaceUse[]
-  /** Tournées de nuit au moins quand la soute le justifie, quel que soit le tempérament (suspensions, profil festif) */
+  /** Tournées de nuit au moins quand la soute le justifie, quel que soit le tempérament (suspensions, tag Festif) */
   nightOwl?: boolean
   /** Chasse au serveur en cours (Résident) : passer par son district producteur pour le trouver en stock */
   huntsServer?: boolean
@@ -125,7 +125,7 @@ export type Plan = {
   iccFloor?: number
 }
 
-/** Usages des lieux spéciaux que sait faire le marchand (chap. 9, tests par retrait) */
+/** Usages des lieux spéciaux que sait faire le marchand (chap. 8, tests par retrait) */
 export type PlaceUse = 'advance' | 'surgery' | 'certificate' | 'pass' | 'influence' | 'auction' | 'blackmail' | 'vip'
 
 const DEFAULT_PLACES: readonly PlaceUse[] = ['advance']
@@ -147,7 +147,7 @@ export type Temperament = {
   boldness: number
 }
 
-/** Objectif (chap. 9, axe 3) : survivre, score maximal, ou une grande fin (Baron, Élite, Résident Réécrit, Saboteur) */
+/** Objectif (chap. 8, axe 3) : survivre, score maximal, ou une grande fin (Baron, Élite, Résident Réécrit, Saboteur) */
 export type Objective = 'score' | 'survive' | 'mafia' | 'elite' | 'resident' | 'saboteur'
 
 const OBJECTIVE_NAMES: Record<Objective, string> = {
@@ -397,12 +397,12 @@ function estimatedSale(view: GameState, districtId: DistrictId, productId: Produ
   const seen = lastSeen(view, districtId)
   // Cours vu aujourd'hui : il compte les événements du jour ; sinon, cours vu (ou normal) corrigé des événements publics du jour
   if (seen?.day === view.day && seen.quotes[productId] !== undefined) return seen.quotes[productId] * SALE_COMMISSION
-  const event = eventMultiplier(view, districtId, productId)?.factor ?? 1
+  const event = Math.min(EVENT_MULT_CAP, eventFactor(view, districtId, productId))
   return (seen?.quotes[productId] ?? normalQuote(view, districtId, productId)) * event * SALE_COMMISSION
 }
 
 /**
- * Facteur de vente d'une caisse au-delà du cours net : fraîcheur, savoir-faire (Mama Rosa), profil de nuit
+ * Facteur de vente d'une caisse au-delà du cours net : fraîcheur, savoir-faire (Mama Rosa), tags de vente de nuit
  * (after du couvre-feu comprise), casse. Calculé par le moteur à l'arrivée dans `to` : un trajet de jour arrive
  * le jour même, un trajet de nuit la nuit même.
  */
@@ -416,8 +416,8 @@ function saleFactor(view: GameState, lot: CargoLot, to: DistrictId = view.distri
 }
 
 /**
- * Noctambule, de jour : une caisse festive peut attendre l'after de ce soir (chap. 2), si la tournée de nuit est permise.
- * Revente estimée au cours normal de l'after, au profil festif de la fête, un peu escomptée (risque de la nuit).
+ * Noctambule, de jour : une caisse festive peut attendre l'after de ce soir (chap. 1), si la tournée de nuit est permise.
+ * Revente estimée au cours normal de l'after, au coefficient Festif de la fête, un peu escomptée (risque de la nuit).
  */
 function tonightAtAfter(view: GameState, plan: Plan, productId: ProductId): number {
   if (!plan.nightOwl || view.phase !== 'day' || !PRODUCTS[productId].tags.includes(AFTER.tag) || checkForceCurfew(view)) return 0

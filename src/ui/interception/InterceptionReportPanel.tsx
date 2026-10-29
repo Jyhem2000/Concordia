@@ -11,7 +11,7 @@ type ReportLinesProps = {
   report: InterceptionReport
 }
 
-/** Compte rendu chiffré de la dernière option tentée au barrage (transparence, chap. 10) */
+/** Compte rendu chiffré de la dernière option tentée au barrage (transparence, chap. 7) */
 export default function InterceptionReportPanel() {
   const report = useGameStore((s) => s.game.interceptionReport)
   const { t } = useI18n()

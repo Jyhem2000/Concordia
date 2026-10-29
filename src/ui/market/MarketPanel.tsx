@@ -38,7 +38,7 @@ type QuantityButtonsProps = {
 /** Ordre d'affichage des états de fraîcheur */
 const FRESHNESS_ORDER: readonly FreshnessStage[] = ['extra', 'standard', 'gamey', 'spoiled']
 
-/** Couleur de chaque tier (chap. 10) */
+/** Couleur de chaque tier (chap. 7) */
 const tierColors: Record<Tier, string> = {
   0: 'border-green-500 text-green-300',
   1: 'border-yellow-500 text-yellow-300',
@@ -47,7 +47,7 @@ const tierColors: Record<Tier, string> = {
   4: 'border-violet-500 text-violet-300',
 }
 
-/** Tableau des cours : la boutique du jour, plus tous les produits en soute (chap. 10) */
+/** Tableau des cours : la boutique du jour, plus tous les produits en soute (chap. 7) */
 export default function MarketPanel() {
   const game = useGameStore((s) => s.game)
   const collapsed = useCollapsed('market')
@@ -87,7 +87,7 @@ export default function MarketPanel() {
   )
 }
 
-/** Ventes groupées : tout vendre, ou seulement ce qui marge, avec le produit annoncé (chap. 10) */
+/** Ventes groupées : tout vendre, ou seulement ce qui marge, avec le produit annoncé (chap. 7) */
 function BulkSales() {
   // Les ventes se calculent sur l'état entier de la partie (lots, demande, fraîcheur)
   const game = useGameStore((s) => s.game)
@@ -121,11 +121,11 @@ function MarketRow({ productId }: MarketRowProps) {
   const owned = ownedQty(game.cargo, productId)
   const cost = averageCost(game.cargo, productId)
   const status = productStatus(game, district, productId)
-  // Pourquoi il est en boutique : socle officiel, arrivage du jour (complément neutre), ou arrivage d'un événement (chap. 7)
+  // Pourquoi il est en boutique : socle officiel, arrivage du jour (complément neutre), ou arrivage d'un événement (chap. 2)
   const origin =
     stock === undefined || status === 'production' ? null : product.tier === 0 ? 'official' : status === 'strong' ? 'exceptional' : 'arrival'
   const quota = demandQuota(game, district, productId)
-  // Tendance : variation depuis le relevé de la veille dans ce district (chap. 7)
+  // Tendance : variation depuis le relevé de la veille dans ce district (chap. 2)
   const history = game.memory[district] ?? []
   const yesterday = history.find((seen) => seen.day === game.day - 1)?.quotes[productId]
   const today = quote(game, district, productId)
@@ -135,7 +135,7 @@ function MarketRow({ productId }: MarketRowProps) {
   const sale = owned > 0 ? saleQuote(game, productId, 1) : null
   const saleAll = owned > 0 ? saleQuote(game, productId, owned) : null
 
-  // État des caisses en soute : fraîcheur des périssables, casse des fragiles (chap. 3)
+  // État des caisses en soute : fraîcheur des périssables, casse des fragiles (chap. 2)
   const lots = game.cargo.filter((lot) => lot.productId === productId)
   const stages = FRESHNESS_ORDER.flatMap((stage) => {
     const qty = lots.reduce((total, lot) => (freshnessOf(game, lot) === stage ? total + lot.qty : total), 0)
@@ -236,7 +236,7 @@ function Field({ label, hint, wide = false, children }: FieldProps) {
   )
 }
 
-/** Curseurs d'achat / vente : +1, +5, MAX (chap. 10) */
+/** Curseurs d'achat / vente : +1, +5, MAX (chap. 7) */
 function QuantityButtons({ label, max, maxLabel, onPick, variant }: QuantityButtonsProps) {
   return (
     <span className="flex items-center gap-1">

@@ -12,7 +12,7 @@ import { createRng } from './rng.ts'
 import type { CrateCount, GameState, RoadChoice, RoadCost, RoadOutcome, RoadReport } from './types.ts'
 
 /*
- * Aléas routiers (chap. 8) : options, coûts au choix, pari, puis dépannage et arrivée.
+ * Aléas routiers (chap. 6) : options, coûts au choix, pari, puis dépannage et arrivée.
  */
 
 export type RoadChoiceId = 'a' | 'b'
@@ -95,7 +95,7 @@ function payCost(state: GameState, cost: RoadCost): GameState {
 
 /**
  * Effets d'une option : ICC gagné en gain de route, Santé jamais sous 1 PV, rations dans la limite du réservoir ;
- * une perte de châssis est un choc qui peut casser les fragiles (chap. 3), sauf suspensions
+ * une perte de châssis est un choc qui peut casser les fragiles (chap. 2), sauf suspensions
  */
 function applyOutcome(state: GameState, outcome: RoadOutcome, paid: number): { state: GameState; damaged: number } {
   let s: GameState = { ...state, cash: state.cash + (outcome.cash ?? 0) }

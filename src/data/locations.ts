@@ -1,17 +1,17 @@
 import type { DistrictId, GlobalEventId, Location, LocationId, ProductId, Requirement, ServiceKey, TagId, Tier } from '../engine/types.ts'
 
 /*
- * Lieux spéciaux (chap. 4) : district d'accueil et services implémentés. Le détail des services
- * et le lore sont au chap. 4, les noms dans src/i18n/fr.ts.
+ * Lieux spéciaux (chap. 3) : district d'accueil et services implémentés. Le détail des services
+ * et le lore sont au chap. 3, les noms dans src/i18n/fr.ts.
  */
 
-/** Cantine des Chauffeurs : Synthanol au tarif syndical, fixe (non indexé) */
+/** Cantine des Chauffeurs : Synthanol au tarif syndical */
 export const CANTINE = { fuelPrice: 60 }
 
-/** Garage de Mécano-Mitch : prix d'un PV de châssis réparé (indexé) */
+/** Garage de Mécano-Mitch : prix d'un PV de châssis réparé */
 export const GARAGE = { repairPerPv: 60 }
 
-/** Karma-Cham : panique algorithmique (coût indexé, hausse par usage), bonus d'influence le lendemain */
+/** Karma-Cham : panique algorithmique (hausse par usage), bonus d'influence le lendemain */
 export const KARMA = {
   cost: 7_500,
   costStep: 3_750,
@@ -20,20 +20,20 @@ export const KARMA = {
   tags: ['TAG-CULTURE', 'TAG-PERISHABLE', 'TAG-CHEMICAL'] as readonly TagId[],
 }
 
-/** Morgue du Dr. K. : laissez-passer, chirurgie, certificat (coûts indexés) */
+/** Morgue du Dr. K. : laissez-passer, chirurgie, certificat */
 export const MORGUE = {
   pass: { cost: 2_250, days: 5, district: 'D3' as DistrictId, tag: 'TAG-CHEMICAL' as TagId, cancels: 'EVT-G02' as GlobalEventId },
   surgery: { cost: 5_250, cashShare: 0.1, cooldownDays: 5, health: 35, healthCap: 85 },
   certificate: { cost: 6_000, costStep: 3_000, cooldownDays: 7, icc: 10 },
 }
 
-/** Cassandre-88 : prédiction de l'événement global à J+2 (coût indexé, hausse par usage, plus une caisse) */
+/** Cassandre-88 : prédiction de l'événement global à J+2 (hausse par usage, plus une caisse) */
 export const CASSANDRE = { cost: 4_500, costStep: 2_250, crate: 'T3-03' as ProductId, aheadDays: 2 }
 
-/** Faux dossier de Loterie à la Laverie (coût indexé, hausse par usage) et effets des cartes */
+/** Faux dossier de Loterie à la Laverie (hausse par usage) et effets des cartes */
 export const FORGERY = { cost: 22_500, costStep: 22_500, chance: 0.6, failIccLoss: 10, captainRisk: -0.15, competitorQuota: 1.5, informantIcc: 5 }
 
-/** Velvet-Silo : enchères, chantage, commande VIP (coûts indexés) */
+/** Velvet-Silo : enchères, chantage, commande VIP */
 export const VELVET = {
   auction: { cooldownDays: 3, factor: 2, minTier: 3 },
   blackmail: { cooldownDays: 4, cost: 12_000, costStep: 6_000, icc: 12, crates: ['T3-07', 'T3-02'] as readonly ProductId[] },
@@ -41,7 +41,7 @@ export const VELVET = {
 }
 
 /**
- * Services réservés (chap. 4) : voie officielle (palier d'ICC, patrimoine), voie pègre (Fiche S), clientèle établie.
+ * Services réservés (chap. 3) : voie officielle (palier d'ICC, patrimoine), voie pègre (Fiche S), clientèle établie.
  * Les services absents sont ouverts à tous.
  */
 export const SERVICE_REQUIREMENTS: Readonly<Partial<Record<ServiceKey, readonly Requirement[]>>> = {

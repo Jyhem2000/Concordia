@@ -5,7 +5,7 @@ import { recordOf } from '../src/engine/records.ts'
 import type { DistrictMarket, GameState } from '../src/engine/types.ts'
 
 /*
- * Information honnête (chap. 9) : ce que voit le joueur. Les bots décident sur cette vue, où l'état caché
+ * Information honnête (chap. 8) : ce que voit le joueur. Les bots décident sur cette vue, où l'état caché
  * est neutralisé ; un test vérifie qu'ils décident pareil sur l'état complet.
  */
 

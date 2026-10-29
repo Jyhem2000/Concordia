@@ -13,7 +13,7 @@ const WIDTH = 300
 const HEIGHT = 110
 const MARGIN = { top: 10, right: 12, bottom: 20, left: 44 }
 
-/** Historique des cours observés dans le district actuel, avec le cours normal en repère (chap. 7 et 10) */
+/** Historique des cours observés dans le district actuel, avec le cours normal en repère (chap. 2 et 7) */
 export default function QuoteChart({ productId }: QuoteChartProps) {
   const game = useGameStore((s) => s.game)
   const { t, credits } = useI18n()

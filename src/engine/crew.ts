@@ -9,7 +9,7 @@ import { keysOf } from './records.ts'
 import type { Crew, CrewId, DistrictId, GameState, ProductId } from './types.ts'
 
 /*
- * Équipage (chap. 5) et Exemption Métabolique (chap. 2) : recrutement à la Cantine, salaires
+ * Équipage (chap. 4) et Exemption Métabolique (chap. 1) : recrutement à la Cantine, salaires
  * payés d'avance, bonus des équipiers qui travaillent, Sédation.
  */
 
@@ -94,7 +94,7 @@ export function payCrew(state: GameState, inCell: boolean): { state: GameState; 
   return { state: { ...state, cash: state.cash - due, cargo, crew: { ...state.crew, paidDay: state.day } }, paid: due, crate }
 }
 
-// ─── Exemption Métabolique et Sédation (chap. 2) ───
+// ─── Exemption Métabolique et Sédation (chap. 1) ───
 
 /** Sédation : protection épuisée */
 export function isSedated(state: GameState): boolean {

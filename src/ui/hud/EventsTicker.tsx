@@ -6,7 +6,7 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import EventDetails from '../events/EventDetails.tsx'
 
-/** Ligne des événements du téléscripteur : global, locaux, contrecoups, Loterie et rumeur du lendemain (chap. 8 et 10) */
+/** Ligne des événements du téléscripteur : global, locaux, contrecoups, Loterie et rumeur du lendemain (chap. 6 et 7) */
 export default function EventsTicker() {
   const events = useGameStore((s) => s.game.events)
   const day = useGameStore((s) => s.game.day)

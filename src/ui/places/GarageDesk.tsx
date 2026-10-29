@@ -19,7 +19,7 @@ type ModuleRowProps = {
   moduleId: ModuleId
 }
 
-/** Garage de Mécano-Mitch : réparations, châssis et modules (chap. 4 et 5) */
+/** Garage de Mécano-Mitch : réparations, châssis et modules (chap. 3 et 4) */
 export default function GarageDesk() {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
@@ -142,7 +142,7 @@ function ModuleRow({ moduleId }: ModuleRowProps) {
   )
 }
 
-/** Passifs des véhicules et effets des modules, chiffres lus dans les données (chap. 5) */
+/** Passifs des véhicules et effets des modules, chiffres lus dans les données (chap. 4) */
 function useEquipmentTexts() {
   const { t, multiplier, signedPercent, percent } = useI18n()
   const g = t.garage

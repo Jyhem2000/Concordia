@@ -44,7 +44,7 @@ import type {
 } from './types.ts'
 
 /*
- * Barrage de la BRC (chap. 6) et racket des milices en zone hors-réseau (chap. 4).
+ * Barrage de la BRC (chap. 5) et racket des milices en zone hors-réseau (chap. 3).
  * Le trajet est fait : le joueur est dans le district de destination et doit résoudre le barrage
  * avant toute autre action. Chaque option renvoie un nouvel état et un compte rendu chiffré.
  */
@@ -112,7 +112,7 @@ function checkFleeTactics(state: GameState, { drop, dope }: Tactics): ActionErro
   return null
 }
 
-/** Bonus de largage d'un produit : le meilleur de ses tags (chap. 3) */
+/** Bonus de largage d'un produit : le meilleur de ses tags (chap. 2) */
 export function dropBonus(productId: ProductId): number {
   return Math.max(0, ...PRODUCTS[productId].tags.map((tag) => TAGS[tag].fleeDropBonus ?? 0))
 }
@@ -124,7 +124,7 @@ const aidCrates = (aids: readonly ProductId[]): CrateCount[] =>
     return aid ? [{ productId, qty: aid.crates }] : []
   })
 
-// ─── Chances (détaillables, chap. 10) ───
+// ─── Chances (détaillables, chap. 7) ───
 
 const stars = (state: GameState) => DISTRICTS[state.districtId].security
 
@@ -235,13 +235,13 @@ export function fleeConsequences(state: GameState): {
   }
 }
 
-/** Où se tient le contrôle (chap. 4) : galerie de service la nuit, quai de service des élites, ou rue */
+/** Où se tient le contrôle (chap. 3) : galerie de service la nuit, quai de service des élites, ou rue */
 export function checkpointPlace(state: GameState): 'street' | 'gallery' | 'docks' {
   if (state.phase === 'night') return 'gallery'
   return DISTRICTS[state.districtId].access === 'docks' ? 'docks' : 'street'
 }
 
-/** Malus de Sédation (chap. 2), 0 sous protection */
+/** Malus de Sédation (chap. 1), 0 sous protection */
 const sedation = (state: GameState) => (isSedated(state) ? -SEDATION.penalty : 0)
 
 /** Transpondeur d'urgence du véhicule, s'il agit dans le district actuel */
@@ -262,7 +262,7 @@ export function ejectChance(state: GameState): Breakdown {
   }
 }
 
-/** Caisses du double fond du véhicule et reste de la soute (chap. 5) */
+/** Caisses du double fond du véhicule et reste de la soute (chap. 4) */
 export function hiddenCargo(state: GameState): { hidden: CargoLot[]; visible: CargoLot[] } {
   return splitHidden(state.cargo, VEHICLES[state.vehicleId].hiddenCompartment)
 }
@@ -293,7 +293,7 @@ export function toll(state: GameState): number {
 
 /**
  * Péage en nature : les milices prennent d'abord leurs produits favoris (dans l'ordre), puis les caisses
- * les plus chères, jusqu'à couvrir le péage ; elles ne rendent pas la monnaie (chap. 4)
+ * les plus chères, jusqu'à couvrir le péage ; elles ne rendent pas la monnaie (chap. 3)
  */
 export function tollInKind(state: GameState): CrateCount[] {
   const due = toll(state)
@@ -363,7 +363,7 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
   const searchedBefore = state.interception?.bluffFailed === true
   const report = (s: GameState, chance: Breakdown | null, success: boolean | null, over: boolean, effectiveSearch: boolean): GameState =>
     finish({ ...s, rng: rng.state }, { move, chance, success, over, ...ledger }, effectiveSearch && lethalCargo, effectiveSearch || searchedBefore)
-  // Double fond : à la fouille qui confisque, second jet ; non trouvé, la sanction se juge sur la soute visible (chap. 5)
+  // Double fond : à la fouille qui confisque, second jet ; non trouvé, la sanction se juge sur la soute visible (chap. 4)
   const frisk = (s: GameState, sanctionOf: (searched: GameState) => GameState): GameState => {
     const { hidden, visible } = hiddenCargo(s)
     if (hidden.length === 0) return sanctionOf(s)
@@ -476,7 +476,7 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
   }
 }
 
-/** Fouille effective avec un produit fatal en soute (chap. 2) */
+/** Fouille effective avec un produit fatal en soute (chap. 1) */
 export function isLethalSearch(state: GameState): boolean {
   return state.cargo.some((lot) => PRODUCTS[lot.productId].lethalOnSearch)
 }
@@ -532,7 +532,7 @@ function keepHidden(state: GameState, ledger: Ledger, hidden: readonly CargoLot[
   return { ...state, cargo: [...state.cargo, ...hidden] }
 }
 
-/** Refus du péage : pillage des caisses les plus chères, tabassage, châssis cabossé (chap. 4) */
+/** Refus du péage : pillage des caisses les plus chères, tabassage, châssis cabossé (chap. 3) */
 function refuseToll(state: GameState, ledger: Ledger, rng: Rng): GameState {
   const { lootShare, healthLoss, chassisLoss } = RACKET.refuse
   const looted = loot(state.cargo, Math.ceil(cargoUsed(state.cargo) * lootShare))
@@ -569,7 +569,7 @@ function shake(state: GameState, ledger: Ledger, breakage: { cargo: CargoLot[]; 
   return { ...state, cargo: breakage.cargo }
 }
 
-/** Perte de châssis hors fuite : au-delà du seuil, le choc peut casser les fragiles (chap. 3) */
+/** Perte de châssis hors fuite : au-delà du seuil, le choc peut casser les fragiles (chap. 2) */
 function hitChassis(state: GameState, ledger: Ledger, pv: number, rng: Rng): GameState {
   return shake(loseChassis(state, ledger, pv), ledger, fragile(state, breakOnShock(state.cargo, rng, pv)))
 }
@@ -672,7 +672,7 @@ function finish(state: GameState, report: InterceptionReport, executed: boolean,
   const fullReport: InterceptionReport = { ...report, towBill: towed.bill }
   if (!report.over) return { ...towed.state, interceptionReport: fullReport }
 
-  // Brouilleur de drones découvert à la fouille : sabotage d'infrastructure, saisi, garde à vue (chap. 5)
+  // Brouilleur de drones découvert à la fouille : sabotage d'infrastructure, saisi, garde à vue (chap. 4)
   const jammer = searched ? mountedWith(towed.state, 'droneJammer') : undefined
   // Amende impayée : la garde à vue s'allonge
   const unpaid = report.unpaidFine > 0 ? FINE.unpaidCustodyDays : 0
@@ -686,7 +686,7 @@ function finish(state: GameState, report: InterceptionReport, executed: boolean,
         },
       }
     : towed.state
-  // Contrôle de la BRC franchi sans garde à vue : noté au carnet (Vance, chap. 5)
+  // Contrôle de la BRC franchi sans garde à vue : noté au carnet (Vance, chap. 4)
   const brc = state.interception !== null && state.interception.kind !== 'racket'
   const noted = brc && custodyDays === 0 ? noteControlPassed(seized) : seized
   // Les caisses sous la protection du parrain reviennent à bord
@@ -704,7 +704,7 @@ function endGame(state: GameState, report: InterceptionReport, id: 'execution' |
   return { ...state, status: 'finished', ending: { id, score: 0 }, interception: null, interceptionReport: report }
 }
 
-/** Dépannage d'urgence à 0 PV de châssis (chap. 2) : châssis remis en état partiel, facture, demi-journée perdue */
+/** Dépannage d'urgence à 0 PV de châssis (chap. 1) : châssis remis en état partiel, facture, demi-journée perdue */
 export function emergencyTow(state: GameState): { state: GameState; bill: number } {
   if (state.chassis > 0) return { state, bill: 0 }
   const bill = EMERGENCY_TOW.bill
@@ -714,7 +714,7 @@ export function emergencyTow(state: GameState): { state: GameState; bill: number
   return { state: loseHalfDay(towed), bill }
 }
 
-/** Part des contrôles volants dans un district : celle du district, majorée par la ronde renforcée (chap. 6) */
+/** Part des contrôles volants dans un district : celle du district, majorée par la ronde renforcée (chap. 5) */
 export function flyingCheckShare(state: GameState, districtId: DistrictId, includePatrol: boolean): number {
   const share = DISTRICTS[districtId].flyingCheckShare
   if (share === 0) return 0

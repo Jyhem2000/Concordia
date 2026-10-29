@@ -18,7 +18,7 @@ type BriefingRowProps = {
   children: ReactNode
 }
 
-/** Briefing de 06h00 : ce que la nuit et la routine matinale ont changé (chap. 2 et 10) */
+/** Briefing de 06h00 : ce que la nuit et la routine matinale ont changé (chap. 1 et 7) */
 export default function BriefingPanel() {
   const briefing = useGameStore((s) => s.game.briefing)
   const day = useGameStore((s) => s.game.day)
@@ -81,7 +81,7 @@ function CrewLine({ crew }: { crew: NonNullable<MorningBriefing['crew']> }) {
   )
 }
 
-/** Une ligne par effet de la routine, dans son ordre d'application (chap. 2) */
+/** Une ligne par effet de la routine, dans son ordre d'application (chap. 1) */
 function BriefingLines({ briefing }: BriefingLinesProps) {
   const { t, credits, signedPercent } = useI18n()
   const districtId = useGameStore((s) => s.game.districtId)

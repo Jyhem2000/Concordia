@@ -103,7 +103,7 @@ describe('trajets', () => {
 })
 
 describe('carburant', () => {
-  it('fait le plein au prix local indexé', () => {
+  it('fait le plein au prix local', () => {
     const state = run({ ...start, fuel: 0 }, { type: 'refuel', qty: 2 })
     expect(state.fuel).toBe(2)
     expect(state.cash).toBe(start.cash - 2 * fuelPrice(start))

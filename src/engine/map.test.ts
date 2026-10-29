@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { crossedDistricts, shortestRoute } from './map.ts'
 
-describe('itinéraires (chap. 4)', () => {
+describe('itinéraires (chap. 3)', () => {
   it('va directement chez un voisin', () => {
     expect(shortestRoute('D1', 'D2')).toEqual(['D1', 'D2'])
     expect(crossedDistricts(shortestRoute('D1', 'D2'))).toEqual([])
   })
 
-  it('traverse D1, D2 et D5 pour aller de D4 à D6 (exemple du chap. 4)', () => {
+  it('traverse D1, D2 et D5 pour aller de D4 à D6 (exemple du chap. 3)', () => {
     const route = shortestRoute('D4', 'D6')
     expect(route).toHaveLength(5)
     expect(crossedDistricts(route)).toHaveLength(3)

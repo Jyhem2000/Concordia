@@ -4,7 +4,7 @@ import { PLANS, TEMPERAMENTS } from './plans.ts'
 import { playGame, type Bot, type GameRecord } from './runner.ts'
 
 /*
- * Tests par retrait (chap. 9, campagne 4) : chaque élément est mesuré dans le plan qui le vise,
+ * Tests par retrait (chap. 8, campagne 4) : chaque élément est mesuré dans le plan qui le vise,
  * joué avec puis sans lui sur les mêmes graines ; les écarts se lisent partie par partie.
  */
 
@@ -54,7 +54,7 @@ function pair(
 const withoutModule = (base: Plan, id: ModuleId): Plan => ({ ...base, modules: base.modules.filter((module) => module !== id) })
 const withPlaces = (base: Plan, extra: readonly PlaceUse[]): Plan => ({ ...base, places: ['advance', ...extra] })
 
-/** Plan dédié au brouilleur de drones : fuite au sommet (chap. 9, étape 2 pour ses autres réglages) */
+/** Plan dédié au brouilleur de drones : fuite au sommet (chap. 8, étape 2 pour ses autres réglages) */
 const FLIGHT: Plan = { name: 'Fuite au sommet', modules: ['MOD-06', 'MOD-09'], crew: 'CREW-02', runner: true }
 /** Plan de nuit avec la plaque rotative */
 const NIGHT_PLATE: Plan = { name: 'Nuit festive + plaque', modules: ['MOD-04', 'MOD-06', 'MOD-05'], nightOwl: true, runner: true }
@@ -142,7 +142,7 @@ export function renderAblations(results: readonly AblationResult[], games: numbe
   return [
     '# Campagne 4 — Tests par retrait',
     '',
-    `* ${games} parties par variante, graines 1 à ${games}, mêmes graines avec et sans l'élément (chap. 9, méthode des tests par retrait).`,
+    `* ${games} parties par variante, graines 1 à ${games}, mêmes graines avec et sans l'élément (chap. 8, méthode des tests par retrait).`,
     '* Écarts appariés avec intervalle de confiance à 95 % ; verdict positif ou négatif si l’intervalle exclut zéro.',
     '* Usage : part des parties jouées avec l’élément où il a été acheté ou utilisé.',
     '',

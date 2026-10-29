@@ -1,7 +1,7 @@
 import type { DistrictId, GameEvent, GlobalEventId, LocalEventId, RoadEvent, RoadEventId } from '../engine/types.ts'
 
 /*
- * Événements (chap. 8) : chances, durées et effets chiffrés. Les règles et le lore sont au chap. 8,
+ * Événements (chap. 6) : chances, durées et effets chiffrés. Les règles et le lore sont au chap. 6,
  * les libellés et les rumeurs dans src/i18n/fr.ts.
  */
 
@@ -11,7 +11,7 @@ export const EVENT_CHANCES = { global: 0.3, local: 0.2, road: 0.25 }
 /** Cooldowns en jours : un événement déclenché le jour J revient au plus tôt le jour J + cooldown */
 export const EVENT_COOLDOWNS = { local: 4, road: 5 }
 
-/** Plafond de Mult_Événement (chap. 7) */
+/** Plafond de Mult_Événement (chap. 2) */
 export const EVENT_MULT_CAP = 4
 
 /** Rumeurs : chance qu'un événement global de demain fuite, chance d'une fausse rumeur sans événement */
@@ -31,7 +31,7 @@ export const LOTTERY = {
   promotedRisk: 0.15,
   /** Durée des vices, jour du tirage compris */
   viceDays: 3,
-  /** Chance que le promu soit l'équipier actif (équipage, chap. 5) */
+  /** Chance que le promu soit l'équipier actif (équipage, chap. 4) */
   crewLossChance: 0.1,
   /** Chance qu'un tirage désigne aussi un déclassé (garanti par un faux dossier « cadre ») */
   demotionChance: 0.5,
@@ -148,7 +148,7 @@ export const LOCAL_EVENTS: Readonly<Record<LocalEventId, GameEvent>> = {
   },
   'EVT-D6-01': { effects: [{ kind: 'price', products: ['T3-01', 'T3-02', 'T3-03', 'T4-01'], factor: 3.5 }] },
   'EVT-D6-02': { effects: [{ kind: 'price', products: ['T2-04', 'T3-07', 'T4-03'], factor: 4 }] },
-  // Prévu à ×5 : ramené au plafond de Mult_Événement (chap. 8)
+  // Prévu à ×5 : ramené au plafond de Mult_Événement (chap. 6)
   'EVT-D6-03': { effects: [{ kind: 'price', products: ['T1-01', 'T1-03', 'T1-04'], factor: 4 }] },
 }
 

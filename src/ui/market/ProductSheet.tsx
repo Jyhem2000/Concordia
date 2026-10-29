@@ -15,7 +15,7 @@ type ProductSheetProps = {
   productId: ProductId
 }
 
-/** Fiche produit dépliable : effets des tags, actions, sanction et où vendre, sans rien cacher (chap. 10) */
+/** Fiche produit dépliable : effets des tags, actions, sanction et où vendre, sans rien cacher (chap. 7) */
 export default function ProductSheet({ productId }: ProductSheetProps) {
   // Profil public (vices de la Loterie compris) et mémoire de marché se lisent sur la partie entière
   const game = useGameStore((s) => s.game)
@@ -27,7 +27,7 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
   const names = (ids: readonly DistrictId[]) => ids.map((id) => t.district[id].name).join(', ')
   const offGrid = names(where((district) => district.offGrid))
 
-  // Effets de chaque tag, tels que les applique le moteur (chap. 3)
+  // Effets de chaque tag, tels que les applique le moteur (chap. 2)
   const tagLines = (tag: TagId): string[] => {
     const { cover, tripRisk, detectedRisk, bluffMalus, smell, perishable, breakage, explosion, fleeDropBonus, nightSale } = TAGS[tag]
     const smelly = smell ? names(where((district) => district.odorFactor > 1)) : ''
@@ -46,7 +46,7 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
     ].map((line) => `${t.tag[tag].name} : ${line}`)
   }
 
-  // Actions propres au produit (chap. 3)
+  // Actions propres au produit (chap. 2)
   const { masks, bluffAid, doping, sleeplessNight, cooling, iccRestore, beaconRisk, lethalOnSearch } = product
   const actions = [
     ...(masks ? [t.sheet.masks(t.tag[masks].name)] : []),
@@ -59,7 +59,7 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
     ...(lethalOnSearch ? [t.sheet.lethal] : []),
   ]
 
-  // Sanction de base d'une saisie (chap. 6)
+  // Sanction de base d'une saisie (chap. 5)
   // Celle du moteur, pour une soute qui ne contiendrait que ce produit
   const sanction = searchSanction({
     ...game,
@@ -70,11 +70,11 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
     ? t.sheet.seizure(percent(sanction.fineRate, 0), sanction.iccLoss, sanction.custodyDays, sanction.custodyDays > 0)
     : t.sheet.legal
 
-  // Qui l'apprécie : connivence des agents, priorité des milices (chap. 6 et 7)
+  // Qui l'apprécie : connivence des agents, priorité des milices (chap. 2 et 5)
   const bribes = where((district) => district.bribeFavorites.includes(productId))
   const tolls = where((district) => district.tollFavorites.includes(productId))
 
-  // Où le vendre : profil public, puis meilleur cours mémorisé ailleurs (chap. 7)
+  // Où le vendre : profil public, puis meilleur cours mémorisé ailleurs (chap. 2)
   const strong = DISTRICT_IDS.filter((id) => productStatus(game, id, productId) === 'strong')
   const produced = DISTRICT_IDS.filter((id) => productStatus(game, id, productId) === 'production')
   const best = DISTRICT_IDS.flatMap((id) => {

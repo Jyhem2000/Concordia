@@ -13,7 +13,7 @@ import { createRng } from './rng.ts'
 import type { CargoLot, CrateCount, DistrictId, ForgeryCard, GameState, ProductId, ServiceKey, TagId } from './types.ts'
 
 /*
- * Lieux spéciaux (chap. 4) : Karma-Cham, Morgue, Cassandre-88, faux dossier de la Laverie, Velvet-Silo.
+ * Lieux spéciaux (chap. 3) : Karma-Cham, Morgue, Cassandre-88, faux dossier de la Laverie, Velvet-Silo.
  * Chaque service vérifie ses conditions (`check*`) puis produit un nouvel état.
  */
 
@@ -45,7 +45,7 @@ function used(state: GameState, key: ServiceKey): GameState {
 
 const gainIcc = (state: GameState, points: number): GameState => ({ ...state, icc: Math.min(ICC_MAX, state.icc + points) })
 
-// ─── Karma-Cham : bonus d'influence (chap. 4 et 7) ───
+// ─── Karma-Cham : bonus d'influence (chap. 2 et 3) ───
 
 export function karmaCost(state: GameState): number {
   return serviceCost(state, 'influence', KARMA.cost, KARMA.costStep)
@@ -113,12 +113,12 @@ export function visitMorgue(state: GameState, service: MorgueService): ServiceRe
       return { ok: true, state: used({ ...paid, health }, 'surgery') }
     }
     case 'certificate':
-      // Hors plafond de gains de route : c'est un service, pas un gain de route (chap. 2)
+      // Hors plafond de gains de route : c'est un service, pas un gain de route (chap. 1)
       return { ok: true, state: used(gainIcc(paid, MORGUE.certificate.icc), 'certificate') }
   }
 }
 
-// ─── Cassandre-88 : prédiction (chap. 4 et 8) ───
+// ─── Cassandre-88 : prédiction (chap. 3 et 6) ───
 
 export function prophecyCost(state: GameState): number {
   return serviceCost(state, 'prophecy', CASSANDRE.cost, CASSANDRE.costStep)
@@ -143,7 +143,7 @@ export function consultCassandre(state: GameState): ServiceResult {
   return { ok: true, state: used({ ...paid, rng: rng.state, events: { ...state.events, prophecy } }, 'prophecy') }
 }
 
-// ─── Laverie : faux dossier de Loterie (chap. 4 et 8) ───
+// ─── Laverie : faux dossier de Loterie (chap. 3 et 6) ───
 
 export function forgeryCost(state: GameState): number {
   return serviceCost(state, 'forgery', FORGERY.cost, FORGERY.costStep)
@@ -182,7 +182,7 @@ export function forge(state: GameState, card: ForgeryCard): ServiceResult {
   }
 }
 
-// ─── Velvet-Silo (chap. 4) ───
+// ─── Velvet-Silo (chap. 3) ───
 
 export function velvetLocked(state: GameState): boolean {
   return state.velvetLock !== null && state.day <= state.velvetLock
@@ -300,7 +300,7 @@ export function deliverVip(state: GameState): ServiceResult {
 export const velvetDistrict = (): DistrictId => LOCATIONS['LOC-D6-1'].district
 
 /**
- * Protection du parrain (chap. 4) : dans le district du Silo, les caisses d'une commande VIP en cours
+ * Protection du parrain (chap. 3) : dans le district du Silo, les caisses d'une commande VIP en cours
  * (au plus le nombre commandé) sont hors de vue des agents : ni risque, ni fouille
  */
 export function sponsorCover(state: GameState, districtId: DistrictId): { covered: CargoLot[]; rest: CargoLot[] } {
@@ -317,7 +317,7 @@ export function shieldSponsored(state: GameState): GameState {
   return covered.length === 0 ? state : { ...state, cargo: rest, interception: { ...state.interception, covered } }
 }
 
-/** Échéance de la commande VIP dépassée à la routine : ICC perdu, Silo verrouillé (chap. 4) */
+/** Échéance de la commande VIP dépassée à la routine : ICC perdu, Silo verrouillé (chap. 3) */
 export function expireVip(state: GameState): { state: GameState; failed: boolean } {
   if (!state.vip || state.day <= state.vip.day + VELVET.vip.deadlineDays) return { state, failed: false }
   const locked = state.day + VELVET.vip.lockDays - 1

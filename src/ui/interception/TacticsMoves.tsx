@@ -19,7 +19,7 @@ type ToggleProps = {
   onChange: (checked: boolean) => void
 }
 
-/** Bluff, avec les aides possibles : caisses données ou sacrifiées à l'agent (chap. 3) */
+/** Bluff, avec les aides possibles : caisses données ou sacrifiées à l'agent (chap. 2) */
 export function BluffMove({ label, outcomes }: TacticalMoveProps) {
   const game = useGameStore((s) => s.game)
   const { t, signedPercent } = useI18n()
@@ -51,7 +51,7 @@ export function BluffMove({ label, outcomes }: TacticalMoveProps) {
   )
 }
 
-/** Fuite (ou forcer le passage), avec largage offensif et dopage pilote (chap. 3 et 6) */
+/** Fuite (ou forcer le passage), avec largage offensif et dopage pilote (chap. 2 et 5) */
 export function FleeMove({ label, outcomes }: TacticalMoveProps) {
   const game = useGameStore((s) => s.game)
   const { t, signedPercent } = useI18n()

@@ -115,7 +115,7 @@ describe('fouille', () => {
   })
 })
 
-describe('double fond (chap. 5)', () => {
+describe('double fond (chap. 4)', () => {
   const hidden = VEHICLES['VEH-01'].hiddenCompartment
 
   it('cache les caisses illégales les plus chères, jamais le serveur Aeterna ni le légal', () => {
@@ -309,7 +309,7 @@ describe('suites du barrage', () => {
   })
 })
 
-describe('tactiques de barrage (chap. 3)', () => {
+describe('tactiques de barrage (chap. 2)', () => {
   it('donne les manuels à l’agent pour un bonus de bluff, et sacrifie une épice contre le malus d’odeur', () => {
     const manuals = defined(PRODUCTS['T0-04'].bluffAid)
     const state = stopped([lot('T0-04', 6), lot('T1-02', 2)])
@@ -371,7 +371,7 @@ describe('contrôle volant', () => {
   })
 })
 
-describe('protection du parrain (chap. 4)', () => {
+describe('protection du parrain (chap. 3)', () => {
   // Commande VIP d'un produit Tech (détecté au Silo), plus des caisses illégales hors commande
   const hidden = VEHICLES['VEH-01'].hiddenCompartment
   const ordered = (patch: Partial<GameState> = {}): GameState =>

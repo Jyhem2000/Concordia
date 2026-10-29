@@ -37,7 +37,7 @@ type StatProps = {
   className?: string
 }
 
-/** Bandeau supérieur permanent : jour, portefeuilles, jauges (chap. 10) */
+/** Bandeau supérieur permanent : jour, portefeuilles, jauges (chap. 7) */
 export default function StatusBar() {
   // Les échéances et la collecte se calculent sur l'état entier de la partie
   const game = useGameStore((s) => s.game)
@@ -47,7 +47,7 @@ export default function StatusBar() {
   const vehicle = VEHICLES[game.vehicleId]
   const deadline = nextDebtDeadline(game)
   const protectionDay = nextProtectionDay(game)
-  // Moment de la journée : Journée, 20h00 (journée finie avant l'heure), Nuit (chap. 2)
+  // Moment de la journée : Journée, 20h00 (journée finie avant l'heure), Nuit (chap. 1)
   const moment = game.phase === 'night' ? 'night' : game.dayOver ? 'curfew' : 'day'
   const tripDone = game.phase === 'day' ? game.dayTripDone : game.nightTripDone
   const debtNotes = [...(game.debtLate ? [t.hud.debtLate] : []), ...(deadline === null ? [] : [t.hud.nextDeadline(deadline)])]
@@ -89,7 +89,7 @@ export default function StatusBar() {
         {game.wanted > 0 && <Stat icon={Crosshair} label={t.hud.wanted(game.wanted, WANTED.maxLevel)} className="text-red-300" />}
         <Stat icon={Fuel} label={t.gauge.fuel} value={`${game.fuel}/${vehicle.tank}`} />
         <Stat icon={Package} label={t.hud.cargo} value={`${cargoUsed(game.cargo)}/${vehicle.cargo}`} />
-        {/* Exemption Métabolique : jours de protection, alerte la veille, Sédation à 0 (chap. 2) */}
+        {/* Exemption Métabolique : jours de protection, alerte la veille, Sédation à 0 (chap. 1) */}
         <Stat
           icon={Droplet}
           label={t.hud.exemption(game.exemption)}

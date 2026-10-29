@@ -4,7 +4,17 @@ import { DISTRICTS } from '../data/districts.ts'
 import { AFTERSHOCK, EVENT_COOLDOWNS, EVENT_MULT_CAP, GLOBAL_EVENTS, LOCAL_EVENTS, LOTTERY, ROAD_EVENTS } from '../data/events.ts'
 import { PRODUCT_IDS } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
-import { drawEvents, eventMultiplier, localEventsOf, NO_EVENTS, rumorReliability, tagFactor, viceChoices, type EventContext } from './events.ts'
+import {
+  drawEvents,
+  eventFactor,
+  eventMultipliers,
+  localEventsOf,
+  NO_EVENTS,
+  rumorReliability,
+  tagFactor,
+  viceChoices,
+  type EventContext,
+} from './events.ts'
 import { drawMarket, productStatus, quote, quoteBreakdown, shopProducts } from './market.ts'
 import { keysOf } from './records.ts'
 import { riskBreakdown } from './risk.ts'
@@ -102,30 +112,32 @@ describe('tirages de 06h00', () => {
   })
 })
 
-describe('cours et Mult_EvtActif', () => {
-  it('garde le multiplicateur le plus éloigné de 1, le local à égalité', () => {
-    // G05 : Tier 1 et 2 ×1.5, mais T1-04 ×2.5 (la ligne la plus forte l'emporte)
-    expect(eventMultiplier(ctx({ global: 'EVT-G05' }), 'D2', 'T1-04')?.factor).toBe(2.5)
-    // D6-03 (local, ×4) contre G05 (global, ×2.5) sur T1-04
-    expect(eventMultiplier(ctx({ global: 'EVT-G05', local: { D6: 'EVT-D6-03' } }), 'D6', 'T1-04')?.source).toBe('EVT-D6-03')
+describe('cours et multiplicateurs d’événement', () => {
+  it('compte chaque événement une fois, par sa ligne la plus forte, et multiplie les événements entre eux', () => {
+    // G05 : Tier 1 et 2 ×1.5, mais T1-04 ×2.5 (la ligne la plus forte de l'événement)
+    expect(eventMultipliers(ctx({ global: 'EVT-G05' }), 'D2', 'T1-04')).toEqual([{ source: 'EVT-G05', factor: 2.5 }])
+    // D6-03 (local) et G05 (global) sur T1-04 : les deux comptent
+    const both = ctx({ global: 'EVT-G05', local: { D6: 'EVT-D6-03' } })
+    expect(eventMultipliers(both, 'D6', 'T1-04').map(({ source }) => source)).toEqual(['EVT-G05', 'EVT-D6-03'])
+    expect(eventFactor(both, 'D6', 'T1-04')).toBeCloseTo(2.5 * eventFactor(ctx({ local: { D6: 'EVT-D6-03' } }), 'D6', 'T1-04'))
   })
 
   it('annule les multiplicateurs « jour seulement » après 20h00', () => {
-    expect(eventMultiplier(ctx({ global: 'EVT-G04' }), 'D1', 'T3-01')?.factor).toBe(0.6)
-    expect(eventMultiplier(ctx({ global: 'EVT-G04' }, 'night'), 'D1', 'T3-01')).toBeNull()
+    expect(eventFactor(ctx({ global: 'EVT-G04' }), 'D1', 'T3-01')).toBe(0.6)
+    expect(eventMultipliers(ctx({ global: 'EVT-G04' }, 'night'), 'D1', 'T3-01')).toEqual([])
   })
 
   it("restreint un effet global aux districts qu'il vise", () => {
-    expect(eventMultiplier(ctx({ global: 'EVT-G06' }), 'D6', 'T3-01')).not.toBeNull()
-    expect(eventMultiplier(ctx({ global: 'EVT-G06' }), 'D1', 'T3-01')).toBeNull()
+    expect(eventMultipliers(ctx({ global: 'EVT-G06' }), 'D6', 'T3-01')).not.toEqual([])
+    expect(eventMultipliers(ctx({ global: 'EVT-G06' }), 'D1', 'T3-01')).toEqual([])
   })
 
   it("applique un contrecoup le lendemain d'une ruée ou d'une braderie, sauf si l'événement se répète", () => {
     const rush = ctx({ yesterday: { global: 'EVT-G01', local: {} } })
-    expect(eventMultiplier(rush, 'D2', 'T0-02')).toEqual({ source: 'rule.aftershock', factor: AFTERSHOCK.afterRush })
+    expect(eventMultipliers(rush, 'D2', 'T0-02')).toEqual([{ source: 'rule.aftershock', factor: AFTERSHOCK.afterRush }])
     const sale = ctx({ yesterday: { global: null, local: { D3: 'EVT-D3-03' } } })
-    expect(eventMultiplier(sale, 'D3', 'T3-04')?.factor).toBe(AFTERSHOCK.afterSale)
-    expect(eventMultiplier(ctx({ global: 'EVT-G01', yesterday: { global: 'EVT-G01', local: {} } }), 'D2', 'T0-02')?.factor).toBe(2.5)
+    expect(eventFactor(sale, 'D3', 'T3-04')).toBe(AFTERSHOCK.afterSale)
+    expect(eventFactor(ctx({ global: 'EVT-G01', yesterday: { global: 'EVT-G01', local: {} } }), 'D2', 'T0-02')).toBe(2.5)
   })
 
   it('plafonne Mult_Événement dans le cours', () => {
@@ -267,7 +279,7 @@ describe('aléas routiers', () => {
     expect(helped.fuel).toBe(tank)
   })
 
-  it('cassent les fragiles sur un choc de châssis, sauf avec les suspensions (chap. 3)', () => {
+  it('cassent les fragiles sur un choc de châssis, sauf avec les suspensions (chap. 2)', () => {
     const shaken = run(gameAt(3, { roadEvent: 'EVT-R10', cargo: [lot('T1-01', 2)], rng: LOW_ROLL_RNG }), { type: 'road', choice: 'b' })
     // Tirage bas : au moins la première caisse casse ; le compte rendu compte ce que la soute a perdu
     const damaged = shaken.cargo.filter((entry) => entry.damaged).reduce((total, entry) => total + entry.qty, 0)

@@ -1,7 +1,7 @@
 import { HEALTH_MAX, ICC_DAILY_ROUTE_GAIN_CAP, ICC_MAX, ICC_TIERS } from '../data/balance.ts'
 import type { GameState, IccTier } from './types.ts'
 
-/** Palier de crédit social d'un ICC (chap. 2) */
+/** Palier de crédit social d'un ICC (chap. 1) */
 export function iccTier(icc: number): IccTier {
   return (ICC_TIERS.find(({ min }) => icc >= min) ?? ICC_TIERS[ICC_TIERS.length - 1]).tier
 }

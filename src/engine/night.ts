@@ -10,7 +10,7 @@ import type { Rng } from './rng.ts'
 import type { CargoLot, DistrictId, GameState } from './types.ts'
 
 /*
- * Tournée de nuit (chap. 2) : la logistique tourne la nuit sur ordre de mission. Sur mission, le trajet
+ * Tournée de nuit (chap. 1) : la logistique tourne la nuit sur ordre de mission. Sur mission, le trajet
  * est couvert et payé ; hors mission, c'est une anomalie enregistrée.
  */
 
@@ -42,7 +42,7 @@ export function sealedCount(state: GameState): number {
   return Math.max(1, Math.ceil(VEHICLES[state.vehicleId].cargo * NIGHT_MISSION.sealedShare))
 }
 
-/** Prime de la mission, indexée et majorée par la confiance du DSC */
+/** Prime de la mission, majorée par la confiance du DSC */
 export function missionFee(state: GameState): number {
   return Math.round(NIGHT_MISSION.fee * trustFactor(state))
 }
@@ -90,7 +90,7 @@ export function recordDeviation(state: GameState): GameState {
   }
 }
 
-/** Résident Réécrit (chap. 5) : serveur en soute et Glitch au travail ce jour-là, tant que l'injection n'est pas complète */
+/** Résident Réécrit (chap. 4) : serveur en soute et Glitch au travail ce jour-là, tant que l'injection n'est pas complète */
 export function canInject(state: GameState): boolean {
   const { injections, requiredProduct, crew } = ENDINGS.resident
   return state.progress.injections < injections && workingCrew(state) === crew && ownedQty(state.cargo, requiredProduct) > 0

@@ -6,14 +6,14 @@ import { offshoreBalance } from './finance.ts'
 import type { CrewId, GameState, ProductId, Requirement } from './types.ts'
 
 /*
- * Progression (chap. 2, 4 et 5) : le carnet des actes du joueur, qui débloque les équipiers, la mission de nuit,
+ * Progression (chap. 1, 3 et 4) : le carnet des actes du joueur, qui débloque les équipiers, la mission de nuit,
  * le garage en rayons et les services réservés, et fait monter la confiance du DSC. Chaque verrou rend sa condition et la progression vers elle.
  */
 
 /** Progression vers un déblocage : acquis, et où en est le joueur */
 export type Unlock = { unlocked: boolean; done: number; needed: number }
 
-/** Progression vers une condition (chap. 2, 4 et 5) */
+/** Progression vers une condition (chap. 1, 3 et 4) */
 export function requirementProgress(state: GameState, requirement: Requirement): Unlock {
   const { controlsPassed, tagSales, flagged, deliveries } = state.progress
   const count = (done: number, needed: number): Unlock => ({ unlocked: done >= needed, done: Math.min(done, needed), needed })

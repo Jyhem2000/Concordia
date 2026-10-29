@@ -1,7 +1,7 @@
 import type { GameDataId } from './types.ts'
 
 /*
- * Principe de transparence (chap. 10) : tout calcul affiché au joueur renvoie un Breakdown,
+ * Principe de transparence (chap. 7) : tout calcul affiché au joueur renvoie un Breakdown,
  * c'est-à-dire son total et les lignes sourcées qui y mènent, dans l'ordre d'application.
  *
  * Ex. (risque) :
@@ -73,6 +73,7 @@ export type RuleId =
   | 'flee-cap'
   | 'eject-manual'
   | 'aftershock'
+  | 'event-cap'
   | 'repair'
   | 'refining'
   | 'sedation'

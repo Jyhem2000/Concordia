@@ -4,7 +4,7 @@ import { cargoUsed } from '../src/engine/cargo.ts'
 import type { GameState } from '../src/engine/types.ts'
 
 /*
- * Invariants de la partie (chap. 9) : vérifiés après chaque action simulée. Une violation est un bug du moteur.
+ * Invariants de la partie (chap. 8) : vérifiés après chaque action simulée. Une violation est un bug du moteur.
  */
 
 /** Liste des invariants violés par un état (vide si tout va bien) */

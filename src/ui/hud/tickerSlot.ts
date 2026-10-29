@@ -4,7 +4,7 @@ import type { Phase } from '../../engine/types.ts'
 export const TICKER_STRIDE = 7
 
 /**
- * Message du téléscripteur (chap. 10) : un par demi-journée (jour, puis nuit), en sautant de TICKER_STRIDE
+ * Message du téléscripteur (chap. 7) : un par demi-journée (jour, puis nuit), en sautant de TICKER_STRIDE
  * dans le catalogue rangé par thèmes. Tout le catalogue passe en une partie s'il compte au plus deux messages par jour.
  */
 export function tickerSlot(day: number, phase: Phase, count: number): number {

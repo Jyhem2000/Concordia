@@ -3,7 +3,7 @@ import { ABLATIONS, renderAblations, runAblation } from './ablation.ts'
 import { CAMPAIGNS, runCampaign } from './campaigns.ts'
 
 /*
- * Lance une campagne de simulation (chap. 9) et écrit son rapport dans sim/reports/<campagne>.md.
+ * Lance une campagne de simulation (chap. 8) et écrit son rapport dans sim/reports/<campagne>.md.
  * Usage : npm run simulate -- <campagne> [parties par bot]
  * Campagnes : celles de campaigns.ts, plus « retraits » (tests par retrait, campagne 4).
  */

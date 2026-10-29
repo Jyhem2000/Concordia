@@ -17,7 +17,7 @@ import CollapseToggle from '../shared/CollapseToggle.tsx'
 import { FOCUS_RING } from '../shared/focus.ts'
 import { useCollapsed } from '../shared/useCollapsed.ts'
 
-/** Plein de Synthanol et dilemme de 20h00 (chap. 2) */
+/** Plein de Synthanol et dilemme de 20h00 (chap. 1) */
 export default function EveningPanel() {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
@@ -27,11 +27,11 @@ export default function EveningPanel() {
   const fuelCollapsed = useCollapsed('fuel')
   const curfewCollapsed = useCollapsed('curfew')
   const refuelMax = maxRefuel(game)
-  // Trois choix le soir (chap. 2) : dormir, livraison de nuit autorisée (mission), ou tournée clandestine
+  // Trois choix le soir (chap. 1) : dormir, livraison de nuit autorisée (mission), ou tournée clandestine
   const offer = missionOffer(game)
   // Mission de nuit : seulement après quelques commandes livrées (confiance du DSC)
   const night = nightUnlock(game)
-  // Épuisé : une boisson pour une nuit blanche malgré tout, si le joueur en a (chap. 3)
+  // Épuisé : une boisson pour une nuit blanche malgré tout, si le joueur en a (chap. 2)
   const exhausted = checkForceCurfew(game) === 'exhausted'
   const drink = exhausted ? PRODUCT_IDS.find((id) => ownedQty(game.cargo, id) > 0 && !checkForceCurfew(game, id)) : undefined
   const sleepless = drink ? PRODUCTS[drink].sleeplessNight : undefined
@@ -39,9 +39,9 @@ export default function EveningPanel() {
   const curfewError = checkForceCurfew(game, drink)
   const missionError = curfewError ?? (offer ? checkMission(game) : 'no-mission')
   const sleepLabel = sleepsAtRelay(game) ? t.evening.sleepRelay : t.evening.bivouac
-  // Eau qui refroidit le moteur la nuit (chap. 3)
+  // Eau qui refroidit le moteur la nuit (chap. 2)
   const coolants = PRODUCT_IDS.filter((id) => PRODUCTS[id].cooling && ownedQty(game.cargo, id) > 0)
-  // After du couvre-feu de ce soir, annoncée dès 06h00 (chap. 2)
+  // After du couvre-feu de ce soir, annoncée dès 06h00 (chap. 1)
   const afterLine = (
     <p className="mt-1 flex items-start gap-1 text-xs text-fuchsia-300">
       <PartyPopper size={14} className="mt-0.5 shrink-0" aria-hidden="true" />

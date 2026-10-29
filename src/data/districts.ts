@@ -3,7 +3,7 @@ import type { District, DistrictId } from '../engine/types.ts'
 
 /*
  * Districts et carte. Les règles géographiques, les menaces propres à chaque district
- * et les lieux spéciaux sont au chap. 4, les noms dans src/i18n/fr.ts.
+ * et les lieux spéciaux sont au chap. 3, les noms dans src/i18n/fr.ts.
  */
 
 export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
@@ -149,7 +149,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     fuelPrice: 450,
     pump: 'official',
     relay: true,
-    detection: 'TAG-TECH', // scanners électromagnétiques (les chiens-robots : chap. 4)
+    detection: 'TAG-TECH', // scanners électromagnétiques (les chiens-robots : chap. 3)
     droneJudges: true,
     offGrid: false,
     exitGateRisk: 0,

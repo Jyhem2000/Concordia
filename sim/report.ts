@@ -1,7 +1,7 @@
 import type { GameRecord } from './runner.ts'
 
 /*
- * Rapport de campagne (chap. 9) : agrégats par bot, en Markdown.
+ * Rapport de campagne (chap. 8) : agrégats par bot, en Markdown.
  */
 
 export type BotSummary = {

@@ -485,3 +485,8 @@ Constat : sur 30 jours, la plupart des équipements ne se remboursaient pas (cam
 **Campagne 4 (retraits) :** aucun véhicule ni équipier n'est plus négatif ; la plupart sont neutres, `[VEH-02]` et `[CREW-01]` positifs. Restent négatifs :
 - `[MOD-04]` (−11 000 ₡) et `[MOD-05]` (−14 000 ₡) dans les plans de nuit ;
 - les lieux spéciaux payants : Karma-Cham (−7 700 ₡), chirurgie (−4 900 ₡), laissez-passer (−2 600 ₡), certificat (−500 ₡).
+
+## Événements : un plafond unique
+Les multiplicateurs d'événement se multiplient (chaque événement par sa ligne la plus forte, plus les contrecoups et l'influence de Karma-Cham), sous un plafond unique ; la règle « le plus fort écart l'emporte » et ses départages sont retirés.
+
+**Campagne Plans :** pas de changement de fond (les écarts suivent surtout le décalage du générateur). Seul l'Opportuniste reste sous le Sans build, à quelques milliers de crédits (51 / 125k contre 55 / 125k).

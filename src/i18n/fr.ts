@@ -54,7 +54,7 @@ export const fr = {
     day: (day: number, total: number) => `Jour ${day} / ${total}`,
   },
 
-  /** Moment de la journée (chap. 2) : Journée, 20h00, Nuit */
+  /** Moment de la journée (chap. 1) : Journée, 20h00, Nuit */
   moment: {
     day: 'Journée (06h00 – 20h00)',
     curfew: '20h00 : couvre-feu',
@@ -73,7 +73,7 @@ export const fr = {
     fuel: 'Synthanol',
   },
 
-  /** Paliers de crédit social (chap. 2) */
+  /** Paliers de crédit social (chap. 1) */
   iccTier: {
     gold: 'Citoyen Or',
     ordinary: 'Citoyen ordinaire',
@@ -137,6 +137,7 @@ export const fr = {
     'rule.flee-cap': 'Plafond de fuite',
     'rule.eject-manual': 'Éjection manuelle',
     'rule.aftershock': 'Contrecoup',
+    'rule.event-cap': 'Plafond des événements',
     'rule.repair': 'Réparation (par PV)',
     'rule.refining': 'Affinage de Mama Rosa (Standard vendu Extra-Frais)',
     'rule.sedation': 'Sédation',
@@ -350,7 +351,7 @@ export const fr = {
     } satisfies Record<RoadEventId, RoadTexts>,
   },
 
-  /** Conditions de progression (chap. 2, 4 et 5) : ce qui manque, et où en est le joueur */
+  /** Conditions de progression (chap. 1, 3 et 4) : ce qui manque, et où en est le joueur */
   requirement: {
     debtPaid: 'Après la dette initiale soldée.',
     deliveries: (done: number, needed: number) => `Après ${needed} commandes du DSC livrées (${done}/${needed}).`,
@@ -626,7 +627,7 @@ export const fr = {
 
   interception: {
     title: { brc: 'Barrage de la BRC', flying: 'Contrôle volant de la BRC', racket: 'Racket des milices' },
-    /** Lieu du contrôle selon la couche du réseau (chap. 4) */
+    /** Lieu du contrôle selon la couche du réseau (chap. 3) */
     place: {
       street: (district: string) => `à l'entrée de ${district}`,
       gallery: (district: string) => `dans la galerie de service de ${district}`,
@@ -917,7 +918,7 @@ export const fr = {
     'no-contract': 'Aucune commande en cours.',
   } satisfies Record<ActionError, string>,
 
-  // ─── Données de jeu (chap. 3 à 8) ───
+  // ─── Données de jeu (chap. 2 à 6) ───
 
   tier: {
     0: 'Marchandises officielles',

@@ -9,7 +9,7 @@ import type { CargoLot, GameState, ProductId } from './types.ts'
 const lot = (productId: ProductId, qty: number): CargoLot => ({ productId, qty, unitCost: 1, travelled: true, boughtDay: 2, damaged: false })
 const brc = { kind: 'brc' as const, acted: false, bluffFailed: false }
 
-describe('progression (chap. 2 et 5)', () => {
+describe('progression (chap. 1 et 4)', () => {
   it('ne présente aucun équipier au début, et dit ce qui manque', () => {
     const start = gameAt(3, { cash: 10_000 })
     for (const id of ['CREW-01', 'CREW-02', 'CREW-03'] as const) expect(errorOf(start, { type: 'hireCrew', crewId: id })).toBe('locked')

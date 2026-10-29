@@ -8,7 +8,7 @@ import type { Rng } from './rng.ts'
 import type { CargoLot, CrateCount, FreshnessStage, GameState, TagId } from './types.ts'
 
 /*
- * État des caisses (chap. 3) : fraîcheur des périssables, casse des fragiles, explosion des
+ * État des caisses (chap. 2) : fraîcheur des périssables, casse des fragiles, explosion des
  * inflammables, et valeur d'une caisse donnée en paiement selon son état.
  */
 
@@ -18,7 +18,7 @@ export const isPerishable = (lot: CargoLot) => PRODUCTS[lot.productId].tags.some
 
 /**
  * Âge effectif d'un lot : matins passés depuis l'achat, retardés par le caisson cryo puis comptés
- * un matin sur deux par la chaîne du froid (chap. 3 et 5)
+ * un matin sur deux par la chaîne du froid (chap. 2 et 4)
  */
 function ageOf(state: GameState, lot: CargoLot, day = state.day): number {
   const delayed = Math.max(0, day - lot.boughtDay - (mountedEffect(state, 'freshnessDelay') ?? 0))
@@ -64,7 +64,7 @@ export function removeRotten(state: GameState): { cargo: CargoLot[]; rotten: num
 
 // ─── Valeur en paiement ───
 
-/** Une caisse donnée vaut son prix de base, réduit par la casse et la fraîcheur (jamais augmenté) (chap. 7) */
+/** Une caisse donnée vaut son prix de base, réduit par la casse et la fraîcheur (jamais augmenté) (chap. 2) */
 export function crateValue(state: GameState, lot: CargoLot): number {
   const condition = lot.damaged ? DAMAGED_FACTOR : 1
   return PRODUCTS[lot.productId].basePrice * condition * Math.min(1, freshnessFactor(freshnessOf(state, lot)))
@@ -121,7 +121,7 @@ export function breakOnShock(cargo: readonly CargoLot[], rng: Rng, chassisLoss: 
 
 /**
  * Explosions en cas d'échec de fuite : chaque caisse inflammable non masquée peut exploser
- * (caisse détruite, châssis endommagé). Les caisses masquées sont protégées (chap. 3).
+ * (caisse détruite, châssis endommagé). Les caisses masquées sont protégées (chap. 2).
  */
 export function explodeFlammable(cargo: readonly CargoLot[], rng: Rng): { cargo: CargoLot[]; exploded: number; chassisLoss: number } {
   let result: CargoLot[] = [...cargo]

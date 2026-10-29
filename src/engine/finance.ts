@@ -12,7 +12,7 @@ import { breakdown, type Breakdown, type RuleSource } from './breakdown.ts'
 import type { GameState, OffshoreAccount } from './types.ts'
 
 /*
- * Les trois portefeuilles (chap. 7) : dette mafieuse, collecte de protection et compte offshore.
+ * Les trois portefeuilles (chap. 1) : dette mafieuse, collecte de protection et compte offshore.
  */
 
 // ─── Dette ───

@@ -190,7 +190,7 @@ function buy(state: GameState, productId: ProductId, qty: number): ActionResult 
 }
 
 /**
- * Ventes groupées (chap. 10) : chaque produit en soute vendu en entier, caisses scellées exclues ; avec `profitableOnly`,
+ * Ventes groupées (chap. 7) : chaque produit en soute vendu en entier, caisses scellées exclues ; avec `profitableOnly`,
  * seulement ceux dont la vente entière rapporte plus que leur prix d'achat (saturation comprise)
  */
 export function bulkSales(state: GameState, profitableOnly: boolean): CrateCount[] {
@@ -210,13 +210,13 @@ function sellAll(state: GameState, profitableOnly: boolean): ActionResult {
 }
 
 function sell(state: GameState, productId: ProductId, qty: number): ActionResult {
-  // Les caisses scellées d'une mission de nuit appartiennent au DSC (chap. 2)
+  // Les caisses scellées d'une mission de nuit appartiennent au DSC (chap. 1)
   if (PRODUCTS[productId].sealed) return fail('not-for-sale')
   if (qty > ownedQty(state.cargo, productId)) return fail('not-enough-cargo')
   const { total, saturatedQty } = saleQuote(state, productId, qty)
   const market = state.markets[state.districtId]
   const demandLeft = market.demand[productId]
-  // Vendre au-delà de la demande alerte Aeterna : pic suspect demain dans ce district (chap. 7)
+  // Vendre au-delà de la demande alerte Aeterna : pic suspect demain dans ce district (chap. 2)
   const oversold = saturatedQty > 0 && !state.oversold.includes(state.districtId) ? [...state.oversold, state.districtId] : state.oversold
 
   return {
@@ -248,7 +248,7 @@ export function maxRefuel(state: GameState): number {
   return Math.max(0, Math.min(space, Math.floor(state.cash / fuelPrice(state))))
 }
 
-/** Pompe officielle fermée la nuit sous un seuil d'ICC (chap. 4) */
+/** Pompe officielle fermée la nuit sous un seuil d'ICC (chap. 3) */
 export function pumpClosed(state: GameState): boolean {
   return state.phase === 'night' && DISTRICTS[state.districtId].pump === 'official' && state.icc < PUMP_NIGHT_MIN_ICC
 }
@@ -261,7 +261,7 @@ function refuel(state: GameState, qty: number): ActionResult {
   return { ok: true, state: { ...state, cash: state.cash - cost, fuel: state.fuel + qty } }
 }
 
-/** Corvée DSC : seul recours sans carburant, sans cargaison et sans de quoi payer 1 ration (chap. 2) */
+/** Corvée DSC : seul recours sans carburant, sans cargaison et sans de quoi payer 1 ration (chap. 1) */
 export function canSiphon(state: GameState): boolean {
   return state.status === 'playing' && state.phase === 'day' && state.fuel === 0 && cargoUsed(state.cargo) === 0 && state.cash < fuelPrice(state)
 }
@@ -314,10 +314,10 @@ function travel(state: GameState, to: DistrictId): ActionResult {
   const rng = createRng(state.rng)
   const interception = drawInterception(rng, tripRisk, state, to)
   const jammed = interception?.jammed === true
-  // Sans barrage ni racket, un aléa routier peut survenir (chap. 8)
+  // Sans barrage ni racket, un aléa routier peut survenir (chap. 6)
   const roadEvent = interception ? null : drawRoadEvent(state, rng)
 
-  // Usure du trajet : galeries de nuit, ou canicule de jour ; des caisses peuvent refroidir le moteur (chap. 2, 3 et 8)
+  // Usure du trajet : galeries de nuit, ou canicule de jour ; des caisses peuvent refroidir le moteur (chap. 1, 2 et 6)
   const heat = state.phase === 'day' ? heatWave(state) : null
   // Les suspensions annulent l'usure de nuit, le caisson cryo celle de la canicule
   const nightWear = mountedEffect(state, 'smoothRide') ? 0 : NIGHT_TRIP_CHASSIS_WEAR
@@ -350,7 +350,7 @@ function travel(state: GameState, to: DistrictId): ActionResult {
     rng: rng.state,
   }
   // Sans barrage ni aléa, le trajet se termine ici ; sinon le dépannage et l'arrivée attendent leur résolution
-  // De nuit, un trajet hors mission qui passe sans interception est un écart enregistré (chap. 2)
+  // De nuit, un trajet hors mission qui passe sans interception est un écart enregistré (chap. 1)
   const logged = state.phase === 'night' && !interception && !isOnMission(state, to) ? recordDeviation(arrived) : arrived
   const done = interception ? shieldSponsored(logged) : roadEvent ? logged : arrive(emergencyTow(logged).state)
   return { ok: true, state: remember(done, to) }
@@ -372,7 +372,7 @@ function tripWear(state: GameState, chassisWear: number): { cargo: CargoLot[]; c
   return { cargo: [...state.cargo], chassisWear, coolingCrates: 0 }
 }
 
-// ─── Produits utilisables (chap. 3) ───
+// ─── Produits utilisables (chap. 2) ───
 
 /** Raison pour laquelle le produit ne peut pas être utilisé maintenant (restauration d'ICC), ou null */
 export function checkUseProduct(state: GameState, productId: ProductId): ActionError | null {
@@ -385,12 +385,12 @@ export function checkUseProduct(state: GameState, productId: ProductId): ActionE
 function applyProduct(state: GameState, productId: ProductId): ActionResult {
   const error = checkUseProduct(state, productId)
   if (error) return fail(error)
-  // Gain hors plafond (chap. 2) : une identité neuve ne passe pas par les gains de route
+  // Gain hors plafond (chap. 1) : une identité neuve ne passe pas par les gains de route
   const icc = Math.min(ICC_MAX, state.icc + (PRODUCTS[productId].iccRestore ?? 0))
   return { ok: true, state: { ...state, icc, iccRestoreUsed: true, cargo: giveCrates(state.cargo, [{ productId, qty: 1 }]) } }
 }
 
-// ─── Lieux spéciaux : dette et compte offshore (chap. 4 et 7) ───
+// ─── Lieux spéciaux : dette et compte offshore (chap. 1 et 3) ───
 
 /** Lieu qui rend ce service dans le district du joueur, s'il y en a un */
 export function locationFor(state: GameState, service: LocationService): LocationId | null {
@@ -446,13 +446,13 @@ function withdraw(state: GameState, amount: number): ActionResult {
 
 // ─── Fin de journée ───
 
-/** La tournée de nuit du Jour J est verrouillée le soir du Jour J+1 (épuisement nerveux, chap. 2) */
+/** La tournée de nuit du Jour J est verrouillée le soir du Jour J+1 (épuisement nerveux, chap. 1) */
 export function checkForceCurfew(state: GameState, drink?: ProductId): ActionError | null {
   if (state.status !== 'playing') return 'game-over'
   if (state.phase !== 'day') return 'not-daytime'
   const exhausted = state.lastCurfewDay === state.day - 1
   if (drink === undefined) return exhausted ? 'exhausted' : null
-  // Nuit blanche forcée : une boisson lève l'épuisement pour une 2e nuit, jamais une 3e (chap. 2 et 3)
+  // Nuit blanche forcée : une boisson lève l'épuisement pour une 2e nuit, jamais une 3e (chap. 1 et 2)
   const sleepless = PRODUCTS[drink].sleeplessNight
   if (!sleepless || !exhausted) return 'not-usable'
   if (ownedQty(state.cargo, drink) < 1) return 'not-enough-cargo'
@@ -464,7 +464,7 @@ export function checkForceCurfew(state: GameState, drink?: ProductId): ActionErr
 function forceCurfew(state: GameState, drink?: ProductId, mission = false): ActionResult {
   const error = checkForceCurfew(state, drink) ?? (mission ? checkMission(state) : null)
   if (error) return fail(error)
-  // La plateforme charge les caisses scellées de la mission acceptée (chap. 2)
+  // La plateforme charge les caisses scellées de la mission acceptée (chap. 1)
   if (mission) state = acceptMission(state)
   const curfewStreak = state.lastCurfewDay === state.day - 1 ? state.curfewStreak + 1 : 1
   const night: GameState = { ...state, phase: 'night', lastCurfewDay: state.day, curfewStreak }
@@ -474,7 +474,7 @@ function forceCurfew(state: GameState, drink?: ProductId, mission = false): Acti
   return { ok: true, state: changeHealth(drunk, -sleepless.healthLoss).state }
 }
 
-// ─── Garage (chap. 4 et 5) ───
+// ─── Garage (chap. 3 et 4) ───
 
 /** Les services du garage s'obtiennent de jour, à Rust Valley */
 function garage(state: GameState, run: () => ActionResult): ActionResult {

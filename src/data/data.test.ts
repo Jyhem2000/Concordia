@@ -25,7 +25,7 @@ import { VEHICLES } from './vehicles.ts'
 const products = entriesOf(PRODUCTS)
 const districts = entriesOf(DISTRICTS)
 
-describe('produits (chap. 3)', () => {
+describe('produits (chap. 2)', () => {
   it('ont le tier de leur ID', () => {
     for (const [id, product] of products) expect(`T${product.tier}`, id).toBe(id.slice(0, 2))
   })
@@ -49,7 +49,7 @@ describe('produits (chap. 3)', () => {
   })
 })
 
-describe('tiers (chap. 3)', () => {
+describe('tiers (chap. 2)', () => {
   it('ont des fourchettes de stock valides', () => {
     for (const tier of Object.values(TIERS)) {
       expect(tier.dailyStock.min).toBeGreaterThan(0)
@@ -64,7 +64,7 @@ describe('tiers (chap. 3)', () => {
   })
 })
 
-describe('districts (chap. 4)', () => {
+describe('districts (chap. 3)', () => {
   it('ne mettent jamais en Forte demande un produit de leur Production', () => {
     for (const [id, district] of districts) {
       const production: readonly string[] = district.production
@@ -102,7 +102,7 @@ describe('districts (chap. 4)', () => {
   })
 })
 
-describe('carte (chap. 4)', () => {
+describe('carte (chap. 3)', () => {
   it('ne contient ni boucle ni liaison en double', () => {
     const keys = MAP_LINKS.map(([a, b]) => [a, b].sort().join('-'))
     for (const [a, b] of MAP_LINKS) expect(a).not.toBe(b)
@@ -125,7 +125,7 @@ describe('carte (chap. 4)', () => {
   })
 })
 
-describe('véhicules (chap. 5)', () => {
+describe('véhicules (chap. 4)', () => {
   it('ne consomment jamais moins de nuit que de jour', () => {
     for (const [id, vehicle] of Object.entries(VEHICLES)) {
       expect(vehicle.fuelPerTrip.night, id).toBeGreaterThanOrEqual(vehicle.fuelPerTrip.day)
@@ -166,7 +166,7 @@ describe('équilibrage (balance.ts)', () => {
   })
 })
 
-describe('risque (chap. 3, 4 et 6)', () => {
+describe('risque (chap. 2, 3 et 5)', () => {
   it('donne aux tags des effets positifs, la couverture au seul tag Légal', () => {
     for (const [id, tag] of entriesOf(TAGS)) {
       for (const value of [tag.cover, tag.tripRisk, tag.detectedRisk, tag.bluffMalus]) if (value !== undefined) expect(value, id).toBeGreaterThan(0)
@@ -187,7 +187,7 @@ describe('risque (chap. 3, 4 et 6)', () => {
   })
 })
 
-describe('produits utilisables (chap. 3)', () => {
+describe('produits utilisables (chap. 2)', () => {
   it('ne refroidit le moteur qu’avec du légal, et donne des aides au bluff en quantité positive', () => {
     for (const [id, product] of products) {
       if (product.cooling) expect(product.tags, id).toContain('TAG-LEGAL')

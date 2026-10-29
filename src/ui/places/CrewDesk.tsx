@@ -12,7 +12,7 @@ type CrewOfferProps = {
   crewId: CrewId
 }
 
-/** Cantine des Chauffeurs : recrutement, renvoi et salaire de l'équipier (chap. 4 et 5) */
+/** Cantine des Chauffeurs : recrutement, renvoi et salaire de l'équipier (chap. 3 et 4) */
 export default function CrewDesk() {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
@@ -90,7 +90,7 @@ function CrewOffer({ crewId }: CrewOfferProps) {
       </p>
       <p className="text-zinc-400">{t.crew[crewId].subtitle}</p>
       <p className="text-zinc-300">{bonuses.join(' · ')}</p>
-      {/* Verrou de progression : condition et avancement, tant qu'il ne s'est pas présenté (chap. 5) */}
+      {/* Verrou de progression : condition et avancement, tant qu'il ne s'est pas présenté (chap. 4) */}
       <Locked requires={crew.requires} />
       <div className="mt-1 flex items-center gap-2">
         <Button variant="primary" disabled={error !== null} onClick={() => dispatch({ type: 'hireCrew', crewId })}>

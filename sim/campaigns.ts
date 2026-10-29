@@ -5,7 +5,7 @@ import { renderReport, renderSpread, summarize } from './report.ts'
 import { playGame, type Bot } from './runner.ts'
 
 /*
- * Campagnes de simulation (chap. 9). Chaque bot joue les mêmes graines, pour comparer à hasard égal.
+ * Campagnes de simulation (chap. 8). Chaque bot joue les mêmes graines, pour comparer à hasard égal.
  */
 
 export type Campaign = {
@@ -30,7 +30,7 @@ export const CAMPAIGNS: Readonly<Record<string, Campaign>> = {
   },
   plans: {
     title: 'Campagne 1 — Viabilité des plans',
-    notes: ['Chaque plan × les 3 tempéraments, objectif « score maximal » (chap. 9, Mise en œuvre).'],
+    notes: ['Chaque plan × les 3 tempéraments, objectif « score maximal » (chap. 8, Mise en œuvre).'],
     bots: PLANS.flatMap((plan) => TEMPERAMENTS.map((temperament) => () => traderBot(plan, temperament, 'score'))),
   },
   fins: {

@@ -46,7 +46,7 @@ function findRng(accept: (draw: number) => boolean): RngState {
  * étant bornés (au moins 5 %, au plus 95 %), ces deux graines fixent l'issue du prochain jet :
  */
 
-/** Carnet où tout est débloqué : équipiers, mission de nuit, rayons du garage, services réservés (chap. 2, 4 et 5) */
+/** Carnet où tout est débloqué : équipiers, mission de nuit, rayons du garage, services réservés (chap. 1, 3 et 4) */
 export const EARNED: GameState['progress'] = {
   controlsPassed: 1,
   tagSales: { 'TAG-PERISHABLE': 10, 'TAG-CHEMICAL': 10 },

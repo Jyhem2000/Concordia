@@ -19,7 +19,7 @@ const lot = (productId: ProductId, qty: number, boughtDay = 3): CargoLot => ({
   boughtDay,
   damaged: false,
 })
-// Client établi : carnet complet et dette soldée (catalogue en rayons, chap. 5)
+// Client établi : carnet complet et dette soldée (catalogue en rayons, chap. 4)
 const atGarage = (patch: Partial<GameState> = {}) =>
   gameAt(3, { districtId: 'D4', cash: 500_000, progress: EARNED, initialDebtPaid: true, debt: 0, ...patch })
 const withModules = (mounted: ModuleId[], patch: Partial<GameState> = {}) => gameAt(3, { modules: { owned: mounted, mounted }, ...patch })
@@ -45,7 +45,7 @@ describe('garage', () => {
     expect(swapped.modules.mounted).toEqual(['MOD-02'])
   })
 
-  it('répare au prix indexé, moins cher pendant le tournoi de démolition', () => {
+  it('répare au prix du garage, moins cher pendant le tournoi de démolition', () => {
     const state = atGarage({ chassis: 50 })
     expect(repairPrice(state).total).toBe(GARAGE.repairPerPv)
     const fixed = run(state, { type: 'repair', pv: 10 })
@@ -56,7 +56,7 @@ describe('garage', () => {
 })
 
 describe('fraîcheur et équipement', () => {
-  it('suit l’exemple du chap. 3 avec le caisson cryo et la chaîne du froid', () => {
+  it('suit l’exemple du chap. 2 avec le caisson cryo et la chaîne du froid', () => {
     const base = gameAt(5, { vehicleId: 'VEH-03', modules: { owned: ['MOD-01'], mounted: ['MOD-01'] } })
     const at = (day: number) => freshnessOf({ ...base, day }, lot('T1-03', 1, 5))
     expect(at(7)).toBe('extra')

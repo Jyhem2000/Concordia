@@ -45,13 +45,13 @@ export function taggedQty(cargo: readonly CargoLot[], tag: TagId): number {
   return cargo.reduce((total, lot) => (PRODUCTS[lot.productId].tags.includes(tag) ? total + lot.qty : total), 0)
 }
 
-/** Caisses de ce tag masquées par les caisses de Tier 0 qui le masquent, 1 pour 1 (chap. 3) */
+/** Caisses de ce tag masquées par les caisses de Tier 0 qui le masquent, 1 pour 1 (chap. 2) */
 export function maskedQty(cargo: readonly CargoLot[], tag: TagId): number {
   const maskers = cargo.reduce((total, lot) => (PRODUCTS[lot.productId].masks === tag ? total + lot.qty : total), 0)
   return Math.min(maskers, taggedQty(cargo, tag))
 }
 
-/** Part d'un tag dans la cargaison ; une caisse masquée compte pour MASKED_CRATE_WEIGHT (chap. 6) */
+/** Part d'un tag dans la cargaison ; une caisse masquée compte pour MASKED_CRATE_WEIGHT (chap. 5) */
 export function tagShare(cargo: readonly CargoLot[], tag: TagId): number {
   const total = cargoUsed(cargo)
   if (total === 0) return 0
@@ -72,7 +72,7 @@ export function isIllegal(lot: CargoLot): boolean {
 }
 
 /**
- * Double fond (chap. 5) : les caisses illégales les plus chères au prix de base, sans les encombrantes,
+ * Double fond (chap. 4) : les caisses illégales les plus chères au prix de base, sans les encombrantes,
  * dans la capacité donnée. Les deux parts gardent l'ordre des lots de la soute.
  */
 export function splitHidden(cargo: readonly CargoLot[], capacity: number): { hidden: CargoLot[]; visible: CargoLot[] } {

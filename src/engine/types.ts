@@ -20,10 +20,10 @@ type Eight = Seven | '08'
 
 export type Tier = 0 | 1 | 2 | 3 | 4
 
-/** Produits (chap. 3) */
+/** Produits (chap. 2) */
 export type ProductId = `T0-${Four | '05'}` | `T1-${Six}` | `T2-${Seven}` | `T3-${Seven}` | `T4-${Six}`
 
-/** Tags système (chap. 3) */
+/** Tags système (chap. 2) */
 export type TagId =
   | 'TAG-LEGAL'
   | 'TAG-PERISHABLE'
@@ -37,18 +37,18 @@ export type TagId =
   | 'TAG-FESTIVE'
   | 'TAG-DIURNAL'
 
-/** Districts (chap. 4) */
+/** Districts (chap. 3) */
 export type DistrictId = `D${1 | 2 | 3 | 4 | 5 | 6}`
 
-/** Lieux spéciaux (chap. 4) */
+/** Lieux spéciaux (chap. 3) */
 export type LocationId = 'LOC-D1-1' | 'LOC-D1-2' | 'LOC-D2-1' | 'LOC-D3-1' | 'LOC-D4-1' | 'LOC-D4-2' | 'LOC-D5-1' | 'LOC-D6-1'
 
-/** Véhicules, modules, équipiers (chap. 5) */
+/** Véhicules, modules, équipiers (chap. 4) */
 export type VehicleId = `VEH-${Four}`
 export type ModuleId = `MOD-${Eight | '09'}`
 export type CrewId = `CREW-${Three}`
 
-/** Événements (chap. 8) */
+/** Événements (chap. 6) */
 export type GlobalEventId = `EVT-G${Six}`
 export type LocalEventId = `EVT-${DistrictId}-${Three}`
 export type RoadEventId = `EVT-R${Eight | '09' | '10' | '11' | '12' | '13' | '14' | '15'}`
@@ -64,7 +64,7 @@ export type Range = { min: number; max: number }
 /** Produits visés par un effet d'événement : liste, tag ou tiers */
 export type ProductSelector = readonly ProductId[] | { tag: TagId } | { tiers: readonly Tier[] }
 
-/** Effet d'un événement (chap. 8) ; `districts` restreint un effet global à certains districts */
+/** Effet d'un événement (chap. 6) ; `districts` restreint un effet global à certains districts */
 export type EventEffect = { districts?: readonly DistrictId[] } & (
   | { kind: 'price'; products: ProductSelector; factor: number; dayOnly?: boolean }
   /** Apparition à l'achat (dérogation à l'exclusion) : `count` produits tirés parmi la liste, tous si absent ; le facteur vaut pour toute la liste */
@@ -118,7 +118,7 @@ export type RoadChoice = {
 
 export type RoadEvent = { a: RoadChoice; b: RoadChoice }
 
-/** Effets chiffrés d'un tag sur le risque et le contrôle (chap. 3) ; absent = sans effet */
+/** Effets chiffrés d'un tag sur le risque et le contrôle (chap. 2) ; absent = sans effet */
 export type Tag = {
   /** Couverture : risque retiré × part du tag dans la cargaison */
   cover?: number
@@ -130,15 +130,15 @@ export type Tag = {
   bluffMalus?: number
   /** Malus d'odeur : multipliés par le facteur d'odeur du district (chiens-robots) */
   smell?: boolean
-  /** Cycle de fraîcheur (chap. 3) */
+  /** Cycle de fraîcheur (chap. 2) */
   perishable?: boolean
-  /** Casse : en fuite réussie, et aux chocs de châssis hors fuite (chap. 3) */
+  /** Casse : en fuite réussie, et aux chocs de châssis hors fuite (chap. 2) */
   breakage?: { fleeChance: number; shockChance: number; shockThreshold: number }
-  /** Explosion des caisses non masquées en cas d'échec de fuite (chap. 3) */
+  /** Explosion des caisses non masquées en cas d'échec de fuite (chap. 2) */
   explosion?: { chance: number; chassisLoss: number }
-  /** Largage offensif en fuite : chance ajoutée en sacrifiant une caisse (chap. 3 et 6) */
+  /** Largage offensif en fuite : chance ajoutée en sacrifiant une caisse (chap. 2 et 5) */
   fleeDropBonus?: number
-  /** Coefficient de vente pendant le couvre-feu (chap. 7) ; pour le tag de l'after, la fête le remplace (chap. 2) */
+  /** Coefficient de vente pendant le couvre-feu (chap. 2) ; pour le tag de l'after, la fête le remplace (chap. 1) */
   nightSale?: number
 }
 
@@ -146,7 +146,7 @@ export type Product = {
   tier: Tier
   basePrice: number
   tags: readonly TagId[]
-  /** Tier 0 : chaque caisse masque 1 caisse de ce tag (chap. 3, masquage 1:1) */
+  /** Tier 0 : chaque caisse masque 1 caisse de ce tag (chap. 2, masquage 1:1) */
   masks?: TagId
   /** Remplace le stock du tier */
   dailyStock?: Range
@@ -154,11 +154,11 @@ export type Product = {
   appearanceChance?: number
   /** Balise de traçage : risque ajouté partout tant qu'une caisse est en soute */
   beaconRisk?: number
-  /** Une fouille effective avec ce produit en soute est fatale (exécution sommaire, chap. 2) */
+  /** Une fouille effective avec ce produit en soute est fatale (exécution sommaire, chap. 1) */
   lethalOnSearch?: boolean
-  /** Trop encombrant pour le double fond (chap. 5) */
+  /** Trop encombrant pour le double fond (chap. 4) */
   bulky?: boolean
-  /** Caisses scellées du DSC (mission de nuit) : hors commerce, ni vendues ni données (chap. 2) */
+  /** Caisses scellées du DSC (mission de nuit) : hors commerce, ni vendues ni données (chap. 1) */
   sealed?: boolean
   /** Refroidissement moteur : caisses consommées pour annuler l'usure d'un trajet de nuit */
   cooling?: { crates: number }
@@ -177,7 +177,7 @@ export type TierStats = {
   dailyStock: Range
   /** Quota de demande par produit et par district ; null = illimité */
   demandQuota: { neutral: number; strong: number } | null
-  /** Ajouté au coefficient de Forte demande du district (chap. 7) */
+  /** Ajouté au coefficient de Forte demande du district (chap. 2) */
   strongDemandBonus: number
 }
 
@@ -187,37 +187,37 @@ export type PumpType = 'official' | 'fixed'
 export type District = {
   /** Place dans la pyramide sociale, du pire (0) au meilleur (5) */
   echelon: number
-  /** Étoiles de sécurité (1 à 5) : bluff, corruption, plafond de fuite (chap. 6) */
+  /** Étoiles de sécurité (1 à 5) : bluff, corruption, plafond de fuite (chap. 5) */
   security: number
   baseRisk: number
   /** Prix de base d'une ration de Synthanol */
   fuelPrice: number
   pump: PumpType
-  /** Relais routier du DSC où dormir ; sinon bivouac, sans gain de sommeil (chap. 2) */
+  /** Relais routier du DSC où dormir ; sinon bivouac, sans gain de sommeil (chap. 1) */
   relay: boolean
   /** Tag ciblé par la détection spéciale du district */
   detection: TagId | null
   droneJudges: boolean
-  /** Zone hors-réseau : pas de BRC, racket des milices à la place (chap. 4) */
+  /** Zone hors-réseau : pas de BRC, racket des milices à la place (chap. 3) */
   offGrid: boolean
   /** Risque ajouté à destination pour tout trajet au départ de ce district (portique du sas) */
   exitGateRisk: number
   /** Multiplicateur des malus d'odeur (chiens-robots) */
   odorFactor: number
-  /** Coupe-file des Citoyens Or aux portiques (chap. 2) */
+  /** Coupe-file des Citoyens Or aux portiques (chap. 1) */
   goldFastLane: boolean
-  /** Détecteurs biométriques d'ICC : un Déviant notoire y est intercepté à coup sûr (chap. 2) */
+  /** Détecteurs biométriques d'ICC : un Déviant notoire y est intercepté à coup sûr (chap. 1) */
   iccScanners: boolean
   /** Éjection d'urgence possible (dalle bio-scellée sinon) */
-  /** Entrée des livreurs de jour : voies de surface, ou quais de service des élites (chap. 4) */
+  /** Entrée des livreurs de jour : voies de surface, ou quais de service des élites (chap. 3) */
   access: 'street' | 'docks'
-  /** Part des interceptions BRC qui sont des contrôles volants : ni fuite ni éjection (chap. 6) */
+  /** Part des interceptions BRC qui sont des contrôles volants : ni fuite ni éjection (chap. 5) */
   flyingCheckShare: number
   /** Modes d'éjection autorisés : décharge manuelle, trappe de MOD-07 (le broyeur de VEH-04 passe partout) */
   ejection: { manual: boolean; trapdoor: boolean }
-  /** Produits qui valent la connivence des agents dans une offre de corruption (chap. 6) */
+  /** Produits qui valent la connivence des agents dans une offre de corruption (chap. 5) */
   bribeFavorites: readonly ProductId[]
-  /** Produits que les milices prennent en premier au péage en nature, dans l'ordre (chap. 4) */
+  /** Produits que les milices prennent en premier au péage en nature, dans l'ordre (chap. 3) */
   tollFavorites: readonly ProductId[]
   /** Coefficient de marché des produits de la liste Production */
   coefProduction: number
@@ -229,13 +229,13 @@ export type District = {
   strongDemand: readonly ProductId[]
 }
 
-/** Services rendus par les lieux spéciaux implémentés (chap. 4 et 7) */
+/** Services rendus par les lieux spéciaux implémentés (chap. 2 et 3) */
 export type LocationService = 'debt' | 'offshore' | 'garage' | 'crew' | 'influence' | 'morgue' | 'prophecy' | 'forgery' | 'velvet'
 
 /** Services à usage compté (coût croissant) ou à cooldown */
 export type ServiceKey = 'influence' | 'pass' | 'surgery' | 'certificate' | 'prophecy' | 'forgery' | 'auction' | 'blackmail' | 'vip'
 
-/** Carte d'un faux dossier de Loterie (chap. 4) */
+/** Carte d'un faux dossier de Loterie (chap. 3) */
 export type ForgeryCard =
   { kind: 'captain' | 'competitor'; district: DistrictId } | { kind: 'informant' } | { kind: 'cadre'; district: DistrictId; vice: ProductId }
 
@@ -245,12 +245,12 @@ export type Location = {
 }
 
 export type Vehicle = {
-  /** Conditions pour que Mitch le vende (catalogue en rayons, chap. 5) */
+  /** Conditions pour que Mitch le vende (catalogue en rayons, chap. 4) */
   requires?: readonly Requirement[]
   price: number
   /** Emplacements de soute (1 caisse = 1 emplacement) */
   cargo: number
-  /** Emplacements du double fond, compris dans la soute (chap. 5) */
+  /** Emplacements du double fond, compris dans la soute (chap. 4) */
   hiddenCompartment: number
   moduleSlots: number
   /** PV max du châssis */
@@ -274,7 +274,7 @@ export type Vehicle = {
 export type ModuleCategory = 'conservation' | 'camouflage' | 'tactical'
 
 export type Module = {
-  /** Conditions pour que Mitch le vende (catalogue en rayons, chap. 5) */
+  /** Conditions pour que Mitch le vende (catalogue en rayons, chap. 4) */
   requires?: readonly Requirement[]
   price: number
   category: ModuleCategory
@@ -302,10 +302,10 @@ export type Module = {
   droneJammer?: boolean
 }
 
-/** Acte qui fait se présenter un équipier (chap. 5) : contrôles franchis sans garde à vue, caisses d'un tag vendues, première Fiche S */
+/** Acte qui fait se présenter un équipier (chap. 4) : contrôles franchis sans garde à vue, caisses d'un tag vendues, première Fiche S */
 /**
- * Condition de progression (chap. 2, 4 et 5) : dette initiale soldée, commandes du DSC livrées, première Fiche S,
- * palier d'ICC actuel, patrimoine actuel (Cash-Puce et offshore, ₡ non indexés), caisses d'un tag vendues,
+ * Condition de progression (chap. 1, 3 et 4) : dette initiale soldée, commandes du DSC livrées, première Fiche S,
+ * palier d'ICC actuel, patrimoine actuel (Cash-Puce et offshore), caisses d'un tag vendues,
  * contrôles de la BRC franchis sans garde à vue
  */
 export type Requirement =
@@ -320,7 +320,7 @@ export type Requirement =
 export type Crew = {
   /** Conditions pour qu'il se présente à la Cantine */
   requires: readonly Requirement[]
-  /** Salaire quotidien de base, indexé */
+  /** Salaire quotidien */
   dailySalary: number
   /** Salaire réduit contre une caisse consommée à 06h00 (tag et tier minimal) */
   inKindSalary?: { amount: number; tag: TagId; minTier: Tier }
@@ -349,16 +349,16 @@ export type Crew = {
 
 // ─── État de la partie ───
 
-/** Service de jour (06h00 – 20h00) ou tournée de nuit (chap. 2) */
+/** Service de jour (06h00 – 20h00) ou tournée de nuit (chap. 1) */
 export type Phase = 'day' | 'night'
 
 /** `finished` : audit du Jour 30 passé ou défaite ; la fin est dans `GameState.ending` */
 export type GameStatus = 'playing' | 'finished'
 
-/** Paliers de crédit social (chap. 2), du plus haut au plus bas */
+/** Paliers de crédit social (chap. 1), du plus haut au plus bas */
 export type IccTier = 'gold' | 'ordinary' | 'probation' | 'deviant'
 
-/** Fins de partie (chap. 2) : les quatre grandes fins, puis les défaites */
+/** Fins de partie (chap. 1) : les quatre grandes fins, puis les défaites */
 export type EndingId = 'saboteur' | 'resident' | 'elite' | 'mafia' | 'standard' | 'bio-bricks' | 'death' | 'execution'
 
 export type Ending = {
@@ -367,7 +367,7 @@ export type Ending = {
   score: number
 }
 
-/** Compte offshore : intérêts simples, donc dépôts et intérêts versés sont suivis à part (chap. 7) */
+/** Compte offshore : intérêts simples, donc dépôts et intérêts versés sont suivis à part (chap. 1) */
 export type OffshoreAccount = {
   /** Dépôts nets de commission : seule base des intérêts */
   deposited: number
@@ -375,7 +375,7 @@ export type OffshoreAccount = {
   interest: number
 }
 
-/** Barrage en cours, à résoudre avant toute autre action (chap. 6) ; `racket` en zone hors-réseau (chap. 4) */
+/** Barrage en cours, à résoudre avant toute autre action (chap. 5) ; `racket` en zone hors-réseau (chap. 3) */
 export type Interception = {
   /** Barrage fixe de la BRC, contrôle volant (ni fuite ni éjection), ou racket des milices */
   kind: 'brc' | 'flying' | 'racket'
@@ -398,7 +398,7 @@ export type CrateCount = {
   qty: number
 }
 
-/** Offre de corruption : Cash-Puce et caisses de la soute, cumulables (chap. 6) */
+/** Offre de corruption : Cash-Puce et caisses de la soute, cumulables (chap. 5) */
 export type Offer = {
   cash: number
   crates: readonly CrateCount[]
@@ -438,7 +438,7 @@ export type InterceptionReport = {
   hiddenCrates: number
 }
 
-/** Tactiques d'une option de barrage : aides au bluff, sacrifices et dopage en fuite (chap. 3 et 6) */
+/** Tactiques d'une option de barrage : aides au bluff, sacrifices et dopage en fuite (chap. 2 et 5) */
 export type Tactics = {
   /** Produits dont les caisses sont données ou sacrifiées à l'agent pendant le bluff */
   bluffAids?: readonly ProductId[]
@@ -464,7 +464,7 @@ export type TripReport = {
   injection: number
 }
 
-/** Ce que la nuit et la routine de 06h00 ont changé, pour le briefing du matin (chap. 2 et 10) */
+/** Ce que la nuit et la routine de 06h00 ont changé, pour le briefing du matin (chap. 1 et 7) */
 export type MorningBriefing = {
   day: number
   /** Gains de la nuit au relais routier (après plafond d'ICC) ; null au bivouac */
@@ -497,7 +497,7 @@ export type MorningBriefing = {
   offshoreInterest: Breakdown | null
 }
 
-/** Événements en cours et tirages à venir (chap. 8) */
+/** Événements en cours et tirages à venir (chap. 6) */
 export type EventsState = {
   global: GlobalEventId | null
   local: Partial<Record<DistrictId, LocalEventId>>
@@ -552,7 +552,7 @@ export type RoadReport = {
   towBill: number
 }
 
-/** États de fraîcheur d'une caisse périssable (chap. 3) ; une caisse pourrie est détruite */
+/** États de fraîcheur d'une caisse périssable (chap. 2) ; une caisse pourrie est détruite */
 export type FreshnessStage = 'extra' | 'standard' | 'gamey' | 'spoiled'
 
 /** Caisses d'un même produit achetées ensemble */
@@ -561,9 +561,9 @@ export type CargoLot = {
   qty: number
   /** Prix d'achat unitaire, pour le prix moyen d'achat affiché */
   unitCost: number
-  /** Faux tant que le lot n'a pas quitté son district d'achat (clause anti-arbitrage, chap. 7) */
+  /** Faux tant que le lot n'a pas quitté son district d'achat (clause anti-arbitrage, chap. 2) */
   travelled: boolean
-  /** Jour d'achat : base du cycle de fraîcheur des périssables (chap. 3) */
+  /** Jour d'achat : base du cycle de fraîcheur des périssables (chap. 2) */
   boughtDay: number
   /** Caisses endommagées (casse des fragiles) : vendues et données à prix réduit */
   damaged: boolean
@@ -608,17 +608,17 @@ export type GameState = {
   roadReport: RoadReport | null
   dayTripDone: boolean
   nightTripDone: boolean
-  /** Dernier jour où le couvre-feu a été forcé (épuisement nerveux, chap. 2) */
+  /** Dernier jour où le couvre-feu a été forcé (épuisement nerveux, chap. 1) */
   lastCurfewDay: number | null
   /** Cash-Puce */
   cash: number
   /** Solde de la dette mafieuse */
   debt: number
-  /** Statut acquis définitivement la première fois que la dette atteint 0 (chap. 7) */
+  /** Statut acquis définitivement la première fois que la dette atteint 0 (chap. 1) */
   initialDebtPaid: boolean
   /** Total emprunté en avance de survie, avant que la dette initiale soit soldée */
   advanced: number
-  /** Modules possédés et modules montés sur le véhicule (chap. 5) */
+  /** Modules possédés et modules montés sur le véhicule (chap. 4) */
   modules: { owned: readonly ModuleId[]; mounted: readonly ModuleId[] }
   /** Dernier jour d'usage de la trappe de largage (cooldown) */
   trapdoorDay: number | null
@@ -626,7 +626,7 @@ export type GameState = {
   dumped: readonly CargoLot[]
   /** Dernier jour où la plaque rotative a effacé une perte d'ICC */
   plateDay: number | null
-  /** Équipage (chap. 5) : équipier actif, jour payé (il travaille), recrutements, disparus */
+  /** Équipage (chap. 4) : équipier actif, jour payé (il travaille), recrutements, disparus */
   crew: {
     active: CrewId | null
     paidDay: number | null
@@ -637,7 +637,7 @@ export type GameState = {
     /** Le joueur permet de payer un salaire réduit en caisses (réglage) */
     payInKind: boolean
   }
-  /** Jours de protection de l'Exemption Métabolique ; 0 = Sédation (chap. 2) */
+  /** Jours de protection de l'Exemption Métabolique ; 0 = Sédation (chap. 1) */
   exemption: number
   /** Lieux spéciaux : utilisations passées (coûts croissants) et dernier jour d'usage (cooldowns) */
   services: { uses: Partial<Record<ServiceKey, number>>; lastDay: Partial<Record<ServiceKey, number>> }
@@ -651,7 +651,7 @@ export type GameState = {
   velvetLock: number | null
   /** Livraison officielle proposée ce matin (district), jusqu'à son acceptation */
   dayOffer: DistrictId | null
-  /** Carnet de progression (chap. 2 et 5) : actes qui débloquent équipiers, nuit et confiance du DSC */
+  /** Carnet de progression (chap. 1 et 4) : actes qui débloquent équipiers, nuit et confiance du DSC */
   progress: {
     /** Contrôles de la BRC franchis sans garde à vue */
     controlsPassed: number
@@ -687,17 +687,17 @@ export type GameState = {
   health: number
   /** PV du châssis du véhicule */
   chassis: number
-  /** Fiche S algorithmique : niveau de recherche, 0 à 3 (chap. 6) */
+  /** Fiche S algorithmique : niveau de recherche, 0 à 3 (chap. 5) */
   wanted: number
   /** District de la ronde renforcée du jour, caché au joueur */
   patrolDistrict: DistrictId | null
-  /** Districts en pic suspect aujourd'hui (ventes saturées la veille, chap. 7) */
+  /** Districts en pic suspect aujourd'hui (ventes saturées la veille, chap. 2) */
   suspiciousPeaks: readonly DistrictId[]
   /** Districts où le joueur a vendu au-delà de la demande aujourd'hui : pics suspects de demain */
   oversold: readonly DistrictId[]
   /**
    * Service de jour terminé avant le couvre-feu (« passé à 20h00 » : demi-journée perdue, sortie de garde à vue,
-   * immobilisation) : plus de trajet de jour ni de lieu spécial, seul le marché de rue reste ouvert (chap. 2)
+   * immobilisation) : plus de trajet de jour ni de lieu spécial, seul le marché de rue reste ouvert (chap. 1)
    */
   dayOver: boolean
   /** Le dépannage de cette nuit immobilisera le joueur demain jusqu'à 20h00 */

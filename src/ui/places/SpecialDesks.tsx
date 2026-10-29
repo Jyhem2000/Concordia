@@ -41,7 +41,7 @@ type DeskRowProps = {
   detail: string
   error: ActionError | null
   onClick: () => void
-  /** Conditions du service réservé (chap. 4), affichées tant qu'elles manquent */
+  /** Conditions du service réservé (chap. 3), affichées tant qu'elles manquent */
   requires?: readonly Requirement[]
 }
 
@@ -68,7 +68,7 @@ function DeskRow({ label, detail, error, onClick, requires }: DeskRowProps) {
   )
 }
 
-/** Karma-Cham : panique algorithmique sur un tag, effet le lendemain (chap. 4) */
+/** Karma-Cham : panique algorithmique sur un tag, effet le lendemain (chap. 3) */
 export function KarmaDesk() {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
@@ -100,7 +100,7 @@ export function KarmaDesk() {
   )
 }
 
-/** Morgue du Dr. K. : laissez-passer, chirurgie, certificat (chap. 4) */
+/** Morgue du Dr. K. : laissez-passer, chirurgie, certificat (chap. 3) */
 export function MorgueDesk() {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
@@ -132,7 +132,7 @@ export function MorgueDesk() {
   )
 }
 
-/** Cassandre-88 : prédiction garantie de l'événement global de J+2 (chap. 4 et 8) */
+/** Cassandre-88 : prédiction garantie de l'événement global de J+2 (chap. 3 et 6) */
 export function CassandreDesk() {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
@@ -157,7 +157,7 @@ export function CassandreDesk() {
   )
 }
 
-/** Laverie : faux dossier pour le tirage de la Loterie du lendemain (chap. 4 et 8) */
+/** Laverie : faux dossier pour le tirage de la Loterie du lendemain (chap. 3 et 6) */
 export function ForgeryDesk() {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
@@ -248,7 +248,7 @@ export function ForgeryDesk() {
   )
 }
 
-/** Velvet-Silo : enchères, chantage, commande VIP (chap. 4) */
+/** Velvet-Silo : enchères, chantage, commande VIP (chap. 3) */
 export function VelvetDesk() {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)

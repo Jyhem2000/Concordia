@@ -5,16 +5,16 @@
 
 | Bot | Parties | Survie | dont ruinés à 0 ₡ | Défaites | Fins | Score moyen | Score p10 / médiane / p90 | Score médian des survivants | Dette soldée (jour médian) | Interceptions | Jours de garde à vue | Équipement acheté |
 | :--- | ---: | ---: | ---: | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |
-| Couverture légale · Équilibré · Baron | 200 | 86 % | 5 % | bio-bricks 14 % | standard 62 %, mafia 24 % | 75 988 ₡ | 0 ₡ / 43 367 ₡ / 194 225 ₡ | 67 827 ₡ | 90 % (J3) | 10.5 (35 % des trajets) | 2.7 | MOD-02 75 %, VEH-02 37 % |
-| Haut tier · Équilibré · Baron | 200 | 81 % | 13 % | bio-bricks 19 % | standard 68 %, mafia 13 % | 52 311 ₡ | 0 ₡ / 14 558 ₡ / 166 069 ₡ | 48 748 ₡ | 87 % (J4) | 9.2 (34 % des trajets) | 2.9 | MOD-07 56 %, VEH-04 25 % |
-| Rentier · Équilibré · Baron | 200 | 85 % | 9 % | bio-bricks 16 % | standard 74 %, mafia 11 % | 52 399 ₡ | 0 ₡ / 26 652 ₡ / 153 673 ₡ | 45 619 ₡ | 90 % (J2) | 8.9 (35 % des trajets) | 2.6 | CREW-02 72 % |
-| Citoyen modèle · Équilibré · Élite | 200 | 87 % | 21 % | bio-bricks 13 % | standard 62 %, mafia 21 %, elite 5 % | 91 896 ₡ | 0 ₡ / 43 864 ₡ / 264 466 ₡ | 74 589 ₡ | 93 % (J3) | 11.0 (34 % des trajets) | 2.6 | VEH-02 41 %, MOD-08 38 % |
-| Couverture légale · Équilibré · Élite | 200 | 86 % | 26 % | bio-bricks 14 % | standard 68 %, mafia 16 %, elite 3 % | 73 739 ₡ | 0 ₡ / 26 279 ₡ / 220 641 ₡ | 42 053 ₡ | 91 % (J3) | 10.9 (35 % des trajets) | 3.0 | MOD-02 74 %, VEH-02 32 % |
-| Rentier · Équilibré · Élite | 200 | 84 % | 26 % | bio-bricks 16 % | standard 74 %, mafia 8 %, elite 3 % | 51 699 ₡ | 0 ₡ / 24 487 ₡ / 152 786 ₡ | 45 677 ₡ | 88 % (J2) | 9.8 (38 % des trajets) | 3.0 | CREW-02 70 % |
-| Fuite au sommet · Équilibré · Résident | 200 | 74 % | 21 % | bio-bricks 14 %, execution 12 % | standard 65 %, resident 6 %, mafia 4 % | 44 414 ₡ | 0 ₡ / 169 ₡ / 145 114 ₡ | 35 598 ₡ | 92 % (J2) | 8.9 (37 % des trajets) | 2.0 | CREW-02 80 %, MOD-06 74 %, MOD-09 65 % |
-| Rentier · Équilibré · Résident | 200 | 67 % | 14 % | bio-bricks 20 %, execution 14 % | standard 60 %, resident 5 %, mafia 3 % | 38 877 ₡ | 0 ₡ / 73 ₡ / 143 887 ₡ | 41 402 ₡ | 90 % (J2) | 8.7 (38 % des trajets) | 2.4 | CREW-02 72 % |
-| Saboteur · Équilibré · Saboteur | 200 | 82 % | 14 % | bio-bricks 19 % | standard 68 %, mafia 14 % | 58 018 ₡ | 0 ₡ / 8 215 ₡ / 181 488 ₡ | 38 850 ₡ | 88 % (J4) | 9.4 (35 % des trajets) | 3.1 | MOD-03 62 %, VEH-04 31 % |
-| Haut tier · Équilibré · Saboteur | 200 | 81 % | 13 % | bio-bricks 20 % | standard 68 %, mafia 12 %, saboteur 1 % | 59 374 ₡ | 0 ₡ / 13 490 ₡ / 171 060 ₡ | 47 216 ₡ | 87 % (J4) | 9.4 (35 % des trajets) | 3.0 | MOD-07 56 %, VEH-04 25 % |
+| Couverture légale · Équilibré · Baron | 200 | 86 % | 5 % | bio-bricks 14 % | standard 62 %, mafia 24 % | 74 642 ₡ | 0 ₡ / 37 008 ₡ / 196 883 ₡ | 67 151 ₡ | 90 % (J3) | 10.5 (35 % des trajets) | 2.7 | MOD-02 76 %, VEH-02 39 % |
+| Haut tier · Équilibré · Baron | 200 | 80 % | 15 % | bio-bricks 20 % | standard 66 %, mafia 14 % | 52 208 ₡ | 0 ₡ / 12 631 ₡ / 172 118 ₡ | 45 814 ₡ | 87 % (J4) | 9.3 (35 % des trajets) | 2.9 | MOD-07 57 %, VEH-04 28 % |
+| Rentier · Équilibré · Baron | 200 | 84 % | 12 % | bio-bricks 17 % | standard 73 %, mafia 11 % | 50 336 ₡ | 0 ₡ / 23 881 ₡ / 155 781 ₡ | 41 682 ₡ | 88 % (J2) | 9.0 (36 % des trajets) | 2.7 | CREW-02 70 % |
+| Citoyen modèle · Équilibré · Élite | 200 | 85 % | 22 % | bio-bricks 16 % | standard 60 %, mafia 20 %, elite 6 % | 89 654 ₡ | 0 ₡ / 43 864 ₡ / 257 969 ₡ | 68 385 ₡ | 92 % (J3) | 11.0 (34 % des trajets) | 2.8 | VEH-02 45 %, MOD-08 41 % |
+| Couverture légale · Équilibré · Élite | 200 | 84 % | 27 % | bio-bricks 17 % | standard 65 %, mafia 16 %, elite 3 % | 73 513 ₡ | 0 ₡ / 15 336 ₡ / 205 645 ₡ | 52 340 ₡ | 90 % (J3) | 10.8 (35 % des trajets) | 3.1 | MOD-02 74 %, VEH-02 37 % |
+| Rentier · Équilibré · Élite | 200 | 83 % | 28 % | bio-bricks 18 % | standard 73 %, mafia 7 %, elite 3 % | 51 727 ₡ | 0 ₡ / 17 035 ₡ / 147 404 ₡ | 42 554 ₡ | 86 % (J2) | 9.9 (38 % des trajets) | 3.0 | CREW-02 70 % |
+| Fuite au sommet · Équilibré · Résident | 200 | 74 % | 21 % | bio-bricks 14 %, execution 12 % | standard 65 %, resident 7 %, mafia 3 % | 46 548 ₡ | 0 ₡ / 196 ₡ / 146 239 ₡ | 45 282 ₡ | 90 % (J2) | 9.1 (38 % des trajets) | 2.1 | CREW-02 77 %, MOD-06 72 %, MOD-09 63 % |
+| Rentier · Équilibré · Résident | 200 | 65 % | 16 % | bio-bricks 21 %, execution 15 % | standard 56 %, mafia 5 %, resident 4 % | 37 408 ₡ | 0 ₡ / 0 ₡ / 142 924 ₡ | 38 890 ₡ | 88 % (J2) | 8.5 (37 % des trajets) | 2.5 | CREW-02 70 % |
+| Saboteur · Équilibré · Saboteur | 200 | 81 % | 13 % | bio-bricks 19 % | standard 66 %, mafia 15 % | 55 682 ₡ | 0 ₡ / 3 917 ₡ / 181 102 ₡ | 31 386 ₡ | 88 % (J4) | 9.3 (35 % des trajets) | 3.2 | MOD-03 59 %, VEH-04 30 % |
+| Haut tier · Équilibré · Saboteur | 200 | 80 % | 15 % | bio-bricks 20 % | standard 66 %, mafia 14 %, saboteur 1 % | 57 679 ₡ | 0 ₡ / 12 631 ₡ / 167 381 ₡ | 45 814 ₡ | 87 % (J4) | 9.6 (35 % des trajets) | 3.0 | MOD-07 57 %, VEH-04 28 % |
 
 ## Défauts relevés
 Aucun : pas d’action refusée, pas de sommeil forcé, aucun invariant violé.

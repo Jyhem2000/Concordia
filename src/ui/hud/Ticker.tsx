@@ -3,7 +3,7 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import { tickerSlot } from './tickerSlot.ts'
 
-/** Téléscripteur d'Aeterna (chap. 10) : message du jour */
+/** Téléscripteur d'Aeterna (chap. 7) : message du jour */
 export default function Ticker() {
   const day = useGameStore((s) => s.game.day)
   const phase = useGameStore((s) => s.game.phase)

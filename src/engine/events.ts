@@ -24,7 +24,7 @@ import type {
 } from './types.ts'
 
 /*
- * Événements (chap. 8) : tirages de 06h00, effets en vigueur dans un district, contrecoups, Loterie.
+ * Événements (chap. 6) : tirages de 06h00, effets en vigueur dans un district, contrecoups, Loterie.
  */
 
 /** Ce que les règles d'événements lisent de la partie */
@@ -95,30 +95,32 @@ function priceFactor(effect: EventEffect, productId: ProductId): number | null {
   return null
 }
 
-// ─── Mult_EvtActif (chap. 7) ───
+// ─── Multiplicateurs d'événement (chap. 2) ───
 
 export type EventMultiplier = { source: BreakdownSource; factor: number }
 
 /**
- * Multiplicateur d'événement d'un produit dans un district : parmi les événements en vigueur et les contrecoups,
- * le plus fort écart à 1 l'emporte ; égalité : le local prime, puis le contrecoup cède.
+ * Multiplicateurs d'événement d'un produit dans un district : un par événement en vigueur (sa ligne la plus éloignée de 1
+ * pour ce produit) et un par contrecoup. Ils se multiplient ; le plafond s'applique au cours (chap. 2).
  */
-export function eventMultiplier(ctx: EventContext, districtId: DistrictId, productId: ProductId): EventMultiplier | null {
-  const candidates: { source: BreakdownSource; factor: number; rank: number }[] = []
-  for (const { source, local, effect } of activeEffects(ctx, districtId)) {
+export function eventMultipliers(ctx: EventContext, districtId: DistrictId, productId: ProductId): EventMultiplier[] {
+  const bySource = new Map<BreakdownSource, number>()
+  for (const { source, effect } of activeEffects(ctx, districtId)) {
     const factor = priceFactor(effect, productId)
     // Les multiplicateurs « jour seulement » tombent après 20h00
     const dayOnly = effect.kind === 'price' && effect.dayOnly === true
-    if (factor !== null && !(dayOnly && ctx.phase === 'night')) candidates.push({ source, factor, rank: local ? 2 : 1 })
+    if (factor === null || (dayOnly && ctx.phase === 'night')) continue
+    const kept = bySource.get(source)
+    if (kept === undefined || Math.abs(factor - 1) > Math.abs(kept - 1)) bySource.set(source, factor)
   }
-  for (const factor of aftershockFactors(ctx, districtId, productId)) candidates.push({ source: 'rule.aftershock', factor, rank: 0 })
+  const fromEvents = [...bySource].map(([source, factor]) => ({ source, factor }))
+  const aftershocks = aftershockFactors(ctx, districtId, productId).map((factor) => ({ source: 'rule.aftershock' as const, factor }))
+  return [...fromEvents, ...aftershocks].filter(({ factor }) => factor !== 1)
+}
 
-  const best = candidates.reduce<(typeof candidates)[number] | null>((top, candidate) => {
-    if (top === null) return candidate
-    const gap = Math.abs(candidate.factor - 1) - Math.abs(top.factor - 1)
-    return gap > 0 || (gap === 0 && candidate.rank > top.rank) ? candidate : top
-  }, null)
-  return best && best.factor !== 1 ? { source: best.source, factor: best.factor } : null
+/** Produit des multiplicateurs d'événement, avant plafond */
+export function eventFactor(ctx: EventContext, districtId: DistrictId, productId: ProductId): number {
+  return eventMultipliers(ctx, districtId, productId).reduce((total, { factor }) => total * factor, 1)
 }
 
 /** Événements d'hier qui ont touché des cours dans ce district et ne se répètent pas aujourd'hui */
@@ -184,10 +186,10 @@ export function heatWave(ctx: EventContext): Extract<EventEffect, { kind: 'heat'
   return null
 }
 
-/** Arrivée dans un district (chap. 2) : effets d'arrivée des événements locaux, comme le sas de `[EVT-D3-01]` */
+/** Arrivée dans un district (chap. 1) : effets d'arrivée des événements locaux, comme le sas de `[EVT-D3-01]` */
 export function arrive(state: GameState): GameState {
   const halted = hasEffect(state, state.districtId, 'halfDay') ? loseHalfDay(state) : state
-  // Tournée de nuit hors mission arrivée sans garde à vue (contrôle franchi compris) : injection du Résident Réécrit (chap. 5)
+  // Tournée de nuit hors mission arrivée sans garde à vue (contrôle franchi compris) : injection du Résident Réécrit (chap. 4)
   const arrived = halted.phase === 'night' && !isOnMission(halted, halted.districtId) ? injectServer(halted) : halted
   // Arriver en D1 de jour, c'est passer à la Cantine : l'Exemption Métabolique revient au maximum ;
   // arriver dans le district d'une commande du DSC (livraison du jour, mission de nuit), c'est livrer les caisses scellées
@@ -226,7 +228,7 @@ export function viceChoices(district: DistrictId): ProductId[] {
   return DISTRICTS[district].strongDemand.filter((id) => !below.production.includes(id) && !below.strongDemand.includes(id))
 }
 
-/** Tirage de la Loterie ; un faux dossier accepté impose un rôle, l'autre reste tiré au hasard (chap. 4) */
+/** Tirage de la Loterie ; un faux dossier accepté impose un rôle, l'autre reste tiré au hasard (chap. 3) */
 function drawLottery(day: number, rng: Rng, card: ForgeryCard | null): Lottery {
   const cadre = card?.kind === 'cadre' ? card : null
   const imposedPromotion = card?.kind === 'captain' || card?.kind === 'competitor' ? card.district : null
@@ -250,7 +252,7 @@ function drawLottery(day: number, rng: Rng, card: ForgeryCard | null): Lottery {
 // ─── Tirages ───
 
 /**
- * Tirages de 06h00 (chap. 8) : l'événement global tiré la veille entre en vigueur, puis les locaux,
+ * Tirages de 06h00 (chap. 6) : l'événement global tiré la veille entre en vigueur, puis les locaux,
  * la Loterie, l'événement global du lendemain et sa rumeur. Le Jour 1, l'événement global du jour est tiré sur place.
  */
 export function drawEvents(previous: EventsState, day: number, rng: Rng, firstDay = false): EventsState {
@@ -299,7 +301,7 @@ export function rumorReliability(): number {
 
 /** Aléa routier d'un trajet sans interception, parmi ceux hors cooldown, ou null */
 export function drawRoadEvent(state: GameState, rng: Rng): RoadEventId | null {
-  // La nuit, dans les galeries de service, personne à croiser (chap. 8)
+  // La nuit, dans les galeries de service, personne à croiser (chap. 6)
   if (state.phase !== 'day' || !rng.chance(EVENT_CHANCES.road)) return null
   const ready = ROAD_EVENT_IDS.filter((id) => (state.events.roadDays[id] ?? -Infinity) + EVENT_COOLDOWNS.road <= state.day)
   return ready.length > 0 ? rng.pick(ready) : null

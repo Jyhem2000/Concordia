@@ -6,7 +6,7 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 
-/** Compte rendu chiffré du dernier aléa routier (transparence, chap. 10) */
+/** Compte rendu chiffré du dernier aléa routier (transparence, chap. 7) */
 export default function RoadReportPanel() {
   const report = useGameStore((s) => s.game.roadReport)
   const { t, credits, signedCredits, signedPercent, number } = useI18n()

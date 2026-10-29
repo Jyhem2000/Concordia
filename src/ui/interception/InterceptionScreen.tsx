@@ -46,7 +46,7 @@ type CrateOfferRowProps = {
   onChange: (qty: number) => void
 }
 
-/** Écran d'interception (chap. 6 et 10) : chaque option affiche sa chance détaillable et ses conséquences */
+/** Écran d'interception (chap. 5 et 7) : chaque option affiche sa chance détaillable et ses conséquences */
 export default function InterceptionScreen() {
   // Les chances et les sanctions se calculent sur l'état entier de la partie
   const game = useGameStore((s) => s.game)
@@ -62,12 +62,12 @@ export default function InterceptionScreen() {
     ? PRODUCT_IDS.find((id) => PRODUCTS[id].lethalOnSearch && game.cargo.some((lot) => lot.productId === id))
     : undefined
   const sanction = searchSanction(game)
-  // Double fond (chap. 5) : caisses cachées, regroupées par produit
+  // Double fond (chap. 4) : caisses cachées, regroupées par produit
   const hidden = PRODUCT_IDS.flatMap((id) => {
     const qty = ownedQty(hiddenCargo(game).hidden, id)
     return qty > 0 ? [`${qty} × ${t.product[id].name}`] : []
   })
-  // Protection du parrain (chap. 4) : caisses de la commande VIP mises de côté
+  // Protection du parrain (chap. 3) : caisses de la commande VIP mises de côté
   const covered = (interception.covered ?? []).map((lot) => `${lot.qty} × ${t.product[lot.productId].name}`)
   const custody = (days: number) => (days > 0 ? [t.interception.custody(days)] : [])
   const available = (move: InterceptionMove) => checkMove(game, move) !== 'move-unavailable'
@@ -84,7 +84,7 @@ export default function InterceptionScreen() {
   // Dégâts et pertes annoncés avec l'équipement actuel (pare-buffles, transpondeur, plaque rotative)
   const fled = fleeConsequences(game)
   const mode = ejectMode(game)
-  // Risques propres à la soute pendant une fuite : casse des fragiles, explosion des inflammables (chap. 3)
+  // Risques propres à la soute pendant une fuite : casse des fragiles, explosion des inflammables (chap. 2)
   const cargoRisks = keysOf(TAGS).flatMap((tag) => {
     const { breakage, explosion } = TAGS[tag]
     if (!game.cargo.some((lot) => PRODUCTS[lot.productId].tags.includes(tag))) return []
@@ -214,7 +214,7 @@ export default function InterceptionScreen() {
   )
 }
 
-/** Offre de corruption : Cash-Puce et caisses, chance mise à jour en temps réel (chap. 6 et 10) */
+/** Offre de corruption : Cash-Puce et caisses, chance mise à jour en temps réel (chap. 5 et 7) */
 function BribeForm({ label }: BribeFormProps) {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
@@ -292,7 +292,7 @@ function BribeForm({ label }: BribeFormProps) {
   )
 }
 
-/** Une ligne de caisses à offrir : valeur en paiement, prix d'achat, gain ou perte face au cash (chap. 7) */
+/** Une ligne de caisses à offrir : valeur en paiement, prix d'achat, gain ou perte face au cash (chap. 2) */
 function CrateOfferRow({ productId, qty, onChange }: CrateOfferRowProps) {
   const owned = useGameStore((s) => ownedQty(s.game.cargo, productId))
   const cost = useGameStore((s) => averageCost(s.game.cargo, productId) ?? 0)

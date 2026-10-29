@@ -81,7 +81,7 @@ export function createInitialState(seed: number): GameState {
   return remember(state, START_DISTRICT)
 }
 
-/** Mémorise les cours d'un district où se trouve le joueur : un relevé par jour, le dernier du jour l'emporte (chap. 7) */
+/** Mémorise les cours d'un district où se trouve le joueur : un relevé par jour, le dernier du jour l'emporte (chap. 2) */
 export function remember(state: GameState, districtId: DistrictId): GameState {
   // Flux pirate de Glitch : tous les districts sont relevés en temps réel
   const seen = crewEffect(state, 'liveQuotes') ? DISTRICT_IDS : [districtId]

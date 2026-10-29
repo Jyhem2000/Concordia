@@ -29,10 +29,10 @@ type TravelButtonProps = {
   to: DistrictId
 }
 
-/** Ordre d'affichage : de la périphérie au sommet de la pyramide (carte du chap. 4) */
+/** Ordre d'affichage : de la périphérie au sommet de la pyramide (carte du chap. 3) */
 const order = [...DISTRICT_IDS].sort((a, b) => DISTRICTS[a].echelon - DISTRICTS[b].echelon)
 
-/** Carte tactique : destinations, coût du trajet et mémoire de marché (chap. 10) */
+/** Carte tactique : destinations, coût du trajet et mémoire de marché (chap. 7) */
 export default function TravelPanel() {
   const tripDone = useGameStore((s) => (s.game.phase === 'day' ? s.game.dayTripDone : s.game.nightTripDone))
   const collapsed = useCollapsed('travel')
@@ -61,7 +61,7 @@ export default function TravelPanel() {
   )
 }
 
-/** Récapitulatif de la soute pour choisir la destination : produits, quantités, part du double fond (chap. 10) */
+/** Récapitulatif de la soute pour choisir la destination : produits, quantités, part du double fond (chap. 7) */
 function CargoSummary() {
   // Le double fond dépend du véhicule et de la soute : état entier
   const game = useGameStore((s) => s.game)
@@ -77,7 +77,7 @@ function CargoSummary() {
   )
 }
 
-/** Livraison officielle du jour (chap. 2) : offre de la plateforme, ou livraison en cours */
+/** Livraison officielle du jour (chap. 1) : offre de la plateforme, ou livraison en cours */
 function DayDelivery() {
   // L'offre, la place et la prime se calculent sur l'état entier de la partie
   const game = useGameStore((s) => s.game)
@@ -107,7 +107,7 @@ function DayDelivery() {
   )
 }
 
-/** Ce qu'un barrage raté coûterait : caisses illégales en soute et sanction de base d'une saisie (chap. 6) */
+/** Ce qu'un barrage raté coûterait : caisses illégales en soute et sanction de base d'une saisie (chap. 5) */
 function Exposure() {
   // La sanction et le double fond se calculent sur l'état entier de la partie (véhicule, district)
   const game = useGameStore((s) => s.game)
@@ -201,7 +201,7 @@ function DistrictRow({ districtId }: DistrictRowProps) {
             )}
           </div>
           <div className="text-xs text-zinc-400">{t.district[districtId].subtitle}</div>
-          {/* Événement local du jour, visible dès 06h00 (chap. 8) */}
+          {/* Événement local du jour, visible dès 06h00 (chap. 6) */}
           {events.local[districtId] && <EventDetails event={events.local[districtId]} className="text-xs text-amber-200" />}
         </div>
         {here ? (
@@ -217,7 +217,7 @@ function DistrictRow({ districtId }: DistrictRowProps) {
       {!here && (
         <div className="mt-1 text-xs text-zinc-400">
           {memoryLabel}
-          {/* Produits en soute : statut public du district (chap. 7) et cours mémorisé, pour décider où vendre */}
+          {/* Produits en soute : statut public du district (chap. 2) et cours mémorisé, pour décider où vendre */}
           {owned.length > 0 && (
             <ul className="mt-0.5 text-zinc-300" title={t.travel.estimateHint}>
               {owned.map((id) => {

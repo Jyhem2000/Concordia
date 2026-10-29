@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { SHOP_MIN_PRODUCTS } from '../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../data/districts.ts'
+import { EVENT_MULT_CAP } from '../data/events.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import { NO_EVENTS, type EventContext } from './events.ts'
 import { demandQuota, demandRefill, drawMarket, productStatus, quoteBreakdown, saleQuote, shopProducts } from './market.ts'
@@ -9,7 +10,7 @@ import { createInitialState } from './state.ts'
 import { defined } from './test-helpers.ts'
 import type { GameState } from './types.ts'
 
-/** Journée sans événement : la boutique et les cours suivent les seules règles du chap. 7 */
+/** Journée sans événement : la boutique et les cours suivent les seules règles du chap. 2 */
 const CALM: EventContext = { day: 1, phase: 'day', events: NO_EVENTS }
 
 describe('boutique du jour', () => {
@@ -76,6 +77,14 @@ describe('cours du jour', () => {
   it('donne un cours entier', () => {
     for (const id of PRODUCT_IDS) expect(Number.isInteger(quoteBreakdown(state, 'D3', id).total)).toBe(true)
   })
+
+  it('multiplie les événements entre eux, sous un plafond unique', () => {
+    // G05 (×2.5 sur T1-04) et D6-03 (×4) : ×10, ramené au plafond
+    const both: GameState = { ...state, events: { ...state.events, global: 'EVT-G05', local: { D6: 'EVT-D6-03' } } }
+    const factors = quoteBreakdown(both, 'D6', 'T1-04').lines.filter((line) => ['EVT-G05', 'EVT-D6-03', 'rule.event-cap'].includes(line.source))
+    expect(factors.map((line) => line.source)).toEqual(['EVT-G05', 'EVT-D6-03', 'rule.event-cap'])
+    expect(factors.reduce((total, line) => total * line.value, 1)).toBeCloseTo(EVENT_MULT_CAP)
+  })
 })
 
 describe('prix de vente', () => {
@@ -113,7 +122,7 @@ describe('prix de vente', () => {
     expect(saleQuote(state, 'T2-02', 4).cost).toBe(100 + 100 + 300 + 300)
   })
 
-  it('applique le profil nuit festif, sauf sans avoir voyagé (anti-arbitrage)', () => {
+  it('applique le tag Festif la nuit, sauf sans avoir voyagé (anti-arbitrage)', () => {
     const day = saleQuote(withLot(true), 'T2-02', 1).total
     expect(saleQuote(withLot(true, 'night'), 'T2-02', 1).total).toBeGreaterThan(day)
     expect(saleQuote(withLot(false, 'night'), 'T2-02', 1).total).toBe(day)

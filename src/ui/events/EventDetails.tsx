@@ -10,7 +10,7 @@ type EventDetailsProps = {
   className?: string
 }
 
-/** Événement dépliable sur ses effets exacts : produits et facteurs, risque, tags, stocks (chap. 8 et 10) */
+/** Événement dépliable sur ses effets exacts : produits et facteurs, risque, tags, stocks (chap. 6 et 7) */
 export default function EventDetails({ event, label, className = '' }: EventDetailsProps) {
   const { t } = useI18n()
   const lines = useEventLines()(event)

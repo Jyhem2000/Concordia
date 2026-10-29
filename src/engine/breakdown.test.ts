@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { breakdown } from './breakdown.ts'
 
 describe('breakdown', () => {
-  it("reproduit l'exemple de risque du chap. 10", () => {
+  it("reproduit l'exemple de risque du chap. 7", () => {
     const risk = breakdown('D5', 0.4)
       .add('EVT-G02', 0.1)
       .add('TAG-TECH', 0.167, { count: 4, cargo: 12 })
@@ -30,7 +30,7 @@ describe('breakdown', () => {
     expect(result.lines.at(-1)).toMatchObject({ op: 'clamp', source: 'rule.clamp', total: 1 })
   })
 
-  it('applique les rendements décroissants via set (Savoir_Faire, chap. 7)', () => {
+  it('applique les rendements décroissants via set (Savoir_Faire, chap. 2)', () => {
     const builder = breakdown('TAG-PERISHABLE', 1.3).mul('rule.after', 1.2).mul('CREW-03', 1.25)
     const excess = builder.total - 1.5
     const result = builder.set('rule.diminishing-returns', 1.5 + excess / 2).build()

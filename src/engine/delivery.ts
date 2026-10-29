@@ -10,7 +10,7 @@ import type { Rng } from './rng.ts'
 import type { CargoLot, DistrictId, GameState } from './types.ts'
 
 /*
- * Livraison officielle du jour (chap. 2) : la plateforme du DSC confie au livreur une commande légale
+ * Livraison officielle du jour (chap. 1) : la plateforme du DSC confie au livreur une commande légale
  * à livrer par son trajet de jour, contre une prime. Le revenu sûr de celui qui ne veut pas risquer gros.
  */
 
@@ -29,7 +29,7 @@ export function deliveryCrates(state: GameState): number {
   return Math.max(1, Math.ceil(VEHICLES[state.vehicleId].cargo * DAY_DELIVERY.sealedShare))
 }
 
-/** Prime de la livraison, indexée et majorée par la confiance du DSC */
+/** Prime de la livraison, majorée par la confiance du DSC */
 export function deliveryFee(state: GameState): number {
   return Math.round(DAY_DELIVERY.fee * trustFactor(state))
 }

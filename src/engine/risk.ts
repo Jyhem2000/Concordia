@@ -32,9 +32,9 @@ import type { Rng } from './rng.ts'
 import type { DistrictId, GameState } from './types.ts'
 
 /*
- * Risque d'interception à l'arrivée d'un trajet (chap. 6) :
+ * Risque d'interception à l'arrivée d'un trajet (chap. 5) :
  *   ( Base + Suspicion + Malus_Tags + Malus_Contexte − Couverture ) × Équipement × Multiplicateurs_finaux
- * borné après tous les multiplicateurs. En zone hors-réseau ([D4], chap. 4), seul le physique compte :
+ * borné après tous les multiplicateurs. En zone hors-réseau ([D4], chap. 3), seul le physique compte :
  * la suspicion, les tags, la couverture, la ronde, la Fiche S, le pic suspect et le coupe-file valent 0.
  */
 
@@ -50,7 +50,7 @@ export function riskBreakdown(trip: GameState, to: DistrictId, { includePatrol }
   const destination = DISTRICTS[to]
   const offGrid = destination.offGrid
 
-  // Un Déviant notoire qui entre dans un district à détecteurs biométriques est intercepté à coup sûr (chap. 2)
+  // Un Déviant notoire qui entre dans un district à détecteurs biométriques est intercepté à coup sûr (chap. 1)
   if (destination.iccScanners && iccTier(state.icc) === 'deviant') return breakdown('rule.icc-scanners', 1).build()
 
   const risk = breakdown(to, destination.baseRisk)
@@ -65,7 +65,7 @@ export function riskBreakdown(trip: GameState, to: DistrictId, { includePatrol }
   if (isPurged(state, to)) risk.add('EVT-L01', LOTTERY.promotedRisk)
 
   // Contexte physique : il s'applique partout, zone hors-réseau comprise
-  // De nuit, seul un trajet hors mission est une anomalie (chap. 2)
+  // De nuit, seul un trajet hors mission est une anomalie (chap. 1)
   if (state.phase === 'night' && !isOnMission(state, to)) {
     risk.add('rule.night-trip', NIGHT_TRIP_RISK)
     // Silentblocs de [MOD-04] : une part du malus de nuit retirée, sur sa propre ligne
@@ -107,7 +107,7 @@ export function riskBreakdown(trip: GameState, to: DistrictId, { includePatrol }
   return risk.clamp(RISK_BOUNDS.min, RISK_BOUNDS.max).build()
 }
 
-/** Ronde renforcée du jour : un district sous contrôle d'Aeterna, tiré au hasard, caché au joueur (chap. 6) */
+/** Ronde renforcée du jour : un district sous contrôle d'Aeterna, tiré au hasard, caché au joueur (chap. 5) */
 export function drawPatrol(rng: Rng): DistrictId {
   return rng.pick(DISTRICT_IDS.filter((id) => !DISTRICTS[id].offGrid))
 }
