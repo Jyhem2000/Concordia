@@ -10,7 +10,7 @@ import { crossedDistricts, shortestRoute } from './map.ts'
 import { dismiss, hire } from './crew.ts'
 import { acceptDelivery, checkDelivery } from './delivery.ts'
 import { noteSale } from './progress.ts'
-import { acceptMission, checkMission, isOnMission, recordDeviation } from './night.ts'
+import { acceptMission, checkMission, injectServer, isOnMission, recordDeviation } from './night.ts'
 import { auction, blackmail, consultCassandre, deliverVip, forge, orderInfluence, requestVip, visitMorgue, type MorgueService } from './services.ts'
 import { buyModule, buyVehicle, mountedEffect, mountModule, repair } from './equipment.ts'
 import { arrive, drawRoadEvent, heatWave } from './events.ts'
@@ -107,7 +107,6 @@ export type ActionError =
   | 'location-closed'
   | 'no-debt'
   | 'advance-used'
-  | 'advance-closed'
   | 'not-enough-offshore'
   | 'intercepted'
   | 'not-intercepted'
@@ -327,6 +326,7 @@ function travel(state: GameState, to: DistrictId): ActionResult {
       heatHealth: stroke ? -stroke.delta : 0,
       mission: null,
       missionFee: 0,
+      injection: 0,
     },
     jammerDay: jammed ? state.day : state.jammerDay,
     dayTripDone: state.dayTripDone || state.phase === 'day',
@@ -339,8 +339,9 @@ function travel(state: GameState, to: DistrictId): ActionResult {
     rng: rng.state,
   }
   // Sans barrage ni aléa, le trajet se termine ici ; sinon le dépannage et l'arrivée attendent leur résolution
-  // De nuit, un trajet hors mission qui passe sans interception est un écart enregistré (chap. 2)
-  const logged = state.phase === 'night' && !interception && !isOnMission(state, to) ? recordDeviation(arrived) : arrived
+  // De nuit, un trajet hors mission qui passe sans interception est un écart enregistré (chap. 2),
+  // et, serveur en soute et Glitch au travail, une injection du Résident Réécrit (chap. 5)
+  const logged = state.phase === 'night' && !interception && !isOnMission(state, to) ? injectServer(recordDeviation(arrived)) : arrived
   const done = interception || roadEvent ? logged : arrive(emergencyTow(logged).state)
   return { ok: true, state: remember(done, to) }
 }
@@ -411,7 +412,6 @@ function repay(state: GameState, amount: number): ActionResult {
 function borrow(state: GameState, amount: number): ActionResult {
   const closed = checkService(state, 'debt')
   if (closed) return fail(closed)
-  if (state.initialDebtPaid) return fail('advance-closed')
   if (amount > loanRoom(state)) return fail('advance-used')
   return { ok: true, state: { ...state, cash: state.cash + amount, debt: state.debt + amount, advanced: state.advanced + amount } }
 }

@@ -349,7 +349,7 @@ export type GameStatus = 'playing' | 'finished'
 export type IccTier = 'gold' | 'ordinary' | 'probation' | 'deviant'
 
 /** Fins de partie (chap. 2) : les quatre grandes fins, puis les défaites */
-export type EndingId = 'saboteur' | 'elite' | 'mafia' | 'standard' | 'bio-bricks' | 'death' | 'execution'
+export type EndingId = 'saboteur' | 'resident' | 'elite' | 'mafia' | 'standard' | 'bio-bricks' | 'death' | 'execution'
 
 export type Ending = {
   id: EndingId
@@ -448,6 +448,8 @@ export type TripReport = {
   mission: 'delivered' | 'deviated' | null
   /** Prime de la commande livrée */
   missionFee: number
+  /** Injection du serveur réussie pendant ce trajet : le total atteint, 0 sinon */
+  injection: number
 }
 
 /** Ce que la nuit et la routine de 06h00 ont changé, pour le briefing du matin (chap. 2 et 10) */
@@ -647,6 +649,10 @@ export type GameState = {
     flagged: boolean
     /** Commandes du DSC livrées (jour et nuit) */
     deliveries: number
+    /** Commandes VIP du Velvet-Silo livrées, moins celles manquées (parrainage de l'Élite) */
+    vipOrders: number
+    /** Injections du serveur réussies par Glitch (Résident Réécrit) */
+    injections: number
   }
   /** Livraison officielle acceptée, jusqu'à sa livraison ou à 06h00 */
   delivery: { to: DistrictId } | null

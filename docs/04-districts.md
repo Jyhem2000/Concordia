@@ -41,7 +41,7 @@ Les stats de chaque district sont dans [`districts.ts`](../src/data/districts.ts
 
 ### `[LOC-D1-1]` L'Arrière-Salle de Viktor Varga (usurier mafieux)
 Boucherie clandestine de Viktor Varga et de ses « Bouchers ».
-* **Dette :** remboursement, et avance de survie tant que la dette initiale court (chap. 7, *Dette mafieuse*).
+* **Dette :** remboursement, et avance de survie (une fois par partie au total, chap. 7, *Dette mafieuse*).
 
 ### `[LOC-D1-2]` La Cantine des Chauffeurs (« Chez Borg »)
 Bar enfumé réservé aux routiers, où l'on sert l'eau de l'Exemption Métabolique.
@@ -155,4 +155,5 @@ Lupanar clandestin et bar à oxygène caché dans les galeries de climatisation 
 | Chantage sur l'oreiller | oui | une base plus une hausse par utilisation précédente, en ₡ **ou** en caisses de `[T3-07]` puis `[T3-02]` (lots les plus anciens d'abord) jusqu'à couvrir le montant à la valeur en paiement, sans rendu de monnaie (chap. 7) | Gain d'ICC **hors plafond** (vidéos compromettantes de juges). Les juges finissent par se méfier. |
 | Commande spéciale VIP | après résolution (1 contrat actif max) | — | Sur demande, un produit précis de Tier 2 ou 3 **absent de la soute**, tiré au hasard : livrer **3 caisses** au Silo le jour même ou le lendemain (avant 20h00), rachetées à un multiple du cours local. **Échec** (constaté à la routine suivant l'échéance) : perte d'ICC et lieu verrouillé plusieurs jours. |
 
+* **Parrainage (fin Élite, chap. 2) :** chaque commande VIP livrée rapproche d'un parrain ; une commande manquée en efface une (le parrain n'aime pas attendre). Le guichet affiche la progression (nombre exigé : `ENDINGS` dans [`balance.ts`](../src/data/balance.ts)).
 * **Enchères & Commande VIP :** le multiple s'applique au cours local ; la commission de puce est prélevée, ainsi que l'effet de l'état de la caisse (abîmée, fraîcheur), mais pas le savoir-faire ; ces ventes sont **hors quota** (elles ne consomment pas la demande et ne déclenchent pas de pic suspect).

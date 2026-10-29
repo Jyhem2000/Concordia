@@ -10,7 +10,7 @@
 >
 > **Recommandé de garder, à confirmer :** chantage du Velvet-Silo, laissez-passer de la Morgue, collecte de protection, rendements décroissants, plafond des événements, tranches du compte offshore (voir le tableau plus bas).
 >
-> **Nouvelle question :** le filet de sécurité après la dette initiale (voir *Avance de survie* plus bas).
+> **Adopté ensuite :** l'avance de survie ouverte toute la partie (voir *Avance de survie* plus bas).
 
 Analyse de conception. Chaque mécanique est revue sous trois angles : **ce qu'elle apporte au joueur**, **ce qu'elle coûte** (règles à apprendre, chiffres à l'écran, code), **ce que disent les mesures** (`sim/reports/`). Les propositions retenues rejoindront leurs chapitres ; les chiffres seront mesurés au simulateur avant d'être fixés.
 

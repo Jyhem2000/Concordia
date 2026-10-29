@@ -379,6 +379,8 @@ export const fr = {
     bribe: (bonus: string) => `corruption ${bonus}`,
     patrol: 'révèle la ronde renforcée',
     liveQuotes: 'cours de tous les districts en temps réel',
+    injection: (done: number, needed: number) =>
+      `avec le serveur Aeterna en soute, chaque tournée clandestine passée sans interception injecte un morceau de ton dossier (${done}/${needed}, Résident Réécrit)`,
     offshore: (bonus: string) => `rendement offshore ${bonus} par tranche`,
     flee: (bonus: string) => `fuite ${bonus}`,
     forgery: (bonus: string) => `falsification de la Loterie ${bonus}`,
@@ -455,6 +457,8 @@ export const fr = {
       request: 'Demander une commande',
       requestDetail: (tiers: string) => `Produit de Tier ${tiers}`,
       deliver: 'Livrer',
+      sponsor: (done: number, needed: number) =>
+        `Parrainage : ${done}/${needed} commandes livrées. Un oligarque servi assez souvent te parraine pour un fauteuil (fin Élite) ; une commande manquée en efface une.`,
       contract: (crates: number, product: string, deadline: number, value: string) =>
         `${crates} × ${product}, avant le J${deadline} à 20h00 (valeur : ${value})`,
     },
@@ -506,7 +510,7 @@ export const fr = {
     repay: 'Rembourser',
     borrow: 'Emprunter',
     advanceRule: (total: string) =>
-      `Avance de survie : tant que la dette initiale court, Viktor avance jusqu'à ${total} sur toute la partie, au taux de la dette. Une fois la dette initiale soldée, il ne prête plus.`,
+      `Avance de survie : Viktor avance jusqu'à ${total} au total sur toute la partie, au taux de la dette ; rembourser ne la reconstitue pas.`,
     loanRoom: (amount: string) => `Encore ${amount} empruntables`,
     offshoreTitle: 'Compte offshore',
     deposit: 'Déposer',
@@ -523,7 +527,9 @@ export const fr = {
     title: (day: number) => `Objectifs du Jour ${day}`,
     score: 'Score (compte offshore)',
     threshold: (amount: string) => `≥ ${amount}`,
-    goldStatus: 'Statut Citoyen Or',
+    goldStatus: 'Statut Citoyen Or à minuit (portiques de la dalle)',
+    sponsor: (done: number, needed: number) => `Parrain au Velvet-Silo : ${done}/${needed} commandes VIP livrées`,
+    injections: (done: number, needed: number) => `Injections du serveur par Glitch : ${done}/${needed}`,
     met: 'Atteint :',
     unmet: 'Pas encore :',
     inCargo: (product: string) => `${product} en soute`,
@@ -755,6 +761,7 @@ export const fr = {
     heatStroke: (health: number) => `coup de chaleur, Santé −${health}`,
     delivered: (fee: string) => `commande du DSC livrée, prime ${fee}`,
     deviated: (wanted: string) => `écart de mission enregistré, ${wanted}`,
+    injected: (done: number, needed: number) => `Glitch a injecté un morceau de ton dossier dans Aeterna (${done}/${needed})`,
     mission: 'Mission de nuit',
     trust: (deliveries: number, factor: string) =>
       `Confiance du DSC : ${deliveries} commande${deliveries > 1 ? 's' : ''} livrée${deliveries > 1 ? 's' : ''}, prime ${factor}.`,
@@ -785,6 +792,8 @@ export const fr = {
       `La plateforme charge ${crates} caisses scellées (place libre requise) : le trajet vers ce district est couvert, et votre marchandise peut voyager avec.`,
     clandestineTour: 'Tournée clandestine',
     clandestineHint: (wanted: string) => `Hors mission, vers le district de votre choix : risque accru, et ${wanted} si le trajet passe.`,
+    injectionHint: (next: number, needed: number) =>
+      `Serveur Aeterna en soute et Glitch au travail : si le trajet passe sans interception, elle injecte un morceau de ton dossier (${next}/${needed}).`,
     withDrink: (product: string, health: number) => ` — nuit blanche : boire 1 × ${product} (Santé −${health})`,
     missionLocked: (done: number, needed: number) =>
       `La plateforme ne vous confie pas encore la nuit : ${done}/${needed} commandes livrées (livraisons officielles du jour). Seule la tournée clandestine reste possible.`,
@@ -809,10 +818,15 @@ export const fr = {
         epilogue:
           "Le chalutier blindé des cartels franchit l'écluse de Rust Valley. Derrière le mur, les preuves inondent le Fil Rose et Concordia s'embrase pendant que tu goûtes un vrai whisky au soleil des îles libres.",
       },
+      resident: {
+        title: 'Le Résident Réécrit',
+        epilogue:
+          "La dernière greffe prend à 03h12. Le code d'Aeterna se réécrit ligne par ligne : résident de Catégorie S, né sous la verrière, casier vierge. Le lendemain, les douaniers d'élite te saluent par ton nom. L'algorithme ne se trompe jamais : c'est donc que tu as toujours été des leurs.",
+      },
       elite: {
         title: "Nouvel Oligarque d'Olympus-Green",
         epilogue:
-          "Le fauteuil d'un Haut-Commissaire purgé t'attendait. Sous la verrière d'Olympus-Green, c'est désormais toi qui commandes de la vraie viande aux petits livreurs.",
+          "Ton parrain du Velvet-Silo glisse ton nom pour le fauteuil d'un Haut-Commissaire « suicidé » la semaine dernière. Le Conseil vote à l'unanimité, par habitude. Sous la verrière, c'est désormais toi qui commandes de la vraie viande aux petits livreurs.",
       },
       mafia: {
         title: 'Baron de Rust Valley',
@@ -864,8 +878,7 @@ export const fr = {
     'not-at-location': "Ce lieu n'est pas dans ce district.",
     'location-closed': 'Fermé : les lieux spéciaux ouvrent de 06h00 à 20h00.',
     'no-debt': 'Aucune dette à rembourser.',
-    'advance-used': 'Avance de survie épuisée : Viktor ne prêtera plus avant que la dette initiale soit soldée.',
-    'advance-closed': 'La dette initiale est soldée : Viktor ne prête plus.',
+    'advance-used': 'Avance de survie épuisée : Viktor ne prête qu’une fois par partie.',
     'not-enough-offshore': 'Solde offshore insuffisant.',
     intercepted: "Un barrage vous attend : réglez d'abord le contrôle.",
     'not-intercepted': 'Aucun contrôle en cours.',

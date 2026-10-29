@@ -169,11 +169,11 @@ function secured(view: GameState, objective: Objective): boolean {
   return target !== null && offshoreBalance(view.offshore) + view.cash >= target
 }
 
-/** L'Élite défend son ICC au-dessus du palier Or (certificat, chantage, prudence au barrage) */
+/** L'Élite défend son ICC au-dessus du palier Or (certificat, chantage, prudence au barrage) et sert les commandes VIP du Velvet-Silo (parrain) */
 function goalPlan(plan: Plan, objective: Objective): Plan {
   if (objective !== 'elite') return plan
   const gold = ICC_TIERS.find((tier) => tier.tier === ENDINGS.elite.iccTier)?.min ?? 0
-  return { ...plan, places: [...(plan.places ?? DEFAULT_PLACES), 'certificate', 'blackmail'], iccFloor: gold + ELITE_ICC_MARGIN }
+  return { ...plan, places: [...(plan.places ?? DEFAULT_PLACES), 'certificate', 'blackmail', 'vip'], iccFloor: gold + ELITE_ICC_MARGIN }
 }
 
 /** Seuil atteint : on sécurise plutôt que maximiser, plus aucun illégal (livraisons et légal seulement) */

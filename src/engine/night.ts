@@ -1,9 +1,10 @@
-import { DAY_DELIVERY, NIGHT_MISSION } from '../data/balance.ts'
+import { DAY_DELIVERY, ENDINGS, NIGHT_MISSION } from '../data/balance.ts'
 import { DISTRICT_IDS } from '../data/districts.ts'
 import { PRODUCTS, SEALED_PRODUCT } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import type { ActionError } from './actions.ts'
-import { cargoUsed } from './cargo.ts'
+import { cargoUsed, ownedQty } from './cargo.ts'
+import { workingCrew } from './crew.ts'
 import { nightUnlock, noteDelivery, raiseWanted, trustFactor } from './progress.ts'
 import type { Rng } from './rng.ts'
 import type { CargoLot, DistrictId, GameState } from './types.ts'
@@ -76,6 +77,23 @@ export function recordDeviation(state: GameState): GameState {
     ...state,
     ...raiseWanted(state),
     tripReport: state.tripReport ? { ...state.tripReport, mission: 'deviated' } : state.tripReport,
+  }
+}
+
+/** Résident Réécrit (chap. 5) : serveur en soute et Glitch au travail ce jour-là, tant que l'injection n'est pas complète */
+export function canInject(state: GameState): boolean {
+  const { injections, requiredProduct, crew } = ENDINGS.resident
+  return state.progress.injections < injections && workingCrew(state) === crew && ownedQty(state.cargo, requiredProduct) > 0
+}
+
+/** Tournée de nuit hors mission passée sans interception : Glitch injecte un morceau du dossier dans Aeterna */
+export function injectServer(state: GameState): GameState {
+  if (!canInject(state)) return state
+  const injections = state.progress.injections + 1
+  return {
+    ...state,
+    progress: { ...state.progress, injections },
+    tripReport: state.tripReport ? { ...state.tripReport, injection: injections } : state.tripReport,
   }
 }
 

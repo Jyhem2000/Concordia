@@ -1,6 +1,6 @@
 # Proposition — Deux chemins vers Olympus-Green
 
-> Pas encore écrit dans les chapitres ni dans le code. Seuils à mesurer au simulateur.
+> **Adopté le 29/10/2026** : écrit dans les chap. 2 à 5, 7, 9 et 10, et dans le code (3 injections, 3 commandes VIP, seuils à mesurer). L'avance de survie est ouverte toute la partie dans le même changement. Reste : un bot pour le Résident Réécrit, et la remesure.
 > * **Le Résident Réécrit :** validé sur le principe (ex-« Fantôme »). Ce n'est pas un fantôme : Aeterna le reconnaît comme résident autorisé.
 > * **L'Élite par cooptation :** proposé pour remplacer « Citoyen Or + score », peu crédible dans le lore.
 

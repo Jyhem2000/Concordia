@@ -26,7 +26,7 @@ Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la dé
 
 | Thème | Mécaniques | Où lire |
 | :--- | :--- | :--- |
-| **Partie** | objectif, audit du Jour 30, défaites (Bio-Briques, mort, exécution), grandes fins, score | chap. 2 → chap. 7 (dette, compte offshore) |
+| **Partie** | objectif, audit du Jour 30, défaites (Bio-Briques, mort, exécution), grandes fins (Saboteur, Résident Réécrit et injections, Élite par cooptation, Baron), score | chap. 2 → chap. 7 (dette, compte offshore) |
 | **Jauges** | ICC (paliers, suspicion, gains de route et plafond), Santé, châssis, carburant, Exemption Métabolique et Sédation | chap. 2 → chap. 5 (capacités du véhicule) |
 | **Journée** | moments (Journée, 20h00, Nuit), routine de 06h00, service de jour, dilemme de 20h00 (relais, bivouac, tournée de nuit), livraison officielle du jour, missions de nuit et caisses scellées, épuisement, demi-journée perdue, immobilisation, dépannage d'urgence | chap. 2 |
 | **Trajet** | ordre de résolution, consommation, usure de nuit et canicule, carte et districts traversés, couches du réseau (surface, galeries, quais), zone hors-réseau, mission de nuit | chap. 2 → chap. 4 → chap. 8 (canicule, aléas de jour) |
@@ -38,8 +38,8 @@ Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la dé
 | **Marché** | information (mémoire, historique, profil public des districts), boutique du jour, exclusion, cours (coefficient du district, tendance, Mult_Événement), quota de rachat, saturation, pic suspect | chap. 7 → chap. 8 (événements, contrecoups, vices de la Loterie) |
 | **Vente** | prix de vente, commission, savoir-faire (fraîcheur, nuit, rendements décroissants), clause anti-arbitrage, lots les plus anciens d'abord | chap. 7 → chap. 3 (fraîcheur) |
 | **Argent** | Cash-Puce, paiement en nature, dette (intérêts, retard, avance de survie), collecte de protection, compte offshore (commission au retrait) | chap. 7 → chap. 4 (guichets des lieux spéciaux) |
-| **Lieux spéciaux** | services, horaires, effets de chaque lieu | chap. 4 → chap. 7 (dette, offshore) |
-| **Équipement** | véhicules (double fond compris), modules (brouilleur de drones compris), équipage, salaires | chap. 5 |
+| **Lieux spéciaux** | services, horaires, effets de chaque lieu, parrainage du Velvet-Silo | chap. 4 → chap. 7 (dette, offshore) |
+| **Équipement** | véhicules (double fond compris), modules (brouilleur de drones compris), équipage (injection du serveur par Glitch comprise), salaires | chap. 5 |
 | **Événements** | globaux, locaux, rumeurs, contrecoups, Loterie, aléas routiers | chap. 8 |
 | **Prévisibilité** | ce que le joueur sait ou peut deviner (cours, rumeurs, contrecoups, Loterie) et ce qui reste caché (ronde renforcée) | chap. 7 → chap. 8 → chap. 6 |
 | **Affichage** | où chaque règle est montrée et détaillée au joueur | chap. 10 |
@@ -49,7 +49,7 @@ Les docs décrivent le jeu complet ; tout n'est pas encore en jeu. Ce tableau di
 
 | Chap. | En jeu | À venir |
 | :---: | :--- | :--- |
-| 2 | Jauges (ICC, Santé, châssis, carburant), journée, couvre-feu, épuisement, demi-journée perdue, dépannage, audit et fins, Exemption Métabolique et Sédation, pompes officielles fermées la nuit, livraison officielle du jour, confiance du DSC et mission de nuit débloquée | — |
+| 2 | Jauges (ICC, Santé, châssis, carburant), journée, couvre-feu, épuisement, demi-journée perdue, dépannage, audit et fins (Résident Réécrit et Élite par cooptation compris), Exemption Métabolique et Sédation, pompes officielles fermées la nuit, livraison officielle du jour, confiance du DSC et mission de nuit débloquée | — |
 | 3 | Tags, masquage, fraîcheur, casse, explosions, actions des produits | — |
 | 4 | Carte, districts, racket et portique de `[D4]`, tous les lieux spéciaux et leurs services, services réservés (voies officielle et pègre) | — |
 | 5 | Véhicules, modules, catalogue du garage en rayons, double fond, équipage (débloqué par des actes) et salaires | — |
@@ -63,7 +63,7 @@ Les docs décrivent le jeu complet ; tout n'est pas encore en jeu. Ce tableau di
 Analyses de conception pas encore tranchées ; les règles retenues rejoindront leurs chapitres.
 * [Mini-progression : débloquer les mécaniques au fil de la partie](propositions/progression.md)
 * [Mécaniques à simplifier](propositions/simplification.md) : premier lot adopté (inflation, Laverie, rachat, Hachoir de Viktor, tabassage, emprunt tactique), le reste ouvert
-* [Deux chemins vers Olympus-Green : l'Élite par cooptation et le Résident Réécrit](propositions/fins-olympus.md)
+* [Deux chemins vers Olympus-Green](propositions/fins-olympus.md) : adopté (Élite par cooptation, Résident Réécrit)
 
 ## Feuille de route
 Étapes restantes, dans l'ordre des dépendances :

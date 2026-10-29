@@ -171,7 +171,7 @@ describe('guichets : dette et compte offshore', () => {
     expect(run(repaid, { type: 'borrow', amount: 500 }).advanced).toBe(SURVIVAL_ADVANCE)
   })
 
-  it("soldent la dette initiale pour de bon et débloquent l'emprunt tactique", () => {
+  it("soldent la dette initiale pour de bon, l'avance de survie restant ouverte", () => {
     const rich = gameAt(2, { cash: start.debt + 500 })
     expect(maxRepay(rich)).toBe(start.debt)
     expect(errorOf(rich, { type: 'repay', amount: start.debt + 1 })).toBe('invalid-amount')
@@ -180,8 +180,9 @@ describe('guichets : dette et compte offshore', () => {
     expect(paid).toMatchObject({ debt: 0, cash: 500, initialDebtPaid: true })
     expect(errorOf(paid, { type: 'repay', amount: 1 })).toBe('no-debt')
 
-    // Dette initiale soldée : Viktor ne prête plus
-    expect(errorOf(paid, { type: 'borrow', amount: 1 })).toBe('advance-closed')
+    // L'avance reste ouverte toute la partie, et réemprunter ne retire pas le statut
+    const advanced = run(paid, { type: 'borrow', amount: 1_000 })
+    expect(advanced).toMatchObject({ debt: 1_000, cash: 1_500, initialDebtPaid: true, advanced: 1_000 })
   })
 
   it('créditent les dépôts en entier et rendent les retraits en Cash-Puce, commission déduite', () => {

@@ -75,12 +75,20 @@ describe('audit du Jour 30', () => {
   })
 
   it('évalue les fins de la plus prestigieuse à la plus modeste', () => {
-    const { saboteur, elite, mafia } = ENDINGS
+    const { saboteur, resident, elite, mafia } = ENDINGS
     const beacon = [{ productId: saboteur.requiredProduct, qty: 1, unitCost: 1, travelled: true, boughtDay: 1, damaged: false }]
     expect(endingFor(solvent({ offshore: offshore(saboteur.minScore), cargo: beacon, districtId: saboteur.district })).id).toBe('saboteur')
-    // Sans la balise : fin suivante (Citoyen Or au départ)
-    expect(endingFor(solvent({ offshore: offshore(saboteur.minScore), districtId: saboteur.district })).id).toBe('elite')
-    expect(endingFor(solvent({ offshore: offshore(elite.minScore), icc: 50 })).id).toBe('mafia')
+    // Sans la balise mais greffe complète : le Résident Réécrit, sans condition de lieu ni d'ICC
+    const grafted = { ...solvent({}).progress, injections: resident.injections }
+    expect(endingFor(solvent({ offshore: offshore(resident.minScore), icc: 10, progress: grafted })).id).toBe('resident')
+    expect(endingFor(solvent({ offshore: offshore(resident.minScore), progress: { ...grafted, injections: resident.injections - 1 } })).id).not.toBe(
+      'resident',
+    )
+    // Élite : parrain au Velvet-Silo et Citoyen Or (au départ) ; sans parrain, fin suivante
+    const sponsored = { ...solvent({}).progress, vipOrders: elite.sponsorOrders }
+    expect(endingFor(solvent({ offshore: offshore(elite.minScore), progress: sponsored })).id).toBe('elite')
+    expect(endingFor(solvent({ offshore: offshore(elite.minScore) })).id).toBe('mafia')
+    expect(endingFor(solvent({ offshore: offshore(elite.minScore), icc: 50, progress: sponsored })).id).toBe('mafia')
     expect(endingFor(solvent({ offshore: offshore(mafia.minScore - 1) })).id).toBe('standard')
   })
 })

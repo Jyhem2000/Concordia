@@ -52,6 +52,8 @@ export const EARNED: GameState['progress'] = {
   tagSales: { 'TAG-PERISHABLE': 10, 'TAG-CHEMICAL': 10 },
   flagged: true,
   deliveries: 3,
+  vipOrders: 0,
+  injections: 0,
 }
 
 /** Tirage haut : aucun barrage au prochain trajet, échec de la prochaine option tentée */

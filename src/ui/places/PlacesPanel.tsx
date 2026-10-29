@@ -115,14 +115,10 @@ function DebtDesk() {
         <span className="font-bold text-red-300">{credits(game.debt)}</span>
       </p>
       <AmountForm label={t.place.repay} max={maxRepay(game)} onSubmit={(amount) => dispatch({ type: 'repay', amount })} />
-      {!game.initialDebtPaid && (
-        <>
-          <AmountForm label={t.place.borrow} variant="danger" max={room} onSubmit={(amount) => dispatch({ type: 'borrow', amount })} />
-          <p className="text-xs text-zinc-400">
-            {t.place.loanRoom(credits(room))} · {t.place.advanceRule(credits(SURVIVAL_ADVANCE))}
-          </p>
-        </>
-      )}
+      <AmountForm label={t.place.borrow} variant="danger" max={room} onSubmit={(amount) => dispatch({ type: 'borrow', amount })} />
+      <p className="text-xs text-zinc-400">
+        {t.place.loanRoom(credits(room))} · {t.place.advanceRule(credits(SURVIVAL_ADVANCE))}
+      </p>
     </>
   )
 }

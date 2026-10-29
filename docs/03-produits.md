@@ -156,4 +156,4 @@ Stock par jour, quota de demande (chap. 7) et bonus de Forte demande de chaque t
   * **Mort subite :** une fouille effective avec au moins 1 caisse en soute déclenche l'exécution sommaire (Game Over).
   * **Encombrant :** une baie de serveur n'entre pas dans le double fond (chap. 5).
   * **Balise de traçage :** tant qu'au moins 1 caisse est en soute, un malus au risque d'interception partout (`beaconRisk` dans [`products.ts`](../src/data/products.ts)), racket de `[D4]` compris (les milices captent aussi le signal).
-  * **Objectif ultime :** condition de la fin « Saboteur » (chap. 2).
+  * **Grandes fins :** condition de la fin « Saboteur » (en `[D4]` à minuit), et outil des injections de Glitch pour la fin « Résident Réécrit » (chap. 2 et 5).

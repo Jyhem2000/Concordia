@@ -1,11 +1,11 @@
 import { BedDouble, Fuel, Siren } from 'lucide-react'
-import { WANTED } from '../../data/balance.ts'
+import { ENDINGS, WANTED } from '../../data/balance.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { VEHICLES } from '../../data/vehicles.ts'
 import { ownedQty } from '../../engine/cargo.ts'
 import { canSiphon, checkForceCurfew, maxRefuel } from '../../engine/actions.ts'
 import { fuelPriceBreakdown } from '../../engine/market.ts'
-import { checkMission, missionFee, missionOffer, sealedCount } from '../../engine/night.ts'
+import { canInject, checkMission, missionFee, missionOffer, sealedCount } from '../../engine/night.ts'
 import { nightUnlock } from '../../engine/progress.ts'
 import { sleepsAtRelay } from '../../engine/routine.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
@@ -113,6 +113,9 @@ export default function EveningPanel() {
                   <p className="text-xs text-zinc-400">
                     {curfewError ? t.error[curfewError] : t.evening.clandestineHint(t.hud.wantedGain(WANTED.perOffense))}
                   </p>
+                  {canInject(game) && (
+                    <p className="text-xs text-amber-300">{t.evening.injectionHint(game.progress.injections + 1, ENDINGS.resident.injections)}</p>
+                  )}
                 </li>
               </ul>
               {coolants.map((id) => (
@@ -134,6 +137,9 @@ export default function EveningPanel() {
             <p className="mt-1 text-xs text-sky-300">
               {game.mission ? t.evening.missionActive(t.district[game.mission.to].name) : t.evening.offMission}
             </p>
+            {!game.mission && canInject(game) && (
+              <p className="mt-1 text-xs text-amber-300">{t.evening.injectionHint(game.progress.injections + 1, ENDINGS.resident.injections)}</p>
+            )}
             <Button variant="primary" className="mt-2" onClick={() => dispatch({ type: 'sleep' })}>
               <BedDouble size={14} className="mr-1 inline" aria-hidden="true" />
               {sleepLabel}

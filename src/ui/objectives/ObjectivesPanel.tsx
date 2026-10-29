@@ -20,6 +20,7 @@ export default function ObjectivesPanel() {
   const cargo = useGameStore((s) => s.game.cargo)
   const districtId = useGameStore((s) => s.game.districtId)
   const icc = useGameStore((s) => s.game.icc)
+  const progress = useGameStore((s) => s.game.progress)
   const { t, credits } = useI18n()
   if (!unlocked) return null
 
@@ -37,8 +38,25 @@ export default function ObjectivesPanel() {
       ],
     },
     {
+      id: 'resident',
+      conditions: [
+        scoreCondition(ENDINGS.resident.minScore),
+        {
+          label: t.objectives.injections(Math.min(progress.injections, ENDINGS.resident.injections), ENDINGS.resident.injections),
+          met: progress.injections >= ENDINGS.resident.injections,
+        },
+      ],
+    },
+    {
       id: 'elite',
-      conditions: [scoreCondition(ENDINGS.elite.minScore), { label: t.objectives.goldStatus, met: iccTier(icc) === ENDINGS.elite.iccTier }],
+      conditions: [
+        scoreCondition(ENDINGS.elite.minScore),
+        {
+          label: t.objectives.sponsor(Math.min(progress.vipOrders, ENDINGS.elite.sponsorOrders), ENDINGS.elite.sponsorOrders),
+          met: progress.vipOrders >= ENDINGS.elite.sponsorOrders,
+        },
+        { label: t.objectives.goldStatus, met: iccTier(icc) === ENDINGS.elite.iccTier },
+      ],
     },
     { id: 'mafia', conditions: [scoreCondition(ENDINGS.mafia.minScore)] },
   ]

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { NIGHT_MISSION } from '../data/balance.ts'
+import { ENDINGS, NIGHT_MISSION } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
 import { SEALED_PRODUCT } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
@@ -61,6 +61,23 @@ describe('mission de nuit', () => {
     const night = run(evening(), { type: 'forceCurfew' })
     expect(nightRisk(night, 'D2')).toBe(true)
     expect(run(night, { type: 'travel', to: 'D2' }).wanted).toBe(1)
+  })
+
+  it('injecte le serveur à chaque tournée clandestine passée, Glitch au travail, jusqu’à la greffe complète', () => {
+    const { requiredProduct, crew, injections } = ENDINGS.resident
+    const glitch = { ...evening().crew, active: crew, paidDay: 3 }
+    const night = run(evening({ cargo: [lot(requiredProduct, 1)], crew: glitch }), { type: 'forceCurfew' })
+    const injected = run(night, { type: 'travel', to: 'D2' })
+    expect(injected.progress.injections).toBe(1)
+    expect(injected.tripReport?.injection).toBe(1)
+    // Sans Glitch au travail, ou sans serveur, ou greffe déjà complète : rien
+    expect(run(run(evening({ cargo: [lot(requiredProduct, 1)] }), { type: 'forceCurfew' }), { type: 'travel', to: 'D2' }).progress.injections).toBe(0)
+    expect(run(run(evening({ crew: glitch }), { type: 'forceCurfew' }), { type: 'travel', to: 'D2' }).progress.injections).toBe(0)
+    const complete = { ...EARNED, injections }
+    expect(
+      run(run(evening({ cargo: [lot(requiredProduct, 1)], crew: glitch, progress: complete }), { type: 'forceCurfew' }), { type: 'travel', to: 'D2' })
+        .progress.injections,
+    ).toBe(injections)
   })
 
   it('interdit de vendre ou de donner les caisses scellées', () => {

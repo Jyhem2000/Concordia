@@ -223,11 +223,16 @@ export function isDefeat(ending: EndingId): boolean {
 export function endingFor(state: GameState): Ending {
   if (state.debt > 0) return { id: 'bio-bricks', score: 0 }
   const score = offshoreBalance(state.offshore)
-  const { saboteur, elite, mafia } = ENDINGS
+  const { saboteur, resident, elite, mafia } = ENDINGS
   if (score >= saboteur.minScore && ownedQty(state.cargo, saboteur.requiredProduct) > 0 && state.districtId === saboteur.district) {
     return { id: 'saboteur', score }
   }
-  if (score >= elite.minScore && iccTier(state.icc) === elite.iccTier) return { id: 'elite', score }
+  // Résident Réécrit : la greffe a pris, ni lieu, ni ICC, ni serveur à bord exigés
+  if (score >= resident.minScore && state.progress.injections >= resident.injections) return { id: 'resident', score }
+  // Élite par cooptation : un parrain au Velvet-Silo, et l'ICC qui passe les portiques de la dalle
+  if (score >= elite.minScore && iccTier(state.icc) === elite.iccTier && state.progress.vipOrders >= elite.sponsorOrders) {
+    return { id: 'elite', score }
+  }
   if (score >= mafia.minScore) return { id: 'mafia', score }
   return { id: 'standard', score }
 }

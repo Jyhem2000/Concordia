@@ -1,3 +1,4 @@
+import { ENDINGS } from '../../data/balance.ts'
 import { CREW } from '../../data/vehicles.ts'
 import { checkHire, CREW_IDS, hireFee, inKindCrate, salary } from '../../engine/crew.ts'
 import type { CrewId } from '../../engine/types.ts'
@@ -68,6 +69,9 @@ function CrewOffer({ crewId }: CrewOfferProps) {
     ...(crew.bribeBonus ? [t.crewDesk.bribe(signedPercent(crew.bribeBonus, 0))] : []),
     ...(crew.revealsPatrol ? [t.crewDesk.patrol] : []),
     ...(crew.liveQuotes ? [t.crewDesk.liveQuotes] : []),
+    ...(crewId === ENDINGS.resident.crew
+      ? [t.crewDesk.injection(Math.min(game.progress.injections, ENDINGS.resident.injections), ENDINGS.resident.injections)]
+      : []),
     ...(crew.offshoreBonus ? [t.crewDesk.offshore(signedPercent(crew.offshoreBonus, 1))] : []),
     ...(crew.fleeBonus ? [t.crewDesk.flee(signedPercent(crew.fleeBonus, 0))] : []),
     ...(crew.forgeryBonus ? [t.crewDesk.forgery(signedPercent(crew.forgeryBonus, 0))] : []),

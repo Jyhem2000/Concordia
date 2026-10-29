@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { WANTED } from '../../data/balance.ts'
+import { ENDINGS, WANTED } from '../../data/balance.ts'
 import { LOTTERY } from '../../data/events.ts'
 import { CASSANDRE, FORGERY, KARMA, MORGUE, SERVICE_REQUIREMENTS, VELVET } from '../../data/locations.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
@@ -307,6 +307,9 @@ export function VelvetDesk() {
         <p className="font-bold">{d.vipTitle}</p>
         <p className="text-xs text-zinc-400">
           {d.vipRule(VELVET.vip.crates, multiplier(VELVET.vip.factor), VELVET.vip.failIccLoss, VELVET.vip.lockDays)}
+        </p>
+        <p className="text-xs text-amber-300">
+          {d.sponsor(Math.min(game.progress.vipOrders, ENDINGS.elite.sponsorOrders), ENDINGS.elite.sponsorOrders)}
         </p>
         <ul className="mt-1 space-y-1">
           {vip ? (

@@ -54,7 +54,8 @@ L'objectif change surtout les décisions de fin de partie et quelques contrainte
 | **Survivre** | Solder la dette au plus tôt, ne jamais risquer la Santé ni la garde à vue près du Jour 30. |
 | **Score maximal** | Tout pour le solde offshore à l'audit, sans condition de fin. |
 | **Baron** | Atteindre le seuil, puis sécuriser plutôt que maximiser. |
-| **Élite** | Score, plus le palier Or à l'audit : arbitre en permanence ICC contre marge. |
+| **Élite** | Score, plus un parrain au Velvet-Silo (commandes VIP) et le palier Or à l'audit : arbitre en permanence ICC contre marge. |
+| **Résident Réécrit** | Score, plus les injections du serveur par Glitch (tournées de nuit clandestines). Pas encore joué par un bot. |
 | **Saboteur** | Score, plus `[T4-06]` en soute et la nuit du Jour 30 à Rust Valley. |
 
 ### Bots de référence (hors matrice)
@@ -94,7 +95,7 @@ L'objectif change surtout les décisions de fin de partie et quelques contrainte
 * **Saboteur :** `[VEH-04]` et brouillage Tech, Tech favorisée.
 * **Objectifs de grande fin :** comme « score maximal », jusqu'au seuil de score de la fin visée (offshore et Cash-Puce).
   * **Baron, Élite :** une fois le seuil atteint, on sécurise : plus aucun illégal (risque accepté nul : livraisons et légal seulement), tout à l'abri offshore sauf le carburant.
-  * **Élite :** défend en plus un ICC de 5 points au-dessus du palier Or, comme le Citoyen modèle.
+  * **Élite :** défend en plus un ICC de 5 points au-dessus du palier Or, comme le Citoyen modèle, et sert les commandes VIP du Velvet-Silo quand il s'y trouve (parrain).
   * **Saboteur :** seuil atteint à partir du Jour 25, il se procure `[T4-06]` dans son district producteur, ne le vend jamais, reste à la Laverie, dépose tout le Jour 30, puis rejoint Rust Valley la dernière nuit (racket des milices, pas de fouille de la BRC).
 * **Campagne 3 :** chaque bot sur un grand nombre de graines ; le rapport compare l'écart-type du score entre graines à l'écart entre bots (écart-type des scores moyens), puis donne, pour chaque paire de bots, la part des graines où l'un fait mieux que l'autre : mêmes tirages, seul le jeu change. C'est la mesure qui dit si un choix compte partie par partie, et pas seulement en moyenne.
   3. tests par retrait (campagne 4), avant l'étape 2 si l'équilibrage des équipements l'exige ;
@@ -136,7 +137,7 @@ Cibles de départ, à recaler avec les premières mesures.
 | Contrôle | Le Novice atteint l'audit sans dette dans la majorité des parties. L'Aléatoire ne bloque jamais le moteur. |
 | 1 | Chaque plan bat le plan « Sans build » en score moyen pour au moins un tempérament. Aucun plan ne domine tous les autres à la fois en score moyen et en taux de survie. |
 | 1 | Le tempérament compte : pour un même plan, le casse-cou a un score plus dispersé et un taux de Game Over plus élevé que le prudent. |
-| 2 | Chaque grande fin est obtenue dans une part significative des parties qui la visent. Taux de réussite décroissant de Baron à Élite à Saboteur, taux de Game Over croissant dans le même ordre. |
+| 2 | Chaque grande fin est obtenue dans une part significative des parties qui la visent. Taux de réussite décroissant du Baron à l'Élite et au Résident Réécrit, puis au Saboteur ; taux de Game Over croissant dans le même ordre. |
 | 2 | La fin de partie reste tendue : la dette et l'audit pèsent encore dans les derniers jours. |
 | 3 | À graine égale (mêmes tirages), un choix meilleur en moyenne gagne au moins 60 % des parties départagées : l'Équilibré contre le Prudent, chaque plan équipé contre le Sans build. L'écart entre graines d'un même bot, lui, peut rester grand : c'est l'effet boule de neige d'un jeu de négoce. |
 | 4 | Chaque équipement, équipier et lieu spécial améliore le plan qui le vise ; un élément sans effet mesurable est à revoir. |

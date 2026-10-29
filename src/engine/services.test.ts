@@ -125,7 +125,10 @@ describe('Velvet-Silo', () => {
     const delivered = run({ ...ordered, cargo: [lot(vip.productId, VELVET.vip.crates)] }, { type: 'vipDeliver' })
     expect(delivered.vip).toBeNull()
     expect(delivered.cash).toBeGreaterThan(ordered.cash)
-    const missed = sleep(sleep({ ...ordered, districtId: 'D1' }))
+    // Parrainage de l'Élite : une commande livrée compte, une commande manquée en efface une
+    expect(delivered.progress.vipOrders).toBe(ordered.progress.vipOrders + 1)
+    const missed = sleep(sleep({ ...ordered, districtId: 'D1', progress: { ...ordered.progress, vipOrders: 2 } }))
+    expect(missed.progress.vipOrders).toBe(1)
     expect(missed.briefing?.vipFailed).toBe(true)
     expect(missed.velvetLock).toBe(missed.day + VELVET.vip.lockDays - 1)
     expect(missed.icc).toBeLessThan(ICC_MAX)

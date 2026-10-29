@@ -291,7 +291,9 @@ export function deliverVip(state: GameState): ServiceResult {
   if (error || !state.vip) return fail(error ?? 'no-contract')
   const { taken, remaining } = takeLots(state.cargo, state.vip.productId, VELVET.vip.crates)
   const total = taken.reduce((sum, lot) => sum + silverPrice(state, lot, VELVET.vip.factor) * lot.qty, 0)
-  return { ok: true, state: used({ ...state, cash: state.cash + total, cargo: remaining, vip: null }, 'vip') }
+  // Parrainage de l'Élite : chaque commande livrée compte
+  const progress = { ...state.progress, vipOrders: state.progress.vipOrders + 1 }
+  return { ok: true, state: used({ ...state, cash: state.cash + total, cargo: remaining, vip: null, progress }, 'vip') }
 }
 
 /** Échéance de la commande VIP dépassée à la routine : ICC perdu, Silo verrouillé (chap. 4) */
@@ -299,7 +301,17 @@ export function expireVip(state: GameState): { state: GameState; failed: boolean
   if (!state.vip || state.day <= state.vip.day + 1) return { state, failed: false }
   const locked = state.day + VELVET.vip.lockDays - 1
   return {
-    state: used({ ...state, vip: null, icc: Math.max(0, state.icc - VELVET.vip.failIccLoss), velvetLock: locked }, 'vip'),
+    // Le parrain n'aime pas attendre : une commande manquée en efface une
+    state: used(
+      {
+        ...state,
+        vip: null,
+        icc: Math.max(0, state.icc - VELVET.vip.failIccLoss),
+        velvetLock: locked,
+        progress: { ...state.progress, vipOrders: Math.max(0, state.progress.vipOrders - 1) },
+      },
+      'vip',
+    ),
     failed: true,
   }
 }

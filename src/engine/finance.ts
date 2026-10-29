@@ -37,9 +37,9 @@ export function nextDebtDeadline(state: GameState): number | null {
   return GAME_LENGTH_DAYS
 }
 
-/** Avance de survie qu'on peut encore emprunter à `[LOC-D1-1]` : rien une fois la dette initiale soldée */
+/** Avance de survie qu'on peut encore emprunter à `[LOC-D1-1]` : un total sur toute la partie */
 export function loanRoom(state: GameState): number {
-  return state.initialDebtPaid ? 0 : Math.max(0, SURVIVAL_ADVANCE - state.advanced)
+  return Math.max(0, SURVIVAL_ADVANCE - state.advanced)
 }
 
 // ─── Collecte de protection ───

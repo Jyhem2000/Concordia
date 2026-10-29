@@ -1,4 +1,4 @@
-import type { DistrictId, IccTier, NightProfile, ProductId } from '../engine/types.ts'
+import type { CrewId, DistrictId, IccTier, NightProfile, ProductId } from '../engine/types.ts'
 
 /*
  * Constantes globales d'équilibrage. Ce fichier fait foi ; chaque valeur cite le chapitre
@@ -52,14 +52,18 @@ export const AUDIT_COUNTDOWN_DAY = 28
 
 type EndingRules = {
   saboteur: { minScore: number; requiredProduct: ProductId; district: DistrictId }
-  elite: { minScore: number; iccTier: IccTier }
+  /** Résident Réécrit : injections du serveur par l'équipier, chacune une tournée de nuit hors mission */
+  resident: { minScore: number; injections: number; requiredProduct: ProductId; crew: CrewId }
+  /** Élite par cooptation : commandes VIP livrées au Velvet-Silo pour gagner un parrain, palier d'ICC à minuit */
+  elite: { minScore: number; iccTier: IccTier; sponsorOrders: number }
   mafia: { minScore: number }
 }
 
-/** Fins de partie (dette soldée), de la plus prestigieuse à la plus modeste : seuils de score offshore */
+/** Fins de partie (dette soldée), de la plus prestigieuse à la plus modeste : seuils de score offshore et conditions propres */
 export const ENDINGS: Readonly<EndingRules> = {
   saboteur: { minScore: 500_000, requiredProduct: 'T4-06', district: 'D4' },
-  elite: { minScore: 300_000, iccTier: 'gold' },
+  resident: { minScore: 300_000, injections: 3, requiredProduct: 'T4-06', crew: 'CREW-02' },
+  elite: { minScore: 300_000, iccTier: 'gold', sponsorOrders: 3 },
   mafia: { minScore: 150_000 },
 }
 

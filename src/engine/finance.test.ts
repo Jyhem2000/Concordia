@@ -36,10 +36,10 @@ describe('dette', () => {
     expect(nextDebtDeadline(gameAt(2, { debt: 0 }))).toBeNull()
   })
 
-  it("limite l'avance de survie, et ne prête plus une fois la dette initiale soldée", () => {
+  it("limite l'avance de survie à un total sur toute la partie, dette initiale soldée ou non", () => {
     expect(loanRoom(gameAt(2))).toBe(SURVIVAL_ADVANCE)
     expect(loanRoom(gameAt(2, { advanced: SURVIVAL_ADVANCE }))).toBe(0)
-    expect(loanRoom(gameAt(2, { initialDebtPaid: true, debt: 1_000 }))).toBe(0)
+    expect(loanRoom(gameAt(2, { initialDebtPaid: true, debt: 0 }))).toBe(SURVIVAL_ADVANCE)
   })
 })
 

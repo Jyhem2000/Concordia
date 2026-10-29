@@ -90,12 +90,12 @@ Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est 
 
 ### Dette mafieuse
 * **Créancier :** `[LOC-D1-1]`. **Solde unique :** la dette de départ, l'avance de survie et les reliquats (dépannage, collecte) s'ajoutent au même solde. **Départ :** [`balance.ts`](../src/data/balance.ts).
-* **Dette initiale soldée :** statut acquis **définitivement** la première fois que le solde atteint 0. Il ferme l'avance de survie et débloque la collecte de protection et la modale « Objectifs du Jour 30 ».
+* **Dette initiale soldée :** statut acquis **définitivement** la première fois que le solde atteint 0. Il débloque la collecte de protection et la modale « Objectifs du Jour 30 ».
 * **Taux :** un taux quotidien, arrondi au ₡ chaque matin (`DEBT_DAILY_RATE` dans [`balance.ts`](../src/data/balance.ts)) sur tout le solde, composés à chaque routine matinale (pas le Jour 1).
 * **Échéances :**
   * **Retard** (jour, taux majoré et malus de risque : `DEBT_LATE` dans [`balance.ts`](../src/data/balance.ts)) **:** à 06h00 du jour d'échéance, si la dette initiale n'a **jamais** été soldée, le taux est majoré et ses hommes de main renseignent patrouilles et milices : malus au risque d'interception partout (*embuscades*). Ces deux pénalités restent acquises jusqu'à la fin de la partie, même après remboursement.
   * **Jour 30, minuit :** audit — le solde doit être à 0 (chap. 2).
-* **Avance de survie :** tant que la dette initiale n'est pas soldée, Viktor avance au plus une somme fixe **sur toute la partie** (`SURVIVAL_ADVANCE` dans [`balance.ts`](../src/data/balance.ts)), ajoutée au solde au taux en vigueur. *Lore :* un débiteur à sec ne rembourse rien ; Viktor avance de quoi repartir, une fois. *Intention :* un joueur ruiné par un barrage n'est jamais bloqué sans issue, mais sa dette, et la menace de l'audit, grossissent. Les remboursements ne reconstituent pas l'avance.
+* **Avance de survie :** Viktor avance au plus une somme fixe **sur toute la partie**, dette initiale soldée ou non (`SURVIVAL_ADVANCE` dans [`balance.ts`](../src/data/balance.ts)), ajoutée au solde au taux en vigueur. *Lore :* un débiteur à sec ne rembourse rien ; Viktor avance de quoi repartir, une fois. *Intention :* un joueur ruiné par un barrage n'est jamais bloqué sans issue, mais sa dette, et la menace de l'audit, grossissent ; prise tard, elle remet une dette en jeu avant l'audit. Les remboursements ne reconstituent pas l'avance.
 * **Augmentée** par l'avance de survie, le dépannage d'urgence (chap. 2) et la collecte de protection ; **réduite** par les remboursements à `[LOC-D1-1]`.
 
 ### Collecte de protection
