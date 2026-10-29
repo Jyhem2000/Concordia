@@ -15,7 +15,7 @@
 | `[TAG-CULTURE]` | Culture | Cible idéologique : **risque ajouté × part culturelle** de la cargaison dans les districts à **délation idéologique** (chap. 4). Modificateur : `[EVT-D2-01]`. Interaction : `[LOC-D2-1]`. |
 | `[TAG-TECH]` | Tech | **risque ajouté × part Tech** de la cargaison dans les districts équipés de **scanners électromagnétiques** (chap. 4). Modificateurs : `[MOD-03]`, `[EVT-G03]`, `[EVT-D5-03]`. |
 | `[TAG-CHEMICAL]` | Chimique | **risque ajouté × part chimique** de la cargaison dans les districts équipés de **bio-scanners** (chap. 4). Modificateur : `[LOC-D3-1]`. **Largage offensif** en fuite : sacrifier 1 caisse crée un nuage aveuglant, chance de fuite en plus (`fleeDropBonus` dans [`tags.ts`](../src/data/tags.ts)). Interactions : `[EVT-D2-03]`, `[LOC-D2-1]`. |
-| `[TAG-FESTIVE]` | Festif | **Vente de nuit :** pendant le couvre-feu, se vend mieux (la vie nocturne réclame ses vices : produits addictifs, culture interdite, charcuterie). À l'**after du couvre-feu** (chap. 2), beaucoup mieux. Coefficients : `nightSale` dans [`tags.ts`](../src/data/tags.ts), `AFTER` dans [`balance.ts`](../src/data/balance.ts) (chap. 7). |
+| `[TAG-FESTIVE]` | Festif | **Vente de nuit :** pendant le couvre-feu, se vend mieux (la vie nocturne réclame ses vices : sodas et boissons énergisantes, alcool, cigares, musique interdite, charcuterie d'apéro, et la vraie viande du buffet). À l'**after du couvre-feu** (chap. 2), beaucoup mieux. Coefficients : `nightSale` dans [`tags.ts`](../src/data/tags.ts), `AFTER` dans [`balance.ts`](../src/data/balance.ts) (chap. 7). |
 | `[TAG-DIURNAL]` | Diurne | **Vente de nuit :** pendant le couvre-feu, se vend moins bien (excitants de bureau : leurs clients dorment). Coefficient : `nightSale` dans [`tags.ts`](../src/data/tags.ts). |
 | `[TAG-FLAMMABLE]` | Inflammable | **Explosion :** en cas d'échec de fuite (passage forcé chez les milices compris : c'est le véhicule qui part en tête-à-queue), chaque caisse **non masquée** peut exploser : caisse détruite, châssis endommagé (`explosion` dans [`tags.ts`](../src/data/tags.ts)). Les explosions ont lieu avant la sanction. **Largage offensif** en fuite : déverser / enflammer 1 caisse, chance de fuite en plus (`fleeDropBonus`). |
 
@@ -142,14 +142,14 @@ Stock par jour, quota de demande (chap. 7) et bonus de Forte demande de chaque t
 | ID | Nom |
 | :--- | :--- |
 | `[T4-01]` | Bœuf Wagyu de Kobé & Côtes Argentines |
-| `[T4-02]` | Malles d'Œuvres d'Art & Montres Suisses |
+| `[T4-02]` | Malles d'Œuvres d'Art du Monde d'Avant |
 | `[T4-03]` | Mallettes de Pass Biométriques « ICC-100% » |
 | `[T4-04]` | Glacières de « Placebo-Officiel » (Anti-Vaccin DSC) |
 | `[T4-05]` | Cuves de Cellules Souches « Jouvence » (Clonage) |
 | `[T4-06]` | Vieux Serveur Aeterna |
 
 * **[T4-01]** — L'élevage bovin est puni de rééducation à vie pour « Écocide Méthanier » : cette vraie viande vaut une fortune chez l'élite.
-* **[T4-02]** — Toiles de maîtres et chronographes sans puce : valeur refuge des élites, hors des Crédits périssables.
+* **[T4-02]** — Toiles de maîtres et sculptures d'avant la fermeture du mur, rayées des inventaires officiels : valeur refuge des élites, hors des Crédits périssables.
 * **[T4-03]** — Certificats administratifs vierges. Les bannis sans puce de `[D4]` s'en arrachent pour se refaire une identité. **Action joueur :** utiliser une mallette (consommée) restaure de l'ICC hors plafond (`iccRestore` dans [`products.ts`](../src/data/products.ts)), **1 seule fois par partie** (un double réenregistrement d'identité alerterait le noyau d'Aeterna).
 * **[T4-04]** — Sérum physiologique détourné de `[D3]`, qui valide le QR-code sanitaire sans injecter la molécule de docilité.
 * **[T4-05]** — Bioréacteurs de sang synthétique et greffons volés dans les cliniques de `[D3]`. Extrêmement sensibles aux chocs. Convoités par les gérontocrates en quête d'immortalité.

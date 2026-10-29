@@ -438,3 +438,36 @@ Le tirage parmi cinq districts décale à nouveau le générateur : on ne compar
 - **À surveiller :** la Couverture légale redevient le meilleur plan Équilibré (89 %, 103 000 ₡ de score moyen, contre 85 % et 68 000 ₡ en Sans build). Seul le Citoyen modèle, qui repose aussi sur la couverture en Tier 0, fait mieux (127 000 ₡).
 - **Fins visées** (Équilibré) : Baron 32 % en Couverture légale, Élite 7 % (Citoyen modèle), Résident 8 %, Saboteur 1 %, presque inchangées.
 - **Limite de la mesure :** la survie compte comme survivant un joueur ruiné à 0 ₡ (en Équilibré, 7 % des parties en Couverture légale, 12 % en Sans build).
+
+## Dernier lot d'équilibrage et gel
+Principe retenu : le but d'une partie est le score ; les grandes fins sont des accomplissements, et la prise de risque doit payer (critères 1 et 2 du chap. 9 récrits).
+
+**Changements :**
+- **Festif réduit aux produits de fête :** 7 produits au lieu de 12 (sodas, boissons énergisantes, vinyles, charcuterie, cigares, whisky, viande de buffet). Le coefficient hors after passe de ×1,5 à ×2 pour garder la nuit rentable.
+- **`[T4-02]` :** Malles d'Œuvres d'Art du Monde d'Avant (les montres sont retirées).
+- **Couverture du Légal divisée par deux.** Mesure à graine égale (Couverture légale, Équilibré, avant réglage) :
+
+  | Variante | Score moyen | Survie |
+  | :--- | ---: | ---: |
+  | Plan complet | 87 000 ₡ | 89 % |
+  | Sans la baisse de risque du Légal | 61 000 ₡ | 85 % |
+  | Sans le masquage de l'odeur | 70 000 ₡ | 85 % |
+  | Ni l'une ni l'autre | 49 000 ₡ | 79 % |
+  | Baisse de risque divisée par deux (retenue) | 77 000 ₡ | 86 % |
+
+  La dilution fait presque tout l'écart : VEH-02 et MOD-02 n'ajoutent que 7 000 à 12 000 ₡. Une couverture plus faible, ou nulle, pénalise aussi les livraisons du DSC de tous les plans sans changer le classement en Casse-cou.
+- **Propositions de nuit B et C écartées.**
+- **Essai sans suite :** un bot qui garde la moitié de son disponible en achetant son équipement ne change rien de mesurable ; annulé.
+
+**Campagne Plans** (score moyen Prudent / Équilibré / Casse-cou) :
+- Le Festif réduit a baissé tous les scores d'environ 10 000 ₡ en Équilibré (Sans build 68 000 → 59 000 ₡).
+- Tête : Citoyen modèle (25 / 90 / 234k), Couverture légale (23 / 85 / 186k). Aucun plan ne domine à la fois la survie et le score : la Nuit festive survit mieux (95 / 91 / 81 %).
+- **Le risque paie par le tempérament :** le Casse-cou gagne 2 à 3 fois plus que l'Équilibré, pour 5 à 10 points de survie en moins.
+- **Critère 1 non tenu pour quatre plans** (sous le Sans build pour tous les tempéraments) : Électronique, Saboteur, Rentier, Opportuniste. Les deux premiers ont `[MOD-03]` en commun, qui coûte 37 000 ₡ en Casse-cou à graine égale : c'est le seul défaut net qui reste. Rentier et Opportuniste sont à quelques milliers de crédits, dans le bruit.
+
+**Fins visées** (Équilibré) : Baron 26 %, Élite 5 %, Résident 8 %, Saboteur 0 % (accessible surtout en Casse-cou, conforme au critère 2).
+
+**Gel :** l'équilibrage s'arrête ici. Écarts assumés :
+- les builds qui réduisent le risque (couverture en Tier 0, ICC haut) restent les plus rentables, la témérité paie par le tempérament ;
+- `[MOD-03]` ne se rentabilise pas ;
+- le hasard des graines pèse plus que le choix du plan (écart entre graines 106 000 ₡, entre bots 38 000 ₡) : l'effet boule de neige d'un jeu de négoce.

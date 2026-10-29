@@ -968,7 +968,7 @@ export const fr = {
     'T3-06': { name: 'Cartes Graphiques Rétro (Sans Bride IA)' },
     'T3-07': { name: 'Clones Vocaux & Deepfakes sur Mesure' },
     'T4-01': { name: 'Bœuf Wagyu de Kobé & Côtes Argentines' },
-    'T4-02': { name: "Malles d'Œuvres d'Art & Montres Suisses" },
+    'T4-02': { name: "Malles d'Œuvres d'Art du Monde d'Avant" },
     'T4-03': { name: 'Mallettes de Pass Biométriques « ICC-100% »' },
     'T4-04': { name: 'Glacières de « Placebo-Officiel » (Anti-Vaccin DSC)' },
     'T4-05': { name: 'Cuves de Cellules Souches « Jouvence » (Clonage)' },

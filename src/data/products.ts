@@ -43,11 +43,11 @@ export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
     doping: { fleeBonus: 0.25, chassisLoss: 10, iccLoss: 5 },
     sleeplessNight: { healthLoss: 10, minHealth: 10 },
   },
-  'T2-06': { tier: 2, basePrice: 550, tags: ['TAG-CULTURE', 'TAG-TECH', 'TAG-FESTIVE'] },
+  'T2-06': { tier: 2, basePrice: 550, tags: ['TAG-CULTURE', 'TAG-TECH'] },
   'T2-07': { tier: 2, basePrice: 480, tags: ['TAG-FRAGILE', 'TAG-CHEMICAL'] },
 
   // Tier 3 : trafic lourd & « armes » gastronomiques
-  'T3-01': { tier: 3, basePrice: 1_200, tags: ['TAG-ODOROUS', 'TAG-PERISHABLE', 'TAG-FESTIVE'] },
+  'T3-01': { tier: 3, basePrice: 1_200, tags: ['TAG-ODOROUS', 'TAG-PERISHABLE'] },
   'T3-02': {
     tier: 3,
     basePrice: 1_500,
@@ -59,13 +59,13 @@ export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
     tags: ['TAG-FRAGILE', 'TAG-FLAMMABLE', 'TAG-ADDICTIVE', 'TAG-FESTIVE'],
   },
   'T3-04': { tier: 3, basePrice: 2_200, tags: ['TAG-CHEMICAL'] },
-  'T3-05': { tier: 3, basePrice: 1_600, tags: ['TAG-CULTURE', 'TAG-FESTIVE'] },
+  'T3-05': { tier: 3, basePrice: 1_600, tags: ['TAG-CULTURE'] },
   'T3-06': { tier: 3, basePrice: 2_500, tags: ['TAG-TECH', 'TAG-FRAGILE'] },
-  'T3-07': { tier: 3, basePrice: 3_200, tags: ['TAG-TECH', 'TAG-CULTURE', 'TAG-FESTIVE'] },
+  'T3-07': { tier: 3, basePrice: 3_200, tags: ['TAG-TECH', 'TAG-CULTURE'] },
 
   // Tier 4 : ennemis publics n°1
   'T4-01': { tier: 4, basePrice: 6_000, tags: ['TAG-PERISHABLE', 'TAG-ODOROUS', 'TAG-FESTIVE'] },
-  'T4-02': { tier: 4, basePrice: 8_500, tags: ['TAG-CULTURE', 'TAG-FRAGILE', 'TAG-FESTIVE'] },
+  'T4-02': { tier: 4, basePrice: 8_500, tags: ['TAG-CULTURE', 'TAG-FRAGILE'] },
   'T4-03': { tier: 4, basePrice: 12_000, tags: ['TAG-TECH'], iccRestore: 25 },
   'T4-04': { tier: 4, basePrice: 15_000, tags: ['TAG-CHEMICAL', 'TAG-FRAGILE'] },
   'T4-05': { tier: 4, basePrice: 18_000, tags: ['TAG-CHEMICAL', 'TAG-FRAGILE'] },

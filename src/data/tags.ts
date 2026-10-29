@@ -6,7 +6,7 @@ import type { Tag, TagId } from '../engine/types.ts'
  */
 
 export const TAGS: Readonly<Record<TagId, Tag>> = {
-  'TAG-LEGAL': { cover: 0.2 },
+  'TAG-LEGAL': { cover: 0.1 },
   'TAG-PERISHABLE': { perishable: true },
   'TAG-FRAGILE': { breakage: { fleeChance: 0.3, shockChance: 0.1, shockThreshold: 10 } },
   'TAG-ADDICTIVE': {},
@@ -16,6 +16,6 @@ export const TAGS: Readonly<Record<TagId, Tag>> = {
   'TAG-CHEMICAL': { detectedRisk: 0.25, fleeDropBonus: 0.15 },
   'TAG-FLAMMABLE': { explosion: { chance: 0.25, chassisLoss: 15 }, fleeDropBonus: 0.2 },
   // Vente pendant le couvre-feu (chap. 7) : la vie nocturne réclame ses vices ; les excitants de bureau, eux, attendent le matin
-  'TAG-FESTIVE': { nightSale: 1.5 },
+  'TAG-FESTIVE': { nightSale: 2 },
   'TAG-DIURNAL': { nightSale: 0.8 },
 }

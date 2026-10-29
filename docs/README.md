@@ -56,7 +56,7 @@ Les docs décrivent le jeu complet ; tout n'est pas encore en jeu. Ce tableau di
 | 6 | Risque, Fiche S, barrage fixe et contrôle volant, toutes les options et modes d'éjection, garde à vue, bonus des véhicules, modules et équipiers | — |
 | 7 | Boutique, cours et tendance, quotas, prix de vente, paiement en nature, dette, avance de survie, collecte, compte offshore, flux et bonus de `[CREW-02]`, bonus d'influence de `[LOC-D2-1]` | — |
 | 8 | Événements globaux et locaux, rumeurs, contrecoups, Loterie (faux dossiers compris), aléas routiers, prédictions de Cassandre-88 | — |
-| 9 | Moteur de simulation, invariants, Novice, Aléatoire, marchand (12 plans × 3 tempéraments, lieux spéciaux, commande VIP), objectifs de grande fin ; campagnes Contrôle, 1 à 4 (`sim/reports/`) | Spéculation sur l'événement de demain (Cassandre-88, rumeur), faux dossier de Loterie, optimiseur et campagne 5 |
+| 9 | Moteur de simulation, invariants, Novice, Aléatoire, marchand (12 plans × 3 tempéraments, lieux spéciaux, commande VIP), objectifs de grande fin ; campagnes Contrôle, 1 à 4 (`sim/reports/`) ; équilibrage gelé | Spéculation sur l'événement de demain (Cassandre-88, rumeur), faux dossier de Loterie, optimiseur et campagne 5 (reportés après l'habillage) |
 | 10 | Bandeau, téléscripteur, marché et fiche produit, carte, lieux, soir, briefing, barrage, aléa routier, objectifs | Vue véhicule et soute (dont le choix du contenu du double fond), filtres du marché, dégradation de l'interface selon l'ICC, manuel en jeu |
 
 ## Propositions en cours
@@ -64,11 +64,11 @@ Analyses de conception pas encore tranchées ; les règles retenues rejoindront 
 * [Mini-progression : débloquer les mécaniques au fil de la partie](propositions/progression.md)
 * [Mécaniques à simplifier](propositions/simplification.md) : premier lot adopté (inflation, Laverie, rachat, Hachoir de Viktor, tabassage, emprunt tactique), le reste ouvert
 * [Deux chemins vers Olympus-Green](propositions/fins-olympus.md) : adopté (Élite par cooptation, Résident Réécrit), assoupli après remesure
-* [Des nuits qui demandent un choix](propositions/nuits.md) : afters du couvre-feu adoptées ; écrémage des caisses scellées et deux ordres de mission ouverts
+* [Des nuits qui demandent un choix](propositions/nuits.md) : afters du couvre-feu adoptées ; écrémage des caisses scellées et deux ordres de mission écartés
 
 ## Feuille de route
 Étapes restantes, dans l'ordre des dépendances :
-1. **Simulations** — campagnes du chap. 9 sur le jeu complet, sans interface, puis équilibrage. L'équilibrage peut changer des règles : l'habillage et le manuel viennent après.
+1. ~~**Simulations**~~ — campagnes Contrôle et 1 à 4 menées sur le jeu complet ; **équilibrage gelé le 29/10/2026**. Les écarts restants sont assumés et listés dans [`sim/reports/analyse-etape-2.md`](../sim/reports/analyse-etape-2.md). L'optimiseur (campagne 5) est reporté après l'habillage, comme contrôle final.
 2. **Habillage et manuel du jeu** — interface restante (chap. 10), manuel du joueur en jeu, et refonte des docs à cette occasion : répartir le contenu de `07-economie.md` (marché, vente, argent) dans les autres chapitres, renommer et renuméroter les fichiers, puis mettre à jour par script tous les renvois « chap. N » (docs et commentaires du code).
 
 ## Règles de rédaction

@@ -138,9 +138,9 @@ Cibles de départ, à recaler avec les premières mesures.
 | Campagne | Critère |
 | :--- | :--- |
 | Contrôle | Le Novice atteint l'audit sans dette dans la majorité des parties. L'Aléatoire ne bloque jamais le moteur. |
-| 1 | Chaque plan bat le plan « Sans build » en score moyen pour au moins un tempérament. Aucun plan ne domine tous les autres à la fois en score moyen et en taux de survie. |
+| 1 | Chaque plan bat le plan « Sans build » en score moyen pour au moins un tempérament. Aucun plan ne domine tous les autres à la fois en score moyen et en taux de survie. La prise de risque paie : un build qui réduit le risque ne rapporte pas aussi le plus. |
 | 1 | Le tempérament compte : pour un même plan, le casse-cou a un score plus dispersé et un taux de Game Over plus élevé que le prudent. |
-| 2 | Chaque grande fin est obtenue dans une part significative des parties qui la visent. Taux de réussite décroissant du Baron à l'Élite et au Résident Réécrit, puis au Saboteur ; taux de Game Over croissant dans le même ordre. |
+| 2 | Le but de chaque partie est le score : les grandes fins sont des accomplissements, pas des objectifs imposés. Chacune reste atteignable par qui la vise (quelques parties sur cent), du Baron, le plus courant, au Saboteur, le plus rare. Le Saboteur récompense la prise de risque : il s'obtient surtout en Casse-cou. |
 | 2 | La fin de partie reste tendue : la dette et l'audit pèsent encore dans les derniers jours. |
 | 3 | À graine égale (mêmes tirages), un choix meilleur en moyenne gagne au moins 60 % des parties départagées : l'Équilibré contre le Prudent, chaque plan équipé contre le Sans build. L'écart entre graines d'un même bot, lui, peut rester grand : c'est l'effet boule de neige d'un jeu de négoce. |
 | 4 | Chaque équipement, équipier et lieu spécial améliore le plan qui le vise ; un élément sans effet mesurable est à revoir. |

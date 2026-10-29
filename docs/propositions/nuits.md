@@ -1,6 +1,8 @@
 # Proposition — Des nuits qui demandent un choix
 
-> **A adopté le 29/10/2026** : écrit dans les chap. 2, 7, 9 et 10, et dans le code (`AFTER`). Simplification : pas de quota propre à l'after, la demande restante du district suffit. Ensuite : profil nuit devenu tags (`[TAG-FESTIVE]`, `[TAG-DIURNAL]`), after aussi à Panacea `[D3]`. B et C restent ouverts.
+> **A adopté le 29/10/2026** : écrit dans les chap. 2, 7, 9 et 10, et dans le code (`AFTER`). Simplification : pas de quota propre à l'after, la demande restante du district suffit. Ensuite : profil nuit devenu tags (`[TAG-FESTIVE]`, `[TAG-DIURNAL]`), after aussi à Panacea `[D3]`, Festif réduit aux produits de fête (sodas, boissons énergisantes, alcool, cigares, vinyles, charcuterie, viande de buffet).
+>
+> **B et C écartés le 29/10/2026.** B : ouvrir une caisse scellée coûte de la confiance du DSC et des missions de nuit, pour un produit de Tier 2 ou 3 qui rapporte peu ; personne ne le ferait. C : deux ordres au choix facilitent le marché au lieu de forcer un choix. Les afters suffisent à rendre la nuit intéressante.
 
 ## Constat
 Aujourd'hui, la nuit se résume à trois règles :
