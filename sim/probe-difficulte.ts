@@ -21,28 +21,29 @@ const k = (x: number) => `${Math.round(x / 1000)}k`
 const mode = process.argv[2]
 
 if (mode === 'fins') {
-  type Variant = { label: string; mafia: number; elite: number; saboteur: number }
+  type Variant = { label: string; mafia: number; elite: number; resident: number; saboteur: number }
   const variants: Variant[] = [
-    { label: 'actuel 200k / 500k / 1M', mafia: 200_000, elite: 500_000, saboteur: 1_000_000 },
-    { label: '150k / 300k / 500k', mafia: 150_000, elite: 300_000, saboteur: 500_000 },
-    { label: '150k / 250k / 400k', mafia: 150_000, elite: 250_000, saboteur: 400_000 },
-    { label: '100k / 200k / 300k', mafia: 100_000, elite: 200_000, saboteur: 300_000 },
+    { label: 'actuel 150k / 300k / 300k / 500k', mafia: 150_000, elite: 300_000, resident: 300_000, saboteur: 500_000 },
+    { label: '150k / 200k / 200k / 300k', mafia: 150_000, elite: 200_000, resident: 200_000, saboteur: 300_000 },
+    { label: '150k / 150k / 150k / 250k', mafia: 150_000, elite: 150_000, resident: 150_000, saboteur: 250_000 },
   ]
   const bots: { planName: string; objective: Objective }[] = [
     { planName: 'Couverture légale', objective: 'mafia' },
     { planName: 'Citoyen modèle', objective: 'elite' },
+    { planName: 'Fuite au sommet', objective: 'resident' },
     { planName: 'Saboteur', objective: 'saboteur' },
   ]
   for (const v of variants) {
     Object.assign(ENDINGS.mafia, { minScore: v.mafia })
     Object.assign(ENDINGS.elite, { minScore: v.elite })
+    Object.assign(ENDINGS.resident, { minScore: v.resident })
     Object.assign(ENDINGS.saboteur, { minScore: v.saboteur })
-    console.log(`— ${v.label}`)
+    console.log(`— ${v.label} (Baron / Élite / Résident / Saboteur)`)
     for (const b of bots) {
       for (const t of [balanced, bold]) {
         const r = run(b.planName, t, b.objective)
         console.log(
-          `  ${`${b.planName} · ${t.name} · ${b.objective}`.padEnd(38)} visée ${pct(r, (g) => g.ending === b.objective).padStart(5)} · survie ${pct(r, (g) => !g.defeat)} · score moyen ${k(r.reduce((a, g) => a + g.score, 0) / n)}`,
+          `  ${`${b.planName} · ${t.name} · ${b.objective}`.padEnd(38)} visée ${pct(r, (g) => g.ending === b.objective).padStart(5)} · survie ${pct(r, (g) => !g.defeat)} · exécution ${pct(r, (g) => g.ending === 'execution')} · score moyen ${k(r.reduce((a, g) => a + g.score, 0) / n)}`,
         )
       }
     }

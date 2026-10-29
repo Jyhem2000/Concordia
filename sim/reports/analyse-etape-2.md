@@ -256,3 +256,47 @@ Premier lot de `docs/propositions/simplification.md`, sans campagne :
 - Hachoir de Viktor (effet nul mesuré), tabassage du Jour 10 (presque jamais déclenché) et emprunt tactique (jamais utilisé) retirés.
 
 À vérifier à la prochaine campagne : survie des trois tempéraments (les coûts du début montent de ×1 à ×1,5), et score moyen (la fin de partie coûte moins cher qu'avec l'indice à ×2,9).
+
+## Remesure après simplifications et nouvelles fins
+Campagnes Contrôle et 1 à 4 sur le jeu simplifié : amendes ×2, coûts fixes (×1,5, plus d'inflation), commission de la Laverie au retrait, sans hachoir, tabassage ni emprunt tactique, avance de survie toute la partie, fins Résident Réécrit et Élite par cooptation, bots Élite, Résident et Saboteur réécrits.
+
+**Difficulté** (campagne 1, survie par tempérament, tous plans) :
+
+| Tempérament | Nuit repensée | Maintenant |
+| :--- | :--- | :--- |
+| Prudent | 87 à 96 % | 86 à 91 % |
+| Équilibré | 85 à 89 % | 76 à 90 % |
+| Casse-cou | 73 à 83 % | 72 à 82 % |
+
+- Le jeu est un peu plus dur, surtout en score : le Sans build Équilibré passe de 75 000 à 69 000 ₡, le Casse-cou de 140 000 à 132 000 ₡ (et de 80 à 76 % de survie).
+- L'ordre des tempéraments tient pour presque tous les plans. Deux exceptions, la Nuit festive et la Fuite au sommet, où l'Équilibré survit un peu mieux que le Prudent (écarts de 2 et 3 points).
+- **Les plans à couverture légale perdent le plus** : la Couverture légale Équilibré passe de 85 à 78 % de survie et de 106 000 à 85 000 ₡, le Citoyen modèle de 87 à 76 %. La campagne 4 le confirme : la dilution en Tier 0 coûte 8 points de survie (± 5). Hypothèse : les places de soute réservées au Tier 0 dès le Jour 1 ralentissent le remboursement de la dette, alors que le début de partie coûte plus cher (×1,5 au lieu de ×1). C'est un réglage du bot (couverture dès le départ) plus qu'une règle : à vérifier en ne couvrant qu'après la dette.
+- Le Novice survit à 90 % (critère du contrôle tenu).
+
+**À graine égale :** la Couverture légale ne bat plus le Prudent que sur 59 % des parties (66 % avant), juste sous le critère de 60 %, pour la même raison.
+
+**Campagne 4 :**
+- l'avance de survie reste le premier filet (+14 points de survie) ;
+- `[MOD-07]` devient positif (+3 points, +7 900 ₡) ;
+- restent négatifs en score `[MOD-01]`, `[MOD-04]` et `[MOD-06]` (plan Nuit festive, piège de mesure déjà décrit) et `[MOD-09]` ;
+- Karma-Cham redevient neutre (−3 000 ₡ ± 4 500) avec le coût fixe ;
+- le laissez-passer de la Morgue est neutre.
+
+**Grandes fins** (campagne 2, Équilibré) :
+- Baron 13 à 29 %, Élite 0 %, Résident 0 % (9 à 11 % d'exécutions), Saboteur 0 à 1 %.
+- Les bots Résident complètent souvent leurs injections, mais finissent sous le seuil de score : l'Équilibré fait en moyenne 50 000 à 90 000 ₡, et son p90 dépasse à peine 250 000 ₡.
+- L'Élite ne gagne presque jamais son parrain : trois commandes VIP livrées, avec un produit tiré au hasard et un jour pour le livrer, c'est rare même en allant le chercher la nuit.
+
+**Sonde des seuils** (`sim/probe-difficulte.ts fins`, 200 parties par ligne, fin visée atteinte, Équilibré / Casse-cou) :
+
+| Seuils (Baron / Élite / Résident / Saboteur) | Baron | Élite | Résident | Saboteur |
+| :--- | :--- | :--- | :--- | :--- |
+| 150k / 300k / 300k / 500k (actuels) | 29 / 50 % | 0 / 0 % | 0 / 7 % | 1 / 4 % |
+| 150k / 200k / 200k / 300k | 29 / 50 % | 0 / 1 % | 3 / 8 % | 1 / 5 % |
+| 150k / 150k / 150k / 250k | 29 / 50 % | 0 / 1 % | 5 / 5 % | 1 / 4 % |
+
+- **Baisser les seuils ne suffit pas :** chaque fin de prestige bute sur sa condition propre, pas sur le score.
+  - **Élite :** le parrain (trois commandes VIP livrées, un jour de délai, produit tiré au hasard).
+  - **Résident :** le temps passé à chercher le serveur et à l'injecter coûte du score (40 000 ₡ en moyenne en Équilibré, contre 60 000 pour le même plan en score), et 9 à 12 % des parties finissent exécutées.
+  - **Saboteur :** le serveur apparaît rarement en stock (une chance sur 0,15 par jour, dans un seul district).
+- **Critère 2 non tenu** pour les trois fins de prestige. Leviers à trancher : les conditions propres (nombre de commandes, délai VIP, nombre d'injections, apparition du serveur) avant les seuils.

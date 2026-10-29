@@ -36,11 +36,12 @@ export const CAMPAIGNS: Readonly<Record<string, Campaign>> = {
   fins: {
     title: 'Campagne 2 — Atteignabilité des grandes fins',
     notes: [
-      'Pour chaque grande fin, les plans qui la visent naturellement, tempérament équilibré, objectif de la fin : sécuriser une fois le seuil atteint (Baron, Élite), défendre l’ICC au palier Or (Élite), se procurer [T4-06] et rejoindre Rust Valley la dernière nuit (Saboteur).',
+      'Pour chaque grande fin, les plans qui la visent naturellement, tempérament équilibré, objectif de la fin : sécuriser une fois le seuil atteint (Baron, Élite), défendre l’ICC au palier Or et servir les commandes VIP du parrain (Élite), engager Glitch, se procurer [T4-06] et l’injecter en tournées de nuit (Résident), se procurer [T4-06] et rejoindre Rust Valley (Saboteur).',
     ],
     bots: [
       ...['Couverture légale', 'Haut tier', 'Rentier'].map((name) => () => traderBot(plan(name), balanced, 'mafia')),
       ...['Citoyen modèle', 'Couverture légale', 'Rentier'].map((name) => () => traderBot(plan(name), balanced, 'elite')),
+      ...['Fuite au sommet', 'Rentier'].map((name) => () => traderBot(plan(name), balanced, 'resident')),
       ...['Saboteur', 'Haut tier'].map((name) => () => traderBot(plan(name), balanced, 'saboteur')),
     ],
   },

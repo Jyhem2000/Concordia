@@ -12,7 +12,7 @@ import {
   SURVIVAL_ADVANCE,
 } from '../../src/data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../src/data/districts.ts'
-import { KARMA, LOCATIONS, VELVET } from '../../src/data/locations.ts'
+import { KARMA, LOCATIONS, SERVICE_REQUIREMENTS, VELVET } from '../../src/data/locations.ts'
 import { ROAD_EVENTS } from '../../src/data/events.ts'
 import { PRODUCT_IDS, PRODUCTS, SEALED_PRODUCT } from '../../src/data/products.ts'
 import { CREW, MODULES, VEHICLES } from '../../src/data/vehicles.ts'
@@ -34,13 +34,14 @@ import {
   fineAmount,
   fleeConsequences,
   hiddenCargo,
+  isLethalSearch,
   minimumOffer,
   searchSanction,
   toll,
 } from '../../src/engine/interception.ts'
 import { demandQuota, lastSeen, normalQuote, productStatus, quote, saleQuote, shopProducts, unitSaleBreakdown } from '../../src/engine/market.ts'
 import { checkDelivery, deliveryCrates, deliveryFee, deliveryOffer } from '../../src/engine/delivery.ts'
-import { checkMission, missionOffer } from '../../src/engine/night.ts'
+import { canInject, checkMission, missionOffer } from '../../src/engine/night.ts'
 import { checkRoadChoice } from '../../src/engine/road.ts'
 import {
   blackmailCost,
@@ -54,6 +55,7 @@ import {
   morgueCost,
   vipValue,
 } from '../../src/engine/services.ts'
+import { meets } from '../../src/engine/progress.ts'
 import { risk } from '../../src/engine/risk.ts'
 import type {
   CargoLot,
@@ -97,6 +99,12 @@ export type Plan = {
   places?: readonly PlaceUse[]
   /** Tournées de nuit au moins quand la soute le justifie, quel que soit le tempérament (suspensions, profil festif) */
   nightOwl?: boolean
+  /** Chasse au serveur en cours (Résident) : passer par son district producteur pour le trouver en stock */
+  huntsServer?: boolean
+  /** Parrain à gagner (Élite) : passer au Velvet-Silo demander une commande VIP */
+  seeksSponsor?: boolean
+  /** Commande VIP en cours à honorer (Élite) : aller chercher le produit là où il est produit, de jour comme de nuit */
+  vipErrand?: boolean
   /** Fuite préférée à espérance égale (pare-buffles, brouilleur, transpondeur) */
   runner?: boolean
   /** ICC à défendre : certificat et chantage sous ce seuil, pertes d'ICC pesées plus lourd au barrage */
@@ -125,19 +133,33 @@ export type Temperament = {
   boldness: number
 }
 
-/** Objectif (chap. 9, axe 3) : survivre, score maximal, ou une grande fin (Baron, Élite, Saboteur) */
-export type Objective = 'score' | 'survive' | 'mafia' | 'elite' | 'saboteur'
+/** Objectif (chap. 9, axe 3) : survivre, score maximal, ou une grande fin (Baron, Élite, Résident Réécrit, Saboteur) */
+export type Objective = 'score' | 'survive' | 'mafia' | 'elite' | 'resident' | 'saboteur'
 
-const OBJECTIVE_NAMES: Record<Objective, string> = { score: 'score', survive: 'survie', mafia: 'Baron', elite: 'Élite', saboteur: 'Saboteur' }
+const OBJECTIVE_NAMES: Record<Objective, string> = {
+  score: 'score',
+  survive: 'survie',
+  mafia: 'Baron',
+  elite: 'Élite',
+  resident: 'Résident',
+  saboteur: 'Saboteur',
+}
 
 /** Élite : ICC défendu avec une marge au-dessus du palier Or */
 const ELITE_ICC_MARGIN = 5
 
-/** Saboteur : à partir de ce jour, score assuré, il part chercher le serveur */
-const SABOTEUR_HUNT_DAY = 25
+/** Saboteur : à partir de ce jour, score assuré, il part chercher le serveur (rare : il faut du temps pour le trouver en stock) */
+const SABOTEUR_HUNT_DAY = 20
+
+/** Résident : à partir de ce jour, Glitch engagée, il part chercher le serveur pour les injections */
+const RESIDENT_HUNT_DAY = 8
+
+/** Le serveur des fins Saboteur et Résident, et son district producteur */
+const SERVER = ENDINGS.saboteur.requiredProduct
+const SERVER_PRODUCER = DISTRICT_IDS.find((id) => DISTRICTS[id].production.includes(SERVER)) ?? 'D5'
 
 /** Valeurs de référence pour comparer des pertes de nature différente (₡ de base) */
-const VALUE = { custodyDay: 1_200, iccPoint: 60, healthPoint: 40, wantedLevel: 400, chassisPoint: 40, trustDelivery: 1_500 }
+const VALUE = { custodyDay: 1_200, iccPoint: 60, healthPoint: 40, wantedLevel: 400, chassisPoint: 40, trustDelivery: 1_500, sponsorVisit: 3_000 }
 
 /** Marge minimale espérée pour acheter, en part du prix d'achat */
 const MIN_MARGIN = 0.15
@@ -160,7 +182,7 @@ export function traderBot(plan: Plan, temperament: Temperament, objective: Objec
 
 /** Score que vise l'objectif : le seuil de sa fin, ou rien */
 function targetScore(objective: Objective): number | null {
-  return objective === 'mafia' || objective === 'elite' || objective === 'saboteur' ? ENDINGS[objective].minScore : null
+  return objective === 'mafia' || objective === 'elite' || objective === 'resident' || objective === 'saboteur' ? ENDINGS[objective].minScore : null
 }
 
 /** Seuil atteint : l'argent (offshore et Cash-Puce) couvre le score de la fin visée */
@@ -176,34 +198,94 @@ function goalPlan(plan: Plan, objective: Objective): Plan {
   return { ...plan, places: [...(plan.places ?? DEFAULT_PLACES), 'certificate', 'blackmail', 'vip'], iccFloor: gold + ELITE_ICC_MARGIN }
 }
 
-/** Seuil atteint : on sécurise plutôt que maximiser, plus aucun illégal (livraisons et légal seulement) */
+/** Seuil atteint : on sécurise plutôt que maximiser, plus aucun illégal (livraisons et légal seulement) ; le Résident, une fois la greffe complète */
 function goalTemperament(view: GameState, temperament: Temperament, objective: Objective): Temperament {
-  return secured(view, objective) && objective !== 'saboteur' ? { ...temperament, maxRisk: 0, night: 'mission' } : temperament
+  if (objective === 'saboteur' || !secured(view, objective)) return temperament
+  if (objective === 'resident' && view.progress.injections < ENDINGS.resident.injections) return temperament
+  if (objective === 'elite' && view.progress.vipOrders < ENDINGS.elite.sponsorOrders) return temperament
+  return { ...temperament, maxRisk: 0, night: 'mission' }
 }
 
-/** Saboteur assuré en fin de partie : le serveur [T4-06] à se procurer puis à porter à Rust Valley à minuit */
-function saboteurHunt(view: GameState, objective: Objective): boolean {
-  return objective === 'saboteur' && view.day >= SABOTEUR_HUNT_DAY && secured(view, objective)
+/**
+ * Le serveur que l'objectif doit garder ou se procurer : Saboteur (score assuré, fin de partie, jusqu'à Rust Valley),
+ * Résident (Glitch engagée, tant que l'injection n'est pas complète)
+ */
+function serverHunt(view: GameState, objective: Objective): boolean {
+  if (objective === 'saboteur') return view.day >= SABOTEUR_HUNT_DAY && secured(view, objective)
+  if (objective === 'resident') {
+    const { crew, injections } = ENDINGS.resident
+    return view.day >= RESIDENT_HUNT_DAY && view.crew.active === crew && view.progress.injections < injections
+  }
+  return false
 }
 
-/** Saboteur : acheter le serveur là où il apparaît, puis rejoindre Rust Valley la nuit du dernier jour (racket, pas de fouille) */
-function sabotage(view: GameState): Action | null {
-  const { requiredProduct: server, district: harbor } = ENDINGS.saboteur
-  const owned = ownedQty(view.cargo, server) > 0
-  const producer = DISTRICT_IDS.find((id) => DISTRICTS[id].production.includes(server)) ?? 'D5'
+/** Élite sans parrain, Velvet-Silo ouvert et pas de commande en cours : il faut aller en demander une */
+function seeksSponsor(view: GameState, objective: Objective): boolean {
+  return objective === 'elite' && view.progress.vipOrders < ENDINGS.elite.sponsorOrders && !view.vip && meets(view, SERVICE_REQUIREMENTS.vip)
+}
+
+/** Élite avec une commande VIP en cours et pas encore les caisses : le parrain n'attend que jusqu'au lendemain */
+function vipErrand(view: GameState, objective: Objective): boolean {
+  return objective === 'elite' && view.vip !== null && ownedQty(view.cargo, view.vip.productId) < VELVET.vip.crates
+}
+
+/** Cash-Puce gardé pour la chasse : le prix du serveur tant qu'il n'est pas à bord, puis le péage des milices et la collecte */
+function huntReserve(view: GameState, objective: Objective): number {
+  if (!serverHunt(view, objective)) return 0
+  const value = PRODUCTS[SERVER].basePrice
+  return ownedQty(view.cargo, SERVER) > 0 ? value * 0.3 : value * 1.5
+}
+
+/** Un trajet vers ce district, s'il reste un trajet dans la phase, carburant compris */
+function travelTo(view: GameState, to: DistrictId): Action | null {
+  const left = view.phase === 'night' ? !view.nightTripDone : !view.dayTripDone && !view.dayOver
+  if (!left || view.districtId === to) return null
+  const trip = planTravel(view, to)
+  if (trip.error === 'not-enough-fuel') return refuelFor(view, trip.fuelCost)
+  return trip.error ? null : { type: 'travel', to }
+}
+
+/**
+ * Chasse au serveur : l'acheter quand il est en stock dans son district producteur. Saboteur : l'y attendre, puis rejoindre
+ * Rust Valley (racket, pas de fouille) et y rester jusqu'à l'audit. Résident : continuer de commercer en passant par le
+ * district producteur ; null une fois le serveur à bord, les injections se font en tournée de nuit.
+ */
+function serverMove(view: GameState, objective: Objective): Action | null {
+  const owned = ownedQty(view.cargo, SERVER) > 0
   if (!owned) {
-    if (view.districtId === producer && view.phase === 'day' && !view.dayOver && maxBuy(view, server) > 0)
-      return { type: 'buy', productId: server, qty: 1 }
-    return null
+    if (view.districtId === SERVER_PRODUCER && view.phase === 'day' && !view.dayOver && maxBuy(view, SERVER) > 0)
+      return { type: 'buy', productId: SERVER, qty: 1 }
+    // Le Résident continue de commercer en passant par le district producteur ; le Saboteur, score assuré, l'attend sur place
+    if (objective === 'resident') return null
+    return view.districtId !== SERVER_PRODUCER ? (travelTo(view, SERVER_PRODUCER) ?? { type: 'sleep' }) : { type: 'sleep' }
   }
-  const lastNight = view.day === GAME_LENGTH_DAYS && view.phase === 'night'
-  if (lastNight && view.districtId !== harbor && !view.nightTripDone) {
-    const trip = planTravel(view, harbor)
-    if (trip.error === 'not-enough-fuel') return refuelFor(view, trip.fuelCost)
-    if (!trip.error) return { type: 'travel', to: harbor }
-  }
-  if (view.day === GAME_LENGTH_DAYS && view.phase === 'day' && view.dayOver && !checkForceCurfew(view)) return { type: 'forceCurfew' }
+  if (objective === 'saboteur') return travelTo(view, ENDINGS.saboteur.district) ?? { type: 'sleep' }
   return null
+}
+
+/** Injections du Résident : soute couverte de Tier 0 le jour, tournée clandestine le soir vers le district le moins exposé */
+function injectionMove(view: GameState): Action {
+  if (view.phase === 'night') {
+    const room = !view.nightTripDone
+    // La fouille tue : le racket des milices (sans fouille) vaut mieux qu'un barrage, s'il reste de quoi payer le péage
+    const exposure = (to: DistrictId) => (DISTRICTS[to].offGrid ? (view.cash >= toll(view) * 1.5 ? 0 : 1) : risk(view, to, { includePatrol: false }))
+    const reachable = (id: DistrictId) => {
+      const error = planTravel(view, id).error
+      return !error || error === 'not-enough-fuel'
+    }
+    const targets = room ? DISTRICT_IDS.filter((id) => id !== view.districtId && reachable(id)) : []
+    const safest = targets.sort((a, b) => exposure(a) - exposure(b))[0]
+    return (safest && travelTo(view, safest)) || { type: 'sleep' }
+  }
+  if (!view.dayOver) {
+    // Plein fait de jour : la nuit, la pompe officielle peut être fermée
+    const refuel = refuelFor(view, VEHICLES[view.vehicleId].tank)
+    if (refuel) return refuel
+    const free = VEHICLES[view.vehicleId].cargo - cargoUsed(view.cargo)
+    const cover = Math.min(free, maxBuy(view, 'T0-01'))
+    if (cover > 0) return { type: 'buy', productId: 'T0-01', qty: cover }
+  }
+  return checkForceCurfew(view) ? { type: 'sleep' } : { type: 'forceCurfew' }
 }
 
 function decide(view: GameState, plan: Plan, temperament: Temperament, objective: Objective): Action {
@@ -216,7 +298,7 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
   const tripLeft = night ? !view.nightTripDone : !view.dayTripDone && !view.dayOver
   const endgame = view.day >= ENDGAME_DAY
 
-  const hunt = saboteurHunt(view, objective)
+  const hunt = serverHunt(view, objective)
   const sale = sell(view, endgame, hunt)
   if (sale) return sale
 
@@ -226,8 +308,10 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
   }
 
   if (hunt) {
-    const move = sabotage(view)
+    const move = serverMove(view, objective)
     if (move) return move
+    // Résident, serveur à bord : chaque nuit passée sans garde à vue est une injection
+    if (canInject(view) || (view.phase === 'night' && ownedQty(view.cargo, SERVER) > 0)) return injectionMove(view)
   }
 
   if (tripLeft) {
@@ -238,8 +322,10 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
         ? { to: 'D1' as const, buys: [], value: 0 }
         : null
     // Fin de partie, ou serveur à bord : solder la dette puis rester à la Laverie
-    const banking = objective !== 'survive' && (endgame || (hunt && ownedQty(view.cargo, ENDINGS.saboteur.requiredProduct) > 0))
-    const route = rescue ?? (banking ? endgameRoute(view) : bestRoute(view, plan, temperament))
+    const banking = objective !== 'survive' && endgame
+    const hunting = hunt && objective === 'resident' && ownedQty(view.cargo, SERVER) === 0
+    const routePlan = { ...plan, huntsServer: hunting, seeksSponsor: seeksSponsor(view, objective), vipErrand: vipErrand(view, objective) }
+    const route = rescue ?? (banking ? endgameRoute(view) : bestRoute(view, routePlan, temperament))
     if (route) {
       if (route.accept) return { type: 'acceptDelivery' }
       const [next] = route.buys
@@ -255,7 +341,7 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
   }
 
   if (!night) {
-    const tour = eveningTour(view, plan, temperament)
+    const tour = eveningTour(view, { ...plan, vipErrand: vipErrand(view, objective) }, temperament)
     if (tour) return tour
   }
   return { type: 'sleep' }
@@ -389,6 +475,10 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
     if (equipment) return equipment
     const place = specialPlaces(view, uses, reserve, plan.iccFloor ?? PLACE_THRESHOLDS.iccBelow)
     if (place) return place
+  } else if (objective === 'elite') {
+    // Élite : défendre l'ICC et servir le parrain jusqu'à l'audit
+    const place = specialPlaces(view, uses, reserve, plan.iccFloor ?? PLACE_THRESHOLDS.iccBelow)
+    if (place) return place
   }
 
   // Fin de partie avec une dette (collecte de Viktor sur un Cash-Puce vide…) : retirer de la Laverie de quoi la solder
@@ -401,9 +491,11 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
 
   // Laverie : mettre à l'abri ce qui dépasse le fonds de roulement, dette soldée ; tout en fin de partie
   if (!checkService(view, 'offshore') && view.debt === 0 && objective !== 'survive') {
-    // Seuil de la fin visée atteint : tout à l'abri, sauf le carburant
-    const working = secured(view, objective) ? fuelPrice(view) * 2 : reserve + CAPITAL * 2
-    const amount = endgame ? view.cash : view.day >= (plan.offshoreFromDay ?? 15) || secured(view, objective) ? view.cash - working : 0
+    // Seuil de la fin visée atteint : tout à l'abri, sauf le carburant ; la chasse au serveur garde son prix,
+    // l'Élite de quoi payer un certificat
+    const kept = huntReserve(view, objective) + (objective === 'elite' ? morgueCost(view, 'certificate') + CAPITAL : 0)
+    const working = (secured(view, objective) ? fuelPrice(view) * 2 : reserve + CAPITAL * 2) + kept
+    const amount = endgame ? view.cash - kept : view.day >= (plan.offshoreFromDay ?? 15) || secured(view, objective) ? view.cash - working : 0
     if (amount > 0) return { type: 'deposit', amount }
   }
   return null
@@ -588,6 +680,11 @@ function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route
         if (night && !view.mission) value += seeksFlag(view, plan) ? VALUE.wantedLevel : -VALUE.wantedLevel
         // Raisons d'aller quelque part : dette à solder, équipement à acheter
         if (to === 'D1') value += debtVisit(view, reserveOf(view, temperament))
+        // Résident sans serveur : passer à son district producteur, où il apparaît parfois
+        if (plan.huntsServer && to === SERVER_PRODUCER && !night) value += PRODUCTS[SERVER].basePrice * 0.1
+        // Élite sans parrain : passer au Velvet-Silo demander une commande
+        if (plan.seeksSponsor && to === velvetDistrict() && !night) value += VALUE.sponsorVisit
+        if (plan.vipErrand && view.vip && DISTRICTS[to].production.includes(view.vip.productId)) value += VALUE.sponsorVisit
         if (to === 'D4' && pendingEquipment(view, plan)) value += 2_000
         if (to === velvetDistrict() && view.vip && ownedQty(view.cargo, view.vip.productId) >= VELVET.vip.crates) value += vipValue(view) ?? 0
         // Livraison : la prime, plus la confiance du DSC qu'attend l'équipement de la voie officielle
@@ -642,8 +739,8 @@ function refuelFor(view: GameState, needed: number): Action | null {
 
 /** Tournées de nuit : le tempérament, relevé par un plan noctambule */
 function nightMode(view: GameState, plan: Plan, temperament: Temperament): Temperament['night'] {
-  // L'équipier du plan attend une première Fiche S : une tournée clandestine la lui donne
-  if (seeksFlag(view, plan)) return 'always'
+  // L'équipier du plan attend une première Fiche S : une tournée clandestine la lui donne ; une commande VIP n'attend pas
+  if (seeksFlag(view, plan) || plan.vipErrand) return 'always'
   if (!plan.nightOwl || temperament.night === 'always') return temperament.night
   return 'margin'
 }
@@ -679,6 +776,8 @@ function barrage(view: GameState, plan: Plan, temperament: Temperament): Action 
     if (!checkMove(view, 'payTollInKind')) return { type: 'intercept', move: 'payTollInKind' }
     return { type: 'intercept', move: 'refuseToll' }
   }
+  // Serveur en soute : la fouille tue, on joue l'option la plus sûre
+  if (isLethalSearch(view)) return survivalMove(view)
   const illegal = illegalValue(view.cargo)
   if (plan.novice || illegal === 0) return { type: 'intercept', move: 'search' }
 
@@ -740,6 +839,18 @@ function barrage(view: GameState, plan: Plan, temperament: Temperament): Action 
   }
   if (options.length === 0) return { type: 'intercept', move: 'search' }
   return options.reduce((best, option) => (option.loss < best.loss ? option : best)).action
+}
+
+/** Fouille mortelle (serveur en soute) : l'option qui a le plus de chances d'éviter la fouille, corruption au plus offrant */
+function survivalMove(view: GameState): Action {
+  const options: { action: Action; chance: number }[] = []
+  if (!checkMove(view, 'bluff')) options.push({ action: { type: 'intercept', move: 'bluff' }, chance: bluffChance(view).total })
+  if (!checkMove(view, 'flee')) options.push({ action: { type: 'intercept', move: 'flee' }, chance: fleeChance(view).total })
+  if (!checkMove(view, 'eject')) options.push({ action: { type: 'intercept', move: 'eject' }, chance: ejectChance(view).total })
+  const offer = { cash: Math.min(view.cash, Math.max(minimumOffer(view), bribeRate(view).total * 3)), crates: [] }
+  if (!checkMove(view, 'bribe', offer)) options.push({ action: { type: 'intercept', move: 'bribe', offer }, chance: bribeChance(view, offer).total })
+  if (options.length === 0) return { type: 'intercept', move: 'search' }
+  return options.reduce((best, option) => (option.chance > best.chance ? option : best)).action
 }
 
 // ─── Aléas routiers ───
