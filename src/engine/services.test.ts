@@ -124,10 +124,15 @@ describe('Velvet-Silo', () => {
     expect(errorOf(ordered, { type: 'vipDeliver' })).toBe('not-enough-cargo')
     const delivered = run({ ...ordered, cargo: [lot(vip.productId, VELVET.vip.crates)] }, { type: 'vipDeliver' })
     expect(delivered.vip).toBeNull()
+    const lastDay = { ...ordered, day: vip.day + VELVET.vip.deadlineDays, cargo: [lot(vip.productId, VELVET.vip.crates)] }
+    expect(errorOf(lastDay, { type: 'vipDeliver' })).toBeNull()
+    expect(errorOf({ ...lastDay, day: lastDay.day + 1 }, { type: 'vipDeliver' })).toBe('too-late')
     expect(delivered.cash).toBeGreaterThan(ordered.cash)
     // Parrainage de l'Élite : une commande livrée compte, une commande manquée en efface une
     expect(delivered.progress.vipOrders).toBe(ordered.progress.vipOrders + 1)
-    const missed = sleep(sleep({ ...ordered, districtId: 'D1', progress: { ...ordered.progress, vipOrders: 2 } }))
+    // Échec constaté à la routine qui suit l'échéance
+    let missed: GameState = { ...ordered, districtId: 'D1', progress: { ...ordered.progress, vipOrders: 2 } }
+    for (let night = 0; night <= VELVET.vip.deadlineDays; night++) missed = sleep(missed)
     expect(missed.progress.vipOrders).toBe(1)
     expect(missed.briefing?.vipFailed).toBe(true)
     expect(missed.velvetLock).toBe(missed.day + VELVET.vip.lockDays - 1)

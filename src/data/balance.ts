@@ -62,8 +62,8 @@ type EndingRules = {
 /** Fins de partie (dette soldée), de la plus prestigieuse à la plus modeste : seuils de score offshore et conditions propres */
 export const ENDINGS: Readonly<EndingRules> = {
   saboteur: { minScore: 500_000, requiredProduct: 'T4-06', district: 'D4' },
-  resident: { minScore: 300_000, injections: 3, requiredProduct: 'T4-06', crew: 'CREW-02' },
-  elite: { minScore: 300_000, iccTier: 'gold', sponsorOrders: 3 },
+  resident: { minScore: 150_000, injections: 3, requiredProduct: 'T4-06', crew: 'CREW-02' },
+  elite: { minScore: 300_000, iccTier: 'gold', sponsorOrders: 2 },
   mafia: { minScore: 150_000 },
 }
 

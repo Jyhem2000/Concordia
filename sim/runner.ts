@@ -46,6 +46,8 @@ export type GameRecord = {
   forcedSleeps: number
   /** Invariants violés : bugs du moteur */
   violations: string[]
+  /** Progression des grandes fins à la dernière journée : commandes VIP, injections, ICC */
+  progress: { vipOrders: number; injections: number; icc: number }
   /** Fin de chaque journée : Cash-Puce, offshore, dette, ICC */
   daily: { day: number; cash: number; offshore: number; debt: number; icc: number }[]
 }
@@ -89,6 +91,7 @@ export function playGame(bot: Bot, seed: number): GameRecord {
     refused: 0,
     forcedSleeps: 0,
     violations: [],
+    progress: { vipOrders: 0, injections: 0, icc: state.icc },
     daily: [],
   }
   let actionsToday = 0
@@ -116,6 +119,7 @@ export function playGame(bot: Bot, seed: number): GameRecord {
   record.defeat = ending ? isDefeat(ending.id) : false
   record.score = ending?.score ?? 0
   record.lastDay = state.day
+  record.progress = { vipOrders: state.progress.vipOrders, injections: state.progress.injections, icc: state.icc }
   return record
 }
 

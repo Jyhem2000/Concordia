@@ -77,7 +77,7 @@ export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
     basePrice: 25_000,
     tags: ['TAG-TECH', 'TAG-CULTURE'],
     dailyStock: { min: 1, max: 2 },
-    appearanceChance: 0.15,
+    appearanceChance: 0.3,
     beaconRisk: 0.1,
     lethalOnSearch: true,
     bulky: true, // une baie de serveur : pas de double fond

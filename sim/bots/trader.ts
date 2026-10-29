@@ -105,6 +105,8 @@ export type Plan = {
   seeksSponsor?: boolean
   /** Commande VIP en cours à honorer (Élite) : aller chercher le produit là où il est produit, de jour comme de nuit */
   vipErrand?: boolean
+  /** Commande VIP en cours dont dépend le parrain (Élite) : la livraison au Silo vaut plus que sa recette */
+  sponsorOrder?: boolean
   /** Fuite préférée à espérance égale (pare-buffles, brouilleur, transpondeur) */
   runner?: boolean
   /** ICC à défendre : certificat et chantage sous ce seuil, pertes d'ICC pesées plus lourd au barrage */
@@ -159,7 +161,16 @@ const SERVER = ENDINGS.saboteur.requiredProduct
 const SERVER_PRODUCER = DISTRICT_IDS.find((id) => DISTRICTS[id].production.includes(SERVER)) ?? 'D5'
 
 /** Valeurs de référence pour comparer des pertes de nature différente (₡ de base) */
-const VALUE = { custodyDay: 1_200, iccPoint: 60, healthPoint: 40, wantedLevel: 400, chassisPoint: 40, trustDelivery: 1_500, sponsorVisit: 3_000 }
+const VALUE = {
+  custodyDay: 1_200,
+  iccPoint: 60,
+  healthPoint: 40,
+  wantedLevel: 400,
+  chassisPoint: 40,
+  trustDelivery: 1_500,
+  sponsorVisit: 3_000,
+  sponsorOrder: 10_000,
+}
 
 /** Marge minimale espérée pour acheter, en part du prix d'achat */
 const MIN_MARGIN = 0.15
@@ -224,9 +235,14 @@ function seeksSponsor(view: GameState, objective: Objective): boolean {
   return objective === 'elite' && view.progress.vipOrders < ENDINGS.elite.sponsorOrders && !view.vip && meets(view, SERVICE_REQUIREMENTS.vip)
 }
 
-/** Élite avec une commande VIP en cours et pas encore les caisses : le parrain n'attend que jusqu'au lendemain */
+/** Élite avec une commande VIP en cours et pas encore les caisses : le parrain n'attend que quelques jours */
 function vipErrand(view: GameState, objective: Objective): boolean {
   return objective === 'elite' && view.vip !== null && ownedQty(view.cargo, view.vip.productId) < VELVET.vip.crates
+}
+
+/** Élite sans parrain avec une commande VIP en cours : la livrer le rapproche du parrain */
+function sponsorOrder(view: GameState, objective: Objective): boolean {
+  return objective === 'elite' && view.vip !== null && view.progress.vipOrders < ENDINGS.elite.sponsorOrders
 }
 
 /** Cash-Puce gardé pour la chasse : le prix du serveur tant qu'il n'est pas à bord, puis le péage des milices et la collecte */
@@ -324,7 +340,13 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
     // Fin de partie, ou serveur à bord : solder la dette puis rester à la Laverie
     const banking = objective !== 'survive' && endgame
     const hunting = hunt && objective === 'resident' && ownedQty(view.cargo, SERVER) === 0
-    const routePlan = { ...plan, huntsServer: hunting, seeksSponsor: seeksSponsor(view, objective), vipErrand: vipErrand(view, objective) }
+    const routePlan = {
+      ...plan,
+      huntsServer: hunting,
+      seeksSponsor: seeksSponsor(view, objective),
+      vipErrand: vipErrand(view, objective),
+      sponsorOrder: sponsorOrder(view, objective),
+    }
     const route = rescue ?? (banking ? endgameRoute(view) : bestRoute(view, routePlan, temperament))
     if (route) {
       if (route.accept) return { type: 'acceptDelivery' }
@@ -665,7 +687,9 @@ function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route
         ]
         const tripRisk = risk({ ...view, cargo: planned }, to, { includePatrol: revealed })
         const illegal = illegalValue(planned)
-        const tooRisky = illegal > 0 && tripRisk > temperament.maxRisk
+        // Livraison VIP de jour (avant 20h00) : la commande prise, le Silo vaut le risque au-delà du tempérament
+        const vipDelivery = !night && to === velvetDistrict() && view.vip !== null && ownedQty(planned, view.vip.productId) >= VELVET.vip.crates
+        const tooRisky = illegal > 0 && tripRisk > temperament.maxRisk && !vipDelivery
         // Achats trop risqués pour le tempérament : le même trajet, sans rien acheter
         if (tooRisky && buys.length > 0) continue
 
@@ -686,7 +710,7 @@ function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route
         if (plan.seeksSponsor && to === velvetDistrict() && !night) value += VALUE.sponsorVisit
         if (plan.vipErrand && view.vip && DISTRICTS[to].production.includes(view.vip.productId)) value += VALUE.sponsorVisit
         if (to === 'D4' && pendingEquipment(view, plan)) value += 2_000
-        if (to === velvetDistrict() && view.vip && ownedQty(view.cargo, view.vip.productId) >= VELVET.vip.crates) value += vipValue(view) ?? 0
+        if (vipDelivery) value += (vipValue({ ...view, cargo: planned }) ?? 0) + (plan.sponsorOrder ? VALUE.sponsorOrder : 0)
         // Livraison : la prime, plus la confiance du DSC qu'attend l'équipement de la voie officielle
         if (contract) value += deliveryFee(view) + (trustWanted(view, plan) ? VALUE.trustDelivery : 0)
         if (!best || value > best.value) best = { to, buys: [...legalBuys.filter((buy) => buy.qty > 0), ...buys], value, accept: contract }

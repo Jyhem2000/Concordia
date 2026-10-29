@@ -37,7 +37,7 @@ export const FORGERY = { cost: 22_500, costStep: 22_500, chance: 0.6, failIccLos
 export const VELVET = {
   auction: { cooldownDays: 3, factor: 2, minTier: 3 },
   blackmail: { cooldownDays: 4, cost: 12_000, costStep: 6_000, icc: 12, crates: ['T3-07', 'T3-02'] as readonly ProductId[] },
-  vip: { cooldownDays: 3, crates: 3, factor: 3.5, tiers: [2, 3] as readonly Tier[], failIccLoss: 10, lockDays: 5 },
+  vip: { cooldownDays: 3, deadlineDays: 2, crates: 3, factor: 3.5, tiers: [2, 3] as readonly Tier[], failIccLoss: 10, lockDays: 5 },
 }
 
 /**

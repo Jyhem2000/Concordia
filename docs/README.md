@@ -63,7 +63,8 @@ Les docs décrivent le jeu complet ; tout n'est pas encore en jeu. Ce tableau di
 Analyses de conception pas encore tranchées ; les règles retenues rejoindront leurs chapitres.
 * [Mini-progression : débloquer les mécaniques au fil de la partie](propositions/progression.md)
 * [Mécaniques à simplifier](propositions/simplification.md) : premier lot adopté (inflation, Laverie, rachat, Hachoir de Viktor, tabassage, emprunt tactique), le reste ouvert
-* [Deux chemins vers Olympus-Green](propositions/fins-olympus.md) : adopté (Élite par cooptation, Résident Réécrit)
+* [Deux chemins vers Olympus-Green](propositions/fins-olympus.md) : adopté (Élite par cooptation, Résident Réécrit), assoupli après remesure
+* [Des nuits qui demandent un choix](propositions/nuits.md) : ouvert (afters du couvre-feu, écrémage des caisses scellées, deux ordres de mission)
 
 ## Feuille de route
 Étapes restantes, dans l'ordre des dépendances :

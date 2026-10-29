@@ -281,7 +281,7 @@ export function requestVip(state: GameState): ServiceResult {
 export function checkVipDelivery(state: GameState): ActionError | null {
   if (velvetLocked(state)) return 'location-locked'
   if (!state.vip) return 'no-contract'
-  if (state.day > state.vip.day + 1) return 'too-late'
+  if (state.day > state.vip.day + VELVET.vip.deadlineDays) return 'too-late'
   return ownedQty(state.cargo, state.vip.productId) < VELVET.vip.crates ? 'not-enough-cargo' : null
 }
 
@@ -298,7 +298,7 @@ export function deliverVip(state: GameState): ServiceResult {
 
 /** Échéance de la commande VIP dépassée à la routine : ICC perdu, Silo verrouillé (chap. 4) */
 export function expireVip(state: GameState): { state: GameState; failed: boolean } {
-  if (!state.vip || state.day <= state.vip.day + 1) return { state, failed: false }
+  if (!state.vip || state.day <= state.vip.day + VELVET.vip.deadlineDays) return { state, failed: false }
   const locked = state.day + VELVET.vip.lockDays - 1
   return {
     // Le parrain n'aime pas attendre : une commande manquée en efface une

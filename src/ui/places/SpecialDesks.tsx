@@ -315,7 +315,12 @@ export function VelvetDesk() {
           {vip ? (
             <DeskRow
               label={d.deliver}
-              detail={d.contract(VELVET.vip.crates, t.product[vip.productId].name, vip.day + 1, value === null ? '—' : credits(value))}
+              detail={d.contract(
+                VELVET.vip.crates,
+                t.product[vip.productId].name,
+                vip.day + VELVET.vip.deadlineDays,
+                value === null ? '—' : credits(value),
+              )}
               error={checkVipDelivery(game)}
               onClick={() => dispatch({ type: 'vipDeliver' })}
             />

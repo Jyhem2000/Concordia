@@ -23,9 +23,8 @@ const mode = process.argv[2]
 if (mode === 'fins') {
   type Variant = { label: string; mafia: number; elite: number; resident: number; saboteur: number }
   const variants: Variant[] = [
-    { label: 'actuel 150k / 300k / 300k / 500k', mafia: 150_000, elite: 300_000, resident: 300_000, saboteur: 500_000 },
-    { label: '150k / 200k / 200k / 300k', mafia: 150_000, elite: 200_000, resident: 200_000, saboteur: 300_000 },
-    { label: '150k / 150k / 150k / 250k', mafia: 150_000, elite: 150_000, resident: 150_000, saboteur: 250_000 },
+    { label: 'actuel 150k / 300k / 150k / 500k', mafia: 150_000, elite: 300_000, resident: 150_000, saboteur: 500_000 },
+    { label: '150k / 200k / 150k / 300k', mafia: 150_000, elite: 200_000, resident: 150_000, saboteur: 300_000 },
   ]
   const bots: { planName: string; objective: Objective }[] = [
     { planName: 'Couverture légale', objective: 'mafia' },

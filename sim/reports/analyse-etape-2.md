@@ -270,7 +270,7 @@ Campagnes Contrôle et 1 à 4 sur le jeu simplifié : amendes ×2, coûts fixes 
 
 - Le jeu est un peu plus dur, surtout en score : le Sans build Équilibré passe de 75 000 à 69 000 ₡, le Casse-cou de 140 000 à 132 000 ₡ (et de 80 à 76 % de survie).
 - L'ordre des tempéraments tient pour presque tous les plans. Deux exceptions, la Nuit festive et la Fuite au sommet, où l'Équilibré survit un peu mieux que le Prudent (écarts de 2 et 3 points).
-- **Les plans à couverture légale perdent le plus** : la Couverture légale Équilibré passe de 85 à 78 % de survie et de 106 000 à 85 000 ₡, le Citoyen modèle de 87 à 76 %. La campagne 4 le confirme : la dilution en Tier 0 coûte 8 points de survie (± 5). Hypothèse : les places de soute réservées au Tier 0 dès le Jour 1 ralentissent le remboursement de la dette, alors que le début de partie coûte plus cher (×1,5 au lieu de ×1). C'est un réglage du bot (couverture dès le départ) plus qu'une règle : à vérifier en ne couvrant qu'après la dette.
+- **Les plans à couverture légale perdent le plus** : la Couverture légale Équilibré passe de 85 à 78 % de survie et de 106 000 à 85 000 ₡, le Citoyen modèle de 87 à 76 %. Hypothèse d'abord retenue : les places de soute réservées au Tier 0 dès le Jour 1 ralentiraient le remboursement de la dette. **Démentie** (section suivante) : la campagne 4 montre au contraire que la dilution *rapporte* 8 points de survie (84 → 76 % sans elle), et ne couvrir qu'après la dette fait baisser la Couverture légale.
 - Le Novice survit à 90 % (critère du contrôle tenu).
 
 **À graine égale :** la Couverture légale ne bat plus le Prudent que sur 59 % des parties (66 % avant), juste sous le critère de 60 %, pour la même raison.
@@ -300,3 +300,43 @@ Campagnes Contrôle et 1 à 4 sur le jeu simplifié : amendes ×2, coûts fixes 
   - **Résident :** le temps passé à chercher le serveur et à l'injecter coûte du score (40 000 ₡ en moyenne en Équilibré, contre 60 000 pour le même plan en score), et 9 à 12 % des parties finissent exécutées.
   - **Saboteur :** le serveur apparaît rarement en stock (une chance sur 0,15 par jour, dans un seul district).
 - **Critère 2 non tenu** pour les trois fins de prestige. Leviers à trancher : les conditions propres (nombre de commandes, délai VIP, nombre d'injections, apparition du serveur) avant les seuils.
+
+## Fins de prestige assouplies
+Changements :
+- **Élite :** 2 commandes VIP pour le parrain (3 avant), livrables le jour même ou l'un des deux jours suivants (le lendemain avant).
+- **Résident Réécrit :** seuil au niveau du Baron (150 000 ₡, 300 000 avant).
+- **Serveur `[T4-06]` :** deux fois plus souvent en stock.
+- **Bot Élite :**
+  - la livraison VIP de jour au Velvet-Silo est acceptée au-delà du risque du tempérament ;
+  - elle vaut sa recette plus la valeur du parrain ;
+  - les caisses achetées au départ comptent.
+- **Bot à couverture légale :** essai d'une couverture de Tier 0 seulement après la dette. **Annulé** : la Couverture légale tombe de 80 à 75 % de survie, et le Baron de 29 à 24 %. La dilution sert dès le début (campagne 4 : +8 points de survie).
+
+**Campagne Plans :** inchangée à ±3 points près (aucune règle touchée hors fins).
+
+**Sonde des seuils** (200 parties par ligne, fin visée atteinte, Équilibré / Casse-cou) :
+
+| Seuils (Baron / Élite / Résident / Saboteur) | Baron | Élite | Résident | Saboteur |
+| :--- | :--- | :--- | :--- | :--- |
+| 150k / 300k / 150k / 500k (actuels) | 31 / 50 % | 4 / 2 % | 6 / 9 % | 0 / 5 % |
+| 150k / 200k / 150k / 300k | 31 / 50 % | 5 / 2 % | 6 / 9 % | 1 / 6 % |
+
+**Sonde des conditions** (`sim/probe-prestige.ts`, part des survivants qui remplissent chaque condition) :
+
+| Bot | Score | Condition propre | ICC Or |
+| :--- | ---: | ---: | ---: |
+| Citoyen modèle · Élite · Équilibré | 12 % | parrain 9 % | 25 % |
+| Citoyen modèle · Élite · Casse-cou | 39 % | parrain 4 % | 7 % |
+| Fuite au sommet · Résident · Équilibré | 11 % | injection 36 % | — |
+| Fuite au sommet · Résident · Casse-cou | 39 % | injection 18 % | — |
+
+- **Élite : le parrain reste le verrou, et ce n'est plus le bot.**
+  - Les produits VIP sont du Tier 2–3 illégal. Le trajet de livraison entre donc dans `[D6]`, le district le plus surveillé, avec environ 28 % d'interception.
+  - Au barrage, le bluff échoue souvent devant les douaniers d'élite, et la fouille saisit les caisses.
+  - Le bot ne livre qu'un tiers des commandes qu'il prend. En Casse-cou, l'ICC tombe sous le palier Ordinaire et le Silo se ferme (46 % des parties sans aucune commande).
+  - Levier : une règle (le trajet de livraison VIP), pas un chiffre.
+- **Résident : la greffe se fait, le score manque.**
+  - L'injection est complète dans 18 à 36 % des parties survivantes, mais le score atteint 150 000 ₡ dans 11 % seulement en Équilibré (moyenne 38 000 ₡).
+  - Les exécutions montent à 13–14 %, car le serveur, plus fréquent, est chassé plus souvent.
+- **Saboteur : le serveur plus fréquent ne change rien.** Le verrou est le seuil de 500 000 ₡ (moyenne 60 000 ₡ en Équilibré). C'est voulu pour la fin ultime, mais même à 300 000 ₡ le taux reste à 1–6 %.
+- **Critère 2 toujours non tenu.** L'ordre voulu (Baron > Élite > Résident > Saboteur) n'est pas encore lisible : Élite et Résident sont au même niveau.

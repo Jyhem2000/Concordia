@@ -2,7 +2,9 @@
 
 > **Révisé après mesure du risque** (`sim/probe-resident.ts`) : l'injection compte à toute arrivée sans garde à vue (contrôle franchi compris), et Glitch brouille la balise du serveur. Le serveur reste hors du double fond.
 >
-> **Adopté le 29/10/2026** : écrit dans les chap. 2 à 5, 7, 9 et 10, et dans le code (3 injections, 3 commandes VIP, seuils à mesurer). L'avance de survie est ouverte toute la partie dans le même changement. Reste : un bot pour le Résident Réécrit, et la remesure.
+> **Adopté le 29/10/2026** : écrit dans les chap. 2 à 5, 7, 9 et 10, et dans le code. L'avance de survie est ouverte toute la partie dans le même changement.
+>
+> **Assoupli après la remesure** (`sim/reports/analyse-etape-2.md`) : 2 commandes VIP avec 2 jours de délai, seuil du Résident abaissé à celui du Baron, serveur deux fois plus souvent en stock. Mesure : Élite 2–4 %, Résident 6–9 %. Le parrain bute sur la livraison au Silo, en `[D6]`, où les caisses VIP (illégales) sont souvent saisies.
 > * **Le Résident Réécrit :** validé sur le principe (ex-« Fantôme »). Ce n'est pas un fantôme : Aeterna le reconnaît comme résident autorisé.
 > * **L'Élite par cooptation :** proposé pour remplacer « Citoyen Or + score », peu crédible dans le lore.
 
