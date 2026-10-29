@@ -3,13 +3,13 @@
 * Les plans de référence des campagnes 1 et 2 sur un grand nombre de graines : le score dépend-il plus du joueur que des tirages ?
 * 1000 parties par bot, graines 1 à 1000.
 
-| Bot | Parties | Survie | Défaites | Fins | Score moyen | Score p10 / médiane / p90 | Score médian des survivants | Dette soldée (jour médian) | Interceptions | Jours de garde à vue | Équipement acheté |
-| :--- | ---: | ---: | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |
-| Sans build · Prudent · score | 1000 | 89 % | bio-bricks 11 % | standard 89 % | 23 898 ₡ | 0 ₡ / 21 690 ₡ / 51 793 ₡ | 25 557 ₡ | 90 % (J6) | 6.0 (20 % des trajets) | 1.5 | — |
-| Couverture légale · Équilibré · score | 1000 | 78 % | bio-bricks 22 % | standard 54 %, mafia 24 % | 90 187 ₡ | 0 ₡ / 45 259 ₡ / 251 650 ₡ | 89 154 ₡ | 92 % (J3) | 9.5 (33 % des trajets) | 3.0 | MOD-02 75 %, VEH-02 42 % |
-| Rentier · Équilibré · score | 1000 | 84 % | bio-bricks 16 % | standard 71 %, mafia 13 % | 63 351 ₡ | 0 ₡ / 36 303 ₡ / 166 659 ₡ | 53 618 ₡ | 89 % (J2) | 8.9 (34 % des trajets) | 2.9 | CREW-02 72 % |
-| Haut tier · Casse-cou · score | 1000 | 75 % | bio-bricks 24 %, execution 1 % | standard 48 %, mafia 27 % | 154 343 ₡ | 0 ₡ / 100 ₡ / 569 917 ₡ | 17 994 ₡ | 85 % (J2) | 10.9 (44 % des trajets) | 3.8 | MOD-07 55 %, VEH-04 37 % |
-| Couverture légale · Équilibré · Baron | 1000 | 81 % | bio-bricks 19 % | standard 51 %, mafia 30 % | 85 612 ₡ | 0 ₡ / 56 662 ₡ / 205 882 ₡ | 96 443 ₡ | 92 % (J3) | 9.0 (32 % des trajets) | 2.6 | MOD-02 75 %, VEH-02 42 % |
+| Bot | Parties | Survie | dont ruinés à 0 ₡ | Défaites | Fins | Score moyen | Score p10 / médiane / p90 | Score médian des survivants | Dette soldée (jour médian) | Interceptions | Jours de garde à vue | Équipement acheté |
+| :--- | ---: | ---: | ---: | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |
+| Sans build · Prudent · score | 1000 | 89 % | 5 % | bio-bricks 11 % | standard 89 % | 23 446 ₡ | 0 ₡ / 21 611 ₡ / 50 313 ₡ | 25 405 ₡ | 90 % (J6) | 6.1 (20 % des trajets) | 1.5 | — |
+| Couverture légale · Équilibré · score | 1000 | 88 % | 5 % | bio-bricks 12 % | standard 59 %, mafia 28 % | 102 176 ₡ | 0 ₡ / 60 982 ₡ / 277 359 ₡ | 79 372 ₡ | 95 % (J3) | 10.0 (32 % des trajets) | 3.0 | MOD-02 79 %, VEH-02 40 % |
+| Rentier · Équilibré · score | 1000 | 87 % | 11 % | bio-bricks 14 % | standard 72 %, mafia 15 % | 68 181 ₡ | 0 ₡ / 42 926 ₡ / 191 133 ₡ | 59 259 ₡ | 91 % (J2) | 8.8 (33 % des trajets) | 2.8 | CREW-02 74 % |
+| Haut tier · Casse-cou · score | 1000 | 77 % | 18 % | bio-bricks 21 %, execution 2 % | standard 48 %, mafia 29 % | 172 732 ₡ | 0 ₡ / 193 ₡ / 655 917 ₡ | 18 020 ₡ | 85 % (J2) | 11.0 (43 % des trajets) | 3.8 | MOD-07 58 %, VEH-04 39 % |
+| Couverture légale · Équilibré · Baron | 1000 | 89 % | 5 % | bio-bricks 11 % | standard 58 %, mafia 30 % | 86 795 ₡ | 0 ₡ / 65 622 ₡ / 205 736 ₡ | 81 450 ₡ | 95 % (J3) | 9.5 (32 % des trajets) | 2.6 | MOD-02 79 %, VEH-02 39 % |
 
 ## Défauts relevés
 Aucun : pas d’action refusée, pas de sommeil forcé, aucun invariant violé.
@@ -18,13 +18,13 @@ Aucun : pas d’action refusée, pas de sommeil forcé, aucun invariant violé.
 
 | Bot | Score moyen | Écart-type entre graines | p10 / p90 |
 | :--- | ---: | ---: | ---: |
-| Sans build · Prudent · score | 23 898 ₡ | 20 540 ₡ | 0 ₡ / 51 793 ₡ |
-| Couverture légale · Équilibré · score | 90 187 ₡ | 114 486 ₡ | 0 ₡ / 251 650 ₡ |
-| Rentier · Équilibré · score | 63 351 ₡ | 77 438 ₡ | 0 ₡ / 166 659 ₡ |
-| Haut tier · Casse-cou · score | 154 343 ₡ | 291 011 ₡ | 0 ₡ / 569 917 ₡ |
-| Couverture légale · Équilibré · Baron | 85 612 ₡ | 89 240 ₡ | 0 ₡ / 205 882 ₡ |
+| Sans build · Prudent · score | 23 446 ₡ | 20 097 ₡ | 0 ₡ / 50 313 ₡ |
+| Couverture légale · Équilibré · score | 102 176 ₡ | 123 416 ₡ | 0 ₡ / 277 359 ₡ |
+| Rentier · Équilibré · score | 68 181 ₡ | 80 908 ₡ | 0 ₡ / 191 133 ₡ |
+| Haut tier · Casse-cou · score | 172 732 ₡ | 307 977 ₡ | 0 ₡ / 655 917 ₡ |
+| Couverture légale · Équilibré · Baron | 86 795 ₡ | 86 102 ₡ | 0 ₡ / 205 736 ₡ |
 
-Écart entre bots (écart-type des scores moyens) : **42 488 ₡** ; écart moyen entre graines : **118 543 ₡**.
+Écart entre bots (écart-type des scores moyens) : **48 798 ₡** ; écart moyen entre graines : **123 700 ₡**.
 Le hasard des graines pèse plus que le choix du plan et du tempérament.
 
 ### À graine égale
@@ -33,8 +33,8 @@ Part des graines où le bot de la ligne fait un meilleur score que celui de la c
 
 | Bot | 1 | 2 | 3 | 4 | 5 |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| 1. Sans build · Prudent · score | — | 37 % | 41 % | 53 % | 34 % |
-| 2. Couverture légale · Équilibré · score | 59 % | — | 52 % | 49 % | 16 % |
-| 3. Rentier · Équilibré · score | 56 % | 42 % | — | 48 % | 41 % |
-| 4. Haut tier · Casse-cou · score | 40 % | 39 % | 41 % | — | 37 % |
-| 5. Couverture légale · Équilibré · Baron | 62 % | 13 % | 54 % | 52 % | — |
+| 1. Sans build · Prudent · score | — | 32 % | 36 % | 51 % | 31 % |
+| 2. Couverture légale · Équilibré · score | 65 % | — | 55 % | 53 % | 21 % |
+| 3. Rentier · Équilibré · score | 60 % | 39 % | — | 47 % | 40 % |
+| 4. Haut tier · Casse-cou · score | 43 % | 38 % | 40 % | — | 39 % |
+| 5. Couverture légale · Équilibré · Baron | 66 % | 9 % | 55 % | 53 % | — |

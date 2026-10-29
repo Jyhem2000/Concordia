@@ -9,6 +9,8 @@ export type BotSummary = {
   games: number
   /** Part des parties finies sans défaite (audit passé) */
   survival: number
+  /** Part des parties finies sans défaite mais à 0 ₡ d'offshore : survivant ruiné */
+  ruined: number
   defeats: Record<string, number>
   endings: Record<string, number>
   meanScore: number
@@ -44,6 +46,7 @@ export function summarize(records: readonly GameRecord[]): BotSummary {
     bot: records[0]?.bot ?? '—',
     games: records.length,
     survival: records.filter((record) => !record.defeat).length / Math.max(1, records.length),
+    ruined: records.filter((record) => !record.defeat && record.score === 0).length / Math.max(1, records.length),
     defeats: count(records.filter((record) => record.defeat).map((record) => record.ending)),
     endings: count(records.filter((record) => !record.defeat).map((record) => record.ending)),
     meanScore: mean(scores),
@@ -126,7 +129,7 @@ function beats(a: readonly number[], b: readonly number[]): number {
 export function renderReport(title: string, notes: readonly string[], summaries: readonly BotSummary[]): string {
   const rows = summaries.map(
     (s) =>
-      `| ${s.bot} | ${s.games} | ${pct(s.survival)} | ${tally(s.defeats, s.games)} | ${tally(s.endings, s.games)} | ${credits(s.meanScore)} | ${credits(s.p10)} / ${credits(s.medianScore)} / ${credits(s.p90)} | ${credits(s.survivorMedian)} | ${pct(s.debtPaidShare)} (J${s.medianDebtPaidDay ?? '—'}) | ${s.meanInterceptions.toFixed(1)} (${pct(s.interceptionRate)} des trajets) | ${s.meanCustodyDays.toFixed(1)} | ${tally(s.purchases, s.games)} |`,
+      `| ${s.bot} | ${s.games} | ${pct(s.survival)} | ${pct(s.ruined)} | ${tally(s.defeats, s.games)} | ${tally(s.endings, s.games)} | ${credits(s.meanScore)} | ${credits(s.p10)} / ${credits(s.medianScore)} / ${credits(s.p90)} | ${credits(s.survivorMedian)} | ${pct(s.debtPaidShare)} (J${s.medianDebtPaidDay ?? '—'}) | ${s.meanInterceptions.toFixed(1)} (${pct(s.interceptionRate)} des trajets) | ${s.meanCustodyDays.toFixed(1)} | ${tally(s.purchases, s.games)} |`,
   )
   const defects = summaries.flatMap((s) =>
     s.refused + s.forcedSleeps + s.violations.length === 0
@@ -140,8 +143,8 @@ export function renderReport(title: string, notes: readonly string[], summaries:
     '',
     ...notes.map((note) => `* ${note}`),
     '',
-    '| Bot | Parties | Survie | Défaites | Fins | Score moyen | Score p10 / médiane / p90 | Score médian des survivants | Dette soldée (jour médian) | Interceptions | Jours de garde à vue | Équipement acheté |',
-    '| :--- | ---: | ---: | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |',
+    '| Bot | Parties | Survie | dont ruinés à 0 ₡ | Défaites | Fins | Score moyen | Score p10 / médiane / p90 | Score médian des survivants | Dette soldée (jour médian) | Interceptions | Jours de garde à vue | Équipement acheté |',
+    '| :--- | ---: | ---: | ---: | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |',
     ...rows,
     '',
     '## Défauts relevés',

@@ -125,6 +125,7 @@ Croiser tous les plans, tempéraments et objectifs donnerait plus d'une centaine
 
 ## Mesures relevées par partie
 * Fin obtenue et score offshore ; jour de la mort ou du Game Over le cas échéant.
+* Survivant ruiné : partie finie sans défaite, mais à 0 ₡ d'offshore. Le rapport le compte dans la survie et le montre à part : un joueur ruiné a passé l'audit, sans rien gagner.
 * Jour où la dette initiale est soldée ; dette maximale atteinte.
 * Nombre d'interceptions, option choisie, issue, pertes (₡, caisses, ICC, Santé, châssis), jours de garde à vue.
 * Marge nette par trajet, ventes saturées, pics suspects déclenchés, caisses perdues (fraîcheur, casse, explosions).
