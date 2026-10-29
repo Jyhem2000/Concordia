@@ -69,6 +69,7 @@ function CrewOffer({ crewId }: CrewOfferProps) {
     ...(crew.bribeBonus ? [t.crewDesk.bribe(signedPercent(crew.bribeBonus, 0))] : []),
     ...(crew.revealsPatrol ? [t.crewDesk.patrol] : []),
     ...(crew.liveQuotes ? [t.crewDesk.liveQuotes] : []),
+    ...(crew.masksBeacon ? [t.crewDesk.masksBeacon] : []),
     ...(crewId === ENDINGS.resident.crew
       ? [t.crewDesk.injection(Math.min(game.progress.injections, ENDINGS.resident.injections), ENDINGS.resident.injections)]
       : []),

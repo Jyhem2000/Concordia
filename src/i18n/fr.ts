@@ -379,8 +379,9 @@ export const fr = {
     bribe: (bonus: string) => `corruption ${bonus}`,
     patrol: 'révèle la ronde renforcée',
     liveQuotes: 'cours de tous les districts en temps réel',
+    masksBeacon: 'brouille la balise de traçage du serveur Aeterna (son malus de risque est annulé)',
     injection: (done: number, needed: number) =>
-      `avec le serveur Aeterna en soute, chaque tournée clandestine passée sans interception injecte un morceau de ton dossier (${done}/${needed}, Résident Réécrit)`,
+      `avec le serveur Aeterna en soute, chaque tournée clandestine arrivée sans garde à vue injecte un morceau de ton dossier (${done}/${needed}, Résident Réécrit)`,
     offshore: (bonus: string) => `rendement offshore ${bonus} par tranche`,
     flee: (bonus: string) => `fuite ${bonus}`,
     forgery: (bonus: string) => `falsification de la Loterie ${bonus}`,
@@ -793,7 +794,7 @@ export const fr = {
     clandestineTour: 'Tournée clandestine',
     clandestineHint: (wanted: string) => `Hors mission, vers le district de votre choix : risque accru, et ${wanted} si le trajet passe.`,
     injectionHint: (next: number, needed: number) =>
-      `Serveur Aeterna en soute et Glitch au travail : si le trajet passe sans interception, elle injecte un morceau de ton dossier (${next}/${needed}).`,
+      `Serveur Aeterna en soute et Glitch au travail : si tu arrives sans garde à vue, elle injecte un morceau de ton dossier (${next}/${needed}).`,
     withDrink: (product: string, health: number) => ` — nuit blanche : boire 1 × ${product} (Santé −${health})`,
     missionLocked: (done: number, needed: number) =>
       `La plateforme ne vous confie pas encore la nuit : ${done}/${needed} commandes livrées (livraisons officielles du jour). Seule la tournée clandestine reste possible.`,

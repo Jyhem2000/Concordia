@@ -74,7 +74,12 @@ export function riskBreakdown(state: GameState, to: DistrictId, { includePatrol 
   risk.add('rule.exit-gate', DISTRICTS[state.districtId].exitGateRisk)
   for (const id of PRODUCT_IDS) {
     const beacon = PRODUCTS[id].beaconRisk
-    if (beacon && ownedQty(state.cargo, id) > 0) risk.add(id, beacon)
+    if (beacon && ownedQty(state.cargo, id) > 0) {
+      risk.add(id, beacon)
+      // Glitch brouille la balise, sur sa propre ligne
+      const masker = crewEffect(state, 'masksBeacon') ? workingCrew(state) : null
+      if (masker) risk.add(masker, -beacon)
+    }
   }
   if (state.debtLate) risk.add('rule.ambush', DEBT_LATE.ambushRisk)
   // Tonnage hors-norme : physique, il compte aussi en zone hors-réseau

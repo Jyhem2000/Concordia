@@ -6,7 +6,7 @@ import { keysOf } from './records.ts'
 import type { Rng } from './rng.ts'
 import { refreshExemption } from './crew.ts'
 import { deliverDay } from './delivery.ts'
-import { deliverMission } from './night.ts'
+import { deliverMission, injectServer, isOnMission } from './night.ts'
 import { loseHalfDay } from './time.ts'
 import type {
   DistrictId,
@@ -186,7 +186,9 @@ export function heatWave(ctx: EventContext): Extract<EventEffect, { kind: 'heat'
 
 /** Arrivée dans un district (chap. 2) : effets d'arrivée des événements locaux, comme le sas de `[EVT-D3-01]` */
 export function arrive(state: GameState): GameState {
-  const arrived = hasEffect(state, state.districtId, 'halfDay') ? loseHalfDay(state) : state
+  const halted = hasEffect(state, state.districtId, 'halfDay') ? loseHalfDay(state) : state
+  // Tournée de nuit hors mission arrivée sans garde à vue (contrôle franchi compris) : injection du Résident Réécrit (chap. 5)
+  const arrived = halted.phase === 'night' && !isOnMission(halted, halted.districtId) ? injectServer(halted) : halted
   // Arriver en D1 de jour, c'est passer à la Cantine : l'Exemption Métabolique revient au maximum ;
   // arriver dans le district d'une commande du DSC (livraison du jour, mission de nuit), c'est livrer les caisses scellées
   return refreshExemption(deliverDay(deliverMission(arrived)))

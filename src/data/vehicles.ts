@@ -91,7 +91,15 @@ export const CREW: Readonly<Record<CrewId, Crew>> = {
     bribeBonus: 0.15,
     revealsPatrol: true,
   },
-  'CREW-02': { requires: [{ kind: 'wanted' }], dailySalary: 900, liveQuotes: true, offshoreBonus: 0.005, fleeBonus: 0.2, forgeryBonus: 0.2 },
+  'CREW-02': {
+    requires: [{ kind: 'wanted' }],
+    dailySalary: 900,
+    liveQuotes: true,
+    masksBeacon: true,
+    offshoreBonus: 0.005,
+    fleeBonus: 0.2,
+    forgeryBonus: 0.2,
+  },
   'CREW-03': {
     requires: [{ kind: 'tagSales', tag: 'TAG-PERISHABLE', count: 10 }],
     dailySalary: 375,

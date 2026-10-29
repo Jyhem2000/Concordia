@@ -18,7 +18,7 @@ Le résultat est **borné, après** tous les multiplicateurs (`RISK_BOUNDS` dans
 | **Base_District** | risque de base du district ([`districts.ts`](../src/data/districts.ts)) ; remplacé par `[EVT-D5-02]` |
 | **Suspicion** | selon l'ICC (chap. 2) |
 | **Malus_Tags** | pour chaque tag détectable : *valeur du tag × part de la cargaison* — `[TAG-ODOROUS]`, `[TAG-TECH]`, `[TAG-CHEMICAL]`, `[TAG-CULTURE]` |
-| **Malus_Contexte** (additif) | trajet de nuit hors mission (chap. 2), districts traversés (chap. 4), portique du sas de `[D4]` (chap. 4), `[VEH-04]`, balise de `[T4-06]`, ronde renforcée, Fiche S, pic suspect de la veille (chap. 7), embuscades de la dette (chap. 7), purge préventive de `[EVT-L01]`, carte « capitaine de la BRC » de `[LOC-D5-1]` (négative), `[EVT-G02]`, `[EVT-D1-03]`, `[EVT-D4-01]` |
+| **Malus_Contexte** (additif) | trajet de nuit hors mission (chap. 2), districts traversés (chap. 4), portique du sas de `[D4]` (chap. 4), `[VEH-04]`, balise de `[T4-06]` (brouillée par `[CREW-02]`), ronde renforcée, Fiche S, pic suspect de la veille (chap. 7), embuscades de la dette (chap. 7), purge préventive de `[EVT-L01]`, carte « capitaine de la BRC » de `[LOC-D5-1]` (négative), `[EVT-G02]`, `[EVT-D1-03]`, `[EVT-D4-01]` |
 | **Couverture** (additive) | `[TAG-LEGAL]` |
 | **Bonus_Équipement** (multiplicatif) | produit des coefficients de `[VEH-01]`, `[VEH-02]`, `[CREW-01]` et du coupe-file Citoyen Or (chap. 2) |
 | **Multiplicateurs_finaux** | `[EVT-D3-02]`, `[EVT-D5-03]` |

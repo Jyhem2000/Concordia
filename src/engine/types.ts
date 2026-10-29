@@ -323,6 +323,8 @@ export type Crew = {
   revealsPatrol?: boolean
   /** Cours de tous les districts en temps réel */
   liveQuotes?: boolean
+  /** Brouille les balises de traçage des produits en soute (malus de risque annulé) */
+  masksBeacon?: boolean
   /** Taux offshore ajouté sur chaque tranche, sauf les matins en cellule */
   offshoreBonus?: number
   /** Bonus de fuite et de passage forcé */

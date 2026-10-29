@@ -86,7 +86,7 @@ export function canInject(state: GameState): boolean {
   return state.progress.injections < injections && workingCrew(state) === crew && ownedQty(state.cargo, requiredProduct) > 0
 }
 
-/** Tournée de nuit hors mission passée sans interception : Glitch injecte un morceau du dossier dans Aeterna */
+/** Tournée de nuit hors mission arrivée sans garde à vue : Glitch injecte un morceau du dossier dans Aeterna */
 export function injectServer(state: GameState): GameState {
   if (!canInject(state)) return state
   const injections = state.progress.injections + 1

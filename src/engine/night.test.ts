@@ -3,7 +3,7 @@ import { ENDINGS, NIGHT_MISSION } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
 import { SEALED_PRODUCT } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
-import { drawRoadEvent } from './events.ts'
+import { arrive, drawRoadEvent } from './events.ts'
 import { checkpointPlace, drawInterception } from './interception.ts'
 import { missionFee, sealedCount } from './night.ts'
 import { riskBreakdown } from './risk.ts'
@@ -78,6 +78,22 @@ describe('mission de nuit', () => {
       run(run(evening({ cargo: [lot(requiredProduct, 1)], crew: glitch, progress: complete }), { type: 'forceCurfew' }), { type: 'travel', to: 'D2' })
         .progress.injections,
     ).toBe(injections)
+  })
+
+  it('injecte aussi après un contrôle franchi, mais pas sur une mission', () => {
+    const { requiredProduct, crew } = ENDINGS.resident
+    const glitch = { ...evening().crew, active: crew, paidDay: 3 }
+    const arrivedAfterControl = { ...evening({ cargo: [lot(requiredProduct, 1)], crew: glitch }), phase: 'night' as const, districtId: 'D2' as const }
+    expect(arrive(arrivedAfterControl).progress.injections).toBe(1)
+    expect(arrive({ ...arrivedAfterControl, mission: { to: 'D2' } }).progress.injections).toBe(0)
+  })
+
+  it('laisse Glitch brouiller la balise du serveur', () => {
+    const { requiredProduct, crew } = ENDINGS.resident
+    const carrying = evening({ cargo: [lot(requiredProduct, 1)] })
+    const glitch = { ...carrying, crew: { ...carrying.crew, active: crew, paidDay: 3 } }
+    const beacon = (state: GameState) => riskBreakdown(state, 'D2', { includePatrol: false }).total
+    expect(beacon(glitch)).toBeLessThan(beacon(carrying))
   })
 
   it('interdit de vendre ou de donner les caisses scellées', () => {
