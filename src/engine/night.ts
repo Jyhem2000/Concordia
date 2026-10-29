@@ -16,9 +16,9 @@ import type { CargoLot, DistrictId, GameState } from './types.ts'
 
 export const isSealed = (lot: CargoLot) => PRODUCTS[lot.productId].sealed === true
 
-/** Mission proposée pour ce soir : une chance, vers un district tiré au hasard */
-export function drawNightOffer(rng: Rng): DistrictId | null {
-  return rng.chance(NIGHT_MISSION.chance) ? rng.pick(DISTRICT_IDS) : null
+/** Mission proposée pour ce soir, vers un district tiré au hasard (une chaque soir) */
+export function drawNightOffer(rng: Rng): DistrictId {
+  return rng.pick(DISTRICT_IDS)
 }
 
 /** Mission valable ce soir : proposée, débloquée (confiance du DSC), et pas vers le district où se trouve déjà le joueur */

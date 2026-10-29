@@ -62,7 +62,7 @@ Prix_Vente = Arrondi( Cours × Commission × Coef_Demande × Coef_Condition × S
 
 | Profil nuit | Effet | Logique |
 | :--- | :---: | :--- |
-| Festif | bonus | Prime de fête clandestine. |
+| Festif | bonus | Prime de fête clandestine : la vie nocturne réclame ses vices (produits addictifs, culture interdite, charcuterie). |
 | Diurne | malus | Excitants de bureau : leurs clients dorment. |
 | — | aucun | — |
 

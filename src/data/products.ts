@@ -24,7 +24,7 @@ export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
   'T0-05': { tier: 0, basePrice: 0, tags: ['TAG-LEGAL'], sealed: true },
 
   // Tier 1 : petits plaisirs coupables
-  'T1-01': { tier: 1, basePrice: 80, tags: ['TAG-ADDICTIVE', 'TAG-FRAGILE'] },
+  'T1-01': { tier: 1, basePrice: 80, tags: ['TAG-ADDICTIVE', 'TAG-FRAGILE'], nightProfile: 'festive' },
   'T1-02': { tier: 1, basePrice: 120, tags: ['TAG-ADDICTIVE', 'TAG-ODOROUS'], nightProfile: 'diurnal' },
   'T1-03': { tier: 1, basePrice: 150, tags: ['TAG-PERISHABLE'] },
   'T1-04': { tier: 1, basePrice: 95, tags: ['TAG-CHEMICAL'] },
@@ -40,10 +40,11 @@ export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
     tier: 2,
     basePrice: 380,
     tags: ['TAG-CHEMICAL', 'TAG-ADDICTIVE'],
+    nightProfile: 'festive',
     doping: { fleeBonus: 0.25, chassisLoss: 10, iccLoss: 5 },
     sleeplessNight: { healthLoss: 10, minHealth: 10 },
   },
-  'T2-06': { tier: 2, basePrice: 550, tags: ['TAG-CULTURE', 'TAG-TECH'] },
+  'T2-06': { tier: 2, basePrice: 550, tags: ['TAG-CULTURE', 'TAG-TECH'], nightProfile: 'festive' },
   'T2-07': { tier: 2, basePrice: 480, tags: ['TAG-FRAGILE', 'TAG-CHEMICAL'] },
 
   // Tier 3 : trafic lourd & « armes » gastronomiques
@@ -61,13 +62,13 @@ export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
     nightProfile: 'festive',
   },
   'T3-04': { tier: 3, basePrice: 2_200, tags: ['TAG-CHEMICAL'] },
-  'T3-05': { tier: 3, basePrice: 1_600, tags: ['TAG-CULTURE'] },
+  'T3-05': { tier: 3, basePrice: 1_600, tags: ['TAG-CULTURE'], nightProfile: 'festive' },
   'T3-06': { tier: 3, basePrice: 2_500, tags: ['TAG-TECH', 'TAG-FRAGILE'] },
-  'T3-07': { tier: 3, basePrice: 3_200, tags: ['TAG-TECH', 'TAG-CULTURE'] },
+  'T3-07': { tier: 3, basePrice: 3_200, tags: ['TAG-TECH', 'TAG-CULTURE'], nightProfile: 'festive' },
 
   // Tier 4 : ennemis publics n°1
   'T4-01': { tier: 4, basePrice: 6_000, tags: ['TAG-PERISHABLE', 'TAG-ODOROUS'], nightProfile: 'festive' },
-  'T4-02': { tier: 4, basePrice: 8_500, tags: ['TAG-CULTURE', 'TAG-FRAGILE'] },
+  'T4-02': { tier: 4, basePrice: 8_500, tags: ['TAG-CULTURE', 'TAG-FRAGILE'], nightProfile: 'festive' },
   'T4-03': { tier: 4, basePrice: 12_000, tags: ['TAG-TECH'], iccRestore: 25 },
   'T4-04': { tier: 4, basePrice: 15_000, tags: ['TAG-CHEMICAL', 'TAG-FRAGILE'] },
   'T4-05': { tier: 4, basePrice: 18_000, tags: ['TAG-CHEMICAL', 'TAG-FRAGILE'] },

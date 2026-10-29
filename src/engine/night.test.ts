@@ -9,6 +9,7 @@ import { missionFee, sealedCount } from './night.ts'
 import { riskBreakdown } from './risk.ts'
 import { createRng, seedRng } from './rng.ts'
 import { sleep } from './routine.ts'
+import { createInitialState } from './state.ts'
 import { defined, EARNED, errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
 import type { CargoLot, GameState, Interception, ProductId } from './types.ts'
 
@@ -18,6 +19,10 @@ const nightRisk = (state: GameState, to: GameState['districtId']) =>
   riskBreakdown(state, to, { includePatrol: false }).lines.some((line) => line.source === 'rule.night-trip')
 
 describe('mission de nuit', () => {
+  it('est proposée chaque soir, vers un district tiré au hasard', () => {
+    for (let seed = 1; seed <= 20; seed++) expect(createInitialState(seed).nightOffer).not.toBeNull()
+  })
+
   it('charge des caisses scellées en proportion de la soute, si la place le permet', () => {
     const night = run(evening(), { type: 'forceCurfew', mission: true })
     expect(night.mission).toEqual({ to: 'D2' })

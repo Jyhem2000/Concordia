@@ -192,3 +192,39 @@ Campagnes Contrôle et 1 à 4 remesurées. Le marchand compte la confiance du DS
   - Le frein est la mécanique elle-même (Fiche S, missions rares au début), pas un chiffre.
 - **Difficulté :** la survie monte un peu, l'Équilibré passant de 77–83 % à 80–86 %. À surveiller au prochain recalage de difficulté.
 - **À graine égale :** la Couverture légale bat le Prudent sur 64 % des parties (61 % avant).
+
+## Nuit repensée : une mission chaque soir, profil festif élargi
+**Changements :**
+- une mission de nuit est proposée chaque soir, une fois la nuit débloquée (au lieu d'une chance sur 0,6) ;
+- profil festif étendu aux produits addictifs et culturels : `[T1-01]`, `[T2-05]`, `[T2-06]`, `[T3-05]`, `[T3-07]`, `[T4-02]`.
+
+Campagnes Contrôle et 1 à 4 remesurées.
+
+| Plan (Équilibré) | Avant | Après | Le Sans build |
+| :--- | :--- | :--- | :--- |
+| Sans build | 55 200 ₡ | **75 000 ₡** | — |
+| Nuit festive | 47 100 ₡ | **71 500 ₡** | 75 000 ₡ |
+| Couverture légale | 85 000 ₡ | 106 400 ₡ | 75 000 ₡ |
+| Citoyen modèle | 82 500 ₡ | 122 400 ₡ | 75 000 ₡ |
+
+- **Tout le monde gagne :** la nuit paie pour tous les plans, pas seulement pour le plan de nuit.
+  - L'écart entre Nuit festive et Sans build passe de −8 000 à −3 500 ₡ en Équilibré.
+  - En Casse-cou, la Nuit festive passe de 129 700 à 158 100 ₡ (le Sans build fait 140 100 ₡).
+- **La dette se solde plus tôt :** jour médian J2 à J3 en Casse-cou (J4 avant), grâce aux primes de mission.
+- **Difficulté, le jeu devient plus facile :**
+
+  | Tempérament | Survie avant | Survie après |
+  | :--- | :--- | :--- |
+  | Prudent | 85 à 93 % | 87 à 96 % |
+  | Équilibré | 80 à 86 % | **85 à 89 %** |
+  | Casse-cou | 67 à 75 % | 73 à 83 % |
+
+  L'ordre des tempéraments est enfin net (Prudent > Équilibré > Casse-cou), mais l'écart Prudent–Équilibré se resserre à 3 ou 4 points.
+- **Campagne 4 :**
+  - l'avance de survie monte à +16 pts ;
+  - Karma-Cham devient négatif (−9 300 ₡ ± 3 600) : le marchand paie la purge plus souvent (53 % des parties) alors que la nuit rapporte ;
+  - `[MOD-06]` devient négatif (−10 100 ₡) dans le plan Nuit festive ; `[MOD-04]` reste à −11 900 ₡ (même piège de mesure qu'avant) ;
+  - `[VEH-03]` et Mama Rosa redeviennent neutres (+3 300 et +2 800 ₡, marges larges).
+- **À graine égale :** la Couverture légale bat le Prudent sur 66 % des parties (64 % avant).
+- **Grandes fins :** la fin mafia monte (Couverture légale Baron 13 → 20 %), l'élite reste sous 5 %.
+- **Suite :** recalage de la difficulté (seuils de fin, intérêts de la dette, risque), à mesurer avant de coder.
