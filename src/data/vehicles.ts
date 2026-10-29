@@ -1,11 +1,11 @@
 import type { Crew, CrewId, Module, ModuleId, Vehicle, VehicleId } from '../engine/types.ts'
 
 /*
- * Véhicules, modules et équipiers. Leurs passifs, effets et bonus sont au chap. 5,
+ * Véhicules, modules et équipiers. Leurs passifs, effets et bonus sont au chap. 4,
  * les noms dans src/i18n/fr.ts.
  */
 
-/** Véhicule de départ (chap. 5) */
+/** Véhicule de départ (chap. 4) */
 export const START_VEHICLE: VehicleId = 'VEH-01'
 
 export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
@@ -21,7 +21,7 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
   },
   'VEH-02': {
     requires: [{ kind: 'deliveries', count: 3 }],
-    price: 22_000,
+    price: 15_000,
     cargo: 20,
     hiddenCompartment: 3,
     moduleSlots: 2,
@@ -32,7 +32,7 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
   },
   'VEH-03': {
     requires: [{ kind: 'debtPaid' }],
-    price: 45_000,
+    price: 25_000,
     cargo: 30,
     hiddenCompartment: 4,
     moduleSlots: 3,
@@ -44,7 +44,7 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
   },
   'VEH-04': {
     requires: [{ kind: 'debtPaid' }],
-    price: 100_000,
+    price: 55_000,
     cargo: 50,
     hiddenCompartment: 6,
     moduleSlots: 4,
@@ -56,44 +56,44 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
 }
 
 export const MODULES: Readonly<Record<ModuleId, Module>> = {
-  'MOD-01': { requires: [{ kind: 'debtPaid' }], price: 3_000, category: 'conservation', freshnessDelay: 2, heatProof: true },
-  'MOD-02': { price: 6_000, category: 'camouflage', tagFactor: { tag: 'TAG-ODOROUS', factor: 0.1 } },
+  'MOD-01': { requires: [{ kind: 'debtPaid' }], price: 2_000, category: 'conservation', freshnessDelay: 2, heatProof: true },
+  'MOD-02': { price: 3_500, category: 'camouflage', tagFactor: { tag: 'TAG-ODOROUS', factor: 0.1 } },
   'MOD-03': {
     requires: [{ kind: 'debtPaid' }],
-    price: 8_000,
+    price: 4_000,
     category: 'camouflage',
     tagFactor: { tag: 'TAG-TECH', factor: 0 },
     flyingCheckFactor: 0.5,
   },
-  'MOD-04': { price: 3_000, category: 'conservation', smoothRide: true, nightRiskFactor: 0.5 },
-  'MOD-05': { requires: [{ kind: 'wanted' }], price: 8_000, category: 'tactical', rotatingPlate: true },
-  'MOD-06': { requires: [{ kind: 'debtPaid' }], price: 7_000, category: 'tactical', ram: { fleeBonus: 0.4, damageFactor: 0.5 } },
-  'MOD-07': { requires: [{ kind: 'debtPaid' }], price: 7_000, category: 'tactical', trapdoor: { chance: 0.75, cooldownDays: 3, maxRecovery: 1 } },
+  'MOD-04': { price: 2_000, category: 'conservation', smoothRide: true, nightRiskFactor: 0.5 },
+  'MOD-05': { requires: [{ kind: 'wanted' }], price: 4_000, category: 'tactical', rotatingPlate: true },
+  'MOD-06': { requires: [{ kind: 'debtPaid' }], price: 4_000, category: 'tactical', ram: { fleeBonus: 0.4, damageFactor: 0.5 } },
+  'MOD-07': { requires: [{ kind: 'debtPaid' }], price: 4_000, category: 'tactical', trapdoor: { chance: 0.75, cooldownDays: 3, maxRecovery: 1 } },
   'MOD-08': {
     requires: [{ kind: 'deliveries', count: 3 }],
-    price: 25_000,
+    price: 12_000,
     category: 'tactical',
     fakeTerminal: { bluffBonus: 0.35, bribeRateFactor: 0.5 },
   },
-  'MOD-09': { requires: [{ kind: 'wanted' }], price: 10_000, category: 'tactical', droneJammer: true },
+  'MOD-09': { requires: [{ kind: 'wanted' }], price: 5_000, category: 'tactical', droneJammer: true },
 }
 
 /** Frais de recrutement à la Cantine (le premier recrutement est gratuit) */
-export const CREW_HIRE_FEE = 2_250
+export const CREW_HIRE_FEE = 1_500
 
-/** Salaires et bonus des équipiers (chap. 5) */
+/** Salaires et bonus des équipiers (chap. 4) */
 export const CREW: Readonly<Record<CrewId, Crew>> = {
   'CREW-01': {
     requires: [{ kind: 'controls', count: 1 }],
-    dailySalary: 600,
-    inKindSalary: { amount: 300, tag: 'TAG-ADDICTIVE', minTier: 2 },
+    dailySalary: 400,
+    inKindSalary: { amount: 200, tag: 'TAG-ADDICTIVE', minTier: 2 },
     riskFactor: 0.8,
     bribeBonus: 0.15,
     revealsPatrol: true,
   },
   'CREW-02': {
     requires: [{ kind: 'wanted' }],
-    dailySalary: 900,
+    dailySalary: 600,
     liveQuotes: true,
     masksBeacon: true,
     offshoreBonus: 0.005,
@@ -102,7 +102,7 @@ export const CREW: Readonly<Record<CrewId, Crew>> = {
   },
   'CREW-03': {
     requires: [{ kind: 'tagSales', tag: 'TAG-PERISHABLE', count: 10 }],
-    dailySalary: 375,
+    dailySalary: 250,
     perishableKnowHow: 1.5,
     refining: true,
     perishableQuota: 2.5,

@@ -126,7 +126,7 @@ Le critère devient : *à graine égale, un choix meilleur en moyenne gagne au m
   - Effet : Chaîne du froid 32 → 38 %, Nuit festive 36 → 44 %.
 - **Essayé, non retenu :** relever le malus Tech pour valoriser `[MOD-03]` pénalisait tout le monde sans aider l'Électronique.
 
-**Critère non atteint.** Un build joué comme une politique fixe (produits favorisés, achats imposés) ne bat pas le jeu libre partie par partie : son coût pèse tôt, son effet arrive trop tard ou trop peu. Le remède est structurel, et c'est l'objet de l'analyse de progression ([docs/propositions/progression.md](../../docs/propositions/progression.md)) : un équipement qui arrive à son heure, à un prix et un effet calibrés pour cette étape de la partie.
+**Critère non atteint.** Un build joué comme une politique fixe (produits favorisés, achats imposés) ne bat pas le jeu libre partie par partie : son coût pèse tôt, son effet arrive trop tard ou trop peu. Le remède est structurel, et c'est l'objet de l'analyse de progression (proposition de progression, adoptée en partie puis retirée des docs) : un équipement qui arrive à son heure, à un prix et un effet calibrés pour cette étape de la partie.
 
 ## Progression, étape 1 (équipiers liés à des actes, nuit après deux livraisons, confiance du DSC)
 Campagnes Contrôle et 1 à 4 remesurées.
@@ -471,3 +471,17 @@ Principe retenu : le but d'une partie est le score ; les grandes fins sont des a
 - les builds qui réduisent le risque (couverture en Tier 0, ICC haut) restent les plus rentables, la témérité paie par le tempérament ;
 - `[MOD-03]` ne se rentabilise pas ;
 - le hasard des graines pèse plus que le choix du plan (écart entre graines 106 000 ₡, entre bots 38 000 ₡) : l'effet boule de neige d'un jeu de négoce.
+
+## Prix de l'équipement divisés par deux environ
+Constat : sur 30 jours, la plupart des équipements ne se remboursaient pas (campagne 4).
+
+**Changements** (`vehicles.ts`) : véhicules (`[VEH-02]` 22 000 → 15 000 ₡, `[VEH-03]` 45 000 → 25 000 ₡, `[VEH-04]` 100 000 → 55 000 ₡), modules à peu près de moitié, salaires des équipiers d'un tiers, frais de recrutement 2 250 → 1 500 ₡.
+
+**Campagne Plans** (score moyen Équilibré / Casse-cou, avant → après) :
+- Chaîne du froid 53 → 61k / 139 → 151k, Haut tier 47 → 60k / 137 → 170k, plan Saboteur 48 → 58k / 125 → 188k, Fuite au sommet 58 → 68k / 145 → 163k : ils repassent devant le Sans build (59 / 130k).
+- Électronique (`[MOD-03]`) reste derrière en Casse-cou (91k) ; Rentier et Opportuniste restent juste sous le Sans build.
+- Citoyen modèle 90 → 112k en Équilibré.
+
+**Campagne 4 (retraits) :** aucun véhicule ni équipier n'est plus négatif ; la plupart sont neutres, `[VEH-02]` et `[CREW-01]` positifs. Restent négatifs :
+- `[MOD-04]` (−11 000 ₡) et `[MOD-05]` (−14 000 ₡) dans les plans de nuit ;
+- les lieux spéciaux payants : Karma-Cham (−7 700 ₡), chirurgie (−4 900 ₡), laissez-passer (−2 600 ₡), certificat (−500 ₡).
