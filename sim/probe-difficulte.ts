@@ -1,4 +1,5 @@
-import { AFTER, BLUFF, BRIBE, ENDINGS, FLEE, NIGHT_PROFILE_FACTOR, PROTECTION, SEARCH } from '../src/data/balance.ts'
+import { AFTER, BLUFF, BRIBE, ENDINGS, FLEE, PROTECTION, SEARCH } from '../src/data/balance.ts'
+import { TAGS } from '../src/data/tags.ts'
 import { DISTRICTS } from '../src/data/districts.ts'
 import { traderBot, type Objective } from './bots/trader.ts'
 import { PLANS, TEMPERAMENTS } from './plans.ts'
@@ -24,7 +25,7 @@ const mode = process.argv[2]
 if (mode === 'fins') {
   type Variant = { label: string; mafia: number; elite: number; resident: number; saboteur: number }
   const variants: Variant[] = [
-    { label: 'actuel 150k / 300k / 150k / 500k', mafia: 150_000, elite: 300_000, resident: 150_000, saboteur: 500_000 },
+    { label: 'actuel 150k / 200k / 150k / 500k', mafia: 150_000, elite: 200_000, resident: 150_000, saboteur: 500_000 },
     { label: '150k / 200k / 150k / 300k', mafia: 150_000, elite: 200_000, resident: 150_000, saboteur: 300_000 },
   ]
   const bots: { planName: string; objective: Objective }[] = [
@@ -66,7 +67,7 @@ if (mode === 'pression') {
   for (const rule of [SEARCH.low, SEARCH.high, BRIBE.fail, FLEE.fail]) Object.assign(rule, { fineRate: rule.fineRate * fine })
   Object.assign(BLUFF.failedFine, { low: BLUFF.failedFine.low * fine, high: BLUFF.failedFine.high * fine })
   // Nuit : profil festif hors after, after du couvre-feu
-  if (option('festif')) Object.assign(NIGHT_PROFILE_FACTOR, { festive: Number(option('festif')) })
+  if (option('festif')) Object.assign(TAGS[AFTER.tag], { nightSale: Number(option('festif')) })
   if (option('after')) Object.assign(AFTER, { festiveFactor: Number(option('after')) })
   if (option('foule')) Object.assign(AFTER, { nightRiskFactor: Number(option('foule')) })
   console.log(`— ${label}`)

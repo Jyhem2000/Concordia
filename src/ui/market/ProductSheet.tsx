@@ -1,4 +1,4 @@
-import { DAMAGED_FACTOR, FRESHNESS } from '../../data/balance.ts'
+import { AFTER, DAMAGED_FACTOR, FRESHNESS } from '../../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
@@ -20,7 +20,7 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
   // Profil public (vices de la Loterie compris) et mémoire de marché se lisent sur la partie entière
   const game = useGameStore((s) => s.game)
   const { day, districtId: here } = game
-  const { t, percent, signedPercent, credits } = useI18n()
+  const { t, percent, signedPercent, credits, multiplier } = useI18n()
   const product = PRODUCTS[productId]
 
   const where = (test: (district: District) => boolean) => DISTRICT_IDS.filter((id) => test(DISTRICTS[id]))
@@ -29,7 +29,7 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
 
   // Effets de chaque tag, tels que les applique le moteur (chap. 3)
   const tagLines = (tag: TagId): string[] => {
-    const { cover, tripRisk, detectedRisk, bluffMalus, smell, perishable, breakage, explosion, fleeDropBonus } = TAGS[tag]
+    const { cover, tripRisk, detectedRisk, bluffMalus, smell, perishable, breakage, explosion, fleeDropBonus, nightSale } = TAGS[tag]
     const smelly = smell ? names(where((district) => district.odorFactor > 1)) : ''
     return [
       ...(cover ? [t.sheet.cover(percent(cover, 0), offGrid)] : []),
@@ -42,11 +42,12 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
         : []),
       ...(explosion ? [t.sheet.explosion(percent(explosion.chance, 0), explosion.chassisLoss)] : []),
       ...(fleeDropBonus ? [t.sheet.drop(signedPercent(fleeDropBonus, 0))] : []),
+      ...(nightSale ? [t.sheet.nightSale(multiplier(nightSale), tag === AFTER.tag ? multiplier(AFTER.festiveFactor) : null)] : []),
     ].map((line) => `${t.tag[tag].name} : ${line}`)
   }
 
   // Actions propres au produit (chap. 3)
-  const { masks, bluffAid, doping, sleeplessNight, cooling, iccRestore, beaconRisk, lethalOnSearch, nightProfile } = product
+  const { masks, bluffAid, doping, sleeplessNight, cooling, iccRestore, beaconRisk, lethalOnSearch } = product
   const actions = [
     ...(masks ? [t.sheet.masks(t.tag[masks].name)] : []),
     ...(bluffAid ? [t.sheet.bluffAid(bluffAid.crates, bluffAid.cancelsSmell ? t.interception.cancelsSmell : signedPercent(bluffAid.bonus, 0))] : []),
@@ -56,7 +57,6 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
     ...(iccRestore ? [t.market.iccRestore(iccRestore)] : []),
     ...(beaconRisk ? [t.sheet.beacon(signedPercent(beaconRisk, 0))] : []),
     ...(lethalOnSearch ? [t.sheet.lethal] : []),
-    ...(nightProfile ? [t.sheet.night[nightProfile]] : []),
   ]
 
   // Sanction de base d'une saisie (chap. 6)

@@ -24,14 +24,14 @@ describe('breakdown', () => {
   })
 
   it("enregistre le plafonnement quand il s'applique", () => {
-    const result = breakdown('D6', 0.55).add('rule.night-festive', 0.25).add('T4-06', 0.3).clamp(0, 1).build()
+    const result = breakdown('D6', 0.55).add('rule.after', 0.25).add('T4-06', 0.3).clamp(0, 1).build()
 
     expect(result.total).toBe(1)
     expect(result.lines.at(-1)).toMatchObject({ op: 'clamp', source: 'rule.clamp', total: 1 })
   })
 
   it('applique les rendements décroissants via set (Savoir_Faire, chap. 7)', () => {
-    const builder = breakdown('TAG-PERISHABLE', 1.3).mul('rule.night-festive', 1.2).mul('CREW-03', 1.25)
+    const builder = breakdown('TAG-PERISHABLE', 1.3).mul('rule.after', 1.2).mul('CREW-03', 1.25)
     const excess = builder.total - 1.5
     const result = builder.set('rule.diminishing-returns', 1.5 + excess / 2).build()
 
@@ -51,7 +51,7 @@ describe('breakdown', () => {
   it('fige le résultat construit', () => {
     const builder = breakdown('D1', 0.1)
     const built = builder.build()
-    builder.add('rule.night-festive', 0.25)
+    builder.add('rule.after', 0.25)
 
     expect(built.total).toBe(0.1)
     expect(built.lines).toHaveLength(1)

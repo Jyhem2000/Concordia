@@ -387,3 +387,31 @@ Changements :
 | Saboteur | 0 / 6 % | score (500k) |
 
 - **Le parrain ne bloque plus l'Élite :** ce sont les trois conditions réunies. Prochain levier : le seuil de score (300k, le double du Baron) ou l'ICC Or.
+
+## Seuil Élite à 200k, tags Festif et Diurne, after à Panacea
+Changements :
+- **Seuil de l'Élite :** 200 000 ₡ (300 000 avant).
+- **Profil nuit devenu tags :**
+  - `[TAG-FESTIVE]` (Festif, ×1,5 la nuit, ×3,5 à l'after) et `[TAG-DIURNAL]` (Diurne, ×0,8 la nuit) ;
+  - mêmes coefficients qu'avant, mais visibles en badge au marché et expliqués dans la fiche du produit.
+- **After à Panacea `[D3]` :** la salle de réveil du bloc opératoire. Il y a maintenant cinq lieux, et la Flèche de Verre n'en accueille toujours pas. Aucun produit ajouté : Panacea produit déjà du Festif (Tcherno-Bull) et en achète (whisky, cigares).
+
+Le tirage parmi cinq districts décale à nouveau le générateur : on ne compare pas aux campagnes précédentes ligne à ligne.
+
+**Campagne Plans :**
+- Nuit festive : 95 / 90 / 75 % de survie, 45 / 89 / 132k.
+- Sans build : 85 / 84 / 75 %, 23 / 68 / 174k.
+- La nuit paie toujours en Prudent et en Équilibré.
+- La Couverture légale Équilibré reste basse (72 %), sous son Prudent (89 %), à égalité avec son Casse-cou (70 %). Ce point reste ouvert.
+
+**Fins de prestige** (fin visée atteinte, Équilibré / Casse-cou) :
+
+| Fin | Taux | Ce qui bloque (part des survivants, Équilibré) |
+| :--- | :--- | :--- |
+| Baron | 31 / 48 % | — |
+| Élite | 7 / 3 % | score ≥ 200k 29 %, parrain 19 %, ICC Or 31 % : il les faut tous les trois |
+| Résident | 8 / 7 % | score ≥ 150k 18 %, injection 35 % ; exécutions 10–12 % |
+| Saboteur | 1 / 7 % | score ≥ 500k |
+
+- **Élite :** l'abaissement du seuil la fait passer de 5 à 7 % en Équilibré. En Casse-cou, l'ICC reste le verrou : le Silo se ferme sous le palier Ordinaire.
+- **L'ordre voulu** (Baron, puis Élite et Résident, puis Saboteur) se lit maintenant en Équilibré, mais les fins de prestige restent sous les 10 %.

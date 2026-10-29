@@ -25,7 +25,17 @@ export type ProductId = `T0-${Four | '05'}` | `T1-${Six}` | `T2-${Seven}` | `T3-
 
 /** Tags système (chap. 3) */
 export type TagId =
-  'TAG-LEGAL' | 'TAG-PERISHABLE' | 'TAG-FRAGILE' | 'TAG-ADDICTIVE' | 'TAG-ODOROUS' | 'TAG-CULTURE' | 'TAG-TECH' | 'TAG-CHEMICAL' | 'TAG-FLAMMABLE'
+  | 'TAG-LEGAL'
+  | 'TAG-PERISHABLE'
+  | 'TAG-FRAGILE'
+  | 'TAG-ADDICTIVE'
+  | 'TAG-ODOROUS'
+  | 'TAG-CULTURE'
+  | 'TAG-TECH'
+  | 'TAG-CHEMICAL'
+  | 'TAG-FLAMMABLE'
+  | 'TAG-FESTIVE'
+  | 'TAG-DIURNAL'
 
 /** Districts (chap. 4) */
 export type DistrictId = `D${1 | 2 | 3 | 4 | 5 | 6}`
@@ -108,9 +118,6 @@ export type RoadChoice = {
 
 export type RoadEvent = { a: RoadChoice; b: RoadChoice }
 
-/** Profil de vente pendant le couvre-feu (chap. 7) */
-export type NightProfile = 'festive' | 'diurnal'
-
 /** Effets chiffrés d'un tag sur le risque et le contrôle (chap. 3) ; absent = sans effet */
 export type Tag = {
   /** Couverture : risque retiré × part du tag dans la cargaison */
@@ -131,6 +138,8 @@ export type Tag = {
   explosion?: { chance: number; chassisLoss: number }
   /** Largage offensif en fuite : chance ajoutée en sacrifiant une caisse (chap. 3 et 6) */
   fleeDropBonus?: number
+  /** Coefficient de vente pendant le couvre-feu (chap. 7) ; pour le tag de l'after, la fête le remplace (chap. 2) */
+  nightSale?: number
 }
 
 export type Product = {
@@ -139,7 +148,6 @@ export type Product = {
   tags: readonly TagId[]
   /** Tier 0 : chaque caisse masque 1 caisse de ce tag (chap. 3, masquage 1:1) */
   masks?: TagId
-  nightProfile?: NightProfile
   /** Remplace le stock du tier */
   dailyStock?: Range
   /** Chance d'apparaître chaque jour dans la boutique de son district producteur */

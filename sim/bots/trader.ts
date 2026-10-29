@@ -1,4 +1,5 @@
 import {
+  AFTER,
   DEBT_DAILY_RATE,
   DEBT_LATE,
   ENDINGS,
@@ -419,7 +420,7 @@ function saleFactor(view: GameState, lot: CargoLot, to: DistrictId = view.distri
  * Revente estimée au cours normal de l'after, au profil festif de la fête, un peu escomptée (risque de la nuit).
  */
 function tonightAtAfter(view: GameState, plan: Plan, productId: ProductId): number {
-  if (!plan.nightOwl || view.phase !== 'day' || PRODUCTS[productId].nightProfile !== 'festive' || checkForceCurfew(view)) return 0
+  if (!plan.nightOwl || view.phase !== 'day' || !PRODUCTS[productId].tags.includes(AFTER.tag) || checkForceCurfew(view)) return 0
   const night: GameState = { ...view, phase: 'night' }
   return normalQuote(view, view.after, productId) * SALE_COMMISSION * saleFactor(night, freshLot(view, productId), view.after) * AFTER_DISCOUNT
 }

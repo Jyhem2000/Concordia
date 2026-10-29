@@ -1,6 +1,6 @@
 # 3. Tags & catalogue des produits
 
-> Les stats des produits et des tiers (prix, tags, masquage, profil nuit, stocks, quotas) sont dans [`products.ts`](../src/data/products.ts), qui fait foi : ce chapitre porte les règles des tags et le lore. Les multiplicateurs d'événements sont au chap. 8, les districts producteurs / demandeurs dans [`districts.ts`](../src/data/districts.ts), les sanctions par tier au chap. 6.
+> Les stats des produits et des tiers (prix, tags, masquage, stocks, quotas) sont dans [`products.ts`](../src/data/products.ts), qui fait foi : ce chapitre porte les règles des tags et le lore. Les multiplicateurs d'événements sont au chap. 8, les districts producteurs / demandeurs dans [`districts.ts`](../src/data/districts.ts), les sanctions par tier au chap. 6.
 > **Unité :** 1 caisse = 1 emplacement de soute.
 
 ## Les tags système
@@ -15,6 +15,8 @@
 | `[TAG-CULTURE]` | Culture | Cible idéologique : **risque ajouté × part culturelle** de la cargaison dans les districts à **délation idéologique** (chap. 4). Modificateur : `[EVT-D2-01]`. Interaction : `[LOC-D2-1]`. |
 | `[TAG-TECH]` | Tech | **risque ajouté × part Tech** de la cargaison dans les districts équipés de **scanners électromagnétiques** (chap. 4). Modificateurs : `[MOD-03]`, `[EVT-G03]`, `[EVT-D5-03]`. |
 | `[TAG-CHEMICAL]` | Chimique | **risque ajouté × part chimique** de la cargaison dans les districts équipés de **bio-scanners** (chap. 4). Modificateur : `[LOC-D3-1]`. **Largage offensif** en fuite : sacrifier 1 caisse crée un nuage aveuglant, chance de fuite en plus (`fleeDropBonus` dans [`tags.ts`](../src/data/tags.ts)). Interactions : `[EVT-D2-03]`, `[LOC-D2-1]`. |
+| `[TAG-FESTIVE]` | Festif | **Vente de nuit :** pendant le couvre-feu, se vend mieux (la vie nocturne réclame ses vices : produits addictifs, culture interdite, charcuterie). À l'**after du couvre-feu** (chap. 2), beaucoup mieux. Coefficients : `nightSale` dans [`tags.ts`](../src/data/tags.ts), `AFTER` dans [`balance.ts`](../src/data/balance.ts) (chap. 7). |
+| `[TAG-DIURNAL]` | Diurne | **Vente de nuit :** pendant le couvre-feu, se vend moins bien (excitants de bureau : leurs clients dorment). Coefficient : `nightSale` dans [`tags.ts`](../src/data/tags.ts). |
 | `[TAG-FLAMMABLE]` | Inflammable | **Explosion :** en cas d'échec de fuite (passage forcé chez les milices compris : c'est le véhicule qui part en tête-à-queue), chaque caisse **non masquée** peut exploser : caisse détruite, châssis endommagé (`explosion` dans [`tags.ts`](../src/data/tags.ts)). Les explosions ont lieu avant la sanction. **Largage offensif** en fuite : déverser / enflammer 1 caisse, chance de fuite en plus (`fleeDropBonus`). |
 
 ### Masquage 1:1 (partiel)
@@ -55,7 +57,7 @@ Tout lot acheté démarre **Extra-Frais**. L'Extra-Frais est une **prime de livr
 | **3** | Trafic lourd & « armes » gastronomiques (crimes fédéraux) | Gros investissements, fortes marges. |
 | **4** | Ennemis publics n°1 (légendaires) | Fin de partie. Marges colossales. |
 
-Stock par jour, quota de demande (chap. 7) et bonus de Forte demande de chaque tier : `TIERS` dans [`products.ts`](../src/data/products.ts). **Profil nuit** (*Festif* ou *Diurne*, chap. 7) : champ `nightProfile` de chaque produit.
+Stock par jour, quota de demande (chap. 7) et bonus de Forte demande de chaque tier : `TIERS` dans [`products.ts`](../src/data/products.ts).
 
 ---
 

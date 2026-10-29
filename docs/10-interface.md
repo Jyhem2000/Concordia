@@ -47,7 +47,7 @@ Mêmes paliers et mêmes noms que les règles (chap. 2) : l'interface ne défini
 * **Indicateurs :**
   * 📉 vert (prix très bas / production locale, « se revend mal ici ») · 🔥 orange (forte demande) · 🚀 rouge clignotant (explosion liée à un événement) ;
   * **origine** de chaque produit en boutique : production locale, socle officiel (Tier 0), arrivage du jour (complément neutre) ou arrivage d'événement ;
-  * profil nuit à côté du prix (🌙 + / 🌙 −) ;
+  * tags de vente de nuit (Festif, Diurne) parmi les tags du produit ;
   * **rachat au cours** sur chaque ligne : les caisses que ce district rachète encore aujourd'hui au plein cours (côté acheteurs, indépendant du stock de la boutique), avec sa reconstitution du lendemain (*« 5 (+2 demain) »*) et une explication au survol ; au-delà, le prix saturé s'affiche ;
   * **PMA** sur chaque ligne possédée, ex. *« En soute : 8 (acheté à 410 ₡/u) »*.
   * **État** sur chaque ligne possédée : caisses par état de fraîcheur, caisses abîmées, et délai avant que le lot le plus ancien pourrisse.

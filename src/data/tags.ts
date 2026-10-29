@@ -15,4 +15,7 @@ export const TAGS: Readonly<Record<TagId, Tag>> = {
   'TAG-TECH': { detectedRisk: 0.5 },
   'TAG-CHEMICAL': { detectedRisk: 0.25, fleeDropBonus: 0.15 },
   'TAG-FLAMMABLE': { explosion: { chance: 0.25, chassisLoss: 15 }, fleeDropBonus: 0.2 },
+  // Vente pendant le couvre-feu (chap. 7) : la vie nocturne réclame ses vices ; les excitants de bureau, eux, attendent le matin
+  'TAG-FESTIVE': { nightSale: 1.5 },
+  'TAG-DIURNAL': { nightSale: 0.8 },
 }

@@ -1,4 +1,4 @@
-import type { CrewId, DistrictId, IccTier, NightProfile, ProductId } from '../engine/types.ts'
+import type { CrewId, DistrictId, IccTier, ProductId, TagId } from '../engine/types.ts'
 
 /*
  * Constantes globales d'équilibrage. Ce fichier fait foi ; chaque valeur cite le chapitre
@@ -63,7 +63,7 @@ type EndingRules = {
 export const ENDINGS: Readonly<EndingRules> = {
   saboteur: { minScore: 500_000, requiredProduct: 'T4-06', district: 'D4' },
   resident: { minScore: 150_000, injections: 3, requiredProduct: 'T4-06', crew: 'CREW-02' },
-  elite: { minScore: 300_000, iccTier: 'gold', sponsorOrders: 2 },
+  elite: { minScore: 200_000, iccTier: 'gold', sponsorOrders: 2 },
   mafia: { minScore: 150_000 },
 }
 
@@ -95,15 +95,17 @@ export const SATURATED_SALE_FACTOR = 0.5
 /** Chaque matin, la demande restante remonte de quota / DEMAND_REFILL_DIVISOR (arrondi au supérieur) */
 export const DEMAND_REFILL_DIVISOR = 3
 
-/** Coefficient de vente pendant le couvre-feu, selon le profil nuit du produit (hors after) */
-export const NIGHT_PROFILE_FACTOR: Readonly<Record<NightProfile, number>> = { festive: 1.5, diurnal: 0.8 }
-
 /**
  * Afters du couvre-feu (chap. 2) : chaque soir, une fête clandestine dans un de ces districts, annoncée dès 06h00.
- * Là, le profil festif vaut `festiveFactor` (au lieu de NIGHT_PROFILE_FACTOR) et la foule réduit le malus de nuit
- * hors mission à `nightRiskFactor`.
+ * Là, les produits du tag `tag` se vendent à `festiveFactor` (au lieu de leur coefficient de nuit, `nightSale` dans tags.ts)
+ * et la foule réduit le malus de nuit hors mission à `nightRiskFactor`.
  */
-export const AFTER = { districts: ['D1', 'D2', 'D4', 'D6'] as readonly DistrictId[], festiveFactor: 3.5, nightRiskFactor: 0.5 }
+export const AFTER = {
+  districts: ['D1', 'D2', 'D3', 'D4', 'D6'] as readonly DistrictId[],
+  tag: 'TAG-FESTIVE' as TagId,
+  festiveFactor: 3.5,
+  nightRiskFactor: 0.5,
+}
 
 /** Savoir-faire : au-delà de ce seuil, l'excédent ne compte que pour KNOW_HOW_EXCESS_FACTOR */
 export const KNOW_HOW_SOFT_CAP = 1.5

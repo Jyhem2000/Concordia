@@ -1,5 +1,6 @@
 import { BedDouble, Fuel, PartyPopper, Siren } from 'lucide-react'
-import { AFTER, ENDINGS, NIGHT_PROFILE_FACTOR, WANTED } from '../../data/balance.ts'
+import { AFTER, ENDINGS, WANTED } from '../../data/balance.ts'
+import { TAGS } from '../../data/tags.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { VEHICLES } from '../../data/vehicles.ts'
 import { ownedQty } from '../../engine/cargo.ts'
@@ -47,7 +48,7 @@ export default function EveningPanel() {
       {t.evening.after(
         t.district[game.after].name,
         multiplier(AFTER.festiveFactor),
-        multiplier(NIGHT_PROFILE_FACTOR.festive),
+        multiplier(TAGS[AFTER.tag].nightSale ?? 1),
         percent(1 - AFTER.nightRiskFactor, 0),
       )}
     </p>

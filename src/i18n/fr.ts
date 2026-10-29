@@ -93,9 +93,7 @@ export const fr = {
     'rule.commission': 'Commission de puce',
     'rule.saturation': 'Marché saturé',
     'rule.know-how': 'Savoir-faire',
-    'rule.night-festive': 'Nuit festive',
     'rule.after': 'After du couvre-feu',
-    'rule.night-diurnal': 'Nuit (clients endormis)',
     'rule.diminishing-returns': 'Rendements décroissants',
     'rule.anti-arbitrage': 'Pas de voyage, pas de bonus',
     'rule.debt-balance': 'Solde de la veille',
@@ -601,7 +599,7 @@ export const fr = {
     cooling: (crates: number) => `La nuit : ${crates} caisses refroidissent le moteur au lieu d'user le châssis`,
     beacon: (risk: string) => `Balise de traçage : ${risk} de risque de contrôle partout tant qu'il est en soute`,
     lethal: 'Fouille effective avec ce produit en soute : exécution sommaire',
-    night: { festive: 'Se vend mieux la nuit', diurnal: 'Se vend moins bien la nuit' },
+    nightSale: (factor: string, after: string | null) => `la nuit, se vend ${factor}${after ? `, et ${after} à l'after du couvre-feu` : ''}`,
     legal: 'Fouille : rien à craindre, simple formalité',
     seizure: (fine: string, icc: number, custodyDays: number, high: boolean) =>
       `Saisie : confiscation, amende de ${fine} de leur valeur (prix de base), ICC −${icc}${high ? `, garde à vue ${custodyDays} jour${custodyDays > 1 ? 's' : ''} (haut tier)` : ''}`,
@@ -939,6 +937,8 @@ export const fr = {
     'TAG-TECH': { name: 'Tech' },
     'TAG-CHEMICAL': { name: 'Chimique' },
     'TAG-FLAMMABLE': { name: 'Inflammable' },
+    'TAG-FESTIVE': { name: 'Festif' },
+    'TAG-DIURNAL': { name: 'Diurne' },
   } satisfies Record<TagId, Named>,
 
   product: {

@@ -5,7 +5,6 @@ import {
   DEMAND_REFILL_DIVISOR,
   KNOW_HOW_EXCESS_FACTOR,
   KNOW_HOW_SOFT_CAP,
-  NIGHT_PROFILE_FACTOR,
   QUOTE_NOISE,
   SALE_COMMISSION,
   SATURATED_SALE_FACTOR,
@@ -198,10 +197,14 @@ export function knowHowBreakdown(state: GameState, lot: CargoLot, districtId: Di
   const perishableKnowHow = crewEffect(state, 'perishableKnowHow')
   if (freshness && perishableKnowHow) knowHow.mul('CREW-03', perishableKnowHow)
 
-  // Profil nuit (chap. 7) ; à l'after du couvre-feu, la fête paie le festif bien plus cher (chap. 2)
-  const profile = PRODUCTS[lot.productId].nightProfile
-  if (profile === 'festive' && atAfter(state, districtId)) knowHow.mul('rule.after', AFTER.festiveFactor)
-  else if (state.phase === 'night' && profile) knowHow.mul(`rule.night-${profile}`, NIGHT_PROFILE_FACTOR[profile])
+  // Couvre-feu (chap. 7) : tags de vente de nuit ; à l'after, la fête paie le festif bien plus cher (chap. 2)
+  if (state.phase === 'night') {
+    for (const tag of PRODUCTS[lot.productId].tags) {
+      const nightSale = TAGS[tag].nightSale
+      if (tag === AFTER.tag && atAfter(state, districtId)) knowHow.mul('rule.after', AFTER.festiveFactor)
+      else if (nightSale) knowHow.mul(tag, nightSale)
+    }
+  }
 
   if (knowHow.total > KNOW_HOW_SOFT_CAP) {
     knowHow.set('rule.diminishing-returns', KNOW_HOW_SOFT_CAP + (knowHow.total - KNOW_HOW_SOFT_CAP) * KNOW_HOW_EXCESS_FACTOR)

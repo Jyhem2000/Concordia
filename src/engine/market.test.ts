@@ -119,6 +119,16 @@ describe('prix de vente', () => {
     expect(saleQuote(withLot(false, 'night'), 'T2-02', 1).total).toBe(day)
   })
 
+  it('vend moins bien la nuit un produit Diurne', () => {
+    const office = (phase: GameState['phase']): GameState => ({
+      ...base,
+      phase,
+      cargo: [{ productId: 'T1-05', qty: 5, unitCost: 1, travelled: true, boughtDay: 0, damaged: false }],
+    })
+    expect(PRODUCTS['T1-05'].tags).toContain('TAG-DIURNAL')
+    expect(saleQuote(office('night'), 'T1-05', 1).total).toBeLessThan(saleQuote(office('day'), 'T1-05', 1).total)
+  })
+
   it("paie le festif bien plus cher à l'after du couvre-feu, la nuit seulement", () => {
     const night = (after: GameState['after'], phase: GameState['phase'] = 'night') => saleQuote({ ...withLot(true, phase), after }, 'T2-02', 1).total
     // Le joueur est à Hives (D1)

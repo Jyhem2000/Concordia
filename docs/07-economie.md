@@ -37,7 +37,7 @@ Cours = Arrondi( Prix_Base × Coef_District × Bruit × Mult_Événement )
   * *Mult_EvtActif :* 1.00 par défaut. Si plusieurs multiplicateurs touchent le même produit (événement global, local, contrecoup, chap. 8), on garde celui dont l'écart `|Mult − 1.00|` est le plus fort (égalité : le local prime, puis le contrecoup cède).
   * *Bonus_Influence :* `[LOC-D2-1]`, multiplié par-dessus, le lendemain de la commande seulement (1.00 sinon).
   * *Plafond :* quel que soit le cumul, jamais au-dessus.
-* **Le cours est fixe toute la journée.** La nuit ne recalcule rien ; elle n'applique que deux ajustements connus dès le matin : le profil nuit à la vente, et l'annulation des événements marqués « jour seulement ».
+* **Le cours est fixe toute la journée.** La nuit ne recalcule rien ; elle n'applique que deux ajustements connus dès le matin : les tags de vente de nuit (Festif, Diurne), et l'annulation des événements marqués « jour seulement ».
 
 ## Quota de rachat
 Pendant de la boutique : un district ne rachète qu'une quantité limitée de chaque produit au plein cours. À ne pas confondre avec le statut *Forte demande* (qui fixe le cours et le quota) : tout produit a un quota, même produit sur place, où il se revend mal (coefficient de production).
@@ -59,13 +59,13 @@ Prix_Vente = Arrondi( Cours × Commission × Coef_Demande × Coef_Condition × S
 * **Coef_Condition :** caisse endommagée (`[TAG-FRAGILE]`, chap. 3 ; `DAMAGED_FACTOR` dans [`balance.ts`](../src/data/balance.ts)).
 * **Savoir_Faire = Coef_Fraîcheur × Coef_Nuit × Bonus_Mama**, avec **rendements décroissants** : au-delà d'un seuil, l'excédent ne compte qu'en partie (`KNOW_HOW_SOFT_CAP` et `KNOW_HOW_EXCESS_FACTOR` dans [`balance.ts`](../src/data/balance.ts)).
   * *Coef_Fraîcheur :* `[TAG-PERISHABLE]` (chap. 3).
-  * *Coef_Nuit — profil nocturne* (pendant le couvre-feu ; coefficients : `NIGHT_PROFILE_FACTOR` dans [`balance.ts`](../src/data/balance.ts) ; à l'after du couvre-feu, le festif prend le coefficient de la fête, `AFTER`, chap. 2) :
+  * *Coef_Nuit — tags de vente de nuit* (pendant le couvre-feu ; coefficients : `nightSale` dans [`tags.ts`](../src/data/tags.ts) ; à l'after du couvre-feu, le Festif prend le coefficient de la fête, `AFTER` dans [`balance.ts`](../src/data/balance.ts), chap. 2) :
 
-| Profil nuit | Effet | Logique |
+| Tag | Effet | Logique |
 | :--- | :---: | :--- |
-| Festif | léger bonus ; fort à l'after | Prime de fête clandestine : la vie nocturne réclame ses vices (produits addictifs, culture interdite, charcuterie), surtout là où la fête bat son plein. |
-| Diurne | malus | Excitants de bureau : leurs clients dorment. |
-| — | aucun | — |
+| `[TAG-FESTIVE]` Festif | léger bonus ; fort à l'after | Prime de fête clandestine : la vie nocturne réclame ses vices, surtout là où la fête bat son plein. |
+| `[TAG-DIURNAL]` Diurne | malus | Excitants de bureau : leurs clients dorment. |
+| aucun des deux | aucun | — |
 
   * *Bonus_Mama :* `[CREW-03]`.
 * **Clause anti-arbitrage :** Savoir_Faire est plafonné (`ANTI_ARBITRAGE_CAP` dans [`balance.ts`](../src/data/balance.ts)) si la caisse est revendue dans son district d'achat sans avoir voyagé.
