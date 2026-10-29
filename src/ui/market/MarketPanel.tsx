@@ -121,6 +121,9 @@ function MarketRow({ productId }: MarketRowProps) {
   const owned = ownedQty(game.cargo, productId)
   const cost = averageCost(game.cargo, productId)
   const status = productStatus(game, district, productId)
+  // Pourquoi il est en boutique : socle officiel, arrivage du jour (complément neutre), ou arrivage d'un événement (chap. 7)
+  const origin =
+    stock === undefined || status === 'production' ? null : product.tier === 0 ? 'official' : status === 'strong' ? 'exceptional' : 'arrival'
   const quota = demandQuota(game, district, productId)
   // Tendance : variation depuis le relevé de la veille dans ce district (chap. 7)
   const history = game.memory[district] ?? []
@@ -157,6 +160,7 @@ function MarketRow({ productId }: MarketRowProps) {
         {status !== 'neutral' && (
           <span className={`text-xs ${status === 'strong' ? 'text-orange-300' : 'text-green-300'}`}>{t.market.status[status]}</span>
         )}
+        {origin && <span className="text-xs text-zinc-400">{t.market.origin[origin]}</span>}
         {product.tags.map((tag) => (
           <span key={tag} className="rounded bg-zinc-800 px-1 text-xs text-zinc-300">
             {t.tag[tag].name}

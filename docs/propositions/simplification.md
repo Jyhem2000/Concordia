@@ -1,6 +1,14 @@
 # Proposition — Mécaniques à simplifier
 
-> Analyse de conception, pas encore tranchée. Chaque mécanique est revue sous trois angles : **ce qu'elle apporte au joueur**, **ce qu'elle coûte** (règles à apprendre, chiffres à l'écran, code), **ce que disent les mesures** (`sim/reports/`). Les propositions retenues rejoindront leurs chapitres ; les chiffres seront mesurés au simulateur avant d'être fixés.
+> **Adopté le 29/10/2026** (docs et code à jour, campagnes à remesurer) :
+> * inflation retirée, chaque coût fixé à 1,5 fois son ancienne valeur de base ;
+> * commission de la Laverie au retrait, délai de rentabilité affiché au guichet ;
+> * « Demande ici » renommé « Rachat au cours », origine de chaque produit en boutique affichée ;
+> * Hachoir de Viktor, tabassage du Jour 10 et emprunt tactique retirés.
+>
+> **Encore ouvert :** chantage du Velvet-Silo, laissez-passer de la Morgue, Karma-Cham, collecte de protection, pompes fermées la nuit, rendements décroissants, plafond des événements, tranches du compte offshore.
+
+Analyse de conception. Chaque mécanique est revue sous trois angles : **ce qu'elle apporte au joueur**, **ce qu'elle coûte** (règles à apprendre, chiffres à l'écran, code), **ce que disent les mesures** (`sim/reports/`). Les propositions retenues rejoindront leurs chapitres ; les chiffres seront mesurés au simulateur avant d'être fixés.
 
 ## Mécaniques examinées à la demande
 
@@ -65,7 +73,7 @@ Repérées en relisant les docs, le code et la campagne 4 (retraits). Chaque lig
 
 ## Écarts entre docs et code
 * **Contrôle mécanique :** toutes les constantes citées dans les docs existent dans le code, et chaque constante de `src/data/` non citée par son nom est décrite en clair (recrutement, cooldowns des événements, caisses scellées) ou est une table de données. Aucun écart trouvé à ce niveau.
-* **Reste à faire :** une relecture chapitre par chapitre, règle par règle, face au moteur (la règle n° 8 de rédaction). La dernière (étape de la nuit) avait trouvé trois écarts, tous corrigés. À refaire après les simplifications retenues, pour ne pas relire deux fois.
+* **Reste à faire :** une relecture chapitre par chapitre, règle par règle, face au moteur (la règle n° 7 de rédaction). La dernière (étape de la nuit) avait trouvé trois écarts, tous corrigés. À refaire après les simplifications retenues, pour ne pas relire deux fois.
 
 ## Ordre proposé
 1. Trancher la liste (garder, retirer, retravailler).

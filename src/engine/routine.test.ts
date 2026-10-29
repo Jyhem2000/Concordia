@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DEBT_BEATING, DEBT_DAILY_RATE, DEBT_LATE, ENDINGS, GAME_LENGTH_DAYS, PROTECTION, RELAY_SLEEP } from '../data/balance.ts'
+import { DEBT_DAILY_RATE, DEBT_LATE, ENDINGS, GAME_LENGTH_DAYS, PROTECTION, RELAY_SLEEP } from '../data/balance.ts'
 import { endingFor, sleep } from './routine.ts'
 import { defined, gameAt } from './test-helpers.ts'
 import type { GameState } from './types.ts'
@@ -9,16 +9,6 @@ describe('routine matinale : dette', () => {
     const state = sleep(gameAt(1))
     expect(state.debt).toBe(Math.round(gameAt(1).debt * (1 + DEBT_DAILY_RATE)))
     expect(state.briefing?.debtInterest?.total).toBe(state.debt)
-  })
-
-  it("tabasse le joueur à l'échéance si le solde dépasse le seuil, sans descendre sous le plancher", () => {
-    const state = sleep(gameAt(DEBT_BEATING.day - 1, { debt: DEBT_BEATING.threshold, health: 20 }))
-    expect(state.health).toBe(DEBT_BEATING.healthFloor)
-    expect(state.briefing?.beating).toBe(20 + RELAY_SLEEP.health - DEBT_BEATING.healthFloor)
-  })
-
-  it('épargne le joueur sous le seuil', () => {
-    expect(sleep(gameAt(DEBT_BEATING.day - 1, { debt: 100 })).briefing?.beating).toBe(0)
   })
 
   it('majore le taux pour de bon si la dette initiale n’a jamais été soldée', () => {

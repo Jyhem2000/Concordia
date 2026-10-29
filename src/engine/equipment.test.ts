@@ -5,7 +5,6 @@ import { MODULES, VEHICLES } from '../data/vehicles.ts'
 import { freshnessOf } from './condition.ts'
 import { ejectMode, repairPrice } from './equipment.ts'
 import { NO_EVENTS } from './events.ts'
-import { inflationIndex } from './inflation.ts'
 import { bluffChance, bribeRate, fleeChance, flyingCheckShare } from './interception.ts'
 import { riskBreakdown } from './risk.ts'
 import { sleep } from './routine.ts'
@@ -48,7 +47,7 @@ describe('garage', () => {
 
   it('répare au prix indexé, moins cher pendant le tournoi de démolition', () => {
     const state = atGarage({ chassis: 50 })
-    expect(repairPrice(state).total).toBe(Math.round(GARAGE.repairPerPv * inflationIndex(3)))
+    expect(repairPrice(state).total).toBe(GARAGE.repairPerPv)
     const fixed = run(state, { type: 'repair', pv: 10 })
     expect(fixed.chassis).toBe(60)
     const tournament = atGarage({ events: { ...NO_EVENTS, local: { D4: 'EVT-D4-03' } } })

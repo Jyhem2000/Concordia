@@ -4,7 +4,6 @@ import { PRODUCTS, SEALED_PRODUCT } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import type { ActionError } from './actions.ts'
 import { cargoUsed } from './cargo.ts'
-import { indexed } from './inflation.ts'
 import { nightUnlock, noteDelivery, raiseWanted, trustFactor } from './progress.ts'
 import type { Rng } from './rng.ts'
 import type { CargoLot, DistrictId, GameState } from './types.ts'
@@ -34,7 +33,7 @@ export function sealedCount(state: GameState): number {
 
 /** Prime de la mission, indexée et majorée par la confiance du DSC */
 export function missionFee(state: GameState): number {
-  return Math.round(indexed('rule.night-mission', NIGHT_MISSION.fee, state.day).total * trustFactor(state))
+  return Math.round(NIGHT_MISSION.fee * trustFactor(state))
 }
 
 export function checkMission(state: GameState): ActionError | null {

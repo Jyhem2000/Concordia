@@ -87,7 +87,7 @@ export type RoadCost = {
   freeSlot?: boolean
 }
 
-/** Effets d'une option d'aléa routier ; ₡ indexés sur l'inflation */
+/** Effets d'une option d'aléa routier */
 export type RoadOutcome = {
   cash?: number
   icc?: number
@@ -222,7 +222,7 @@ export type District = {
 }
 
 /** Services rendus par les lieux spéciaux implémentés (chap. 4 et 7) */
-export type LocationService = 'debt' | 'grinder' | 'offshore' | 'garage' | 'crew' | 'influence' | 'morgue' | 'prophecy' | 'forgery' | 'velvet'
+export type LocationService = 'debt' | 'offshore' | 'garage' | 'crew' | 'influence' | 'morgue' | 'prophecy' | 'forgery' | 'velvet'
 
 /** Services à usage compté (coût croissant) ou à cooldown */
 export type ServiceKey = 'influence' | 'pass' | 'surgery' | 'certificate' | 'prophecy' | 'forgery' | 'auction' | 'blackmail' | 'vip'
@@ -476,8 +476,6 @@ export type MorningBriefing = {
   missionReclaimed: number
   /** Faux dossier de l'indic : Fiche S effacée, ICC gagné */
   informant: boolean
-  /** PV perdus au tabassage de l'échéance de la dette, 0 sinon */
-  beating: number
   /** Vrai le matin où la dette passe en retard (taux majoré, embuscades) */
   debtLate: boolean
   /** Collecte de protection : montant dû, part payée en Cash-Puce, reliquat ajouté à la dette */
@@ -693,8 +691,6 @@ export type GameState = {
   lastDopingDay: number | null
   /** Restauration d'ICC hors plafond déjà utilisée (une fois par partie) */
   iccRestoreUsed: boolean
-  /** Caisses rachetées aujourd'hui par le Hachoir de Viktor */
-  grinderToday: number
   /** Refroidissement moteur automatique par les caisses qui le permettent (réglage du joueur) */
   autoCooling: boolean
   /** Briefing de la dernière routine matinale ; null au Jour 1 */

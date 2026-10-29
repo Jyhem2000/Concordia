@@ -21,7 +21,6 @@ import type { GameDataId } from './types.ts'
 export type RuleId =
   | 'clamp'
   | 'round'
-  | 'inflation'
   | 'production'
   | 'strong-demand'
   | 'tier-bonus'
@@ -43,7 +42,7 @@ export type RuleId =
   | 'offshore-tranche-1'
   | 'offshore-tranche-2'
   | 'offshore-tranche-3'
-  | 'deposit'
+  | 'withdrawal'
   | 'laundry-fee'
   | 'suspicion'
   | 'suspicious-peak'
@@ -69,24 +68,20 @@ export type RuleId =
   | 'freshness-gamey'
   | 'freshness-spoiled'
   | 'damaged'
-  | 'grinder-premium'
   | 'bluff-failed'
   | 'drone-judges'
   | 'flee-base'
   | 'flee-cap'
   | 'eject-manual'
-  | 'emergency-tow'
   | 'aftershock'
   | 'repair'
-  | 'night-mission'
-  | 'day-delivery'
   | 'refining'
   | 'sedation'
   | 'cantine'
 
 export type RuleSource = `rule.${RuleId}`
 
-/** ID de donnée de jeu (D5, MOD-03, TAG-TECH…) ou règle sans ID (`rule.inflation`) */
+/** ID de donnée de jeu (D5, MOD-03, TAG-TECH…) ou règle sans ID (`rule.noise`…) */
 export type BreakdownSource = GameDataId | RuleSource
 
 export function isRuleSource(source: BreakdownSource): source is RuleSource {

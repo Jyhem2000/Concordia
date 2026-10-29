@@ -73,9 +73,6 @@ export const SIPHON = { fuel: 1, iccLoss: 5 }
 
 // ─── Économie (chap. 7) ───
 
-/** Indice d'inflation du jour = 1 + (jour − 1) / INFLATION_PERIOD_DAYS */
-export const INFLATION_PERIOD_DAYS = 15
-
 /**
  * Tendance du cours, par produit et par district (chap. 7) : écart du jour = persistance × écart de la veille
  * + choc uniforme dans ±shock, borné à ±max ; Bruit = 1 + écart
@@ -109,25 +106,19 @@ export const ANTI_ARBITRAGE_CAP = 1
 /** Intérêts composés par jour, à chaque routine matinale (pas le Jour 1) */
 export const DEBT_DAILY_RATE = 0.05
 
-/** Échéance du tabassage : au-delà du solde seuil, perte de Santé sans descendre sous le plancher */
-export const DEBT_BEATING = { day: 10, threshold: 10_000, healthLoss: 30, healthFloor: 5 }
-
 /** Échéance du retard : dette initiale jamais soldée → taux majoré et embuscades, jusqu'à la fin de la partie */
 export const DEBT_LATE = { day: 20, dailyRate: 0.2, ambushRisk: 0.15 }
 
 /** Avance de survie (dette initiale pas encore soldée) : total empruntable sur toute la partie */
 export const SURVIVAL_ADVANCE = 2_000
 
-/** Emprunt tactique (dette initiale soldée) : solde maximal de la dette */
-export const LOAN_CEILING = 100_000
-
 /** Collecte de protection (dette initiale soldée) : jours et part de la richesse visible */
 export const PROTECTION = { days: [7, 14, 21, 28] as readonly number[], rate: 0.1 }
 
 // ─── Compte offshore (chap. 7) ───
 
-/** Coefficient appliqué à chaque dépôt (commission de la Laverie) */
-export const OFFSHORE_DEPOSIT_FACTOR = 0.95
+/** Coefficient appliqué à chaque retrait (commission de la Laverie) : les dépôts sont crédités en entier */
+export const OFFSHORE_WITHDRAW_FACTOR = 0.95
 
 /** Intérêts simples par jour, par tranche du solde déposé ; `upTo` null = au-delà */
 export const OFFSHORE_TRANCHES: readonly { upTo: number | null; dailyRate: number }[] = [
@@ -142,7 +133,7 @@ export const OFFSHORE_TRANCHES: readonly { upTo: number | null; dailyRate: numbe
 export const NIGHT_TRIP_CHASSIS_WEAR = 5
 
 /** Dépannage d'urgence à 0 PV : châssis remis à une part du max, facture (reliquat ajouté à la dette) */
-export const EMERGENCY_TOW = { chassisRestore: 0.25, bill: 2_500 }
+export const EMERGENCY_TOW = { chassisRestore: 0.25, bill: 3_750 }
 
 // ─── Risque d'interception (chap. 6) ───
 
@@ -170,9 +161,6 @@ export const FRESHNESS = {
 /** Coefficient d'une caisse endommagée (casse des fragiles), à la vente comme en paiement */
 export const DAMAGED_FACTOR = 0.5
 
-/** Hachoir de Viktor : prime sur le cours local des périssables dégradés, caisses rachetées par jour */
-export const GRINDER = { premium: 1.2, dailyLimit: 5 }
-
 /** Poids d'une caisse masquée dans la part de son tag (masquage 1:1, chap. 3) */
 export const MASKED_CRATE_WEIGHT = 0.5
 
@@ -180,11 +168,11 @@ export const MASKED_CRATE_WEIGHT = 0.5
 export const NIGHT_TRIP_RISK = 0.25
 
 /** Missions de nuit (chap. 2), une offre chaque soir : part de la soute en caisses scellées, prime (indexée), ICC perdu si non livrée */
-export const NIGHT_MISSION = { sealedShare: 0.2, fee: 200, undeliveredIccLoss: 3 }
+export const NIGHT_MISSION = { sealedShare: 0.2, fee: 300, undeliveredIccLoss: 3 }
 /** Confiance du DSC (chap. 2) : prime des commandes majorée par commande livrée (plafonnée) ; mission de nuit après quelques livraisons */
 export const DSC_TRUST = { feeBonusPerDelivery: 0.1, maxBonus: 1, nightAfterDeliveries: 2 }
 /** Livraison officielle du jour (chap. 2) : chance d'offre le matin, part de la capacité en caisses scellées, prime (indexée), ICC perdu si non livrée */
-export const DAY_DELIVERY = { chance: 0.6, sealedShare: 0.3, fee: 250, undeliveredIccLoss: 3 }
+export const DAY_DELIVERY = { chance: 0.6, sealedShare: 0.3, fee: 375, undeliveredIccLoss: 3 }
 export const CROSSED_DISTRICT_RISK = 0.05
 export const SUSPICIOUS_PEAK_RISK = 0.1
 
@@ -238,7 +226,7 @@ export const BRIBE = {
   base: 0.5,
   perExtraStar: 0.05,
   cap: 0.95,
-  ratePerStar: 1_500,
+  ratePerStar: 2_250,
   rateIllegalCargoShare: 0.1,
   minOfferRatio: 0.5,
   offerBonuses: [

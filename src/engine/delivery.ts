@@ -4,7 +4,6 @@ import { SEALED_PRODUCT } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import type { ActionError } from './actions.ts'
 import { cargoUsed } from './cargo.ts'
-import { indexed } from './inflation.ts'
 import { isSealed } from './night.ts'
 import { noteDelivery, trustFactor } from './progress.ts'
 import type { Rng } from './rng.ts'
@@ -32,7 +31,7 @@ export function deliveryCrates(state: GameState): number {
 
 /** Prime de la livraison, indexée et majorée par la confiance du DSC */
 export function deliveryFee(state: GameState): number {
-  return Math.round(indexed('rule.day-delivery', DAY_DELIVERY.fee, state.day).total * trustFactor(state))
+  return Math.round(DAY_DELIVERY.fee * trustFactor(state))
 }
 
 /** La livraison se fait par le trajet de jour : à accepter avant de partir, avec la place libre */

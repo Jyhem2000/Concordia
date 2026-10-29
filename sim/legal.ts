@@ -39,7 +39,6 @@ function candidates(state: GameState): Action[] {
       { type: 'sell', productId, qty: 1 },
       { type: 'sell', productId, qty: ownedQty(state.cargo, productId) },
       { type: 'useProduct', productId },
-      { type: 'grind', productId, qty: 1 },
       { type: 'auction', productId },
     ]),
     ...DISTRICT_IDS.map((to): Action => ({ type: 'travel', to })),

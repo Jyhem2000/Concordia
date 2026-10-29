@@ -4,7 +4,6 @@ import type { District, DistrictId } from '../engine/types.ts'
 /*
  * Districts et carte. Les règles géographiques, les menaces propres à chaque district
  * et les lieux spéciaux sont au chap. 4, les noms dans src/i18n/fr.ts.
- * Montants en ₡ : valeurs de base au Jour 1, indexées sur l'inflation (chap. 7).
  */
 
 export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
@@ -12,7 +11,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     echelon: 1,
     security: 1,
     baseRisk: 0.06,
-    fuelPrice: 80,
+    fuelPrice: 120,
     pump: 'official',
     relay: true,
     detection: null,
@@ -43,7 +42,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     echelon: 2,
     security: 2,
     baseRisk: 0.12,
-    fuelPrice: 120,
+    fuelPrice: 180,
     pump: 'official',
     relay: true,
     detection: 'TAG-CULTURE', // délation idéologique
@@ -67,7 +66,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     echelon: 3,
     security: 3,
     baseRisk: 0.21,
-    fuelPrice: 150,
+    fuelPrice: 225,
     pump: 'official',
     relay: true,
     detection: 'TAG-CHEMICAL', // bio-scanners
@@ -91,7 +90,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     echelon: 0,
     security: 2,
     baseRisk: 0.12,
-    fuelPrice: 80,
+    fuelPrice: 120,
     pump: 'fixed', // pompe pirate
     relay: false, // pas de relais du DSC : bivouac
     detection: null, // zone hors-réseau
@@ -117,7 +116,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     echelon: 4,
     security: 4,
     baseRisk: 0.24,
-    fuelPrice: 200,
+    fuelPrice: 300,
     pump: 'official',
     relay: true,
     detection: 'TAG-TECH', // scanners électromagnétiques
@@ -147,7 +146,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     echelon: 5,
     security: 5,
     baseRisk: 0.33,
-    fuelPrice: 300,
+    fuelPrice: 450,
     pump: 'official',
     relay: true,
     detection: 'TAG-TECH', // scanners électromagnétiques (les chiens-robots : chap. 4)

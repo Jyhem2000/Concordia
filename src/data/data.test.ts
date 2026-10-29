@@ -4,12 +4,11 @@ import { entriesOf } from '../engine/records.ts'
 import type { DistrictId } from '../engine/types.ts'
 import {
   AUDIT_COUNTDOWN_DAY,
-  DEBT_BEATING,
   DEBT_LATE,
   ENDINGS,
   GAME_LENGTH_DAYS,
   ICC_TIERS,
-  OFFSHORE_DEPOSIT_FACTOR,
+  OFFSHORE_WITHDRAW_FACTOR,
   OFFSHORE_TRANCHES,
   PROTECTION,
 } from './balance.ts'
@@ -153,18 +152,17 @@ describe('équilibrage (balance.ts)', () => {
     expect(ascending(limits.slice(0, -1).map((limit) => limit ?? Infinity))).toBe(true)
     expect(OFFSHORE_TRANCHES.length).toBeLessThanOrEqual(OFFSHORE_TRANCHE_SOURCES.length)
     expect(ascending([...OFFSHORE_TRANCHES.map(({ dailyRate }) => dailyRate)].reverse())).toBe(true)
-    expect(OFFSHORE_DEPOSIT_FACTOR).toBeGreaterThan(0)
-    expect(OFFSHORE_DEPOSIT_FACTOR).toBeLessThanOrEqual(1)
+    expect(OFFSHORE_WITHDRAW_FACTOR).toBeGreaterThan(0)
+    expect(OFFSHORE_WITHDRAW_FACTOR).toBeLessThanOrEqual(1)
   })
 
   it('place les échéances dans la partie, dans l’ordre', () => {
-    const days = [...PROTECTION.days, DEBT_BEATING.day, DEBT_LATE.day, AUDIT_COUNTDOWN_DAY]
+    const days = [...PROTECTION.days, DEBT_LATE.day, AUDIT_COUNTDOWN_DAY]
     for (const day of days) {
       expect(day).toBeGreaterThan(1)
       expect(day).toBeLessThanOrEqual(GAME_LENGTH_DAYS)
     }
     expect(ascending(PROTECTION.days)).toBe(true)
-    expect(DEBT_BEATING.day).toBeLessThan(DEBT_LATE.day)
   })
 })
 

@@ -50,7 +50,7 @@ export default function StatusBar() {
   // Moment de la journée : Journée, 20h00 (journée finie avant l'heure), Nuit (chap. 2)
   const moment = game.phase === 'night' ? 'night' : game.dayOver ? 'curfew' : 'day'
   const tripDone = game.phase === 'day' ? game.dayTripDone : game.nightTripDone
-  const debtNotes = [...(game.debtLate ? [t.hud.debtLate] : []), ...(deadline === null ? [] : [t.hud.nextBeating(deadline)])]
+  const debtNotes = [...(game.debtLate ? [t.hud.debtLate] : []), ...(deadline === null ? [] : [t.hud.nextDeadline(deadline)])]
 
   const restart = () => {
     if (window.confirm(t.hud.newGameConfirm)) newGame()

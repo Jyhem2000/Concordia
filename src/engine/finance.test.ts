@@ -1,18 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import {
-  DEBT_BEATING,
   DEBT_DAILY_RATE,
   DEBT_LATE,
   GAME_LENGTH_DAYS,
-  LOAN_CEILING,
-  OFFSHORE_DEPOSIT_FACTOR,
+  OFFSHORE_WITHDRAW_FACTOR,
   OFFSHORE_TRANCHES,
   PROTECTION,
   SURVIVAL_ADVANCE,
 } from '../data/balance.ts'
 import {
   debtInterestBreakdown,
-  depositBreakdown,
+  breakEvenDays,
   effectiveOffshoreRate,
   loanRoom,
   nextDebtDeadline,
@@ -21,6 +19,7 @@ import {
   offshoreInterestBreakdown,
   protectionBreakdown,
   withdrawFrom,
+  withdrawalBreakdown,
 } from './finance.ts'
 import { defined, gameAt } from './test-helpers.ts'
 
@@ -31,17 +30,16 @@ describe('dette', () => {
     expect(debtInterestBreakdown(gameAt(2, { debt: 0 }))).toBeNull()
   })
 
-  it('annonce la prochaine échéance : tabassage, retard, puis audit', () => {
-    expect(nextDebtDeadline(gameAt(1))).toBe(DEBT_BEATING.day)
-    expect(nextDebtDeadline(gameAt(DEBT_BEATING.day))).toBe(DEBT_LATE.day)
-    expect(nextDebtDeadline(gameAt(DEBT_BEATING.day, { initialDebtPaid: true }))).toBe(GAME_LENGTH_DAYS)
+  it('annonce la prochaine échéance : retard, puis audit', () => {
+    expect(nextDebtDeadline(gameAt(1))).toBe(DEBT_LATE.day)
+    expect(nextDebtDeadline(gameAt(2, { initialDebtPaid: true }))).toBe(GAME_LENGTH_DAYS)
     expect(nextDebtDeadline(gameAt(2, { debt: 0 }))).toBeNull()
   })
 
-  it("limite l'avance de survie, puis n'ouvre l'emprunt tactique qu'une fois la dette initiale soldée, jusqu'au plafond", () => {
+  it("limite l'avance de survie, et ne prête plus une fois la dette initiale soldée", () => {
     expect(loanRoom(gameAt(2))).toBe(SURVIVAL_ADVANCE)
     expect(loanRoom(gameAt(2, { advanced: SURVIVAL_ADVANCE }))).toBe(0)
-    expect(loanRoom(gameAt(2, { initialDebtPaid: true, debt: 1_000 }))).toBe(LOAN_CEILING - 1_000)
+    expect(loanRoom(gameAt(2, { initialDebtPaid: true, debt: 1_000 }))).toBe(0)
   })
 })
 
@@ -63,8 +61,14 @@ describe('collecte de protection', () => {
 })
 
 describe('compte offshore', () => {
-  it('déduit la commission de la Laverie à chaque dépôt', () => {
-    expect(depositBreakdown(1_000).total).toBe(Math.round(1_000 * OFFSHORE_DEPOSIT_FACTOR))
+  it('déduit la commission de la Laverie à chaque retrait', () => {
+    expect(withdrawalBreakdown(1_000).total).toBe(Math.round(1_000 * OFFSHORE_WITHDRAW_FACTOR))
+  })
+
+  it('dit en combien de jours un dépôt couvre la commission du retrait', () => {
+    const days = breakEvenDays({ deposited: 0, interest: 0 })
+    expect(days * OFFSHORE_TRANCHES[0].dailyRate).toBeGreaterThanOrEqual(1 - OFFSHORE_WITHDRAW_FACTOR)
+    expect((days - 1) * OFFSHORE_TRANCHES[0].dailyRate).toBeLessThan(1 - OFFSHORE_WITHDRAW_FACTOR)
   })
 
   it('verse des intérêts simples, tranche par tranche, sur les seuls dépôts', () => {

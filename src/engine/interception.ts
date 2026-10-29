@@ -25,7 +25,6 @@ import { crewEffect, isSedated, workingCrew } from './crew.ts'
 import { ejectMode, moduleTagFactor, mountedEffect, mountedWith } from './equipment.ts'
 import { arrive, tagFactor } from './events.ts'
 import { changeHealth, gainRouteIcc } from './gauges.ts'
-import { indexed } from './inflation.ts'
 import { keysOf } from './records.ts'
 import { createRng, type Rng } from './rng.ts'
 import { noteControlPassed, raiseWanted } from './progress.ts'
@@ -156,12 +155,12 @@ export function bluffChance(state: GameState, { bluffAids = [] }: Tactics = NO_T
   return chance.clamp(0, BLUFF.cap).build()
 }
 
-/** Tarif standard : part fixe par étoile (indexée) ou part de la valeur des caisses illégales, le plus élevé */
+/** Tarif standard : part fixe par étoile ou part de la valeur des caisses illégales, le plus élevé */
 export function bribeRate(state: GameState): Breakdown {
-  const fixed = indexed('rule.bribe-rate', BRIBE.ratePerStar * stars(state), state.day)
+  const fixed = BRIBE.ratePerStar * stars(state)
   const cargoShare = Math.round(BRIBE.rateIllegalCargoShare * baseValue(state.cargo.filter(isIllegal)))
   const rate = breakdown('rule.bribe-rate', fixed)
-  if (cargoShare > fixed.total) rate.set('rule.bribe-cargo-share', cargoShare)
+  if (cargoShare > fixed) rate.set('rule.bribe-cargo-share', cargoShare)
   const terminal = mountedWith(state, 'fakeTerminal')
   if (terminal) rate.mul(terminal, MODULES[terminal].fakeTerminal?.bribeRateFactor ?? 1).round()
   return rate.build()
@@ -701,7 +700,7 @@ function endGame(state: GameState, report: InterceptionReport, id: 'execution' |
 /** Dépannage d'urgence à 0 PV de châssis (chap. 2) : châssis remis en état partiel, facture, demi-journée perdue */
 export function emergencyTow(state: GameState): { state: GameState; bill: number } {
   if (state.chassis > 0) return { state, bill: 0 }
-  const bill = indexed('rule.emergency-tow', EMERGENCY_TOW.bill, state.day).total
+  const bill = EMERGENCY_TOW.bill
   const paid = Math.min(state.cash, bill)
   const chassis = Math.round(VEHICLES[state.vehicleId].maxChassis * EMERGENCY_TOW.chassisRestore)
   const towed: GameState = { ...state, chassis, cash: state.cash - paid, debt: state.debt + bill - paid }

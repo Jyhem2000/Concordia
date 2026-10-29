@@ -52,7 +52,6 @@ export type GameRecord = {
 
 /** Actions des lieux spéciaux comptées dans les mesures */
 const SERVICE_ACTIONS: readonly Action['type'][] = [
-  'grind',
   'borrow',
   'morgue',
   'influence',

@@ -153,19 +153,19 @@ export const LOCAL_EVENTS: Readonly<Record<LocalEventId, GameEvent>> = {
 }
 
 export const ROAD_EVENTS: Readonly<Record<RoadEventId, RoadEvent>> = {
-  'EVT-R01': { a: { pay: [{ crates: { qty: 1, tag: 'TAG-ADDICTIVE' } }, { cash: 300 }] }, b: { outcome: { icc: -4 } } },
-  'EVT-R02': { a: { pay: [{ crates: { qty: 1, productId: 'T0-01' } }, { cash: 250 }] }, b: { outcome: { chassis: -5, icc: -5 } } },
+  'EVT-R01': { a: { pay: [{ crates: { qty: 1, tag: 'TAG-ADDICTIVE' } }, { cash: 450 }] }, b: { outcome: { icc: -4 } } },
+  'EVT-R02': { a: { pay: [{ crates: { qty: 1, productId: 'T0-01' } }, { cash: 375 }] }, b: { outcome: { chassis: -5, icc: -5 } } },
   'EVT-R03': { a: { pay: [{ fuel: 1 }], outcome: { icc: 1 } }, b: { outcome: { icc: -4 } } },
-  'EVT-R04': { a: { outcome: { icc: -2 } }, b: { gamble: { chance: 0.5, win: { cash: 400 }, lose: { icc: -6 } } } },
+  'EVT-R04': { a: { outcome: { icc: -2 } }, b: { gamble: { chance: 0.5, win: { cash: 600 }, lose: { icc: -6 } } } },
   'EVT-R05': { a: { outcome: { icc: 1, chassis: -10, health: -5 } }, b: { outcome: { icc: -5 } } },
-  'EVT-R06': { a: { pay: [{ cash: 400 }], outcome: { icc: 2 } }, b: { outcome: { icc: -3 } } },
-  'EVT-R07': { a: { outcome: { health: -10, icc: 2 } }, b: { pay: [{ cash: 500 }], outcome: { icc: -2 } } },
+  'EVT-R06': { a: { pay: [{ cash: 600 }], outcome: { icc: 2 } }, b: { outcome: { icc: -3 } } },
+  'EVT-R07': { a: { outcome: { health: -10, icc: 2 } }, b: { pay: [{ cash: 750 }], outcome: { icc: -2 } } },
   'EVT-R08': { a: { pay: [{ fuel: 1 }], outcome: { icc: 1 } }, b: { outcome: { icc: -4, chassis: -5 } } },
   'EVT-R09': { a: { outcome: { icc: 1, chassis: -5 } }, b: { pay: [{ crates: { qty: 1, tiers: [0, 1] } }], outcome: { icc: -4, fuel: 1 } } },
   'EVT-R10': { a: { pay: [{ fuel: 1 }] }, b: { outcome: { chassis: -10, icc: -3 } } },
   'EVT-R11': { a: { outcome: { health: -10 } }, b: { pay: [{ crates: { qty: 2, productId: 'T0-02' } }] } },
-  'EVT-R12': { a: { pay: [{ fuel: 1 }], outcome: { icc: 1 } }, b: { outcome: { cash: 600, icc: -5 } } },
+  'EVT-R12': { a: { pay: [{ fuel: 1 }], outcome: { icc: 1 } }, b: { outcome: { cash: 900, icc: -5 } } },
   'EVT-R13': { a: { outcome: { health: -5, fuel: 2 } }, b: {} },
-  'EVT-R14': { a: { pay: [{ cash: 500 }], outcome: { icc: 2 } }, b: { outcome: { icc: -4 } } },
-  'EVT-R15': { a: { pay: [{ cash: 500, freeSlot: true }], outcome: { crateTier: 2 } }, b: {} },
+  'EVT-R14': { a: { pay: [{ cash: 750 }], outcome: { icc: 2 } }, b: { outcome: { icc: -4 } } },
+  'EVT-R15': { a: { pay: [{ cash: 750, freeSlot: true }], outcome: { crateTier: 2 } }, b: {} },
 }

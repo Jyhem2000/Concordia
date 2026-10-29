@@ -4,7 +4,6 @@ import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import { CREW, CREW_HIRE_FEE } from '../data/vehicles.ts'
 import type { ActionError } from './actions.ts'
 import { giveCrates, ownedQty } from './cargo.ts'
-import { indexed } from './inflation.ts'
 import { crewUnlocked } from './progress.ts'
 import { keysOf } from './records.ts'
 import type { Crew, CrewId, DistrictId, GameState, ProductId } from './types.ts'
@@ -31,20 +30,21 @@ export function workingCrew(state: GameState): CrewId | null {
   return active && paidDay === state.day ? active : null
 }
 
-export function salary(state: GameState, crewId: CrewId, amount = CREW[crewId].dailySalary): number {
-  return indexed(crewId, amount, state.day).total
+/** Salaire du jour d'un équipier : son tarif, ou le tarif réduit s'il consomme une caisse */
+export function salary(crewId: CrewId, amount = CREW[crewId].dailySalary): number {
+  return amount
 }
 
 /** Frais de recrutement : gratuit la première fois, et après une disparition à la Loterie */
 export function hireFee(state: GameState): number {
-  return state.crew.hires === 0 || state.crew.freeHire ? 0 : indexed('LOC-D1-2', CREW_HIRE_FEE, state.day).total
+  return state.crew.hires === 0 || state.crew.freeHire ? 0 : CREW_HIRE_FEE
 }
 
 export function checkHire(state: GameState, crewId: CrewId): ActionError | null {
   if (state.crew.lost.includes(crewId)) return 'crew-lost'
   if (!crewUnlocked(state, crewId)) return 'locked'
   if (state.crew.active === crewId) return 'already-owned'
-  return hireFee(state) + salary(state, crewId) > state.cash ? 'not-enough-cash' : null
+  return hireFee(state) + salary(crewId) > state.cash ? 'not-enough-cash' : null
 }
 
 /** Recrutement : frais, puis salaire du jour payé d'avance ; remplace l'équipier actif */
@@ -55,7 +55,7 @@ export function hire(state: GameState, crewId: CrewId): CrewResult {
     ok: true,
     state: {
       ...state,
-      cash: state.cash - hireFee(state) - salary(state, crewId),
+      cash: state.cash - hireFee(state) - salary(crewId),
       crew: { ...state.crew, active: crewId, paidDay: state.day, hires: state.crew.hires + 1, freeHire: false },
     },
   }
@@ -88,7 +88,7 @@ export function payCrew(state: GameState, inCell: boolean): { state: GameState; 
 
   const inKind = CREW[active].inKindSalary
   const crate = state.crew.payInKind && inKind ? inKindCrate(state) : null
-  const due = salary(state, active, crate && inKind ? inKind.amount : undefined)
+  const due = salary(active, crate && inKind ? inKind.amount : undefined)
   if (due > state.cash) return { state, paid: null, crate: null }
   const cargo = crate ? giveCrates(state.cargo, [{ productId: crate, qty: 1 }]) : state.cargo
   return { state: { ...state, cash: state.cash - due, cargo, crew: { ...state.crew, paidDay: state.day } }, paid: due, crate }

@@ -6,7 +6,6 @@ import { fuelPrice } from './actions.ts'
 import { hireFee, isMemoryBlurred, isSedated, salary } from './crew.ts'
 import { NO_EVENTS } from './events.ts'
 import { offshoreInterestBreakdown } from './finance.ts'
-import { indexed } from './inflation.ts'
 import { bluffChance, bribeChance, NO_OFFER } from './interception.ts'
 import { demandQuota, saleQuote } from './market.ts'
 import { riskBreakdown } from './risk.ts'
@@ -31,11 +30,11 @@ const brc: Interception = { kind: 'brc', acted: false, bluffFailed: false }
 describe('recrutement à la Cantine', () => {
   it('recrute gratuitement la première fois, salaire du jour payé d’avance, puis avec des frais', () => {
     const first = run(gameAt(3, { cash: 10_000, progress: EARNED }), { type: 'hireCrew', crewId: 'CREW-02' })
-    expect(first.cash).toBe(10_000 - salary(first, 'CREW-02'))
+    expect(first.cash).toBe(10_000 - salary('CREW-02'))
     expect(first.crew).toMatchObject({ active: 'CREW-02', paidDay: 3, hires: 1 })
-    expect(hireFee(first)).toBe(indexed('LOC-D1-2', CREW_HIRE_FEE, 3).total)
+    expect(hireFee(first)).toBe(CREW_HIRE_FEE)
     const second = run(first, { type: 'hireCrew', crewId: 'CREW-03' })
-    expect(second.cash).toBe(first.cash - hireFee(first) - salary(first, 'CREW-03'))
+    expect(second.cash).toBe(first.cash - hireFee(first) - salary('CREW-03'))
     expect(errorOf(gameAt(3, { districtId: 'D2' }), { type: 'hireCrew', crewId: 'CREW-01' })).toBe('not-at-location')
   })
 
@@ -49,7 +48,7 @@ describe('salaire du matin', () => {
   it('paie d’avance, ou laisse l’équipier sans travail faute de cash', () => {
     const paid = sleep(withCrew('CREW-02', { cash: 5_000 }))
     expect(paid.crew.paidDay).toBe(4)
-    expect(paid.briefing?.crew?.paid).toBe(salary(paid, 'CREW-02'))
+    expect(paid.briefing?.crew?.paid).toBe(salary('CREW-02'))
     const broke = sleep(withCrew('CREW-02', { cash: 0 }))
     expect(broke.crew.paidDay).toBe(3)
     expect(broke.briefing?.crew?.paid).toBeNull()
@@ -58,7 +57,7 @@ describe('salaire du matin', () => {
   it('paie Vance en partie avec la caisse addictive éligible la moins chère', () => {
     const state = sleep(withCrew('CREW-01', { cash: 5_000, cargo: [lot('T1-05', 2), lot('T2-05', 1), lot('T3-02', 1)] }))
     const inKind = defined(CREW['CREW-01'].inKindSalary)
-    expect(state.briefing?.crew).toMatchObject({ crate: 'T2-05', paid: salary(state, 'CREW-01', inKind.amount) })
+    expect(state.briefing?.crew).toMatchObject({ crate: 'T2-05', paid: salary('CREW-01', inKind.amount) })
     expect(state.cargo.some((entry) => entry.productId === 'T2-05')).toBe(false)
   })
 })

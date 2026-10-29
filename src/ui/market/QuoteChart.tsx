@@ -59,7 +59,7 @@ export default function QuoteChart({ productId }: QuoteChartProps) {
         ))}
         {[first, last].map((day) => (
           <text key={day} x={x(day)} y={HEIGHT - 6} textAnchor="middle" fontSize={9} className="fill-zinc-500">
-            {t.inflation.dayTick(day)}
+            {t.chart.dayTick(day)}
           </text>
         ))}
 
@@ -95,7 +95,7 @@ export default function QuoteChart({ productId }: QuoteChartProps) {
         <tbody>
           {points.map((point) => (
             <tr key={point.day}>
-              <th scope="row">{t.inflation.dayTick(point.day)}</th>
+              <th scope="row">{t.chart.dayTick(point.day)}</th>
               <td>{credits(point.quote)}</td>
             </tr>
           ))}

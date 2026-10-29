@@ -40,7 +40,7 @@ export default function CrewDesk() {
                 onChange={(event) => dispatch({ type: 'setPayInKind', enabled: event.target.checked })}
                 className={FOCUS_RING}
               />
-              {t.crewDesk.inKind(credits(salary(game, active, inKind.amount)), crate ? t.product[crate].name : t.crewDesk.noCrate)}
+              {t.crewDesk.inKind(credits(salary(active, inKind.amount)), crate ? t.product[crate].name : t.crewDesk.noCrate)}
             </label>
           )}
           <Button className="mt-1" onClick={() => dispatch({ type: 'dismissCrew' })}>
@@ -74,14 +74,14 @@ function CrewOffer({ crewId }: CrewOfferProps) {
     ...(crew.perishableKnowHow ? [t.crewDesk.knowHow(multiplier(crew.perishableKnowHow))] : []),
     ...(crew.refining ? [t.crewDesk.refining] : []),
     ...(crew.perishableQuota ? [t.crewDesk.quota(multiplier(crew.perishableQuota))] : []),
-    ...(crew.inKindSalary ? [t.crewDesk.inKindRule(credits(salary(game, crewId, crew.inKindSalary.amount)), crew.inKindSalary.minTier)] : []),
+    ...(crew.inKindSalary ? [t.crewDesk.inKindRule(credits(salary(crewId, crew.inKindSalary.amount)), crew.inKindSalary.minTier)] : []),
   ]
 
   return (
     <li className="text-xs">
       <p className="font-bold text-zinc-200">
         {t.crew[crewId].name}
-        <span className="ml-1.5 font-normal text-zinc-400">{t.crewDesk.salary(credits(salary(game, crewId)))}</span>
+        <span className="ml-1.5 font-normal text-zinc-400">{t.crewDesk.salary(credits(salary(crewId)))}</span>
       </p>
       <p className="text-zinc-400">{t.crew[crewId].subtitle}</p>
       <p className="text-zinc-300">{bonuses.join(' · ')}</p>

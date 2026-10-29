@@ -72,7 +72,6 @@ export function createInitialState(seed: number): GameState {
     curfewStreak: 0,
     lastDopingDay: null,
     iccRestoreUsed: false,
-    grinderToday: 0,
     autoCooling: true,
     briefing: null,
     ending: null,

@@ -32,7 +32,7 @@
 * Ils passent au téléscripteur. *Lecture :* revendre le jour même d'une ruée ; acheter le lendemain d'une ruée.
 
 ### Hasard limité
-* Les aléas routiers ne tuent jamais : leurs pertes de Santé s'arrêtent à 1 PV. Leurs montants en ₡ sont indexés sur l'inflation (chap. 7). Les rations gagnées ne dépassent jamais la capacité du réservoir. Leurs gains d'ICC sont des gains de route, plafonnés (chap. 2).
+* Les aléas routiers ne tuent jamais : leurs pertes de Santé s'arrêtent à 1 PV. Les rations gagnées ne dépassent jamais la capacité du réservoir. Leurs gains d'ICC sont des gains de route, plafonnés (chap. 2).
 * *Philosophie des aléas routiers :* acheter le silence d'un délateur évite une perte d'ICC, sans jamais en faire gagner. Seule une soumission humiliante et coûteuse à une procédure d'Aeterna rapporte un maigre gain d'ICC.
 
 ---

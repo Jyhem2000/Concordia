@@ -1,10 +1,10 @@
-import { FUEL_PER_CROSSED_DISTRICT, GRINDER, ICC_MAX, NIGHT_TRIP_CHASSIS_WEAR, PUMP_NIGHT_MIN_ICC, SIPHON } from '../data/balance.ts'
+import { FUEL_PER_CROSSED_DISTRICT, ICC_MAX, NIGHT_TRIP_CHASSIS_WEAR, PUMP_NIGHT_MIN_ICC, SIPHON } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
 import { LOCATIONS } from '../data/locations.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import { cargoUsed, giveCrates, ownedQty, takeLots } from './cargo.ts'
-import { depositBreakdown, loanRoom, offshoreBalance, withdrawFrom } from './finance.ts'
+import { loanRoom, offshoreBalance, withdrawalBreakdown, withdrawFrom } from './finance.ts'
 import { checkMove, drawInterception, emergencyTow, resolveMove } from './interception.ts'
 import { crossedDistricts, shortestRoute } from './map.ts'
 import { dismiss, hire } from './crew.ts'
@@ -15,7 +15,7 @@ import { auction, blackmail, consultCassandre, deliverVip, forge, orderInfluence
 import { buyModule, buyVehicle, mountedEffect, mountModule, repair } from './equipment.ts'
 import { arrive, drawRoadEvent, heatWave } from './events.ts'
 import { changeHealth } from './gauges.ts'
-import { fuelPriceBreakdown, grindableQty, grinderSale, quote, saleQuote } from './market.ts'
+import { fuelPriceBreakdown, quote, saleQuote } from './market.ts'
 import { keysOf } from './records.ts'
 import { risk } from './risk.ts'
 import { checkRoadChoice, resolveRoadChoice, type RoadChoiceId } from './road.ts'
@@ -57,7 +57,6 @@ export type Action =
   /** Tournée de nuit ; `drink` : boisson pour une nuit blanche malgré l'épuisement ; `mission` : accepter la mission du soir */
   | { type: 'forceCurfew'; drink?: ProductId; mission?: boolean }
   | { type: 'useProduct'; productId: ProductId }
-  | { type: 'grind'; productId: ProductId; qty: number }
   | { type: 'setAutoCooling'; enabled: boolean }
   | { type: 'sleep' }
   | { type: 'siphon' }
@@ -108,7 +107,7 @@ export type ActionError =
   | 'location-closed'
   | 'no-debt'
   | 'advance-used'
-  | 'loan-ceiling'
+  | 'advance-closed'
   | 'not-enough-offshore'
   | 'intercepted'
   | 'not-intercepted'
@@ -119,8 +118,6 @@ export type ActionError =
   | 'already-used'
   | 'third-night'
   | 'too-weak'
-  | 'grinder-full'
-  | 'not-grindable'
   | 'road-event'
   | 'no-road-event'
   | 'already-owned'
@@ -382,7 +379,7 @@ function applyProduct(state: GameState, productId: ProductId): ActionResult {
   return { ok: true, state: { ...state, icc, iccRestoreUsed: true, cargo: giveCrates(state.cargo, [{ productId, qty: 1 }]) } }
 }
 
-// ─── Lieux spéciaux : dette, Hachoir et compte offshore (chap. 4 et 7) ───
+// ─── Lieux spéciaux : dette et compte offshore (chap. 4 et 7) ───
 
 /** Lieu qui rend ce service dans le district du joueur, s'il y en a un */
 export function locationFor(state: GameState, service: LocationService): LocationId | null {
@@ -414,33 +411,18 @@ function repay(state: GameState, amount: number): ActionResult {
 function borrow(state: GameState, amount: number): ActionResult {
   const closed = checkService(state, 'debt')
   if (closed) return fail(closed)
-  if (amount > loanRoom(state)) return fail(state.initialDebtPaid ? 'loan-ceiling' : 'advance-used')
-  const advanced = state.initialDebtPaid ? state.advanced : state.advanced + amount
-  return { ok: true, state: { ...state, cash: state.cash + amount, debt: state.debt + amount, advanced } }
+  if (state.initialDebtPaid) return fail('advance-closed')
+  if (amount > loanRoom(state)) return fail('advance-used')
+  return { ok: true, state: { ...state, cash: state.cash + amount, debt: state.debt + amount, advanced: state.advanced + amount } }
 }
 
 function deposit(state: GameState, amount: number): ActionResult {
   const closed = checkService(state, 'offshore')
   if (closed) return fail(closed)
   if (amount > state.cash) return fail('not-enough-cash')
-  const credited = depositBreakdown(amount).total
   return {
     ok: true,
-    state: { ...state, cash: state.cash - amount, offshore: { ...state.offshore, deposited: state.offshore.deposited + credited } },
-  }
-}
-
-/** Hachoir de Viktor : rachat des périssables dégradés, déduit de la dette puis versé en Cash-Puce (chap. 4) */
-function grind(state: GameState, productId: ProductId, qty: number): ActionResult {
-  const closed = checkService(state, 'grinder')
-  if (closed) return fail(closed)
-  if (qty > grindableQty(state, productId)) return fail('not-grindable')
-  if (state.grinderToday + qty > GRINDER.dailyLimit) return fail('grinder-full')
-  const { total, cargo } = grinderSale(state, productId, qty)
-  const toDebt = Math.min(state.debt, total)
-  return {
-    ok: true,
-    state: { ...state, cargo, debt: state.debt - toDebt, cash: state.cash + total - toDebt, grinderToday: state.grinderToday + qty },
+    state: { ...state, cash: state.cash - amount, offshore: { ...state.offshore, deposited: state.offshore.deposited + amount } },
   }
 }
 
@@ -448,7 +430,8 @@ function withdraw(state: GameState, amount: number): ActionResult {
   const closed = checkService(state, 'offshore')
   if (closed) return fail(closed)
   if (amount > offshoreBalance(state.offshore)) return fail('not-enough-offshore')
-  return { ok: true, state: { ...state, cash: state.cash + amount, offshore: withdrawFrom(state.offshore, amount) } }
+  // Commission de la Laverie au retrait : le compte est débité du montant, le Cash-Puce n'en reçoit qu'une part
+  return { ok: true, state: { ...state, cash: state.cash + withdrawalBreakdown(amount).total, offshore: withdrawFrom(state.offshore, amount) } }
 }
 
 // ─── Fin de journée ───
@@ -566,8 +549,6 @@ export function applyAction(state: GameState, action: Action): ActionResult {
       return forceCurfew(state, action.drink, action.mission)
     case 'useProduct':
       return applyProduct(state, action.productId)
-    case 'grind':
-      return isQuantity(action.qty) ? grind(state, action.productId, action.qty) : fail('invalid-quantity')
     case 'setAutoCooling':
       return { ok: true, state: { ...state, autoCooling: action.enabled } }
     case 'sleep':

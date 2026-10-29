@@ -248,3 +248,11 @@ Sondes de `sim/probe-difficulte.ts`, 200 parties par ligne, survie du Sans build
   - Élite 7 et 4 % : en Casse-cou, une soixantaine de parties sur 200 dépassent 300 000 ₡ mais finissent avec un ICC de 4 à 84 ; le bot ne défend plus l'ICC après le J18 ni en fin de partie ;
   - Saboteur 0 % : le bot ne cherche le serveur qu'au J25, banque l'argent qui servirait à l'acheter, et reste à la Laverie au lieu de rejoindre `[D4]`.
 - **Reste à faire :** corriger les bots Élite et Saboteur, puis remesurer les campagnes 1 à 4.
+
+## Simplifications (appliquées, campagnes à remesurer)
+Premier lot de `docs/propositions/simplification.md`, sans campagne :
+- inflation retirée, chaque coût fixé à 1,5 fois son ancienne valeur de base (l'indice moyen d'une partie était ×2, mais les défaites se jouent au début, où il valait ×1 à ×1,4) ;
+- commission de la Laverie au retrait : les dépôts, donc le score, ne sont plus taxés ;
+- Hachoir de Viktor (effet nul mesuré), tabassage du Jour 10 (presque jamais déclenché) et emprunt tactique (jamais utilisé) retirés.
+
+À vérifier à la prochaine campagne : survie des trois tempéraments (les coûts du début montent de ×1 à ×1,5), et score moyen (la fin de partie coûte moins cher qu'avec l'indice à ×2,9).

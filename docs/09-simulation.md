@@ -29,7 +29,7 @@ Le cœur de la stratégie : l'équipement visé, la famille de produits, les mé
 | **Corruption** | `[CREW-01]`, `[MOD-08]` | paiement en nature, connivence, `[TAG-ADDICTIVE]` | Payer les agents est-il une stratégie, pas un dernier recours ? |
 | **Citoyen modèle** | `[VEH-02]`, `[MOD-08]` | ICC au palier Or, bluff, coupe-file, services qui rendent de l'ICC | Garder l'ICC haut est-il tenable et rentable ? |
 | **Rentier** | `[CREW-02]` | cours en temps réel, dépôts offshore précoces | Les intérêts suffisent-ils à porter une partie ? |
-| **Haut tier** | `[VEH-04]`, `[MOD-07]`, emprunt tactique | Tier 3–4, racket de `[D4]`, éjection | Le haut tier est-il jouable avant la fin de partie ? |
+| **Haut tier** | `[VEH-04]`, `[MOD-07]` | Tier 3–4, racket de `[D4]`, éjection | Le haut tier est-il jouable avant la fin de partie ? |
 | **Opportuniste** | aucun imposé | événements du téléscripteur, `[LOC-D4-2]`, `[LOC-D2-1]`, Loterie | Les événements créent-ils des coups à jouer ? |
 | **Saboteur** | `[VEH-04]`, `[MOD-03]` | pactole puis `[T4-06]`, fin à Rust Valley | La fin ultime est-elle atteignable sans chance extrême ? |
 
@@ -105,7 +105,7 @@ L'objectif change surtout les décisions de fin de partie et quelques contrainte
 * **Paires :** chaque élément est mesuré dans le plan qui le vise, joué deux fois **sur les mêmes graines** : avec l'élément, puis sans (retiré du plan). La différence se lit partie par partie : un retrait ne change pas le hasard, seulement le jeu.
 * **Écart et incertitude :** pour la survie et le score, écart moyen avec son intervalle de confiance à 95 % (sur les différences appariées). Un élément est jugé **positif** ou **négatif** si l'intervalle exclut zéro, **neutre** sinon.
 * **Usage :** chaque ligne indique la part des parties où l'élément a été acheté ou utilisé. L'écart mesuré est celui du plan tel qu'il est joué : un élément trop cher, rarement acheté, pèse peu, et c'est déjà une information.
-* **Lieux spéciaux :** le marchand utilise un lieu quand il s'y trouve et que le plan le prévoit (chirurgie sous un seuil de Santé, certificat et chantage sous un seuil d'ICC, laissez-passer de la Morgue, panique de Karma-Cham sur le tag le plus présent en soute, enchères des caisses de Tier 3–4). Le Hachoir et l'avance de survie sont mesurés en les retirant du plan de référence.
+* **Lieux spéciaux :** le marchand utilise un lieu quand il s'y trouve et que le plan le prévoit (chirurgie sous un seuil de Santé, certificat et chantage sous un seuil d'ICC, laissez-passer de la Morgue, panique de Karma-Cham sur le tag le plus présent en soute, enchères des caisses de Tier 3–4). L'avance de survie est mesurée en la retirant du plan de référence.
 * **Hors de portée à cette étape :** la prédiction de Cassandre-88, le faux dossier de Loterie et la commande VIP demandent d'anticiper (acheter pour l'événement prédit, viser un tirage, revenir livrer) ; la commande VIP est jouée par le plan Opportuniste (étape 2) ; la prédiction et le faux dossier restent pour l'optimiseur.
 
 ## Campagnes
@@ -122,7 +122,7 @@ Croiser tous les plans, tempéraments et objectifs donnerait plus d'une centaine
 
 ## Mesures relevées par partie
 * Fin obtenue et score offshore ; jour de la mort ou du Game Over le cas échéant.
-* Jour où la dette initiale est soldée ; dette maximale atteinte ; emprunts tactiques.
+* Jour où la dette initiale est soldée ; dette maximale atteinte.
 * Nombre d'interceptions, option choisie, issue, pertes (₡, caisses, ICC, Santé, châssis), jours de garde à vue.
 * Marge nette par trajet, ventes saturées, pics suspects déclenchés, caisses perdues (fraîcheur, casse, explosions).
 * Équipements achetés et jour d'achat ; services des lieux spéciaux utilisés.
@@ -144,5 +144,5 @@ Cibles de départ, à recaler avec les premières mesures.
 
 ## Lecture des résultats
 * Rapports et analyses : dossier `sim/reports/` (un rapport généré par campagne, plus une analyse rédigée par étape).
-* Un écart à une cible se corrige d'abord dans les données (`src/data/`), puis, si besoin, dans une règle : toute règle modifiée l'est d'abord dans le chapitre concerné (règle 7 de [README.md](README.md)).
+* Un écart à une cible se corrige d'abord dans les données (`src/data/`), puis, si besoin, dans une règle : toute règle modifiée l'est d'abord dans le chapitre concerné (règle 6 de [README.md](README.md)).
 * Chaque campagne note la version d'équilibrage, les bots joués (plan, tempérament, objectif, paramètres), le nombre de parties et les écarts constatés.

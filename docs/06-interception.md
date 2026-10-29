@@ -95,7 +95,7 @@ Valeurs : `BRIBE` dans [`balance.ts`](../src/data/balance.ts).
 ```
 Chance = min( plafond,  base + Offre + Connivence − malus × (étoiles du district − 1) − Sédation + bonus ([CREW-01]) )
 ```
-* **Tarif standard :** le plus élevé entre **une part fixe par étoile du district** (indexée) et **une part de la valeur des caisses illégales en soute** (au prix de base). L'agent évalue ce qu'il laisse passer. Réduit par `[MOD-08]`.
+* **Tarif standard :** le plus élevé entre **une part fixe par étoile du district** et **une part de la valeur des caisses illégales en soute** (au prix de base). L'agent évalue ce qu'il laisse passer. Réduit par `[MOD-08]`.
 * **Offre** — Cash-Puce et caisses de la soute, au choix et cumulables ; les caisses comptent à leur valeur en paiement (paiement en nature, chap. 7). Sa valeur totale est comparée au tarif standard. Elle est perdue même en cas d'échec (les caisses offertes ne sont pas confisquées une seconde fois, elles sont déjà parties). **En dessous d'une fraction du tarif, l'agent refuse** : le curseur d'offre démarre à ce minimum.
 * **Bonus d'offre par paliers :** plus l'offre dépasse le tarif standard, plus la chance monte, jusqu'à un plafond (`offerBonuses`).
 

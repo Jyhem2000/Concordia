@@ -7,7 +7,6 @@ import { breakOnShock } from './condition.ts'
 import { mountedEffect } from './equipment.ts'
 import { arrive } from './events.ts'
 import { changeHealth, gainRouteIcc } from './gauges.ts'
-import { indexed } from './inflation.ts'
 import { emergencyTow } from './interception.ts'
 import { createRng } from './rng.ts'
 import type { CrateCount, GameState, RoadChoice, RoadCost, RoadOutcome, RoadReport } from './types.ts'
@@ -36,14 +35,9 @@ export function roadCrates(state: GameState, cost: RoadCost): CrateCount[] | nul
   return cheapest ? [{ productId: cheapest, qty: wanted.qty }] : null
 }
 
-/** Montant en ₡ d'un coût ou d'un gain, indexé sur l'inflation du jour */
-export function roadCash(state: GameState, amount: number | undefined): number {
-  return amount ? indexed('rule.inflation', amount, state.day).total : 0
-}
-
 /** Raison pour laquelle un coût ne peut pas être payé, ou null */
 export function checkRoadCost(state: GameState, cost: RoadCost): ActionError | null {
-  if (roadCash(state, cost.cash) > state.cash) return 'not-enough-cash'
+  if ((cost.cash ?? 0) > state.cash) return 'not-enough-cash'
   if ((cost.fuel ?? 0) > state.fuel) return 'not-enough-fuel'
   if (roadCrates(state, cost) === null) return 'not-enough-cargo'
   if (cost.freeSlot && cargoUsed(state.cargo) >= VEHICLES[state.vehicleId].cargo) return 'cargo-full'
@@ -74,7 +68,7 @@ export function resolveRoadChoice(state: GameState, choice: RoadChoiceId, pay = 
     won = rng.chance(option.gamble.chance)
     outcome = won ? option.gamble.win : option.gamble.lose
   }
-  const applied = applyOutcome({ ...s, rng: rng.state }, outcome, roadCash(state, cost?.cash))
+  const applied = applyOutcome({ ...s, rng: rng.state }, outcome, cost?.cash ?? 0)
   s = applied.state
 
   const towed = emergencyTow(s)
@@ -96,7 +90,7 @@ export function resolveRoadChoice(state: GameState, choice: RoadChoiceId, pay = 
 
 function payCost(state: GameState, cost: RoadCost): GameState {
   const crates = roadCrates(state, cost) ?? []
-  return { ...state, cash: state.cash - roadCash(state, cost.cash), fuel: state.fuel - (cost.fuel ?? 0), cargo: giveCrates(state.cargo, crates) }
+  return { ...state, cash: state.cash - (cost.cash ?? 0), fuel: state.fuel - (cost.fuel ?? 0), cargo: giveCrates(state.cargo, crates) }
 }
 
 /**
@@ -104,7 +98,7 @@ function payCost(state: GameState, cost: RoadCost): GameState {
  * une perte de châssis est un choc qui peut casser les fragiles (chap. 3), sauf suspensions
  */
 function applyOutcome(state: GameState, outcome: RoadOutcome, paid: number): { state: GameState; damaged: number } {
-  let s: GameState = { ...state, cash: state.cash + roadCash(state, outcome.cash) }
+  let s: GameState = { ...state, cash: state.cash + (outcome.cash ?? 0) }
   const icc = outcome.icc ?? 0
   s = icc > 0 ? gainRouteIcc(s, icc).state : { ...s, icc: Math.max(0, s.icc + icc) }
   if (outcome.health) s = changeHealth(s, outcome.health, 1).state

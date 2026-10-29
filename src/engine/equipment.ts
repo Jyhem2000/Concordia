@@ -6,7 +6,6 @@ import type { ActionError } from './actions.ts'
 import { breakdown, type Breakdown } from './breakdown.ts'
 import { cargoUsed } from './cargo.ts'
 import { activeEffects } from './events.ts'
-import { indexed } from './inflation.ts'
 import { keysOf } from './records.ts'
 import type { CargoLot, GameState, Module, ModuleId, TagId, Vehicle, VehicleId } from './types.ts'
 
@@ -65,9 +64,9 @@ export function ejectMode(state: GameState): EjectMode | null {
 
 // ─── Garage (chap. 4 et 5) ───
 
-/** Prix d'un PV de châssis réparé : indexé, réduit par un événement du district */
+/** Prix d'un PV de châssis réparé, réduit par un événement du district */
 export function repairPrice(state: GameState): Breakdown {
-  const price = breakdown('rule.repair', indexed('LOC-D4-1', GARAGE.repairPerPv, state.day).total)
+  const price = breakdown('rule.repair', GARAGE.repairPerPv)
   for (const { source, effect } of activeEffects(state, state.districtId)) if (effect.kind === 'repair') price.mul(source, effect.factor)
   return price.round().build()
 }

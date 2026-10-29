@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { GAME_LENGTH_DAYS, GRINDER, LOAN_CEILING, OFFSHORE_DEPOSIT_FACTOR, SIPHON, SURVIVAL_ADVANCE } from '../data/balance.ts'
+import { GAME_LENGTH_DAYS, OFFSHORE_WITHDRAW_FACTOR, SIPHON, SURVIVAL_ADVANCE } from '../data/balance.ts'
 import { PRODUCTS } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import { canSiphon, checkService, fuelPrice, maxBuy, maxRepay, planTravel, type Action } from './actions.ts'
 import { cargoUsed, ownedQty } from './cargo.ts'
+import { offshoreBalance } from './finance.ts'
 import { quote, shopProducts } from './market.ts'
 import { createInitialState } from './state.ts'
 import { defined, errorOf, gameAt, HIGH_ROLL_RNG, play, run } from './test-helpers.ts'
@@ -179,20 +180,19 @@ describe('guichets : dette et compte offshore', () => {
     expect(paid).toMatchObject({ debt: 0, cash: 500, initialDebtPaid: true })
     expect(errorOf(paid, { type: 'repay', amount: 1 })).toBe('no-debt')
 
-    // Statut définitif : réemprunter ne le retire pas
-    const loan = run(paid, { type: 'borrow', amount: 1_000 })
-    expect(loan).toMatchObject({ debt: 1_000, cash: 1_500, initialDebtPaid: true })
-    expect(errorOf(loan, { type: 'borrow', amount: LOAN_CEILING })).toBe('loan-ceiling')
+    // Dette initiale soldée : Viktor ne prête plus
+    expect(errorOf(paid, { type: 'borrow', amount: 1 })).toBe('advance-closed')
   })
 
-  it('créditent les dépôts commission déduite et rendent les retraits en Cash-Puce', () => {
+  it('créditent les dépôts en entier et rendent les retraits en Cash-Puce, commission déduite', () => {
     const atLaundry = gameAt(2, { districtId: 'D5' })
     const deposited = run(atLaundry, { type: 'deposit', amount: 1_000 })
-    expect(deposited.offshore.deposited).toBe(Math.round(1_000 * OFFSHORE_DEPOSIT_FACTOR))
+    expect(deposited.offshore.deposited).toBe(1_000)
     expect(deposited.cash).toBe(atLaundry.cash - 1_000)
 
     const withdrawn = run(deposited, { type: 'withdraw', amount: 100 })
-    expect(withdrawn.cash).toBe(deposited.cash + 100)
+    expect(withdrawn.cash).toBe(deposited.cash + Math.round(100 * OFFSHORE_WITHDRAW_FACTOR))
+    expect(offshoreBalance(withdrawn.offshore)).toBe(900)
     expect(errorOf(atLaundry, { type: 'withdraw', amount: 1 })).toBe('not-enough-offshore')
     expect(errorOf(atLaundry, { type: 'deposit', amount: 0 })).toBe('invalid-amount')
   })
@@ -234,16 +234,5 @@ describe('produits utilisables et Hachoir', () => {
     expect(restored.icc).toBe(40 + defined(PRODUCTS['T4-03'].iccRestore))
     expect(errorOf(restored, { type: 'useProduct', productId: 'T4-03' })).toBe('already-used')
     expect(errorOf(state, { type: 'useProduct', productId: 'T2-01' })).toBe('not-usable')
-  })
-
-  it('fait racheter les périssables dégradés par le Hachoir, au profit de la dette puis du Cash-Puce', () => {
-    const state = gameAt(5, { debt: 100, cash: 0, cargo: [crates('T3-01', 6, 2), crates('T3-01', 2, 5)] })
-    expect(errorOf(state, { type: 'grind', productId: 'T3-01', qty: 7 })).toBe('not-grindable')
-    expect(errorOf(state, { type: 'grind', productId: 'T3-01', qty: GRINDER.dailyLimit + 1 })).toBe('grinder-full')
-    const ground = run(state, { type: 'grind', productId: 'T3-01', qty: 2 })
-    expect(ground.debt).toBe(0)
-    expect(ground.cash).toBeGreaterThan(0)
-    expect(ownedQty(ground.cargo, 'T3-01')).toBe(6)
-    expect(errorOf({ ...state, districtId: 'D2' }, { type: 'grind', productId: 'T3-01', qty: 1 })).toBe('not-at-location')
   })
 })

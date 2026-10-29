@@ -1,13 +1,18 @@
 import { Landmark, Lock } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { GRINDER, SURVIVAL_ADVANCE } from '../../data/balance.ts'
+import { SURVIVAL_ADVANCE } from '../../data/balance.ts'
 import { LOCATIONS } from '../../data/locations.ts'
-import { PRODUCT_IDS } from '../../data/products.ts'
 import { maxRepay } from '../../engine/actions.ts'
 import { crewEffect } from '../../engine/crew.ts'
 import { keysOf } from '../../engine/records.ts'
-import { grindableQty, grinderPrice, isGrindable } from '../../engine/market.ts'
-import { depositBreakdown, effectiveOffshoreRate, loanRoom, offshoreBalance, offshoreInterestBreakdown } from '../../engine/finance.ts'
+import {
+  breakEvenDays,
+  effectiveOffshoreRate,
+  loanRoom,
+  offshoreBalance,
+  offshoreInterestBreakdown,
+  withdrawalBreakdown,
+} from '../../engine/finance.ts'
 import type { LocationId, LocationService } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -78,8 +83,6 @@ function ServiceDesk({ service }: ServiceDeskProps) {
   switch (service) {
     case 'debt':
       return <DebtDesk />
-    case 'grinder':
-      return <GrinderDesk />
     case 'offshore':
       return <OffshoreDesk />
     case 'garage':
@@ -99,38 +102,6 @@ function ServiceDesk({ service }: ServiceDeskProps) {
   }
 }
 
-/** Hachoir de Viktor : rachat des périssables dégradés, au profit de la dette (chap. 4) */
-function GrinderDesk() {
-  const game = useGameStore((s) => s.game)
-  const dispatch = useGameStore((s) => s.dispatch)
-  const { t, credits } = useI18n()
-  const left = Math.max(0, GRINDER.dailyLimit - game.grinderToday)
-  const offers = PRODUCT_IDS.flatMap((productId) => {
-    const qty = grindableQty(game, productId)
-    const lot = game.cargo.find((candidate) => candidate.productId === productId && isGrindable(game, candidate))
-    return qty > 0 && lot ? [{ productId, qty, price: grinderPrice(game, lot) }] : []
-  })
-
-  return (
-    <div className="border-t border-zinc-800 pt-2">
-      <p className="font-bold">{t.place.grinderTitle}</p>
-      <p className="text-xs text-zinc-400">{t.place.grinderRule(GRINDER.dailyLimit, left)}</p>
-      {offers.length === 0 && <p className="mt-1 text-xs text-zinc-500">{t.place.grinderNothing}</p>}
-      <ul className="mt-1 space-y-2">
-        {offers.map(({ productId, qty, price }) => (
-          <li key={productId} className="flex flex-col gap-1">
-            <span className="flex flex-wrap gap-1.5 text-xs">
-              {t.place.grinderOffer(qty, t.product[productId].name)}
-              <Detailed breakdown={price} format={credits} />
-            </span>
-            <AmountForm label={t.place.grind} max={Math.min(qty, left)} onSubmit={(amount) => dispatch({ type: 'grind', productId, qty: amount })} />
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
-
 function DebtDesk() {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
@@ -144,11 +115,14 @@ function DebtDesk() {
         <span className="font-bold text-red-300">{credits(game.debt)}</span>
       </p>
       <AmountForm label={t.place.repay} max={maxRepay(game)} onSubmit={(amount) => dispatch({ type: 'repay', amount })} />
-      <AmountForm label={t.place.borrow} variant="danger" max={room} onSubmit={(amount) => dispatch({ type: 'borrow', amount })} />
-      <p className="text-xs text-zinc-400">
-        {t.place.loanRoom(credits(room))}
-        {!game.initialDebtPaid && <> · {t.place.advanceRule(credits(SURVIVAL_ADVANCE))}</>}
-      </p>
+      {!game.initialDebtPaid && (
+        <>
+          <AmountForm label={t.place.borrow} variant="danger" max={room} onSubmit={(amount) => dispatch({ type: 'borrow', amount })} />
+          <p className="text-xs text-zinc-400">
+            {t.place.loanRoom(credits(room))} · {t.place.advanceRule(credits(SURVIVAL_ADVANCE))}
+          </p>
+        </>
+      )}
     </>
   )
 }
@@ -177,13 +151,15 @@ function OffshoreDesk() {
           </div>
         )}
       </div>
+      <p className="text-xs text-zinc-400">{t.place.breakEven(breakEvenDays(game.offshore, crewEffect(game, 'offshoreBonus') ?? 0))}</p>
+      <AmountForm label={t.place.deposit} max={game.cash} onSubmit={(amount) => dispatch({ type: 'deposit', amount })} />
       <AmountForm
-        label={t.place.deposit}
-        max={game.cash}
-        onSubmit={(amount) => dispatch({ type: 'deposit', amount })}
-        preview={(amount) => `${t.place.credited} ${credits(depositBreakdown(amount).total)}`}
+        label={t.place.withdraw}
+        variant="default"
+        max={balance}
+        onSubmit={(amount) => dispatch({ type: 'withdraw', amount })}
+        preview={(amount) => `${t.place.received} ${credits(withdrawalBreakdown(amount).total)}`}
       />
-      <AmountForm label={t.place.withdraw} variant="default" max={balance} onSubmit={(amount) => dispatch({ type: 'withdraw', amount })} />
     </>
   )
 }

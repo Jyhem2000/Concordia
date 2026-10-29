@@ -2,7 +2,6 @@ import {
   ANTI_ARBITRAGE_CAP,
   DAMAGED_FACTOR,
   DEMAND_REFILL_DIVISOR,
-  GRINDER,
   KNOW_HOW_EXCESS_FACTOR,
   KNOW_HOW_SOFT_CAP,
   NIGHT_PROFILE_FACTOR,
@@ -22,7 +21,6 @@ import { breakdown, type Breakdown, type BreakdownBuilder, type RuleSource } fro
 import { takeLots } from './cargo.ts'
 import { crewEffect } from './crew.ts'
 import { freshnessFactor, freshnessOf } from './condition.ts'
-import { indexed } from './inflation.ts'
 import { recordOf } from './records.ts'
 import { influenceFactor } from './services.ts'
 import { drawAppearances, eventMultiplier, forgedCard, hasVice, stockFactor, type EventContext } from './events.ts'
@@ -271,49 +269,9 @@ export function estimatedUnitSale(quote: number): number {
   return Math.round(quote * SALE_COMMISSION)
 }
 
-/** Prix d'une ration de Synthanol dans le district actuel, indexé sur l'inflation */
+/** Prix d'une ration de Synthanol dans le district actuel */
 export function fuelPriceBreakdown(state: GameState): Breakdown {
-  // Cantine des Chauffeurs : tarif syndical fixe en D1, de jour (non indexé)
+  // Cantine des Chauffeurs : tarif syndical en D1, de jour
   if (state.districtId === 'D1' && state.phase === 'day' && !state.dayOver) return breakdown('LOC-D1-2', CANTINE.fuelPrice).build()
-  return indexed(state.districtId, DISTRICTS[state.districtId].fuelPrice, state.day)
-}
-
-// ─── Hachoir de Viktor (chap. 4) ───
-
-/** Lots qu'achète le Hachoir : périssables Faisandés ou Avariés */
-export const isGrindable = (state: GameState, lot: CargoLot) => {
-  const stage = freshnessOf(state, lot)
-  return stage === 'gamey' || stage === 'spoiled'
-}
-
-/** Caisses d'un produit que le Hachoir peut racheter */
-export function grindableQty(state: GameState, productId: ProductId): number {
-  return state.cargo.reduce((total, lot) => (lot.productId === productId && isGrindable(state, lot) ? total + lot.qty : total), 0)
-}
-
-/** Prix du Hachoir pour une caisse : cours local × fraîcheur × prime, arrondi */
-export function grinderPrice(state: GameState, lot: CargoLot): Breakdown {
-  return breakdown('rule.quote', quoteBreakdown(state, state.districtId, lot.productId))
-    .mul(FRESHNESS_RULES[freshnessOf(state, lot) ?? 'standard'], freshnessFactor(freshnessOf(state, lot)))
-    .mul('rule.grinder-premium', GRINDER.premium)
-    .round()
-    .build()
-}
-
-/** Rachat de `qty` caisses dégradées, les plus anciennes d'abord : montant total et soute restante */
-export function grinderSale(state: GameState, productId: ProductId, qty: number): { total: number; cargo: CargoLot[] } {
-  let left = qty
-  let total = 0
-  const cargo: CargoLot[] = []
-  for (const lot of state.cargo) {
-    if (lot.productId !== productId || left === 0 || !isGrindable(state, lot)) {
-      cargo.push(lot)
-      continue
-    }
-    const sold = Math.min(lot.qty, left)
-    left -= sold
-    total += grinderPrice(state, lot).total * sold
-    if (sold < lot.qty) cargo.push({ ...lot, qty: lot.qty - sold })
-  }
-  return { total, cargo }
+  return breakdown(state.districtId, DISTRICTS[state.districtId].fuelPrice).build()
 }

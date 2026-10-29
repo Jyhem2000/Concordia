@@ -85,7 +85,6 @@ export const fr = {
   rule: {
     'rule.clamp': 'Plafond',
     'rule.round': 'Arrondi',
-    'rule.inflation': 'Inflation du jour',
     'rule.production': 'Production locale',
     'rule.strong-demand': 'Forte demande',
     'rule.tier-bonus': 'Bonus de tier',
@@ -107,7 +106,7 @@ export const fr = {
     'rule.offshore-tranche-1': '1re tranche',
     'rule.offshore-tranche-2': '2e tranche',
     'rule.offshore-tranche-3': '3e tranche',
-    'rule.deposit': 'Dépôt',
+    'rule.withdrawal': 'Retrait',
     'rule.laundry-fee': 'Commission de la Laverie',
     'rule.suspicion': 'Suspicion (ICC)',
     'rule.suspicious-peak': 'Pic suspect de la veille',
@@ -133,17 +132,13 @@ export const fr = {
     'rule.freshness-gamey': 'Faisandé',
     'rule.freshness-spoiled': 'Avarié',
     'rule.damaged': 'Caisse endommagée',
-    'rule.grinder-premium': 'Prime du Hachoir',
     'rule.bluff-failed': 'Bluff raté',
     'rule.drone-judges': 'Drones-Juges (incorruptibles)',
     'rule.flee-base': 'Fuite : chance de base',
     'rule.flee-cap': 'Plafond de fuite',
     'rule.eject-manual': 'Éjection manuelle',
-    'rule.emergency-tow': "Dépannage d'urgence",
     'rule.aftershock': 'Contrecoup',
     'rule.repair': 'Réparation (par PV)',
-    'rule.night-mission': 'Prime de mission de nuit',
-    'rule.day-delivery': 'Prime de livraison officielle',
     'rule.refining': 'Affinage de Mama Rosa (Standard vendu Extra-Frais)',
     'rule.sedation': 'Sédation',
     'rule.cantine': 'Tarif syndical',
@@ -159,7 +154,7 @@ export const fr = {
     wanted: (level: number, max: number) => `Fiche S ${level}/${max}`,
     wantedGain: (levels: number) => `+${levels} niveau${levels > 1 ? 'x' : ''} de Fiche S`,
     debtLate: 'en retard',
-    nextBeating: (day: number) => `échéance J${day}`,
+    nextDeadline: (day: number) => `échéance J${day}`,
     nextProtection: (day: number, amount: string) => `Collecte de Viktor J${day} : ≈ ${amount}`,
     exemption: (days: number) => `Exemption ${days} j`,
     sedationTomorrow: (district: string) => `Sédation demain : passez à ${district} de jour`,
@@ -172,8 +167,6 @@ export const fr = {
 
   ticker: {
     label: 'Flash Info Aeterna',
-    index: (index: string) => `Indice d'inflation du jour ${index}`,
-    sinceYesterday: (change: string) => `(${change} depuis hier)`,
     messages: [
       // ─── Hygiène mentale, sédation & IA Aeterna ───
       'Un Citoyen-Livreur sourit, un Citoyen-Livreur produit.',
@@ -230,18 +223,8 @@ export const fr = {
     ],
   },
 
-  inflation: {
-    title: "Indice d'inflation algorithmique",
-    rule: (period: number) =>
-      `Indice du jour = 1 + (jour − 1) / ${period} : il monte chaque matin, de la même hauteur. Les montants de base (valeurs du Jour 1) sont multipliés par l'indice.`,
-    readout: (day: number, index: string) => `Jour ${day} : ${index}`,
-    projected: '(projection)',
-    chartLabel: (index: string, day: number, last: number) =>
-      `Indice d'inflation : ${index} au Jour ${day}, en hausse linéaire jusqu'au Jour ${last}.`,
+  chart: {
     dayTick: (day: number) => `J${day}`,
-    indexed:
-      "Indexés : carburant, réparations, dépannage, salaires et frais d'équipage, services des lieux spéciaux, part fixe du tarif de corruption, aléas routiers, prime des missions de nuit.",
-    notIndexed: 'Non indexés : prix des produits, véhicules, modules, dette et emprunts, seuils de fin, tarif syndical de la Cantine.',
   },
 
   briefing: {
@@ -265,7 +248,6 @@ export const fr = {
       `Trappe de largage : les complices rapportent ${back} caisse${back > 1 ? 's' : ''}, ${lost} perdue${lost > 1 ? 's' : ''}.`,
     lockedIn: (district: string) => `Complexe bouclé : vous restez au sas de ${district}, la journée commence à 20h00.`,
     debtInterest: 'Dette après intérêts',
-    beating: (health: number) => `Les Bouchers de Viktor sont passés : −${health} PV.`,
     debtLate: "Dette initiale jamais soldée : taux majoré et embuscades jusqu'à la fin de la partie.",
     protection: 'Collecte de protection',
     protectionToDebt: (amount: string) => `Cash-Puce insuffisant : ${amount} ajoutés à la dette.`,
@@ -524,21 +506,17 @@ export const fr = {
     repay: 'Rembourser',
     borrow: 'Emprunter',
     advanceRule: (total: string) =>
-      `Avance de survie : tant que la dette initiale court, Viktor avance jusqu'à ${total} sur toute la partie, au taux de la dette. L'emprunt tactique s'ouvre une fois la dette initiale soldée.`,
+      `Avance de survie : tant que la dette initiale court, Viktor avance jusqu'à ${total} sur toute la partie, au taux de la dette. Une fois la dette initiale soldée, il ne prête plus.`,
     loanRoom: (amount: string) => `Encore ${amount} empruntables`,
     offshoreTitle: 'Compte offshore',
     deposit: 'Déposer',
     withdraw: 'Retirer',
-    credited: 'Crédité',
+    received: 'Reçu en Cash-Puce',
+    breakEven: (days: number) =>
+      `Dépôt crédité en entier ; un retrait est taxé par la Laverie. Au taux du jour, un dépôt couvre cette commission en ${days} jour${days > 1 ? 's' : ''}.`,
     balance: (deposited: string, interest: string) => `dont dépôts ${deposited}, intérêts ${interest}`,
     rate: 'Taux du jour',
     nextInterest: (amount: string) => `+${amount} demain matin`,
-    grinderTitle: 'Hachoir industriel',
-    grinderRule: (limit: number, left: number) =>
-      `Viktor rachète les périssables Faisandés ou Avariés, ${limit} caisses par jour (reste ${left}). Le montant rembourse la dette, le surplus va au Cash-Puce.`,
-    grinderNothing: "Rien à recycler aujourd'hui.",
-    grind: 'Recycler',
-    grinderOffer: (qty: number, product: string) => `${qty} × ${product}, par caisse :`,
   },
 
   objectives: {
@@ -564,9 +542,9 @@ export const fr = {
     quote: 'Cours',
     stock: 'Stock',
     owned: 'En soute',
-    demand: 'Demande ici',
+    demand: 'Rachat au cours',
     demandHint:
-      "Caisses que ce district rachète aujourd'hui au plein prix. Au-delà, le prix est saturé et Aeterna note un pic suspect. Elle remonte chaque matin.",
+      "Caisses que ce district rachète encore aujourd'hui au plein cours. Au-delà, le prix est saturé et Aeterna note un pic suspect. Le rachat remonte chaque matin.",
     sale: 'Vente nette',
     notInShop: 'Hors boutique',
     unlimited: 'Illimitée',
@@ -587,10 +565,11 @@ export const fr = {
     sell: 'Vendre',
     max: 'MAX',
     status: {
-      production: 'Production locale',
+      production: 'Production locale · se revend mal ici',
       strong: 'Forte demande',
       neutral: '',
     },
+    origin: { official: 'Socle officiel', arrival: 'Arrivage du jour', exceptional: "Arrivage d'événement" },
   },
 
   sheet: {
@@ -620,9 +599,9 @@ export const fr = {
       `Saisie : confiscation, amende de ${fine} de leur valeur (prix de base), ICC −${icc}${high ? `, garde à vue ${custodyDays} jour${custodyDays > 1 ? 's' : ''} (haut tier)` : ''}`,
     bribeFavorite: (districts: string) => `Apprécié des agents de ${districts} : connivence à la corruption`,
     tollFavorite: (districts: string) => `Pris en premier par les milices de ${districts}`,
-    strong: (districts: string) => `Forte demande : ${districts}`,
+    strong: (districts: string) => `Forte demande : ${districts} (jamais en boutique là-bas, sauf événement)`,
     nowhere: 'nulle part',
-    produced: (districts: string) => `Production : ${districts}`,
+    produced: (districts: string) => `Production : ${districts} (en boutique chaque jour, moins cher)`,
     best: (quote: string, district: string, age: number) =>
       `Meilleur cours vu ailleurs : ${quote} à ${district} (${age === 0 ? "aujourd'hui" : `il y a ${age} jour${age > 1 ? 's' : ''}`})`,
     noMemory: 'Aucun cours vu ailleurs pour ce produit',
@@ -886,7 +865,7 @@ export const fr = {
     'location-closed': 'Fermé : les lieux spéciaux ouvrent de 06h00 à 20h00.',
     'no-debt': 'Aucune dette à rembourser.',
     'advance-used': 'Avance de survie épuisée : Viktor ne prêtera plus avant que la dette initiale soit soldée.',
-    'loan-ceiling': "Plafond d'emprunt atteint.",
+    'advance-closed': 'La dette initiale est soldée : Viktor ne prête plus.',
     'not-enough-offshore': 'Solde offshore insuffisant.',
     intercepted: "Un barrage vous attend : réglez d'abord le contrôle.",
     'not-intercepted': 'Aucun contrôle en cours.',
@@ -897,8 +876,6 @@ export const fr = {
     'already-used': 'Déjà utilisé : une seule fois par partie.',
     'third-night': 'Encore une nuit blanche ? Impossible, même dopé : le corps ne suit plus.',
     'too-weak': 'Santé trop basse pour une nuit blanche de plus.',
-    'grinder-full': 'Le Hachoir a atteint sa limite du jour.',
-    'not-grindable': 'Viktor ne rachète que les périssables Faisandés ou Avariés.',
     'road-event': 'Un aléa routier attend votre choix.',
     'no-road-event': 'Aucun aléa routier en cours.',
     'already-owned': 'Déjà possédé.',

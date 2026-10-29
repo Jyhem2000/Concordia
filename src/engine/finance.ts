@@ -1,10 +1,8 @@
 import {
-  DEBT_BEATING,
   DEBT_DAILY_RATE,
   DEBT_LATE,
   GAME_LENGTH_DAYS,
-  LOAN_CEILING,
-  OFFSHORE_DEPOSIT_FACTOR,
+  OFFSHORE_WITHDRAW_FACTOR,
   OFFSHORE_TRANCHES,
   PROTECTION,
   SURVIVAL_ADVANCE,
@@ -15,7 +13,6 @@ import type { GameState, OffshoreAccount } from './types.ts'
 
 /*
  * Les trois portefeuilles (chap. 7) : dette mafieuse, collecte de protection et compte offshore.
- * Les montants ne sont pas indexés sur l'inflation.
  */
 
 // ─── Dette ───
@@ -33,17 +30,16 @@ export function debtInterestBreakdown(state: GameState): Breakdown | null {
     .build()
 }
 
-/** Prochaine échéance qui menace le joueur : tabassage, retard, puis audit ; null sans dette */
+/** Prochaine échéance qui menace le joueur : retard, puis audit ; null sans dette */
 export function nextDebtDeadline(state: GameState): number | null {
   if (state.debt <= 0) return null
-  if (state.day < DEBT_BEATING.day) return DEBT_BEATING.day
   if (!state.initialDebtPaid && !state.debtLate && state.day < DEBT_LATE.day) return DEBT_LATE.day
   return GAME_LENGTH_DAYS
 }
 
-/** Somme qu'on peut encore emprunter à `[LOC-D1-1]` : avance de survie, puis emprunt tactique une fois la dette initiale soldée */
+/** Avance de survie qu'on peut encore emprunter à `[LOC-D1-1]` : rien une fois la dette initiale soldée */
 export function loanRoom(state: GameState): number {
-  return state.initialDebtPaid ? Math.max(0, LOAN_CEILING - state.debt) : Math.max(0, SURVIVAL_ADVANCE - state.advanced)
+  return state.initialDebtPaid ? 0 : Math.max(0, SURVIVAL_ADVANCE - state.advanced)
 }
 
 // ─── Collecte de protection ───
@@ -92,9 +88,14 @@ export function effectiveOffshoreRate(account: OffshoreAccount, crewBonus = 0): 
   return interest ? interest.total / account.deposited : OFFSHORE_TRANCHES[0].dailyRate
 }
 
-/** Somme créditée sur le compte pour un dépôt de `amount` ₡, commission déduite */
-export function depositBreakdown(amount: number): Breakdown {
-  return breakdown('rule.deposit', amount).mul('rule.laundry-fee', OFFSHORE_DEPOSIT_FACTOR).round().build()
+/** Cash-Puce reçu pour un retrait de `amount` ₡ débités du compte, commission déduite */
+export function withdrawalBreakdown(amount: number): Breakdown {
+  return breakdown('rule.withdrawal', amount).mul('rule.laundry-fee', OFFSHORE_WITHDRAW_FACTOR).round().build()
+}
+
+/** Jours de dépôt (au taux du jour) pour que les intérêts couvrent la commission d'un retrait */
+export function breakEvenDays(account: OffshoreAccount, crewBonus = 0): number {
+  return Math.ceil((1 - OFFSHORE_WITHDRAW_FACTOR) / effectiveOffshoreRate(account, crewBonus))
 }
 
 /** Retrait : les intérêts versés partent en premier, les dépôts (qui rapportent) en dernier */

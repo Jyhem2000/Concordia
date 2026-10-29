@@ -1,4 +1,4 @@
-import { ICC_MAX, CUSTODY, DEBT_BEATING, DEBT_LATE, ENDINGS, GAME_LENGTH_DAYS, PROTECTION, RELAY_SLEEP } from '../data/balance.ts'
+import { ICC_MAX, CUSTODY, DEBT_LATE, ENDINGS, GAME_LENGTH_DAYS, PROTECTION, RELAY_SLEEP } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
 import { LOTTERY } from '../data/events.ts'
 import { FORGERY } from '../data/locations.ts'
@@ -84,7 +84,6 @@ function morningRoutine(state: GameState, night: Night): GameState {
     nightTripDone: false,
     immobilizedTomorrow: false,
     iccRouteGains: 0,
-    grinderToday: 0,
     tripReport: null,
     // Les ventes saturées d'hier deviennent les pics suspects du jour (chap. 7)
     suspiciousPeaks: spent.state.oversold,
@@ -104,15 +103,12 @@ function morningRoutine(state: GameState, night: Night): GameState {
     missionReclaimed: 0,
     informant: false,
     debtInterest: null,
-    beating: 0,
     debtLate: false,
     protection: null,
     offshoreInterest: null,
   }
 
-  // 1. L'indice d'inflation se déduit du jour (inflation.ts)
-
-  // 2. Salaire de l'équipier, payé d'avance (rien en cellule)
+  // 1. Salaire de l'équipier, payé d'avance (rien en cellule)
   const crewId = s.crew.active
   const payroll = payCrew(s, night === 'cell')
   s = payroll.state
@@ -123,15 +119,10 @@ function morningRoutine(state: GameState, night: Night): GameState {
   s = reclaimed.state
   briefing.missionReclaimed = reclaimed.crates
 
-  // 3. Intérêts et échéances de la dette
+  // 2. Intérêts et échéances de la dette
   briefing.debtInterest = debtInterestBreakdown(s)
   if (briefing.debtInterest) s = { ...s, debt: briefing.debtInterest.total }
 
-  if (day === DEBT_BEATING.day && s.debt > DEBT_BEATING.threshold) {
-    const beaten = changeHealth(s, -DEBT_BEATING.healthLoss, DEBT_BEATING.healthFloor)
-    s = beaten.state
-    briefing.beating = -beaten.delta
-  }
   if (day === DEBT_LATE.day && !s.initialDebtPaid && !s.debtLate) {
     s = { ...s, debtLate: true }
     briefing.debtLate = true
@@ -145,12 +136,12 @@ function morningRoutine(state: GameState, night: Night): GameState {
     s = { ...s, cash: s.cash - paid, debt: s.debt + due.total - paid }
   }
 
-  // 4. Intérêts simples du compte offshore
+  // 3. Intérêts simples du compte offshore
   // Glitch majore le rendement, sauf les matins en cellule
   briefing.offshoreInterest = offshoreInterestBreakdown(s.offshore, night === 'cell' ? 0 : (crewEffect(s, 'offshoreBonus') ?? 0))
   if (briefing.offshoreInterest) s = { ...s, offshore: { ...s.offshore, interest: s.offshore.interest + briefing.offshoreInterest.total } }
 
-  // 6. Les complices de la trappe rapportent une part des caisses larguées la veille
+  // 5. Les complices de la trappe rapportent une part des caisses larguées la veille
   const trapdoor = MODULES['MOD-07'].trapdoor
   if (s.dumped.length > 0 && trapdoor) {
     const shareRng = createRng(s.rng)
@@ -164,12 +155,12 @@ function morningRoutine(state: GameState, night: Night): GameState {
   s = vip.state
   briefing.vipFailed = vip.failed
 
-  // 5. Fraîcheur : les périssables pourris sont détruits
+  // 4. Fraîcheur : les périssables pourris sont détruits
   const rot = removeRotten(s)
   briefing.rotten = rot.rotten
   s = { ...s, cargo: rot.cargo }
 
-  // 7. Ronde renforcée, événements, puis demande, cours et boutiques qu'ils modifient
+  // 6. Ronde renforcée, événements, puis demande, cours et boutiques qu'ils modifient
   const rng = createRng(s.rng)
   const patrolDistrict = drawPatrol(rng)
   const events = drawEvents(s.events, day, rng)
@@ -187,7 +178,7 @@ function morningRoutine(state: GameState, night: Night): GameState {
   }
   s = { ...s, markets: drawMarkets(s, rng, s.markets), rng: rng.state }
 
-  // 8. Effets du matin des événements : canicule, sas (chap. 8)
+  // 7. Effets du matin des événements : canicule, sas (chap. 8)
   // Le caisson cryo protège la soute de la canicule
   const heat = heatWave(s)
   if (heat && !mountedEffect(s, 'heatProof')) {

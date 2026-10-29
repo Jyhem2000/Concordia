@@ -78,23 +78,23 @@ export const MODULES: Readonly<Record<ModuleId, Module>> = {
   'MOD-09': { requires: [{ kind: 'wanted' }], price: 10_000, category: 'tactical', droneJammer: true },
 }
 
-/** Frais de recrutement à la Cantine, indexés (le premier recrutement est gratuit) */
-export const CREW_HIRE_FEE = 1_500
+/** Frais de recrutement à la Cantine (le premier recrutement est gratuit) */
+export const CREW_HIRE_FEE = 2_250
 
-/** Salaires de base, indexés sur l'inflation, et bonus des équipiers (chap. 5) */
+/** Salaires et bonus des équipiers (chap. 5) */
 export const CREW: Readonly<Record<CrewId, Crew>> = {
   'CREW-01': {
     requires: [{ kind: 'controls', count: 1 }],
-    dailySalary: 400,
+    dailySalary: 600,
     inKindSalary: { amount: 300, tag: 'TAG-ADDICTIVE', minTier: 2 },
     riskFactor: 0.8,
     bribeBonus: 0.15,
     revealsPatrol: true,
   },
-  'CREW-02': { requires: [{ kind: 'wanted' }], dailySalary: 600, liveQuotes: true, offshoreBonus: 0.005, fleeBonus: 0.2, forgeryBonus: 0.2 },
+  'CREW-02': { requires: [{ kind: 'wanted' }], dailySalary: 900, liveQuotes: true, offshoreBonus: 0.005, fleeBonus: 0.2, forgeryBonus: 0.2 },
   'CREW-03': {
     requires: [{ kind: 'tagSales', tag: 'TAG-PERISHABLE', count: 10 }],
-    dailySalary: 250,
+    dailySalary: 375,
     perishableKnowHow: 1.5,
     refining: true,
     perishableQuota: 2.5,

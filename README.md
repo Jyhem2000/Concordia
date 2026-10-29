@@ -48,7 +48,7 @@ Elles s'appliquent à tout le code, sans exception non justifiée. **Toute nouve
 
 - Identifiants (types, fonctions, variables, fichiers) en anglais ; commentaires en français ; textes du jeu uniquement dans `src/i18n/`.
 - Code complet : ni placeholder ni `TODO` dans le code commité.
-- Docs à jour : toute règle décidée en codant (ordre de résolution, arrondi, cas limite) est écrite dans le chapitre concerné de `docs/`, dans le même commit (règle 7 de [docs/README.md](docs/README.md)).
+- Docs à jour : toute règle décidée en codant (ordre de résolution, arrondi, cas limite) est écrite dans le chapitre concerné de `docs/`, dans le même commit (règle 6 de [docs/README.md](docs/README.md)).
 
 **Où vivent les types et les constantes**
 

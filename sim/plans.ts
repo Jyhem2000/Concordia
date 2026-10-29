@@ -24,10 +24,10 @@ export const PLANS: readonly Plan[] = [
     vehicle: 'VEH-02',
     modules: ['MOD-08'],
     legalShare: 0.3,
-    places: ['grinder', 'advance', 'certificate', 'blackmail'],
+    places: ['advance', 'certificate', 'blackmail'],
     iccFloor: 90,
   },
-  { name: 'Opportuniste', modules: [], places: ['grinder', 'advance', 'influence', 'vip'] },
+  { name: 'Opportuniste', modules: [], places: ['advance', 'influence', 'vip'] },
   { name: 'Saboteur', vehicle: 'VEH-04', modules: ['MOD-03'], favorTags: ['TAG-TECH'] },
 ]
 

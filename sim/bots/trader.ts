@@ -4,10 +4,10 @@ import {
   ENDINGS,
   FLEE,
   GAME_LENGTH_DAYS,
-  GRINDER,
   HIGH_TIER,
   ICC_TIERS,
   SALE_COMMISSION,
+  OFFSHORE_WITHDRAW_FACTOR,
   SEARCH,
   SURVIVAL_ADVANCE,
 } from '../../src/data/balance.ts'
@@ -23,7 +23,6 @@ import { checkHire, crewEffect, hireFee, salary } from '../../src/engine/crew.ts
 import { checkBuyModule, checkBuyVehicle, ejectMode, missingChassis, mountedEffect, repairPrice } from '../../src/engine/equipment.ts'
 import { eventMultiplier } from '../../src/engine/events.ts'
 import { loanRoom, offshoreBalance } from '../../src/engine/finance.ts'
-import { indexed } from '../../src/engine/inflation.ts'
 import {
   bluffChance,
   bribeChance,
@@ -39,20 +38,10 @@ import {
   searchSanction,
   toll,
 } from '../../src/engine/interception.ts'
-import {
-  demandQuota,
-  grindableQty,
-  lastSeen,
-  normalQuote,
-  productStatus,
-  quote,
-  saleQuote,
-  shopProducts,
-  unitSaleBreakdown,
-} from '../../src/engine/market.ts'
+import { demandQuota, lastSeen, normalQuote, productStatus, quote, saleQuote, shopProducts, unitSaleBreakdown } from '../../src/engine/market.ts'
 import { checkDelivery, deliveryCrates, deliveryFee, deliveryOffer } from '../../src/engine/delivery.ts'
 import { checkMission, missionOffer } from '../../src/engine/night.ts'
-import { checkRoadChoice, roadCash } from '../../src/engine/road.ts'
+import { checkRoadChoice } from '../../src/engine/road.ts'
 import {
   blackmailCost,
   checkAuction,
@@ -104,7 +93,7 @@ export type Plan = {
   offshoreFromDay?: number
   /** Novice : n'achète que la production locale, accepte toujours la fouille, ne s'équipe pas, ne roule pas la nuit */
   novice?: boolean
-  /** Lieux spéciaux utilisés quand le bot s'y trouve ; par défaut le Hachoir et l'avance de survie */
+  /** Lieux spéciaux utilisés quand le bot s'y trouve ; par défaut l'avance de survie */
   places?: readonly PlaceUse[]
   /** Tournées de nuit au moins quand la soute le justifie, quel que soit le tempérament (suspensions, profil festif) */
   nightOwl?: boolean
@@ -115,9 +104,9 @@ export type Plan = {
 }
 
 /** Usages des lieux spéciaux que sait faire le marchand (chap. 9, tests par retrait) */
-export type PlaceUse = 'grinder' | 'advance' | 'surgery' | 'certificate' | 'pass' | 'influence' | 'auction' | 'blackmail' | 'vip'
+export type PlaceUse = 'advance' | 'surgery' | 'certificate' | 'pass' | 'influence' | 'auction' | 'blackmail' | 'vip'
 
-const DEFAULT_PLACES: readonly PlaceUse[] = ['grinder', 'advance']
+const DEFAULT_PLACES: readonly PlaceUse[] = ['advance']
 
 /** Seuils d'usage des lieux : chirurgie sous cette Santé, certificat et chantage sous cet ICC */
 const PLACE_THRESHOLDS = { surgeryBelowHealth: 50, iccBelow: 60 }
@@ -276,7 +265,7 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
 
 /** Plus de quoi remplir la soute, et rien à vendre */
 function isBroke(view: GameState): boolean {
-  return tradable(view).length === 0 && view.cash < indexed('rule.inflation', CAPITAL, view.day).total / 2
+  return tradable(view).length === 0 && view.cash < CAPITAL / 2
 }
 
 /** Prix net espéré d'une caisse dans un district : cours du jour ici, cours mémorisé ailleurs, sinon profil public */
@@ -324,14 +313,14 @@ const tradable = (view: GameState) => view.cargo.filter((lot) => !PRODUCTS[lot.p
 /** Fonds à garder : carburant d'un trajet et réserve du tempérament ; à sec, le carburant seulement (rester garé ne rapporte rien) */
 function reserveOf(view: GameState, temperament: Temperament): number {
   const fuel = fuelPrice(view) * 2
-  return isBroke(view) ? fuel : fuel + indexed('rule.inflation', temperament.reserve, view.day).total
+  return isBroke(view) ? fuel : fuel + temperament.reserve
 }
 
 /** Fonds de roulement gardés en remboursant ; tout part s'il solde la dette initiale juste avant l'échéance du retard (taux majoré ensuite) */
 function workingCapital(view: GameState, reserve: number): number {
   const fuel = fuelPrice(view) * 2
   const clearsBeforeLate = !view.initialDebtPaid && view.day >= DEBT_LATE.day - 2 && view.cash - fuel >= view.debt
-  return clearsBeforeLate ? fuel : reserve + indexed('rule.inflation', CAPITAL, view.day).total
+  return clearsBeforeLate ? fuel : reserve + CAPITAL
 }
 
 /** Ce que rapporte un passage chez Viktor : intérêts évités sur ce qu'on peut rembourser, et l'échéance du retard évitée */
@@ -384,13 +373,6 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
   const places = plan.places ?? DEFAULT_PLACES
   const uses = (place: PlaceUse) => places.includes(place)
 
-  // Hachoir de Viktor : les périssables dégradés plutôt que perdus
-  if (uses('grinder') && !checkService(view, 'grinder')) {
-    const left = GRINDER.dailyLimit - view.grinderToday
-    const degraded = PRODUCT_IDS.find((id) => grindableQty(view, id) > 0)
-    if (degraded && left > 0) return { type: 'grind', productId: degraded, qty: Math.min(left, grindableQty(view, degraded)) }
-  }
-
   // Dette : à intérêts quotidiens, la rembourser passe avant tout, en gardant de quoi travailler
   if (!checkService(view, 'debt') && view.debt > 0) {
     const working = endgame ? fuelPrice(view) * 2 : workingCapital(view, reserve)
@@ -398,7 +380,7 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
     if (amount > 0) return { type: 'repay', amount }
     // Avance de survie : seulement pour ne pas rester bloqué
     if (uses('advance') && isBroke(view) && loanRoom(view) > 0 && !endgame) {
-      return { type: 'borrow', amount: Math.min(loanRoom(view), indexed('rule.inflation', SURVIVAL_ADVANCE, view.day).total) }
+      return { type: 'borrow', amount: Math.min(loanRoom(view), SURVIVAL_ADVANCE) }
     }
   }
 
@@ -411,14 +393,16 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
 
   // Fin de partie avec une dette (collecte de Viktor sur un Cash-Puce vide…) : retirer de la Laverie de quoi la solder
   if (!checkService(view, 'offshore') && endgame && view.debt > 0) {
-    const missing = Math.min(offshoreBalance(view.offshore), view.debt + fuelPrice(view) * 2 - view.cash)
-    if (missing > 0) return { type: 'withdraw', amount: Math.ceil(missing) }
+    // Commission au retrait : débiter un peu plus que ce qui manque
+    const missing = view.debt + fuelPrice(view) * 2 - view.cash
+    const amount = Math.min(offshoreBalance(view.offshore), Math.ceil(missing / OFFSHORE_WITHDRAW_FACTOR))
+    if (missing > 0 && amount > 0) return { type: 'withdraw', amount }
   }
 
   // Laverie : mettre à l'abri ce qui dépasse le fonds de roulement, dette soldée ; tout en fin de partie
   if (!checkService(view, 'offshore') && view.debt === 0 && objective !== 'survive') {
     // Seuil de la fin visée atteint : tout à l'abri, sauf le carburant
-    const working = secured(view, objective) ? fuelPrice(view) * 2 : reserve + indexed('rule.inflation', CAPITAL, view.day).total * 2
+    const working = secured(view, objective) ? fuelPrice(view) * 2 : reserve + CAPITAL * 2
     const amount = endgame ? view.cash : view.day >= (plan.offshoreFromDay ?? 15) || secured(view, objective) ? view.cash - working : 0
     if (amount > 0) return { type: 'deposit', amount }
   }
@@ -427,7 +411,7 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
 
 /** Lieux spéciaux du district, quand le plan les prévoit et que le seuil est atteint */
 function specialPlaces(view: GameState, uses: (place: PlaceUse) => boolean, reserve: number, iccFloor: number): Action | null {
-  const spare = (cost: number) => view.cash - cost >= reserve + indexed('rule.inflation', CAPITAL, view.day).total
+  const spare = (cost: number) => view.cash - cost >= reserve + CAPITAL
   if (!checkService(view, 'morgue')) {
     if (uses('surgery') && view.health < PLACE_THRESHOLDS.surgeryBelowHealth && !checkMorgue(view, 'surgery') && spare(morgueCost(view, 'surgery'))) {
       return { type: 'morgue', service: 'surgery' }
@@ -459,7 +443,7 @@ function specialPlaces(view: GameState, uses: (place: PlaceUse) => boolean, rese
 }
 
 function equip(view: GameState, plan: Plan, reserve: number): Action | null {
-  const spare = view.cash - reserve - indexed('rule.inflation', CAPITAL, view.day).total
+  const spare = view.cash - reserve - CAPITAL
   if (!checkService(view, 'garage')) {
     if (plan.vehicle && view.vehicleId !== plan.vehicle && VEHICLES[plan.vehicle].price <= spare && !checkBuyVehicle(view, plan.vehicle)) {
       return { type: 'buyVehicle', vehicleId: plan.vehicle }
@@ -476,7 +460,7 @@ function equip(view: GameState, plan: Plan, reserve: number): Action | null {
     }
   }
   if (!checkService(view, 'crew') && plan.crew && view.crew.active !== plan.crew) {
-    const cost = hireFee(view) + salary(view, plan.crew) * 4
+    const cost = hireFee(view) + salary(plan.crew) * 4
     if (cost <= spare && !checkHire(view, plan.crew)) return { type: 'hireCrew', crewId: plan.crew }
   }
   return null
@@ -765,7 +749,7 @@ function roadChoice(view: GameState): Action {
   const event = view.roadEvent
   if (!event) return { type: 'sleep' }
   const outcomeCost = (outcome: RoadOutcome = {}) =>
-    -roadCash(view, outcome.cash) -
+    -(outcome.cash ?? 0) -
     (outcome.icc ?? 0) * VALUE.iccPoint -
     (outcome.health ?? 0) * VALUE.healthPoint -
     (outcome.chassis ?? 0) * VALUE.chassisPoint -
@@ -776,7 +760,7 @@ function roadChoice(view: GameState): Action {
     const pays = option.pay ?? [{}]
     pays.forEach((cost, pay) => {
       if (checkRoadChoice(view, choice, pay)) return
-      const paid = roadCash(view, cost.cash) + (cost.fuel ?? 0) * fuelPrice(view) + (cost.crates?.qty ?? 0) * 50
+      const paid = (cost.cash ?? 0) + (cost.fuel ?? 0) * fuelPrice(view) + (cost.crates?.qty ?? 0) * 50
       const effect = option.gamble
         ? option.gamble.chance * outcomeCost(option.gamble.win) + (1 - option.gamble.chance) * outcomeCost(option.gamble.lose)
         : outcomeCost(option.outcome)

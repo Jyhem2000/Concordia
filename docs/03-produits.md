@@ -39,9 +39,9 @@ Tout lot acheté démarre **Extra-Frais**. L'Extra-Frais est une **prime de livr
 * **Lecture :** livrer le jour même = prime ; livrer de nuit ou le lendemain = prix normal ; traîner = perte.
 * **La prime suppose un trajet :** une caisse revendue sans avoir quitté son district d'achat a son Savoir-Faire plafonné (clause anti-arbitrage, chap. 7). Livrer le jour même, c'est acheter, rouler, vendre avant 20h00.
 * **Ordre de vente :** les lots les plus anciens partent en premier (chap. 7) : on écoule d'abord ce qui se dégrade.
-* **Recours :** les lots Faisandés ou Avariés se revendent au Hachoir de `[LOC-D1-1]` (chap. 4).
+* **Recours :** les lots Faisandés ou Avariés se revendent à prix réduit (coefficient de fraîcheur), ou se donnent en paiement (chap. 7).
 * **Équipement :** les états se calculent sur un **âge effectif**. `[MOD-01]` retarde tout le cycle de son retard (âge − `freshnessDelay`) ; `[VEH-03]` ne compte qu'un matin sur deux (âge divisé par deux, arrondi au supérieur). Les deux se cumulent dans cet ordre. *Ex. (valeurs indicatives) :* avec les deux et un retard de 2 jours, une caisse achetée le Jour 5 est Extra-Frais jusqu'au Jour 7 à 20h00, Standard jusqu'au Jour 9, Faisandée les Jours 10–11, Avariée les Jours 12–13, et pourrit le Jour 14 à 06h00.
-* *Pourquoi pas « jamais sous Standard » pour `[MOD-01]` :* avec l'affinage de `[CREW-03]`, les périssables seraient devenus une rente sans risque, et le Hachoir comme le dilemme de la fraîcheur auraient disparu.
+* *Pourquoi pas « jamais sous Standard » pour `[MOD-01]` :* avec l'affinage de `[CREW-03]`, les périssables seraient devenus une rente sans risque, et le dilemme de la fraîcheur aurait disparu.
 
 ---
 

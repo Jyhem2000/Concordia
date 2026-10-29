@@ -2,7 +2,7 @@ import { Signpost } from 'lucide-react'
 import { useState } from 'react'
 import { ICC_MAX } from '../../data/balance.ts'
 import { ROAD_EVENTS } from '../../data/events.ts'
-import { checkRoadChoice, roadCash, roadCrates, type RoadChoiceId } from '../../engine/road.ts'
+import { checkRoadChoice, roadCrates, type RoadChoiceId } from '../../engine/road.ts'
 import type { RoadCost, RoadEventId, RoadOutcome } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -84,7 +84,7 @@ function useRoadDescriptions() {
     const crates = roadCrates(game, paid)
     const wanted = paid.crates
     const parts = [
-      ...(paid.cash ? [credits(roadCash(game, paid.cash))] : []),
+      ...(paid.cash ? [credits(paid.cash ?? 0)] : []),
       ...(paid.fuel ? [t.road.cost.fuel(paid.fuel)] : []),
       ...(wanted && crates && crates.length > 0 ? crates.map((crate) => t.road.cost.crates(crate.qty, t.product[crate.productId].name)) : []),
       ...(wanted && !crates
@@ -101,7 +101,7 @@ function useRoadDescriptions() {
 
   const outcome = (result: RoadOutcome): string => {
     const parts = [
-      ...(result.cash ? [t.road.outcome.cash(signedCredits(roadCash(game, result.cash)))] : []),
+      ...(result.cash ? [t.road.outcome.cash(signedCredits(result.cash ?? 0))] : []),
       ...(result.icc ? [t.road.outcome.icc(signedPercent(result.icc / ICC_MAX, 0))] : []),
       ...(result.health ? [t.road.outcome.health(signed(result.health))] : []),
       ...(result.chassis ? [t.road.outcome.chassis(signed(result.chassis))] : []),

@@ -35,7 +35,7 @@ export const useGameStore = create<GameStore>()(
       name: 'concordia-save',
       storage: createJSONStorage(() => localStorage),
       // Incrémenter à chaque changement de forme de GameState et gérer la migration
-      version: 17,
+      version: 18,
       // Pas de migration avant la première version publique : une sauvegarde obsolète repart de zéro
       migrate: () => ({ game: createInitialState(randomSeed()) }),
       partialize: savedPart,

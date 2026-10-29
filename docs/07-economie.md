@@ -16,7 +16,8 @@ Chaque district propose un **minimum de produits** (`SHOP_MIN_PRODUCTS` dans [`b
 2. **Production locale :** tous les produits de la liste Production du district (exceptions : tirage partiel en `[D4]`, apparition limitée de `[T4-06]`).
 3. **Complément neutre :** si le total est inférieur au minimum, tirage aléatoire de produits de Tier 1 à 3 neutres pour ce district.
 
-* **Exclusion :** un district ne vend **jamais** un produit de sa liste Forte demande, sauf événement qui le précise.
+* **Exclusion :** un district ne vend **jamais** un produit de sa liste Forte demande, sauf événement qui le précise. *Logique :* un quartier vend son surplus et ne vend pas ce qui lui manque ; le joueur achète là où l'on produit et revend là où ça manque.
+* **Affichage :** chaque produit en boutique dit pourquoi il y est (production locale, socle officiel, arrivage du jour, arrivage d'événement), et la fiche produit rappelle qu'un produit en Forte demande n'est jamais en boutique là-bas (chap. 10).
 * **Stocks :** par produit et par jour, selon le tier ([`products.ts`](../src/data/products.ts)). Modificateurs : `[EVT-G05]`, `[EVT-D1-01]`, `[EVT-D3-03]`.
 * **Demande universelle :** le joueur peut **toujours vendre** n'importe quelle caisse, dans n'importe quel district.
 
@@ -38,13 +39,13 @@ Cours = Arrondi( Prix_Base × Coef_District × Bruit × Mult_Événement )
   * *Plafond :* quel que soit le cumul, jamais au-dessus.
 * **Le cours est fixe toute la journée.** La nuit ne recalcule rien ; elle n'applique que deux ajustements connus dès le matin : le profil nuit à la vente, et l'annulation des événements marqués « jour seulement ».
 
-## Quota de demande
-Pendant de la boutique : un district n'achète qu'une quantité limitée de chaque produit.
+## Quota de rachat
+Pendant de la boutique : un district ne rachète qu'une quantité limitée de chaque produit au plein cours. À ne pas confondre avec le statut *Forte demande* (qui fixe le cours et le quota) : tout produit a un quota, même produit sur place, où il se revend mal (coefficient de production).
 * **Quota :** par produit et par district, selon le tier et le statut du produit dans le district ([`products.ts`](../src/data/products.ts)). Modificateurs (multiplicatifs entre eux) : `[CREW-03]`, carte « contrebandier concurrent » de `[LOC-D5-1]`.
-* **Demande restante :** pleine au Jour 1. Chaque vente la consomme, de jour comme de nuit. **Chaque matin à 06h00, elle remonte d'une fraction du quota** (`DEMAND_REFILL_DIVISOR` dans [`balance.ts`](../src/data/balance.ts), arrondi au supérieur), sans dépasser le quota. Vider un marché le pénalise donc plusieurs jours.
-* **Au-delà de la demande restante, le marché est saturé :** chaque caisse supplémentaire se vend à prix réduit (`Coef_Demande`, `SATURATED_SALE_FACTOR` dans [`balance.ts`](../src/data/balance.ts)).
-* **Pic suspect :** vendre au-delà de la demande restante alerte Aeterna — **le lendemain**, le risque de base de ce district augmente pour toute la journée (un seul pic par district, quel que soit le nombre de ventes saturées ; `SUSPICIOUS_PEAK_RISK` dans [`balance.ts`](../src/data/balance.ts) ; icône 👁️ sur la carte).
-* **Affichage :** *« Demande restante : 5 (+2 demain) »* sur chaque ligne du tableau des cours (chap. 10).
+* **Rachat restant :** plein au Jour 1. Chaque vente le consomme, de jour comme de nuit. **Chaque matin à 06h00, il remonte d'une fraction du quota** (`DEMAND_REFILL_DIVISOR` dans [`balance.ts`](../src/data/balance.ts), arrondi au supérieur), sans dépasser le quota. Vider un marché le pénalise donc plusieurs jours.
+* **Au-delà du rachat restant, le marché est saturé :** chaque caisse supplémentaire se vend à prix réduit (`Coef_Demande`, `SATURATED_SALE_FACTOR` dans [`balance.ts`](../src/data/balance.ts)).
+* **Pic suspect :** vendre au-delà du rachat restant alerte Aeterna — **le lendemain**, le risque de base de ce district augmente pour toute la journée (un seul pic par district, quel que soit le nombre de ventes saturées ; `SUSPICIOUS_PEAK_RISK` dans [`balance.ts`](../src/data/balance.ts) ; icône 👁️ sur la carte).
+* **Affichage :** *« Rachat au cours : 5 (+2 demain) »* sur chaque ligne du tableau des cours (chap. 10).
 * *Lecture stratégique :* on répartit ses ventes **dans le temps et dans l'espace** (8 caisses en `[D6]` aujourd'hui, le reste en `[D5]` demain, et on laisse `[D6]` se reconstituer), en arbitrant avec la fraîcheur et la collecte de Viktor.
 
 ## Prix de vente
@@ -54,7 +55,7 @@ Pendant de la boutique : un district n'achète qu'une quantité limitée de chaq
 Prix_Vente = Arrondi( Cours × Commission × Coef_Demande × Coef_Condition × Savoir_Faire )
 ```
 * **Commission de puce** (`SALE_COMMISSION` dans [`balance.ts`](../src/data/balance.ts)) **:** chaque vente P2P est ponctionnée par l'infrastructure d'Aeterna, à l'aveugle : le relais prélève sa part sans rien enregistrer (voir *Cash-Puce*). Acheter puis revendre au même endroit coûte donc toujours la commission.
-* **Coef_Demande :** 1.00 dans la limite de la demande restante, prix saturé au-delà.
+* **Coef_Demande :** 1.00 dans la limite du rachat restant, prix saturé au-delà.
 * **Coef_Condition :** caisse endommagée (`[TAG-FRAGILE]`, chap. 3 ; `DAMAGED_FACTOR` dans [`balance.ts`](../src/data/balance.ts)).
 * **Savoir_Faire = Coef_Fraîcheur × Coef_Nuit × Bonus_Mama**, avec **rendements décroissants** : au-delà d'un seuil, l'excédent ne compte qu'en partie (`KNOW_HOW_SOFT_CAP` et `KNOW_HOW_EXCESS_FACTOR` dans [`balance.ts`](../src/data/balance.ts)).
   * *Coef_Fraîcheur :* `[TAG-PERISHABLE]` (chap. 3).
@@ -80,17 +81,6 @@ Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est 
 
 ---
 
-## Indice d'inflation algorithmique
-*« Pour votre sécurité économique, Aeterna ajuste les prix en temps réel. »*
-* **Indice du jour = 1 + (jour − 1) / période** (`INFLATION_PERIOD_DAYS` dans [`balance.ts`](../src/data/balance.ts)) : ×1.00 au Jour 1, puis croissance linéaire.
-* **Tous les montants en ₡ de la doc sont des valeurs de base (Jour 1)**, multipliées par l'indice pour : carburant, réparations, dépannage, salaires et frais d'équipage, services des lieux spéciaux, part fixe du tarif de corruption, montants des aléas routiers, prime des missions de nuit.
-* **Non indexés :** prix des produits (ils ont leur propre marché), véhicules, modules, dette et emprunts, seuils de fin, tarif syndical de `[LOC-D1-2]`.
-* *Lore :* le marché noir facture ses services en indice officiel : c'est la seule unité de compte que les puces acceptent sans éveiller l'algorithme.
-* **Affichage :** valeur du jour au téléscripteur dès le Jour 1, avec un graphique d'historique (chap. 10).
-* *Lecture stratégique :* les services coûtent de plus en plus cher ; les équipements, eux, ne sont pas indexés et rapportent d'autant plus qu'on les achète tôt.
-
----
-
 ## Les trois portefeuilles
 
 ### Cash-Puce (portefeuille courant)
@@ -100,15 +90,13 @@ Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est 
 
 ### Dette mafieuse
 * **Créancier :** `[LOC-D1-1]`. **Solde unique :** la dette de départ, les emprunts et les reliquats (dépannage, collecte) s'ajoutent au même solde. **Départ :** [`balance.ts`](../src/data/balance.ts).
-* **Dette initiale soldée :** statut acquis **définitivement** la première fois que le solde atteint 0. Il débloque l'emprunt tactique, la collecte de protection et la modale « Objectifs du Jour 30 ».
+* **Dette initiale soldée :** statut acquis **définitivement** la première fois que le solde atteint 0. Il ferme l'avance de survie et débloque la collecte de protection et la modale « Objectifs du Jour 30 ».
 * **Taux :** un taux quotidien, arrondi au ₡ chaque matin (`DEBT_DAILY_RATE` dans [`balance.ts`](../src/data/balance.ts)) sur tout le solde, composés à chaque routine matinale (pas le Jour 1).
 * **Échéances :**
-  * **Tabassage** (jour, seuil, PV perdus et plancher : `DEBT_BEATING` dans [`balance.ts`](../src/data/balance.ts)) **:** à 06h00 du jour d'échéance, si le solde dépasse le seuil, les Bouchers tabassent le joueur, sans le faire descendre sous un plancher de Santé (un débiteur mort ne paie plus).
   * **Retard** (jour, taux majoré et malus de risque : `DEBT_LATE` dans [`balance.ts`](../src/data/balance.ts)) **:** à 06h00 du jour d'échéance, si la dette initiale n'a **jamais** été soldée, le taux est majoré et ses hommes de main renseignent patrouilles et milices : malus au risque d'interception partout (*embuscades*). Ces deux pénalités restent acquises jusqu'à la fin de la partie, même après remboursement.
   * **Jour 30, minuit :** audit — le solde doit être à 0 (chap. 2).
 * **Avance de survie :** tant que la dette initiale n'est pas soldée, Viktor avance au plus une somme fixe **sur toute la partie** (`SURVIVAL_ADVANCE` dans [`balance.ts`](../src/data/balance.ts)), ajoutée au solde au taux en vigueur. *Lore :* un débiteur à sec ne rembourse rien ; Viktor avance de quoi repartir, une fois. *Intention :* un joueur ruiné par un barrage n'est jamais bloqué sans issue, mais sa dette, et la menace de l'audit, grossissent. Les remboursements ne reconstituent pas l'avance.
-* **Emprunt tactique :** une fois la dette initiale soldée, le joueur peut réemprunter jusqu'à un plafond de solde (`LOAN_CEILING` dans [`balance.ts`](../src/data/balance.ts)), au taux en vigueur.
-* **Augmentée** par le dépannage d'urgence (chap. 2) et la collecte de protection ; **réduite** par le Hachoir de `[LOC-D1-1]`.
+* **Augmentée** par l'avance de survie, le dépannage d'urgence (chap. 2) et la collecte de protection ; **réduite** par les remboursements à `[LOC-D1-1]`.
 
 ### Collecte de protection
 *« Viktor ne t'oublie pas. Viktor n'oublie personne. »*
@@ -120,7 +108,8 @@ Toute caisse donnée en paiement (corruption, chantage, salaire, péage…) est 
 ### Compte offshore
 * **Guichet :** `[LOC-D5-1]`, de jour uniquement.
 * **Insaisissable :** ni la BRC, ni les milices, ni Viktor, ni l'audit n'y touchent.
-* **Dépôt :** commission de la Laverie (`OFFSHORE_DEPOSIT_FACTOR` dans [`balance.ts`](../src/data/balance.ts)). **Retrait :** gratuit mais sur place, l'argent redevient du Cash-Puce exposé. Les intérêts versés sont retirés en premier, les dépôts (seuls à rapporter) en dernier.
+* **Dépôt :** crédité en entier. **Retrait :** sur place, commission de la Laverie (`OFFSHORE_WITHDRAW_FACTOR` dans [`balance.ts`](../src/data/balance.ts)) : le compte est débité du montant demandé, le Cash-Puce n'en reçoit qu'une part, et l'argent redevient exposé. Les intérêts versés sont retirés en premier, les dépôts (seuls à rapporter) en dernier.
+  * *Intention :* le score déposé n'est jamais taxé ; seul l'aller-retour coûte. L'app affiche au guichet en combien de jours un dépôt couvre la commission d'un retrait, au taux du jour.
 * **Rendement — intérêts simples** (les intérêts versés ne produisent pas d'intérêts), versés à la routine matinale sur le solde déposé avant 20h00. Le taux baisse par tranche du solde déposé, à cause des **« frais de conformité »** (`OFFSHORE_TRANCHES` dans [`balance.ts`](../src/data/balance.ts)).
 * **Modificateur :** `[CREW-02]`. L'app affiche le **taux effectif** du compte.
 * **Score final** = solde à l'audit.

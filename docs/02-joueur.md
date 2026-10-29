@@ -28,13 +28,13 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 ### Santé du joueur
 * **Échelle :** 0 à 100 PV. **Départ :** [`balance.ts`](../src/data/balance.ts). **À 0 PV :** mort (Game Over).
 * **Pertes létales :** échec de fuite (chap. 6), racket des milices de `[D4]`.
-* **Pertes non-létales** (plancher à 1 PV, ou défini à la source) : aléas routiers, coup de chaleur de `[EVT-G01]`, tabassage de la dette, garde à vue, nuit blanche sous `[T2-05]`.
+* **Pertes non-létales** (plancher à 1 PV, ou défini à la source) : aléas routiers, coup de chaleur de `[EVT-G01]`, garde à vue, nuit blanche sous `[T2-05]`.
 * **Soins :** sommeil au relais routier, `[LOC-D3-1]`.
 
 ### Intégrité du châssis (PV véhicule)
 * **Maximum :** selon le véhicule ([`vehicles.ts`](../src/data/vehicles.ts)). **Départ :** châssis intact. **Réparation :** `[LOC-D4-1]`.
 * **Pertes :** trajet de nuit, `[EVT-G01]`, `[T2-05]`, éjection manuelle, fuite, explosion `[TAG-FLAMMABLE]`, racket de `[D4]`, aléas `[EVT-R02]`, `[EVT-R05]`, `[EVT-R08]`, `[EVT-R09]`, `[EVT-R10]`.
-* **Dépannage d'urgence (anti soft-lock) :** à 0 PV, une dépanneuse du DSC intervient (en `[D4]`, celle des mécanos pirates, aux mêmes conditions) : **demi-journée** perdue, châssis remis à une part de ses PV max, facture fixe indexée (`EMERGENCY_TOW` dans [`balance.ts`](../src/data/balance.ts)) (si le Cash-Puce ne suffit pas, le reliquat s'ajoute à la dette). Si le châssis tombe à 0 pendant un trajet, le trajet se termine (arrivée à destination), puis le dépannage s'applique.
+* **Dépannage d'urgence (anti soft-lock) :** à 0 PV, une dépanneuse du DSC intervient (en `[D4]`, celle des mécanos pirates, aux mêmes conditions) : **demi-journée** perdue, châssis remis à une part de ses PV max, facture fixe (`EMERGENCY_TOW` dans [`balance.ts`](../src/data/balance.ts)) (si le Cash-Puce ne suffit pas, le reliquat s'ajoute à la dette). Si le châssis tombe à 0 pendant un trajet, le trajet se termine (arrivée à destination), puis le dépannage s'applique.
 
 ### Réservoir de Synthanol
 * **Unité :** la Ration. **Capacité et consommation :** selon le véhicule ([`vehicles.ts`](../src/data/vehicles.ts)) et la distance (chap. 4). **Départ :** réservoir plein.
@@ -60,15 +60,14 @@ Le **Jour** (Jour 1 à Jour 30) est la date. Chaque jour se découpe en trois mo
 Le bandeau affiche la date, le moment et si le trajet du moment est encore disponible (chap. 10).
 
 ### Routine matinale (06h00), dans l'ordre
-Le Jour 1 commence sans routine : pas d'intérêts, inflation à ×1,00, boutiques et événements tirés une première fois.
-1. Publication de l'**indice d'inflation** du jour (chap. 7).
-2. Paiement d'avance du salaire de l'équipier actif (chap. 5) — sauf si le joueur était en garde à vue cette nuit-là ; consommation éventuelle d'une caisse par `[CREW-01]`. Reprise des caisses scellées d'une commande du DSC non livrée, livraison du jour ou mission de nuit (voir *Livraison officielle du jour* et *Tournée de nuit*).
-3. Intérêts et échéances de la dette ; **collecte de protection** (chap. 7).
-4. Intérêts du compte offshore.
-5. Dégradation de fraîcheur des caisses `[TAG-PERISHABLE]` (chap. 3). Protection de l'Exemption Métabolique **−1 jour**.
-6. Récupération des caisses larguées la veille via `[MOD-07]` ; échéance d'une commande VIP de `[LOC-D6-1]` dépassée (chap. 4).
-7. Tirage de la livraison officielle du jour et de la mission de nuit proposée pour ce soir ; tirage de la ronde renforcée ; entrée en vigueur de l'événement global tiré la veille, tirage des événements locaux, de la Loterie les jours de tirage, de l'événement global du lendemain et de sa rumeur ; contrecoups (chap. 8). Puis, parce que les événements les modifient : reconstitution des quotas de demande, cours et boutiques (chap. 7).
-8. Effets du matin des événements : canicule sur les périssables, sas de `[EVT-D3-01]` si le joueur se trouve en `[D3]` (chap. 8).
+Le Jour 1 commence sans routine : pas d'intérêts, boutiques et événements tirés une première fois.
+1. Paiement d'avance du salaire de l'équipier actif (chap. 5) — sauf si le joueur était en garde à vue cette nuit-là ; consommation éventuelle d'une caisse par `[CREW-01]`. Reprise des caisses scellées d'une commande du DSC non livrée, livraison du jour ou mission de nuit (voir *Livraison officielle du jour* et *Tournée de nuit*).
+2. Intérêts et échéances de la dette ; **collecte de protection** (chap. 7).
+3. Intérêts du compte offshore.
+4. Dégradation de fraîcheur des caisses `[TAG-PERISHABLE]` (chap. 3). Protection de l'Exemption Métabolique **−1 jour**.
+5. Récupération des caisses larguées la veille via `[MOD-07]` ; échéance d'une commande VIP de `[LOC-D6-1]` dépassée (chap. 4).
+6. Tirage de la livraison officielle du jour et de la mission de nuit proposée pour ce soir ; tirage de la ronde renforcée ; entrée en vigueur de l'événement global tiré la veille, tirage des événements locaux, de la Loterie les jours de tirage, de l'événement global du lendemain et de sa rumeur ; contrecoups (chap. 8). Puis, parce que les événements les modifient : reconstitution des quotas de demande, cours et boutiques (chap. 7).
+7. Effets du matin des événements : canicule sur les périssables, sas de `[EVT-D3-01]` si le joueur se trouve en `[D3]` (chap. 8).
 
 ### Service de jour (06h00 – 20h00)
 Acheter / vendre au marché, faire le plein, utiliser les lieux spéciaux du district, accepter la livraison officielle du jour, et effectuer **1 trajet de jour**. Une fois arrivé, on peut à nouveau commercer avant 20h00.
@@ -77,7 +76,7 @@ Acheter / vendre au marché, faire le plein, utiliser les lieux spéciaux du dis
 Le joueur est officiellement livreur de Catégorie C : la plateforme logistique du DSC lui confie parfois une commande légale. C'est le revenu sûr de celui qui ne veut pas risquer gros. Chiffres : `DAY_DELIVERY` dans [`balance.ts`](../src/data/balance.ts).
 * **L'offre :** chaque matin, la plateforme propose ou non une livraison (une chance), vers un district tiré au hasard. Elle n'est valable que si le joueur n'est pas déjà dans ce district, et s'accepte avant le trajet de jour.
 * **Accepter :** la plateforme charge des **caisses scellées du DSC**, une part de la capacité du camion (arrondie au supérieur, au moins une caisse), qui doit être libre. Comme celles de la mission de nuit, elles sont légales (couverture, Tier 0 pour le bluff), ne se vendent ni ne se donnent.
-* **Livrer :** à l'arrivée de jour dans le district demandé, barrage franchi compris, les caisses sont remises contre une **prime** (indexée). Le trajet n'a rien de particulier : même risque, mêmes aléas.
+* **Livrer :** à l'arrivée de jour dans le district demandé, barrage franchi compris, les caisses sont remises contre une **prime**. Le trajet n'a rien de particulier : même risque, mêmes aléas.
 * **Confiance du DSC :** chaque commande livrée, de jour comme de nuit, compte. La prime des commandes monte avec ce nombre, jusqu'à un plafond (`DSC_TRUST` dans [`balance.ts`](../src/data/balance.ts)). La plateforme ne confie la nuit qu'après quelques livraisons (voir *Tournée de nuit*). La carte affiche la confiance acquise.
 * **Non livrée** (autre destination, garde à vue…) : à 06h00, la plateforme reprend les caisses et note le retard (perte d'ICC). Tant qu'elles sont à bord, elle ne confie pas de mission de nuit (une seule commande scellée à la fois).
 * *Le choix :* une prime sûre contre de la place en soute et une destination imposée pour la journée ; en échange, la soute est mieux couverte.
@@ -100,7 +99,7 @@ Les sirènes d'Aeterna annoncent le couvre-feu sanitaire : les citoyens rentrent
 ### Tournée de nuit
 Tout est filmé : un camion la nuit n'est légitime que sur **ordre de mission** de la plateforme logistique du DSC. Chiffres : `NIGHT_MISSION` dans [`balance.ts`](../src/data/balance.ts).
 * **La mission du soir :** chaque matin, la plateforme propose une mission pour le soir, vers un district tiré au hasard ; elle est affichée toute la journée. Elle n'est valable que si le joueur n'est pas déjà dans ce district à 20h00, et seulement **après quelques commandes livrées** (confiance du DSC, voir *Livraison officielle du jour*) : d'ici là, le panneau du soir affiche la progression, et seule la tournée clandestine reste possible.
-* **Accepter la mission :** au départ en tournée, la plateforme charge des **caisses scellées du DSC** : une part de la capacité du camion (arrondie au supérieur, au moins une caisse), qui doit être libre. Impossible tant qu'une livraison du jour non faite est à bord. La prime suit la confiance du DSC. Elles sont légales (couverture, Tier 0 pour le bluff), ne se vendent ni ne se donnent, et sont livrées d'office à l'arrivée dans le district de la mission, contre une **prime** (indexée).
+* **Accepter la mission :** au départ en tournée, la plateforme charge des **caisses scellées du DSC** : une part de la capacité du camion (arrondie au supérieur, au moins une caisse), qui doit être libre. Impossible tant qu'une livraison du jour non faite est à bord. La prime suit la confiance du DSC. Elles sont légales (couverture, Tier 0 pour le bluff), ne se vendent ni ne se donnent, et sont livrées d'office à l'arrivée dans le district de la mission, contre une **prime**.
 * **Sur mission** (trajet vers le district de la mission) : trajet couvert, sans malus de nuit.
 * **Hors mission** (autre destination, ou pas de mission acceptée) : c'est une **anomalie**. Malus au risque d'interception (`NIGHT_TRIP_RISK`, milices de `[D4]` comprises ; réduit par les silentblocs de `[MOD-04]`) ; si le trajet passe sans interception, Aeterna enregistre l'écart : **+1 niveau de Fiche S** (chap. 6).
 * **Mission non livrée** (écart, garde à vue, caisses pillées…) : à 06h00, la plateforme reprend les caisses scellées restantes et note le retard (perte d'ICC).

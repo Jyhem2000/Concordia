@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import { DAY_DELIVERY, DSC_TRUST } from '../data/balance.ts'
 import { CREW } from '../data/vehicles.ts'
 import { deliveryFee } from './delivery.ts'
-import { indexed } from './inflation.ts'
 import { crewUnlocked, nightUnlock, requirementProgress, trustFactor } from './progress.ts'
 import { errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
 import type { CargoLot, GameState, ProductId } from './types.ts'
@@ -49,7 +48,7 @@ describe('progression (chap. 2 et 5)', () => {
     const trusted = { ...fresh, progress: { ...fresh.progress, deliveries: DSC_TRUST.nightAfterDeliveries } }
     expect(errorOf(trusted, { type: 'forceCurfew', mission: true })).toBeNull()
     expect(trustFactor(trusted)).toBeCloseTo(1 + DSC_TRUST.feeBonusPerDelivery * DSC_TRUST.nightAfterDeliveries)
-    expect(deliveryFee(trusted)).toBe(Math.round(indexed('rule.day-delivery', DAY_DELIVERY.fee, 3).total * trustFactor(trusted)))
+    expect(deliveryFee(trusted)).toBe(Math.round(DAY_DELIVERY.fee * trustFactor(trusted)))
     const veteran = { ...fresh, progress: { ...fresh.progress, deliveries: 100 } }
     expect(trustFactor(veteran)).toBe(1 + DSC_TRUST.maxBonus)
   })

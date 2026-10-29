@@ -22,7 +22,7 @@ Les chapitres 1 à 8 décrivent le jeu : univers, règles, données. Les deux de
 | 10 | [10-interface.md](10-interface.md) | Écrans et feedback |
 
 ## Où trouver une règle
-Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la décrivent, dans l'ordre de lecture (le premier porte la règle, les suivants ses modificateurs). Une mécanique ajoutée aux docs s'ajoute ici dans le même changement (règle 10).
+Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la décrivent, dans l'ordre de lecture (le premier porte la règle, les suivants ses modificateurs). Une mécanique ajoutée aux docs s'ajoute ici dans le même changement (règle 9).
 
 | Thème | Mécaniques | Où lire |
 | :--- | :--- | :--- |
@@ -35,9 +35,9 @@ Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la dé
 | **Racket des milices** | péage en ₡ ou en caisses, passage forcé, refus | chap. 4 → chap. 6 |
 | **Produits** | tags, masquage 1:1, tiers, catalogue, actions (aide au bluff, largage, dopage, nuit blanche, refroidissement, pass d'identité, balise) | chap. 3 |
 | **État des caisses** | fraîcheur (Extra-Frais à Pourri), casse des fragiles, explosion des inflammables, valeur d'une caisse abîmée ou défraîchie | chap. 3 → chap. 7 (vente, paiement en nature) |
-| **Marché** | information (mémoire, historique, profil public des districts), boutique du jour, exclusion, cours (coefficient du district, tendance, Mult_Événement), quota de demande, saturation, pic suspect | chap. 7 → chap. 8 (événements, contrecoups, vices de la Loterie) |
+| **Marché** | information (mémoire, historique, profil public des districts), boutique du jour, exclusion, cours (coefficient du district, tendance, Mult_Événement), quota de rachat, saturation, pic suspect | chap. 7 → chap. 8 (événements, contrecoups, vices de la Loterie) |
 | **Vente** | prix de vente, commission, savoir-faire (fraîcheur, nuit, rendements décroissants), clause anti-arbitrage, lots les plus anciens d'abord | chap. 7 → chap. 3 (fraîcheur) |
-| **Argent** | Cash-Puce, paiement en nature, inflation et indexation, dette (intérêts, tabassage, retard, avance de survie, emprunt tactique), collecte de protection, compte offshore | chap. 7 → chap. 4 (guichets des lieux spéciaux) |
+| **Argent** | Cash-Puce, paiement en nature, dette (intérêts, retard, avance de survie), collecte de protection, compte offshore (commission au retrait) | chap. 7 → chap. 4 (guichets des lieux spéciaux) |
 | **Lieux spéciaux** | services, horaires, effets de chaque lieu | chap. 4 → chap. 7 (dette, offshore) |
 | **Équipement** | véhicules (double fond compris), modules (brouilleur de drones compris), équipage, salaires | chap. 5 |
 | **Événements** | globaux, locaux, rumeurs, contrecoups, Loterie, aléas routiers | chap. 8 |
@@ -54,7 +54,7 @@ Les docs décrivent le jeu complet ; tout n'est pas encore en jeu. Ce tableau di
 | 4 | Carte, districts, racket et portique de `[D4]`, tous les lieux spéciaux et leurs services, services réservés (voies officielle et pègre) | — |
 | 5 | Véhicules, modules, catalogue du garage en rayons, double fond, équipage (débloqué par des actes) et salaires | — |
 | 6 | Risque, Fiche S, barrage fixe et contrôle volant, toutes les options et modes d'éjection, garde à vue, bonus des véhicules, modules et équipiers | — |
-| 7 | Boutique, cours et tendance, quotas, prix de vente, paiement en nature, inflation, dette, avance de survie, collecte, compte offshore, flux et bonus de `[CREW-02]`, bonus d'influence de `[LOC-D2-1]` | — |
+| 7 | Boutique, cours et tendance, quotas, prix de vente, paiement en nature, dette, avance de survie, collecte, compte offshore, flux et bonus de `[CREW-02]`, bonus d'influence de `[LOC-D2-1]` | — |
 | 8 | Événements globaux et locaux, rumeurs, contrecoups, Loterie (faux dossiers compris), aléas routiers, prédictions de Cassandre-88 | — |
 | 9 | Moteur de simulation, invariants, Novice, Aléatoire, marchand (12 plans × 3 tempéraments, lieux spéciaux, commande VIP), objectifs de grande fin ; campagnes Contrôle, 1 à 4 (`sim/reports/`) | Spéculation sur l'événement de demain (Cassandre-88, rumeur), faux dossier de Loterie, optimiseur et campagne 5 |
 | 10 | Bandeau, téléscripteur, marché et fiche produit, carte, lieux, soir, briefing, barrage, aléa routier, objectifs | Vue véhicule et soute (dont le choix du contenu du double fond), filtres du marché, dégradation de l'interface selon l'ICC, manuel en jeu |
@@ -62,7 +62,7 @@ Les docs décrivent le jeu complet ; tout n'est pas encore en jeu. Ce tableau di
 ## Propositions en cours
 Analyses de conception pas encore tranchées ; les règles retenues rejoindront leurs chapitres.
 * [Mini-progression : débloquer les mécaniques au fil de la partie](propositions/progression.md)
-* [Mécaniques à simplifier : inflation, boutique, rachat, offshore et autres](propositions/simplification.md)
+* [Mécaniques à simplifier](propositions/simplification.md) : premier lot adopté (inflation, Laverie, rachat, hachoir, tabassage, emprunt tactique), le reste ouvert
 * [Fin « Le Fantôme d'Olympus-Green » : le serveur et Glitch en `[D6]`](propositions/fin-fantome.md)
 
 ## Feuille de route
@@ -90,10 +90,9 @@ Analyses de conception pas encore tranchées ; les règles retenues rejoindront 
 Constantes globales (valeurs de départ…) : [`balance.ts`](../src/data/balance.ts).
 
 3. Hors de son chapitre, une donnée à ID est citée **par son ID seul** (pas de libellé ni de stat recopiés).
-4. Les montants en ₡ des services et frais sont des **valeurs de base au Jour 1**, indexées sur l'inflation (chap. 7).
-5. Toute mécanique chiffrée doit être **affichée et détaillable** dans l'app (chap. 10) : le joueur ne calcule jamais, mais peut toujours comprendre.
-6. Le lore, les factions (Aeterna, DSC, BRC…), les monnaies et les règles (garde à vue, couvre-feu…) s'écrivent en clair, sans ID.
-7. **Les docs décrivent toutes les règles.** Développeur ou joueur, on doit comprendre le jeu sans lire le code. Toute décision prise en codant (ordre de résolution, arrondi, cas limite, interprétation d'une règle ambiguë) est écrite dans le chapitre concerné, dans le même changement. Seuls les chiffres vivent dans le code (règle 1).
-8. **Relecture critique avant chaque étape.** Avant d'implémenter un chapitre, on le relit et on le remet en cause : mécanique impossible ou bugguée, gameplay sans intérêt, lore incohérent, règle déjà contredite par le code. Les corrections sont tranchées et écrites avant de coder.
-9. **L'état d'implémentation** (plus haut) se met à jour dans le même changement que le code qui fait entrer une mécanique en jeu.
-10. **L'index « Où trouver une règle »** est complet : une mécanique ajoutée ou déplacée y est reportée dans le même changement.
+4. Toute mécanique chiffrée doit être **affichée et détaillable** dans l'app (chap. 10) : le joueur ne calcule jamais, mais peut toujours comprendre.
+5. Le lore, les factions (Aeterna, DSC, BRC…), les monnaies et les règles (garde à vue, couvre-feu…) s'écrivent en clair, sans ID.
+6. **Les docs décrivent toutes les règles.** Développeur ou joueur, on doit comprendre le jeu sans lire le code. Toute décision prise en codant (ordre de résolution, arrondi, cas limite, interprétation d'une règle ambiguë) est écrite dans le chapitre concerné, dans le même changement. Seuls les chiffres vivent dans le code (règle 1).
+7. **Relecture critique avant chaque étape.** Avant d'implémenter un chapitre, on le relit et on le remet en cause : mécanique impossible ou bugguée, gameplay sans intérêt, lore incohérent, règle déjà contredite par le code. Les corrections sont tranchées et écrites avant de coder.
+8. **L'état d'implémentation** (plus haut) se met à jour dans le même changement que le code qui fait entrer une mécanique en jeu.
+9. **L'index « Où trouver une règle »** est complet : une mécanique ajoutée ou déplacée y est reportée dans le même changement.

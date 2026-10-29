@@ -52,7 +52,7 @@ function pair(
 }
 
 const withoutModule = (base: Plan, id: ModuleId): Plan => ({ ...base, modules: base.modules.filter((module) => module !== id) })
-const withPlaces = (base: Plan, extra: readonly PlaceUse[]): Plan => ({ ...base, places: ['grinder', 'advance', ...extra] })
+const withPlaces = (base: Plan, extra: readonly PlaceUse[]): Plan => ({ ...base, places: ['advance', ...extra] })
 
 /** Plan dédié au brouilleur de drones : fuite au sommet (chap. 9, étape 2 pour ses autres réglages) */
 const FLIGHT: Plan = { name: 'Fuite au sommet', modules: ['MOD-06', 'MOD-09'], crew: 'CREW-02', runner: true }
@@ -79,8 +79,7 @@ export const ABLATIONS: readonly Ablation[] = [
   pair('CREW-02', plan('Rentier'), 'Équilibré', { ...plan('Rentier'), crew: undefined }, bought('CREW-02')),
   pair('CREW-03', plan('Chaîne du froid'), 'Équilibré', { ...plan('Chaîne du froid'), crew: undefined }, bought('CREW-03')),
   // Lieux spéciaux et services
-  pair('Hachoir de Viktor', plan('Chaîne du froid'), 'Équilibré', { ...plan('Chaîne du froid'), places: ['advance'] }, usedService('grind')),
-  pair('Avance de survie', plan('Sans build'), 'Équilibré', { ...plan('Sans build'), places: ['grinder'] }, usedService('borrow')),
+  pair('Avance de survie', plan('Sans build'), 'Équilibré', { ...plan('Sans build'), places: [] }, usedService('borrow')),
   pair('Morgue : chirurgie', withPlaces(plan('Sans build'), ['surgery']), 'Casse-cou', plan('Sans build'), usedService('morgue:surgery')),
   pair('Morgue : certificat', withPlaces(plan('Sans build'), ['certificate']), 'Équilibré', plan('Sans build'), usedService('morgue:certificate')),
   pair('Morgue : laissez-passer', withPlaces(plan('Sans build'), ['pass']), 'Équilibré', plan('Sans build'), usedService('morgue:pass')),

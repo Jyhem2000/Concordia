@@ -62,7 +62,6 @@ function isEmpty(briefing: MorningBriefing): boolean {
     briefing.missionReclaimed === 0 &&
     !briefing.informant &&
     !briefing.debtInterest &&
-    briefing.beating === 0 &&
     !briefing.debtLate &&
     !briefing.protection &&
     !briefing.offshoreInterest
@@ -88,7 +87,7 @@ function BriefingLines({ briefing }: BriefingLinesProps) {
   const districtId = useGameStore((s) => s.game.districtId)
   // Effet de canicule du jour, pour nommer le produit qui fond
   const heat = useGameStore((s) => (briefing.heat ? heatWave(s.game) : null))
-  const { sleep, custodyHealth, debtInterest, beating, debtLate, protection, offshoreInterest } = briefing
+  const { sleep, custodyHealth, debtInterest, debtLate, protection, offshoreInterest } = briefing
 
   return (
     <ul className="mt-1 space-y-0.5">
@@ -114,7 +113,6 @@ function BriefingLines({ briefing }: BriefingLinesProps) {
           </BriefingRow>
         </li>
       )}
-      {beating > 0 && <li className="text-red-300">{t.briefing.beating(beating)}</li>}
       {debtLate && <li className="text-red-300">{t.briefing.debtLate}</li>}
       {protection && (
         <li>

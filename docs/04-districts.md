@@ -15,7 +15,7 @@
 ```
   Liaisons : `MAP_LINKS` dans [`districts.ts`](../src/data/districts.ts) (le schéma n'est qu'une illustration). *Ex. :* `[D4]` → `[D6]` traverse `[D1]`, `[D2]` et `[D5]` : trois districts traversés.
 * **Pompes :** *officielle* = connectée à Aeterna, **fermée la nuit** sous un seuil d'ICC (`PUMP_NIGHT_MIN_ICC` dans [`balance.ts`](../src/data/balance.ts)) ; *fixe* = toujours ouverte.
-* **Lieux spéciaux :** ouverts de jour seulement (06h00 – 20h00, chap. 2). Coûts en ₡ indexés sur l'inflation (chap. 7), sauf mention. **Cooldown :** un service utilisé le jour J redevient disponible le jour J + cooldown. Chiffres : [`locations.ts`](../src/data/locations.ts).
+* **Lieux spéciaux :** ouverts de jour seulement (06h00 – 20h00, chap. 2). **Cooldown :** un service utilisé le jour J redevient disponible le jour J + cooldown. Chiffres : [`locations.ts`](../src/data/locations.ts).
 * **Services réservés (deux voies) :** certains services ne s'ouvrent qu'à qui s'est fait une place (`SERVICE_REQUIREMENTS` dans [`locations.ts`](../src/data/locations.ts)). Le lieu les affiche quand même, avec leur condition et la progression vers elle.
   * **Voie officielle**, pour les citoyens présentables et solvables : panique de Karma-Cham (palier d'ICC et patrimoine), faux dossier de la Laverie (patrimoine), Velvet-Silo sur invitation (palier d'ICC et patrimoine).
   * **Voie pègre**, pour les fichés : Cassandre-88 ne parle qu'à qui a déjà une Fiche S.
@@ -32,8 +32,6 @@ Les stats de chaque district sont dans [`districts.ts`](../src/data/districts.ts
 * *Coefficients de marché :* la Forte demande est échelonnée sur le danger — plus le district est risqué, mieux il paie.
 * *Production* et *Forte demande :* produits fabriqués sur place et produits les plus recherchés (chap. 7).
 
-Montants en ₡ : valeurs de base, indexées sur l'inflation (chap. 7).
-
 ---
 
 ## `[D1]` « Hives » — Les Ruches Grises (zone de départ)
@@ -43,13 +41,12 @@ Montants en ₡ : valeurs de base, indexées sur l'inflation (chap. 7).
 
 ### `[LOC-D1-1]` L'Arrière-Salle de Viktor Varga (usurier mafieux)
 Boucherie clandestine de Viktor Varga et de ses « Bouchers ».
-* **Dette :** remboursement, avance de survie tant que la dette initiale court, puis emprunt tactique (chap. 7, *Dette mafieuse*).
-* **Hachoir Industriel** — *« Viktor ne rachète pas, il recycle. »* Rachète les caisses `[TAG-PERISHABLE]` Faisandées ou Avariées au prix de **cours local du produit × coefficient de fraîcheur × une prime**, dans une limite de caisses par jour (`GRINDER` dans [`balance.ts`](../src/data/balance.ts)). Les lots les plus anciens partent en premier. Le montant rembourse d'abord la dette ; le surplus (ou tout, si la dette est à 0) est versé en Cash-Puce.
+* **Dette :** remboursement, et avance de survie tant que la dette initiale court (chap. 7, *Dette mafieuse*).
 
 ### `[LOC-D1-2]` La Cantine des Chauffeurs (« Chez Borg »)
 Bar enfumé réservé aux routiers, où l'on sert l'eau de l'Exemption Métabolique.
 * **Exemption Métabolique :** se trouver en `[D1]` de jour (au réveil ou à l'arrivée) suffit : les routiers passent tous à la Cantine. La protection contre la Sédation revient au maximum (chap. 2).
-* **Synthanol au tarif syndical :** en `[D1]`, de jour, le plein se fait au tarif fixe de la Cantine, **non indexé** sur l'inflation (`CANTINE` dans [`locations.ts`](../src/data/locations.ts)) ; la nuit, seule la pompe du district est ouverte.
+* **Synthanol au tarif syndical :** en `[D1]`, de jour, le plein se fait au tarif syndical de la Cantine, moins cher que les pompes (`CANTINE` dans [`locations.ts`](../src/data/locations.ts)) ; la nuit, seule la pompe du district est ouverte.
 * **Équipage :** recrutement, remplacement et renvoi de l'équipier actif (chap. 5).
 
 ---
@@ -105,12 +102,12 @@ Coûts, durées et effets chiffrés : `MORGUE` dans [`locations.ts`](../src/data
 ### `[LOC-D4-1]` Le Garage « Faraday » (Mécano-Mitch)
 Tenu par un ancien ingénieur spatial viré pour avoir refusé de manger des insectes. Seul endroit pour :
 * acheter un châssis ou des modules, et **monter ou démonter** ses modules (gratuit, chap. 5) ;
-* **réparer le châssis :** un prix par PV rendu (indexé, `GARAGE` dans [`locations.ts`](../src/data/locations.ts)), réduit par `[EVT-D4-03]` ; le joueur choisit combien de PV réparer.
+* **réparer le châssis :** un prix par PV rendu (`GARAGE` dans [`locations.ts`](../src/data/locations.ts)), réduit par `[EVT-D4-03]` ; le joueur choisit combien de PV réparer.
 
 ### `[LOC-D4-2]` Le Bunker de « Cassandre-88 » (l'informateur sous plomb)
 Ancien analyste de données d'Aeterna, terré dans une caravane blindée sous les pylônes haute tension.
 * **Prédiction :** révèle l'événement global qui frappera **dans deux jours** (J+2) et **garantit** son déclenchement : il est tiré au hasard parmi les événements globaux, et remplace le tirage de ce jour-là. La veille, la rumeur du téléscripteur l'annonce, cette fois sans erreur possible. Les événements locaux restent imprévisibles.
-* **Coût :** une base, plus une hausse par utilisation précédente (indexées) **+ 1 caisse de `[T3-03]`** (`CASSANDRE` dans [`locations.ts`](../src/data/locations.ts)).
+* **Coût :** une base, plus une hausse par utilisation précédente **+ 1 caisse de `[T3-03]`** (`CASSANDRE` dans [`locations.ts`](../src/data/locations.ts)).
 * **Limite :** une seule prédiction active à la fois (jusqu'au jour prédit) ; impossible si J+2 dépasse le Jour 30.
 
 ---
@@ -126,7 +123,7 @@ Les vrais blanchisseurs ne sont pas les punks de `[D4]` mais les hauts fonctionn
 * **Guichet du compte offshore** (chap. 7).
 * **Falsifier un dossier** (`[EVT-L01]`) — c'est Aeterna qui tire au sort : on ne choisit pas le gagnant, on glisse un faux dossier pour que l'algorithme le désigne. C'est un pari.
   * **Quand :** la veille d'un tirage (chap. 8), une fois.
-  * **Coût :** une base, plus une hausse par utilisation précédente (indexées), perdu même en cas d'échec. **Réussite :** une chance fixe (bonus : `[CREW-02]`). Chiffres : `FORGERY` dans [`locations.ts`](../src/data/locations.ts).
+  * **Coût :** une base, plus une hausse par utilisation précédente, perdu même en cas d'échec. **Réussite :** une chance fixe (bonus : `[CREW-02]`). Chiffres : `FORGERY` dans [`locations.ts`](../src/data/locations.ts).
   * **Résolution immédiate :** le joueur sait aussitôt si le faux dossier est passé.
   * **Succès :** la carte choisie impose **un** des deux rôles au tirage du lendemain (l'autre reste tiré au hasard, jamais dans le même district) ; ses effets durent **le jour du tirage et les deux suivants** et remplacent ceux du rôle imposé. Ton équipier est protégé de ce tirage. Le district choisi doit être concerné par la Loterie pour ce rôle (chap. 8).
   * **Échec :** Aeterna détecte l'anomalie et remonte la piste : perte d'ICC et **+1 niveau de Fiche S**. Le tirage se fait normalement, sans protection. *« Votre contribution à la mobilité sociale a été jugée… trop enthousiaste. »*

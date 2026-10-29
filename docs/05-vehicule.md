@@ -3,7 +3,7 @@
 > Prix, capacités, bonus et salaires : [`vehicles.ts`](../src/data/vehicles.ts), qui fait foi. Ce chapitre porte les règles, les effets et le lore.
 
 ## Véhicules
-* **Achat** uniquement à `[LOC-D4-1]`, de jour. Le prix n'est pas indexé sur l'inflation (chap. 7).
+* **Achat** uniquement à `[LOC-D4-1]`, de jour.
 * **Changement de châssis :** le nouveau véhicule reprend la marchandise, le carburant (dans la limite de son réservoir) et les modules possédés ; l'ancien est **perdu** (aucune reprise). Le nouveau châssis arrive en parfait état.
   * Achat refusé si la soute actuelle dépasse la capacité du nouveau véhicule.
   * Si le nouveau véhicule a moins de slots, les derniers modules montés sont démontés (ils restent possédés).
@@ -34,7 +34,7 @@ Chaque châssis a un **double fond** d'origine, soudé par Mécano-Mitch : quelq
 
 ## Modules
 * Chaque châssis a un nombre strict de slots. Les modules s'achètent **définitivement** à `[LOC-D4-1]` ; un module acheté est monté aussitôt s'il reste un slot libre. C'est **uniquement là** qu'on monte ou démonte (gratuitement) ses modules. Le montage est donc un choix de build pour plusieurs jours, pas un réglage par trajet.
-* Seuls les modules **montés** agissent. Prix, catégorie et chiffres : `MODULES` dans [`vehicles.ts`](../src/data/vehicles.ts). Prix non indexés.
+* Seuls les modules **montés** agissent. Prix, catégorie et chiffres : `MODULES` dans [`vehicles.ts`](../src/data/vehicles.ts).
 * **Le catalogue en rayons :** Mitch ne sort pas tout à n'importe qui (`requires` de chaque module et véhicule). Le garage affiche tout, avec la condition de ce qui est réservé et la progression vers elle.
   * **Rayon libre** dès le Jour 1 : `[MOD-02]`, `[MOD-04]`, réparations.
   * **Matériel de contrebande**, une fois la dette initiale soldée (client solvable) : `[MOD-01]`, `[MOD-03]`, `[MOD-06]`, `[MOD-07]`, et les châssis `[VEH-03]` et `[VEH-04]`.
@@ -56,8 +56,8 @@ Chaque châssis a un **double fond** d'origine, soudé par Mécano-Mitch : quelq
 ---
 
 ## Équipage
-* **Recrutement** à `[LOC-D1-2]`, de jour, **1 seul équipier actif** à la fois. Le premier recrutement est gratuit ; chaque recrutement suivant coûte des frais (indexés). **Renvoyer** l'équipier est gratuit. Chaque équipier ouvre un build différent : sûreté (Vance), information et finance (Glitch), gastronomie périssable (Mama Rosa).
-* **Salaire payé d'avance** (indexé) : à l'embauche pour le jour même, puis à chaque routine matinale, avant toute prestation (chap. 2). S'il ne peut pas être payé en Cash-Puce, l'équipier **ne travaille pas ce jour-là** (aucun bonus) mais reste engagé ; le salaire manqué ne s'ajoute pas à la dette. Les matins passés en cellule, aucun salaire n'est dû et l'équipier reste à son poste. Montants : `CREW` dans [`vehicles.ts`](../src/data/vehicles.ts).
+* **Recrutement** à `[LOC-D1-2]`, de jour, **1 seul équipier actif** à la fois. Le premier recrutement est gratuit ; chaque recrutement suivant coûte des frais. **Renvoyer** l'équipier est gratuit. Chaque équipier ouvre un build différent : sûreté (Vance), information et finance (Glitch), gastronomie périssable (Mama Rosa).
+* **Salaire payé d'avance** : à l'embauche pour le jour même, puis à chaque routine matinale, avant toute prestation (chap. 2). S'il ne peut pas être payé en Cash-Puce, l'équipier **ne travaille pas ce jour-là** (aucun bonus) mais reste engagé ; le salaire manqué ne s'ajoute pas à la dette. Les matins passés en cellule, aucun salaire n'est dû et l'équipier reste à son poste. Montants : `CREW` dans [`vehicles.ts`](../src/data/vehicles.ts).
 * **Ils ne se présentent pas d'emblée.** Chacun rejoint le joueur après un acte qui le fait remarquer (`unlock` de chaque équipier dans [`vehicles.ts`](../src/data/vehicles.ts)) ; d'ici là, la Cantine l'affiche avec sa condition et la progression vers elle :
   * **Vance :** après un contrôle de la BRC franchi sans garde à vue. Il vous a repéré au barrage : vous avez du sang-froid.
   * **Mama Rosa :** après un certain nombre de caisses `[TAG-PERISHABLE]` vendues. Elle ne travaille qu'avec qui connaît la marchandise.

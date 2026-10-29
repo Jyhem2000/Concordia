@@ -7,7 +7,6 @@ import { giveCrates, ownedQty, takeLots } from './cargo.ts'
 import { crateValue, freshnessFactor, freshnessOf, paymentValue } from './condition.ts'
 import { crewEffect } from './crew.ts'
 import { GLOBAL_EVENT_IDS, viceChoices } from './events.ts'
-import { indexed } from './inflation.ts'
 import { checkRequirements, raiseWanted } from './progress.ts'
 import { quote } from './market.ts'
 import { createRng } from './rng.ts'
@@ -25,9 +24,9 @@ const fail = (error: ActionError): ServiceResult => ({ ok: false, error })
 /** Utilisations passées d'un service : base des coûts croissants */
 export const usesOf = (state: GameState, key: ServiceKey) => state.services.uses[key] ?? 0
 
-/** Coût indexé d'un service : base, plus une hausse par utilisation précédente */
+/** Coût d'un service : base, plus une hausse par utilisation précédente */
 export function serviceCost(state: GameState, key: ServiceKey, base: number, step = 0): number {
-  return indexed('rule.inflation', base + step * usesOf(state, key), state.day).total
+  return base + step * usesOf(state, key)
 }
 
 /** Premier jour où un service redevient disponible, ou null s'il l'est déjà */
