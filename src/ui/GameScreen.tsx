@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useGameStore } from '../stores/gameStore.ts'
 import BriefingPanel from './briefing/BriefingPanel.tsx'
 import EndScreen from './modals/EndScreen.tsx'
@@ -17,6 +18,17 @@ export default function GameScreen() {
   const finished = useGameStore((s) => s.game.status === 'finished')
   const intercepted = useGameStore((s) => s.game.interception !== null)
   const roadEvent = useGameStore((s) => s.game.roadEvent !== null)
+
+  // Retour en haut de page à chaque changement de scène : trajet, matin, soirée, barrage et chaque option jouée, aléa, comptes rendus
+  const day = useGameStore((s) => s.game.day)
+  const phase = useGameStore((s) => s.game.phase)
+  const districtId = useGameStore((s) => s.game.districtId)
+  const interception = useGameStore((s) => s.game.interception)
+  const interceptionReport = useGameStore((s) => s.game.interceptionReport)
+  const roadReport = useGameStore((s) => s.game.roadReport)
+  useEffect(() => {
+    window.scrollTo({ top: 0 })
+  }, [day, phase, districtId, interception, interceptionReport, roadReport, finished])
 
   return (
     <div className="flex min-h-full flex-col">

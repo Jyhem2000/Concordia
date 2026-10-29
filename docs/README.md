@@ -62,6 +62,8 @@ Les docs décrivent le jeu complet ; tout n'est pas encore en jeu. Ce tableau di
 ## Propositions en cours
 Analyses de conception pas encore tranchées ; les règles retenues rejoindront leurs chapitres.
 * [Mini-progression : débloquer les mécaniques au fil de la partie](propositions/progression.md)
+* [Mécaniques à simplifier : inflation, boutique, rachat, offshore et autres](propositions/simplification.md)
+* [Fin « Le Fantôme d'Olympus-Green » : le serveur et Glitch en `[D6]`](propositions/fin-fantome.md)
 
 ## Feuille de route
 Étapes restantes, dans l'ordre des dépendances :
