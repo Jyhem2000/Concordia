@@ -228,3 +228,23 @@ Campagnes Contrôle et 1 à 4 remesurées.
 - **À graine égale :** la Couverture légale bat le Prudent sur 66 % des parties (64 % avant).
 - **Grandes fins :** la fin mafia monte (Couverture légale Baron 13 → 20 %), l'élite reste sous 5 %.
 - **Suite :** recalage de la difficulté (seuils de fin, intérêts de la dette, risque), à mesurer avant de coder.
+
+## Recalage de difficulté (appliqué, campagnes à remesurer)
+Sondes de `sim/probe-difficulte.ts`, 200 parties par ligne, survie du Sans build :
+
+| Variante | Prudent | Équilibré | Casse-cou |
+| :--- | ---: | ---: | ---: |
+| Référence | 91 % | 88 % | 80 % |
+| Collecte de protection 20 % | 91 % | 88 % | 79 % |
+| Dette de départ 7 500 ₡ | 83 % | 85 % | 74 % |
+| Dette de départ 10 000 ₡ | 76 % | 80 % | 72 % |
+| Risque de base +6 pts | 83 % | 86 % | 76 % |
+| **Amendes ×2** | **88 %** | **85 %** | **74 %** |
+
+- Toutes les défaites sont des Bio-Briques : la dette se solde entre J2 et J6, ensuite la survie n'est plus en jeu.
+- Dette, risque et protection frappent d'abord le Prudent (il gagne lentement) et recassent l'ordre des tempéraments. Les amendes, proportionnelles à la valeur saisie, frappent ceux qui transportent cher : seul levier qui garde Prudent > Équilibré > Casse-cou. **Retenu : amendes ×2.**
+- **Grandes fins**, seuils abaissés à 150 000 / 300 000 / 500 000 ₡ (Baron / Élite / Saboteur). Mesure avec ces seuils :
+  - Baron 36 % (Équilibré) et 53 % (Casse-cou), contre 20 et 44 % ;
+  - Élite 7 et 4 % : en Casse-cou, une soixantaine de parties sur 200 dépassent 300 000 ₡ mais finissent avec un ICC de 4 à 84 ; le bot ne défend plus l'ICC après le J18 ni en fin de partie ;
+  - Saboteur 0 % : le bot ne cherche le serveur qu'au J25, banque l'argent qui servirait à l'acheter, et reste à la Laverie au lieu de rejoindre `[D4]`.
+- **Reste à faire :** corriger les bots Élite et Saboteur, puis remesurer les campagnes 1 à 4.

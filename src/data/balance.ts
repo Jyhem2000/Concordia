@@ -58,9 +58,9 @@ type EndingRules = {
 
 /** Fins de partie (dette soldée), de la plus prestigieuse à la plus modeste : seuils de score offshore */
 export const ENDINGS: Readonly<EndingRules> = {
-  saboteur: { minScore: 1_000_000, requiredProduct: 'T4-06', district: 'D4' },
-  elite: { minScore: 500_000, iccTier: 'gold' },
-  mafia: { minScore: 200_000 },
+  saboteur: { minScore: 500_000, requiredProduct: 'T4-06', district: 'D4' },
+  elite: { minScore: 300_000, iccTier: 'gold' },
+  mafia: { minScore: 150_000 },
 }
 
 // ─── Trajets (chap. 2 et 4) ───
@@ -206,16 +206,16 @@ export const HIGH_TIER = 3
 export const CUSTODY = { healthLossPerMorning: 15, healthFloor: 1 }
 
 /**
- * Amendes (chap. 6) : une part de la valeur des caisses saisies, au prix de base. Impayée faute de Cash-Puce :
+ * Amendes (chap. 6) : proportionnelles à la valeur des caisses saisies, au prix de base. Impayée faute de Cash-Puce :
  * tout le Cash-Puce part et la garde à vue s'allonge.
  */
 export const FINE = { unpaidCustodyDays: 1 }
 
-/** Fouille acceptée : soute légale (gain d'ICC), illégal de bas tier, illégal de haut tier ; `fineRate` : part de la valeur saisie */
+/** Fouille acceptée : soute légale (gain d'ICC), illégal de bas tier, illégal de haut tier ; `fineRate` : part de la valeur saisie (au-delà de 1, l'amende dépasse la valeur des caisses) */
 export const SEARCH = {
   legalIccGain: 2,
-  low: { fineRate: 0.5, iccLoss: 5, custodyDays: 0 },
-  high: { fineRate: 0.75, iccLoss: 12, custodyDays: 1 },
+  low: { fineRate: 1, iccLoss: 5, custodyDays: 0 },
+  high: { fineRate: 1.5, iccLoss: 12, custodyDays: 1 },
 }
 
 /** Bluff administratif */
@@ -229,7 +229,7 @@ export const BLUFF = {
   successIccGain: 3,
   failIccLoss: 3,
   /** Après un bluff raté : taux d'amende de la fouille (part de la valeur saisie), et chance retirée à la corruption et à la fuite */
-  failedFine: { low: 0.75, high: 1 },
+  failedFine: { low: 1.5, high: 2 },
   followUpPenalty: 0.2,
 }
 
@@ -249,7 +249,7 @@ export const BRIBE = {
   droneCriticalFailure: 0.2,
   /** Bonus si l'offre contient un produit apprécié des agents du district */
   connivance: 0.1,
-  fail: { fineRate: 1, iccLoss: 15, custodyDays: 1 },
+  fail: { fineRate: 2, iccLoss: 15, custodyDays: 1 },
 }
 
 /** Fuite : chance de base, plafond selon les étoiles, conséquences */
@@ -258,7 +258,7 @@ export const FLEE = {
   capBase: 0.95,
   capPerExtraStar: 0.05,
   success: { chassisLoss: { min: 15, max: 30 }, iccLoss: 15 },
-  fail: { fineRate: 1, iccLoss: 25, chassisLoss: 35, healthLoss: 15, custodyDays: 1 },
+  fail: { fineRate: 2, iccLoss: 25, chassisLoss: 35, healthLoss: 15, custodyDays: 1 },
 }
 
 /** Contrôles volants (ni fuite ni éjection) : part ajoutée dans le district de la ronde renforcée, faite d'unités mobiles */
@@ -271,7 +271,7 @@ export const COMPARTMENT = { detectionPerStar: 0.12, foundIccLoss: 5 }
 export const EJECT = {
   manualChance: 0.45,
   chassisLoss: 10,
-  fail: { fineRaise: 0.25, iccLoss: 10, custodyDays: 1 },
+  fail: { fineRaise: 0.5, iccLoss: 10, custodyDays: 1 },
 }
 
 /** Racket des milices en zone hors-réseau (chap. 4) */
