@@ -386,9 +386,9 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
 
 // ─── Estimations (information publique) ───
 
-/** Plus de quoi remplir la soute, et rien à vendre */
+/** Plus de quoi remplir la soute, même en revendant ce qui reste (quelques caisses de couverture…) */
 function isBroke(view: GameState): boolean {
-  return tradable(view).length === 0 && view.cash < CAPITAL / 2
+  return view.cash + baseValue(tradable(view)) < CAPITAL / 2
 }
 
 /** Prix net espéré d'une caisse dans un district : cours du jour ici, cours mémorisé ailleurs, sinon profil public */
@@ -492,9 +492,11 @@ function sell(view: GameState, plan: Plan, endgame: boolean, hunt: boolean): Act
     const rotting = lot ? (daysBeforeRot(view, lot) ?? Infinity) <= 1 : false
     // Jamais revendre sur place ce qu'on vient d'acheter (clause anti-arbitrage) : c'est une boucle sans gain
     if (lot && !lot.travelled && !endgame && !rotting) continue
+    // Ruiné : tout revendre, même à perte, pour repartir
     const worth =
       endgame ||
       rotting ||
+      isBroke(view) ||
       first.total >= first.cost * (1 + MIN_MARGIN) ||
       (lot !== undefined && first.total >= bestElsewhere(view, productId, lot) * 0.9)
     if (!worth) continue

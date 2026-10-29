@@ -402,7 +402,7 @@ Le tirage parmi cinq districts décale à nouveau le générateur : on ne compar
 - Nuit festive : 95 / 90 / 75 % de survie, 45 / 89 / 132k.
 - Sans build : 85 / 84 / 75 %, 23 / 68 / 174k.
 - La nuit paie toujours en Prudent et en Équilibré.
-- La Couverture légale Équilibré reste basse (72 %), sous son Prudent (89 %), à égalité avec son Casse-cou (70 %). Ce point reste ouvert.
+- La Couverture légale Équilibré reste basse (72 %), sous son Prudent (89 %), à égalité avec son Casse-cou (70 %). Expliqué et corrigé à la section suivante.
 
 **Fins de prestige** (fin visée atteinte, Équilibré / Casse-cou) :
 
@@ -415,3 +415,26 @@ Le tirage parmi cinq districts décale à nouveau le générateur : on ne compar
 
 - **Élite :** l'abaissement du seuil la fait passer de 5 à 7 % en Équilibré. En Casse-cou, l'ICC reste le verrou : le Silo se ferme sous le palier Ordinaire.
 - **L'ordre voulu** (Baron, puis Élite et Résident, puis Saboteur) se lit maintenant en Équilibré, mais les fins de prestige restent sous les 10 %.
+
+## Couverture légale Équilibré : un défaut du bot ruiné
+**Diagnostic** (Couverture légale Équilibré, 200 graines) :
+- 37 des 57 Bio-Briques sont des rechutes : la dette initiale est soldée, puis une petite dette revient un jour de collecte de Viktor (J7, 14, 21, 28) et n'est jamais remboursée.
+- Ce sont des bots ruinés après une saisie ou un pot-de-vin raté : Cash-Puce à 0, pas d'offshore, carburant à 0. Il leur reste seulement leurs caisses de couverture en Tier 0.
+- La protection (10 % du Cash-Puce et de la soute) sur ces quelques caisses crée une dette de 3 à 9 ₡, qui les tue à l'audit.
+- **Défaut du bot :** avec ces caisses en soute, il ne se croyait pas fauché. Il ne prenait donc pas l'avance de survie, et ne revendait pas la couverture, faute de marge. Il restait garé jusqu'au J30.
+- Un Sans build ruiné a une soute vide : il ne doit rien à Viktor et « survit » à 0 ₡. L'écart de survie venait surtout de là, pas de la règle.
+
+**Correctif (bot) :** est ruiné le bot dont le Cash-Puce et la soute réunis valent moins de la moitié de son fonds de roulement. Il revend alors tout, même à perte, et demande l'avance de survie.
+
+**Campagne Plans** (survie Prudent / Équilibré / Casse-cou) :
+
+| Plan | Avant | Après |
+| :--- | :--- | :--- |
+| Couverture légale | 89 / 72 / 70 % | 93 / 89 / 81 % |
+| Sans build | 85 / 84 / 75 % | 87 / 85 / 75 % |
+| Nuit festive | 95 / 90 / 75 % | 94 / 91 / 79 % |
+
+- L'ordre des tempéraments est rétabli pour tous les plans.
+- **À surveiller :** la Couverture légale redevient le meilleur plan Équilibré (89 %, 103 000 ₡ de score moyen, contre 85 % et 68 000 ₡ en Sans build). Seul le Citoyen modèle, qui repose aussi sur la couverture en Tier 0, fait mieux (127 000 ₡).
+- **Fins visées** (Équilibré) : Baron 32 % en Couverture légale, Élite 7 % (Citoyen modèle), Résident 8 %, Saboteur 1 %, presque inchangées.
+- **Limite de la mesure :** la survie compte comme survivant un joueur ruiné à 0 ₡ (en Équilibré, 7 % des parties en Couverture légale, 12 % en Sans build).
