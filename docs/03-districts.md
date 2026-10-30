@@ -52,7 +52,10 @@ Boucherie clandestine de Viktor Varga et de ses « Bouchers ».
 ### `[LOC-D1-2]` La Cantine des Chauffeurs (« Chez Borg »)
 Bar enfumé réservé aux routiers, où l'on sert l'eau qui garde la Lucidité.
 * **Lucidité :** se trouver en `[D1]` de jour (au réveil ou à l'arrivée) suffit : les routiers passent tous à la Cantine. La Lucidité revient au maximum (chap. 1).
-* **Synthanol au tarif syndical :** en `[D1]`, de jour, le plein se fait au tarif syndical de la Cantine, moins cher que les pompes (`CANTINE` dans [`locations.ts`](../src/data/locations.ts)) ; la nuit, seule la pompe du district est ouverte.
+* **Synthanol au tarif syndical :** en `[D1]`, de jour, le plein se fait à la Cantine, au tarif syndical, moins cher que les pompes (`CANTINE` dans [`locations.ts`](../src/data/locations.ts)) ; la pompe officielle du district ne sert que la nuit, une fois la Cantine fermée.
+
+### `[LOC-D1-3]` Le Quai 9 (bar clandestin)
+Bar sans licence sous les quais de service. La plupart des chauffeurs de catégorie C restent honnêtes, malgré un régime corrompu, et ne mettent jamais les pieds au Quai 9 : on y croise ceux qui ont choisi le marché noir, et ceux qui cherchent à travailler pour eux.
 * **Équipage :** recrutement, remplacement et renvoi de l'équipier actif (chap. 4).
 
 ---

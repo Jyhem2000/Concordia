@@ -308,7 +308,7 @@ export const fr = {
     vehicleTitle: 'Véhicule & équipage',
     modules: (mounted: number, slots: number) => `Modules ${mounted}/${slots}`,
     noModule: 'Aucun module monté : ils se montent au garage.',
-    noCrew: 'Aucun équipier : ils se recrutent à la Cantine.',
+    noCrew: 'Aucun équipier : ils se recrutent au Quai 9.',
     garageAt: (district: string) => `Garage de Mécano-Mitch à ${district}, de jour : modules, châssis et réparations s'y font, dans cet onglet.`,
     title: (used: number, capacity: number) => `Soute ${used}/${capacity}`,
     empty: 'Soute vide.',
@@ -720,6 +720,8 @@ export const fr = {
   },
 
   place: {
+    cantineLucidity: (days: number) => `L'eau sans sédatifs des routiers : Lucidité remise à ${days} jours, ici, de jour.`,
+    cantineFuel: 'Synthanol au tarif syndical · réserve',
     ventureTitle: 'Placement du Cartel',
     ventureRule: (rate: string, chance: string, loss: string) =>
       `Plus rentable que l'offshore (${rate} par jour), mais chaque matin ${chance} de risque de coup de filet : le placement perd alors ${loss} de son solde. Retrait avec la même commission. Compte dans le score.`,
@@ -1248,6 +1250,7 @@ export const fr = {
   location: {
     'LOC-D1-1': { name: "L'Arrière-Salle de Viktor Varga", subtitle: 'Usurier mafieux' },
     'LOC-D1-2': { name: 'La Cantine des Chauffeurs', subtitle: '« Chez Borg »' },
+    'LOC-D1-3': { name: 'Le Quai 9', subtitle: 'Bar clandestin des quais de service' },
     'LOC-D2-1': { name: 'Le Studio de « Karma-Cham »', subtitle: "Influenceuse d'État corrompue" },
     'LOC-D3-1': { name: 'La Morgue Arrière', subtitle: 'Dr. K.' },
     'LOC-D4-1': { name: 'Le Garage « Faraday »', subtitle: 'Mécano-Mitch' },

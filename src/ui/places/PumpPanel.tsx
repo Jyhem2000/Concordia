@@ -12,13 +12,9 @@ import Panel from '../shared/Panel.tsx'
 
 /** Pompe à Synthanol du district (chap. 3) : officielle (fermée la nuit sous un seuil d'ICC) ou pirate (toujours ouverte) */
 export default function PumpPanel() {
-  // Prix, ouverture et plein possible se calculent sur l'état entier
   const game = useGameStore((s) => s.game)
-  const dispatch = useGameStore((s) => s.dispatch)
-  const { t, credits } = useI18n()
+  const { t } = useI18n()
   const tank = VEHICLES[game.vehicleId].tank
-  const refuelMax = maxRefuel(game)
-  const closed = pumpClosed(game)
 
   return (
     <Panel
@@ -28,19 +24,30 @@ export default function PumpPanel() {
       aside={<span className="font-bold">{t.pump.reserve(game.fuel, tank)}</span>}
       collapseId="fuel"
     >
-      {closed ? (
-        <Hint tone="night">{t.error['pump-closed']}</Hint>
-      ) : (
-        <div className="flex flex-wrap items-center gap-2">
-          <Detailed breakdown={fuelPriceBreakdown(game)} format={(price) => t.evening.pricePerRation(credits(price))} />
-          <Button disabled={refuelMax < 1} onClick={() => dispatch({ type: 'refuel', qty: 1 })}>
-            {t.evening.refuelOne}
-          </Button>
-          <Button disabled={refuelMax < 1} onClick={() => dispatch({ type: 'refuel', qty: refuelMax })}>
-            {t.evening.refuelFull}
-          </Button>
-        </div>
-      )}
+      {pumpClosed(game) ? <Hint tone="night">{t.error['pump-closed']}</Hint> : <PumpControls />}
+    </Panel>
+  )
+}
+
+/** Prix de la ration (détaillable), +1 ration, plein, et la corvée DSC quand le joueur est bloqué ; pompe du district ou Cantine */
+export function PumpControls() {
+  // Prix, plein possible et corvée se calculent sur l'état entier
+  const game = useGameStore((s) => s.game)
+  const dispatch = useGameStore((s) => s.dispatch)
+  const { t, credits } = useI18n()
+  const refuelMax = maxRefuel(game)
+
+  return (
+    <>
+      <div className="flex flex-wrap items-center gap-2">
+        <Detailed breakdown={fuelPriceBreakdown(game)} format={(price) => t.evening.pricePerRation(credits(price))} />
+        <Button disabled={refuelMax < 1} onClick={() => dispatch({ type: 'refuel', qty: 1 })}>
+          {t.evening.refuelOne}
+        </Button>
+        <Button disabled={refuelMax < 1} onClick={() => dispatch({ type: 'refuel', qty: refuelMax })}>
+          {t.evening.refuelFull}
+        </Button>
+      </div>
       {canSiphon(game) && (
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <Button variant="danger" onClick={() => dispatch({ type: 'siphon' })}>
@@ -49,6 +56,6 @@ export default function PumpPanel() {
           <Hint>{t.evening.siphonHint}</Hint>
         </div>
       )}
-    </Panel>
+    </>
   )
 }

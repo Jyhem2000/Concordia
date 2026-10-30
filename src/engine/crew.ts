@@ -104,10 +104,14 @@ export function isSedated(state: GameState): boolean {
 /** District de la Cantine des Chauffeurs, où la Lucidité se recharge */
 export const cantineDistrict = (): DistrictId => LOCATIONS['LOC-D1-2'].district
 
-/** Se trouver au district de la Cantine de jour remet la protection au maximum */
+/** De jour, au district de la Cantine : les routiers y passent tous (Lucidité, Synthanol au tarif syndical) */
+export function atCantine(state: GameState): boolean {
+  return state.districtId === cantineDistrict() && state.phase === 'day' && !state.dayOver
+}
+
+/** Se trouver au district de la Cantine de jour remet la Lucidité au maximum */
 export function refreshLucidity(state: GameState): GameState {
-  const atCantine = state.districtId === cantineDistrict() && state.phase === 'day' && !state.dayOver
-  return atCantine ? { ...state, lucidity: SEDATION.lucidityDays } : state
+  return atCantine(state) ? { ...state, lucidity: SEDATION.lucidityDays } : state
 }
 
 /** Mémoire de marché brouillée : Sédation, sauf flux pirate de Glitch, jamais dans le district actuel */

@@ -56,7 +56,7 @@ describe('i18n (fr)', () => {
       /1 \+ \(jour − 1\)/g, // formule de l'indice, affichée telle quelle
       /\b0 (à|et) |à 0\b/g, // zéro
       /sur 5\b/g, // échelle des étoiles de sécurité
-      /Cassandre-88|300 m|90 décibels|3 balles|400 ml|8 secondes|70 km\/h|15 km\/h/g, // lore
+      /Cassandre-88|Quai 9|300 m|90 décibels|3 balles|400 ml|8 secondes|70 km\/h|15 km\/h/g, // lore
     ]
     const ids = /'?\b(T\d-\d\d|EVT-[A-Z0-9-]+|MOD-\d\d|VEH-\d\d|CREW-\d\d|LOC-D\d-\d|D\d|rule\.[a-z0-9-]+)\b'?/g
     // Textes d'interface seulement : les noms des données de jeu, plus bas, sont du lore

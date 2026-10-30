@@ -19,7 +19,7 @@ import { CREW } from '../data/vehicles.ts'
 import { PRODUCT_IDS, PRODUCTS, TIERS } from '../data/products.ts'
 import { breakdown, type Breakdown, type BreakdownBuilder, type RuleSource } from './breakdown.ts'
 import { takeLots } from './cargo.ts'
-import { crewEffect } from './crew.ts'
+import { atCantine, crewEffect } from './crew.ts'
 import { freshnessFactor, freshnessOf } from './condition.ts'
 import { recordOf } from './records.ts'
 import { atAfter } from './night.ts'
@@ -294,6 +294,6 @@ export function estimatedUnitSale(quote: number): number {
 /** Prix d'une ration de Synthanol dans le district actuel */
 export function fuelPriceBreakdown(state: GameState): Breakdown {
   // Cantine des Chauffeurs : tarif syndical en D1, de jour
-  if (state.districtId === 'D1' && state.phase === 'day' && !state.dayOver) return breakdown('LOC-D1-2', CANTINE.fuelPrice).build()
+  if (atCantine(state)) return breakdown('LOC-D1-2', CANTINE.fuelPrice).build()
   return breakdown(state.districtId, DISTRICTS[state.districtId].fuelPrice).build()
 }

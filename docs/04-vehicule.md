@@ -59,9 +59,9 @@ Chaque châssis a un **double fond** d'origine, soudé par Mécano-Mitch : quelq
 ---
 
 ## Équipage
-* **Recrutement** à `[LOC-D1-2]`, de jour, **1 seul équipier actif** à la fois. Le premier recrutement est gratuit ; chaque recrutement suivant coûte des frais. **Renvoyer** l'équipier est gratuit. Chaque équipier ouvre un build différent : sûreté (Vance), information et finance (Glitch), gastronomie périssable (Mama Rosa).
+* **Recrutement** au Quai 9 `[LOC-D1-3]`, de jour, **1 seul équipier actif** à la fois. Le premier recrutement est gratuit ; chaque recrutement suivant coûte des frais. **Renvoyer** l'équipier est gratuit. Chaque équipier ouvre un build différent : sûreté (Vance), information et finance (Glitch), gastronomie périssable (Mama Rosa).
 * **Salaire payé d'avance** : à l'embauche pour le jour même, puis à chaque routine matinale, avant toute prestation (chap. 1). S'il ne peut pas être payé en Cash-Puce, l'équipier **ne travaille pas ce jour-là** (aucun bonus) mais reste engagé ; le salaire manqué ne s'ajoute pas à la dette. Les matins passés en cellule, aucun salaire n'est dû et l'équipier reste à son poste. Montants : `CREW` dans [`vehicles.ts`](../src/data/vehicles.ts).
-* **Ils ne se présentent pas d'emblée.** Chacun rejoint le joueur après un acte qui le fait remarquer (`requires` de chaque équipier dans [`vehicles.ts`](../src/data/vehicles.ts)) ; d'ici là, la Cantine l'affiche avec sa condition et la progression vers elle :
+* **Ils ne se présentent pas d'emblée.** Chacun rejoint le joueur après un acte qui le fait remarquer (`requires` de chaque équipier dans [`vehicles.ts`](../src/data/vehicles.ts)) ; d'ici là, le Quai 9 l'affiche avec sa condition et la progression vers elle :
   * **Vance :** après un contrôle de la BRC franchi sans garde à vue. Il vous a repéré au barrage : vous avez du sang-froid.
   * **Mama Rosa :** après un certain nombre de caisses `[TAG-PERISHABLE]` vendues. Elle ne travaille qu'avec qui connaît la marchandise.
   * **Glitch :** à votre première Fiche S. Elle surveille les fichiers d'Aeterna et vous trouve quand votre nom y entre.

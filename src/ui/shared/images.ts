@@ -9,6 +9,7 @@ import {
   BusFront,
   Ambulance,
   Candy,
+  ChefHat,
   Cigarette,
   Coffee,
   Cpu,
@@ -21,7 +22,9 @@ import {
   Flame,
   Frame,
   Grid3x3,
+  Headset,
   Ham,
+  Medal,
   Hexagon,
   Milk,
   PackageCheck,
@@ -45,10 +48,10 @@ import {
   Zap,
   type LucideIcon,
 } from 'lucide-react'
-import type { ModuleId, ProductId, VehicleId } from '../../engine/types.ts'
+import type { CrewId, ModuleId, ProductId, VehicleId } from '../../engine/types.ts'
 
-/** Données qui ont une image : produits, véhicules, modules (chap. 7) */
-export type ImageId = ProductId | VehicleId | ModuleId
+/** Données qui ont une image : produits, véhicules, modules, équipiers (chap. 7) */
+export type ImageId = ProductId | VehicleId | ModuleId | CrewId
 
 /** Images déposées dans `src/assets/images/`, nommées par l'ID de la donnée (`T1-03.png`) */
 const files = import.meta.glob<string>('../../assets/images/*.png', { eager: true, import: 'default' })
@@ -104,4 +107,7 @@ export const FALLBACK_ICONS: Record<ImageId, LucideIcon> = {
   'MOD-07': ArrowDownToLine,
   'MOD-08': BadgeCheck,
   'MOD-09': WifiOff,
+  'CREW-01': Medal,
+  'CREW-02': Headset,
+  'CREW-03': ChefHat,
 }

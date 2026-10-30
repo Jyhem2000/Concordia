@@ -8,12 +8,13 @@ import Button from '../shared/Button.tsx'
 import Locked from '../shared/Locked.tsx'
 import { FOCUS_RING } from '../shared/focus.ts'
 import Hint from '../shared/Hint.tsx'
+import Thumb from '../shared/Thumb.tsx'
 
 type CrewOfferProps = {
   crewId: CrewId
 }
 
-/** Cantine des Chauffeurs : recrutement, renvoi et salaire de l'équipier (chap. 3 et 4) */
+/** Le Quai 9 : recrutement, renvoi et salaire de l'équipier (chap. 3 et 4) */
 export default function CrewDesk() {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
@@ -50,7 +51,7 @@ export default function CrewDesk() {
           </Button>
         </div>
       )}
-      <ul className="mt-1 space-y-2">
+      <ul className="mt-2 space-y-3">
         {CREW_IDS.filter((id) => id !== active).map((id) => (
           <CrewOffer key={id} crewId={id} />
         ))}
@@ -84,16 +85,22 @@ function CrewOffer({ crewId }: CrewOfferProps) {
   ]
 
   return (
-    <li className="text-xs">
-      <p className="font-bold text-ink">
-        {t.crew[crewId].name}
-        <span className="ml-1.5 font-normal text-ink-muted">{t.crewDesk.salary(credits(salary(crewId)))}</span>
-      </p>
-      <p className="text-ink-muted">{t.crew[crewId].subtitle}</p>
-      <p className="text-ink-soft">{bonuses.join(' · ')}</p>
-      {/* Verrou de progression : condition et avancement, tant qu'il ne s'est pas présenté (chap. 4) */}
-      <Locked requires={crew.requires} />
-      <div className="mt-1 flex items-center gap-2">
+    <li className="flex items-start gap-3 text-xs">
+      {/* Portrait et données de base */}
+      <div className="flex w-24 shrink-0 flex-col items-center gap-1 text-center">
+        <Thumb id={crewId} size="lg" />
+        <p className="font-bold text-ink">{t.crew[crewId].name}</p>
+        <p className="text-ink-muted">{t.crewDesk.salary(credits(salary(crewId)))}</p>
+      </div>
+      {/* Description et effets */}
+      <div className="min-w-0 flex-1">
+        <p className="text-ink-muted">{t.crew[crewId].subtitle}</p>
+        <p className="mt-1 text-ink-soft">{bonuses.join(' · ')}</p>
+        {/* Verrou de progression : condition et avancement, tant qu'il ne s'est pas présenté (chap. 4) */}
+        <Locked requires={crew.requires} />
+      </div>
+      {/* Recrutement */}
+      <div className="flex w-24 shrink-0 flex-col items-end gap-1 text-right">
         <Button variant="primary" disabled={error !== null} onClick={() => dispatch({ type: 'hireCrew', crewId })}>
           {t.crewDesk.hire}
         </Button>

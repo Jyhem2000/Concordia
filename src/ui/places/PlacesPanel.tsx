@@ -1,9 +1,10 @@
 import { Landmark, Lock } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { SURVIVAL_ADVANCE, VENTURE } from '../../data/balance.ts'
+import { SEDATION, SURVIVAL_ADVANCE, VENTURE } from '../../data/balance.ts'
 import { LOCATIONS } from '../../data/locations.ts'
+import { VEHICLES } from '../../data/vehicles.ts'
 import { maxRepay } from '../../engine/actions.ts'
-import { crewEffect } from '../../engine/crew.ts'
+import { atCantine, crewEffect } from '../../engine/crew.ts'
 import {
   breakEvenDays,
   effectiveOffshoreRate,
@@ -24,7 +25,7 @@ import CrewDesk from './CrewDesk.tsx'
 import ContractCard from './ContractCard.tsx'
 import GarageDesk from './GarageDesk.tsx'
 import { placesHere } from './placesHere.ts'
-import PumpPanel from './PumpPanel.tsx'
+import PumpPanel, { PumpControls } from './PumpPanel.tsx'
 import { CassandreDesk, ForgeryDesk, KarmaDesk, MorgueDesk, VelvetDesk } from './SpecialDesks.tsx'
 
 type PlaceProps = {
@@ -44,12 +45,14 @@ type PlacesPanelProps = {
 /** Pompe à Synthanol et guichets des lieux spéciaux du district courant */
 export default function PlacesPanel({ garage = false }: PlacesPanelProps) {
   const districtId = useGameStore((s) => s.game.districtId)
+  // De jour à Hives, le plein se fait à la Cantine, au tarif syndical : la pompe du district ne sert qu'une fois la Cantine fermée
+  const cantine = useGameStore((s) => atCantine(s.game))
   const here = placesHere(districtId, garage)
 
   return (
     <>
       {/* Chaque district a sa pompe ; elle n'a rien à voir avec le garage */}
-      {!garage && <PumpPanel />}
+      {!garage && !cantine && <PumpPanel />}
       {here.map((id) => (
         <Place key={id} locationId={id}>
           {LOCATIONS[id].services.map((service) => (
@@ -83,6 +86,8 @@ function ServiceDesk({ service }: ServiceDeskProps) {
   switch (service) {
     case 'debt':
       return <DebtDesk />
+    case 'cantine':
+      return <CantineDesk />
     case 'offshore':
       return <OffshoreDesk />
     case 'garage':
@@ -100,6 +105,23 @@ function ServiceDesk({ service }: ServiceDeskProps) {
     case 'velvet':
       return <VelvetDesk />
   }
+}
+
+/** Cantine des Chauffeurs : l'eau des routiers (Lucidité) et le Synthanol au tarif syndical */
+function CantineDesk() {
+  const game = useGameStore((s) => s.game)
+  const { t } = useI18n()
+
+  return (
+    <>
+      <p className="text-info">{t.place.cantineLucidity(SEDATION.lucidityDays)}</p>
+      <p>
+        <span className="text-ink-muted">{t.place.cantineFuel} </span>
+        <span className="font-bold">{t.pump.reserve(game.fuel, VEHICLES[game.vehicleId].tank)}</span>
+      </p>
+      <PumpControls />
+    </>
+  )
 }
 
 function DebtDesk() {

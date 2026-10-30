@@ -41,7 +41,7 @@ export type TagId =
 export type DistrictId = `D${1 | 2 | 3 | 4 | 5 | 6}`
 
 /** Lieux spéciaux (chap. 3) */
-export type LocationId = 'LOC-D1-1' | 'LOC-D1-2' | 'LOC-D2-1' | 'LOC-D3-1' | 'LOC-D4-1' | 'LOC-D4-2' | 'LOC-D5-1' | 'LOC-D6-1'
+export type LocationId = 'LOC-D1-1' | 'LOC-D1-2' | 'LOC-D1-3' | 'LOC-D2-1' | 'LOC-D3-1' | 'LOC-D4-1' | 'LOC-D4-2' | 'LOC-D5-1' | 'LOC-D6-1'
 
 /** Véhicules, modules, équipiers (chap. 4) */
 export type VehicleId = `VEH-${Four}`
@@ -230,7 +230,7 @@ export type District = {
 }
 
 /** Services rendus par les lieux spéciaux implémentés (chap. 2 et 3) */
-export type LocationService = 'debt' | 'offshore' | 'garage' | 'crew' | 'influence' | 'morgue' | 'prophecy' | 'forgery' | 'velvet'
+export type LocationService = 'debt' | 'cantine' | 'offshore' | 'garage' | 'crew' | 'influence' | 'morgue' | 'prophecy' | 'forgery' | 'velvet'
 
 /** Services à usage compté (coût croissant) ou à cooldown */
 export type ServiceKey = 'influence' | 'pass' | 'surgery' | 'certificate' | 'prophecy' | 'forgery' | 'auction' | 'blackmail' | 'vip'
