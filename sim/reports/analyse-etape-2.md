@@ -490,3 +490,14 @@ Constat : sur 30 jours, la plupart des équipements ne se remboursaient pas (cam
 Les multiplicateurs d'événement se multiplient (chaque événement par sa ligne la plus forte, plus les contrecoups et l'influence de Karma-Cham), sous un plafond unique ; la règle « le plus fort écart l'emporte » et ses départages sont retirés.
 
 **Campagne Plans :** pas de changement de fond (les écarts suivent surtout le décalage du générateur). Seul l'Opportuniste reste sous le Sans build, à quelques milliers de crédits (51 / 125k contre 55 / 125k).
+
+## Prix des lieux spéciaux divisés par deux environ
+**Changements** (`locations.ts`) : Karma-Cham, Morgue (laissez-passer, chirurgie et sa part du Cash-Puce, certificat), Cassandre-88, faux dossier de la Laverie et chantage du Velvet-Silo, à peu près à moitié prix.
+
+**Campagne 4 (retraits)** :
+- Karma-Cham (−7 700 → −2 400 ₡), laissez-passer (−2 600 → −700 ₡) et certificat deviennent neutres ; la chirurgie reste légèrement négative (−3 200 ₡ ± 2 400), dans le seul plan Casse-cou qui l'utilise.
+- `[MOD-05]` est neutre (−4 800 ₡ ± 13 000).
+- `[MOD-04]` reste négatif (−13 900 ₡), mais ce n'est pas son prix : la fourgonnette de départ n'a qu'un emplacement, le bot y monte `[MOD-04]` (rayon libre, acheté vers le J4) et ne peut plus monter `[MOD-06]` (acheté vers le J6). Son retrait mesure en fait le pare-buffles à sa place : plus de fuites réussies, moins de garde à vue. C'est un arbitrage d'emplacement laissé au joueur.
+- `[MOD-08]` et `[CREW-01]` sont positifs ; aucun autre élément n'est négatif.
+
+**Campagne Plans :** peu de changement, les bots utilisent peu les lieux ; l'Opportuniste (qui s'en sert) rejoint le Sans build (53 / 126k contre 55 / 125k).
