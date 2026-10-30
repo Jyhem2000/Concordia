@@ -18,7 +18,7 @@ import { EVENT_MULT_CAP, ROAD_EVENTS } from '../../src/data/events.ts'
 import { PRODUCT_IDS, PRODUCTS, SEALED_PRODUCT } from '../../src/data/products.ts'
 import { CREW, MODULES, VEHICLES } from '../../src/data/vehicles.ts'
 import { canSiphon, checkForceCurfew, checkService, fuelPrice, maxBuy, planTravel, pumpClosed, type Action } from '../../src/engine/actions.ts'
-import { baseValue, cargoUsed, isIllegal, ownedQty, taggedQty } from '../../src/engine/cargo.ts'
+import { baseValue, cargoUsed, isIllegal, ownedQty } from '../../src/engine/cargo.ts'
 import { daysBeforeRot, paymentValue } from '../../src/engine/condition.ts'
 import { checkHire, crewEffect, hireFee, salary } from '../../src/engine/crew.ts'
 import { checkBuyModule, checkBuyVehicle, ejectMode, missingChassis, mountedEffect, repairPrice } from '../../src/engine/equipment.ts'
@@ -132,8 +132,14 @@ export type PlaceUse = 'advance' | 'surgery' | 'certificate' | 'pass' | 'influen
 
 const DEFAULT_PLACES: readonly PlaceUse[] = ['advance']
 
-/** Seuils d'usage des lieux : chirurgie sous cette Santé, certificat et chantage sous cet ICC */
-const PLACE_THRESHOLDS = { surgeryBelowHealth: 50, iccBelow: 60 }
+/**
+ * Seuils d'usage des lieux : chirurgie sous cette Santé (seul un coup dur près de zéro menace la partie), certificat et
+ * chantage sous cet ICC
+ */
+const PLACE_THRESHOLDS = { surgeryBelowHealth: 30, iccBelow: 60 }
+
+/** Karma-Cham : le surplus de revente des caisses gardées pour demain doit dépasser le prix de la panique d'autant */
+const KARMA_MARGIN = 1.2
 
 export type Temperament = {
   name: string
@@ -375,6 +381,9 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
   if (!checkDeliverContract(view)) return { type: 'deliverContract' }
 
   const hunt = serverHunt(view, objective)
+  const panic = open && !endgame ? karmaOrder(view, plan, temperament) : null
+  if (panic) return panic
+
   const sale = sell(view, plan, endgame, hunt)
   if (sale) return sale
 
@@ -549,6 +558,9 @@ function sell(view: GameState, plan: Plan, endgame: boolean, hunt: boolean): Act
       first.total >= first.cost * (1 + MIN_MARGIN) ||
       (lot !== undefined && first.total >= bestElsewhere(view, productId, lot) * 0.9)
     if (!worth) continue
+    // Panique de Karma-Cham commandée pour demain : la caisse du tag attend
+    const panic = view.influence?.day === view.day + 1 && PRODUCTS[productId].tags.includes(view.influence.tag)
+    if (panic && !endgame && !rotting) continue
     // Noctambule : la caisse festive attend l'after de ce soir si elle s'y vendra mieux
     if (!endgame && !rotting && first.total < tonightAtAfter(view, plan, productId)) continue
     // Sans saturer le marché, sauf en fin de partie ou si la caisse pourrit
@@ -629,6 +641,22 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
   return null
 }
 
+/**
+ * Karma-Cham, avant de vendre : panique sur le tag dont les caisses gardées jusqu'à demain (sans pourrir d'ici là)
+ * rapporteraient en plus nettement davantage que son prix ; demain doit être un jour de vente
+ */
+function karmaOrder(view: GameState, plan: Plan, temperament: Temperament): Action | null {
+  if (!(plan.places ?? DEFAULT_PLACES).includes('influence') || checkService(view, 'influence') || view.day >= GAME_LENGTH_DAYS) return null
+  const cost = karmaCost(view)
+  if (view.cash - cost < reserveOf(view, temperament) + CAPITAL) return null
+  const surplus = (tag: TagId) =>
+    tradable(view)
+      .filter((lot) => PRODUCTS[lot.productId].tags.includes(tag) && (daysBeforeRot(view, lot) ?? Infinity) > 1)
+      .reduce((total, lot) => total + lot.qty * quote(view, view.districtId, lot.productId) * SALE_COMMISSION * (KARMA.factor - 1), 0)
+  const tag = [...KARMA.tags].sort((a, b) => surplus(b) - surplus(a))[0]
+  return tag && surplus(tag) > cost * KARMA_MARGIN && !checkInfluence(view, tag) ? { type: 'influence', tag } : null
+}
+
 /** Lieux spéciaux du district, quand le plan les prévoit et que le seuil est atteint */
 function specialPlaces(view: GameState, uses: (place: PlaceUse) => boolean, reserve: number, iccFloor: number): Action | null {
   const spare = (cost: number) => view.cash - cost >= reserve + CAPITAL
@@ -642,11 +670,6 @@ function specialPlaces(view: GameState, uses: (place: PlaceUse) => boolean, rese
     // Laissez-passer : seulement avec du chimique illégal à faire passer par les bio-scanners
     const chemical = view.cargo.some((lot) => isIllegal(lot) && PRODUCTS[lot.productId].tags.includes('TAG-CHEMICAL'))
     if (uses('pass') && chemical && !checkMorgue(view, 'pass') && spare(morgueCost(view, 'pass'))) return { type: 'morgue', service: 'pass' }
-  }
-  if (uses('influence') && !checkService(view, 'influence')) {
-    // Panique sur le tag le plus présent en soute : il se vendra plus cher demain
-    const tag = [...KARMA.tags].sort((a, b) => taggedQty(view.cargo, b) - taggedQty(view.cargo, a))[0]
-    if (tag && taggedQty(view.cargo, tag) > 0 && !checkInfluence(view, tag) && spare(karmaCost(view))) return { type: 'influence', tag }
   }
   if (!checkService(view, 'velvet') && uses('vip')) {
     if (view.vip && !checkVipDelivery(view)) return { type: 'vipDeliver' }

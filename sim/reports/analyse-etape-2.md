@@ -565,3 +565,10 @@ Mêmes effectifs que les rapports précédents (contrôle, plans et fins : 200 p
 - `[MOD-02]` : −3 points de survie ± 3, à la limite du bruit.
 - Karma-Cham (−3 700 ₡ ± 3 500) et la chirurgie de la Morgue (−2 200 ₡ ± 1 500) restent légèrement négatifs pour les bots, qui s'en servent sans viser un événement.
 - Positifs : avance de survie (+15 points), dilution en Tier 0 (+20 000 ₡), `[MOD-08]` et `[CREW-01]`.
+
+## Karma-Cham et chirurgie : politique du bot revue
+Les deux services restaient négatifs aux retraits. Le bot les jouait mal : panique commandée dès une seule caisse du tag en soute (après avoir vendu le reste au cours normal), chirurgie dès 50 PV. Désormais : panique commandée avant de vendre, seulement si le surplus des caisses gardées jusqu'au lendemain dépasse son prix de 20 %, caisses gardées un jour ; chirurgie sous 30 PV.
+
+**Retraits** (400 parties, mêmes graines) :
+- **Chirurgie** (Sans build, Casse-cou) : utilisée dans 4 % des parties (11 % avant), score −700 ₡ ± 1 100 (neutre, −2 200 avant), survie inchangée. La Santé ne compte qu'à zéro (mort) et pour la nuit blanche : la mort est rare, la chirurgie n'a presque jamais d'utilité, quel que soit le joueur.
+- **Karma-Cham** (Sans build, Équilibré) : utilisée dans 23 % des parties (40 % avant), score −4 000 ₡ ± 3 200, toujours négatif. La panique ne dure qu'un jour et la demande de chaque marché limite les caisses vendues à ×1,5 ; garder les caisses un jour coûte aussi un trajet de vente. Non joué : acheter exprès les caisses du tag pour la panique du lendemain.
