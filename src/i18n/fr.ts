@@ -179,14 +179,20 @@ export const fr = {
     label: 'Écrans',
     market: 'Marché',
     places: 'Lieux',
-    fil: 'Le Fil',
+    fil: 'En bref',
     vehicle: 'Véhicule',
     map: 'Carte',
   },
 
-  /** Onglet Le Fil : tout ce qui compte aujourd'hui, avant d'aller au marché puis sur la carte (chap. 7) */
+  /** Onglet En bref : tout ce qui compte aujourd'hui, avant d'aller au marché puis sur la carte (chap. 7) */
   fil: {
     news: 'Actualités',
+    newsGlobal: 'Événement du jour, dans toute la ville',
+    newsLocal: 'Événements locaux',
+    newsAftershock: 'Contrecoups',
+    newsLottery: 'Loterie',
+    newsInfluence: 'Karma-Cham',
+    newsTomorrow: 'Demain',
     noNews: "Rien à signaler aujourd'hui.",
     today: "Aujourd'hui & ce soir",
     deliveryOffer: (district: string, crates: number, fee: string) =>
@@ -215,7 +221,6 @@ export const fr = {
     calendarDay: (day: number) => `Jour ${day}`,
     calendarEmpty: 'Rien de connu ce jour-là.',
     calendarCount: (count: number) => `${count} élément${count > 1 ? 's' : ''}`,
-    upcoming: 'À venir',
     agendaContract: (district: string) => `Dernier jour du contrat de la Pègre (livraison à ${district})`,
     service: {
       influence: 'Karma-Cham',
@@ -359,7 +364,7 @@ export const fr = {
   },
 
   ticker: {
-    label: 'Flash Info Aeterna',
+    label: 'Message Aeterna',
     messages: [
       // ─── Hygiène mentale, sédation & IA Aeterna ───
       'Un Citoyen-Livreur sourit, un Citoyen-Livreur produit.',
@@ -582,7 +587,7 @@ export const fr = {
     liveQuotes: 'cours de tous les districts en temps réel',
     masksBeacon: 'brouille la balise de traçage du serveur Aeterna (son malus de risque est annulé)',
     injection: (done: number, needed: number) =>
-      `avec le serveur Aeterna en soute, chaque tournée clandestine arrivée sans garde à vue injecte un morceau de ton dossier (${done}/${needed}, Résident Réécrit)`,
+      `avec le serveur Aeterna en soute, chaque tournée clandestine arrivée sans garde à vue injecte un morceau de ton dossier (${done}/${needed}, Fantôme)`,
     offshore: (bonus: string) => `rendement offshore ${bonus}`,
     flee: (bonus: string) => `fuite ${bonus}`,
     forgery: (bonus: string) => `falsification de la Loterie ${bonus}`,
@@ -1056,17 +1061,17 @@ export const fr = {
     gameOver: 'Game Over',
     endings: {
       saboteur: {
-        title: "Le Saboteur du Monde d'Avant",
+        title: 'Le Saboteur',
         epilogue:
           "Le chalutier blindé des cartels franchit l'écluse de Rust Valley. Derrière le mur, les preuves inondent le Fil Rose et Concordia s'embrase pendant que tu goûtes un vrai whisky au soleil des îles libres.",
       },
       resident: {
-        title: 'Le Résident Réécrit',
+        title: 'Le Fantôme',
         epilogue:
           "La dernière greffe prend à 03h12. Le code d'Aeterna se réécrit ligne par ligne : résident de Catégorie S, né sous la verrière, casier vierge. Le lendemain, les douaniers d'élite te saluent par ton nom. L'algorithme ne se trompe jamais : c'est donc que tu as toujours été des leurs.",
       },
       elite: {
-        title: "Nouvel Oligarque d'Olympus-Green",
+        title: 'Nouvel Oligarque',
         epilogue:
           "Ton parrain du Velvet-Silo glisse ton nom pour le fauteuil d'un Haut-Commissaire « suicidé » la semaine dernière. Le Conseil vote à l'unanimité, par habitude. Sous la verrière, c'est désormais toi qui commandes de la vraie viande aux petits livreurs.",
       },
@@ -1076,7 +1081,7 @@ export const fr = {
           'Trop grillé pour la haute société, tu rachètes la boucherie de Viktor et les quais de Rust Valley : la contrebande a un nouveau parrain.',
       },
       standard: {
-        title: "Survivant du Mois d'Août",
+        title: 'Survivant',
         epilogue:
           'Tu as échappé au recyclage, mais ton pécule ne rachète pas ta liberté. Demain 06h00, septembre commence et tu remontes dans ta fourgonnette…',
       },

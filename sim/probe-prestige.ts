@@ -4,7 +4,7 @@ import { PLANS, TEMPERAMENTS } from './plans.ts'
 import { playGame, type GameRecord } from './runner.ts'
 
 /*
- * Sonde des fins de prestige : quelle condition manque aux parties qui visent l'Élite ou le Résident Réécrit.
+ * Sonde des fins de prestige : quelle condition manque aux parties qui visent l'Élite ou le Fantôme.
  * Usage : node sim/probe-prestige.ts [parties]
  */
 const n = Number(process.argv[2] ?? 200)

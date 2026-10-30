@@ -52,7 +52,7 @@ export const AUDIT_COUNTDOWN_DAY = 28
 
 type EndingRules = {
   saboteur: { minScore: number; requiredProduct: ProductId; district: DistrictId }
-  /** Résident Réécrit : injections du serveur par l'équipier, chacune une tournée de nuit hors mission */
+  /** Fantôme : injections du serveur par l'équipier, chacune une tournée de nuit hors mission */
   resident: { minScore: number; injections: number; requiredProduct: ProductId; crew: CrewId }
   /** Élite par cooptation : commandes VIP livrées au Velvet-Silo pour gagner un parrain, palier d'ICC à minuit */
   elite: { minScore: number; iccTier: IccTier; sponsorOrders: number }

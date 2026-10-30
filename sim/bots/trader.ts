@@ -113,7 +113,7 @@ export type Plan = {
   places?: readonly PlaceUse[]
   /** Tournées de nuit au moins quand la soute le justifie, quel que soit le tempérament (suspensions, tag Festif) */
   nightOwl?: boolean
-  /** Chasse au serveur en cours (Résident) : passer par son district producteur pour le trouver en stock */
+  /** Chasse au serveur en cours (Fantôme) : passer par son district producteur pour le trouver en stock */
   huntsServer?: boolean
   /** Parrain à gagner (Élite) : passer au Velvet-Silo demander une commande VIP */
   seeksSponsor?: boolean
@@ -151,7 +151,7 @@ export type Temperament = {
   venture: number
 }
 
-/** Objectif (chap. 8, axe 3) : survivre, score maximal, ou une grande fin (Baron, Élite, Résident Réécrit, Saboteur) */
+/** Objectif (chap. 8, axe 3) : survivre, score maximal, ou une grande fin (Baron, Élite, Fantôme, Saboteur) */
 export type Objective = 'score' | 'survive' | 'mafia' | 'elite' | 'resident' | 'saboteur'
 
 const OBJECTIVE_NAMES: Record<Objective, string> = {
@@ -159,7 +159,7 @@ const OBJECTIVE_NAMES: Record<Objective, string> = {
   survive: 'survie',
   mafia: 'Baron',
   elite: 'Élite',
-  resident: 'Résident',
+  resident: 'Fantôme',
   saboteur: 'Saboteur',
 }
 
@@ -169,10 +169,10 @@ const ELITE_ICC_MARGIN = 5
 /** Saboteur : à partir de ce jour, score assuré, il part chercher le serveur (rare : il faut du temps pour le trouver en stock) */
 const SABOTEUR_HUNT_DAY = 20
 
-/** Résident : à partir de ce jour, Glitch engagée, il part chercher le serveur pour les injections */
+/** Fantôme : à partir de ce jour, Glitch engagée, il part chercher le serveur pour les injections */
 const RESIDENT_HUNT_DAY = 8
 
-/** Le serveur des fins Saboteur et Résident, et son district producteur */
+/** Le serveur des fins Saboteur et Fantôme, et son district producteur */
 const SERVER = ENDINGS.saboteur.requiredProduct
 const SERVER_PRODUCER = DISTRICT_IDS.find((id) => DISTRICTS[id].production.includes(SERVER)) ?? 'D5'
 
@@ -234,7 +234,7 @@ function goalPlan(plan: Plan, objective: Objective): Plan {
   return { ...plan, places: [...(plan.places ?? DEFAULT_PLACES), 'certificate', 'blackmail', 'vip'], iccFloor: gold + ELITE_ICC_MARGIN }
 }
 
-/** Seuil atteint : on sécurise plutôt que maximiser, plus aucun illégal (livraisons et légal seulement) ; le Résident, une fois la greffe complète */
+/** Seuil atteint : on sécurise plutôt que maximiser, plus aucun illégal (livraisons et légal seulement) ; le Fantôme, une fois la greffe complète */
 function goalTemperament(view: GameState, temperament: Temperament, objective: Objective): Temperament {
   if (objective === 'saboteur' || !secured(view, objective)) return temperament
   if (objective === 'resident' && view.progress.injections < ENDINGS.resident.injections) return temperament
@@ -244,7 +244,7 @@ function goalTemperament(view: GameState, temperament: Temperament, objective: O
 
 /**
  * Le serveur que l'objectif doit garder ou se procurer : Saboteur (score assuré, fin de partie, jusqu'à Rust Valley),
- * Résident (Glitch engagée, tant que l'injection n'est pas complète)
+ * Fantôme (Glitch engagée, tant que l'injection n'est pas complète)
  */
 function serverHunt(view: GameState, objective: Objective): boolean {
   if (objective === 'saboteur') return view.day >= SABOTEUR_HUNT_DAY && secured(view, objective)
@@ -305,7 +305,7 @@ function travelTo(view: GameState, to: DistrictId): Action | null {
 
 /**
  * Chasse au serveur : l'acheter quand il est en stock dans son district producteur. Saboteur : l'y attendre, puis rejoindre
- * Rust Valley (racket, pas de fouille) et y rester jusqu'à l'audit. Résident : continuer de commercer en passant par le
+ * Rust Valley (racket, pas de fouille) et y rester jusqu'à l'audit. Fantôme : continuer de commercer en passant par le
  * district producteur ; null une fois le serveur à bord, les injections se font en tournée de nuit.
  */
 function serverMove(view: GameState, objective: Objective): Action | null {
@@ -313,7 +313,7 @@ function serverMove(view: GameState, objective: Objective): Action | null {
   if (!owned) {
     if (view.districtId === SERVER_PRODUCER && view.phase === 'day' && !view.dayOver && maxBuy(view, SERVER) > 0)
       return { type: 'buy', productId: SERVER, qty: 1 }
-    // Le Résident continue de commercer en passant par le district producteur ; le Saboteur, score assuré, l'attend sur place
+    // Le Fantôme continue de commercer en passant par le district producteur ; le Saboteur, score assuré, l'attend sur place
     if (objective === 'resident') return null
     return view.districtId !== SERVER_PRODUCER ? (travelTo(view, SERVER_PRODUCER) ?? { type: 'sleep' }) : { type: 'sleep' }
   }
@@ -321,7 +321,7 @@ function serverMove(view: GameState, objective: Objective): Action | null {
   return null
 }
 
-/** Injections du Résident : soute couverte de Tier 0 le jour, tournée clandestine le soir vers le district le moins exposé */
+/** Injections du Fantôme : soute couverte de Tier 0 le jour, tournée clandestine le soir vers le district le moins exposé */
 function injectionMove(view: GameState): Action {
   if (view.phase === 'night') {
     const room = !view.nightTripDone
@@ -371,7 +371,7 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
   if (hunt) {
     const move = serverMove(view, objective)
     if (move) return move
-    // Résident, serveur à bord : chaque nuit passée sans garde à vue est une injection
+    // Fantôme, serveur à bord : chaque nuit passée sans garde à vue est une injection
     if (canInject(view) || (view.phase === 'night' && ownedQty(view.cargo, SERVER) > 0)) return injectionMove(view)
   }
 
@@ -795,7 +795,7 @@ function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route
         if (night && !view.mission) value += seeksFlag(view, plan) ? VALUE.wantedLevel : -VALUE.wantedLevel
         // Raisons d'aller quelque part : dette à solder, équipement à acheter
         if (to === 'D1') value += debtVisit(view, reserveOf(view, temperament))
-        // Résident sans serveur : passer à son district producteur, où il apparaît parfois
+        // Fantôme sans serveur : passer à son district producteur, où il apparaît parfois
         if (plan.huntsServer && to === SERVER_PRODUCER && !night) value += PRODUCTS[SERVER].basePrice * 0.1
         // Élite sans parrain : passer au Velvet-Silo demander une commande
         if (plan.seeksSponsor && to === velvetDistrict() && !night) value += VALUE.sponsorVisit

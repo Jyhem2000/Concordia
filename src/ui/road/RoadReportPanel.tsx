@@ -37,9 +37,9 @@ export default function RoadReportPanel() {
         <Deltas deltas={deltas} />
         {report.towBill > 0 && <li className="text-danger">{t.report.tow(credits(report.towBill))}</li>}
       </ul>
-      <Button className="mt-2" onClick={() => setDismissed(report)}>
-        {t.report.dismiss}
-      </Button>
+      <div className="mt-3 flex justify-center">
+        <Button onClick={() => setDismissed(report)}>{t.report.dismiss}</Button>
+      </div>
     </Panel>
   )
 }

@@ -55,7 +55,7 @@ L'objectif change surtout les décisions de fin de partie et quelques contrainte
 | **Score maximal** | Tout pour le solde offshore à l'audit, sans condition de fin. |
 | **Baron** | Atteindre le seuil, puis sécuriser plutôt que maximiser. |
 | **Élite** | Score, plus un parrain au Velvet-Silo (commandes VIP) et le palier Or à l'audit : arbitre en permanence ICC contre marge. |
-| **Résident Réécrit** | Score, plus les injections du serveur par Glitch (tournées de nuit clandestines). |
+| **Fantôme** | Score, plus les injections du serveur par Glitch (tournées de nuit clandestines). |
 | **Saboteur** | Score, plus `[T4-06]` en soute et la nuit du Jour 30 à Rust Valley. |
 
 ### Bots de référence (hors matrice)
@@ -99,7 +99,7 @@ L'objectif change surtout les décisions de fin de partie et quelques contrainte
   * **Baron, Élite :** une fois le seuil atteint, on sécurise : plus aucun illégal (risque accepté nul : livraisons et légal seulement), tout à l'abri offshore sauf le carburant.
   * **Élite :** défend en plus un ICC de 5 points au-dessus du palier Or, comme le Citoyen modèle, jusqu'à l'audit (certificat et chantage hors de la fenêtre d'équipement, de quoi payer un certificat gardé en Cash-Puce). Tant qu'il n'a pas de parrain, il passe au Velvet-Silo demander une commande VIP, va chercher le produit dans un district qui le produit (tournée de nuit comprise) et revient livrer de jour, au-delà du risque qu'accepte son tempérament, la livraison comptant plus que sa recette ; il ne sécurise qu'une fois le parrain acquis.
   * **Saboteur :** seuil atteint à partir du Jour 20, il garde le prix du serveur en Cash-Puce, rejoint le district producteur de `[T4-06]` et l'y attend (stock rare), l'achète, puis rejoint Rust Valley (racket des milices, pas de fouille de la BRC) et y reste jusqu'à l'audit.
-  * **Résident Réécrit :** Glitch engagée, à partir du Jour 8, il commerce en passant par le district producteur du serveur et l'achète dès qu'il le trouve (prix gardé en Cash-Puce). Serveur à bord : le jour, plein et soute couverte de Tier 0 ; le soir, tournée clandestine vers le district le moins exposé, le racket de Rust Valley (sans fouille) avant tout s'il peut payer le péage. L'injection complète, il revend le serveur et reprend le commerce.
+  * **Fantôme :** Glitch engagée, à partir du Jour 8, il commerce en passant par le district producteur du serveur et l'achète dès qu'il le trouve (prix gardé en Cash-Puce). Serveur à bord : le jour, plein et soute couverte de Tier 0 ; le soir, tournée clandestine vers le district le moins exposé, le racket de Rust Valley (sans fouille) avant tout s'il peut payer le péage. L'injection complète, il revend le serveur et reprend le commerce.
   * **Fouille mortelle** (serveur en soute) : au barrage, le marchand joue l'option qui a le plus de chances d'éviter la fouille, corruption au plus offrant comprise, quel qu'en soit le coût.
 * **Campagne 3 :** chaque bot sur un grand nombre de graines ; le rapport compare l'écart-type du score entre graines à l'écart entre bots (écart-type des scores moyens), puis donne, pour chaque paire de bots, la part des graines où l'un fait mieux que l'autre : mêmes tirages, seul le jeu change. C'est la mesure qui dit si un choix compte partie par partie, et pas seulement en moyenne.
   3. tests par retrait (campagne 4), avant l'étape 2 si l'équilibrage des équipements l'exige ;

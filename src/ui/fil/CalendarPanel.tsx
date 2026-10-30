@@ -36,7 +36,7 @@ const MAX_DOTS = 3
 
 /**
  * Calendrier de la partie (chap. 7) : chaque jour passé avec ses événements et ses faits marquants (carnet de route),
- * chaque jour à venir avec les échéances connues à coup sûr ; puis la liste des échéances à venir
+ * chaque jour à venir avec les échéances connues à coup sûr
  */
 export default function CalendarPanel() {
   // Carnet, échéances et collecte se lisent sur l'état entier
@@ -118,7 +118,7 @@ export default function CalendarPanel() {
                     )}
                   </div>
                 }
-                className={`flex h-11 w-full flex-col items-center justify-center gap-1 rounded-md border text-xs ${
+                className={`flex h-14 w-full flex-col items-center justify-center gap-1 rounded-md border text-xs ${
                   state === 'today'
                     ? 'border-accent bg-accent/15 font-bold text-accent'
                     : state === 'past'
@@ -127,9 +127,9 @@ export default function CalendarPanel() {
                 }`}
               >
                 {day}
-                <span className="flex h-1.5 gap-0.5" aria-hidden="true">
+                <span className="flex h-2.5 gap-1" aria-hidden="true">
                   {lines.slice(0, MAX_DOTS).map((line, position) => (
-                    <span key={position} className={`h-1.5 w-1.5 rounded-full ${state === 'past' ? 'bg-ink-faint' : TONE_BG[line.tone]}`} />
+                    <span key={position} className={`h-2.5 w-2.5 rounded-full ${state === 'past' ? 'bg-ink-faint' : TONE_BG[line.tone]}`} />
                   ))}
                 </span>
                 <span className="sr-only">{t.fil.calendarCount(lines.length)}</span>
@@ -138,19 +138,6 @@ export default function CalendarPanel() {
           )
         })}
       </ol>
-      <h3 className="mt-3 text-xs text-ink-muted uppercase">{t.fil.upcoming}</h3>
-      <ul className="mt-1 flex flex-col gap-1 text-xs">
-        {/* Échéances triées par jour, sans identité propre : la position sert de clé */}
-        {items.map((item, position) => {
-          const { text, tone } = itemLine(item)
-          return (
-            <li key={position} className="flex gap-2">
-              <span className="w-20 shrink-0 font-bold text-ink-muted">{t.fil.dayLabel(item.day, item.day - game.day)}</span>
-              <span className={TONE_TEXT[tone]}>{text}</span>
-            </li>
-          )
-        })}
-      </ul>
     </Panel>
   )
 }

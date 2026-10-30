@@ -734,7 +734,7 @@ export type GameState = {
     deliveries: number
     /** Commandes VIP du Velvet-Silo livrées, moins celles manquées (parrainage de l'Élite) */
     vipOrders: number
-    /** Injections du serveur réussies par Glitch (Résident Réécrit) */
+    /** Injections du serveur réussies par Glitch (Fantôme) */
     injections: number
   }
   /** Livraison officielle acceptée, jusqu'à sa livraison ou à 06h00 */

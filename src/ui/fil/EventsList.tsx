@@ -4,8 +4,14 @@ import { KARMA } from '../../data/locations.ts'
 import { aftershockEvents, rumorReliability } from '../../engine/events.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
+import type { ReactNode } from 'react'
 import EventDetails from '../events/EventDetails.tsx'
 import Hint from '../shared/Hint.tsx'
+
+type NewsGroupProps = {
+  title: string
+  children: ReactNode
+}
 
 /** Actualités du jour : événement global, locaux, contrecoups, Loterie, influence et rumeur du lendemain (chap. 6 et 7) */
 export default function EventsList() {
@@ -33,35 +39,67 @@ export default function EventsList() {
     return <Hint>{t.fil.noNews}</Hint>
 
   return (
-    <ul className="flex flex-col gap-1 text-xs text-ink-soft">
+    <dl className="flex flex-col gap-2 text-xs text-ink-soft">
       {events.global && (
-        <li className="font-bold text-accent">
-          <EventDetails event={events.global} />
-        </li>
+        <NewsGroup title={t.fil.newsGlobal}>
+          <span className="font-bold text-accent">
+            <EventDetails event={events.global} />
+          </span>
+        </NewsGroup>
       )}
-      {locals.map(({ district, event }) => (
-        <li key={district}>
-          <EventDetails event={event} label={t.events.local(t.district[district].name, t.event[event].name)} />
-        </li>
-      ))}
-      {aftershocks.map((event) => (
-        <li key={event} className="text-ink-muted">
-          {t.events.aftershock(t.event[event].name, multiplier(AFTERSHOCK.afterRush), multiplier(AFTERSHOCK.afterSale))}
-        </li>
-      ))}
-      {lottery && drawToday && <li>{t.events.promoted(name(lottery.names.promoted), t.district[lottery.promoted].name)}</li>}
-      {lottery && demotion && (
-        <li>
-          {t.events.demoted(name(lottery.names.demoted), t.district[demotion.from].name, t.district[demotion.to].name)}
-          {lottery.vice && <> {t.events.vice(t.product[lottery.vice].name, t.district[demotion.to].name, lottery.viceUntil)}</>}
-        </li>
+      {locals.length > 0 && (
+        <NewsGroup title={t.fil.newsLocal}>
+          <ul className="flex flex-col gap-0.5">
+            {locals.map(({ district, event }) => (
+              <li key={district}>
+                <EventDetails event={event} label={t.events.local(t.district[district].name, t.event[event].name)} />
+              </li>
+            ))}
+          </ul>
+        </NewsGroup>
       )}
-      {influence && <li className="text-accent">{t.events.influence(t.tag[influence.tag].name, multiplier(KARMA.factor))}</li>}
+      {aftershocks.length > 0 && (
+        <NewsGroup title={t.fil.newsAftershock}>
+          <ul className="flex flex-col gap-0.5 text-ink-muted">
+            {aftershocks.map((event) => (
+              <li key={event}>{t.events.aftershock(t.event[event].name, multiplier(AFTERSHOCK.afterRush), multiplier(AFTERSHOCK.afterSale))}</li>
+            ))}
+          </ul>
+        </NewsGroup>
+      )}
+      {lottery && (drawToday || demotion) && (
+        <NewsGroup title={t.fil.newsLottery}>
+          {drawToday && <p>{t.events.promoted(name(lottery.names.promoted), t.district[lottery.promoted].name)}</p>}
+          {demotion && (
+            <p>
+              {t.events.demoted(name(lottery.names.demoted), t.district[demotion.from].name, t.district[demotion.to].name)}
+              {lottery.vice && <> {t.events.vice(t.product[lottery.vice].name, t.district[demotion.to].name, lottery.viceUntil)}</>}
+            </p>
+          )}
+        </NewsGroup>
+      )}
+      {influence && (
+        <NewsGroup title={t.fil.newsInfluence}>
+          <p className="text-accent">{t.events.influence(t.tag[influence.tag].name, multiplier(KARMA.factor))}</p>
+        </NewsGroup>
+      )}
       {events.rumor && (
-        <li className="text-night italic">
-          {foretold ? t.events.prophecy(t.rumor[events.rumor]) : t.events.rumor(t.rumor[events.rumor], percent(rumorReliability(), 0))}
-        </li>
+        <NewsGroup title={t.fil.newsTomorrow}>
+          <p className="text-night italic">
+            {foretold ? t.events.prophecy(t.rumor[events.rumor]) : t.events.rumor(t.rumor[events.rumor], percent(rumorReliability(), 0))}
+          </p>
+        </NewsGroup>
       )}
-    </ul>
+    </dl>
+  )
+}
+
+/** Une rubrique des actualités : son intitulé, puis son contenu */
+function NewsGroup({ title, children }: NewsGroupProps) {
+  return (
+    <div>
+      <dt className="text-ink-muted uppercase">{title}</dt>
+      <dd className="mt-0.5">{children}</dd>
+    </div>
   )
 }

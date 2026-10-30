@@ -25,9 +25,9 @@ export default function InterceptionReportPanel() {
     <Panel tone="report" icon={ClipboardList} title={t.report.title}>
       <ReportLines report={report} />
       {report.over && (
-        <Button className="mt-2" onClick={() => setDismissed(report)}>
-          {t.report.dismiss}
-        </Button>
+        <div className="mt-3 flex justify-center">
+          <Button onClick={() => setDismissed(report)}>{t.report.dismiss}</Button>
+        </div>
       )}
     </Panel>
   )

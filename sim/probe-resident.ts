@@ -7,7 +7,7 @@ import { createInitialState } from '../src/engine/state.ts'
 import type { CargoLot, DistrictId, GameState, Interception } from '../src/engine/types.ts'
 
 /*
- * Sonde du Résident Réécrit : chance de mourir (fouille effective avec le serveur) sur une tournée de nuit d'injection.
+ * Sonde du Fantôme : chance de mourir (fouille effective avec le serveur) sur une tournée de nuit d'injection.
  * Calcul exact sur les règles du moteur, au meilleur choix au barrage pour survivre (bluff puis relance comprise).
  * Usage : node sim/probe-resident.ts
  */

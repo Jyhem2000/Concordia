@@ -39,7 +39,7 @@ if (mode === 'fins') {
     Object.assign(ENDINGS.elite, { minScore: v.elite })
     Object.assign(ENDINGS.resident, { minScore: v.resident })
     Object.assign(ENDINGS.saboteur, { minScore: v.saboteur })
-    console.log(`— ${v.label} (Baron / Élite / Résident / Saboteur)`)
+    console.log(`— ${v.label} (Baron / Élite / Fantôme / Saboteur)`)
     for (const b of bots) {
       for (const t of [balanced, bold]) {
         const r = run(b.planName, t, b.objective)

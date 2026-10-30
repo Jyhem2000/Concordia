@@ -24,7 +24,7 @@ Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la dé
 
 | Thème | Mécaniques | Où lire |
 | :--- | :--- | :--- |
-| **Partie** | objectif, audit du Jour 30, défaites (Bio-Briques, mort, exécution), grandes fins (Saboteur, Résident Réécrit et injections, Élite par cooptation, Baron), score | chap. 1 |
+| **Partie** | objectif, audit du Jour 30, défaites (Bio-Briques, mort, exécution), grandes fins (Saboteur, Fantôme et injections, Élite par cooptation, Baron), score | chap. 1 |
 | **Jauges** | ICC (paliers, suspicion, gains de route et plafond), Santé, châssis, carburant, Exemption Métabolique et Sédation | chap. 1 → chap. 4 (capacités du véhicule) |
 | **Journée** | moments (Journée, 20h00, Nuit), routine de 06h00, service de jour, dilemme de 20h00 (relais, bivouac, tournée de nuit), livraison officielle du jour, missions de nuit et caisses scellées, after du couvre-feu, épuisement, demi-journée perdue, immobilisation, dépannage d'urgence | chap. 1 |
 | **Trajet** | ordre de résolution, consommation, usure de nuit et canicule, carte et districts traversés, couches du réseau (surface, galeries, quais), zone hors-réseau, mission de nuit | chap. 1 → chap. 3 → chap. 6 (canicule, aléas de jour) |
@@ -40,7 +40,7 @@ Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la dé
 | **Équipement** | véhicules (double fond et son contenu compris), modules (brouilleur de drones compris), équipage (injection du serveur par Glitch comprise), salaires | chap. 4 |
 | **Événements** | globaux, locaux, rumeurs, contrecoups, Loterie, aléas routiers | chap. 6 |
 | **Prévisibilité** | ce que le joueur sait ou peut deviner (cours, rumeurs, contrecoups, Loterie) et ce qui reste caché (ronde renforcée) | chap. 2 → chap. 6 → chap. 5 |
-| **Affichage** | charte graphique, onglets, Le Fil (actualités, agenda, bonnes affaires, alertes), carnet de route et courbe du patrimoine, palmarès, confirmations, où chaque règle est montrée et détaillée au joueur, manuel en jeu | chap. 7 |
+| **Affichage** | charte graphique, onglets, En bref (actualités, agenda, bonnes affaires, alertes), carnet de route et courbe du patrimoine, palmarès, confirmations, où chaque règle est montrée et détaillée au joueur, manuel en jeu | chap. 7 |
 
 ## État d'implémentation
 Toutes les règles des chap. 1 à 6 sont en jeu. Ce tableau dit ce qui reste à faire, et se met à jour à chaque étape.

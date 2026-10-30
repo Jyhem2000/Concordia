@@ -78,7 +78,7 @@ describe('audit du Jour 30', () => {
     const { saboteur, resident, elite, mafia } = ENDINGS
     const beacon = [{ productId: saboteur.requiredProduct, qty: 1, unitCost: 1, travelled: true, boughtDay: 1, damaged: false }]
     expect(endingFor(solvent({ offshore: offshore(saboteur.minScore), cargo: beacon, districtId: saboteur.district })).id).toBe('saboteur')
-    // Sans la balise mais greffe complète : le Résident Réécrit, sans condition de lieu ni d'ICC
+    // Sans la balise mais greffe complète : le Fantôme, sans condition de lieu ni d'ICC
     const grafted = { ...solvent({}).progress, injections: resident.injections }
     expect(endingFor(solvent({ offshore: offshore(resident.minScore), icc: 10, progress: grafted })).id).toBe('resident')
     expect(endingFor(solvent({ offshore: offshore(resident.minScore), progress: { ...grafted, injections: resident.injections - 1 } })).id).not.toBe(

@@ -34,9 +34,9 @@ export default function BriefingPanel() {
   return (
     <Panel tone="highlight" icon={Sunrise} title={t.briefing.title(briefing.day)}>
       <BriefingLines briefing={briefing} />
-      <Button className="mt-2" onClick={() => setDismissedDay(day)}>
-        {t.briefing.dismiss}
-      </Button>
+      <div className="mt-3 flex justify-center">
+        <Button onClick={() => setDismissedDay(day)}>{t.briefing.dismiss}</Button>
+      </div>
     </Panel>
   )
 }

@@ -261,7 +261,7 @@ export function endingFor(state: GameState): Ending {
   if (score >= saboteur.minScore && ownedQty(state.cargo, saboteur.requiredProduct) > 0 && state.districtId === saboteur.district) {
     return { id: 'saboteur', score }
   }
-  // Résident Réécrit : la greffe a pris, ni lieu, ni ICC, ni serveur à bord exigés
+  // Fantôme : la greffe a pris, ni lieu, ni ICC, ni serveur à bord exigés
   if (score >= resident.minScore && state.progress.injections >= resident.injections) return { id: 'resident', score }
   // Élite par cooptation : un parrain au Velvet-Silo, et l'ICC qui passe les portiques de la dalle
   if (score >= elite.minScore && iccTier(state.icc) === elite.iccTier && state.progress.vipOrders >= elite.sponsorOrders) {
