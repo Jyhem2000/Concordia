@@ -512,3 +512,20 @@ Les multiplicateurs d'événement se multiplient (chaque événement par sa lign
 **Campagne Plans :** Prudent et Équilibré restent dans le bruit. Casse-cou bouge davantage dans les deux sens : Corruption +17 000 ₡, Haut tier +12 000 ₡ ; Nuit festive −32 000 ₡, Citoyen modèle −34 000 ₡, Saboteur −64 000 ₡ (écart-type de ces scores autour de 200 000 ₡, soit ±15 000 ₡ sur la moyenne). Hypothèse, non vérifiée : tous les Casse-cou placent la moitié de leur épargne, et un coup de filet tardif coûte cher au score ; le décalage du générateur pèse aussi. Une sonde à graines égales avec et sans placement trancherait.
 
 **Parcours type :** nouveau tableau du rapport, lu dans le carnet de route (patrimoine médian à J5, J10, J20, J30, premier équipement, contrôles avec pertes, contrats, coups de filet).
+
+## Remesure novice / expert, tournées de nuit après le trajet du jour
+**Changement de règle :** la tournée de nuit (mission ou clandestine) ne part plus qu'après le trajet du jour.
+
+**Sonde `sim/probe-expert.ts`** (200 parties par bot, mêmes graines ; score moyen Prudent / Équilibré / Casse-cou, survie Équilibré) :
+
+| Variante | Sans build | Couverture légale | Citoyen modèle | Nuit festive |
+| :--- | ---: | ---: | ---: | ---: |
+| Actuel | 22 / 52 / 128k, 83 % | 24 / 80 / 181k, 84 % | 25 / 102 / 187k, 82 % | 22 / 62 / 113k, 84 % |
+| Couverture du Légal 0,2 (au lieu de 0,1) | 26 / 54 / 144k, 83 % | 30 / 84 / 192k, 86 % | 27 / 91 / 226k, 84 % | 24 / 59 / 116k, 84 % |
+| Sans plafond des événements | 23 / 54 / 122k, 86 % | 25 / 81 / 185k, 86 % | 25 / 99 / 176k, 83 % | 22 / 65 / 114k, 84 % |
+| Sans placement du Cartel | 22 / 52 / 130k, 84 % | 24 / 81 / 176k, 83 % | 25 / 101 / 182k, 82 % | 22 / 60 / 110k, 85 % |
+
+- **Couverture du Légal 0,2 :** tous les plans montent un peu (+2 à +6k en Prudent, +3 points de survie), parce que tous transportent du légal. L'avance de Couverture légale sur Sans build ne grandit pas (+28k → +30k en Équilibré, +53k → +48k en Casse-cou) et Citoyen modèle reste devant en Équilibré et Casse-cou : la dilution ne domine pas.
+- **Plafond des événements :** sans effet mesurable. Les bots ne cherchent pas à cumuler les événements (rumeur, prophétie, Karma-Cham) : la sonde ne peut pas dire ce que le plafond retire à un expert qui le ferait.
+- **Placement du Cartel :** neutre (±5k en Casse-cou). L'hypothèse d'un placement responsable des baisses du Casse-cou est écartée : elles venaient du décalage du générateur.
+- **Tournées après le trajet du jour :** Sans build ne bouge pas par rapport à la campagne Plans précédente (22 / 51 / 126k), mais la Nuit festive perd son avance : 30 / 69 / 105k → 22 / 62 / 113k, survie Équilibré 88 → 84 %. Son bot partait en tournée sans rouler de jour ; sa politique n'a pas encore été revue pour la nouvelle règle.
