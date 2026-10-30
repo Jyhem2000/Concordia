@@ -137,7 +137,7 @@ function OffshoreDesk() {
       </p>
       <div className="flex flex-wrap gap-1.5">
         <span className="text-ink-muted">{t.place.rate}</span>
-        <span>{percent(effectiveOffshoreRate(game.offshore, crewEffect(game, 'offshoreBonus') ?? 0), 2)}</span>
+        <span>{percent(effectiveOffshoreRate(crewEffect(game, 'offshoreBonus') ?? 0), 2)}</span>
         {interest && (
           <div className="flex gap-1">
             ·
@@ -145,7 +145,7 @@ function OffshoreDesk() {
           </div>
         )}
       </div>
-      <Hint>{t.place.breakEven(breakEvenDays(game.offshore, crewEffect(game, 'offshoreBonus') ?? 0))}</Hint>
+      <Hint>{t.place.breakEven(breakEvenDays(crewEffect(game, 'offshoreBonus') ?? 0))}</Hint>
       <AmountForm label={t.place.deposit} max={game.cash} onSubmit={(amount) => dispatch({ type: 'deposit', amount })} />
       <AmountForm
         label={t.place.withdraw}

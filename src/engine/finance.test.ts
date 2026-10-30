@@ -4,7 +4,7 @@ import {
   DEBT_LATE,
   GAME_LENGTH_DAYS,
   OFFSHORE_WITHDRAW_FACTOR,
-  OFFSHORE_TRANCHES,
+  OFFSHORE_DAILY_RATE,
   PROTECTION,
   SURVIVAL_ADVANCE,
 } from '../data/balance.ts'
@@ -66,19 +66,16 @@ describe('compte offshore', () => {
   })
 
   it('dit en combien de jours un dépôt couvre la commission du retrait', () => {
-    const days = breakEvenDays({ deposited: 0, interest: 0 })
-    expect(days * OFFSHORE_TRANCHES[0].dailyRate).toBeGreaterThanOrEqual(1 - OFFSHORE_WITHDRAW_FACTOR)
-    expect((days - 1) * OFFSHORE_TRANCHES[0].dailyRate).toBeLessThan(1 - OFFSHORE_WITHDRAW_FACTOR)
+    const days = breakEvenDays()
+    expect(days * OFFSHORE_DAILY_RATE).toBeGreaterThanOrEqual(1 - OFFSHORE_WITHDRAW_FACTOR)
+    expect((days - 1) * OFFSHORE_DAILY_RATE).toBeLessThan(1 - OFFSHORE_WITHDRAW_FACTOR)
   })
 
-  it('verse des intérêts simples, tranche par tranche, sur les seuls dépôts', () => {
-    const [first, second] = OFFSHORE_TRANCHES
-    const firstLimit = defined(first.upTo, 'plafond de la 1re tranche')
-    const deposited = firstLimit + 100_000
+  it('verse des intérêts simples à taux unique sur les seuls dépôts', () => {
+    const deposited = 300_000
     const interest = defined(offshoreInterestBreakdown({ deposited, interest: 999 }))
-    expect(interest.total).toBe(Math.round(firstLimit * first.dailyRate + 100_000 * second.dailyRate))
-    expect(interest.lines.map((line) => line.source)).toEqual(['rule.offshore-tranche-1', 'rule.offshore-tranche-2'])
-    expect(effectiveOffshoreRate({ deposited, interest: 0 })).toBeLessThan(first.dailyRate)
+    expect(interest.total).toBe(Math.round(deposited * OFFSHORE_DAILY_RATE))
+    expect(effectiveOffshoreRate(0.005)).toBeCloseTo(OFFSHORE_DAILY_RATE + 0.005)
     expect(offshoreInterestBreakdown({ deposited: 0, interest: 50 })).toBeNull()
   })
 

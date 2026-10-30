@@ -51,7 +51,6 @@ describe('i18n (fr)', () => {
     const allowed = [
       /\d{2}h\d{2}/g, // horaires fixes : 06h00, 20h00
       /\b1 (×|caisse|trajet|ration)/g, // une unité
-      /\b[123](re|e) tranche/g, // libellés des tranches offshore
       /Tier 0/g, // nom de la règle de bluff
       /Jour 1\b/g, // début de partie
       /1 \+ \(jour − 1\)/g, // formule de l'indice, affichée telle quelle

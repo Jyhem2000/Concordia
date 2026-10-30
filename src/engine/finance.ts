@@ -3,12 +3,12 @@ import {
   DEBT_LATE,
   GAME_LENGTH_DAYS,
   OFFSHORE_WITHDRAW_FACTOR,
-  OFFSHORE_TRANCHES,
+  OFFSHORE_DAILY_RATE,
   PROTECTION,
   SURVIVAL_ADVANCE,
 } from '../data/balance.ts'
 import { baseValue } from './cargo.ts'
-import { breakdown, type Breakdown, type RuleSource } from './breakdown.ts'
+import { breakdown, type Breakdown } from './breakdown.ts'
 import type { GameState, OffshoreAccount } from './types.ts'
 
 /*
@@ -61,31 +61,18 @@ export function offshoreBalance(account: OffshoreAccount): number {
   return account.deposited + account.interest
 }
 
-/** Libellé de chaque tranche dans le détail des intérêts, dans l'ordre de OFFSHORE_TRANCHES */
-export const OFFSHORE_TRANCHE_SOURCES: readonly RuleSource[] = ['rule.offshore-tranche-1', 'rule.offshore-tranche-2', 'rule.offshore-tranche-3']
-
-/** Intérêts simples du jour, tranche par tranche, sur les seuls dépôts ; null sans dépôt */
+/** Intérêts simples du jour sur les seuls dépôts, flux pirate de Glitch compris ; null sans dépôt */
 export function offshoreInterestBreakdown(account: OffshoreAccount, crewBonus = 0): Breakdown | null {
-  const terms = OFFSHORE_TRANCHES.map(({ upTo, dailyRate }, i) => {
-    const from = i === 0 ? 0 : (OFFSHORE_TRANCHES[i - 1].upTo ?? Infinity)
-    const portion = Math.max(0, Math.min(account.deposited, upTo ?? Infinity) - from)
-    return { source: OFFSHORE_TRANCHE_SOURCES[i], interest: portion * dailyRate }
-  }).filter(({ interest }) => interest > 0)
-
-  const [first, ...others] = terms
-  if (!first) return null
-  const interest = others.reduce((builder, { source, interest }) => builder.add(source, interest), breakdown(first.source, first.interest))
-  // Flux pirate de Glitch : le même taux ajouté sur chaque tranche
-  return interest
+  if (account.deposited <= 0) return null
+  return breakdown('rule.offshore-rate', account.deposited * OFFSHORE_DAILY_RATE)
     .add('CREW-02', account.deposited * crewBonus)
     .round()
     .build()
 }
 
-/** Taux du jour effectivement servi sur les dépôts (taux de la 1re tranche sans dépôt) */
-export function effectiveOffshoreRate(account: OffshoreAccount, crewBonus = 0): number {
-  const interest = offshoreInterestBreakdown(account, crewBonus)
-  return interest ? interest.total / account.deposited : OFFSHORE_TRANCHES[0].dailyRate
+/** Taux du jour servi sur les dépôts */
+export function effectiveOffshoreRate(crewBonus = 0): number {
+  return OFFSHORE_DAILY_RATE + crewBonus
 }
 
 /** Cash-Puce reçu pour un retrait de `amount` ₡ débités du compte, commission déduite */
@@ -94,8 +81,8 @@ export function withdrawalBreakdown(amount: number): Breakdown {
 }
 
 /** Jours de dépôt (au taux du jour) pour que les intérêts couvrent la commission d'un retrait */
-export function breakEvenDays(account: OffshoreAccount, crewBonus = 0): number {
-  return Math.ceil((1 - OFFSHORE_WITHDRAW_FACTOR) / effectiveOffshoreRate(account, crewBonus))
+export function breakEvenDays(crewBonus = 0): number {
+  return Math.ceil((1 - OFFSHORE_WITHDRAW_FACTOR) / effectiveOffshoreRate(crewBonus))
 }
 
 /** Retrait : les intérêts versés partent en premier, les dépôts (qui rapportent) en dernier */

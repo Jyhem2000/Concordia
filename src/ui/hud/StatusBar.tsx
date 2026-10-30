@@ -59,7 +59,7 @@ export default function StatusBar() {
   const newGame = useGameStore((s) => s.newGame)
   const { t, credits, signedCredits, number, percent } = useI18n()
   const offshore = offshoreBalance(game.offshore)
-  const offshoreRate = effectiveOffshoreRate(game.offshore, crewEffect(game, 'offshoreBonus') ?? 0)
+  const offshoreRate = effectiveOffshoreRate(crewEffect(game, 'offshoreBonus') ?? 0)
   const tier = iccTier(game.icc)
   const deadline = nextDebtDeadline(game)
   const protectionDay = nextProtectionDay(game)

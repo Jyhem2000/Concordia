@@ -333,7 +333,7 @@ export type Crew = {
   liveQuotes?: boolean
   /** Brouille les balises de traçage des produits en soute (malus de risque annulé) */
   masksBeacon?: boolean
-  /** Taux offshore ajouté sur chaque tranche, sauf les matins en cellule */
+  /** Taux offshore ajouté, sauf les matins en cellule */
   offshoreBonus?: number
   /** Bonus de fuite et de passage forcé */
   fleeBonus?: number

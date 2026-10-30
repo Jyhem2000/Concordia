@@ -115,7 +115,7 @@ Seuls les routiers boivent l'eau sans sédatifs de `[LOC-D1-2]` : c'est elle qui
 * **Insaisissable :** ni la BRC, ni les milices, ni Viktor, ni l'audit n'y touchent.
 * **Dépôt :** crédité en entier. **Retrait :** sur place, commission de la Laverie (`OFFSHORE_WITHDRAW_FACTOR` dans [`balance.ts`](../src/data/balance.ts)) : le compte est débité du montant demandé, le Cash-Puce n'en reçoit qu'une part, et l'argent redevient exposé. Les intérêts versés sont retirés en premier, les dépôts (seuls à rapporter) en dernier.
   * *Intention :* le score déposé n'est jamais taxé ; seul l'aller-retour coûte. L'app affiche au guichet en combien de jours un dépôt couvre la commission d'un retrait, au taux du jour.
-* **Rendement — intérêts simples** (les intérêts versés ne produisent pas d'intérêts), versés à la routine matinale sur le solde déposé avant 20h00. Le taux baisse par tranche du solde déposé, à cause des **« frais de conformité »** (`OFFSHORE_TRANCHES` dans [`balance.ts`](../src/data/balance.ts)).
+* **Rendement — intérêts simples** (les intérêts versés ne produisent pas d'intérêts), versés à la routine matinale sur le solde déposé avant 20h00, à taux unique (`OFFSHORE_DAILY_RATE` dans [`balance.ts`](../src/data/balance.ts)).
 * **Modificateur :** `[CREW-02]`. L'app affiche le **taux effectif** du compte.
 * **Score final** = solde à l'audit.
 

@@ -133,12 +133,8 @@ export const PROTECTION = { days: [7, 14, 21, 28] as readonly number[], rate: 0.
 /** Coefficient appliqué à chaque retrait (commission de la Laverie) : les dépôts sont crédités en entier */
 export const OFFSHORE_WITHDRAW_FACTOR = 0.95
 
-/** Intérêts simples par jour, par tranche du solde déposé ; `upTo` null = au-delà */
-export const OFFSHORE_TRANCHES: readonly { upTo: number | null; dailyRate: number }[] = [
-  { upTo: 200_000, dailyRate: 0.015 },
-  { upTo: 500_000, dailyRate: 0.01 },
-  { upTo: null, dailyRate: 0.005 },
-]
+/** Intérêts simples par jour sur le solde déposé (chap. 1) */
+export const OFFSHORE_DAILY_RATE = 0.015
 
 // ─── Châssis (chap. 1) ───
 

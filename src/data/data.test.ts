@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { OFFSHORE_TRANCHE_SOURCES } from '../engine/finance.ts'
 import { entriesOf } from '../engine/records.ts'
 import type { DistrictId } from '../engine/types.ts'
 import {
@@ -9,7 +8,7 @@ import {
   GAME_LENGTH_DAYS,
   ICC_TIERS,
   OFFSHORE_WITHDRAW_FACTOR,
-  OFFSHORE_TRANCHES,
+  OFFSHORE_DAILY_RATE,
   PROTECTION,
 } from './balance.ts'
 import { DISTRICTS, MAP_LINKS } from './districts.ts'
@@ -146,12 +145,8 @@ describe('équilibrage (balance.ts)', () => {
     expect(ascending([ENDINGS.mafia.minScore, ENDINGS.elite.minScore, ENDINGS.saboteur.minScore])).toBe(true)
   })
 
-  it('ordonne les tranches offshore, la dernière sans plafond, chacune avec son libellé', () => {
-    const limits = OFFSHORE_TRANCHES.map(({ upTo }) => upTo)
-    expect(limits.at(-1)).toBeNull()
-    expect(ascending(limits.slice(0, -1).map((limit) => limit ?? Infinity))).toBe(true)
-    expect(OFFSHORE_TRANCHES.length).toBeLessThanOrEqual(OFFSHORE_TRANCHE_SOURCES.length)
-    expect(ascending([...OFFSHORE_TRANCHES.map(({ dailyRate }) => dailyRate)].reverse())).toBe(true)
+  it('sert un taux offshore positif et une commission de retrait entre 0 et 1', () => {
+    expect(OFFSHORE_DAILY_RATE).toBeGreaterThan(0)
     expect(OFFSHORE_WITHDRAW_FACTOR).toBeGreaterThan(0)
     expect(OFFSHORE_WITHDRAW_FACTOR).toBeLessThanOrEqual(1)
   })
