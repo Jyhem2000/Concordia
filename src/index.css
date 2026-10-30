@@ -6,6 +6,8 @@
  * Chaque variable `--color-x` donne les utilitaires `text-x`, `bg-x`, `border-x`… ; les fonds teintés passent par l'opacité (`bg-danger/15`).
  */
 @theme {
+  /* Largeur de l'écran de jeu sur très grand écran */
+  --container-8xl: 96rem;
   --font-sans: ui-sans-serif, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
@@ -86,6 +88,11 @@
 }
 
 /* Images en pixel art : agrandies sans flou (chap. 7) */
+/* En bref sur grand écran : autant de colonnes que la place en tient, chacune élargie à parts égales */
+@utility grid-cols-panels {
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+}
+
 @utility pixelated {
   image-rendering: pixelated;
 }

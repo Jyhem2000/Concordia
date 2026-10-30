@@ -83,7 +83,7 @@ export default function GameScreen() {
         <RoadEventScreen />
       ) : (
         <>
-          <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-4 p-4 pb-24 md:grid md:grid-cols-5 md:content-start md:items-start md:pb-4">
+          <main className="mx-auto flex w-full max-w-8xl flex-1 flex-col gap-4 p-4 pb-24 md:grid md:grid-cols-5 md:content-start md:items-start md:pb-4">
             <DesktopTabs current={tab} onPick={pick} />
             {/* Comptes rendus : au-dessus de tout, sur toute la largeur */}
             {reportsShown && (
@@ -92,9 +92,9 @@ export default function GameScreen() {
                 <RoadReportPanel />
               </div>
             )}
-            {/* En bref : sur grand écran, ses colonnes thématiques */}
+            {/* En bref : sur grand écran, ses colonnes thématiques, élargies ou repliées selon la place */}
             <div
-              className={`min-w-0 flex-col gap-4 motion-safe:animate-fade-in md:col-span-5 md:grid-cols-2 md:items-start xl:grid-cols-3 ${tab === 'fil' ? 'flex' : 'hidden'} ${TAB_GROUP[tab] === 'brief' ? 'md:grid' : 'md:hidden'}`}
+              className={`min-w-0 flex-col gap-4 motion-safe:animate-fade-in md:col-span-5 md:grid-cols-panels md:items-start ${tab === 'fil' ? 'flex' : 'hidden'} ${TAB_GROUP[tab] === 'brief' ? 'md:grid' : 'md:hidden'}`}
             >
               <FilView onGo={go} />
             </div>

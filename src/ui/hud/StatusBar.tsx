@@ -84,7 +84,7 @@ export default function StatusBar() {
 
   return (
     <header className="z-20 border-b border-line bg-base/95 backdrop-blur md:sticky md:top-0">
-      <div className="mx-auto max-w-7xl px-3 py-2 text-sm">
+      <div className="mx-auto max-w-8xl px-3 py-2 text-sm">
         {/* Téléphone : deux rangées de quatre cases ; desktop : une rangée de huit */}
         <div className="grid grid-cols-4 gap-y-2 sm:grid-cols-8 sm:divide-x sm:divide-line">
           <Cell
