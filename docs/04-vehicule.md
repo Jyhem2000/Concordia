@@ -21,7 +21,10 @@
 
 ### Double fond
 Chaque châssis a un **double fond** d'origine, soudé par Mécano-Mitch : quelques emplacements cachés sous le plancher, sans slot de module (`hiddenCompartment` dans [`vehicles.ts`](../src/data/vehicles.ts) ; il fait partie de la soute, il ne l'agrandit pas).
-* **Remplissage automatique :** il contient toujours les caisses illégales les plus chères (prix de base), jusqu'à sa capacité. Les caisses légales n'y vont jamais (rien à cacher).
+* **Remplissage :** par défaut, il contient les caisses illégales les plus chères (prix de base), jusqu'à sa capacité. Les caisses légales n'y vont jamais (rien à cacher). Le joueur peut changer ce choix produit par produit, depuis la soute (chap. 7) :
+  * **Envoyer au double fond :** le produit passe avant le remplissage automatique (le dernier envoyé en premier), quitte à en déloger d'autres caisses. Utile quand un événement fait exploser le cours d'un produit moins cher ailleurs.
+  * **Retirer du double fond :** le produit n'y entre plus, même s'il est le plus cher.
+  * Le choix s'oublie dès que le produit quitte la soute (vendu, saisi, jeté…) : une caisse rachetée plus tard repart du remplissage par défaut.
 * **Trop encombrant :** `[T4-06]` n'y entre pas (une baie de serveur, chap. 2). La règle d'exécution sommaire et la fin « Saboteur » ne changent donc pas.
 * **À la fouille effective de la BRC** (chap. 5) : un second jet décide si les agents trouvent le double fond. Chance de le trouver : par étoile de sécurité du district (`COMPARTMENT` dans [`balance.ts`](../src/data/balance.ts)), du simple coup d'œil des ruches aux scanners du sommet.
   * **Non trouvé :** ses caisses sont gardées. La sanction est jugée sur la soute visible seulement (formalité si elle est légale, sanction de bas tier si le haut tier était caché).

@@ -1,10 +1,18 @@
 # 7. Interface (UI / UX)
 
-* **Single-Page Application** réactive, écran unique responsive : mobile-first en portrait (onglets rapides en bas d'écran), panneaux côte à côte sur desktop / paysage.
+* **Single-Page Application** réactive, écran unique responsive : mobile-first en portrait, panneaux côte à côte sur desktop / paysage.
+  * **Onglets en bas d'écran (téléphone) :** Marché (cours et ventes), Lieux (services du district, garage, Cantine), Soute (véhicule, soute et équipage), Carte (livraison officielle, carte, panneau du soir et départs). Le bandeau supérieur, le briefing et les comptes rendus restent au-dessus de l'onglet ouvert. Un trajet ramène à l'onglet Marché.
+  * **Desktop :** tous les panneaux visibles, marché à gauche, le reste à droite, sans onglets.
 * **Aucun chiffre codé en dur :** boutons et panneaux affichent les valeurs calculées depuis les règles du jour.
 * **Principe de transparence — « zéro calculatrice, zéro boîte noire » :** chaque probabilité, prix ou coût affiché peut être touché pour révéler son **détail ligne par ligne**, avec la source de chaque ligne (district, tag, module, équipier, événement…). Le joueur occasionnel lit le total ; le joueur optimisateur lit le détail et ajuste son build.
-  * **Toutes les règles sont accessibles en jeu.** Aucune mécanique n'est cachée au joueur (seuls des tirages le sont, comme la ronde renforcée). Chaque calcul se détaille, et chaque règle qui pèse sur un choix est expliquée à l'endroit du choix, en une ou deux phrases. Un **manuel en jeu**, consultable à tout moment et organisé comme ces docs, rassemble l'ensemble (prévu avec l'habillage).
+  * **Toutes les règles sont accessibles en jeu.** Aucune mécanique n'est cachée au joueur (seuls des tirages le sont, comme la ronde renforcée). Chaque calcul se détaille, et chaque règle qui pèse sur un choix est expliquée à l'endroit du choix, en une ou deux phrases. Un **manuel en jeu** rassemble l'ensemble (voir plus bas).
   * *Ex. (risque, valeurs indicatives) :* « Base D5 40 % · Suspicion +10 % · Tech (4/12) +16,7 % · Couverture légale −10 % = 56,7 % · Zéro-C ×0,85 = **48 %** ».
+
+## Charte graphique
+Terminal de livraison d'Aeterna : fond ardoise sombre, cartes à bords arrondis, titres en capitales, chiffres alignés (chiffres tabulaires). Un seul thème, sombre.
+* **Couleurs par rôle, jamais par écran :** Cash-Puce jaune, offshore cyan, dette rouge, gain vert, perte rouge, nuit indigo, action principale ambre, action risquée ou destructrice rouge. Les tiers gardent leur couleur partout : **vert** 0, **jaune** 1, **orange** 2, **rouge** 3, **violet** 4 (liseré à gauche de chaque ligne de produit, case d'image). Ces couleurs sont des variables du thème (`src/index.css`), utilisées par leur nom de rôle.
+* **Composants partagés** (`src/ui/shared/`) : panneau repliable, bouton, pastille (tag, statut, indicateur), jauge, statistique, encadré d'information, image de produit. Un style qui sert à deux endroits devient un composant ou une variante, jamais une copie.
+* **Images :** produits, véhicules et modules ont une image dans une case carrée. Sans fichier d'image, une icône vectorielle (lucide) dans la couleur du tier la remplace. Déposer une image 32×32 (pixel art) sous le nom de l'ID de la donnée suffit à la remplacer, sans toucher au code. Le reste de l'interface reste en icônes vectorielles.
 
 ## Panneaux repliables
 Chaque panneau (marché, carte, lieux spéciaux, plein, couvre-feu, objectifs) et les longues sous-parties du garage (modules, châssis) se replient d'un clic sur leur titre, pour faire de la place. Le choix est mémorisé dans les réglages du joueur, d'une partie à l'autre.
@@ -25,20 +33,14 @@ Chaque panneau (marché, carte, lieux spéciaux, plein, couvre-feu, objectifs) e
 * **Briefing de 06h00 :** chaque matin, un encadré refermable récapitule la nuit et la routine : gains de sommeil, PV perdus en cellule, dette après intérêts, passage en retard, collecte de Viktor (et reliquat ajouté à la dette), intérêts offshore. Chaque montant est détaillable.
 * **Compte à rebours de l'audit** (à partir de `AUDIT_COUNTDOWN_DAY`, [`balance.ts`](../src/data/balance.ts)) : *« Dernier dépôt offshore possible : J30, 19h59 »* et *« Dernier remboursement possible : J30, 19h59 »*.
 
-### Dégradation de l'UI selon l'ICC
-Mêmes paliers et mêmes noms que les règles (chap. 1) : l'interface ne définit aucun seuil propre.
-
-| Palier (chap. 1) | Rendu | Exemple de message |
-| :--- | :--- | :--- |
-| Citoyen Or | Interface nette et dorée, couleurs apaisantes, ton maternel. Jauge **verte**. | *« Bonne route, Citoyen-Livreur ! Pensez à vous hydrater. »* |
-| Citoyen ordinaire | Interface standard, ton faussement enjoué. Jauge **jaune**. | *« Aeterna est fière de vous. Presque. »* |
-| Citoyen sous réserve | Légères scanlines, ton passif-agressif. Jauge **orange**. | *« Votre rythme cardiaque suggère une déviance fiscale, Aeterna vous observe. »* |
-| Déviant notoire | Glitchs chromatiques, ● REC rouge clignotant, bip sonar aux changements d'onglet, ton froid. Jauge **rouge clignotante**. | *« Anomalie civique confirmée. Les unités de la BRC convergent vers votre secteur. »* |
+### Couleur de l'ICC
+Partout où l'ICC s'affiche (bandeau, objectifs, verrous), il prend la couleur de son palier (chap. 1), avec le nom du palier : **vert** Citoyen Or, **jaune** Citoyen ordinaire, **orange** Citoyen sous réserve, **rouge** Déviant notoire. L'interface ne définit aucun seuil propre.
 
 ## Vue « Véhicule, soute & équipage »
-* **Grille de soute :** une case par emplacement. Chaque caisse : couleur du tier (**vert** 0, **jaune** 1, **orange** 2, **rouge** 3, **violet** 4), icône du produit, badge d'état (bouclier si masquée, goutte/chrono si sa fraîcheur a baissé, fêlure si endommagée).
+* **Véhicule :** image du châssis, jauges de châssis et de Synthanol, modules montés.
+* **Soute :** une ligne par produit, dans la couleur de son tier, avec son image, sa quantité, ses tags, son état (fraîcheur, caisses abîmées, masquage) et les caisses cachées au double fond ; les emplacements libres se voient.
 * **Profil de la cargaison :** jauges de part odorante, Tech, chimique, culturelle et légale (ce sont elles qui pilotent le risque), avec les masquages actifs.
-* **Double fond :** capacité du châssis, affichée avec ses stats au garage. *À venir avec cette vue :* choisir les caisses qu'on y cache ; d'ici là, ce sont automatiquement les illégales les plus chères (chap. 4).
+* **Double fond :** sa capacité et son contenu, séparés du reste de la soute. Un clic sur un produit illégal de la soute ouvre un menu pour l'**envoyer au double fond** ; un clic sur un produit caché, pour l'en **retirer** (chap. 4). Le menu dit quelles caisses seraient délogées.
 * **Modules & équipage :** slots du châssis (modifiables seulement au garage de `[D4]`), canal radio / portrait de l'équipier actif.
 
 ## Vue « Marché noir & lieux spéciaux »
@@ -89,3 +91,8 @@ Options numérotées **0** Fouille · **1** Bluff · **2** Corruption · **3** F
 ## Modale « Objectifs du Jour 30 »
 Accessible une fois la dette initiale soldée : les grandes fins et la progression vers chacune (score, `[T4-06]` en soute et position en `[D4]` à minuit, injections de Glitch, commandes VIP du parrain, statut Citoyen Or).
 * **Suivi en route :** le bureau de Glitch et la tournée clandestine du soir annoncent l'injection à venir (« 2/3 ») quand le serveur est à bord et Glitch au travail ; le compte rendu du trajet la confirme. Le guichet VIP du Velvet-Silo affiche le parrainage.
+
+## Manuel en jeu
+Un bouton « ? » du bandeau ouvre le manuel, consultable à tout moment, même pendant un barrage. Il est écrit pour le joueur, pas recopié de ces docs : mêmes chapitres (1 à 6), sans renvoi au code.
+* **Chiffres lus dans les données :** le texte reçoit ses valeurs en paramètres, et les tableaux de référence (produits et tags, districts et lieux, véhicules, modules et équipiers, événements) sont générés depuis `src/data/`. Le manuel ne peut donc pas se tromper de chiffre.
+* **Aide en contexte :** les choix importants (départ, barrage, garage, lieux spéciaux, double fond) portent un lien « ? » vers le passage du manuel qui les explique.

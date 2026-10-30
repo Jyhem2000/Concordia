@@ -37,17 +37,17 @@ Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la dé
 | **Marché** | information (mémoire, historique, profil public des districts), boutique du jour, exclusion, cours (coefficient du district, tendance, Mult_Événement), quota de rachat, saturation, pic suspect | chap. 2 → chap. 6 (événements, contrecoups, vices de la Loterie) |
 | **Vente** | prix de vente, commission, savoir-faire (fraîcheur, nuit, rendements décroissants), clause anti-arbitrage, lots les plus anciens d'abord, paiement en nature | chap. 2 |
 | **Lieux spéciaux** | services, horaires, effets de chaque lieu, parrainage du Velvet-Silo | chap. 3 → chap. 1 (dette, offshore) |
-| **Équipement** | véhicules (double fond compris), modules (brouilleur de drones compris), équipage (injection du serveur par Glitch comprise), salaires | chap. 4 |
+| **Équipement** | véhicules (double fond et son contenu compris), modules (brouilleur de drones compris), équipage (injection du serveur par Glitch comprise), salaires | chap. 4 |
 | **Événements** | globaux, locaux, rumeurs, contrecoups, Loterie, aléas routiers | chap. 6 |
 | **Prévisibilité** | ce que le joueur sait ou peut deviner (cours, rumeurs, contrecoups, Loterie) et ce qui reste caché (ronde renforcée) | chap. 2 → chap. 6 → chap. 5 |
-| **Affichage** | où chaque règle est montrée et détaillée au joueur | chap. 7 |
+| **Affichage** | charte graphique, onglets, où chaque règle est montrée et détaillée au joueur, manuel en jeu | chap. 7 |
 
 ## État d'implémentation
 Toutes les règles des chap. 1 à 6 sont en jeu. Ce tableau dit ce qui reste à faire, et se met à jour à chaque étape.
 
 | Chap. | À venir |
 | :---: | :--- |
-| 7 | Vue véhicule et soute (dont le choix du contenu du double fond), filtres du marché, dégradation de l'interface selon l'ICC, manuel en jeu |
+| 7 | Charte graphique et composants partagés, onglets en bas d'écran (téléphone), vue véhicule et soute (dont le choix du contenu du double fond), carte schématique, filtres du marché, couleur de l'ICC selon le palier, images des produits, véhicules et modules, manuel en jeu |
 | 8 | Spéculation sur l'événement de demain (Cassandre-88, rumeur) et faux dossier de Loterie dans les bots, optimiseur et campagne 5 (reportés après l'interface, comme contrôle final) |
 
 ## Feuille de route
