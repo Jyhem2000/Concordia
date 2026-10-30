@@ -10,6 +10,7 @@ import CollapseToggle from '../shared/CollapseToggle.tsx'
 import Detailed from '../shared/Detailed.tsx'
 import Locked from '../shared/Locked.tsx'
 import { useCollapsed } from '../shared/useCollapsed.ts'
+import Hint from '../shared/Hint.tsx'
 
 type VehicleOfferProps = {
   vehicleId: VehicleId
@@ -33,16 +34,16 @@ export default function GarageDesk() {
 
   return (
     <>
-      <div className="border-t border-zinc-800 pt-2">
+      <div className="border-t border-line pt-2">
         <p className="font-bold">{t.garage.repairTitle}</p>
-        <p className="flex flex-wrap gap-1.5 text-xs text-zinc-400">
+        <p className="flex flex-wrap gap-1.5 text-xs text-ink-muted">
           {t.garage.repairRule(missing)}
           <Detailed breakdown={price} format={credits} />
         </p>
         {missing > 0 && <AmountForm label={t.garage.repair} max={affordable} onSubmit={(pv) => dispatch({ type: 'repair', pv })} />}
       </div>
 
-      <div className="border-t border-zinc-800 pt-2">
+      <div className="border-t border-line pt-2">
         <CollapseToggle id="garage:modules">{t.garage.modulesTitle(game.modules.mounted.length, vehicle.moduleSlots)}</CollapseToggle>
         {!modulesCollapsed && (
           <ul className="mt-1 space-y-2">
@@ -53,11 +54,11 @@ export default function GarageDesk() {
         )}
       </div>
 
-      <div className="border-t border-zinc-800 pt-2">
+      <div className="border-t border-line pt-2">
         <CollapseToggle id="garage:vehicles">{t.garage.vehiclesTitle}</CollapseToggle>
         {!vehiclesCollapsed && (
           <>
-            <p className="text-xs text-zinc-400">{t.garage.vehicleRule}</p>
+            <Hint>{t.garage.vehicleRule}</Hint>
             <ul className="mt-1 space-y-2">
               {VEHICLE_IDS.filter((id) => id !== game.vehicleId).map((id) => (
                 <VehicleOffer key={id} vehicleId={id} />
@@ -79,10 +80,10 @@ function VehicleOffer({ vehicleId }: VehicleOfferProps) {
 
   return (
     <li className="text-xs">
-      <p className="font-bold text-zinc-200">
+      <p className="font-bold text-ink">
         {t.vehicle[vehicleId].name} — {credits(vehicle.price)}
       </p>
-      <p className="text-zinc-400">
+      <p className="text-ink-muted">
         {t.garage.vehicleStats(
           vehicle.cargo,
           vehicle.hiddenCompartment,
@@ -93,13 +94,13 @@ function VehicleOffer({ vehicleId }: VehicleOfferProps) {
           vehicle.fuelPerTrip.night,
         )}
       </p>
-      <p className="text-zinc-300">{describe.vehicle(vehicleId)}</p>
+      <p className="text-ink-soft">{describe.vehicle(vehicleId)}</p>
       <Locked requires={vehicle.requires} />
       <div className="mt-1 flex items-center gap-2">
         <Button variant="primary" disabled={error !== null} onClick={() => dispatch({ type: 'buyVehicle', vehicleId })}>
           {t.garage.buy}
         </Button>
-        {error && error !== 'locked' && <span className="text-red-300">{t.error[error]}</span>}
+        {error && error !== 'locked' && <span className="text-danger">{t.error[error]}</span>}
       </div>
     </li>
   )
@@ -117,13 +118,13 @@ function ModuleRow({ moduleId }: ModuleRowProps) {
 
   return (
     <li className="text-xs">
-      <p className="font-bold text-zinc-200">
+      <p className="font-bold text-ink">
         {t.module[moduleId].name}
-        <span className="ml-1.5 font-normal text-zinc-400">
+        <span className="ml-1.5 font-normal text-ink-muted">
           {owned ? (mounted ? t.garage.mounted : t.garage.stored) : credits(MODULES[moduleId].price)}
         </span>
       </p>
-      <p className="text-zinc-300">{describe.module(moduleId)}</p>
+      <p className="text-ink-soft">{describe.module(moduleId)}</p>
       {!owned && <Locked requires={MODULES[moduleId].requires} />}
       <div className="mt-1 flex items-center gap-2">
         {owned ? (
@@ -135,8 +136,8 @@ function ModuleRow({ moduleId }: ModuleRowProps) {
             {t.garage.buy}
           </Button>
         )}
-        {owned && mountError && !mounted && <span className="text-zinc-400">{t.error[mountError]}</span>}
-        {!owned && buyError && buyError !== 'locked' && <span className="text-red-300">{t.error[buyError]}</span>}
+        {owned && mountError && !mounted && <span className="text-ink-muted">{t.error[mountError]}</span>}
+        {!owned && buyError && buyError !== 'locked' && <span className="text-danger">{t.error[buyError]}</span>}
       </div>
     </li>
   )

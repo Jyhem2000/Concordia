@@ -22,7 +22,7 @@ export default function QuoteChart({ productId }: QuoteChartProps) {
 
   const district = game.districtId
   const points = (game.memory[district] ?? []).map((seen) => ({ day: seen.day, quote: seen.quotes[productId] }))
-  if (points.length < 2) return <p className="text-zinc-500">{t.sheet.historyEmpty}</p>
+  if (points.length < 2) return <p className="text-ink-faint">{t.sheet.historyEmpty}</p>
 
   const normal = normalQuote(game, district, productId)
   const values = [...points.map((point) => point.quote), normal]
@@ -38,7 +38,7 @@ export default function QuoteChart({ productId }: QuoteChartProps) {
 
   return (
     <figure className="mt-1">
-      <figcaption className="mb-1 text-zinc-300">
+      <figcaption className="mb-1 text-ink-soft">
         {t.sheet.historyReadout(t.district[district].name, shown.day, credits(shown.quote), credits(normal))}
       </figcaption>
       <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full max-w-sm" role="img" aria-label={t.sheet.historyLabel(t.district[district].name)}>
@@ -48,29 +48,29 @@ export default function QuoteChart({ productId }: QuoteChartProps) {
           x2={WIDTH - MARGIN.right}
           y1={y(normal)}
           y2={y(normal)}
-          className="stroke-zinc-600"
+          className="stroke-line-strong"
           strokeWidth={1}
           strokeDasharray="3 3"
         />
         {[low, high].map((value) => (
-          <text key={value} x={MARGIN.left - 4} y={y(value) + 3} textAnchor="end" fontSize={9} className="fill-zinc-500">
+          <text key={value} x={MARGIN.left - 4} y={y(value) + 3} textAnchor="end" fontSize={9} className="fill-ink-faint">
             {credits(value)}
           </text>
         ))}
         {[first, last].map((day) => (
-          <text key={day} x={x(day)} y={HEIGHT - 6} textAnchor="middle" fontSize={9} className="fill-zinc-500">
+          <text key={day} x={x(day)} y={HEIGHT - 6} textAnchor="middle" fontSize={9} className="fill-ink-faint">
             {t.chart.dayTick(day)}
           </text>
         ))}
 
-        <path d={line} fill="none" className="stroke-amber-400" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+        <path d={line} fill="none" className="stroke-accent" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
         {points.map((point) => (
           <circle
             key={point.day}
             cx={x(point.day)}
             cy={y(point.quote)}
             r={point.day === shown.day ? 4 : 2.5}
-            className="fill-amber-400 stroke-zinc-900"
+            className="fill-accent stroke-base"
             strokeWidth={point.day === shown.day ? 2 : 1}
           />
         ))}

@@ -22,7 +22,7 @@ export default function CollapseToggle({ id, children }: CollapseToggleProps) {
       onClick={() => toggle(id)}
       className={`flex w-full cursor-pointer items-center gap-1.5 rounded text-left font-bold uppercase ${FOCUS_RING}`}
     >
-      <Chevron size={14} aria-hidden="true" className="shrink-0 text-zinc-500" />
+      <Chevron size={14} aria-hidden="true" className="shrink-0 text-ink-faint" />
       {children}
     </button>
   )

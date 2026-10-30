@@ -104,8 +104,8 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
 
   return (
     <details className="mt-1 text-xs">
-      <summary className={`w-fit cursor-pointer rounded text-zinc-400 ${FOCUS_RING}`}>{t.sheet.title}</summary>
-      <ul className="mt-1 list-disc space-y-0.5 pl-4 text-zinc-300">
+      <summary className={`w-fit cursor-pointer rounded text-ink-muted ${FOCUS_RING}`}>{t.sheet.title}</summary>
+      <ul className="mt-1 list-disc space-y-0.5 pl-4 text-ink-soft">
         {lines.map((line) => (
           <li key={line}>{line}</li>
         ))}

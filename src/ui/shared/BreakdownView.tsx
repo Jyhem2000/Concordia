@@ -17,7 +17,7 @@ export default function BreakdownView({ breakdown, formatTotal }: BreakdownViewP
   return (
     <div className="text-xs">
       <Lines lines={breakdown.lines} />
-      <div className="mt-1 flex justify-between border-t border-zinc-700 pt-1 font-bold">
+      <div className="mt-1 flex justify-between border-t border-line-strong pt-1 font-bold">
         <span>{t.breakdown.total}</span>
         <span>{formatTotal(breakdown.total)}</span>
       </div>
@@ -48,11 +48,11 @@ function Lines({ lines }: LinesProps) {
       {lines.map((line, position) => (
         <li key={position}>
           <div className="flex justify-between gap-3">
-            <span className="text-zinc-400">{label(line.source)}</span>
+            <span className="text-ink-muted">{label(line.source)}</span>
             <span>{operand(line)}</span>
           </div>
           {line.detail && line.op !== 'base' && (
-            <div className="ml-3 border-l border-zinc-800 pl-2">
+            <div className="ml-3 border-l border-line pl-2">
               <Lines lines={line.detail.lines} />
             </div>
           )}

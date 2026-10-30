@@ -1,6 +1,7 @@
 import type { Breakdown } from '../../engine/breakdown.ts'
 import BreakdownView from './BreakdownView.tsx'
 import { FOCUS_RING } from './focus.ts'
+import { POPOVER } from './styles.ts'
 
 type DetailedProps = {
   breakdown: Breakdown
@@ -15,11 +16,11 @@ export default function Detailed({ breakdown, format, align = 'left', className 
   return (
     <details className={`group relative ${className}`}>
       <summary
-        className={`cursor-pointer list-none rounded underline ${FOCUS_RING} decoration-zinc-600 decoration-dotted underline-offset-4 group-open:decoration-amber-400`}
+        className={`cursor-pointer list-none rounded underline ${FOCUS_RING} decoration-ink-faint decoration-dotted underline-offset-4 group-open:decoration-accent`}
       >
         {format(breakdown.total)}
       </summary>
-      <div className={`absolute ${align === 'left' ? 'left-0' : 'right-0'} z-10 mt-1 w-64 rounded border border-zinc-700 bg-zinc-900 p-2 shadow-lg`}>
+      <div className={`${align === 'left' ? 'left-0' : 'right-0'} w-64 ${POPOVER}`}>
         <BreakdownView breakdown={breakdown} formatTotal={format} />
       </div>
     </details>

@@ -89,6 +89,8 @@ Elles s'appliquent à tout le code, sans exception non justifiée. **Toute nouve
 
 - Config CSS-first dans `src/index.css`, pas de `tailwind.config.js`.
 - Un seul thème (sombre), aucune variante `dark:`.
+- Couleurs par rôle, définies une fois dans `@theme` (`text-danger`, `bg-panel`, `border-tier-2`…) : aucune couleur brute de la palette (`text-red-300`) dans `src/ui/`, ce que vérifie `src/ui/shared/styles.test.ts`. Les correspondances rôle → classes (pastilles, tiers, paliers d'ICC) vivent dans `src/ui/shared/styles.ts`.
+- Un style qui sert à deux endroits devient un composant partagé de `src/ui/shared/` (`Panel`, `Card`, `Scene`, `Button`, `Chip`, `Hint`, `Deltas`…) ou une constante de `styles.ts` (`POPOVER`, `FIELD`), jamais une copie de classes.
 - Classes standard, pas de valeurs arbitraires (`p-4`, pas `p-[17px]`).
 - Mobile d'abord : styles de base pour le téléphone, variantes `sm:` / `md:` pour les écrans larges.
 

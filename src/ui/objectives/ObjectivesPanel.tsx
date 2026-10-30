@@ -6,7 +6,7 @@ import { iccTier } from '../../engine/gauges.ts'
 import type { EndingId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
-import { FOCUS_RING } from '../shared/focus.ts'
+import Panel from '../shared/Panel.tsx'
 
 type Condition = {
   label: string
@@ -62,19 +62,19 @@ export default function ObjectivesPanel() {
   ]
 
   return (
-    <details className="rounded border border-zinc-800 bg-zinc-900/40 p-3 text-sm">
-      <summary className={`flex cursor-pointer items-center gap-1.5 rounded font-bold text-amber-300 uppercase ${FOCUS_RING}`}>
-        <Target size={14} aria-hidden="true" />
-        {t.objectives.title(GAME_LENGTH_DAYS)}
-        <span className="ml-auto font-normal text-cyan-300 normal-case">{credits(score)}</span>
-      </summary>
-      <ul className="mt-2 space-y-2">
+    <Panel
+      icon={Target}
+      title={t.objectives.title(GAME_LENGTH_DAYS)}
+      collapseId="objectives"
+      aside={<span className="font-bold text-offshore">{credits(score)}</span>}
+    >
+      <ul className="space-y-2">
         {goals.map(({ id, conditions }) => (
           <li key={id}>
             <div className="font-bold">{t.end.endings[id].title}</div>
             <ul className="text-xs">
               {conditions.map(({ label, met }) => (
-                <li key={label} className={`flex items-center gap-1.5 ${met ? 'text-green-400' : 'text-zinc-400'}`}>
+                <li key={label} className={`flex items-center gap-1.5 ${met ? 'text-success' : 'text-ink-muted'}`}>
                   {met ? <Check size={12} aria-hidden="true" /> : <X size={12} aria-hidden="true" />}
                   <span className="sr-only">{met ? t.objectives.met : t.objectives.unmet}</span>
                   {label}
@@ -84,6 +84,6 @@ export default function ObjectivesPanel() {
           </li>
         ))}
       </ul>
-    </details>
+    </Panel>
   )
 }

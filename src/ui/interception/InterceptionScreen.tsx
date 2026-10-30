@@ -31,10 +31,12 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import Detailed from '../shared/Detailed.tsx'
-import { FOCUS_RING } from '../shared/focus.ts'
 import InterceptionReportPanel from './InterceptionReportPanel.tsx'
 import MoveCard from './MoveCard.tsx'
 import { BluffMove, FleeMove } from './TacticsMoves.tsx'
+import { FIELD } from '../shared/styles.ts'
+import Hint from '../shared/Hint.tsx'
+import Scene from '../shared/Scene.tsx'
 
 type BribeFormProps = {
   label: string
@@ -95,31 +97,32 @@ export default function InterceptionScreen() {
   })
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 p-4">
-      <section className="rounded border border-red-800 bg-red-950/30 p-4">
-        <h1 className="flex items-center gap-2 text-xl font-bold text-red-300 uppercase">
-          <ShieldAlert size={20} aria-hidden="true" />
-          {t.interception.title[interception.kind]}
-        </h1>
-        <p className="mt-1 text-zinc-300">
-          {t.interception.intro[interception.kind](t.interception.place[checkpointPlace(game)](t.district[game.districtId].name))}
-        </p>
-        {interception.jammed && <p className="mt-1 text-sky-300">{t.interception.jammed}</p>}
-        {!racket && hidden.length > 0 && (
-          <p className="mt-1 flex flex-wrap gap-1.5 text-sky-300">
-            {t.interception.compartment(hidden.join(', '))}
-            <Detailed breakdown={compartmentDetection(game)} format={pct} />
+    <Scene
+      tone="danger"
+      icon={ShieldAlert}
+      title={t.interception.title[interception.kind]}
+      intro={
+        <>
+          <p className="text-ink-soft">
+            {t.interception.intro[interception.kind](t.interception.place[checkpointPlace(game)](t.district[game.districtId].name))}
           </p>
-        )}
-        {covered.length > 0 && <p className="mt-1 text-amber-200">{t.interception.sponsorCovered(covered.join(', '))}</p>}
-        {lethalProduct && !racket && (
-          <p role="alert" className="mt-2 flex items-center gap-1.5 font-bold text-red-400">
-            <Skull size={16} aria-hidden="true" />
-            {t.interception.lethal(t.product[lethalProduct].name)}
-          </p>
-        )}
-      </section>
-
+          {interception.jammed && <p className="text-info">{t.interception.jammed}</p>}
+          {!racket && hidden.length > 0 && (
+            <p className="flex flex-wrap gap-1.5 text-info">
+              {t.interception.compartment(hidden.join(', '))}
+              <Detailed breakdown={compartmentDetection(game)} format={pct} />
+            </p>
+          )}
+          {covered.length > 0 && <p className="text-accent">{t.interception.sponsorCovered(covered.join(', '))}</p>}
+          {lethalProduct && !racket && (
+            <p role="alert" className="mt-1 flex items-center gap-1.5 font-bold text-danger">
+              <Skull size={16} aria-hidden="true" />
+              {t.interception.lethal(t.product[lethalProduct].name)}
+            </p>
+          )}
+        </>
+      }
+    >
       <InterceptionReportPanel />
 
       <ul className="flex flex-col gap-3">
@@ -210,7 +213,7 @@ export default function InterceptionScreen() {
           />
         )}
       </ul>
-    </main>
+    </Scene>
   )
 }
 
@@ -240,13 +243,13 @@ function BribeForm({ label }: BribeFormProps) {
   return (
     <div className="mt-2 flex flex-col gap-2">
       <p className="flex flex-wrap gap-1.5 text-xs">
-        <span className="text-zinc-400">{t.interception.bribeRate}</span>
+        <span className="text-ink-muted">{t.interception.bribeRate}</span>
         <Detailed breakdown={rate} format={credits} />
       </p>
 
       {owned.length > 0 && (
         <div>
-          <p className="text-xs text-zinc-400">{t.interception.offerCrates}</p>
+          <Hint>{t.interception.offerCrates}</Hint>
           <ul className="mt-1 space-y-1">
             {owned.map((productId) => (
               <CrateOfferRow key={productId} productId={productId} qty={crates[productId] ?? 0} onChange={(qty) => setQty(productId, qty)} />
@@ -256,7 +259,7 @@ function BribeForm({ label }: BribeFormProps) {
       )}
 
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-xs text-zinc-400">{t.interception.offerCash}</span>
+        <span className="text-xs text-ink-muted">{t.interception.offerCash}</span>
         {presets.map((ratio) => (
           <Button key={ratio} onClick={() => setCashValue(String(Math.max(0, Math.round(rate.total * ratio) - cratesValue)))}>
             {multiplier(ratio)}
@@ -270,16 +273,16 @@ function BribeForm({ label }: BribeFormProps) {
           value={cashValue}
           aria-label={t.interception.offerCash}
           onChange={(event) => setCashValue(event.target.value)}
-          className={`w-28 rounded border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm ${FOCUS_RING}`}
+          className={`w-28 ${FIELD}`}
         />
       </div>
 
-      <p className="text-xs">{t.interception.offerTotal(credits(offerValue(game, offer)))}</p>
+      <Hint tone="neutral">{t.interception.offerTotal(credits(offerValue(game, offer)))}</Hint>
       {error ? (
-        <p className="text-xs text-red-300">{t.error[error]}</p>
+        <Hint tone="danger">{t.error[error]}</Hint>
       ) : (
         <p className="flex flex-wrap gap-1.5 text-xs">
-          <span className="text-zinc-400">{t.interception.chance}</span>
+          <span className="text-ink-muted">{t.interception.chance}</span>
           <Detailed breakdown={bribeChance(game, offer)} format={(chance) => percent(chance, 0)} />
         </p>
       )}
@@ -313,9 +316,9 @@ function CrateOfferRow({ productId, qty, onChange }: CrateOfferRowProps) {
         +
       </Button>
       <span className="font-bold">{t.product[productId].name}</span>
-      <span className="text-zinc-400">{t.interception.crateValue(credits(value), credits(Math.round(cost)))}</span>
-      <span className={gain >= 0 ? 'text-green-400' : 'text-red-300'}>{t.interception.crateGain(signedCredits(Math.round(gain)))}</span>
-      {favorite && <span className="text-amber-300">{t.interception.favorite}</span>}
+      <span className="text-ink-muted">{t.interception.crateValue(credits(value), credits(Math.round(cost)))}</span>
+      <span className={gain >= 0 ? 'text-success' : 'text-danger'}>{t.interception.crateGain(signedCredits(Math.round(gain)))}</span>
+      {favorite && <span className="text-accent">{t.interception.favorite}</span>}
     </li>
   )
 }

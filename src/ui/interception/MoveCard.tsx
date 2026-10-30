@@ -5,7 +5,9 @@ import type { InterceptionMove, Tactics } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
+import Card from '../shared/Card.tsx'
 import Detailed from '../shared/Detailed.tsx'
+import Hint from '../shared/Hint.tsx'
 
 type MoveCardProps = {
   move: InterceptionMove
@@ -28,7 +30,7 @@ export default function MoveCard({ move, label, chance, outcomes, tactics, custo
   const { t, percent } = useI18n()
 
   return (
-    <li className="rounded border border-zinc-800 bg-zinc-900/40 p-3 text-sm">
+    <Card as="li">
       <div className="flex flex-wrap items-center gap-3">
         {customAction ? (
           <span className="font-bold">{label}</span>
@@ -39,18 +41,22 @@ export default function MoveCard({ move, label, chance, outcomes, tactics, custo
         )}
         {chance && (
           <span className="flex gap-1.5">
-            <span className="text-zinc-400">{t.interception.chance}</span>
+            <span className="text-ink-muted">{t.interception.chance}</span>
             <Detailed breakdown={chance} format={(value) => percent(value, 0)} />
           </span>
         )}
       </div>
-      <ul className="mt-1 space-y-0.5 text-xs text-zinc-400">
+      <ul className="mt-1 space-y-0.5 text-xs text-ink-muted">
         {outcomes.map((outcome) => (
           <li key={outcome}>{outcome}</li>
         ))}
       </ul>
       {children && <div className="mt-2 flex flex-col gap-1">{children}</div>}
-      {!customAction && error && error !== 'move-unavailable' && <p className="mt-1 text-xs text-red-300">{t.error[error]}</p>}
-    </li>
+      {!customAction && error && error !== 'move-unavailable' && (
+        <Hint tone="danger" className="mt-1">
+          {t.error[error]}
+        </Hint>
+      )}
+    </Card>
   )
 }

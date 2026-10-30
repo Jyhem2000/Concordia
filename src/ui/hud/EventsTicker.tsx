@@ -31,9 +31,9 @@ export default function EventsTicker() {
   if (!events.global && locals.length === 0 && aftershocks.length === 0 && !drawToday && !demotion && !events.rumor && !influence) return null
 
   return (
-    <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-zinc-800 px-4 py-1 text-xs text-zinc-300">
+    <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line px-4 py-1 text-xs text-ink-soft">
       {events.global && (
-        <li className="font-bold text-amber-200">
+        <li className="font-bold text-accent">
           <EventDetails event={events.global} />
         </li>
       )}
@@ -43,7 +43,7 @@ export default function EventsTicker() {
         </li>
       ))}
       {aftershocks.map((event) => (
-        <li key={event} className="text-zinc-400">
+        <li key={event} className="text-ink-muted">
           {t.events.aftershock(t.event[event].name, multiplier(AFTERSHOCK.afterRush), multiplier(AFTERSHOCK.afterSale))}
         </li>
       ))}
@@ -54,9 +54,9 @@ export default function EventsTicker() {
           {lottery.vice && <> {t.events.vice(t.product[lottery.vice].name, t.district[demotion.to].name, lottery.viceUntil)}</>}
         </li>
       )}
-      {influence && <li className="text-amber-200">{t.events.influence(t.tag[influence.tag].name, multiplier(KARMA.factor))}</li>}
+      {influence && <li className="text-accent">{t.events.influence(t.tag[influence.tag].name, multiplier(KARMA.factor))}</li>}
       {events.rumor && (
-        <li className="text-indigo-300 italic">
+        <li className="text-night italic">
           {foretold ? t.events.prophecy(t.rumor[events.rumor]) : t.events.rumor(t.rumor[events.rumor], percent(rumorReliability(), 0))}
         </li>
       )}

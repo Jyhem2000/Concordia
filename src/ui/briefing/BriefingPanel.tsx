@@ -7,6 +7,7 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import Detailed from '../shared/Detailed.tsx'
+import Panel from '../shared/Panel.tsx'
 
 type BriefingLinesProps = {
   briefing: MorningBriefing
@@ -30,16 +31,12 @@ export default function BriefingPanel() {
   if (!briefing || briefing.day !== day || !isDay || dismissedDay === day || isEmpty(briefing)) return null
 
   return (
-    <section className="rounded border border-amber-700/60 bg-amber-950/20 p-3 text-sm">
-      <h2 className="flex items-center gap-1.5 font-bold text-amber-300 uppercase">
-        <Sunrise size={14} aria-hidden="true" />
-        {t.briefing.title(briefing.day)}
-      </h2>
+    <Panel tone="highlight" icon={Sunrise} title={t.briefing.title(briefing.day)}>
       <BriefingLines briefing={briefing} />
       <Button className="mt-2" onClick={() => setDismissedDay(day)}>
         {t.briefing.dismiss}
       </Button>
-    </section>
+    </Panel>
   )
 }
 
@@ -72,7 +69,7 @@ function isEmpty(briefing: MorningBriefing): boolean {
 function CrewLine({ crew }: { crew: NonNullable<MorningBriefing['crew']> }) {
   const { t, credits } = useI18n()
   const name = t.crew[crew.id].name
-  if (crew.paid === null) return <li className="text-red-300">{t.briefing.unpaid(name)}</li>
+  if (crew.paid === null) return <li className="text-danger">{t.briefing.unpaid(name)}</li>
   if (crew.paid === 0) return <li>{t.briefing.salaryCell(name)}</li>
   return (
     <li>
@@ -90,41 +87,41 @@ function BriefingLines({ briefing }: BriefingLinesProps) {
   const { sleep, custodyHealth, debtInterest, debtLate, protection, offshoreInterest } = briefing
 
   return (
-    <ul className="mt-1 space-y-0.5">
+    <ul className="space-y-0.5">
       {sleep && hasSleepGains(briefing) && <li>{t.briefing.sleep(signedPercent(sleep.icc / ICC_MAX, 0), sleep.health)}</li>}
-      {custodyHealth > 0 && <li className="text-red-300">{t.briefing.custody(custodyHealth)}</li>}
-      {briefing.rotten > 0 && <li className="text-red-300">{t.briefing.rotten(briefing.rotten)}</li>}
+      {custodyHealth > 0 && <li className="text-danger">{t.briefing.custody(custodyHealth)}</li>}
+      {briefing.rotten > 0 && <li className="text-danger">{t.briefing.rotten(briefing.rotten)}</li>}
       {heat && (
-        <li className="text-red-300">
+        <li className="text-danger">
           {t.briefing.heat(t.product[heat.melts].name, briefing.heat?.melted ?? 0, briefing.heat?.aged ?? 0, briefing.heat?.rotten ?? 0)}
         </li>
       )}
-      {briefing.lockedIn && <li className="text-red-300">{t.briefing.lockedIn(t.district[districtId].name)}</li>}
+      {briefing.lockedIn && <li className="text-danger">{t.briefing.lockedIn(t.district[districtId].name)}</li>}
       {briefing.crew && <CrewLine crew={briefing.crew} />}
-      {briefing.missionReclaimed > 0 && <li className="text-red-300">{t.briefing.missionReclaimed(briefing.missionReclaimed)}</li>}
-      {briefing.vipFailed && <li className="text-red-300">{t.briefing.vipFailed}</li>}
-      {briefing.informant && <li className="text-green-400">{t.briefing.informant}</li>}
-      {briefing.crewLost && <li className="text-red-300">{t.briefing.crewLost(t.crew[briefing.crewLost].name)}</li>}
+      {briefing.missionReclaimed > 0 && <li className="text-danger">{t.briefing.missionReclaimed(briefing.missionReclaimed)}</li>}
+      {briefing.vipFailed && <li className="text-danger">{t.briefing.vipFailed}</li>}
+      {briefing.informant && <li className="text-success">{t.briefing.informant}</li>}
+      {briefing.crewLost && <li className="text-danger">{t.briefing.crewLost(t.crew[briefing.crewLost].name)}</li>}
       {briefing.recovered && <li>{t.briefing.recovered(briefing.recovered.back, briefing.recovered.lost)}</li>}
       {debtInterest && (
         <li>
-          <BriefingRow label={t.briefing.debtInterest} className="text-red-300">
+          <BriefingRow label={t.briefing.debtInterest} className="text-danger">
             <Detailed breakdown={debtInterest} format={credits} />
           </BriefingRow>
         </li>
       )}
-      {debtLate && <li className="text-red-300">{t.briefing.debtLate}</li>}
+      {debtLate && <li className="text-danger">{t.briefing.debtLate}</li>}
       {protection && (
         <li>
-          <BriefingRow label={t.briefing.protection} className="text-red-300">
+          <BriefingRow label={t.briefing.protection} className="text-danger">
             <Detailed breakdown={protection.due} format={(amount) => `−${credits(amount)}`} />
           </BriefingRow>
         </li>
       )}
-      {protection && protection.toDebt > 0 && <li className="text-red-300">{t.briefing.protectionToDebt(credits(protection.toDebt))}</li>}
+      {protection && protection.toDebt > 0 && <li className="text-danger">{t.briefing.protectionToDebt(credits(protection.toDebt))}</li>}
       {offshoreInterest && (
         <li>
-          <BriefingRow label={t.briefing.offshoreInterest} className="text-cyan-300">
+          <BriefingRow label={t.briefing.offshoreInterest} className="text-offshore">
             <Detailed breakdown={offshoreInterest} format={(amount) => `+${credits(amount)}`} />
           </BriefingRow>
         </li>
@@ -136,7 +133,7 @@ function BriefingLines({ briefing }: BriefingLinesProps) {
 function BriefingRow({ label, className, children }: BriefingRowProps) {
   return (
     <div className={`flex flex-wrap gap-1.5 ${className}`}>
-      <span className="text-zinc-400">{label}</span>
+      <span className="text-ink-muted">{label}</span>
       {children}
     </div>
   )

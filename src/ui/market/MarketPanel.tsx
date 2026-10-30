@@ -4,14 +4,16 @@ import { bulkSales, checkUseProduct, maxBuy } from '../../engine/actions.ts'
 import { daysBeforeRot, freshnessOf } from '../../engine/condition.ts'
 import { averageCost, ownedQty } from '../../engine/cargo.ts'
 import { demandQuota, demandRefill, productStatus, quote, quoteBreakdown, saleQuote, shopProducts } from '../../engine/market.ts'
-import type { FreshnessStage, ProductId, Tier } from '../../engine/types.ts'
+import type { FreshnessStage, ProductId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import Detailed from '../shared/Detailed.tsx'
-import CollapseToggle from '../shared/CollapseToggle.tsx'
+import Chip from '../shared/Chip.tsx'
+import Hint from '../shared/Hint.tsx'
 import Margin from '../shared/Margin.tsx'
-import { useCollapsed } from '../shared/useCollapsed.ts'
+import Panel from '../shared/Panel.tsx'
+import { TIER_STYLES } from '../shared/styles.ts'
 import ProductSheet from './ProductSheet.tsx'
 
 type MarketRowProps = {
@@ -38,19 +40,9 @@ type QuantityButtonsProps = {
 /** Ordre d'affichage des états de fraîcheur */
 const FRESHNESS_ORDER: readonly FreshnessStage[] = ['extra', 'standard', 'gamey', 'spoiled']
 
-/** Couleur de chaque tier (chap. 7) */
-const tierColors: Record<Tier, string> = {
-  0: 'border-green-500 text-green-300',
-  1: 'border-yellow-500 text-yellow-300',
-  2: 'border-orange-500 text-orange-300',
-  3: 'border-red-500 text-red-300',
-  4: 'border-violet-500 text-violet-300',
-}
-
 /** Tableau des cours : la boutique du jour, plus tous les produits en soute (chap. 7) */
 export default function MarketPanel() {
   const game = useGameStore((s) => s.game)
-  const collapsed = useCollapsed('market')
   const { t } = useI18n()
 
   const shop = shopProducts(game.markets[game.districtId])
@@ -63,27 +55,24 @@ export default function MarketPanel() {
   )
 
   return (
-    <section className="rounded border border-zinc-800 bg-zinc-900/40">
-      <h2 className="border-b border-zinc-800 px-3 py-2 tracking-wide text-amber-300">
-        <CollapseToggle id="market">
-          {t.market.title} — {t.district[game.districtId].name}
-        </CollapseToggle>
-      </h2>
-      {!collapsed && (
-        <>
-          {(game.phase === 'night' || game.dayOver) && <p className="px-3 pt-2 text-sm text-indigo-300">{t.market.streetOnly}</p>}
-          {sealed > 0 && game.mission && (
-            <p className="px-3 pt-2 text-sm text-sky-300">{t.travel.sealed(sealed, t.district[game.mission.to].name)}</p>
-          )}
-          <BulkSales />
-          <ul className="divide-y divide-zinc-800">
-            {rows.map((id) => (
-              <MarketRow key={id} productId={id} />
-            ))}
-          </ul>
-        </>
+    <Panel title={`${t.market.title} — ${t.district[game.districtId].name}`} collapseId="market" flush>
+      {(game.phase === 'night' || game.dayOver) && (
+        <Hint tone="night" className="px-3 pt-2">
+          {t.market.streetOnly}
+        </Hint>
       )}
-    </section>
+      {sealed > 0 && game.mission && (
+        <Hint tone="info" className="px-3 pt-2">
+          {t.travel.sealed(sealed, t.district[game.mission.to].name)}
+        </Hint>
+      )}
+      <BulkSales />
+      <ul className="space-y-2 p-2">
+        {rows.map((id) => (
+          <MarketRow key={id} productId={id} />
+        ))}
+      </ul>
+    </Panel>
   )
 }
 
@@ -99,7 +88,7 @@ function BulkSales() {
   if (all.length === 0) return null
   const profitable = bulkSales(game, true)
   return (
-    <div className="flex flex-wrap gap-2 px-3 pt-2">
+    <div className="flex flex-wrap gap-2 px-3 pt-3">
       <Button variant="primary" disabled={profitable.length === 0} onClick={() => dispatch({ type: 'sellAll', profitableOnly: true })}>
         {t.market.sellProfitable(credits(revenue(true)))}
       </Button>
@@ -153,18 +142,16 @@ function MarketRow({ productId }: MarketRowProps) {
   const sell = (qty: number) => dispatch({ type: 'sell', productId, qty })
 
   return (
-    <li className="px-3 py-2">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className={`rounded border px-1 text-xs ${tierColors[product.tier]}`}>T{product.tier}</span>
-        <span className="font-bold">{t.product[productId].name}</span>
-        {status !== 'neutral' && (
-          <span className={`text-xs ${status === 'strong' ? 'text-orange-300' : 'text-green-300'}`}>{t.market.status[status]}</span>
-        )}
-        {origin && <span className="text-xs text-zinc-400">{t.market.origin[origin]}</span>}
+    <li className={`rounded-md border border-l-4 border-line bg-raised/60 px-3 py-2 ${TIER_STYLES[product.tier].stripe}`}>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className={`text-xs font-bold ${TIER_STYLES[product.tier].text}`}>T{product.tier}</span>
+        <span className="mr-1 font-bold">{t.product[productId].name}</span>
+        {status !== 'neutral' && <Chip tone={status === 'strong' ? 'warning' : 'success'}>{t.market.status[status]}</Chip>}
+        {origin && <span className="text-xs text-ink-muted">{t.market.origin[origin]}</span>}
+      </div>
+      <div className="mt-1 flex flex-wrap gap-1">
         {product.tags.map((tag) => (
-          <span key={tag} className="rounded bg-zinc-800 px-1 text-xs text-zinc-300">
-            {t.tag[tag].name}
-          </span>
+          <Chip key={tag}>{t.tag[tag].name}</Chip>
         ))}
       </div>
 
@@ -172,10 +159,10 @@ function MarketRow({ productId }: MarketRowProps) {
         <Field label={t.market.quote}>
           <Detailed breakdown={quoteBreakdown(game, district, productId)} format={credits} />
           {trend !== null && trend !== 0 && (
-            <span className={`ml-1 text-xs ${trend > 0 ? 'text-green-300' : 'text-red-300'}`}>{t.market.trend(signedPercent(trend, 0))}</span>
+            <span className={`ml-1 text-xs ${trend > 0 ? 'text-success' : 'text-danger'}`}>{t.market.trend(signedPercent(trend, 0))}</span>
           )}
         </Field>
-        <Field label={t.market.stock}>{stock === undefined ? <span className="text-zinc-500">{t.market.notInShop}</span> : stock}</Field>
+        <Field label={t.market.stock}>{stock === undefined ? <span className="text-ink-faint">{t.market.notInShop}</span> : stock}</Field>
         <Field label={t.market.demand} hint={t.market.demandHint}>
           {quota === null || demandLeft === undefined
             ? t.market.unlimited
@@ -188,12 +175,12 @@ function MarketRow({ productId }: MarketRowProps) {
         )}
         <Field label={t.market.owned}>
           {owned}
-          {cost !== null && <span className="ml-1 text-xs text-zinc-400">({t.market.averageCost(credits(cost))})</span>}
+          {cost !== null && <span className="ml-1 text-xs text-ink-muted">({t.market.averageCost(credits(cost))})</span>}
         </Field>
         {sale?.first && saleAll && (
           <Field label={t.market.sale}>
             <Detailed breakdown={sale.first} format={credits} className="inline-block" />
-            {saleAll.saturatedQty > 0 && <span className="ml-1 text-xs text-red-300">{t.market.saturated(saleAll.saturatedQty)}</span>}
+            {saleAll.saturatedQty > 0 && <span className="ml-1 text-xs text-danger">{t.market.saturated(saleAll.saturatedQty)}</span>}
           </Field>
         )}
         {sale && saleAll && (
@@ -201,7 +188,7 @@ function MarketRow({ productId }: MarketRowProps) {
             <Margin revenue={sale.total} cost={sale.cost} unit={t.market.marginUnit} />
             {owned > 1 && (
               <>
-                <span className="ml-2 text-xs text-zinc-400">{t.market.marginAll(owned)}</span>
+                <span className="ml-2 text-xs text-ink-muted">{t.market.marginAll(owned)}</span>
                 <Margin revenue={saleAll.total} cost={saleAll.cost} className="ml-1" />
               </>
             )}
@@ -216,10 +203,10 @@ function MarketRow({ productId }: MarketRowProps) {
         {owned > 0 && <QuantityButtons label={t.market.sell} max={owned} onPick={sell} maxLabel={t.market.max} variant="danger" />}
         {owned > 0 && iccRestore !== undefined && (
           <span className="flex items-center gap-1.5">
-            <Button disabled={useError !== null} onClick={() => dispatch({ type: 'useProduct', productId })}>
+            <Button size="sm" disabled={useError !== null} onClick={() => dispatch({ type: 'useProduct', productId })}>
               {t.market.use}
             </Button>
-            <span className="text-xs text-zinc-400">{useError ? t.error[useError] : t.market.iccRestore(iccRestore)}</span>
+            <span className="text-xs text-ink-muted">{useError ? t.error[useError] : t.market.iccRestore(iccRestore)}</span>
           </span>
         )}
       </div>
@@ -230,7 +217,7 @@ function MarketRow({ productId }: MarketRowProps) {
 function Field({ label, hint, wide = false, children }: FieldProps) {
   return (
     <div className={`flex gap-1.5 ${wide ? 'col-span-2' : ''}`} title={hint}>
-      <dt className="text-zinc-500">{label}</dt>
+      <dt className="text-ink-faint">{label}</dt>
       <dd className="flex flex-wrap items-baseline">{children}</dd>
     </div>
   )
@@ -240,14 +227,14 @@ function Field({ label, hint, wide = false, children }: FieldProps) {
 function QuantityButtons({ label, max, maxLabel, onPick, variant }: QuantityButtonsProps) {
   return (
     <span className="flex items-center gap-1">
-      <span className="text-xs text-zinc-400">{label}</span>
-      <Button variant={variant} disabled={max < 1} aria-label={`${label} 1`} onClick={() => onPick(1)}>
+      <span className="text-xs text-ink-muted">{label}</span>
+      <Button variant={variant} size="sm" disabled={max < 1} aria-label={`${label} 1`} onClick={() => onPick(1)}>
         1
       </Button>
-      <Button variant={variant} disabled={max < 5} aria-label={`${label} 5`} onClick={() => onPick(5)}>
+      <Button variant={variant} size="sm" disabled={max < 5} aria-label={`${label} 5`} onClick={() => onPick(5)}>
         5
       </Button>
-      <Button variant={variant} disabled={max < 1} onClick={() => onPick(max)}>
+      <Button variant={variant} size="sm" disabled={max < 1} onClick={() => onPick(max)}>
         {maxLabel} ({max})
       </Button>
     </span>

@@ -13,13 +13,13 @@ export default function EndScreen() {
 
   return (
     <main className="mx-auto flex max-w-lg flex-1 flex-col items-center justify-center gap-4 p-4 text-center">
-      {defeat && <p className="text-sm font-bold tracking-widest text-red-400 uppercase">{t.end.gameOver}</p>}
-      <h1 className={`text-2xl font-bold ${defeat ? 'text-red-300' : 'text-amber-300'}`}>{t.end.endings[id].title}</h1>
-      <p className="text-zinc-300">{t.end.endings[id].epilogue}</p>
+      {defeat && <p className="text-sm font-bold tracking-widest text-danger uppercase">{t.end.gameOver}</p>}
+      <h1 className={`text-2xl font-bold ${defeat ? 'text-danger' : 'text-accent'}`}>{t.end.endings[id].title}</h1>
+      <p className="text-ink-soft">{t.end.endings[id].epilogue}</p>
       {!defeat && ending && (
         <p>
-          <span className="text-zinc-400">{t.end.score} </span>
-          <span className="text-xl font-bold text-cyan-300">{credits(ending.score)}</span>
+          <span className="text-ink-muted">{t.end.score} </span>
+          <span className="text-xl font-bold text-offshore">{credits(ending.score)}</span>
         </p>
       )}
       <Button variant="primary" onClick={newGame}>

@@ -33,8 +33,9 @@ import type { DistrictId, ForgeryCard, ProductId, Requirement } from '../../engi
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
-import { FOCUS_RING } from '../shared/focus.ts'
 import Locked from '../shared/Locked.tsx'
+import { FIELD } from '../shared/styles.ts'
+import Hint from '../shared/Hint.tsx'
 
 type DeskRowProps = {
   label: string
@@ -49,7 +50,6 @@ type CardKind = ForgeryCard['kind']
 
 const MORGUE_SERVICES: readonly MorgueService[] = ['pass', 'surgery', 'certificate']
 const CARD_KINDS: readonly CardKind[] = ['captain', 'competitor', 'informant', 'cadre']
-const SELECT = `rounded border border-zinc-700 bg-zinc-950 px-1 py-0.5 ${FOCUS_RING}`
 
 /** Une ligne de guichet : bouton, détail du coût et de l'effet, raison d'un refus */
 function DeskRow({ label, detail, error, onClick, requires }: DeskRowProps) {
@@ -60,9 +60,9 @@ function DeskRow({ label, detail, error, onClick, requires }: DeskRowProps) {
         <Button variant="primary" disabled={error !== null} onClick={onClick}>
           {label}
         </Button>
-        <span className="text-zinc-300">{detail}</span>
+        <span className="text-ink-soft">{detail}</span>
       </div>
-      {error && error !== 'locked' && <p className="mt-0.5 text-red-300">{t.error[error]}</p>}
+      {error && error !== 'locked' && <p className="mt-0.5 text-danger">{t.error[error]}</p>}
       <Locked requires={requires} />
     </li>
   )
@@ -77,14 +77,12 @@ export function KarmaDesk() {
   const from = availableFrom(game, 'influence', KARMA.cooldownDays)
 
   return (
-    <div className="border-t border-zinc-800 pt-2">
+    <div className="border-t border-line pt-2">
       <p className="font-bold">{d.title}</p>
-      <p className="text-xs text-zinc-400">{d.rule(credits(karmaCost(game)), multiplier(KARMA.factor), KARMA.cooldownDays)}</p>
+      <Hint>{d.rule(credits(karmaCost(game)), multiplier(KARMA.factor), KARMA.cooldownDays)}</Hint>
       <Locked requires={SERVICE_REQUIREMENTS.influence} />
-      {game.influence && game.influence.day >= game.day && (
-        <p className="text-xs text-amber-200">{d.pending(t.tag[game.influence.tag].name, game.influence.day)}</p>
-      )}
-      {from !== null && <p className="text-xs text-zinc-400">{t.desks.availableFrom(from)}</p>}
+      {game.influence && game.influence.day >= game.day && <Hint tone="accent">{d.pending(t.tag[game.influence.tag].name, game.influence.day)}</Hint>}
+      {from !== null && <Hint>{t.desks.availableFrom(from)}</Hint>}
       <ul className="mt-1 space-y-1">
         {KARMA.tags.map((tag) => (
           <DeskRow
@@ -113,9 +111,9 @@ export function MorgueDesk() {
   }
 
   return (
-    <div className="border-t border-zinc-800 pt-2">
+    <div className="border-t border-line pt-2">
       <p className="font-bold">{d.title}</p>
-      {passActive(game) && game.morguePass !== null && <p className="text-xs text-green-400">{d.passValid(game.morguePass)}</p>}
+      {passActive(game) && game.morguePass !== null && <Hint tone="success">{d.passValid(game.morguePass)}</Hint>}
       <ul className="mt-1 space-y-1">
         {MORGUE_SERVICES.map((service) => (
           <DeskRow
@@ -141,9 +139,9 @@ export function CassandreDesk() {
   const prophecy = game.events.prophecy
 
   return (
-    <div className="border-t border-zinc-800 pt-2">
+    <div className="border-t border-line pt-2">
       <p className="font-bold">{d.title}</p>
-      {prophecy && prophecy.day >= game.day && <p className="text-xs text-amber-200">{d.foretold(prophecy.day, t.event[prophecy.event].name)}</p>}
+      {prophecy && prophecy.day >= game.day && <Hint tone="accent">{d.foretold(prophecy.day, t.event[prophecy.event].name)}</Hint>}
       <ul className="mt-1">
         <DeskRow
           label={d.consult}
@@ -186,18 +184,18 @@ export function ForgeryDesk() {
         : { kind, district: chosenDistrict }
 
   return (
-    <div className="border-t border-zinc-800 pt-2">
+    <div className="border-t border-line pt-2">
       <p className="font-bold">{d.title}</p>
       <Locked requires={SERVICE_REQUIREMENTS.forgery} />
-      <p className="text-xs text-zinc-400">{nextDraw ? d.nextDraw(nextDraw) : d.noDraw}</p>
-      {accepted && <p className="text-xs text-green-400">{d.accepted}</p>}
-      {rejected && <p className="text-xs text-red-300">{d.rejected(FORGERY.failIccLoss, t.hud.wantedGain(WANTED.perOffense))}</p>}
+      <Hint>{nextDraw ? d.nextDraw(nextDraw) : d.noDraw}</Hint>
+      {accepted && <Hint tone="success">{d.accepted}</Hint>}
+      {rejected && <Hint tone="danger">{d.rejected(FORGERY.failIccLoss, t.hud.wantedGain(WANTED.perOffense))}</Hint>}
       {LOTTERY.days.includes(drawDay) && !accepted && !rejected && (
         <div className="mt-1 flex flex-col gap-1 text-xs">
-          <p className="text-zinc-300">{d.rule(credits(forgeryCost(game)), percent(forgeryChance(game), 0))}</p>
+          <p className="text-ink-soft">{d.rule(credits(forgeryCost(game)), percent(forgeryChance(game), 0))}</p>
           <label className="flex flex-wrap items-center gap-1.5">
             {d.card}
-            <select value={kind} onChange={(event) => setKind(CARD_KINDS.find((id) => id === event.target.value) ?? 'captain')} className={SELECT}>
+            <select value={kind} onChange={(event) => setKind(CARD_KINDS.find((id) => id === event.target.value) ?? 'captain')} className={FIELD}>
               {CARD_KINDS.map((id) => (
                 <option key={id} value={id}>
                   {d.cards[id]}
@@ -205,14 +203,14 @@ export function ForgeryDesk() {
               ))}
             </select>
           </label>
-          <p className="text-zinc-400">{typeof d.effects[kind] === 'function' ? d.effects[kind](LOTTERY.viceDays) : d.effects[kind]}</p>
+          <p className="text-ink-muted">{typeof d.effects[kind] === 'function' ? d.effects[kind](LOTTERY.viceDays) : d.effects[kind]}</p>
           {kind !== 'informant' && (
             <label className="flex flex-wrap items-center gap-1.5">
               {d.district}
               <select
                 value={chosenDistrict}
                 onChange={(event) => setDistrict(districts.find((id) => id === event.target.value) ?? districts[0])}
-                className={SELECT}
+                className={FIELD}
               >
                 {districts.map((id) => (
                   <option key={id} value={id}>
@@ -225,7 +223,7 @@ export function ForgeryDesk() {
           {kind === 'cadre' && (
             <label className="flex flex-wrap items-center gap-1.5">
               {d.vice}
-              <select value={chosenVice ?? ''} onChange={(event) => setVice(vices.find((id) => id === event.target.value) ?? '')} className={SELECT}>
+              <select value={chosenVice ?? ''} onChange={(event) => setVice(vices.find((id) => id === event.target.value) ?? '')} className={FIELD}>
                 {vices.map((id) => (
                   <option key={id} value={id}>
                     {t.product[id].name}
@@ -255,7 +253,7 @@ export function VelvetDesk() {
   const { t, credits, multiplier } = useI18n()
   const d = t.desks.velvet
   if (velvetLocked(game) && game.velvetLock !== null)
-    return <p className="border-t border-zinc-800 pt-2 text-xs text-red-300">{d.locked(game.velvetLock)}</p>
+    return <p className="border-t border-line pt-2 text-xs text-danger">{d.locked(game.velvetLock)}</p>
 
   const lots = PRODUCT_IDS.filter((id) => PRODUCTS[id].tier >= VELVET.auction.minTier && ownedQty(game.cargo, id) > 0)
   const crates = blackmailCrates(game)
@@ -264,13 +262,11 @@ export function VelvetDesk() {
 
   return (
     <>
-      <div className="border-t border-zinc-800 pt-2">
+      <div className="border-t border-line pt-2">
         <Locked requires={SERVICE_REQUIREMENTS.auction} />
         <p className="font-bold">{d.auctionTitle}</p>
-        <p className="text-xs text-zinc-400">
-          {d.auctionRule(VELVET.auction.minTier, multiplier(VELVET.auction.factor), VELVET.auction.cooldownDays)}
-        </p>
-        {lots.length === 0 && <p className="text-xs text-zinc-500">{d.nothingToAuction(VELVET.auction.minTier)}</p>}
+        <Hint>{d.auctionRule(VELVET.auction.minTier, multiplier(VELVET.auction.factor), VELVET.auction.cooldownDays)}</Hint>
+        {lots.length === 0 && <Hint>{d.nothingToAuction(VELVET.auction.minTier)}</Hint>}
         <ul className="mt-1 space-y-1">
           {lots.map((id) => (
             <DeskRow
@@ -284,9 +280,9 @@ export function VelvetDesk() {
         </ul>
       </div>
 
-      <div className="border-t border-zinc-800 pt-2">
+      <div className="border-t border-line pt-2">
         <p className="font-bold">{d.blackmailTitle}</p>
-        <p className="text-xs text-zinc-400">{d.blackmailRule(VELVET.blackmail.icc, VELVET.blackmail.cooldownDays)}</p>
+        <Hint>{d.blackmailRule(VELVET.blackmail.icc, VELVET.blackmail.cooldownDays)}</Hint>
         <ul className="mt-1 space-y-1">
           <DeskRow
             label={d.payCash}
@@ -303,14 +299,10 @@ export function VelvetDesk() {
         </ul>
       </div>
 
-      <div className="border-t border-zinc-800 pt-2">
+      <div className="border-t border-line pt-2">
         <p className="font-bold">{d.vipTitle}</p>
-        <p className="text-xs text-zinc-400">
-          {d.vipRule(VELVET.vip.crates, multiplier(VELVET.vip.factor), VELVET.vip.failIccLoss, VELVET.vip.lockDays)}
-        </p>
-        <p className="text-xs text-amber-300">
-          {d.sponsor(Math.min(game.progress.vipOrders, ENDINGS.elite.sponsorOrders), ENDINGS.elite.sponsorOrders)}
-        </p>
+        <Hint>{d.vipRule(VELVET.vip.crates, multiplier(VELVET.vip.factor), VELVET.vip.failIccLoss, VELVET.vip.lockDays)}</Hint>
+        <Hint tone="accent">{d.sponsor(Math.min(game.progress.vipOrders, ENDINGS.elite.sponsorOrders), ENDINGS.elite.sponsorOrders)}</Hint>
         <ul className="mt-1 space-y-1">
           {vip ? (
             <DeskRow

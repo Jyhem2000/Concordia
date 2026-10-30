@@ -34,7 +34,7 @@ Chaque panneau (marché, carte, lieux spéciaux, plein, couvre-feu, objectifs) e
 * **Compte à rebours de l'audit** (à partir de `AUDIT_COUNTDOWN_DAY`, [`balance.ts`](../src/data/balance.ts)) : *« Dernier dépôt offshore possible : J30, 19h59 »* et *« Dernier remboursement possible : J30, 19h59 »*.
 
 ### Couleur de l'ICC
-Partout où l'ICC s'affiche (bandeau, objectifs, verrous), il prend la couleur de son palier (chap. 1), avec le nom du palier : **vert** Citoyen Or, **jaune** Citoyen ordinaire, **orange** Citoyen sous réserve, **rouge** Déviant notoire. L'interface ne définit aucun seuil propre.
+Dans le bandeau, l'ICC prend la couleur de son palier (chap. 1), avec le nom du palier : **vert** Citoyen Or, **jaune** Citoyen ordinaire, **orange** Citoyen sous réserve, **rouge** Déviant notoire. L'interface ne définit aucun seuil propre.
 
 ## Vue « Véhicule, soute & équipage »
 * **Véhicule :** image du châssis, jauges de châssis et de Synthanol, modules montés.

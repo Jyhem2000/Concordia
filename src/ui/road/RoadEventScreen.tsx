@@ -7,7 +7,10 @@ import type { RoadCost, RoadEventId, RoadOutcome } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
+import Card from '../shared/Card.tsx'
+import Scene from '../shared/Scene.tsx'
 import { FOCUS_RING } from '../shared/focus.ts'
+import Hint from '../shared/Hint.tsx'
 
 type RoadOptionProps = {
   eventId: RoadEventId
@@ -21,19 +24,12 @@ export default function RoadEventScreen() {
   if (!eventId) return null
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 p-4">
-      <section className="rounded border border-amber-700 bg-amber-950/20 p-4">
-        <h1 className="flex items-center gap-2 text-xl font-bold text-amber-300 uppercase">
-          <Signpost size={20} aria-hidden="true" />
-          {t.road.title} — {t.event[eventId].name}
-        </h1>
-        <p className="mt-2">{t.road.events[eventId].situation}</p>
-      </section>
+    <Scene tone="accent" icon={Signpost} title={`${t.road.title} — ${t.event[eventId].name}`} intro={<p>{t.road.events[eventId].situation}</p>}>
       <ul className="flex flex-col gap-3">
         <RoadOption eventId={eventId} choice="a" />
         <RoadOption eventId={eventId} choice="b" />
       </ul>
-    </main>
+    </Scene>
   )
 }
 
@@ -52,14 +48,18 @@ function RoadOption({ eventId, choice }: RoadOptionProps) {
     : describe.outcome(option.outcome ?? {})
 
   return (
-    <li className="rounded border border-zinc-800 bg-zinc-900/40 p-3 text-sm">
+    <Card as="li">
       <Button variant="primary" disabled={error !== null} onClick={() => dispatch({ type: 'road', choice, pay })}>
         {t.road.events[eventId][choice]}
       </Button>
-      {pays.length === 1 && <p className="mt-1 text-xs text-zinc-300">{describe.cost(pays[0])}</p>}
+      {pays.length === 1 && (
+        <Hint tone="neutral" className="mt-1">
+          {describe.cost(pays[0])}
+        </Hint>
+      )}
       {pays.length > 1 && (
         <fieldset className="mt-1 text-xs">
-          <legend className="text-zinc-400">{t.road.payWith}</legend>
+          <legend className="text-ink-muted">{t.road.payWith}</legend>
           {pays.map((cost, index) => (
             <label key={describe.cost(cost)} className="mr-3 inline-flex items-center gap-1.5">
               <input type="radio" name={`${eventId}-${choice}`} checked={pay === index} onChange={() => setPay(index)} className={FOCUS_RING} />
@@ -68,9 +68,13 @@ function RoadOption({ eventId, choice }: RoadOptionProps) {
           ))}
         </fieldset>
       )}
-      <p className="mt-1 text-xs text-zinc-400">{effects}</p>
-      {error && <p className="mt-1 text-xs text-red-300">{t.error[error]}</p>}
-    </li>
+      <Hint className="mt-1">{effects}</Hint>
+      {error && (
+        <Hint tone="danger" className="mt-1">
+          {t.error[error]}
+        </Hint>
+      )}
+    </Card>
   )
 }
 

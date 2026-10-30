@@ -13,9 +13,9 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import Detailed from '../shared/Detailed.tsx'
-import CollapseToggle from '../shared/CollapseToggle.tsx'
 import { FOCUS_RING } from '../shared/focus.ts'
-import { useCollapsed } from '../shared/useCollapsed.ts'
+import Hint from '../shared/Hint.tsx'
+import Panel from '../shared/Panel.tsx'
 
 /** Plein de Synthanol et dilemme de 20h00 (chap. 1) */
 export default function EveningPanel() {
@@ -24,8 +24,6 @@ export default function EveningPanel() {
   const { t, credits, multiplier, percent } = useI18n()
 
   const tank = VEHICLES[game.vehicleId].tank
-  const fuelCollapsed = useCollapsed('fuel')
-  const curfewCollapsed = useCollapsed('curfew')
   const refuelMax = maxRefuel(game)
   // Trois choix le soir (chap. 1) : dormir, livraison de nuit autorisée (mission), ou tournée clandestine
   const offer = missionOffer(game)
@@ -43,27 +41,20 @@ export default function EveningPanel() {
   const coolants = PRODUCT_IDS.filter((id) => PRODUCTS[id].cooling && ownedQty(game.cargo, id) > 0)
   // After du couvre-feu de ce soir, annoncée dès 06h00 (chap. 1)
   const afterLine = (
-    <p className="mt-1 flex items-start gap-1 text-xs text-fuchsia-300">
-      <PartyPopper size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
+    <Hint tone="event" icon={PartyPopper} className="mt-1">
       {t.evening.after(
         t.district[game.after].name,
         multiplier(AFTER.festiveFactor),
         multiplier(TAGS[AFTER.tag].nightSale ?? 1),
         percent(1 - AFTER.nightRiskFactor, 0),
       )}
-    </p>
+    </Hint>
   )
 
   return (
-    <section className="rounded border border-zinc-800 bg-zinc-900/40 text-sm">
-      <div className="border-b border-zinc-800 p-3">
-        <h2 className="text-amber-300">
-          <CollapseToggle id="fuel">
-            <Fuel size={14} aria-hidden="true" />
-            {t.evening.fuelTitle} {game.fuel}/{tank}
-          </CollapseToggle>
-        </h2>
-        <div className={`mt-1 flex flex-wrap items-center gap-2 ${fuelCollapsed ? 'hidden' : ''}`}>
+    <>
+      <Panel icon={Fuel} title={`${t.evening.fuelTitle} ${game.fuel}/${tank}`} collapseId="fuel">
+        <div className="flex flex-wrap items-center gap-2">
           <Detailed breakdown={fuelPriceBreakdown(game)} format={(price) => t.evening.pricePerRation(credits(price))} />
           <Button disabled={refuelMax < 1} onClick={() => dispatch({ type: 'refuel', qty: 1 })}>
             {t.evening.refuelOne}
@@ -76,92 +67,82 @@ export default function EveningPanel() {
               <Button variant="danger" onClick={() => dispatch({ type: 'siphon' })}>
                 {t.evening.siphon}
               </Button>
-              <span className="text-xs text-zinc-400">{t.evening.siphonHint}</span>
+              <Hint>{t.evening.siphonHint}</Hint>
             </>
           )}
         </div>
-      </div>
+      </Panel>
 
-      <div className="p-3">
+      <Panel icon={Siren} title={t.evening.curfewTitle} collapseId="curfew">
         {game.phase === 'day' ? (
           <>
-            <h2 className="text-amber-300">
-              <CollapseToggle id="curfew">
-                <Siren size={14} aria-hidden="true" />
-                {t.evening.curfewTitle}
-              </CollapseToggle>
-            </h2>
-            <div className={curfewCollapsed ? 'hidden' : ''}>
-              <p className="mt-1 text-xs text-sky-300">
-                {!night.unlocked
-                  ? t.evening.missionLocked(night.done, night.needed)
-                  : offer
-                    ? t.evening.missionOffer(t.district[offer].name, sealedCount(game), credits(missionFee(game)))
-                    : game.nightOffer
-                      ? t.evening.missionHere(t.district[game.nightOffer].name)
-                      : t.evening.noMission}
-              </p>
-              {afterLine}
-              <p className="mt-1 text-xs text-zinc-400">{t.evening.nightRule}</p>
-              <ul className="mt-2 flex flex-col gap-2">
+            <Hint tone="info">
+              {!night.unlocked
+                ? t.evening.missionLocked(night.done, night.needed)
+                : offer
+                  ? t.evening.missionOffer(t.district[offer].name, sealedCount(game), credits(missionFee(game)))
+                  : game.nightOffer
+                    ? t.evening.missionHere(t.district[game.nightOffer].name)
+                    : t.evening.noMission}
+            </Hint>
+            {afterLine}
+            <Hint className="mt-1">{t.evening.nightRule}</Hint>
+            <ul className="mt-2 flex flex-col gap-2">
+              <li>
+                <Button variant="primary" onClick={() => dispatch({ type: 'sleep' })}>
+                  <BedDouble size={14} aria-hidden="true" />
+                  {sleepLabel}
+                </Button>
+              </li>
+              {offer && (
                 <li>
-                  <Button variant="primary" onClick={() => dispatch({ type: 'sleep' })}>
-                    <BedDouble size={14} className="mr-1 inline" aria-hidden="true" />
-                    {sleepLabel}
-                  </Button>
-                </li>
-                {offer && (
-                  <li>
-                    <Button disabled={missionError !== null} onClick={() => dispatch({ type: 'forceCurfew', mission: true, drink })}>
-                      {t.evening.missionTour(t.district[offer].name, credits(missionFee(game)))}
-                      {drinkLabel}
-                    </Button>
-                    <p className="text-xs text-zinc-400">{missionError ? t.error[missionError] : t.evening.missionTourHint(sealedCount(game))}</p>
-                  </li>
-                )}
-                <li>
-                  <Button variant="danger" disabled={curfewError !== null} onClick={() => dispatch({ type: 'forceCurfew', drink })}>
-                    {t.evening.clandestineTour}
+                  <Button disabled={missionError !== null} onClick={() => dispatch({ type: 'forceCurfew', mission: true, drink })}>
+                    {t.evening.missionTour(t.district[offer].name, credits(missionFee(game)))}
                     {drinkLabel}
                   </Button>
-                  <p className="text-xs text-zinc-400">
-                    {curfewError ? t.error[curfewError] : t.evening.clandestineHint(t.hud.wantedGain(WANTED.perOffense))}
-                  </p>
-                  {canInject(game) && (
-                    <p className="text-xs text-amber-300">{t.evening.injectionHint(game.progress.injections + 1, ENDINGS.resident.injections)}</p>
-                  )}
+                  <Hint>{missionError ? t.error[missionError] : t.evening.missionTourHint(sealedCount(game))}</Hint>
                 </li>
-              </ul>
-              {coolants.map((id) => (
-                <label key={id} className="mt-2 flex items-center gap-1.5 text-xs text-zinc-300">
-                  <input
-                    type="checkbox"
-                    checked={game.autoCooling}
-                    onChange={(event) => dispatch({ type: 'setAutoCooling', enabled: event.target.checked })}
-                    className={FOCUS_RING}
-                  />
-                  {t.evening.cooling(PRODUCTS[id].cooling?.crates ?? 0, t.product[id].name)}
-                </label>
-              ))}
-            </div>
+              )}
+              <li>
+                <Button variant="danger" disabled={curfewError !== null} onClick={() => dispatch({ type: 'forceCurfew', drink })}>
+                  {t.evening.clandestineTour}
+                  {drinkLabel}
+                </Button>
+                <Hint>{curfewError ? t.error[curfewError] : t.evening.clandestineHint(t.hud.wantedGain(WANTED.perOffense))}</Hint>
+                {canInject(game) && <Hint tone="accent">{t.evening.injectionHint(game.progress.injections + 1, ENDINGS.resident.injections)}</Hint>}
+              </li>
+            </ul>
+            {coolants.map((id) => (
+              <label key={id} className="mt-2 flex items-center gap-1.5 text-xs text-ink-soft">
+                <input
+                  type="checkbox"
+                  checked={game.autoCooling}
+                  onChange={(event) => dispatch({ type: 'setAutoCooling', enabled: event.target.checked })}
+                  className={FOCUS_RING}
+                />
+                {t.evening.cooling(PRODUCTS[id].cooling?.crates ?? 0, t.product[id].name)}
+              </label>
+            ))}
           </>
         ) : (
           <>
-            <p className="text-indigo-300">{t.evening.nightNotice}</p>
-            <p className="mt-1 text-xs text-sky-300">
+            <p className="text-night">{t.evening.nightNotice}</p>
+            <Hint tone="info" className="mt-1">
               {game.mission ? t.evening.missionActive(t.district[game.mission.to].name) : t.evening.offMission}
-            </p>
+            </Hint>
             {afterLine}
             {!game.mission && canInject(game) && (
-              <p className="mt-1 text-xs text-amber-300">{t.evening.injectionHint(game.progress.injections + 1, ENDINGS.resident.injections)}</p>
+              <Hint tone="accent" className="mt-1">
+                {t.evening.injectionHint(game.progress.injections + 1, ENDINGS.resident.injections)}
+              </Hint>
             )}
             <Button variant="primary" className="mt-2" onClick={() => dispatch({ type: 'sleep' })}>
-              <BedDouble size={14} className="mr-1 inline" aria-hidden="true" />
+              <BedDouble size={14} aria-hidden="true" />
               {sleepLabel}
             </Button>
           </>
         )}
-      </div>
-    </section>
+      </Panel>
+    </>
   )
 }

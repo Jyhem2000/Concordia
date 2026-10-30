@@ -19,9 +19,9 @@ const LOW_MARGIN_RATE = 0.15
 type Trend = 'up' | 'flat' | 'down'
 
 const trendStyles: Record<Trend, { icon: LucideIcon; className: string }> = {
-  up: { icon: TrendingUp, className: 'text-green-400' },
-  flat: { icon: Minus, className: 'text-amber-300' },
-  down: { icon: TrendingDown, className: 'text-red-400' },
+  up: { icon: TrendingUp, className: 'text-success' },
+  flat: { icon: Minus, className: 'text-accent' },
+  down: { icon: TrendingDown, className: 'text-danger' },
 }
 
 function trendOf(revenue: number, cost: number): Trend {

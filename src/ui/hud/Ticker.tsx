@@ -12,12 +12,12 @@ export default function Ticker() {
   const message = t.ticker.messages[tickerSlot(day, phase, t.ticker.messages.length)]
 
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-zinc-800 px-4 py-1 text-xs text-zinc-300">
-      <span className="flex items-center gap-1.5 font-bold text-amber-300 uppercase">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-line px-4 py-1 text-xs text-ink-soft">
+      <span className="flex items-center gap-1.5 font-bold text-accent uppercase">
         <Tv size={12} aria-hidden="true" />
         {t.ticker.label}
       </span>
-      <span className="text-zinc-400 italic">{message}</span>
+      <span className="text-ink-muted italic">{message}</span>
     </div>
   )
 }

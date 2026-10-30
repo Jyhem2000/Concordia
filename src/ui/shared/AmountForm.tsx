@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useI18n } from '../../i18n/useI18n.ts'
+import { FIELD } from './styles.ts'
 import Button, { type ButtonVariant } from './Button.tsx'
-import { FOCUS_RING } from './focus.ts'
 
 type AmountFormProps = {
   label: string
@@ -41,7 +41,7 @@ export default function AmountForm({ label, max, onSubmit, variant = 'primary', 
         aria-label={`${label} — ${t.place.amount}`}
         disabled={max < 1}
         onChange={(event) => setValue(event.target.value)}
-        className={`w-28 rounded border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm disabled:opacity-35 ${FOCUS_RING}`}
+        className={`w-28 ${FIELD}`}
       />
       <Button disabled={max < 1} aria-label={`${label} — ${t.place.max}`} onClick={() => setValue(String(max))}>
         {t.place.max}
@@ -49,7 +49,7 @@ export default function AmountForm({ label, max, onSubmit, variant = 'primary', 
       <Button type="submit" variant={variant} disabled={!valid}>
         {label}
       </Button>
-      {hint && <span className="text-xs text-zinc-400">{hint}</span>}
+      {hint && <span className="text-xs text-ink-muted">{hint}</span>}
     </form>
   )
 }

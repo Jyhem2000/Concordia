@@ -38,7 +38,7 @@ export default function Locked({ requires = [] }: LockedProps) {
   })
   if (missing.length === 0) return null
   return (
-    <ul className="text-xs text-amber-300">
+    <ul className="text-xs text-accent">
       {missing.map((line) => (
         <li key={line}>{line}</li>
       ))}

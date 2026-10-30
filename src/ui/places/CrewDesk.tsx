@@ -7,6 +7,7 @@ import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import Locked from '../shared/Locked.tsx'
 import { FOCUS_RING } from '../shared/focus.ts'
+import Hint from '../shared/Hint.tsx'
 
 type CrewOfferProps = {
   crewId: CrewId
@@ -22,14 +23,14 @@ export default function CrewDesk() {
   const crate = inKindCrate(game)
 
   return (
-    <div className="border-t border-zinc-800 pt-2">
+    <div className="border-t border-line pt-2">
       <p className="font-bold">{t.crewDesk.title}</p>
-      <p className="text-xs text-zinc-400">{t.crewDesk.rule(credits(hireFee(game)))}</p>
+      <Hint>{t.crewDesk.rule(credits(hireFee(game)))}</Hint>
       {active && (
         <div className="mt-1 text-xs">
           <p>
             {t.crewDesk.active(t.crew[active].name)}{' '}
-            <span className={paidDay === game.day ? 'text-green-400' : 'text-red-300'}>
+            <span className={paidDay === game.day ? 'text-success' : 'text-danger'}>
               {paidDay === game.day ? t.crewDesk.working : t.crewDesk.unpaid}
             </span>
           </p>
@@ -84,19 +85,19 @@ function CrewOffer({ crewId }: CrewOfferProps) {
 
   return (
     <li className="text-xs">
-      <p className="font-bold text-zinc-200">
+      <p className="font-bold text-ink">
         {t.crew[crewId].name}
-        <span className="ml-1.5 font-normal text-zinc-400">{t.crewDesk.salary(credits(salary(crewId)))}</span>
+        <span className="ml-1.5 font-normal text-ink-muted">{t.crewDesk.salary(credits(salary(crewId)))}</span>
       </p>
-      <p className="text-zinc-400">{t.crew[crewId].subtitle}</p>
-      <p className="text-zinc-300">{bonuses.join(' · ')}</p>
+      <p className="text-ink-muted">{t.crew[crewId].subtitle}</p>
+      <p className="text-ink-soft">{bonuses.join(' · ')}</p>
       {/* Verrou de progression : condition et avancement, tant qu'il ne s'est pas présenté (chap. 4) */}
       <Locked requires={crew.requires} />
       <div className="mt-1 flex items-center gap-2">
         <Button variant="primary" disabled={error !== null} onClick={() => dispatch({ type: 'hireCrew', crewId })}>
           {t.crewDesk.hire}
         </Button>
-        {error && error !== 'locked' && <span className="text-red-300">{t.error[error]}</span>}
+        {error && error !== 'locked' && <span className="text-danger">{t.error[error]}</span>}
       </div>
     </li>
   )

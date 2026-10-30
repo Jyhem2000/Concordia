@@ -6,6 +6,7 @@ import type { ProductId, Tactics } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import { FOCUS_RING } from '../shared/focus.ts'
+import { FIELD } from '../shared/styles.ts'
 import MoveCard from './MoveCard.tsx'
 
 type TacticalMoveProps = {
@@ -66,12 +67,8 @@ export function FleeMove({ label, outcomes }: TacticalMoveProps) {
     <MoveCard move="flee" label={label} chance={fleeChance(game, tactics)} outcomes={outcomes} tactics={tactics}>
       {droppable.length > 0 && (
         <label className="flex flex-wrap items-center gap-1.5 text-xs">
-          <span className="text-zinc-400">{t.interception.drop}</span>
-          <select
-            value={drop ?? ''}
-            onChange={(event) => setDrop(droppable.find((id) => id === event.target.value))}
-            className={`rounded border border-zinc-700 bg-zinc-950 px-1 py-0.5 ${FOCUS_RING}`}
-          >
+          <span className="text-ink-muted">{t.interception.drop}</span>
+          <select value={drop ?? ''} onChange={(event) => setDrop(droppable.find((id) => id === event.target.value))} className={FIELD}>
             <option value="">{t.interception.noDrop}</option>
             {droppable.map((id) => (
               <option key={id} value={id}>

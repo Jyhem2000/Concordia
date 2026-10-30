@@ -17,9 +17,9 @@ import type { LocationId, LocationService } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import AmountForm from '../shared/AmountForm.tsx'
-import CollapseToggle from '../shared/CollapseToggle.tsx'
 import Detailed from '../shared/Detailed.tsx'
-import { useCollapsed } from '../shared/useCollapsed.ts'
+import Hint from '../shared/Hint.tsx'
+import Panel from '../shared/Panel.tsx'
 import CrewDesk from './CrewDesk.tsx'
 import GarageDesk from './GarageDesk.tsx'
 import { CassandreDesk, ForgeryDesk, KarmaDesk, MorgueDesk, VelvetDesk } from './SpecialDesks.tsx'
@@ -55,27 +55,18 @@ export default function PlacesPanel() {
 /** Les lieux spéciaux ouvrent de 06h00 à 20h00 (chap. 1) */
 function Place({ locationId, children }: PlaceProps) {
   const closed = useGameStore((s) => s.game.phase === 'night' || s.game.dayOver)
-  const collapsed = useCollapsed(`place:${locationId}`)
   const { t } = useI18n()
 
   return (
-    <section className="rounded border border-zinc-800 bg-zinc-900/40 p-3 text-sm">
-      <h2 className="text-amber-300">
-        <CollapseToggle id={`place:${locationId}`}>
-          <Landmark size={14} aria-hidden="true" />
-          {t.location[locationId].name}
-        </CollapseToggle>
-      </h2>
-      <p className="text-xs text-zinc-400">{t.location[locationId].subtitle}</p>
-      {collapsed ? null : closed ? (
-        <p className="mt-2 flex items-center gap-1.5 text-indigo-300">
-          <Lock size={14} aria-hidden="true" />
+    <Panel icon={Landmark} title={t.location[locationId].name} subtitle={t.location[locationId].subtitle} collapseId={`place:${locationId}`}>
+      {closed ? (
+        <Hint tone="night" icon={Lock}>
           {t.place.closedAtNight}
-        </p>
+        </Hint>
       ) : (
-        <div className="mt-2 flex flex-col gap-2">{children}</div>
+        <div className="flex flex-col gap-2">{children}</div>
       )}
-    </section>
+    </Panel>
   )
 }
 
@@ -111,14 +102,14 @@ function DebtDesk() {
   return (
     <>
       <p>
-        <span className="text-zinc-400">{t.place.debtTitle} </span>
-        <span className="font-bold text-red-300">{credits(game.debt)}</span>
+        <span className="text-ink-muted">{t.place.debtTitle} </span>
+        <span className="font-bold text-danger">{credits(game.debt)}</span>
       </p>
       <AmountForm label={t.place.repay} max={maxRepay(game)} onSubmit={(amount) => dispatch({ type: 'repay', amount })} />
       <AmountForm label={t.place.borrow} variant="danger" max={room} onSubmit={(amount) => dispatch({ type: 'borrow', amount })} />
-      <p className="text-xs text-zinc-400">
+      <Hint>
         {t.place.loanRoom(credits(room))} · {t.place.advanceRule(credits(SURVIVAL_ADVANCE))}
-      </p>
+      </Hint>
     </>
   )
 }
@@ -133,12 +124,12 @@ function OffshoreDesk() {
   return (
     <>
       <p>
-        <span className="text-zinc-400">{t.place.offshoreTitle} </span>
-        <span className="font-bold text-cyan-300">{credits(balance)}</span>
-        <span className="ml-1 text-xs text-zinc-400">{t.place.balance(credits(game.offshore.deposited), credits(game.offshore.interest))}</span>
+        <span className="text-ink-muted">{t.place.offshoreTitle} </span>
+        <span className="font-bold text-offshore">{credits(balance)}</span>
+        <span className="ml-1 text-xs text-ink-muted">{t.place.balance(credits(game.offshore.deposited), credits(game.offshore.interest))}</span>
       </p>
       <div className="flex flex-wrap gap-1.5">
-        <span className="text-zinc-400">{t.place.rate}</span>
+        <span className="text-ink-muted">{t.place.rate}</span>
         <span>{percent(effectiveOffshoreRate(game.offshore, crewEffect(game, 'offshoreBonus') ?? 0), 2)}</span>
         {interest && (
           <div className="flex gap-1">
@@ -147,7 +138,7 @@ function OffshoreDesk() {
           </div>
         )}
       </div>
-      <p className="text-xs text-zinc-400">{t.place.breakEven(breakEvenDays(game.offshore, crewEffect(game, 'offshoreBonus') ?? 0))}</p>
+      <Hint>{t.place.breakEven(breakEvenDays(game.offshore, crewEffect(game, 'offshoreBonus') ?? 0))}</Hint>
       <AmountForm label={t.place.deposit} max={game.cash} onSubmit={(amount) => dispatch({ type: 'deposit', amount })} />
       <AmountForm
         label={t.place.withdraw}

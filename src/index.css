@@ -1,9 +1,47 @@
 /* Tailwind v4 : inclut Preflight (reset CSS), les utilitaires et le thème par défaut */
 @import 'tailwindcss';
 
-/* Tokens du design system (couleurs, polices…) : ajouter ici les variables de thème */
+/*
+ * Charte graphique (chap. 7) : couleurs par rôle, jamais par écran.
+ * Chaque variable `--color-x` donne les utilitaires `text-x`, `bg-x`, `border-x`… ; les fonds teintés passent par l'opacité (`bg-danger/15`).
+ */
 @theme {
+  --font-sans: ui-sans-serif, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Surfaces, du fond de page aux éléments posés sur un panneau */
+  --color-base: #111317;
+  --color-panel: #1a1d22;
+  --color-raised: #24282f;
+  --color-line: #30353d;
+  --color-line-strong: #464d58;
+
+  /* Encre */
+  --color-ink: #e9ebee;
+  --color-ink-soft: #c5c9d0;
+  --color-ink-muted: #959ca6;
+  --color-ink-faint: #6b727c;
+
+  /* Rôles */
+  --color-accent: #fbbf24;
+  --color-danger: #f87171;
+  --color-danger-strong: #dc2626;
+  --color-success: #4ade80;
+  --color-warning: #fb923c;
+  --color-info: #7dd3fc;
+  --color-night: #a5b4fc;
+  --color-event: #f0abfc;
+
+  /* Portefeuilles */
+  --color-cash: #fde047;
+  --color-offshore: #67e8f9;
+
+  /* Tiers des produits */
+  --color-tier-0: #4ade80;
+  --color-tier-1: #facc15;
+  --color-tier-2: #fb923c;
+  --color-tier-3: #f87171;
+  --color-tier-4: #a78bfa;
 }
 
 @layer base {
@@ -13,11 +51,12 @@
     height: 100%;
   }
 
-  /* Terminal d'Aeterna : un seul thème sombre */
+  /* Terminal d'Aeterna : un seul thème sombre, chiffres alignés dans les tableaux */
   body {
-    background-color: var(--color-zinc-950);
-    color: var(--color-zinc-100);
-    font-family: var(--font-mono);
+    background-color: var(--color-base);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
     color-scheme: dark;
   }
 }

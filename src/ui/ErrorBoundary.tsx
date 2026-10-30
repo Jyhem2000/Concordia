@@ -42,8 +42,8 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
 
     return (
       <main role="alert" className="mx-auto flex max-w-md flex-col items-center justify-center gap-4 p-4 text-center">
-        <h1 className="text-xl font-bold text-red-300">{t.crash.title}</h1>
-        <p className="text-zinc-300">{t.crash.body}</p>
+        <h1 className="text-xl font-bold text-danger">{t.crash.title}</h1>
+        <p className="text-ink-soft">{t.crash.body}</p>
         <div className="flex flex-wrap justify-center gap-2">
           <Button onClick={retry}>{t.crash.retry}</Button>
           <Button variant="primary" onClick={restart}>

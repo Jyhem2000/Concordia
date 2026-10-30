@@ -5,6 +5,8 @@ import type { RoadReport } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
+import Deltas from '../shared/Deltas.tsx'
+import Panel from '../shared/Panel.tsx'
 
 /** Compte rendu chiffré du dernier aléa routier (transparence, chap. 7) */
 export default function RoadReportPanel() {
@@ -23,30 +25,21 @@ export default function RoadReportPanel() {
     { key: 'fuel', label: t.road.fuelGain, value: report.fuel, text: signed(report.fuel) },
     { key: 'crates', label: t.report.crates, value: report.crates, text: signed(report.crates) },
     { key: 'damaged', label: t.report.damaged, value: -report.damaged, text: number(report.damaged) },
-  ].filter(({ value }) => value !== 0)
+  ]
 
   return (
-    <section className="rounded border border-zinc-700 bg-zinc-900/60 p-3 text-sm">
-      <h2 className="flex items-center gap-1.5 font-bold text-amber-300 uppercase">
-        <Signpost size={14} aria-hidden="true" />
-        {t.road.title} — {t.event[report.eventId].name}
-      </h2>
-      <ul className="mt-1 space-y-0.5">
+    <Panel tone="report" icon={Signpost} title={`${t.road.title} — ${t.event[report.eventId].name}`}>
+      <ul className="space-y-0.5">
         <li className="flex flex-wrap gap-1.5">
           <span className="font-bold">{t.road.events[report.eventId][report.choice]}</span>
-          {report.won !== null && <span className={report.won ? 'text-green-400' : 'text-red-300'}>{report.won ? t.road.won : t.road.lost}</span>}
+          {report.won !== null && <span className={report.won ? 'text-success' : 'text-danger'}>{report.won ? t.road.won : t.road.lost}</span>}
         </li>
-        {deltas.map(({ key, label, text, value }) => (
-          <li key={key} className={`flex gap-1.5 ${value < 0 ? 'text-red-300' : 'text-green-400'}`}>
-            <span className="text-zinc-400">{label}</span>
-            {text}
-          </li>
-        ))}
-        {report.towBill > 0 && <li className="text-red-300">{t.report.tow(credits(report.towBill))}</li>}
+        <Deltas deltas={deltas} />
+        {report.towBill > 0 && <li className="text-danger">{t.report.tow(credits(report.towBill))}</li>}
       </ul>
       <Button className="mt-2" onClick={() => setDismissed(report)}>
         {t.report.dismiss}
       </Button>
-    </section>
+    </Panel>
   )
 }
