@@ -8,6 +8,11 @@ export function wealthOf(state: GameState): WealthSnapshot {
   return { cash: state.cash, offshore: offshoreBalance(state.offshore), venture: offshoreBalance(state.venture), debt: state.debt }
 }
 
+/** Événements du jour, pour le carnet */
+function eventsOf(state: GameState): DayLog['events'] {
+  return { global: state.events.global, local: state.events.local }
+}
+
 /** Patrimoine net : Cash-Puce et offshore, moins la dette */
 export function netWealth({ cash, offshore, venture, debt }: WealthSnapshot): number {
   return cash + offshore + venture - debt
@@ -15,7 +20,7 @@ export function netWealth({ cash, offshore, venture, debt }: WealthSnapshot): nu
 
 /** Première entrée du carnet : le Jour 1 au départ */
 export function firstDayLog(state: GameState): DayLog {
-  return { day: state.day, start: wealthOf(state), bought: 0, sold: 0, highlights: [] }
+  return { day: state.day, start: wealthOf(state), events: eventsOf(state), bought: 0, sold: 0, highlights: [] }
 }
 
 /**
@@ -73,6 +78,7 @@ export function recordJournal(before: GameState, after: GameState, action: Actio
   const morning: Highlight[] = []
   if (fresh && fresh.ventureRaid > 0) morning.push({ kind: 'raid', loss: fresh.ventureRaid })
   if (fresh && fresh.contractFailed > 0) morning.push({ kind: 'contractFailed', penalty: fresh.contractFailed })
-  const opened: DayLog[] = after.day > today.day ? [{ day: after.day, start: wealthOf(after), bought: 0, sold: 0, highlights: morning }] : []
+  const opened: DayLog[] =
+    after.day > today.day ? [{ day: after.day, start: wealthOf(after), events: eventsOf(after), bought: 0, sold: 0, highlights: morning }] : []
   return { ...after, journal: [...past, updated, ...opened] }
 }

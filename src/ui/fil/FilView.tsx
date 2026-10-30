@@ -1,7 +1,6 @@
-import { AlertTriangle, CalendarDays, Megaphone, Newspaper, TrendingUp } from 'lucide-react'
-import { AFTER, GAME_LENGTH_DAYS } from '../../data/balance.ts'
+import { AlertTriangle, Megaphone, Newspaper, TrendingUp } from 'lucide-react'
+import { AFTER } from '../../data/balance.ts'
 import { DISTRICT_IDS } from '../../data/districts.ts'
-import { LOTTERY } from '../../data/events.ts'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
 import { averageCost, canHide, ownedQty } from '../../engine/cargo.ts'
@@ -10,11 +9,8 @@ import { daysBeforeRot } from '../../engine/condition.ts'
 import { planTravel } from '../../engine/actions.ts'
 import { crewEffect, isMemoryBlurred, workingCrew } from '../../engine/crew.ts'
 import { deliveryCrates, deliveryFee, deliveryOffer } from '../../engine/delivery.ts'
-import { trapdoorReadyDay } from '../../engine/equipment.ts'
-import { nextDebtDeadline, nextProtectionDay, protectionBreakdown } from '../../engine/finance.ts'
 import { bestRemembered, blurredQuote, estimatedUnitSale, productStatus, shopProducts } from '../../engine/market.ts'
 import { missionFee, missionOffer, sealedCount } from '../../engine/night.ts'
-import { pendingServices } from '../../engine/services.ts'
 import type { ProductId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -27,15 +23,9 @@ import Panel from '../shared/Panel.tsx'
 import { TONE_TEXT, type Tone } from '../shared/styles.ts'
 import EventsList from './EventsList.tsx'
 import FlashInfo from './FlashInfo.tsx'
+import CalendarPanel from './CalendarPanel.tsx'
 import JournalPanel from './JournalPanel.tsx'
 import RecordsPanel from './RecordsPanel.tsx'
-
-type AgendaEntry = {
-  key: string
-  day: number
-  label: string
-  tone: Tone
-}
 
 type Line = {
   key: string
@@ -45,9 +35,6 @@ type Line = {
 
 /** Ligne colorée d'un panneau du Fil */
 const line = (key: string, text: string, tone: Tone): Line => ({ key, text, tone })
-
-/** Échéance de l'agenda */
-const entry = (key: string, day: number, label: string, tone: Tone): AgendaEntry => ({ key, day, label, tone })
 
 type DealRowProps = {
   productId: ProductId
@@ -61,7 +48,7 @@ export default function FilView() {
       <NewsPanel />
       <TodayPanel />
       <AlertsPanel />
-      <AgendaPanel />
+      <CalendarPanel />
       <DealsPanel />
       <ObjectivesPanel />
       <JournalPanel />
@@ -191,48 +178,6 @@ function AlertsPanel() {
       </ul>
       <Exposure className="mt-1" />
       {lines.length === 0 && room === 0 && <Hint>{t.fil.noAlert}</Hint>}
-    </Panel>
-  )
-}
-
-/** Échéances à venir, du plus proche au plus lointain */
-function AgendaPanel() {
-  // Échéances et délais se calculent sur l'état entier
-  const game = useGameStore((s) => s.game)
-  const { t, credits } = useI18n()
-  const debtDay = nextDebtDeadline(game)
-  const protectionDay = nextProtectionDay(game)
-  const lottery = LOTTERY.days.find((day) => day > game.day)
-  const vice = game.events.lottery
-  const trapdoor = trapdoorReadyDay(game)
-  const entries: AgendaEntry[] = [
-    ...(debtDay !== null ? [entry('debt', debtDay, t.fil.debt(credits(game.debt)), 'danger')] : []),
-    ...(game.debtLate ? [entry('late', game.day, t.fil.debtLate, 'danger')] : []),
-    ...(protectionDay !== null ? [entry('protection', protectionDay, t.fil.protection(credits(protectionBreakdown(game).total)), 'warning')] : []),
-    game.exemption === 0
-      ? entry('sedation', game.day, t.fil.sedated, 'danger')
-      : entry('sedation', game.day + game.exemption, t.fil.sedation, 'info'),
-    ...(lottery !== undefined ? [entry('lottery', lottery, t.fil.lottery, 'neutral')] : []),
-    ...(vice?.vice && vice.viceDistrict && game.day <= vice.viceUntil
-      ? [entry('vice', vice.viceUntil, t.fil.viceEnd(t.product[vice.vice].name, t.district[vice.viceDistrict].name), 'neutral')]
-      : []),
-    ...pendingServices(game).map(({ key, day }): AgendaEntry => ({ key, day, label: t.fil.serviceReady(t.fil.service[key]), tone: 'muted' })),
-    ...(game.contract ? [entry('contract', game.contract.deadline, t.fil.agendaContract(t.district[game.contract.to].name), 'warning')] : []),
-    ...(trapdoor !== null ? [entry('trapdoor', trapdoor, t.fil.trapdoorReady, 'muted')] : []),
-    entry('audit', GAME_LENGTH_DAYS, t.fil.audit(GAME_LENGTH_DAYS), 'accent'),
-  ]
-  entries.sort((a, b) => a.day - b.day)
-
-  return (
-    <Panel icon={CalendarDays} title={t.fil.agenda} collapseId="fil-agenda">
-      <ul className="flex flex-col gap-1 text-xs">
-        {entries.map(({ key, day, label, tone }) => (
-          <li key={key} className="flex gap-2">
-            <span className="w-20 shrink-0 font-bold text-ink-muted">{t.fil.dayLabel(day, day - game.day)}</span>
-            <span className={TONE_TEXT[tone]}>{label}</span>
-          </li>
-        ))}
-      </ul>
     </Panel>
   )
 }

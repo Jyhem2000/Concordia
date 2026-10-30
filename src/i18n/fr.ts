@@ -211,6 +211,11 @@ export const fr = {
     viceEnd: (product: string, district: string) => `Fin du vice : ${product} en Forte demande à ${district}`,
     serviceReady: (service: string) => `${service} : de nouveau disponible`,
     trapdoorReady: 'Trappe de largage rechargée',
+    prophecy: (event: string) => `Prophétie de Cassandre-88 : ${event}, garanti`,
+    calendarDay: (day: number) => `Jour ${day}`,
+    calendarEmpty: 'Rien de connu ce jour-là.',
+    calendarCount: (count: number) => `${count} élément${count > 1 ? 's' : ''}`,
+    upcoming: 'À venir',
     agendaContract: (district: string) => `Dernier jour du contrat de la Pègre (livraison à ${district})`,
     service: {
       influence: 'Karma-Cham',

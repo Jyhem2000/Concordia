@@ -8,7 +8,14 @@ describe('carnet de route (chap. 7)', () => {
   it('s’ouvre au Jour 1 sur le patrimoine de départ', () => {
     const state = createInitialState(7)
     expect(state.journal).toEqual([
-      { day: 1, start: { cash: state.cash, offshore: 0, venture: 0, debt: state.debt }, bought: 0, sold: 0, highlights: [] },
+      {
+        day: 1,
+        start: { cash: state.cash, offshore: 0, venture: 0, debt: state.debt },
+        events: { global: state.events.global, local: state.events.local },
+        bought: 0,
+        sold: 0,
+        highlights: [],
+      },
     ])
   })
 

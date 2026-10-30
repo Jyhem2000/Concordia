@@ -596,6 +596,8 @@ export type DayLog = {
   day: number
   /** Patrimoine à 06h00, routine faite ; celui du lendemain matin ferme la journée */
   start: WealthSnapshot
+  /** Événements du jour, tirés à 06h00 : le passé du calendrier */
+  events: { global: GlobalEventId | null; local: Partial<Record<DistrictId, LocalEventId>> }
   /** Cash-Puce dépensé en marchandise, et encaissé en ventes */
   bought: number
   sold: number
