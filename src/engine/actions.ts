@@ -74,6 +74,7 @@ export type Action =
   | { type: 'setAutoCooling'; enabled: boolean }
   | { type: 'sleep' }
   | { type: 'siphon' }
+  | { type: 'waitEvening' }
   | { type: 'repay'; amount: number }
   | { type: 'borrow'; amount: number }
   | { type: 'deposit'; amount: number }
@@ -125,7 +126,7 @@ export type ActionError =
   | 'not-enough-fuel'
   | 'not-daytime'
   | 'exhausted'
-  | 'day-trip-pending'
+  | 'not-evening'
   | 'siphon-unavailable'
   | 'invalid-amount'
   | 'not-at-location'
@@ -477,12 +478,26 @@ function divest(state: GameState, amount: number): ActionResult {
 
 // ─── Fin de journée ───
 
+/** On ne dort que le soir venu (après le trajet du jour ou en attendant le soir), ou la nuit (chap. 1) */
+export function checkSleep(state: GameState): ActionError | null {
+  if (state.status !== 'playing') return 'game-over'
+  return state.phase === 'day' && !state.dayTripDone ? 'not-evening' : null
+}
+
+/** Attendre le soir (chap. 1) : la journée passe sur place, sans trajet ; place à 20h00 */
+function waitEvening(state: GameState): ActionResult {
+  if (state.status !== 'playing') return fail('game-over')
+  if (state.phase !== 'day') return fail('not-daytime')
+  if (state.dayTripDone) return fail('trip-done')
+  return { ok: true, state: { ...state, dayTripDone: true, dayOver: true } }
+}
+
 /** La tournée de nuit du Jour J est verrouillée le soir du Jour J+1 (épuisement nerveux, chap. 1) */
 export function checkForceCurfew(state: GameState, drink?: ProductId): ActionError | null {
   if (state.status !== 'playing') return 'game-over'
   if (state.phase !== 'day') return 'not-daytime'
-  // La tournée de nuit est le second trajet de la journée : elle part après celui du jour (chap. 1)
-  if (!state.dayTripDone) return 'day-trip-pending'
+  // La tournée de nuit part le soir : après le trajet du jour, ou une fois la journée passée sur place (chap. 1)
+  if (!state.dayTripDone) return 'not-evening'
   const exhausted = state.lastCurfewDay === state.day - 1
   if (drink === undefined) return exhausted ? 'exhausted' : null
   // Nuit blanche forcée : une boisson lève l'épuisement pour une 2e nuit, jamais une 3e (chap. 1 et 2)
@@ -607,10 +622,14 @@ function resolveAction(state: GameState, action: Action): ActionResult {
       const error = checkCompartment(state, action.productId, action.hide)
       return error ? fail(error) : { ok: true, state: setCompartment(state, action.productId, action.hide) }
     }
-    case 'sleep':
-      return { ok: true, state: sleep(state) }
+    case 'sleep': {
+      const error = checkSleep(state)
+      return error ? fail(error) : { ok: true, state: sleep(state) }
+    }
     case 'siphon':
       return siphon(state)
+    case 'waitEvening':
+      return waitEvening(state)
     case 'repay':
       return isQuantity(action.amount) ? repay(state, action.amount) : fail('invalid-amount')
     case 'borrow':

@@ -1,4 +1,4 @@
-import { BedDouble, PartyPopper, Siren } from 'lucide-react'
+import { BedDouble, Hourglass, PartyPopper, Siren } from 'lucide-react'
 import { AFTER, ENDINGS, WANTED } from '../../data/balance.ts'
 import { TAGS } from '../../data/tags.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
@@ -18,7 +18,10 @@ import Panel from '../shared/Panel.tsx'
 /** Un choix du soir : côte à côte sur grand écran, l'un sous l'autre quand la place manque */
 const CHOICE = 'flex min-w-0 flex-1 basis-48 flex-col gap-1'
 
-/** Dilemme de 20h00 (chap. 1) : dormir, mission de nuit ou tournée clandestine ; le plein se fait à la pompe (onglet Lieux) */
+/**
+ * Dilemme de 20h00 (chap. 1) : de jour, attendre le soir sur place ; le soir venu, mission de nuit, tournée clandestine ou
+ * sommeil ; le plein se fait à la pompe (onglet Lieux)
+ */
 export default function EveningPanel() {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
@@ -68,29 +71,37 @@ export default function EveningPanel() {
             </Hint>
             {afterLine}
             <Hint className="mt-1">{t.evening.nightRule}</Hint>
-            {!game.dayTripDone && (
-              <Hint tone="night" className="mt-1">
-                {t.error['day-trip-pending']}
+            {game.contract && (
+              <Hint tone="warning" className="mt-1">
+                {t.evening.contractTonight(t.district[game.contract.to].name)}
               </Hint>
             )}
-            {/* Les choix côte à côte ; les tournées de nuit n'apparaissent qu'après le trajet du jour */}
-            <ul className="mt-2 flex flex-wrap items-start gap-2">
-              <li className={CHOICE}>
-                <Button variant="primary" className="w-full" onClick={() => dispatch({ type: 'sleep' })}>
-                  <BedDouble size={14} aria-hidden="true" />
-                  {sleepLabel}
+            {!game.dayTripDone ? (
+              // Journée en cours : rester sur place jusqu'au soir ; les trajets de jour partent de la carte (Aller)
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <Button onClick={() => dispatch({ type: 'waitEvening' })}>
+                  <Hourglass size={14} aria-hidden="true" />
+                  {t.evening.wait}
                 </Button>
-              </li>
-              {game.dayTripDone && offer && (
-                <li className={CHOICE}>
-                  <Button className="w-full" disabled={missionError !== null} onClick={() => dispatch({ type: 'forceCurfew', mission: true, drink })}>
-                    {t.evening.missionTour(t.district[offer].name, credits(missionFee(game)))}
-                    {drinkLabel}
-                  </Button>
-                  <Hint>{missionError ? t.error[missionError] : t.evening.missionTourHint(sealedCount(game))}</Hint>
-                </li>
-              )}
-              {game.dayTripDone && (
+                <Hint>{t.evening.waitHint}</Hint>
+                <Hint tone="night">{t.evening.beforeEvening}</Hint>
+              </div>
+            ) : (
+              /* Le soir : les choix côte à côte */
+              <ul className="mt-2 flex flex-wrap items-start gap-2">
+                {offer && (
+                  <li className={CHOICE}>
+                    <Button
+                      className="w-full"
+                      disabled={missionError !== null}
+                      onClick={() => dispatch({ type: 'forceCurfew', mission: true, drink })}
+                    >
+                      {t.evening.missionTour(t.district[offer].name, credits(missionFee(game)))}
+                      {drinkLabel}
+                    </Button>
+                    <Hint>{missionError ? t.error[missionError] : t.evening.missionTourHint(sealedCount(game))}</Hint>
+                  </li>
+                )}
                 <li className={CHOICE}>
                   <ConfirmButton
                     variant="danger"
@@ -109,8 +120,14 @@ export default function EveningPanel() {
                   <Hint>{curfewError ? t.error[curfewError] : t.evening.clandestineHint(t.hud.wantedGain(WANTED.perOffense))}</Hint>
                   {canInject(game) && <Hint tone="accent">{t.evening.injectionHint(game.progress.injections + 1, ENDINGS.resident.injections)}</Hint>}
                 </li>
-              )}
-            </ul>
+                <li className={CHOICE}>
+                  <Button variant="primary" className="w-full" onClick={() => dispatch({ type: 'sleep' })}>
+                    <BedDouble size={14} aria-hidden="true" />
+                    {sleepLabel}
+                  </Button>
+                </li>
+              </ul>
+            )}
             {coolants.map((id) => (
               <label key={id} className="mt-2 flex items-center gap-1.5 text-xs text-ink-soft">
                 <input

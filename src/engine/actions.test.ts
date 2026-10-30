@@ -128,8 +128,10 @@ describe('journées', () => {
     expect(state.memory.D2?.at(-1)?.day).toBe(2)
   })
 
-  it('fait partir la tournée de nuit après le trajet du jour', () => {
-    expect(errorOf(start, { type: 'forceCurfew' })).toBe('day-trip-pending')
+  it('fait partir la tournée de nuit le soir : après le trajet du jour, ou en attendant le soir', () => {
+    expect(errorOf(start, { type: 'forceCurfew' })).toBe('not-evening')
+    expect(errorOf(run(start, { type: 'waitEvening' }), { type: 'forceCurfew' })).toBeNull()
+    expect(run(start, { type: 'waitEvening' })).toMatchObject({ phase: 'day', dayTripDone: true, dayOver: true })
     expect(errorOf(run(start, { type: 'travel', to: 'D2' }), { type: 'forceCurfew' })).toBeNull()
   })
 
@@ -140,15 +142,16 @@ describe('journées', () => {
     expect(errorOf(night, { type: 'forceCurfew' })).toBe('not-daytime')
     const nextDay = run(night, { type: 'sleep' })
     expect(errorOf(tripped(nextDay), { type: 'forceCurfew' })).toBe('exhausted')
-    const dayAfter = run(nextDay, { type: 'sleep' })
+    const dayAfter = run(nextDay, { type: 'waitEvening' }, { type: 'sleep' })
     expect(errorOf(tripped(dayAfter), { type: 'forceCurfew' })).toBeNull()
   })
 
   it('termine la partie après le Jour 30', () => {
     let state = start
-    for (let day = 1; day < GAME_LENGTH_DAYS; day++) state = run(state, { type: 'sleep' })
+    for (let day = 1; day < GAME_LENGTH_DAYS; day++) state = run(state, { type: 'waitEvening' }, { type: 'sleep' })
     expect(state.day).toBe(GAME_LENGTH_DAYS)
-    state = run(state, { type: 'sleep' })
+    expect(errorOf(state, { type: 'sleep' })).toBe('not-evening')
+    state = run(state, { type: 'waitEvening' }, { type: 'sleep' })
     expect(state.status).toBe('finished')
     expect(errorOf(state, { type: 'sleep' })).toBe('game-over')
   })

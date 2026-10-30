@@ -114,7 +114,7 @@ function TodayPanel({ onGo }: GoProps) {
   const lines: Line[] = [
     ...(game.delivery ? [line('delivery', t.fil.deliveryActive(t.district[game.delivery.to].name), 'info', 'map')] : []),
     ...(delivery
-      ? [line('delivery', t.fil.deliveryOffer(t.district[delivery].name, deliveryCrates(game), credits(deliveryFee(game))), 'info', 'map')]
+      ? [line('delivery', t.fil.deliveryOffer(t.district[delivery].name, deliveryCrates(game), credits(deliveryFee(game))), 'info', 'market')]
       : []),
     ...(game.contract
       ? [

@@ -53,6 +53,7 @@ function candidates(state: GameState): Action[] {
     { type: 'forceCurfew', mission: true },
     ...owned.map((drink): Action => ({ type: 'forceCurfew', drink })),
     { type: 'siphon' },
+    { type: 'waitEvening' },
     { type: 'repay', amount },
     { type: 'borrow', amount: 1_000 },
     { type: 'deposit', amount },

@@ -1,3 +1,4 @@
+import DeliveryCard from './DeliveryCard.tsx'
 import { ArrowUpDown, EyeOff, Filter, RotateCcw } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { PRODUCTS } from '../../data/products.ts'
@@ -104,6 +105,7 @@ export default function MarketPanel() {
           {t.travel.sealed(sealed, t.district[game.mission.to].name)}
         </Hint>
       )}
+      <DeliveryCard />
       <CompartmentNotice className="px-3 pt-2" />
       {contractHere && (
         <div className="px-3 pt-3">

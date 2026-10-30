@@ -1,5 +1,6 @@
-import { Eye, PartyPopper, Siren, Sparkles, Truck, type LucideIcon } from 'lucide-react'
+import { Eye, PackageCheck, PartyPopper, Siren, Sparkles, Truck, type LucideIcon } from 'lucide-react'
 import { crewEffect } from '../../engine/crew.ts'
+import { deliveryOffer } from '../../engine/delivery.ts'
 import type { DistrictId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -21,8 +22,13 @@ type Sign = {
   tone: Tone
 }
 
-/** Bulles d'indices d'un district (chap. 7) : mission de nuit, ronde renforcée, after du couvre-feu, pic suspect, événement */
+/** Bulles d'indices d'un district (chap. 7) : livraison officielle du jour, mission de nuit, ronde renforcée, after du couvre-feu, pic suspect, événement */
 export default function DistrictSigns({ districtId, withEvent = false, labelled = false }: DistrictSignsProps) {
+  // Destination de la livraison officielle du jour, proposée ou acceptée
+  const deliveryHere = useGameStore(
+    (s) =>
+      s.game.phase === 'day' && (s.game.delivery ? s.game.delivery.to === districtId : !s.game.dayTripDone && deliveryOffer(s.game) === districtId),
+  )
   // Destination de la mission de nuit acceptée
   const missionHere = useGameStore((s) => s.game.phase === 'night' && s.game.mission?.to === districtId)
   // Vance révèle chaque matin le district de la ronde renforcée
@@ -34,6 +40,7 @@ export default function DistrictSigns({ districtId, withEvent = false, labelled 
   const { t } = useI18n()
 
   const candidates: (Sign | false)[] = [
+    deliveryHere && { key: 'delivery', icon: PackageCheck, label: t.travel.deliveryTarget, tone: 'info' },
     missionHere && { key: 'mission', icon: Truck, label: t.travel.mission, tone: 'info' },
     patrolled && { key: 'patrol', icon: Siren, label: t.travel.patrol, tone: 'info' },
     after && { key: 'after', icon: PartyPopper, label: t.travel.after, tone: 'event' },

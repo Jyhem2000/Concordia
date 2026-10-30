@@ -218,7 +218,11 @@ const ENDGAME_DAY = 28
 export function traderBot(plan: Plan, temperament: Temperament, objective: Objective): Bot {
   return {
     name: `${plan.name} · ${temperament.name} · ${OBJECTIVE_NAMES[objective]}`,
-    decide: (view) => decide(view, goalPlan(plan, objective), goalTemperament(view, temperament, objective), objective),
+    decide: (view) => {
+      const action = decide(view, goalPlan(plan, objective), goalTemperament(view, temperament, objective), objective)
+      // On ne dort que le soir : sans trajet de jour, la journée passe d'abord sur place
+      return action.type === 'sleep' && view.phase === 'day' && !view.dayTripDone ? { type: 'waitEvening' } : action
+    },
   }
 }
 
@@ -328,22 +332,22 @@ function serverMove(view: GameState, objective: Objective): Action | null {
 }
 
 /**
- * Trajet vers le district le moins exposé (hors `avoid`), s'il reste un trajet dans la phase. La fouille coûte le plus :
+ * Trajet vers le district le moins exposé, s'il reste un trajet dans la phase. La fouille coûte le plus :
  * le racket des milices (sans fouille) vaut mieux qu'un barrage, s'il reste de quoi payer le péage.
  */
-function safestTrip(view: GameState, avoid?: DistrictId): Action | null {
+function safestTrip(view: GameState): Action | null {
   const exposure = (to: DistrictId) => (DISTRICTS[to].offGrid ? (view.cash >= toll(view) * 1.5 ? 0 : 1) : risk(view, to, { includePatrol: false }))
   const reachable = (id: DistrictId) => {
     const error = planTravel(view, id).error
     return !error || error === 'not-enough-fuel'
   }
-  const targets = DISTRICT_IDS.filter((id) => id !== view.districtId && id !== avoid && reachable(id))
+  const targets = DISTRICT_IDS.filter((id) => id !== view.districtId && reachable(id))
   const safest = targets.sort((a, b) => exposure(a) - exposure(b))[0]
   return safest ? travelTo(view, safest) : null
 }
 
 /**
- * Tournée de ce soir, une fois le trajet du jour fait (chap. 1) : de jour, le bot prévoit la nuit avant d'avoir roulé.
+ * Tournée de ce soir, une fois le soir venu (chap. 1) : de jour, le bot prévoit la nuit avant d'avoir roulé ou attendu.
  * Null si elle sera permise.
  */
 function tourTonight(view: GameState, drink?: ProductId) {
@@ -362,8 +366,8 @@ function injectionMove(view: GameState): Action {
     if (cover > 0) return { type: 'buy', productId: 'T0-01', qty: cover }
   }
   if (tourTonight(view)) return { type: 'sleep' }
-  // La tournée part après le trajet du jour : d'abord un trajet de jour, le moins exposé
-  if (!view.dayTripDone) return safestTrip(view) ?? { type: 'sleep' }
+  // La tournée part le soir : sans trajet de jour, attendre le soir sur place
+  if (!view.dayTripDone) return { type: 'waitEvening' }
   return { type: 'forceCurfew' }
 }
 
@@ -928,8 +932,8 @@ function eveningTour(view: GameState, plan: Plan, temperament: Temperament): Act
       : mode === 'always' || (mode === 'margin' && tradable(view).length > 0)
         ? { type: 'forceCurfew' }
         : null
-  // Tournée voulue, trajet du jour pas encore fait : rouler d'abord, sans finir dans le district de la mission
-  if (tour && !view.dayTripDone) return safestTrip(view, mission ?? undefined)
+  // Tournée voulue, sans trajet de jour : attendre le soir sur place
+  if (tour && !view.dayTripDone) return { type: 'waitEvening' }
   return tour
 }
 

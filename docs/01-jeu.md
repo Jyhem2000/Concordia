@@ -135,7 +135,7 @@ Seuls les routiers boivent l'eau sans sédatifs de `[LOC-D1-2]` : c'est elle qui
 ### Les moments de la journée
 Le **Jour** (Jour 1 à Jour 30) est la date. Chaque jour se découpe en trois moments, toujours nommés ainsi :
 * **Journée** (06h00 – 20h00) : commerce, lieux spéciaux, 1 trajet de jour. Elle commence par la routine matinale.
-* **20h00** : le couvre-feu sanitaire des citoyens et le dilemme du livreur (dormir, bivouaquer ou partir en tournée de nuit). On y arrive quand le joueur le décide, ou d'office après la perte d'une demi-journée (voir plus bas) : seul le marché de rue reste alors ouvert.
+* **20h00** : le couvre-feu sanitaire des citoyens et le dilemme du livreur (dormir, bivouaquer ou partir en tournée de nuit). Le soir vient après le trajet du jour, ou quand le joueur choisit d'**attendre le soir** sur place (la journée passe sans trajet), ou d'office après la perte d'une demi-journée (voir plus bas) : seul le marché de rue reste alors ouvert. On ne dort que le soir venu, ou la nuit.
 * **Nuit** (après 20h00, tournée de nuit) : marché de rue seulement, 1 trajet de nuit, puis dormir. La nuit s'achève à la routine de 06h00 du jour suivant.
 
 Le bandeau affiche la date, le moment et si le trajet du moment est encore disponible (chap. 7).
@@ -151,7 +151,7 @@ Le Jour 1 commence sans routine : pas d'intérêts, boutiques et événements ti
 7. Effets du matin des événements : canicule sur les périssables, sas de `[EVT-D3-01]` si le joueur se trouve en `[D3]` (chap. 6). Enfin, Lucidité **−1 jour**.
 
 ### Service de jour (06h00 – 20h00)
-Acheter / vendre au marché, faire le plein, utiliser les lieux spéciaux du district, accepter la livraison officielle du jour, et effectuer **1 trajet de jour**. Une fois arrivé, on peut à nouveau commercer avant 20h00.
+Acheter / vendre au marché, faire le plein, utiliser les lieux spéciaux du district, accepter la livraison officielle du jour, et effectuer **1 trajet de jour**, ou rester sur place et attendre le soir. Une fois arrivé, on peut à nouveau commercer avant 20h00.
 
 ### Livraison officielle du jour
 Le joueur est officiellement livreur de Catégorie C : la plateforme logistique du DSC lui confie parfois une commande légale. C'est le revenu sûr de celui qui ne veut pas risquer gros. Chiffres : `DAY_DELIVERY` dans [`balance.ts`](../src/data/balance.ts).
@@ -175,7 +175,7 @@ Le joueur est officiellement livreur de Catégorie C : la plateforme logistique 
 Les sirènes d'Aeterna annoncent le couvre-feu sanitaire : les citoyens rentrent, la logistique continue. Trois options :
 * **Dormir au relais routier du DSC** (dans chaque district sauf `[D4]`, côté quais de service) : jusqu'à 06h00. **Gain d'ICC et de Santé** (`RELAY_SLEEP` dans [`balance.ts`](../src/data/balance.ts)), réinitialise l'épuisement, baisse la Fiche S d'un niveau (chap. 5).
 * **Bivouac** (seule façon de dormir en `[D4]`) : réinitialise l'épuisement, mais **0 ICC, 0 PV**, et la Fiche S ne baisse pas (aucun capteur ne certifie ta nuit sage).
-* **Tournée de nuit :** un second trajet dans la journée, dans les galeries de service. Elle ne part qu'**après le trajet du jour** (ou une demi-journée perdue qui en tient lieu, comme la corvée DSC) : sans lui, il n'y a que le sommeil. La nuit qui suit ne rapporte aucun gain de sommeil et ne baisse pas la Fiche S, même en dormant ensuite dans un district à relais.
+* **Tournée de nuit :** un second trajet dans la journée, dans les galeries de service. Elle part **le soir** : après le trajet du jour, après avoir attendu le soir sur place, ou après une demi-journée perdue (corvée DSC). La nuit qui suit ne rapporte aucun gain de sommeil et ne baisse pas la Fiche S, même en dormant ensuite dans un district à relais.
 
 ### Tournée de nuit
 Tout est filmé : un camion la nuit n'est légitime que sur **ordre de mission** de la plateforme logistique du DSC. Chiffres : `NIGHT_MISSION` dans [`balance.ts`](../src/data/balance.ts).

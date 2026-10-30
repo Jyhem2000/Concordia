@@ -13,6 +13,7 @@ describe('gameStore', () => {
 
   it('remplace la partie quand le moteur accepte une action', () => {
     const before = useGameStore.getState().game
+    useGameStore.getState().dispatch({ type: 'waitEvening' })
     useGameStore.getState().dispatch({ type: 'sleep' })
     const { game, lastError } = useGameStore.getState()
     expect(game.day).toBe(before.day + 1)
@@ -26,11 +27,12 @@ describe('gameStore', () => {
     expect(useGameStore.getState().lastError).toBe('tank-full')
 
     // L'erreur affichée s'efface à l'action suivante qui réussit
-    useGameStore.getState().dispatch({ type: 'sleep' })
+    useGameStore.getState().dispatch({ type: 'waitEvening' })
     expect(useGameStore.getState().lastError).toBeNull()
   })
 
   it('repart au Jour 1 avec une nouvelle partie', () => {
+    useGameStore.getState().dispatch({ type: 'waitEvening' })
     useGameStore.getState().dispatch({ type: 'sleep' })
     useGameStore.getState().newGame()
     expect(useGameStore.getState()).toMatchObject({ game: { day: 1, status: 'playing' }, lastError: null })

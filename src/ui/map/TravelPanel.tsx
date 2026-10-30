@@ -10,8 +10,6 @@ import { averageCost, cargoUsed, ownedQty } from '../../engine/cargo.ts'
 import { crewEffect, isMemoryBlurred } from '../../engine/crew.ts'
 import { blurredQuote, estimatedUnitSale, fuelPriceBreakdown, lastSeen, productStatus } from '../../engine/market.ts'
 import { flyingCheckShare, hiddenCargo } from '../../engine/interception.ts'
-import { checkDelivery, deliveryCrates, deliveryFee, deliveryOffer } from '../../engine/delivery.ts'
-import { trustFactor } from '../../engine/progress.ts'
 import { riskBreakdown } from '../../engine/risk.ts'
 import type { DistrictId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
@@ -73,7 +71,6 @@ export default function TravelPanel() {
       {tripDone && <Hint className="px-3 pt-2">{t.error['trip-done']}</Hint>}
       <LastTrip />
       <CargoSummary />
-      <DayDelivery />
       <Exposure className="px-3 pt-2" />
       <ul className="mt-2 divide-y divide-line border-t border-line">
         {order.map((id) => (
@@ -97,36 +94,6 @@ function CargoSummary() {
       <span className="font-bold text-accent">{t.travel.cargoTitle(cargoUsed(game.cargo), VEHICLES[game.vehicleId].cargo)}</span>{' '}
       {lines.length > 0 ? lines.join(' · ') : t.travel.cargoEmpty}
     </Hint>
-  )
-}
-
-/** Livraison officielle du jour (chap. 1) : offre de la plateforme, ou livraison en cours */
-function DayDelivery() {
-  // L'offre, la place et la prime se calculent sur l'état entier de la partie
-  const game = useGameStore((s) => s.game)
-  const dispatch = useGameStore((s) => s.dispatch)
-  const { t, credits, multiplier } = useI18n()
-  const trust = t.travel.trust(game.progress.deliveries, multiplier(trustFactor(game)))
-  if (game.phase !== 'day') return null
-  if (game.delivery)
-    return (
-      <Hint tone="info" className="px-3 pt-2">
-        {t.travel.deliveryActive(t.district[game.delivery.to].name)} {trust}
-      </Hint>
-    )
-  const to = deliveryOffer(game)
-  if (!to || game.dayTripDone) return null
-  const error = checkDelivery(game)
-  return (
-    <div className="px-3 pt-2 text-xs">
-      <p className="font-bold text-info">{t.travel.deliveryTitle}</p>
-      <p className="text-ink-soft">{t.travel.deliveryOffer(t.district[to].name, deliveryCrates(game), credits(deliveryFee(game)))}</p>
-      <p className="text-ink-muted">{trust}</p>
-      <Button className="mt-1" size="sm" disabled={error !== null} onClick={() => dispatch({ type: 'acceptDelivery' })}>
-        {t.travel.acceptDelivery}
-      </Button>
-      {error && <p className="mt-1 text-ink-muted">{t.error[error]}</p>}
-    </div>
   )
 }
 
@@ -313,7 +280,7 @@ function TravelButton({ to }: TravelButtonProps) {
   return (
     <div className="text-right">
       <Button variant="primary" disabled={plan.error !== null} onClick={() => dispatch({ type: 'travel', to })}>
-        {t.travel.go[game.phase]}
+        {t.travel.go}
       </Button>
       <div className="mt-0.5 text-xs text-ink-muted">
         {route} · {t.travel.fuel(plan.fuelCost)}

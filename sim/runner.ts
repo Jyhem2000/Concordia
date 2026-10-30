@@ -98,7 +98,7 @@ export function playGame(bot: Bot, seed: number): GameRecord {
   // Garde-fou absolu : une partie ne peut pas tourner sans fin, même si la sortie de secours est refusée
   for (let step = 0; state.status === 'playing' && step < ACTIONS_PER_DAY * 40; step++) {
     const action: Action = actionsToday >= ACTIONS_PER_DAY ? forcedEnd(state) : bot.decide(publicView(state))
-    if (actionsToday >= ACTIONS_PER_DAY) record.forcedSleeps++
+    if (actionsToday >= ACTIONS_PER_DAY && action.type === 'sleep') record.forcedSleeps++
     const result = applyAction(state, action)
     if (!result.ok) {
       record.refused++
@@ -123,12 +123,12 @@ export function playGame(bot: Bot, seed: number): GameRecord {
   return record
 }
 
-/** Sortie de secours d'une journée bloquée : régler le barrage ou l'aléa, sinon dormir */
+/** Sortie de secours d'une journée bloquée : régler le barrage ou l'aléa, sinon attendre le soir, puis dormir */
 function forcedEnd(state: GameState): Action {
   if (state.interception) return { type: 'intercept', move: state.interception.kind === 'racket' ? 'refuseToll' : 'search' }
   // Chaque aléa garde une option sans paiement (chap. 6)
   if (state.roadEvent) return { type: 'road', choice: ROAD_EVENTS[state.roadEvent].a.pay ? 'b' : 'a' }
-  return { type: 'sleep' }
+  return state.phase === 'day' && !state.dayTripDone ? { type: 'waitEvening' } : { type: 'sleep' }
 }
 
 /** Relève ce qu'une action a changé */

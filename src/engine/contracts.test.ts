@@ -43,7 +43,7 @@ describe('contrats de la Pègre (chap. 3)', () => {
   })
 
   it('ajoute une pénalité à la dette quand le délai est passé', () => {
-    const late = run(gameAt(contract.deadline, { contract }), { type: 'sleep' })
+    const late = run(gameAt(contract.deadline, { contract }), { type: 'waitEvening' }, { type: 'sleep' })
     const penalty = Math.round(contract.reward * CONTRACT.failDebtShare)
     expect(late.contract).toBeNull()
     expect(late.briefing?.contractFailed).toBe(penalty)
