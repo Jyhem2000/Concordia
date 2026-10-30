@@ -14,7 +14,7 @@ import { defined, EARNED, errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } fr
 import type { CargoLot, GameState, Interception, ProductId } from './types.ts'
 
 const lot = (productId: ProductId, qty: number): CargoLot => ({ productId, qty, unitCost: 10, travelled: true, boughtDay: 3, damaged: false })
-const evening = (patch: Partial<GameState> = {}) => gameAt(3, { districtId: 'D1', nightOffer: 'D2', rng: HIGH_ROLL_RNG, progress: EARNED, ...patch })
+const evening = (patch: Partial<GameState> = {}) => gameAt(3, { districtId: 'D1', dayTripDone: true, nightOffer: 'D2', rng: HIGH_ROLL_RNG, progress: EARNED, ...patch })
 const nightRisk = (state: GameState, to: GameState['districtId']) =>
   riskBreakdown(state, to, { includePatrol: false }).lines.some((line) => line.source === 'rule.night-trip')
 

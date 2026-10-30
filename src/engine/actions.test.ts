@@ -128,13 +128,20 @@ describe('journées', () => {
     expect(state.memory.D2?.at(-1)?.day).toBe(2)
   })
 
+  it('fait partir la tournée de nuit après le trajet du jour', () => {
+    expect(errorOf(start, { type: 'forceCurfew' })).toBe('day-trip-pending')
+    expect(errorOf(run(start, { type: 'travel', to: 'D2' }), { type: 'forceCurfew' })).toBeNull()
+  })
+
   it('verrouille le couvre-feu le lendemain d’une nuit blanche', () => {
-    const night = run(start, { type: 'forceCurfew' })
+    // Trajet du jour supposé fait : seule compte ici la nuit blanche de la veille
+    const tripped = (state: GameState): GameState => ({ ...state, dayTripDone: true })
+    const night = run(tripped(start), { type: 'forceCurfew' })
     expect(errorOf(night, { type: 'forceCurfew' })).toBe('not-daytime')
     const nextDay = run(night, { type: 'sleep' })
-    expect(errorOf(nextDay, { type: 'forceCurfew' })).toBe('exhausted')
+    expect(errorOf(tripped(nextDay), { type: 'forceCurfew' })).toBe('exhausted')
     const dayAfter = run(nextDay, { type: 'sleep' })
-    expect(errorOf(dayAfter, { type: 'forceCurfew' })).toBeNull()
+    expect(errorOf(tripped(dayAfter), { type: 'forceCurfew' })).toBeNull()
   })
 
   it('termine la partie après le Jour 30', () => {
@@ -221,7 +228,7 @@ describe('produits utilisables', () => {
 
   it('autorise une 2e nuit blanche avec une boisson, jamais une 3e', () => {
     const sleepless = defined(PRODUCTS['T2-05'].sleeplessNight)
-    const exhausted = gameAt(5, { lastCurfewDay: 4, curfewStreak: 1, cargo: [crates('T2-05', 2)] })
+    const exhausted = gameAt(5, { dayTripDone: true, lastCurfewDay: 4, curfewStreak: 1, cargo: [crates('T2-05', 2)] })
     expect(errorOf(exhausted, { type: 'forceCurfew' })).toBe('exhausted')
     const second = run(exhausted, { type: 'forceCurfew', drink: 'T2-05' })
     expect(second).toMatchObject({ phase: 'night', curfewStreak: 2, health: 100 - sleepless.healthLoss })

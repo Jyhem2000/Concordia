@@ -15,6 +15,9 @@ import { FOCUS_RING } from '../shared/focus.ts'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
 
+/** Un choix du soir : côte à côte sur grand écran, l'un sous l'autre quand la place manque */
+const CHOICE = 'flex min-w-0 flex-1 basis-48 flex-col gap-1'
+
 /** Dilemme de 20h00 (chap. 1) : dormir, mission de nuit ou tournée clandestine ; le plein se fait à la pompe (onglet Lieux) */
 export default function EveningPanel() {
   const game = useGameStore((s) => s.game)
@@ -65,39 +68,48 @@ export default function EveningPanel() {
             </Hint>
             {afterLine}
             <Hint className="mt-1">{t.evening.nightRule}</Hint>
-            <ul className="mt-2 flex flex-col gap-2">
-              <li>
-                <Button variant="primary" onClick={() => dispatch({ type: 'sleep' })}>
+            {!game.dayTripDone && (
+              <Hint tone="night" className="mt-1">
+                {t.error['day-trip-pending']}
+              </Hint>
+            )}
+            {/* Les choix côte à côte ; les tournées de nuit n'apparaissent qu'après le trajet du jour */}
+            <ul className="mt-2 flex flex-wrap items-start gap-2">
+              <li className={CHOICE}>
+                <Button variant="primary" className="w-full" onClick={() => dispatch({ type: 'sleep' })}>
                   <BedDouble size={14} aria-hidden="true" />
                   {sleepLabel}
                 </Button>
               </li>
-              {offer && (
-                <li>
-                  <Button disabled={missionError !== null} onClick={() => dispatch({ type: 'forceCurfew', mission: true, drink })}>
+              {game.dayTripDone && offer && (
+                <li className={CHOICE}>
+                  <Button className="w-full" disabled={missionError !== null} onClick={() => dispatch({ type: 'forceCurfew', mission: true, drink })}>
                     {t.evening.missionTour(t.district[offer].name, credits(missionFee(game)))}
                     {drinkLabel}
                   </Button>
                   <Hint>{missionError ? t.error[missionError] : t.evening.missionTourHint(sealedCount(game))}</Hint>
                 </li>
               )}
-              <li>
-                <ConfirmButton
-                  variant="danger"
-                  disabled={curfewError !== null}
-                  onClick={() => dispatch({ type: 'forceCurfew', drink })}
-                  confirm={
-                    lethal
-                      ? { title: t.evening.lethalConfirm, message: t.evening.lethalWarning(t.product[lethal].name), action: t.evening.lethalAction }
-                      : undefined
-                  }
-                >
-                  {t.evening.clandestineTour}
-                  {drinkLabel}
-                </ConfirmButton>
-                <Hint>{curfewError ? t.error[curfewError] : t.evening.clandestineHint(t.hud.wantedGain(WANTED.perOffense))}</Hint>
-                {canInject(game) && <Hint tone="accent">{t.evening.injectionHint(game.progress.injections + 1, ENDINGS.resident.injections)}</Hint>}
-              </li>
+              {game.dayTripDone && (
+                <li className={CHOICE}>
+                  <ConfirmButton
+                    variant="danger"
+                    className="w-full"
+                    disabled={curfewError !== null}
+                    onClick={() => dispatch({ type: 'forceCurfew', drink })}
+                    confirm={
+                      lethal
+                        ? { title: t.evening.lethalConfirm, message: t.evening.lethalWarning(t.product[lethal].name), action: t.evening.lethalAction }
+                        : undefined
+                    }
+                  >
+                    {t.evening.clandestineTour}
+                    {drinkLabel}
+                  </ConfirmButton>
+                  <Hint>{curfewError ? t.error[curfewError] : t.evening.clandestineHint(t.hud.wantedGain(WANTED.perOffense))}</Hint>
+                  {canInject(game) && <Hint tone="accent">{t.evening.injectionHint(game.progress.injections + 1, ENDINGS.resident.injections)}</Hint>}
+                </li>
+              )}
             </ul>
             {coolants.map((id) => (
               <label key={id} className="mt-2 flex items-center gap-1.5 text-xs text-ink-soft">

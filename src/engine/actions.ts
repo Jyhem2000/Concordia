@@ -125,6 +125,7 @@ export type ActionError =
   | 'not-enough-fuel'
   | 'not-daytime'
   | 'exhausted'
+  | 'day-trip-pending'
   | 'siphon-unavailable'
   | 'invalid-amount'
   | 'not-at-location'
@@ -480,6 +481,8 @@ function divest(state: GameState, amount: number): ActionResult {
 export function checkForceCurfew(state: GameState, drink?: ProductId): ActionError | null {
   if (state.status !== 'playing') return 'game-over'
   if (state.phase !== 'day') return 'not-daytime'
+  // La tournée de nuit est le second trajet de la journée : elle part après celui du jour (chap. 1)
+  if (!state.dayTripDone) return 'day-trip-pending'
   const exhausted = state.lastCurfewDay === state.day - 1
   if (drink === undefined) return exhausted ? 'exhausted' : null
   // Nuit blanche forcée : une boisson lève l'épuisement pour une 2e nuit, jamais une 3e (chap. 1 et 2)

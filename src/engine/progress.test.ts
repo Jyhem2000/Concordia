@@ -42,7 +42,7 @@ describe('progression (chap. 1 et 4)', () => {
   })
 
   it('confie la nuit après quelques livraisons, et paie mieux avec la confiance', () => {
-    const fresh = gameAt(3, { nightOffer: 'D2' })
+    const fresh = gameAt(3, { dayTripDone: true, nightOffer: 'D2' })
     expect(errorOf(fresh, { type: 'forceCurfew', mission: true })).toBe('mission-locked')
     expect(nightUnlock(fresh).needed).toBe(DSC_TRUST.nightAfterDeliveries)
     const trusted = { ...fresh, progress: { ...fresh.progress, deliveries: DSC_TRUST.nightAfterDeliveries } }

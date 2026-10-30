@@ -1124,6 +1124,7 @@ export const fr = {
     'not-enough-fuel': 'Pas assez de Synthanol.',
     'not-daytime': 'Possible seulement de jour.',
     exhausted: "Épuisement nerveux : pas de seconde nuit blanche d'affilée.",
+    'day-trip-pending': 'Les tournées de nuit partent après le trajet du jour.',
     'siphon-unavailable': "La corvée DSC n'est possible que bloqué, sans carburant, ni cargaison, ni Cash-Puce.",
     'invalid-amount': 'Montant invalide.',
     'not-at-location': "Ce lieu n'est pas dans ce district.",
