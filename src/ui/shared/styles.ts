@@ -99,8 +99,5 @@ export const ICC_TONE: Record<IccTier, Tone> = {
 /** Bulle flottante (infobulle, menu) : placée par Floating UI */
 export const BUBBLE = 'z-50 rounded-lg border border-line-strong bg-raised p-2 text-xs text-ink-soft shadow-lg shadow-black/40'
 
-/** Bulle de détail qui s'ouvre sous une valeur, sous son déclencheur */
-export const POPOVER = `absolute mt-1 ${BUBBLE}`
-
 /** Champ de saisie ou liste déroulante */
 export const FIELD = `rounded-md border border-line-strong bg-base px-2 py-1 text-sm disabled:opacity-35 ${FOCUS_RING}`

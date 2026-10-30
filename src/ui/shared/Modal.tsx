@@ -1,7 +1,9 @@
 import { X } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useEffect, useRef, type ReactNode } from 'react'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { FOCUS_RING } from './focus.ts'
+import { POP } from './motion.ts'
 
 type ModalProps = {
   open: boolean
@@ -36,7 +38,7 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
       className="m-auto max-h-dvh w-full max-w-lg overflow-y-auto rounded-lg border border-line-strong bg-panel p-0 text-sm text-ink shadow-xl shadow-black/60 backdrop:bg-black/70"
     >
       {open && (
-        <>
+        <motion.div {...POP}>
           <div className="sticky top-0 z-10 flex items-start gap-2 border-b border-line bg-panel px-4 py-3">
             <div className="min-w-0 flex-1">{title}</div>
             <button
@@ -49,7 +51,7 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
             </button>
           </div>
           <div className="p-4">{children}</div>
-        </>
+        </motion.div>
       )}
     </dialog>
   )

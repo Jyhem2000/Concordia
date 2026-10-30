@@ -46,7 +46,7 @@ export default function GameScreen() {
     window.scrollTo({ top: 0 })
   }
   // Téléphone : seul l'onglet ouvert s'affiche ; desktop : tout
-  const shown = (of: Tab) => (tab === of ? 'flex' : 'hidden md:flex')
+  const shown = (of: Tab) => (tab === of ? 'flex motion-safe:animate-fade-in md:animate-none' : 'hidden md:flex')
 
   return (
     <div className="flex min-h-full flex-col">

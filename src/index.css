@@ -47,6 +47,19 @@
     }
   }
 
+  /* Changement d'onglet : le bloc qui réapparaît glisse en fondu */
+  --animate-fade-in: fade-in 0.2s ease-out;
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   /* Tiers des produits */
   --color-tier-0: #4ade80;
   --color-tier-1: #facc15;

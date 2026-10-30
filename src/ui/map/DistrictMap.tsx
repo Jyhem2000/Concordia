@@ -80,8 +80,11 @@ export default function DistrictMap({ selected, onSelect }: DistrictMapProps) {
                   {t.travel.security(DISTRICTS[id].security)}
                   {isHere && ` — ${t.travel.here}`}
                 </span>
-                <DistrictSigns districtId={id} withEvent />
               </button>
+              {/* Hors du bouton : chaque indice ouvre sa propre infobulle */}
+              <div className="flex justify-center">
+                <DistrictSigns districtId={id} withEvent />
+              </div>
             </li>
           )
         })}

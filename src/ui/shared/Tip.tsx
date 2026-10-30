@@ -14,8 +14,10 @@ import {
   useRole,
 } from '@floating-ui/react'
 import { Info } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useState, type ReactNode } from 'react'
 import { FOCUS_RING } from './focus.ts'
+import { POP } from './motion.ts'
 import { BUBBLE } from './styles.ts'
 
 type TipProps = {
@@ -72,8 +74,10 @@ export default function Tip({ content, children, label, className = '', wide = f
       </button>
       {open && (
         <FloatingPortal>
-          <div ref={setFloating} style={floatingStyles} className={`${wide ? 'w-72' : 'max-w-64'} ${BUBBLE}`} {...getFloatingProps()}>
-            {content}
+          <div ref={setFloating} style={floatingStyles} className={`z-50 ${wide ? 'w-72' : 'max-w-64'}`} {...getFloatingProps()}>
+            <motion.div {...POP} className={BUBBLE}>
+              {content}
+            </motion.div>
           </div>
         </FloatingPortal>
       )}

@@ -1,6 +1,8 @@
 import type { LucideIcon } from 'lucide-react'
+import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
 import CollapseToggle from './CollapseToggle.tsx'
+import { APPEAR, ARRIVE } from './motion.ts'
 import { useCollapsed } from './useCollapsed.ts'
 
 type PanelProps = {
@@ -37,7 +39,7 @@ export default function Panel({ title, icon: Icon, collapseId, aside, subtitle, 
   )
 
   return (
-    <section className={`rounded-lg border text-sm ${tones[tone]}`}>
+    <motion.section {...(tone === 'default' ? {} : ARRIVE)} className={`rounded-lg border text-sm ${tones[tone]}`}>
       <div className={`px-3 py-2 ${collapsed ? '' : 'border-b border-line'}`}>
         <div className="flex items-center gap-2">
           <h2 className="min-w-0 flex-1 font-bold tracking-wide text-accent uppercase">
@@ -47,7 +49,11 @@ export default function Panel({ title, icon: Icon, collapseId, aside, subtitle, 
         </div>
         {subtitle && <div className="mt-0.5 text-xs text-ink-muted">{subtitle}</div>}
       </div>
-      {!collapsed && <div className={flush ? '' : 'p-3'}>{children}</div>}
-    </section>
+      {!collapsed && (
+        <motion.div {...APPEAR} className={flush ? '' : 'p-3'}>
+          {children}
+        </motion.div>
+      )}
+    </motion.section>
   )
 }

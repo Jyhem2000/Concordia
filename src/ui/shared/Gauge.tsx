@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
+import { motion } from 'motion/react'
 import { TONE_BG, type Tone } from './styles.ts'
 
 type GaugeProps = {
@@ -29,9 +30,21 @@ export default function Gauge({ icon: Icon, label, value, max, display, tone }: 
         </span>
         <span className="font-bold">{display ?? `${value}/${max}`}</span>
       </div>
-      <div role="meter" aria-label={label} aria-valuemin={0} aria-valuemax={max} aria-valuenow={value} className="mt-1 h-1.5 rounded-full bg-line">
-        {/* Largeur calculée : la seule valeur de style qui ne peut pas être une classe */}
-        <div className={`h-full rounded-full ${color}`} style={{ width: `${ratio * 100}%` }} />
+      <div
+        role="meter"
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={max}
+        aria-valuenow={value}
+        className="mt-1 h-1.5 overflow-hidden rounded-full bg-line"
+      >
+        {/* Remplissage par échelle horizontale depuis la gauche : Motion l'anime quand la valeur change */}
+        <motion.div
+          className={`h-full w-full origin-left rounded-full ${color}`}
+          initial={false}
+          animate={{ scaleX: ratio }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+        />
       </div>
     </div>
   )

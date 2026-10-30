@@ -14,6 +14,7 @@ import {
   Wrench,
   type LucideIcon,
 } from 'lucide-react'
+import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
 import { AUDIT_COUNTDOWN_DAY, GAME_LENGTH_DAYS, HEALTH_MAX, ICC_MAX, WANTED } from '../../data/balance.ts'
 import { VEHICLES } from '../../data/vehicles.ts'
@@ -25,6 +26,7 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import { FOCUS_RING } from '../shared/focus.ts'
 import Gauge from '../shared/Gauge.tsx'
+import { APPEAR } from '../shared/motion.ts'
 import Tip from '../shared/Tip.tsx'
 import { ICC_TONE, TONE_TEXT, type Tone } from '../shared/styles.ts'
 
@@ -35,6 +37,8 @@ type CellProps = {
   note?: string
   /** Texte complet en infobulle, quand la case est abrégée */
   info?: string
+  /** Valeur affichée : quand elle change, la case le montre */
+  valueKey: string | number
   children: ReactNode
 }
 
@@ -77,25 +81,26 @@ export default function StatusBar() {
         {/* Desktop : jauges à droite des cases */}
         <div className="md:flex md:items-center md:gap-6">
           <div className="grid flex-1 grid-cols-5 divide-x divide-line">
-            <Cell label={t.hud.day} tone="accent">
+            <Cell label={t.hud.day} tone="accent" valueKey={`${game.day}-${game.phase}`}>
               <PhaseIcon size={14} aria-hidden="true" />
               {t.format.dayShort(game.day, GAME_LENGTH_DAYS)}
             </Cell>
-            <Cell label={t.hud.cash} tone="cash">
+            <Cell label={t.hud.cash} tone="cash" valueKey={game.cash}>
               {credits(game.cash)}
             </Cell>
             <Cell
               label={t.gauge.debt}
+              valueKey={game.debt}
               tone="danger"
               note={game.debtLate ? t.hud.debtLate : deadline === null ? undefined : t.hud.deadlineShort(deadline)}
               info={debtNotes.length > 0 ? debtNotes.join(' · ') : undefined}
             >
               {credits(game.debt)}
             </Cell>
-            <Cell label={t.gauge.icc} tone={ICC_TONE[tier]} note={t.iccTier[tier]}>
+            <Cell label={t.gauge.icc} tone={ICC_TONE[tier]} note={t.iccTier[tier]} valueKey={game.icc}>
               {percent(game.icc / ICC_MAX, 0)}
             </Cell>
-            <Cell label={t.gauge.health} tone={game.health <= HEALTH_MAX * LOW_HEALTH ? 'danger' : 'success'}>
+            <Cell label={t.gauge.health} tone={game.health <= HEALTH_MAX * LOW_HEALTH ? 'danger' : 'success'} valueKey={game.health}>
               {number(game.health, 0)}
             </Cell>
           </div>
@@ -167,23 +172,31 @@ export default function StatusBar() {
         </p>
       )}
       {lastError && (
-        <p role="alert" className="border-t border-danger/40 bg-danger/10 px-4 py-1 text-center text-sm text-danger">
+        <motion.p
+          key={lastError}
+          {...APPEAR}
+          role="alert"
+          className="border-t border-danger/40 bg-danger/10 px-4 py-1 text-center text-sm text-danger"
+        >
           {t.error[lastError]}
-        </p>
+        </motion.p>
       )}
     </header>
   )
 }
 
 /** Case de la rangée de tête : libellé en petit, valeur en gras, précision dessous */
-function Cell({ label, tone = 'neutral', note, info, children }: CellProps) {
+function Cell({ label, tone = 'neutral', note, info, valueKey, children }: CellProps) {
   return (
     <div className="min-w-0 px-1 text-center first:pl-0 last:pr-0">
       <div className="flex items-center justify-center gap-0.5 text-xs text-ink-muted uppercase">
         <span className="truncate">{label}</span>
         {info && <Tip label={label} content={info} />}
       </div>
-      <div className={`flex items-center justify-center gap-1 font-bold whitespace-nowrap ${TONE_TEXT[tone]}`}>{children}</div>
+      {/* Nouvelle valeur, nouvelle clé : Motion rejoue l'apparition */}
+      <motion.div key={valueKey} {...APPEAR} className={`flex items-center justify-center gap-1 font-bold whitespace-nowrap ${TONE_TEXT[tone]}`}>
+        {children}
+      </motion.div>
       {note && <div className={`truncate text-xs leading-tight opacity-80 ${TONE_TEXT[tone]}`}>{note}</div>}
     </div>
   )

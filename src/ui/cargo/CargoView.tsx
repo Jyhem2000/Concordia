@@ -1,4 +1,5 @@
 import { EyeOff, Fuel, Package, Tag, UserRound, Wrench } from 'lucide-react'
+import { motion } from 'motion/react'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
 import { VEHICLES } from '../../data/vehicles.ts'
@@ -147,10 +148,13 @@ function SlotRow({ label, slots, compartment = false }: SlotRowProps) {
         aria-hidden="true"
         className={`mt-1 flex w-fit flex-wrap gap-1 ${compartment ? 'rounded-md border border-dashed border-night/40 p-1' : ''}`}
       >
-        {/* Cases figées, recalculées à chaque rendu et sans identité propre : la position sert de clé */}
+        {/* Cases sans identité propre : la position et le contenu font la clé, une case qui change de contenu rejoue son apparition */}
         {slots.map((slot, position) => (
-          <li
-            key={position}
+          <motion.li
+            key={`${position}-${slot === null ? 'free' : `${slot.tier}-${slot.hidden}`}`}
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
             className={`h-4 w-4 rounded-sm ${
               slot === null
                 ? 'border border-line-strong'
