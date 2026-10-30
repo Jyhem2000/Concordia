@@ -543,3 +543,25 @@ Les multiplicateurs d'événement se multiplient (chaque événement par sa lign
   | Citoyen modèle | 27 / 91 / 226k | inchangé |
 
   La Nuit festive retrouve son niveau d'avant la règle (30 / 69 / 105k), en tête en Prudent, derrière Citoyen modèle et Couverture légale en Équilibré, loin en Casse-cou : elle ne domine pas. Aucune action refusée.
+
+## Campagnes complètes après la règle de nuit, le Légal à 0,2 et le bot adapté
+Mêmes effectifs que les rapports précédents (contrôle, plans et fins : 200 parties par bot ; hasard : 1000 ; retraits : 400 par variante). Les rapports précédents dataient d'avant les contrats et le placement : les écarts mêlent tous ces changements, plus le décalage du générateur.
+
+**Contrôle :** le Novice survit à 80 % (84 % avant). Il prend des contrats (1,1 livré, 0,3 manqué par partie) : c'est le coût attendu d'un contrat mal choisi, comme mesuré par les sondes de contrats. L'Aléatoire perd toujours.
+
+**Plans** (score moyen Prudent / Équilibré / Casse-cou) :
+- presque tous les plans montent en Prudent (+2 à +6k, +1 à +4 points de survie), effet de la couverture du Légal ;
+- Sans build 26 / 54 / 144k ; en tête : Citoyen modèle (27 / 91 / 226k), Couverture légale (30 / 84 / 192k), Nuit festive (33 / 73 / 119k), Corruption (19 / 68 / 184k) ;
+- Haut tier Casse-cou baisse (174 → 131k) : score médian nul, moyenne tirée par quelques très grosses parties ; à 1000 parties (campagne hasard) il est à 159k contre 169k avant, dans le bruit ;
+- **critère 1 :** l'Opportuniste est sous le Sans build pour les trois tempéraments (25 / 52 / 124k), à quelques milliers de crédits en Prudent et Équilibré. Fuite au sommet en Prudent (10k) et Rentier en Prudent (15k) restent bas, mais pas en Équilibré.
+
+**Fins visées** (Équilibré) : Baron 27 % (Couverture légale), Élite 8 % (Citoyen modèle), Fantôme 8 % (Fuite au sommet, exécutions 12 → 8 %), Saboteur 1 %.
+
+**Hasard** (1000 parties) : écart entre bots 43 700 ₡ (48 500 avant), entre graines 117 400 ₡ (113 600 avant). Le hasard des graines pèse toujours bien plus que le choix du plan.
+
+**Retraits** (400 parties, avec l'élément face à sans) :
+- `[MOD-04]` n'est plus négatif (−400 ₡ ± 8 300) : avec la règle de nuit, l'emplacement qu'il prend au pare-buffles coûte moins.
+- `[VEH-03]` : +11 000 ₡ de score, mais −4 points de survie ; `[VEH-04]` : −5 points de survie, score neutre. Les grands véhicules emportent plus, donc perdent plus au contrôle : un arbitrage, pas un piège net.
+- `[MOD-02]` : −3 points de survie ± 3, à la limite du bruit.
+- Karma-Cham (−3 700 ₡ ± 3 500) et la chirurgie de la Morgue (−2 200 ₡ ± 1 500) restent légèrement négatifs pour les bots, qui s'en servent sans viser un événement.
+- Positifs : avance de survie (+15 points), dilution en Tier 0 (+20 000 ₡), `[MOD-08]` et `[CREW-01]`.
