@@ -33,7 +33,7 @@ Force de police unique. Dans les quartiers pauvres : agents humains fatigués, s
 ## Le rôle du joueur
 Tu incarnes un **Livreur de Catégorie C** de la plateforme logistique d'État, officiellement chargé de transporter des caisses légales à bord de ton utilitaire propulsé au **Synthanol** (biocarburant d'État rationné).
 
-* **Le Paradoxe du Chauffeur :** pour éviter que les camions de 3,5 tonnes ne provoquent des carambolages, la guilde des routiers bénéficie d'une **Exemption Métabolique** (eau filtrée sans sédatifs, servie à `[LOC-D1-2]` ; sans elle, la sédation te rattrape, chap. 1). Seuls prolétaires à avoir l'esprit clair et à traverser tous les districts chaque jour, les chauffeurs ont compris l'hypocrisie du système : officieusement, tu es devenu un **« Passeur du Monde d'Avant »**.
+* **Le Paradoxe du Chauffeur :** pour éviter que les camions de 3,5 tonnes ne provoquent des carambolages, la guilde des routiers garde sa **Lucidité** (eau filtrée sans sédatifs, servie à `[LOC-D1-2]` ; sans elle, la sédation te rattrape, chap. 1). Seuls prolétaires à avoir l'esprit clair et à traverser tous les districts chaque jour, les chauffeurs ont compris l'hypocrisie du système : officieusement, tu es devenu un **« Passeur du Monde d'Avant »**.
 * Tu ne consommes pas tes cargaisons de luxe (scellées sous vide pour des clients VIP, et bien trop précieuses face à la mafia qui menace de te recycler en Bio-Briques), mais tu sais utiliser certains produits tactiques pour survivre à la route : `[T2-05]`, `[T2-01]`, `[T1-06]`, `[T4-03]`.
 
 ---
@@ -79,11 +79,11 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 * **Prix d'une ration :** fixé par district ([`districts.ts`](../src/data/districts.ts)).
 * **Siphonage / Corvée DSC (anti soft-lock) :** de jour, bloqué avec 0 ration, une soute vide et pas assez de Cash-Puce pour 1 ration locale → une ration gratuite contre une perte d'ICC (`SIPHON` dans [`balance.ts`](../src/data/balance.ts)) et une **demi-journée** perdue. En `[D4]`, ce sont les milices qui « prêtent » la ration, aux mêmes conditions.
 
-### Exemption Métabolique & Sédation
+### Lucidité & Sédation
 Seuls les routiers boivent l'eau sans sédatifs de `[LOC-D1-2]` : c'est elle qui leur garde l'esprit clair.
 * **Protection :** se trouver en `[D1]` de jour (au réveil ou à l'arrivée d'un trajet de jour, Cantine `[LOC-D1-2]`) la remet au maximum. Elle baisse de 1 à chaque routine matinale. Départ au maximum. Chiffres : `SEDATION` dans [`balance.ts`](../src/data/balance.ts).
 * **Sédation** (protection à 0, jusqu'au prochain passage en `[D1]` de jour) : malus au bluff, à la corruption et à la fuite (racket de `[D4]` compris), et la mémoire de marché des autres districts est **brouillée** : les cours mémorisés s'affichent en fourchette autour du vrai relevé (l'historique aussi). Le flux de `[CREW-02]` reste exact. Le district actuel n'est jamais brouillé.
-* L'app affiche les jours de protection restants sous le nom de **Lucidité** et prévient la veille de la Sédation (chap. 7).
+* L'app affiche les jours de Lucidité restants et prévient la veille de la Sédation (chap. 7).
 
 ---
 
@@ -148,7 +148,7 @@ Le Jour 1 commence sans routine : pas d'intérêts, boutiques et événements ti
 4. Récupération des caisses larguées la veille via `[MOD-07]` ; échéance d'une commande VIP de `[LOC-D6-1]` ou d'un contrat de la Pègre de `[LOC-D1-1]` dépassée (chap. 3).
 5. Dégradation de fraîcheur des caisses `[TAG-PERISHABLE]`, caisses récupérées comprises (chap. 2).
 6. Tirage de la livraison officielle du jour, de la mission de nuit proposée pour ce soir et du contrat de la Pègre proposé (s'il n'y en a pas en cours) ; tirage de la ronde renforcée ; entrée en vigueur de l'événement global tiré la veille, tirage des événements locaux, de la Loterie les jours de tirage, de l'événement global du lendemain et de sa rumeur ; contrecoups (chap. 6). Puis, parce que les événements les modifient : reconstitution des quotas de demande, cours et boutiques (chap. 2) ; enfin, tirage de l'after du couvre-feu de ce soir (voir *Tournée de nuit*).
-7. Effets du matin des événements : canicule sur les périssables, sas de `[EVT-D3-01]` si le joueur se trouve en `[D3]` (chap. 6). Enfin, protection de l'Exemption Métabolique **−1 jour**.
+7. Effets du matin des événements : canicule sur les périssables, sas de `[EVT-D3-01]` si le joueur se trouve en `[D3]` (chap. 6). Enfin, Lucidité **−1 jour**.
 
 ### Service de jour (06h00 – 20h00)
 Acheter / vendre au marché, faire le plein, utiliser les lieux spéciaux du district, accepter la livraison officielle du jour, et effectuer **1 trajet de jour**. Une fois arrivé, on peut à nouveau commercer avant 20h00.

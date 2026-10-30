@@ -50,8 +50,8 @@ Boucherie clandestine de Viktor Varga et de ses « Bouchers ».
   * *Intention :* un objectif à quelques jours, accessible à tous dès le début, qui fait planifier un achat et un trajet ; la prime ne bouge pas avec le marché, mais il faut traverser la ville avec la marchandise.
 
 ### `[LOC-D1-2]` La Cantine des Chauffeurs (« Chez Borg »)
-Bar enfumé réservé aux routiers, où l'on sert l'eau de l'Exemption Métabolique.
-* **Exemption Métabolique :** se trouver en `[D1]` de jour (au réveil ou à l'arrivée) suffit : les routiers passent tous à la Cantine. La protection contre la Sédation revient au maximum (chap. 1).
+Bar enfumé réservé aux routiers, où l'on sert l'eau qui garde la Lucidité.
+* **Lucidité :** se trouver en `[D1]` de jour (au réveil ou à l'arrivée) suffit : les routiers passent tous à la Cantine. La protection contre la Sédation revient au maximum (chap. 1).
 * **Synthanol au tarif syndical :** en `[D1]`, de jour, le plein se fait au tarif syndical de la Cantine, moins cher que les pompes (`CANTINE` dans [`locations.ts`](../src/data/locations.ts)) ; la nuit, seule la pompe du district est ouverte.
 * **Équipage :** recrutement, remplacement et renvoi de l'équipier actif (chap. 4).
 

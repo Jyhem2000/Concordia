@@ -58,7 +58,7 @@ type StatProps = {
 const LOW_HEALTH = 0.25
 const MEDIUM_HEALTH = 0.5
 
-/** Bandeau supérieur permanent : huit cases (jour, argent, dette, Lucidité, lieu, ICC, Santé), puis Fiche S, équipier, collecte (chap. 7) */
+/** Bandeau supérieur permanent : huit cases (jour, lieu, Lucidité, ICC, argent, dette, Santé), puis Fiche S, équipier, collecte (chap. 7) */
 export default function StatusBar() {
   // Les échéances et la collecte se calculent sur l'état entier de la partie
   const game = useGameStore((s) => s.game)
@@ -95,6 +95,52 @@ export default function StatusBar() {
           >
             <PhaseIcon size={14} aria-hidden="true" />
             {t.format.dayShort(game.day, GAME_LENGTH_DAYS)}
+          </Cell>
+          <Cell
+            label={t.hud.place}
+            tone="neutral"
+            valueKey={game.districtId}
+            info={
+              <CellInfo
+                status={moment === 'curfew' ? undefined : [tripDone ? t.moment.tripDone : t.moment.tripLeft]}
+                statusTone={tripDone ? 'muted' : 'success'}
+                text={t.hud.placeInfo}
+              />
+            }
+            wrap
+          >
+            {t.district[game.districtId].name}
+          </Cell>
+          {/* Lucidité : jours avant la Sédation (chap. 1) */}
+          <Cell
+            label={t.hud.lucidity}
+            tone={game.exemption <= 1 ? 'danger' : 'info'}
+            valueKey={game.exemption}
+            alert={sedation ? 'danger' : undefined}
+            info={
+              <CellInfo
+                status={sedation ? [sedation] : undefined}
+                statusTone="danger"
+                text={t.hud.lucidityInfo(SEDATION.protectionDays, t.district[cantineDistrict()].name, percent(SEDATION.penalty, 0))}
+              />
+            }
+          >
+            <Droplet size={14} aria-hidden="true" />
+            {t.hud.lucidityDays(game.exemption)}
+          </Cell>
+          <Cell
+            label={t.gauge.icc}
+            tone={ICC_TONE[tier]}
+            valueKey={game.icc}
+            info={
+              <CellInfo
+                status={[t.iccTier[tier]]}
+                statusTone={ICC_TONE[tier]}
+                text={t.hud.iccInfo(iccRouteGainLeft(game), ICC_DAILY_ROUTE_GAIN_CAP)}
+              />
+            }
+          >
+            {percent(game.icc / ICC_MAX, 0)}
           </Cell>
           <Cell
             label={t.hud.cash}
@@ -134,52 +180,6 @@ export default function StatusBar() {
             }
           >
             {credits(game.debt)}
-          </Cell>
-          {/* Lucidité : jours d'Exemption Métabolique avant la Sédation (chap. 1) */}
-          <Cell
-            label={t.hud.lucidity}
-            tone={game.exemption <= 1 ? 'danger' : 'info'}
-            valueKey={game.exemption}
-            alert={sedation ? 'danger' : undefined}
-            info={
-              <CellInfo
-                status={sedation ? [sedation] : undefined}
-                statusTone="danger"
-                text={t.hud.exemptionInfo(SEDATION.protectionDays, t.district[cantineDistrict()].name, percent(SEDATION.penalty, 0))}
-              />
-            }
-          >
-            <Droplet size={14} aria-hidden="true" />
-            {t.hud.exemptionDays(game.exemption)}
-          </Cell>
-          <Cell
-            label={t.hud.place}
-            tone="neutral"
-            valueKey={game.districtId}
-            info={
-              <CellInfo
-                status={moment === 'curfew' ? undefined : [tripDone ? t.moment.tripDone : t.moment.tripLeft]}
-                statusTone={tripDone ? 'muted' : 'success'}
-                text={t.hud.placeInfo}
-              />
-            }
-            wrap
-          >
-            {t.district[game.districtId].name}
-          </Cell>
-          <Cell
-            label={t.gauge.icc}
-            tone={ICC_TONE[tier]}
-            valueKey={game.icc}
-            info={
-              <CellInfo
-                status={[t.iccTier[tier]]}
-                statusTone={ICC_TONE[tier]}
-                text={t.hud.iccInfo(iccRouteGainLeft(game), ICC_DAILY_ROUTE_GAIN_CAP)}
-              />
-            }
-          >
-            {percent(game.icc / ICC_MAX, 0)}
           </Cell>
           <Cell
             label={t.gauge.health}

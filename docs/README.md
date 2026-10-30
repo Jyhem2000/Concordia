@@ -25,7 +25,7 @@ Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la dé
 | Thème | Mécaniques | Où lire |
 | :--- | :--- | :--- |
 | **Partie** | objectif, audit du Jour 30, défaites (Bio-Briques, mort, exécution), grandes fins (Saboteur, Fantôme et injections, Élite par cooptation, Baron), score | chap. 1 |
-| **Jauges** | ICC (paliers, suspicion, gains de route et plafond), Santé, châssis, carburant, Exemption Métabolique et Sédation | chap. 1 → chap. 4 (capacités du véhicule) |
+| **Jauges** | ICC (paliers, suspicion, gains de route et plafond), Santé, châssis, carburant, Lucidité et Sédation | chap. 1 → chap. 4 (capacités du véhicule) |
 | **Journée** | moments (Journée, 20h00, Nuit), routine de 06h00, service de jour, dilemme de 20h00 (relais, bivouac, tournée de nuit), livraison officielle du jour, missions de nuit et caisses scellées, after du couvre-feu, épuisement, demi-journée perdue, immobilisation, dépannage d'urgence | chap. 1 |
 | **Trajet** | ordre de résolution, consommation, usure de nuit et canicule, carte et districts traversés, couches du réseau (surface, galeries, quais), zone hors-réseau, mission de nuit | chap. 1 → chap. 3 → chap. 6 (canicule, aléas de jour) |
 | **Argent** | Cash-Puce, dette (intérêts, retard, avance de survie), collecte de protection, compte offshore (commission au retrait), placement du Cartel (coup de filet) | chap. 1 → chap. 3 (guichets des lieux spéciaux) |

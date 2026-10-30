@@ -213,7 +213,7 @@ export const fr = {
     debtLate: 'Dette en retard : la prochaine échéance est un audit',
     protection: (amount: string) => `Collecte de Viktor (≈ ${amount})`,
     audit: (day: number) => `Audit du Jour ${day}, à minuit`,
-    sedation: 'Fin de l’Exemption Métabolique : Sédation',
+    sedation: 'Fin de la Lucidité : Sédation',
     sedated: 'Sédation en cours : passez à la Cantine de jour',
     lottery: 'Tirage de la Loterie',
     viceEnd: (product: string, district: string) => `Fin du vice : ${product} en Forte demande à ${district}`,
@@ -361,11 +361,11 @@ export const fr = {
     place: 'Lieu',
     placeInfo: 'District où se trouve le camion. Chaque district a sa propre économie : ses cours ne valent que chez lui.',
     lucidity: 'Lucidité',
-    exemptionDays: (days: number) => `${days} j`,
+    lucidityDays: (days: number) => `${days} j`,
     sedated: 'Sédation en cours',
     sedationTomorrow: 'Sédation demain matin',
-    exemptionInfo: (days: number, district: string, penalty: string) =>
-      `Jours d'Exemption Métabolique : l'eau sans sédatifs des routiers garde l'esprit clair. Elle perd un jour chaque matin et revient à ${days} jours en passant à ${district} de jour. Épuisée, c'est la Sédation : bluff, corruption et fuite à −${penalty}, et les cours mémorisés des autres districts brouillés en fourchette.`,
+    lucidityInfo: (days: number, district: string, penalty: string) =>
+      `Lucidité : l'eau sans sédatifs servie aux seuls routiers leur garde l'esprit clair. Elle perd un jour chaque matin et revient à ${days} jours en passant à ${district} de jour. À zéro, c'est la Sédation : bluff, corruption et fuite à −${penalty}, et les cours mémorisés des autres districts brouillés en fourchette.`,
     offshore: 'Offshore',
     crew: (name: string) => name,
     crewUnpaid: 'non payé, ne travaille pas',
