@@ -42,7 +42,8 @@ export function sleep(state: GameState): GameState {
   if (state.day >= GAME_LENGTH_DAYS) return audit(state)
   // Après une tournée de nuit, la nuit blanche ne rapporte aucun gain de sommeil (chap. 1)
   const night: Night = state.phase === 'day' && sleepsAtRelay(state) ? 'relay' : 'bivouac'
-  return morningRoutine({ ...state, interceptionReport: null }, night)
+  // Les comptes rendus de la veille ne suivent pas le joueur au matin
+  return morningRoutine({ ...state, interceptionReport: null, roadReport: null }, night)
 }
 
 /**

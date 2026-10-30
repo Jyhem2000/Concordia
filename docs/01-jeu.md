@@ -83,7 +83,7 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 Seuls les routiers boivent l'eau sans sédatifs de `[LOC-D1-2]` : c'est elle qui leur garde l'esprit clair.
 * **Protection :** se trouver en `[D1]` de jour (au réveil ou à l'arrivée d'un trajet de jour, Cantine `[LOC-D1-2]`) la remet au maximum. Elle baisse de 1 à chaque routine matinale. Départ au maximum. Chiffres : `SEDATION` dans [`balance.ts`](../src/data/balance.ts).
 * **Sédation** (protection à 0, jusqu'au prochain passage en `[D1]` de jour) : malus au bluff, à la corruption et à la fuite (racket de `[D4]` compris), et la mémoire de marché des autres districts est **brouillée** : les cours mémorisés s'affichent en fourchette autour du vrai relevé (l'historique aussi). Le flux de `[CREW-02]` reste exact. Le district actuel n'est jamais brouillé.
-* L'app affiche les jours de protection restants et prévient la veille de la Sédation (chap. 7).
+* L'app affiche les jours de protection restants sous le nom de **Lucidité** et prévient la veille de la Sédation (chap. 7).
 
 ---
 

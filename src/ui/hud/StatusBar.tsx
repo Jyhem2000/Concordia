@@ -1,4 +1,4 @@
-import { Crosshair, Droplet, HandCoins, Hourglass, Moon, RotateCcw, Sun, UserRound, type LucideIcon } from 'lucide-react'
+import { Crosshair, Droplet, HandCoins, Hourglass, Info, Moon, RotateCcw, Sun, UserRound, type LucideIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
 import {
@@ -25,17 +25,22 @@ import { ICC_TONE, TONE_TEXT, type Tone } from '../shared/styles.ts'
 type CellProps = {
   label: string
   tone?: Tone
-  /** Précision sous la valeur (échéance, palier…) */
-  note?: string
-  /** Couleur de la précision, si elle diffère de la valeur */
-  noteTone?: Tone
-  /** Explication de la règle, en infobulle */
-  info?: string
+  /** Précisions et explication de la règle, dans le « i » à côté du libellé */
+  info: ReactNode
+  /** Une précision mérite l'attention (échéance, Sédation, épuisement) : le « i » prend cette couleur */
+  alert?: Tone
   /** Valeur longue (nom de district) : en plus petit, sur deux lignes au besoin */
   wrap?: boolean
   /** Valeur affichée : quand elle change, la case le montre */
   valueKey: string | number
   children: ReactNode
+}
+
+type CellInfoProps = {
+  /** État du moment (échéance, palier, écart du jour…), en tête de bulle */
+  status?: readonly string[]
+  statusTone?: Tone
+  text: string
 }
 
 type StatProps = {
@@ -53,7 +58,7 @@ type StatProps = {
 const LOW_HEALTH = 0.25
 const MEDIUM_HEALTH = 0.5
 
-/** Bandeau supérieur permanent : huit cases (jour, lieu, argent, ICC, Santé, Exemption), puis Fiche S, équipier, collecte (chap. 7) */
+/** Bandeau supérieur permanent : huit cases (jour, argent, dette, Lucidité, lieu, ICC, Santé), puis Fiche S, équipier, collecte (chap. 7) */
 export default function StatusBar() {
   // Les échéances et la collecte se calculent sur l'état entier de la partie
   const game = useGameStore((s) => s.game)
@@ -73,6 +78,8 @@ export default function StatusBar() {
   const cashToday = game.cash - (game.journal.at(-1)?.start.cash ?? game.cash)
   // Épuisé : tournée de nuit la veille, pas de nouvelle nuit sur la route ce soir (chap. 1)
   const exhausted = checkForceCurfew(game) === 'exhausted'
+  const debtStatus = game.debtLate ? t.hud.debtLate : deadline === null ? undefined : t.hud.debtDue(t.hud.daysLeft(deadline - game.day))
+  const sedation = game.exemption === 0 ? t.hud.sedated : game.exemption === 1 ? t.hud.sedationTomorrow : undefined
   const PhaseIcon = game.phase === 'day' ? Sun : Moon
 
   return (
@@ -80,26 +87,26 @@ export default function StatusBar() {
       <div className="mx-auto max-w-7xl px-3 py-2 text-sm">
         {/* Téléphone : deux rangées de quatre cases ; desktop : une rangée de huit */}
         <div className="grid grid-cols-4 gap-y-2 sm:grid-cols-8 sm:divide-x sm:divide-line">
-          <Cell label={t.hud.day} tone="accent" valueKey={`${game.day}-${game.phase}`} note={t.moment.short[moment]}>
+          <Cell
+            label={t.hud.day}
+            tone="accent"
+            valueKey={`${game.day}-${game.phase}`}
+            info={<CellInfo status={[t.moment.short[moment]]} statusTone="accent" text={t.hud.dayInfo(GAME_LENGTH_DAYS)} />}
+          >
             <PhaseIcon size={14} aria-hidden="true" />
             {t.format.dayShort(game.day, GAME_LENGTH_DAYS)}
-          </Cell>
-          <Cell
-            label={t.hud.place}
-            tone="neutral"
-            valueKey={game.districtId}
-            note={moment === 'curfew' ? undefined : tripDone ? t.moment.tripDoneShort : t.moment.tripLeftShort}
-            noteTone={tripDone ? 'muted' : 'success'}
-            wrap
-          >
-            {t.district[game.districtId].name}
           </Cell>
           <Cell
             label={t.hud.cash}
             tone="cash"
             valueKey={game.cash}
-            note={cashToday === 0 ? undefined : t.hud.cashToday(signedCredits(cashToday))}
-            noteTone={cashToday > 0 ? 'success' : 'danger'}
+            info={
+              <CellInfo
+                status={cashToday === 0 ? undefined : [t.hud.cashToday(signedCredits(cashToday))]}
+                statusTone={cashToday > 0 ? 'success' : 'danger'}
+                text={t.hud.cashInfo}
+              />
+            }
           >
             {credits(game.cash)}
           </Cell>
@@ -107,8 +114,13 @@ export default function StatusBar() {
             label={t.hud.offshore}
             tone="offshore"
             valueKey={offshore}
-            note={venture > 0 ? t.hud.withVenture(credits(venture)) : t.hud.offshoreRate(percent(offshoreRate, 2))}
-            info={t.hud.offshoreInfo(percent(offshoreRate, 2))}
+            info={
+              <CellInfo
+                status={[t.hud.offshoreRate(percent(offshoreRate, 2)), ...(venture > 0 ? [t.hud.withVenture(credits(venture))] : [])]}
+                statusTone="offshore"
+                text={t.hud.offshoreInfo(percent(offshoreRate, 2))}
+              />
+            }
           >
             {credits(offshore)}
           </Cell>
@@ -116,17 +128,56 @@ export default function StatusBar() {
             label={t.gauge.debt}
             valueKey={game.debt}
             tone="danger"
-            note={game.debtLate ? t.hud.debtLate : deadline === null ? undefined : t.hud.daysLeft(deadline - game.day)}
-            info={t.hud.debtInfo(DEBT_LATE.day, GAME_LENGTH_DAYS)}
+            alert={debtStatus ? 'danger' : undefined}
+            info={
+              <CellInfo status={debtStatus ? [debtStatus] : undefined} statusTone="danger" text={t.hud.debtInfo(DEBT_LATE.day, GAME_LENGTH_DAYS)} />
+            }
           >
             {credits(game.debt)}
+          </Cell>
+          {/* Lucidité : jours d'Exemption Métabolique avant la Sédation (chap. 1) */}
+          <Cell
+            label={t.hud.lucidity}
+            tone={game.exemption <= 1 ? 'danger' : 'info'}
+            valueKey={game.exemption}
+            alert={sedation ? 'danger' : undefined}
+            info={
+              <CellInfo
+                status={sedation ? [sedation] : undefined}
+                statusTone="danger"
+                text={t.hud.exemptionInfo(SEDATION.protectionDays, t.district[cantineDistrict()].name, percent(SEDATION.penalty, 0))}
+              />
+            }
+          >
+            <Droplet size={14} aria-hidden="true" />
+            {t.hud.exemptionDays(game.exemption)}
+          </Cell>
+          <Cell
+            label={t.hud.place}
+            tone="neutral"
+            valueKey={game.districtId}
+            info={
+              <CellInfo
+                status={moment === 'curfew' ? undefined : [tripDone ? t.moment.tripDone : t.moment.tripLeft]}
+                statusTone={tripDone ? 'muted' : 'success'}
+                text={t.hud.placeInfo}
+              />
+            }
+            wrap
+          >
+            {t.district[game.districtId].name}
           </Cell>
           <Cell
             label={t.gauge.icc}
             tone={ICC_TONE[tier]}
-            note={t.iccTier[tier]}
             valueKey={game.icc}
-            info={t.hud.iccInfo(iccRouteGainLeft(game), ICC_DAILY_ROUTE_GAIN_CAP)}
+            info={
+              <CellInfo
+                status={[t.iccTier[tier]]}
+                statusTone={ICC_TONE[tier]}
+                text={t.hud.iccInfo(iccRouteGainLeft(game), ICC_DAILY_ROUTE_GAIN_CAP)}
+              />
+            }
           >
             {percent(game.icc / ICC_MAX, 0)}
           </Cell>
@@ -134,22 +185,16 @@ export default function StatusBar() {
             label={t.gauge.health}
             tone={game.health <= HEALTH_MAX * LOW_HEALTH ? 'danger' : game.health <= HEALTH_MAX * MEDIUM_HEALTH ? 'warning' : 'success'}
             valueKey={game.health}
-            note={exhausted ? t.hud.exhausted : undefined}
-            noteTone="warning"
-            info={exhausted ? t.hud.exhaustedInfo : t.hud.healthInfo}
+            alert={exhausted ? 'warning' : undefined}
+            info={
+              <CellInfo
+                status={exhausted ? [t.hud.exhausted] : undefined}
+                statusTone="warning"
+                text={exhausted ? t.hud.exhaustedInfo : t.hud.healthInfo}
+              />
+            }
           >
             {t.hud.healthValue(number(game.health, 0))}
-          </Cell>
-          {/* Exemption Métabolique : jours de protection, alerte la veille, Sédation à zéro (chap. 1) */}
-          <Cell
-            label={t.hud.exemptionLabel}
-            tone={game.exemption <= 1 ? 'danger' : 'info'}
-            valueKey={game.exemption}
-            note={game.exemption === 0 ? t.hud.sedatedShort : game.exemption === 1 ? t.hud.sedationTomorrowShort : undefined}
-            info={t.hud.exemptionInfo(SEDATION.protectionDays, t.district[cantineDistrict()].name, percent(SEDATION.penalty, 0))}
-          >
-            <Droplet size={14} aria-hidden="true" />
-            {t.hud.exemptionDays(game.exemption)}
           </Cell>
         </div>
 
@@ -201,24 +246,40 @@ export default function StatusBar() {
   )
 }
 
-/** Case de la rangée de tête : libellé en petit, valeur en gras, précision dessous */
-function Cell({ label, tone = 'neutral', note, noteTone, info, wrap = false, valueKey, children }: CellProps) {
+/** Case de la rangée de tête : libellé en petit avec son « i », valeur en gras sur une seule ligne */
+function Cell({ label, tone = 'neutral', info, alert, wrap = false, valueKey, children }: CellProps) {
   return (
     <div className="flex min-w-0 flex-col px-1 text-center first:pl-0 last:pr-0">
       <div className="flex items-center justify-center gap-0.5 text-xs text-ink-muted uppercase">
         <span className="truncate">{label}</span>
-        {info && <Tip label={label} content={info} />}
+        <Tip label={label} content={info}>
+          {/* « i » coloré quand une précision mérite l'attention ; le nom accessible reste le libellé */}
+          <Info size={13} aria-hidden="true" className={alert ? TONE_TEXT[alert] : 'text-ink-faint hover:text-ink-soft'} />
+          <span className="sr-only">{label}</span>
+        </Tip>
       </div>
       {/* Nouvelle valeur, nouvelle clé : Motion rejoue l'apparition */}
-      {/* Sans précision, la valeur occupe toute la case, plus grande */}
       <motion.div
         key={valueKey}
         {...APPEAR}
-        className={`flex items-center justify-center gap-1 font-bold ${wrap ? 'text-xs leading-tight' : 'whitespace-nowrap'} ${TONE_TEXT[tone]} ${note || wrap ? '' : 'flex-1 text-base'}`}
+        className={`flex flex-1 items-center justify-center gap-1 font-bold ${wrap ? 'text-xs leading-tight' : 'whitespace-nowrap'} ${TONE_TEXT[tone]}`}
       >
         {children}
       </motion.div>
-      {note && <div className={`truncate text-xs leading-tight opacity-80 ${TONE_TEXT[noteTone ?? tone]}`}>{note}</div>}
+    </div>
+  )
+}
+
+/** Bulle d'une case : l'état du moment en tête, puis la règle */
+function CellInfo({ status, statusTone = 'neutral', text }: CellInfoProps) {
+  return (
+    <div>
+      {status?.map((line) => (
+        <p key={line} className={`font-bold ${TONE_TEXT[statusTone]}`}>
+          {line}
+        </p>
+      ))}
+      <p className={status ? 'mt-1' : ''}>{text}</p>
     </div>
   )
 }

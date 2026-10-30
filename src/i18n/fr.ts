@@ -57,8 +57,8 @@ export const fr = {
   /** Moment de la journée (chap. 1) : Journée, 20h00, Nuit */
   moment: {
     short: { day: 'Journée', curfew: '20h00', night: 'Nuit' },
-    tripLeftShort: 'trajet libre',
-    tripDoneShort: 'trajet fait',
+    tripLeft: 'Trajet libre',
+    tripDone: 'Trajet fait',
   },
 
   gauge: {
@@ -326,13 +326,17 @@ export const fr = {
 
   hud: {
     day: 'Jour',
+    dayInfo: (auditDay: number) =>
+      `Chaque journée : un trajet de jour, puis à 20h00 le couvre-feu : dormir, ou un second trajet de nuit. Audit le Jour ${auditDay} à minuit.`,
     /** Libellé court du Cash-Puce dans la rangée de tête du bandeau */
     cash: 'Cash',
     daysLeft: (days: number) => (days <= 0 ? "aujourd'hui" : `dans ${days} j`),
     debtInfo: (lateDay: number, auditDay: number) =>
       `Dette de Viktor, à intérêts chaque matin. Si la dette initiale n'est pas soldée avant le matin du J${lateDay}, elle passe en retard pour toute la partie : taux majoré et embuscades (risque de contrôle accru partout). À l'audit du J${auditDay} à minuit, le solde doit être nul. Remboursement à l'Arrière-Salle, de jour.`,
     cashToday: (delta: string) => `${delta} aujourd'hui`,
-    withVenture: (amount: string) => `+ placement ${amount}`,
+    cashInfo:
+      "Cash-Puce en poche : achats, Synthanol, services, corruption, collecte de Viktor. Il ne compte pas au score : seul ce qui dort à l'offshore et au placement du Cartel compte.",
+    withVenture: (amount: string) => `Placement du Cartel : ${amount}`,
     offshoreInfo: (rate: string) =>
       `Compte offshore : à l'abri de la collecte de Viktor et de l'audit, ${rate} d'intérêts simples par jour. Avec le placement du Cartel, c'est le score de fin de partie. Guichet à la Laverie, de jour.`,
     iccInfo: (left: number, cap: number) =>
@@ -346,18 +350,20 @@ export const fr = {
     newGame: 'Nouvelle partie',
     newGameConfirm: 'Abandonner la partie en cours et recommencer au Jour 1 ? Elle ne comptera pas au palmarès.',
     newGameAction: 'Abandonner et recommencer',
-    offshoreRate: (rate: string) => `${rate}/j`,
+    offshoreRate: (rate: string) => `Intérêts : ${rate} par jour`,
     wanted: (level: number, max: number) => `Fiche S ${level}/${max}`,
     wantedGain: (levels: number) => `+${levels} niveau${levels > 1 ? 'x' : ''} de Fiche S`,
-    debtLate: 'en retard',
+    debtLate: 'Dette initiale en retard',
+    debtDue: (when: string) => `Dette initiale à solder ${when}`,
     nextProtection: (day: number, amount: string) => `Collecte de Viktor J${day} : ≈ ${amount}`,
     place: 'Lieu',
-    exemptionLabel: 'Exemption',
+    placeInfo: 'District où se trouve le camion. Chaque district a sa propre économie : ses cours ne valent que chez lui.',
+    lucidity: 'Lucidité',
     exemptionDays: (days: number) => `${days} j`,
-    sedatedShort: 'Sédation',
-    sedationTomorrowShort: 'Sédation demain',
+    sedated: 'Sédation en cours',
+    sedationTomorrow: 'Sédation demain matin',
     exemptionInfo: (days: number, district: string, penalty: string) =>
-      `Exemption Métabolique : l'eau sans sédatifs des routiers garde l'esprit clair. Elle perd un jour chaque matin et revient à ${days} jours en passant à ${district} de jour. Épuisée, c'est la Sédation : bluff, corruption et fuite à −${penalty}, et les cours mémorisés des autres districts brouillés en fourchette.`,
+      `Jours d'Exemption Métabolique : l'eau sans sédatifs des routiers garde l'esprit clair. Elle perd un jour chaque matin et revient à ${days} jours en passant à ${district} de jour. Épuisée, c'est la Sédation : bluff, corruption et fuite à −${penalty}, et les cours mémorisés des autres districts brouillés en fourchette.`,
     offshore: 'Offshore',
     crew: (name: string) => name,
     crewUnpaid: 'non payé, ne travaille pas',
