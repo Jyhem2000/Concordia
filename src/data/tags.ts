@@ -6,7 +6,7 @@ import type { Tag, TagId } from '../engine/types.ts'
  */
 
 export const TAGS: Readonly<Record<TagId, Tag>> = {
-  'TAG-LEGAL': { cover: 0.1 },
+  'TAG-LEGAL': { cover: 0.2 },
   'TAG-PERISHABLE': { perishable: true },
   'TAG-FRAGILE': { breakage: { fleeChance: 0.3, shockChance: 0.1, shockThreshold: 10 } },
   'TAG-ADDICTIVE': {},

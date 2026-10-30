@@ -321,20 +321,32 @@ function serverMove(view: GameState, objective: Objective): Action | null {
   return null
 }
 
+/**
+ * Trajet vers le district le moins exposé (hors `avoid`), s'il reste un trajet dans la phase. La fouille coûte le plus :
+ * le racket des milices (sans fouille) vaut mieux qu'un barrage, s'il reste de quoi payer le péage.
+ */
+function safestTrip(view: GameState, avoid?: DistrictId): Action | null {
+  const exposure = (to: DistrictId) => (DISTRICTS[to].offGrid ? (view.cash >= toll(view) * 1.5 ? 0 : 1) : risk(view, to, { includePatrol: false }))
+  const reachable = (id: DistrictId) => {
+    const error = planTravel(view, id).error
+    return !error || error === 'not-enough-fuel'
+  }
+  const targets = DISTRICT_IDS.filter((id) => id !== view.districtId && id !== avoid && reachable(id))
+  const safest = targets.sort((a, b) => exposure(a) - exposure(b))[0]
+  return safest ? travelTo(view, safest) : null
+}
+
+/**
+ * Tournée de ce soir, une fois le trajet du jour fait (chap. 1) : de jour, le bot prévoit la nuit avant d'avoir roulé.
+ * Null si elle sera permise.
+ */
+function tourTonight(view: GameState, drink?: ProductId) {
+  return checkForceCurfew(view.phase === 'day' ? { ...view, dayTripDone: true } : view, drink)
+}
+
 /** Injections du Fantôme : soute couverte de Tier 0 le jour, tournée clandestine le soir vers le district le moins exposé */
 function injectionMove(view: GameState): Action {
-  if (view.phase === 'night') {
-    const room = !view.nightTripDone
-    // La fouille tue : le racket des milices (sans fouille) vaut mieux qu'un barrage, s'il reste de quoi payer le péage
-    const exposure = (to: DistrictId) => (DISTRICTS[to].offGrid ? (view.cash >= toll(view) * 1.5 ? 0 : 1) : risk(view, to, { includePatrol: false }))
-    const reachable = (id: DistrictId) => {
-      const error = planTravel(view, id).error
-      return !error || error === 'not-enough-fuel'
-    }
-    const targets = room ? DISTRICT_IDS.filter((id) => id !== view.districtId && reachable(id)) : []
-    const safest = targets.sort((a, b) => exposure(a) - exposure(b))[0]
-    return (safest && travelTo(view, safest)) || { type: 'sleep' }
-  }
+  if (view.phase === 'night') return safestTrip(view) ?? { type: 'sleep' }
   if (!view.dayOver) {
     // Plein fait de jour : la nuit, la pompe officielle peut être fermée
     const refuel = refuelFor(view, VEHICLES[view.vehicleId].tank)
@@ -343,7 +355,10 @@ function injectionMove(view: GameState): Action {
     const cover = Math.min(free, maxBuy(view, 'T0-01'))
     if (cover > 0) return { type: 'buy', productId: 'T0-01', qty: cover }
   }
-  return checkForceCurfew(view) ? { type: 'sleep' } : { type: 'forceCurfew' }
+  if (tourTonight(view)) return { type: 'sleep' }
+  // La tournée part après le trajet du jour : d'abord un trajet de jour, le moins exposé
+  if (!view.dayTripDone) return safestTrip(view) ?? { type: 'sleep' }
+  return { type: 'forceCurfew' }
 }
 
 function decide(view: GameState, plan: Plan, temperament: Temperament, objective: Objective): Action {
@@ -453,7 +468,7 @@ function saleFactor(view: GameState, lot: CargoLot, to: DistrictId = view.distri
  * Revente estimée au cours normal de l'after, au coefficient Festif de la fête, un peu escomptée (risque de la nuit).
  */
 function tonightAtAfter(view: GameState, plan: Plan, productId: ProductId): number {
-  if (!plan.nightOwl || view.phase !== 'day' || !PRODUCTS[productId].tags.includes(AFTER.tag) || checkForceCurfew(view)) return 0
+  if (!plan.nightOwl || view.phase !== 'day' || !PRODUCTS[productId].tags.includes(AFTER.tag) || tourTonight(view)) return 0
   const night: GameState = { ...view, phase: 'night' }
   return normalQuote(view, view.after, productId) * SALE_COMMISSION * saleFactor(night, freshLot(view, productId), view.after) * AFTER_DISCOUNT
 }
@@ -882,10 +897,17 @@ function seeksFlag(view: GameState, plan: Plan): boolean {
 
 function eveningTour(view: GameState, plan: Plan, temperament: Temperament): Action | null {
   const mode = nightMode(view, plan, temperament)
-  if (mode === 'never' || checkForceCurfew(view) || view.day >= ENDGAME_DAY) return null
-  if (missionOffer(view) && !checkMission(view)) return { type: 'forceCurfew', mission: true }
-  if (mode === 'always' || (mode === 'margin' && tradable(view).length > 0)) return { type: 'forceCurfew' }
-  return null
+  if (mode === 'never' || tourTonight(view) || view.day >= ENDGAME_DAY) return null
+  const mission = missionOffer(view)
+  const tour: Action | null =
+    mission && !checkMission(view)
+      ? { type: 'forceCurfew', mission: true }
+      : mode === 'always' || (mode === 'margin' && tradable(view).length > 0)
+        ? { type: 'forceCurfew' }
+        : null
+  // Tournée voulue, trajet du jour pas encore fait : rouler d'abord, sans finir dans le district de la mission
+  if (tour && !view.dayTripDone) return safestTrip(view, mission ?? undefined)
+  return tour
 }
 
 // ─── Barrage ───

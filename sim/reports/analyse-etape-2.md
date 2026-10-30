@@ -528,4 +528,18 @@ Les multiplicateurs d'événement se multiplient (chaque événement par sa lign
 - **Couverture du Légal 0,2 :** tous les plans montent un peu (+2 à +6k en Prudent, +3 points de survie), parce que tous transportent du légal. L'avance de Couverture légale sur Sans build ne grandit pas (+28k → +30k en Équilibré, +53k → +48k en Casse-cou) et Citoyen modèle reste devant en Équilibré et Casse-cou : la dilution ne domine pas.
 - **Plafond des événements :** sans effet mesurable. Les bots ne cherchent pas à cumuler les événements (rumeur, prophétie, Karma-Cham) : la sonde ne peut pas dire ce que le plafond retire à un expert qui le ferait.
 - **Placement du Cartel :** neutre (±5k en Casse-cou). L'hypothèse d'un placement responsable des baisses du Casse-cou est écartée : elles venaient du décalage du générateur.
-- **Tournées après le trajet du jour :** Sans build ne bouge pas par rapport à la campagne Plans précédente (22 / 51 / 126k), mais la Nuit festive perd son avance : 30 / 69 / 105k → 22 / 62 / 113k, survie Équilibré 88 → 84 %. Son bot partait en tournée sans rouler de jour ; sa politique n'a pas encore été revue pour la nouvelle règle.
+- **Tournées après le trajet du jour :** Sans build ne bouge pas par rapport à la campagne Plans précédente (22 / 51 / 126k), mais la Nuit festive perd son avance : 30 / 69 / 105k → 22 / 62 / 113k, survie Équilibré 88 → 84 %. Son bot partait en tournée sans rouler de jour, et ne prévoyait plus la tournée du soir avant d'avoir roulé.
+
+**Suite retenue :**
+- **Couverture du Légal remise à 0,2 :** elle récompense la dilution sans qu'aucun plan domine.
+- **Plafond des événements gardé :** garde-fou contre des prix absurdes, sans effet sur les bots.
+- **Bot adapté à la règle de nuit :** il prévoit la tournée du soir dès le matin et, sans trajet rentable, roule d'abord vers le district le moins exposé. Avec Légal 0,2 (même sonde, score moyen Prudent / Équilibré / Casse-cou, survie) :
+
+  | Plan | Avant l'adaptation | Après |
+  | :--- | ---: | ---: |
+  | Nuit festive | 24 / 59 / 116k, 93 / 84 / 75 % | 33 / 73 / 119k, 92 / 86 / 80 % |
+  | Sans build | 26 / 54 / 144k | inchangé |
+  | Couverture légale | 30 / 84 / 192k | inchangé |
+  | Citoyen modèle | 27 / 91 / 226k | inchangé |
+
+  La Nuit festive retrouve son niveau d'avant la règle (30 / 69 / 105k), en tête en Prudent, derrière Citoyen modèle et Couverture légale en Équilibré, loin en Casse-cou : elle ne domine pas. Aucune action refusée.
