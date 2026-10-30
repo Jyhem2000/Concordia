@@ -22,7 +22,7 @@ Chaque panneau (marché, carte, lieux spéciaux, plein, couvre-feu, objectifs) e
 **Retour en haut de page** à chaque changement de scène : arrivée d'un trajet, matin, soirée, barrage et chaque option jouée, aléa routier, comptes rendus, fin de partie. Le briefing et les comptes rendus sont en haut de l'écran.
 
 ## Bandeau supérieur permanent
-* **Rangée de tête** (trois cases par ligne sur téléphone, six sur desktop) : Jour X / 30 avec ☀️ ou 🌙 · Cash-Puce (jaune) · Compte offshore (cyan, cadenas, taux effectif) · Dette (rouge, prochaine échéance : retard si la dette initiale n'a jamais été soldée, puis audit ; « en retard » une fois le retard acquis ; le détail en infobulle) · ICC (couleur et nom du palier, voir plus bas) · Santé.
+* **Rangée de tête** (trois cases par ligne sur téléphone, six sur desktop) : Jour X / 30 avec ☀️ ou 🌙 · Cash-Puce (jaune) · Compte offshore (cyan, taux effectif) · Dette (rouge, prochaine échéance : retard si la dette initiale n'a jamais été soldée, puis audit ; « en retard » une fois le retard acquis ; le détail en infobulle) · ICC (couleur et nom du palier, voir plus bas) · Santé.
 * **Ligne du moment :** district actuel, moment de la journée (Journée, 20h00, Nuit, chap. 1) et état du trajet du moment (disponible ou effectué), bouton de nouvelle partie.
 * **États du chauffeur, en petit :** **Exemption Métabolique** (jours de protection restants, alerte la veille, Sédation à zéro ; la règle en infobulle) · **Fiche S** · équipier actif (et salaire impayé) · **prochaine collecte de Viktor** (date et montant estimé, une fois la dette initiale soldée).
 * Les jauges du véhicule (châssis, Synthanol) et le remplissage de la soute sont dans l'onglet Véhicule.

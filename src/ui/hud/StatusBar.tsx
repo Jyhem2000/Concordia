@@ -1,4 +1,4 @@
-import { Crosshair, Droplet, HandCoins, Hourglass, Lock, MapPin, Moon, RotateCcw, Sun, UserRound, type LucideIcon } from 'lucide-react'
+import { Crosshair, Droplet, HandCoins, Hourglass, MapPin, Moon, RotateCcw, Sun, UserRound, type LucideIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
 import { AUDIT_COUNTDOWN_DAY, GAME_LENGTH_DAYS, HEALTH_MAX, ICC_MAX, SEDATION, WANTED } from '../../data/balance.ts'
@@ -73,7 +73,6 @@ export default function StatusBar() {
             {credits(game.cash)}
           </Cell>
           <Cell label={t.hud.offshore} tone="offshore" valueKey={offshore} note={t.hud.offshoreRate(percent(offshoreRate, 2))}>
-            <Lock size={12} aria-hidden="true" />
             {credits(offshore)}
           </Cell>
           <Cell
