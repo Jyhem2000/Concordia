@@ -16,7 +16,7 @@ export const KARMA = {
   cost: 4_000,
   costStep: 2_000,
   cooldownDays: 5,
-  factor: 1.5,
+  factor: 1.75,
   tags: ['TAG-CULTURE', 'TAG-PERISHABLE', 'TAG-CHEMICAL'] as readonly TagId[],
 }
 

@@ -590,3 +590,11 @@ Les deux services restaient négatifs aux retraits. Le bot les jouait mal : pani
 - **Fins visées :** le Fantôme gagne à attendre le soir plutôt que rouler de jour avec le serveur : survie 73 → 78 % (Fuite au sommet), 62 → 65 % (Rentier), exécutions 8 → 5 %.
 - **Hasard :** écart entre bots 43 700 ₡, entre graines 117 500 ₡, inchangés.
 - **Retraits :** Karma-Cham et la chirurgie neutres (voir plus haut) ; `[MOD-08]` +14 800 ₡ mais −5 points de survie (la corruption pousse à transporter plus d'illégal), `[VEH-03]` et `[VEH-04]` inchangés (arbitrage capacité / survie) ; aucun élément net négatif.
+
+## Karma-Cham à ×1,75
+**Changement de règle :** la panique de Karma-Cham passe de ×1,5 à ×1,75 (`KARMA.factor`), pour que le coup d'expert paie au moins son prix.
+
+**Campagnes relancées** (mêmes effectifs) : seuls les plans qui jouent Karma-Cham bougent.
+- **Retraits :** Karma-Cham (Sans build, Équilibré) utilisée dans 54 % des parties, −600 ₡ ± 6 300 (−3 500 ₡ ± 5 400 à ×1,5) : à l'équilibre, sans dominer.
+- **Plans :** l'Opportuniste gagne un peu en Prudent (moyenne 25 800 → 27 600 ₡) et en Équilibré (médiane 26 900 → 31 300 ₡), inchangé en Casse-cou ; il rejoint le Sans build (26 / 54 / 143k) sauf en Casse-cou (126k).
+- **Contrôle, fins, hasard :** inchangés (ces bots ne commandent pas de panique).

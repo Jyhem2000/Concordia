@@ -35,9 +35,9 @@
 | Citoyen modèle · Prudent · score | 200 | 91 % | 2 % | bio-bricks 9 % | standard 91 % | 26 832 ₡ | 0 ₡ / 25 141 ₡ / 57 232 ₡ | 27 972 ₡ | 96 % (J5) | 6.2 (18 % des trajets) | 1.2 | MOD-08 25 %, VEH-02 24 % |
 | Citoyen modèle · Équilibré · score | 200 | 85 % | 4 % | bio-bricks 16 % | standard 59 %, mafia 26 % | 90 661 ₡ | 0 ₡ / 45 094 ₡ / 284 264 ₡ | 75 367 ₡ | 92 % (J3) | 9.7 (31 % des trajets) | 2.9 | VEH-02 37 %, MOD-08 33 % |
 | Citoyen modèle · Casse-cou · score | 200 | 74 % | 7 % | bio-bricks 21 %, execution 6 % | standard 40 %, mafia 35 % | 232 836 ₡ | 0 ₡ / 6 684 ₡ / 835 992 ₡ | 122 172 ₡ | 89 % (J2) | 10.7 (39 % des trajets) | 3.6 | MOD-08 18 %, VEH-02 18 % |
-| Opportuniste · Prudent · score | 200 | 91 % | 2 % | bio-bricks 10 % | standard 91 % | 25 828 ₡ | 0 ₡ / 23 568 ₡ / 54 506 ₡ | 25 699 ₡ | 94 % (J5) | 6.1 (20 % des trajets) | 1.5 | — |
-| Opportuniste · Équilibré · score | 200 | 86 % | 11 % | bio-bricks 14 % | standard 75 %, mafia 11 % | 53 880 ₡ | 0 ₡ / 26 851 ₡ / 155 102 ₡ | 44 929 ₡ | 92 % (J4) | 9.3 (34 % des trajets) | 3.0 | — |
-| Opportuniste · Casse-cou · score | 200 | 74 % | 14 % | bio-bricks 26 %, execution 1 % | standard 44 %, mafia 30 % | 126 426 ₡ | 0 ₡ / 776 ₡ / 439 176 ₡ | 102 717 ₡ | 85 % (J2) | 11.3 (43 % des trajets) | 3.7 | — |
+| Opportuniste · Prudent · score | 200 | 91 % | 2 % | bio-bricks 10 % | standard 91 % | 27 640 ₡ | 0 ₡ / 23 828 ₡ / 59 920 ₡ | 25 699 ₡ | 94 % (J5) | 6.1 (20 % des trajets) | 1.5 | — |
+| Opportuniste · Équilibré · score | 200 | 84 % | 9 % | bio-bricks 17 % | standard 74 %, mafia 10 % | 53 692 ₡ | 0 ₡ / 31 332 ₡ / 143 076 ₡ | 51 118 ₡ | 92 % (J4) | 9.2 (33 % des trajets) | 3.0 | — |
+| Opportuniste · Casse-cou · score | 200 | 73 % | 13 % | bio-bricks 26 %, execution 1 % | standard 44 %, mafia 29 % | 126 511 ₡ | 0 ₡ / 738 ₡ / 433 340 ₡ | 97 388 ₡ | 85 % (J2) | 11.4 (43 % des trajets) | 3.7 | — |
 | Saboteur · Prudent · score | 200 | 89 % | 4 % | bio-bricks 12 % | standard 89 % | 24 093 ₡ | 0 ₡ / 21 661 ₡ / 51 999 ₡ | 23 404 ₡ | 93 % (J6) | 5.9 (20 % des trajets) | 1.7 | MOD-03 66 % |
 | Saboteur · Équilibré · score | 200 | 81 % | 14 % | bio-bricks 20 % | standard 69 %, mafia 12 % | 55 281 ₡ | 0 ₡ / 3 113 ₡ / 183 236 ₡ | 22 823 ₡ | 91 % (J4) | 8.8 (34 % des trajets) | 3.2 | MOD-03 64 %, VEH-04 27 % |
 | Saboteur · Casse-cou · score | 200 | 71 % | 18 % | bio-bricks 26 %, execution 4 % | standard 44 %, mafia 27 % | 152 205 ₡ | 0 ₡ / 27 ₡ / 558 742 ₡ | 20 255 ₡ | 86 % (J2) | 10.8 (44 % des trajets) | 3.7 | MOD-03 59 %, VEH-04 42 % |
@@ -78,9 +78,9 @@ Lu dans le carnet de route de chaque partie : patrimoine net médian (cash + off
 | Citoyen modèle · Prudent · score | 2 121 ₡ | 6 345 ₡ | 12 625 ₡ | 25 366 ₡ | J13 | 2.6 | 1.1 / 0.3 | 0.0 |
 | Citoyen modèle · Équilibré · score | 4 920 ₡ | 13 875 ₡ | 24 474 ₡ | 52 095 ₡ | J11 | 3.6 | 0.6 / 0.2 | 0.2 |
 | Citoyen modèle · Casse-cou · score | 4 316 ₡ | 8 682 ₡ | 9 306 ₡ | 36 301 ₡ | J10 | 4.1 | 0.3 / 0.2 | 0.2 |
-| Opportuniste · Prudent · score | 2 184 ₡ | 6 796 ₡ | 15 121 ₡ | 23 568 ₡ | — | 2.5 | 0.8 / 0.2 | 0.0 |
-| Opportuniste · Équilibré · score | 1 506 ₡ | 9 262 ₡ | 20 292 ₡ | 27 211 ₡ | — | 4.2 | 0.5 / 0.2 | 0.1 |
-| Opportuniste · Casse-cou · score | 797 ₡ | 669 ₡ | 428 ₡ | 1 089 ₡ | — | 4.4 | 0.2 / 0.1 | 0.1 |
+| Opportuniste · Prudent · score | 2 184 ₡ | 6 766 ₡ | 15 682 ₡ | 23 828 ₡ | — | 2.5 | 0.8 / 0.2 | 0.0 |
+| Opportuniste · Équilibré · score | 1 506 ₡ | 9 918 ₡ | 21 007 ₡ | 35 443 ₡ | — | 4.1 | 0.6 / 0.2 | 0.2 |
+| Opportuniste · Casse-cou · score | 797 ₡ | 669 ₡ | 531 ₡ | 1 278 ₡ | — | 4.4 | 0.2 / 0.1 | 0.1 |
 | Saboteur · Prudent · score | 2 184 ₡ | 5 655 ₡ | 14 266 ₡ | 21 825 ₡ | J10 | 2.5 | 0.8 / 0.2 | 0.0 |
 | Saboteur · Équilibré · score | 1 420 ₡ | 7 227 ₡ | 3 170 ₡ | 7 753 ₡ | J9 | 4.1 | 0.4 / 0.2 | 0.2 |
 | Saboteur · Casse-cou · score | 797 ₡ | 89 ₡ | 54 ₡ | 144 ₡ | J6 | 4.4 | 0.1 / 0.1 | 0.1 |

@@ -25,7 +25,7 @@
 | Morgue : chirurgie | Sans build · Casse-cou | 4 % | 75 % → 75 % (−0 pts ± 0) | neutre | 142 530 ₡ → 141 583 ₡ (−947 ₡ ± 1 226 ₡) | neutre |
 | Morgue : certificat | Sans build · Équilibré | 8 % | 83 % → 83 % (+0 pts ± 0) | neutre | 56 280 ₡ → 55 935 ₡ (−344 ₡ ± 736 ₡) | neutre |
 | Morgue : laissez-passer | Sans build · Équilibré | 32 % | 83 % → 83 % (+1 pts ± 1) | neutre | 56 280 ₡ → 56 119 ₡ (−160 ₡ ± 1 108 ₡) | neutre |
-| Karma-Cham | Sans build · Équilibré | 51 % | 83 % → 84 % (+1 pts ± 2) | neutre | 56 280 ₡ → 52 815 ₡ (−3 464 ₡ ± 5 418 ₡) | neutre |
+| Karma-Cham | Sans build · Équilibré | 54 % | 83 % → 83 % (+1 pts ± 2) | neutre | 56 280 ₡ → 55 663 ₡ (−617 ₡ ± 6 296 ₡) | neutre |
 | Velvet-Silo : enchères | Haut tier · Casse-cou | 22 % | 71 % → 71 % (+0 pts ± 1) | neutre | 153 046 ₡ → 154 974 ₡ (+1 928 ₡ ± 14 389 ₡) | neutre |
 | Velvet-Silo : chantage | Sans build · Équilibré | 3 % | 83 % → 83 % (+0 pts ± 0) | neutre | 56 280 ₡ → 56 067 ₡ (−213 ₡ ± 643 ₡) | neutre |
 | Dilution en Tier 0 | Couverture légale · Équilibré | 100 % | 82 % → 84 % (+3 pts ± 5) | neutre | 58 832 ₡ → 79 386 ₡ (+20 554 ₡ ± 12 921 ₡) | positif |
