@@ -61,6 +61,7 @@ import {
   checkAuction,
   checkBlackmail,
   checkInfluence,
+  influenceFactor,
   checkMorgue,
   checkVipDelivery,
   checkVipRequest,
@@ -383,7 +384,7 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
   if (!checkDeliverContract(view)) return { type: 'deliverContract' }
 
   const hunt = serverHunt(view, objective)
-  const panic = open && !endgame ? karmaOrder(view, plan, temperament) : null
+  const panic = open && !endgame ? (karmaOrder(view, plan, temperament) ?? panicStock(view, temperament)) : null
   if (panic) return panic
 
   const sale = sell(view, plan, endgame, hunt)
@@ -550,8 +551,9 @@ function sell(view: GameState, plan: Plan, endgame: boolean, hunt: boolean): Act
     const first = saleQuote(view, productId, 1)
     const lot = view.cargo.find((entry) => entry.productId === productId)
     const rotting = lot ? (daysBeforeRot(view, lot) ?? Infinity) <= 1 : false
-    // Jamais revendre sur place ce qu'on vient d'acheter (clause anti-arbitrage) : c'est une boucle sans gain
-    if (lot && !lot.travelled && !endgame && !rotting) continue
+    // Jamais revendre sur place ce qu'on vient d'acheter (clause anti-arbitrage) : c'est une boucle sans gain,
+    // sauf au cours paniqué par Karma-Cham, qui monte le cours lui-même
+    if (lot && !lot.travelled && !endgame && !rotting && influenceFactor(view, productId) === 1) continue
     // Ruiné : tout revendre, même à perte, pour repartir
     const worth =
       endgame ||
@@ -644,19 +646,60 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
 }
 
 /**
- * Karma-Cham, avant de vendre : panique sur le tag dont les caisses gardées jusqu'à demain (sans pourrir d'ici là)
- * rapporteraient en plus nettement davantage que son prix ; demain doit être un jour de vente
+ * Karma-Cham, avant de vendre (coup d'expert) : panique sur le tag qui rapporterait le plus demain, caisses gardées
+ * (sans pourrir d'ici là) et caisses du tag achetées ici aujourd'hui au cours normal ; seulement si ce surplus dépasse
+ * nettement son prix, et si demain est un jour de vente
  */
 function karmaOrder(view: GameState, plan: Plan, temperament: Temperament): Action | null {
   if (!(plan.places ?? DEFAULT_PLACES).includes('influence') || checkService(view, 'influence') || view.day >= GAME_LENGTH_DAYS) return null
   const cost = karmaCost(view)
-  if (view.cash - cost < reserveOf(view, temperament) + CAPITAL) return null
-  const surplus = (tag: TagId) =>
+  const budget = view.cash - cost - reserveOf(view, temperament) - CAPITAL
+  if (budget < 0) return null
+  const held = (tag: TagId) =>
     tradable(view)
       .filter((lot) => PRODUCTS[lot.productId].tags.includes(tag) && (daysBeforeRot(view, lot) ?? Infinity) > 1)
       .reduce((total, lot) => total + lot.qty * quote(view, view.districtId, lot.productId) * SALE_COMMISSION * (KARMA.factor - 1), 0)
+  const bought = (tag: TagId) => panicPurchases(view, tag, budget).reduce((total, { qty, gain }) => total + qty * gain, 0)
+  const surplus = (tag: TagId) => held(tag) + bought(tag)
   const tag = [...KARMA.tags].sort((a, b) => surplus(b) - surplus(a))[0]
   return tag && surplus(tag) > cost * KARMA_MARGIN && !checkInfluence(view, tag) ? { type: 'influence', tag } : null
+}
+
+/**
+ * Achats pour la panique de demain : caisses du tag de la boutique d'ici, au cours normal, revendues demain au cours
+ * paniqué (commission déduite) ; les plus rentables d'abord, dans la limite du budget, de la place, du stock et de la
+ * demande d'ici (ce qu'un marché absorbe en un jour)
+ */
+function panicPurchases(view: GameState, tag: TagId, budget: number): { productId: ProductId; qty: number; gain: number }[] {
+  const market = view.markets[view.districtId]
+  let cash = budget
+  let space = VEHICLES[view.vehicleId].cargo - cargoUsed(view.cargo)
+  return (
+    shopProducts(market)
+      // Les périssables ne passent pas la nuit sans perdre leur fraîcheur
+      .filter((id) => PRODUCTS[id].tags.includes(tag) && !PRODUCTS[id].tags.includes('TAG-PERISHABLE'))
+      .map((productId) => {
+        const price = quote(view, view.districtId, productId)
+        return { productId, price, gain: price * (KARMA.factor * SALE_COMMISSION - 1) }
+      })
+      .filter(({ gain }) => gain > 0)
+      .sort((a, b) => b.gain - a.gain)
+      .map(({ productId, price, gain }) => {
+        const qty = Math.max(0, Math.min(market.stock[productId] ?? 0, market.demand[productId] ?? 0, space, Math.floor(cash / price)))
+        cash -= qty * price
+        space -= qty
+        return { productId, qty, gain }
+      })
+      .filter(({ qty }) => qty > 0)
+  )
+}
+
+/** Panique commandée pour demain : acheter ici, aujourd'hui, les caisses du tag qui se revendront au cours paniqué */
+function panicStock(view: GameState, temperament: Temperament): Action | null {
+  const influence = view.influence
+  if (!influence || influence.day !== view.day + 1) return null
+  const [next] = panicPurchases(view, influence.tag, view.cash - reserveOf(view, temperament) - CAPITAL)
+  return next ? { type: 'buy', productId: next.productId, qty: Math.min(next.qty, maxBuy(view, next.productId)) } : null
 }
 
 /** Lieux spéciaux du district, quand le plan les prévoit et que le seuil est atteint */

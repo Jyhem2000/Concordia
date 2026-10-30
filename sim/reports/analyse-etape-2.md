@@ -572,3 +572,14 @@ Les deux services restaient négatifs aux retraits. Le bot les jouait mal : pani
 **Retraits** (400 parties, mêmes graines) :
 - **Chirurgie** (Sans build, Casse-cou) : utilisée dans 4 % des parties (11 % avant), score −700 ₡ ± 1 100 (neutre, −2 200 avant), survie inchangée. La Santé ne compte qu'à zéro (mort) et pour la nuit blanche : la mort est rare, la chirurgie n'a presque jamais d'utilité, quel que soit le joueur.
 - **Karma-Cham** (Sans build, Équilibré) : utilisée dans 23 % des parties (40 % avant), score −4 000 ₡ ± 3 200, toujours négatif. La panique ne dure qu'un jour et la demande de chaque marché limite les caisses vendues à ×1,5 ; garder les caisses un jour coûte aussi un trajet de vente. Non joué : acheter exprès les caisses du tag pour la panique du lendemain.
+
+## Chauffeur à bout, soirée explicite, Karma-Cham joué en expert
+**Changements de règle :** sous un seuil de Santé, le chauffeur est à bout (malus au bluff et à la fuite, `WORN`) ; la journée se passe sur place avec « Attendre le soir » ; on ne dort que le soir venu ; les tournées de nuit partent le soir, après le trajet du jour ou après avoir attendu.
+
+**Bot :** chirurgie quand le chauffeur est à bout ; Karma-Cham joué en coup d'expert : panique commandée si les caisses gardées et celles achetées ici au cours normal (non périssables, dans la limite de la demande d'un jour) rapportent demain nettement plus que son prix ; achat, puis revente le lendemain au cours paniqué (la clause anti-arbitrage ne plafonne que le savoir-faire, pas le cours).
+
+**Retraits** (400 parties, mêmes graines) :
+- Chirurgie (Sans build, Casse-cou) : 4 % des parties, −900 ₡ ± 1 200, neutre.
+- Karma-Cham (Sans build, Équilibré) : 51 % des parties, −3 500 ₡ ± 5 400, neutre (−4 000 ± 3 200 avec le bot précédent).
+
+**Sondes Karma-Cham** (même paire) : à moitié prix (2 000 ₡, +1 000 par usage), −4 600 ₡ ± 6 400 : le prix n'est pas le levier, le marchand commande plus souvent sans gagner davantage ; facteur ×1,75 au lieu de ×1,5, −600 ₡ ± 6 300, à l'équilibre.
