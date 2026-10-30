@@ -71,9 +71,6 @@ type DealRowProps = {
   here?: boolean
 }
 
-/** Colonne d'En bref sur grand écran ; sur téléphone, ses encarts se rangent directement dans la page */
-const COLUMN = 'contents md:flex md:min-w-0 md:flex-col md:gap-4'
-
 /** Intitulé d'une rubrique d'encart, et séparation de la précédente */
 const SECTION = 'mb-1.5 text-xs font-bold text-ink-soft uppercase'
 const SEPARATED = 'mt-3 border-t border-line pt-2'
@@ -82,21 +79,15 @@ const SEPARATED = 'mt-3 border-t border-line pt-2'
 export default function FilView({ onGo }: FilViewProps) {
   return (
     <>
-      {/* Grand écran : la journée, puis les décisions, puis le bilan ; sur téléphone, les encarts se suivent */}
-      <div className={COLUMN}>
-        <BriefingPanel />
-        <TodayPanel onGo={onGo} />
-        <AlertsPanel onGo={onGo} />
-      </div>
-      <div className={COLUMN}>
-        <DealsPanel />
-        <CalendarPanel />
-        <ObjectivesPanel />
-      </div>
-      <div className={COLUMN}>
-        <JournalPanel />
-        <RecordsPanel />
-      </div>
+      {/* Dans l'ordre de lecture : la journée, les décisions, le bilan ; sur grand écran, répartis en colonnes */}
+      <BriefingPanel />
+      <TodayPanel onGo={onGo} />
+      <AlertsPanel onGo={onGo} />
+      <DealsPanel />
+      <CalendarPanel />
+      <ObjectivesPanel />
+      <JournalPanel />
+      <RecordsPanel />
     </>
   )
 }

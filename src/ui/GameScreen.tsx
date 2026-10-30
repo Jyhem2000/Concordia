@@ -92,9 +92,12 @@ export default function GameScreen() {
                 <RoadReportPanel />
               </div>
             )}
-            {/* En bref : sur grand écran, ses colonnes thématiques, élargies ou repliées selon la place */}
+            {/*
+              En bref : sur grand écran, autant de colonnes que la place en tient (largeur minimale fixe), élargies à parts
+              égales ; les encarts s'y répartissent dans l'ordre de lecture, équilibrés par leur hauteur
+            */}
             <div
-              className={`min-w-0 flex-col gap-4 motion-safe:animate-fade-in md:col-span-5 md:grid-cols-panels md:items-start ${tab === 'fil' ? 'flex' : 'hidden'} ${TAB_GROUP[tab] === 'brief' ? 'md:grid' : 'md:hidden'}`}
+              className={`min-w-0 flex-col gap-4 motion-safe:animate-fade-in md:col-span-5 md:columns-xs md:*:mb-4 md:*:break-inside-avoid ${tab === 'fil' ? 'flex' : 'hidden'} ${TAB_GROUP[tab] === 'brief' ? 'md:block' : 'md:hidden'}`}
             >
               <FilView onGo={go} />
             </div>

@@ -57,13 +57,13 @@ export default function TabBar({ current, tabs, onPick }: TabBarProps) {
   )
 }
 
-/** Onglets du grand écran, sous le bandeau, masqués sur téléphone */
+/** Onglets du grand écran, sous le bandeau : toute la largeur de l'écran de jeu, un tiers chacun ; masqués sur téléphone */
 export function DesktopTabs({ current, onPick }: Omit<TabBarProps, 'tabs'>) {
   const { t } = useI18n()
   const group = TAB_GROUP[current]
   return (
     <nav aria-label={t.tabs.label} className="hidden md:col-span-5 md:block">
-      <ul className="flex gap-2 border-b border-line">
+      <ul className="grid grid-cols-3 border-b border-line">
         {GROUPS.map((id) => {
           const Icon = groupIcons[id]
           const active = id === group
@@ -73,11 +73,13 @@ export function DesktopTabs({ current, onPick }: Omit<TabBarProps, 'tabs'>) {
                 type="button"
                 aria-pressed={active}
                 onClick={() => onPick(GROUP_TAB[id])}
-                className={`-mb-px flex items-center gap-2 border-b-2 px-4 py-2 text-sm uppercase ${FOCUS_RING} ${
-                  active ? 'border-accent font-bold text-accent' : 'border-transparent text-ink-muted hover:text-ink-soft'
+                className={`-mb-px flex w-full items-center justify-center gap-2 border-b-2 px-4 py-3 text-sm uppercase transition-colors ${FOCUS_RING} ${
+                  active
+                    ? 'border-accent bg-accent/10 font-bold text-accent'
+                    : 'border-transparent text-ink-muted hover:bg-raised hover:text-ink-soft'
                 }`}
               >
-                <Icon size={16} aria-hidden="true" />
+                <Icon size={18} aria-hidden="true" />
                 {t.tabs.groups[id]}
               </button>
             </li>

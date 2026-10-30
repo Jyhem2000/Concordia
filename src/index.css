@@ -88,11 +88,6 @@
 }
 
 /* Images en pixel art : agrandies sans flou (chap. 7) */
-/* En bref sur grand écran : autant de colonnes que la place en tient, chacune élargie à parts égales */
-@utility grid-cols-panels {
-  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
-}
-
 @utility pixelated {
   image-rendering: pixelated;
 }
