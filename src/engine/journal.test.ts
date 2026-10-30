@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { offshoreBalance } from './finance.ts'
+import { netWealth } from './journal.ts'
 import { createInitialState } from './state.ts'
 import { defined, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
 
@@ -33,5 +34,11 @@ describe('carnet de route (chap. 7)', () => {
     const passed = run(stopped, { type: 'intercept', move: 'search' })
     const control = defined(passed.journal.at(-1)).highlights.find((highlight) => highlight.kind === 'control')
     expect(control).toMatchObject({ kind: 'control', move: 'search' })
+  })
+})
+
+describe('patrimoine net (chap. 7)', () => {
+  it('ajoute le cash et l’offshore, retire la dette', () => {
+    expect(netWealth({ cash: 2_000, offshore: 500, debt: 5_000 })).toBe(-2_500)
   })
 })

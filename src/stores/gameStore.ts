@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 import { applyAction, type Action, type ActionError } from '../engine/actions.ts'
 import { randomSeed } from '../engine/rng.ts'
 import { createInitialState } from '../engine/state.ts'
+import { useRecordsStore } from './recordsStore.ts'
 import type { GameState } from '../engine/types.ts'
 
 type GameStore = {
@@ -21,14 +22,16 @@ export function savedPart({ game }: GameStore): Pick<GameStore, 'game'> {
 
 export const useGameStore = create<GameStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       game: createInitialState(randomSeed()),
       lastError: null,
-      dispatch: (action) =>
-        set(({ game }) => {
-          const result = applyAction(game, action)
-          return result.ok ? { game: result.state, lastError: null } : { lastError: result.error }
-        }),
+      dispatch: (action) => {
+        const result = applyAction(get().game, action)
+        if (!result.ok) return set({ lastError: result.error })
+        // Une partie qui s'achève entre au palmarès, une seule fois
+        if (result.state.ending && !get().game.ending) useRecordsStore.getState().record(result.state.ending)
+        set({ game: result.state, lastError: null })
+      },
       newGame: () => set({ game: createInitialState(randomSeed()), lastError: null }),
     }),
     {

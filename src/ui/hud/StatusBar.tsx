@@ -17,7 +17,7 @@ import { checkForceCurfew } from '../../engine/actions.ts'
 import { iccRouteGainLeft, iccTier } from '../../engine/gauges.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
-import { FOCUS_RING } from '../shared/focus.ts'
+import ConfirmButton from '../shared/ConfirmButton.tsx'
 import { APPEAR } from '../shared/motion.ts'
 import Tip from '../shared/Tip.tsx'
 import { ICC_TONE, TONE_TEXT, type Tone } from '../shared/styles.ts'
@@ -71,10 +71,6 @@ export default function StatusBar() {
   // Épuisé : tournée de nuit la veille, pas de nouvelle nuit sur la route ce soir (chap. 1)
   const exhausted = checkForceCurfew(game) === 'exhausted'
   const PhaseIcon = game.phase === 'day' ? Sun : Moon
-
-  const restart = () => {
-    if (window.confirm(t.hud.newGameConfirm)) newGame()
-  }
 
   return (
     <header className="z-20 border-b border-line bg-base/95 backdrop-blur md:sticky md:top-0">
@@ -132,18 +128,18 @@ export default function StatusBar() {
             {t.district[game.districtId].name}
           </span>
           <span className="min-w-0 flex-1 truncate text-ink-muted">{moment !== 'curfew' && (tripDone ? t.moment.tripDone : t.moment.tripLeft)}</span>
-          <button
-            type="button"
-            onClick={restart}
+          <ConfirmButton
+            size="sm"
+            onClick={newGame}
             aria-label={t.hud.newGame}
-            className={`flex shrink-0 items-center gap-1 rounded-md border border-line-strong p-1 text-ink-muted hover:text-ink ${FOCUS_RING}`}
+            confirm={{ title: t.hud.newGame, message: t.hud.newGameConfirm, action: t.hud.newGameAction }}
           >
             <RotateCcw size={14} aria-hidden="true" />
             {/* Libellé visible là où il y a la place ; le nom accessible vient de aria-label */}
             <span aria-hidden="true" className="hidden md:inline">
               {t.hud.newGame}
             </span>
-          </button>
+          </ConfirmButton>
         </div>
 
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">

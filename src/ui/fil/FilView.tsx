@@ -28,6 +28,7 @@ import { TONE_TEXT, type Tone } from '../shared/styles.ts'
 import EventsList from './EventsList.tsx'
 import FlashInfo from './FlashInfo.tsx'
 import JournalPanel from './JournalPanel.tsx'
+import RecordsPanel from './RecordsPanel.tsx'
 
 type AgendaEntry = {
   key: string
@@ -64,6 +65,7 @@ export default function FilView() {
       <DealsPanel />
       <ObjectivesPanel />
       <JournalPanel />
+      <RecordsPanel />
     </>
   )
 }

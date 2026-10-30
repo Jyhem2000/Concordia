@@ -3,6 +3,8 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import { useHighlightText } from '../fil/useHighlightText.ts'
+import RecordsPanel from '../fil/RecordsPanel.tsx'
+import WealthChart from '../fil/WealthChart.tsx'
 
 /** Écran de fin : la fin débloquée à l'audit du Jour 30, ou la défaite (chap. 1) */
 export default function EndScreen() {
@@ -30,6 +32,9 @@ export default function EndScreen() {
         </p>
       )}
       <section className="w-full rounded-lg border border-line bg-panel p-3 text-left">
+        <WealthChart />
+      </section>
+      <section className="w-full rounded-lg border border-line bg-panel p-3 text-left">
         <h2 className="text-xs font-bold tracking-wide text-accent uppercase">{t.journal.highlights}</h2>
         {highlights.length === 0 ? (
           <p className="mt-1 text-xs text-ink-muted">{t.journal.noHighlight}</p>
@@ -45,6 +50,9 @@ export default function EndScreen() {
           </ul>
         )}
       </section>
+      <div className="w-full text-left">
+        <RecordsPanel />
+      </div>
       <Button variant="primary" onClick={newGame}>
         {t.hud.newGame}
       </Button>

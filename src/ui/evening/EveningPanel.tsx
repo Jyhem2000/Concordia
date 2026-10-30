@@ -10,6 +10,7 @@ import { sleepsAtRelay } from '../../engine/routine.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
+import ConfirmButton from '../shared/ConfirmButton.tsx'
 import { FOCUS_RING } from '../shared/focus.ts'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
@@ -32,6 +33,8 @@ export default function EveningPanel() {
   const curfewError = checkForceCurfew(game, drink)
   const missionError = curfewError ?? (offer ? checkMission(game) : 'no-mission')
   const sleepLabel = sleepsAtRelay(game) ? t.evening.sleepRelay : t.evening.bivouac
+  // Produit qui mène à l'exécution sommaire si la soute est fouillée (chap. 5)
+  const lethal = PRODUCT_IDS.find((id) => PRODUCTS[id].lethalOnSearch && ownedQty(game.cargo, id) > 0)
   // Eau qui refroidit le moteur la nuit (chap. 2)
   const coolants = PRODUCT_IDS.filter((id) => PRODUCTS[id].cooling && ownedQty(game.cargo, id) > 0)
   // After du couvre-feu de ce soir, annoncée dès 06h00 (chap. 1)
@@ -79,10 +82,19 @@ export default function EveningPanel() {
                 </li>
               )}
               <li>
-                <Button variant="danger" disabled={curfewError !== null} onClick={() => dispatch({ type: 'forceCurfew', drink })}>
+                <ConfirmButton
+                  variant="danger"
+                  disabled={curfewError !== null}
+                  onClick={() => dispatch({ type: 'forceCurfew', drink })}
+                  confirm={
+                    lethal
+                      ? { title: t.evening.lethalConfirm, message: t.evening.lethalWarning(t.product[lethal].name), action: t.evening.lethalAction }
+                      : undefined
+                  }
+                >
                   {t.evening.clandestineTour}
                   {drinkLabel}
-                </Button>
+                </ConfirmButton>
                 <Hint>{curfewError ? t.error[curfewError] : t.evening.clandestineHint(t.hud.wantedGain(WANTED.perOffense))}</Hint>
                 {canInject(game) && <Hint tone="accent">{t.evening.injectionHint(game.progress.injections + 1, ENDINGS.resident.injections)}</Hint>}
               </li>

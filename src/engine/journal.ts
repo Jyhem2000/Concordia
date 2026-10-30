@@ -8,6 +8,11 @@ export function wealthOf(state: GameState): WealthSnapshot {
   return { cash: state.cash, offshore: offshoreBalance(state.offshore), debt: state.debt }
 }
 
+/** Patrimoine net : Cash-Puce et offshore, moins la dette */
+export function netWealth({ cash, offshore, debt }: WealthSnapshot): number {
+  return cash + offshore - debt
+}
+
 /** Première entrée du carnet : le Jour 1 au départ */
 export function firstDayLog(state: GameState): DayLog {
   return { day: state.day, start: wealthOf(state), bought: 0, sold: 0, highlights: [] }

@@ -156,6 +156,7 @@ export const fr = {
 
   modal: {
     close: 'Fermer',
+    cancel: 'Annuler',
   },
 
   /** Onglets en bas d'écran du téléphone (chap. 7) */
@@ -230,8 +231,22 @@ export const fr = {
     noYesterday: 'Premier jour : pas encore de bilan.',
     flows: (bought: string, sold: string) => `Achats ${bought} · ventes ${sold}`,
     wealth: 'Patrimoine (cash + offshore − dette)',
+    wealthLabel: 'Patrimoine net (cash + offshore − dette) chaque matin, puis maintenant',
+    wealthReadout: (when: string, amount: string) => `Patrimoine net, ${when} : ${amount}`,
+    morningOf: (day: number) => `J${day} à 06h00`,
+    now: 'maintenant',
     showAll: 'Tout le carnet',
     hideAll: 'Masquer le carnet',
+  },
+
+  /** Palmarès, d'une partie à l'autre (chap. 7) */
+  records: {
+    title: 'Palmarès',
+    none: 'Aucune partie terminée pour l’instant : les fins atteintes s’inscriront ici.',
+    summary: (games: number, defeats: number) =>
+      `${games} partie${games > 1 ? 's' : ''} terminée${games > 1 ? 's' : ''}, dont ${defeats} défaite${defeats > 1 ? 's' : ''}.`,
+    best: (score: string) => `Meilleur score : ${score}`,
+    reached: (title: string, count: number) => `${title} ×${count}`,
   },
 
   /** Carnet de route : faits marquants d'une journée (chap. 7) */
@@ -295,7 +310,8 @@ export const fr = {
     healthInfo:
       'Santé du chauffeur : à zéro, la partie est perdue. Fuite ratée, racket, aléas, canicule et cellule en coûtent ; le relais et la Morgue en rendent.',
     newGame: 'Nouvelle partie',
-    newGameConfirm: 'Abandonner la partie en cours et recommencer au Jour 1 ?',
+    newGameConfirm: 'Abandonner la partie en cours et recommencer au Jour 1 ? Elle ne comptera pas au palmarès.',
+    newGameAction: 'Abandonner et recommencer',
     offshoreRate: (rate: string) => `${rate}/j`,
     wanted: (level: number, max: number) => `Fiche S ${level}/${max}`,
     wantedGain: (levels: number) => `+${levels} niveau${levels > 1 ? 'x' : ''} de Fiche S`,
@@ -707,6 +723,11 @@ export const fr = {
     noMatch: 'Aucun produit de ce filtre ici.',
     streetOnly: 'Passé 20h00 : seul le marché de rue est ouvert.',
     sellAll: (amount: string) => `Vendre tout (${amount})`,
+    sellAllConfirm: 'Vendre aussi à perte ?',
+    sellAllLosses: (lines: string) =>
+      `Une partie de la soute se vendrait moins cher qu'elle n'a coûté : ${lines}. « Vendre tout ce qui marge » garde ces caisses.`,
+    sellAllLoss: (product: string, loss: string) => `${product} (${loss})`,
+    sellAllAction: 'Vendre tout quand même',
     sellProfitable: (amount: string) => `Vendre tout ce qui marge (${amount})`,
     quote: 'Cours',
     stock: 'Stock',
@@ -966,6 +987,10 @@ export const fr = {
     missionTour: (district: string, fee: string) => `Livraison de nuit autorisée vers ${district} (prime ${fee})`,
     missionTourHint: (crates: number) =>
       `La plateforme charge ${crates} caisses scellées (place libre requise) : le trajet vers ce district est couvert, et votre marchandise peut voyager avec.`,
+    lethalConfirm: 'Tournée clandestine avec le serveur ?',
+    lethalWarning: (product: string) =>
+      `${product} est à bord : si les agents fouillent la soute, c'est l'exécution sommaire et la fin de la partie.`,
+    lethalAction: 'Partir quand même',
     clandestineTour: 'Tournée clandestine',
     clandestineHint: (wanted: string) => `Hors mission, vers le district de votre choix : risque accru, et ${wanted} si le trajet passe.`,
     injectionHint: (next: number, needed: number) =>

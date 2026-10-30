@@ -40,7 +40,7 @@ Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la dé
 | **Équipement** | véhicules (double fond et son contenu compris), modules (brouilleur de drones compris), équipage (injection du serveur par Glitch comprise), salaires | chap. 4 |
 | **Événements** | globaux, locaux, rumeurs, contrecoups, Loterie, aléas routiers | chap. 6 |
 | **Prévisibilité** | ce que le joueur sait ou peut deviner (cours, rumeurs, contrecoups, Loterie) et ce qui reste caché (ronde renforcée) | chap. 2 → chap. 6 → chap. 5 |
-| **Affichage** | charte graphique, onglets, Le Fil (actualités, agenda, bonnes affaires, alertes), carnet de route, où chaque règle est montrée et détaillée au joueur, manuel en jeu | chap. 7 |
+| **Affichage** | charte graphique, onglets, Le Fil (actualités, agenda, bonnes affaires, alertes), carnet de route et courbe du patrimoine, palmarès, confirmations, où chaque règle est montrée et détaillée au joueur, manuel en jeu | chap. 7 |
 
 ## État d'implémentation
 Toutes les règles des chap. 1 à 6 sont en jeu. Ce tableau dit ce qui reste à faire, et se met à jour à chaque étape.

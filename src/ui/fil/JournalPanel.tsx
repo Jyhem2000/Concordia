@@ -1,6 +1,6 @@
 import { BookMarked } from 'lucide-react'
 import { useState } from 'react'
-import { wealthOf } from '../../engine/journal.ts'
+import { netWealth, wealthOf } from '../../engine/journal.ts'
 import type { DayLog, WealthSnapshot } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -8,15 +8,13 @@ import Button from '../shared/Button.tsx'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
 import { useHighlightText } from './useHighlightText.ts'
+import WealthChart from './WealthChart.tsx'
 
 type DayEntryProps = {
   log: DayLog
   /** Patrimoine qui ferme la journée : le matin suivant, ou maintenant pour aujourd'hui */
   end: WealthSnapshot
 }
-
-/** Patrimoine net : Cash-Puce et offshore, moins la dette */
-const net = ({ cash, offshore, debt }: WealthSnapshot) => cash + offshore - debt
 
 /** Bilan de la veille, puis tout le carnet de route sur demande (chap. 7) */
 export default function JournalPanel() {
@@ -30,7 +28,8 @@ export default function JournalPanel() {
 
   return (
     <Panel icon={BookMarked} title={t.fil.journal} collapseId="fil-journal">
-      {yesterday ? <DayEntry log={yesterday.log} end={yesterday.end} /> : <Hint>{t.fil.noYesterday}</Hint>}
+      <WealthChart />
+      <div className="mt-3">{yesterday ? <DayEntry log={yesterday.log} end={yesterday.end} /> : <Hint>{t.fil.noYesterday}</Hint>}</div>
       {days.length > 2 && (
         <>
           <Button size="sm" className="mt-2" onClick={() => setAll(!all)}>
@@ -58,7 +57,7 @@ export default function JournalPanel() {
 export function DayEntry({ log, end }: DayEntryProps) {
   const { t, credits, signedCredits } = useI18n()
   const text = useHighlightText()
-  const delta = net(end) - net(log.start)
+  const delta = netWealth(end) - netWealth(log.start)
   return (
     <div className="text-xs">
       <p className="flex flex-wrap items-baseline gap-x-2">

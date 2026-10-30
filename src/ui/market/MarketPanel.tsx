@@ -12,6 +12,7 @@ import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import Detailed from '../shared/Detailed.tsx'
 import Chip from '../shared/Chip.tsx'
+import ConfirmButton from '../shared/ConfirmButton.tsx'
 import Hint from '../shared/Hint.tsx'
 import Margin from '../shared/Margin.tsx'
 import Panel from '../shared/Panel.tsx'
@@ -152,20 +153,33 @@ function BulkSales() {
   // Les ventes se calculent sur l'état entier de la partie (lots, demande, fraîcheur)
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
-  const { t, credits } = useI18n()
+  const { t, credits, signedCredits } = useI18n()
   const revenue = (profitableOnly: boolean) =>
     bulkSales(game, profitableOnly).reduce((total, { productId, qty }) => total + saleQuote(game, productId, qty).total, 0)
   const all = bulkSales(game, false)
   if (all.length === 0) return null
   const profitable = bulkSales(game, true)
+  // Produits que « Vendre tout » céderait à perte, saturation et état des caisses compris
+  const losses = all.flatMap(({ productId, qty }) => {
+    const sale = saleQuote(game, productId, qty)
+    return sale.total < sale.cost ? [t.market.sellAllLoss(t.product[productId].name, signedCredits(sale.total - sale.cost))] : []
+  })
   return (
     <div className="flex flex-wrap gap-2 px-3 pt-3">
       <Button variant="primary" disabled={profitable.length === 0} onClick={() => dispatch({ type: 'sellAll', profitableOnly: true })}>
         {t.market.sellProfitable(credits(revenue(true)))}
       </Button>
-      <Button variant="danger" onClick={() => dispatch({ type: 'sellAll', profitableOnly: false })}>
+      <ConfirmButton
+        variant="danger"
+        onClick={() => dispatch({ type: 'sellAll', profitableOnly: false })}
+        confirm={
+          losses.length > 0
+            ? { title: t.market.sellAllConfirm, message: t.market.sellAllLosses(losses.join(', ')), action: t.market.sellAllAction }
+            : undefined
+        }
+      >
         {t.market.sellAll(credits(revenue(false)))}
-      </Button>
+      </ConfirmButton>
     </div>
   )
 }
