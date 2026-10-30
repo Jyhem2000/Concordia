@@ -9,6 +9,7 @@ import { drawAfter, drawNightOffer } from './night.ts'
 import { drawPatrol } from './risk.ts'
 import { createRng, seedRng } from './rng.ts'
 import type { DistrictId, GameState } from './types.ts'
+import { firstDayLog } from './journal.ts'
 
 /** Nouvelle partie au Jour 1, 06h00 : pas de routine matinale, marchés tirés une première fois. */
 export function createInitialState(seed: number): GameState {
@@ -79,8 +80,10 @@ export function createInitialState(seed: number): GameState {
     briefing: null,
     ending: null,
     rng: rng.state,
+    journal: [],
   }
-  return remember(state, START_DISTRICT)
+  // Le carnet de route s'ouvre sur le patrimoine de départ
+  return remember({ ...state, journal: [firstDayLog(state)] }, START_DISTRICT)
 }
 
 /** Mémorise les cours d'un district où se trouve le joueur : un relevé par jour, le dernier du jour l'emporte (chap. 2) */

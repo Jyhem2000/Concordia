@@ -8,7 +8,7 @@ import { planTravel } from '../../engine/actions.ts'
 import { averageCost, cargoUsed, ownedQty } from '../../engine/cargo.ts'
 import { crewEffect, isMemoryBlurred } from '../../engine/crew.ts'
 import { blurredQuote, estimatedUnitSale, fuelPriceBreakdown, lastSeen, productStatus } from '../../engine/market.ts'
-import { exposure, fineAmount, flyingCheckShare, hiddenCargo } from '../../engine/interception.ts'
+import { flyingCheckShare, hiddenCargo } from '../../engine/interception.ts'
 import { checkDelivery, deliveryCrates, deliveryFee, deliveryOffer } from '../../engine/delivery.ts'
 import { trustFactor } from '../../engine/progress.ts'
 import { riskBreakdown } from '../../engine/risk.ts'
@@ -18,6 +18,7 @@ import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import EventDetails from '../events/EventDetails.tsx'
 import DistrictMap from './DistrictMap.tsx'
+import Exposure from './Exposure.tsx'
 import DistrictSigns from './DistrictSigns.tsx'
 import { placesHere } from '../places/placesHere.ts'
 import Detailed from '../shared/Detailed.tsx'
@@ -67,7 +68,7 @@ export default function TravelPanel() {
       <LastTrip />
       <CargoSummary />
       <DayDelivery />
-      <Exposure />
+      <Exposure className="px-3 pt-2" />
       <ul className="mt-2 divide-y divide-line border-t border-line">
         {order.map((id) => (
           <DistrictRow key={id} districtId={id} selected={id === selected} />
@@ -120,24 +121,6 @@ function DayDelivery() {
       </Button>
       {error && <p className="mt-1 text-ink-muted">{t.error[error]}</p>}
     </div>
-  )
-}
-
-/** Ce qu'un barrage raté coûterait : caisses illégales en soute et sanction de base d'une saisie (chap. 5) */
-function Exposure() {
-  // La sanction et le double fond se calculent sur l'état entier de la partie (véhicule, district)
-  const game = useGameStore((s) => s.game)
-  const { t, credits, percent } = useI18n()
-  const { crates, hidden, cost, sanction } = exposure(game)
-  if (crates === 0 || !sanction) return null
-  return (
-    <Hint tone="accent" className="px-3 pt-2">
-      {t.travel.exposed(crates, credits(cost), hidden)}{' '}
-      {t.travel.exposedSanction(
-        t.interception.fine(percent(sanction.fineRate, 0), credits(fineAmount(game, sanction.fineRate))),
-        sanction.custodyDays,
-      )}
-    </Hint>
   )
 }
 

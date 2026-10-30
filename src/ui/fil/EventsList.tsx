@@ -5,9 +5,10 @@ import { aftershockEvents, rumorReliability } from '../../engine/events.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import EventDetails from '../events/EventDetails.tsx'
+import Hint from '../shared/Hint.tsx'
 
-/** Ligne des événements du téléscripteur : global, locaux, contrecoups, Loterie et rumeur du lendemain (chap. 6 et 7) */
-export default function EventsTicker() {
+/** Actualités du jour : événement global, locaux, contrecoups, Loterie, influence et rumeur du lendemain (chap. 6 et 7) */
+export default function EventsList() {
   const events = useGameStore((s) => s.game.events)
   const day = useGameStore((s) => s.game.day)
   const phase = useGameStore((s) => s.game.phase)
@@ -28,10 +29,11 @@ export default function EventsTicker() {
   const demotion = lottery?.demoted && lottery.viceDistrict && day <= lottery.viceUntil ? { from: lottery.demoted, to: lottery.viceDistrict } : null
   const name = (index: number) => t.events.names[index % t.events.names.length]
 
-  if (!events.global && locals.length === 0 && aftershocks.length === 0 && !drawToday && !demotion && !events.rumor && !influence) return null
+  if (!events.global && locals.length === 0 && aftershocks.length === 0 && !drawToday && !demotion && !events.rumor && !influence)
+    return <Hint>{t.fil.noNews}</Hint>
 
   return (
-    <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line px-4 py-1 text-xs text-ink-soft">
+    <ul className="flex flex-col gap-1 text-xs text-ink-soft">
       {events.global && (
         <li className="font-bold text-accent">
           <EventDetails event={events.global} />

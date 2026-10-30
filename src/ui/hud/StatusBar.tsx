@@ -27,8 +27,6 @@ import { FOCUS_RING } from '../shared/focus.ts'
 import Gauge from '../shared/Gauge.tsx'
 import Tip from '../shared/Tip.tsx'
 import { ICC_TONE, TONE_TEXT, type Tone } from '../shared/styles.ts'
-import EventsTicker from './EventsTicker.tsx'
-import Ticker from './Ticker.tsx'
 
 type CellProps = {
   label: string
@@ -162,8 +160,6 @@ export default function StatusBar() {
           )}
         </div>
       </div>
-      <Ticker />
-      <EventsTicker />
       {game.day >= AUDIT_COUNTDOWN_DAY && (
         <p className="flex items-center justify-center gap-1.5 border-t border-accent/40 bg-accent/10 px-4 py-1 text-center text-xs text-accent">
           <Hourglass size={12} aria-hidden="true" />

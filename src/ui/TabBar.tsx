@@ -1,9 +1,9 @@
-import { Landmark, Map as MapIcon, Package, Store, type LucideIcon } from 'lucide-react'
+import { Landmark, Map as MapIcon, Newspaper, Package, Store, type LucideIcon } from 'lucide-react'
 import { useI18n } from '../i18n/useI18n.ts'
 import { FOCUS_RING } from './shared/focus.ts'
 
 /** Onglets du téléphone (chap. 7) ; sur desktop, tous les panneaux sont visibles */
-export type Tab = 'market' | 'places' | 'cargo' | 'map'
+export type Tab = 'fil' | 'market' | 'places' | 'cargo' | 'map'
 
 type TabBarProps = {
   current: Tab
@@ -13,6 +13,7 @@ type TabBarProps = {
 }
 
 const icons: Record<Tab, LucideIcon> = {
+  fil: Newspaper,
   market: Store,
   places: Landmark,
   cargo: Package,

@@ -555,7 +555,41 @@ export type RoadReport = {
 /** États de fraîcheur d'une caisse périssable (chap. 2) ; une caisse pourrie est détruite */
 export type FreshnessStage = 'extra' | 'standard' | 'gamey' | 'spoiled'
 
-/** Caisses d'un même produit achetées ensemble */
+/** Patrimoine à un instant : Cash-Puce, solde offshore, dette (carnet de route, chap. 7) */
+export type WealthSnapshot = {
+  cash: number
+  offshore: number
+  debt: number
+}
+
+/** Fait marquant d'une journée, noté au carnet de route (chap. 7) */
+export type Highlight =
+  | { kind: 'trip'; from: DistrictId; to: DistrictId; phase: Phase }
+  /** Barrage réglé : forme du contrôle, dernière option jouée, issue, caisses perdues, jours de garde à vue */
+  | { kind: 'control'; control: Interception['kind']; move: InterceptionMove; success: boolean | null; crates: number; custodyDays: number }
+  | { kind: 'road'; eventId: RoadEventId; won: boolean | null }
+  | { kind: 'delivered'; fee: number }
+  | { kind: 'deviated' }
+  | { kind: 'injection'; total: number }
+  | { kind: 'vehicle'; vehicleId: VehicleId }
+  | { kind: 'module'; moduleId: ModuleId }
+  | { kind: 'crew'; crewId: CrewId }
+  | { kind: 'debtPaid' }
+  | { kind: 'wanted'; level: number }
+  | { kind: 'iccTier'; tier: IccTier }
+  | { kind: 'ending'; id: EndingId; score: number }
+
+/** Une journée du carnet de route (chap. 7) */
+export type DayLog = {
+  day: number
+  /** Patrimoine à 06h00, routine faite ; celui du lendemain matin ferme la journée */
+  start: WealthSnapshot
+  /** Cash-Puce dépensé en marchandise, et encaissé en ventes */
+  bought: number
+  sold: number
+  highlights: readonly Highlight[]
+}
+
 /** Contenu du double fond (chap. 4) : caisses cachées par produit */
 export type Compartment = Partial<Record<ProductId, number>>
 
@@ -565,6 +599,7 @@ export type CompartmentNotice = {
   displaced: readonly CrateCount[]
 }
 
+/** Caisses d'un même produit achetées ensemble */
 export type CargoLot = {
   productId: ProductId
   qty: number
@@ -726,6 +761,8 @@ export type GameState = {
   compartment: Compartment
   /** Caisses délogées par la dernière action ; effacé à la suivante */
   compartmentNotice: CompartmentNotice | null
+  /** Carnet de route : une entrée par jour joué (chap. 7) */
+  journal: readonly DayLog[]
   /** Briefing de la dernière routine matinale ; null au Jour 1 */
   briefing: MorningBriefing | null
   /** Fin de partie, une fois `status` à `finished` */

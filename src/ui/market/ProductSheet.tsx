@@ -6,7 +6,7 @@ import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
 import { isMemoryBlurred } from '../../engine/crew.ts'
 import { searchSanction } from '../../engine/interception.ts'
-import { blurredQuote, lastSeen, productStatus } from '../../engine/market.ts'
+import { bestRemembered, blurredQuote, productStatus } from '../../engine/market.ts'
 import type { District, DistrictId, ProductId, TagId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -70,7 +70,7 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
 function SheetBody({ productId }: ProductSheetProps) {
   // Profil public (vices de la Loterie compris) et mémoire de marché se lisent sur la partie entière
   const game = useGameStore((s) => s.game)
-  const { day, districtId: here } = game
+  const here = game.districtId
   const { t, percent, signedPercent, credits, multiplier } = useI18n()
   const product = PRODUCTS[productId]
 
@@ -128,11 +128,7 @@ function SheetBody({ productId }: ProductSheetProps) {
   // Où le vendre : profil public, puis meilleur cours mémorisé ailleurs (chap. 2)
   const strong = DISTRICT_IDS.filter((id) => productStatus(game, id, productId) === 'strong')
   const produced = DISTRICT_IDS.filter((id) => productStatus(game, id, productId) === 'production')
-  const best = DISTRICT_IDS.flatMap((id) => {
-    const seen = lastSeen(game, id)
-    const quote = seen?.quotes[productId]
-    return id !== here && seen && quote !== undefined ? [{ id, quote, age: day - seen.day }] : []
-  }).reduce<{ id: DistrictId; quote: number; age: number } | null>((top, entry) => (top === null || entry.quote > top.quote ? entry : top), null)
+  const best = bestRemembered(game, productId)
 
   // Districts dont le joueur a vu le marché, pour la courbe ; le district actuel d'abord
   const observed = [here, ...DISTRICT_IDS.filter((id) => id !== here)].filter((id) =>
@@ -146,10 +142,10 @@ function SheetBody({ productId }: ProductSheetProps) {
     ...(produced.length > 0 ? [t.sheet.produced(names(produced))] : []),
     best
       ? t.sheet.best(
-          isMemoryBlurred(game, best.id)
+          isMemoryBlurred(game, best.districtId)
             ? t.travel.blurred(credits(blurredQuote(best.quote).low), credits(blurredQuote(best.quote).high))
             : credits(best.quote),
-          t.district[best.id].name,
+          t.district[best.districtId].name,
           best.age,
         )
       : t.sheet.noMemory,

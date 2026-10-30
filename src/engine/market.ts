@@ -185,6 +185,16 @@ export function lastSeen(state: GameState, districtId: DistrictId): MarketMemory
   return state.memory[districtId]?.at(-1)
 }
 
+/** Meilleur cours vu ailleurs qu'ici pour un produit, avec son district et son ancienneté en jours (chap. 2) */
+export function bestRemembered(state: GameState, productId: ProductId): { districtId: DistrictId; quote: number; age: number } | null {
+  return DISTRICT_IDS.reduce<{ districtId: DistrictId; quote: number; age: number } | null>((best, districtId) => {
+    const seen = lastSeen(state, districtId)
+    const quote = seen?.quotes[productId]
+    if (districtId === state.districtId || !seen || quote === undefined || (best && best.quote >= quote)) return best
+    return { districtId, quote, age: state.day - seen.day }
+  }, null)
+}
+
 /** Cours observés dans un district, pour la mémoire de marché */
 export function observeMarket(state: GameState, districtId: DistrictId): MarketMemory {
   return { day: state.day, quotes: recordOf(PRODUCT_IDS, (id) => quote(state, districtId, id)) }

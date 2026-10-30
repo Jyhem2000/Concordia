@@ -1,8 +1,8 @@
 # 7. Interface (UI / UX)
 
 * **Single-Page Application** réactive, écran unique responsive : mobile-first en portrait, panneaux côte à côte sur desktop / paysage.
-  * **Onglets en bas d'écran (téléphone) :** Marché (cours et ventes), Lieux (services du district, garage, Cantine ; absent dans un district sans lieu spécial), Soute (véhicule, soute et équipage), Carte (plein, panneau du soir, objectifs, livraison officielle, carte et départs). Le bandeau supérieur, le briefing et les comptes rendus restent au-dessus de l'onglet ouvert. Un trajet ou une nouvelle demi-journée ramène à l'onglet Marché.
-  * **Desktop :** tous les panneaux visibles, marché à gauche, le reste à droite, sans onglets.
+  * **Onglets en bas d'écran (téléphone) :** Le Fil (tout ce qui compte aujourd'hui, voir plus bas), Marché (cours et ventes), Lieux (services du district, garage, Cantine ; absent dans un district sans lieu spécial), Soute (véhicule, soute et équipage), Carte (plein, panneau du soir, livraison officielle, carte et départs). Le bandeau supérieur et les comptes rendus restent au-dessus de l'onglet ouvert. Un nouveau matin ouvre Le Fil ; un trajet ou la tombée de la nuit ouvre le Marché.
+  * **Desktop :** tous les panneaux visibles, sans onglets : Le Fil en bande pleine largeur (en colonnes), puis le marché à gauche et le reste à droite.
 * **Aucun chiffre codé en dur :** boutons et panneaux affichent les valeurs calculées depuis les règles du jour.
 * **Principe de transparence — « zéro calculatrice, zéro boîte noire » :** chaque probabilité, prix ou coût affiché peut être touché pour révéler son **détail ligne par ligne**, avec la source de chaque ligne (district, tag, module, équipier, événement…). Le joueur occasionnel lit le total ; le joueur optimisateur lit le détail et ajuste son build.
   * **Toutes les règles sont accessibles en jeu.** Aucune mécanique n'est cachée au joueur (seuls des tirages le sont, comme la ronde renforcée). Chaque calcul se détaille, et chaque règle qui pèse sur un choix est expliquée à l'endroit du choix, en une ou deux phrases. Un **manuel en jeu** rassemble l'ensemble (voir plus bas).
@@ -20,8 +20,7 @@ Chaque panneau (marché, carte, lieux spéciaux, plein, couvre-feu, objectifs) e
 
 **Retour en haut de page** à chaque changement de scène : arrivée d'un trajet, matin, soirée, barrage et chaque option jouée, aléa routier, comptes rendus, fin de partie. Le briefing et les comptes rendus sont en haut de l'écran.
 
-## Bandeau supérieur permanent & briefing de 06h00
-* **Téléscripteur d'Aeterna (Flash Info TV) :** sous les barres d'état, un message passif-agressif par demi-journée (jour, puis nuit ; le catalogue, rangé par thèmes, est parcouru en sautant d'un thème à l'autre et passe en entier en une partie), l'événement global et les événements locaux du jour, les contrecoups, le tirage de la Loterie (le promu, et le déclassé seulement s'il y en a un) et ses vices en cours, et la **rumeur** du lendemain avec sa fiabilité. Chaque événement se déplie sur ses effets exacts (produits et facteurs, risque, tags, stocks).
+## Bandeau supérieur permanent
 * **Barres d'état (toujours visibles) :** une rangée de tête (Jour, Cash-Puce, Dette et son échéance, ICC et son palier, Santé), puis le district et le moment, les jauges en barre du châssis et du Synthanol, et le reste en petit.
   * Jour X / 30 + ☀️ ou 🌙, et le moment de la journée (Journée, 20h00, Nuit, chap. 1) avec l'état du trajet du moment (disponible ou effectué) ;
   * Cash-Puce (jaune) · Compte offshore (cyan, cadenas, taux effectif) · Dette (rouge, prochaine échéance : retard si la dette initiale n'a jamais été soldée, puis audit ; mention « en retard » une fois le retard acquis) ;
@@ -31,11 +30,30 @@ Chaque panneau (marché, carte, lieux spéciaux, plein, couvre-feu, objectifs) e
   * **Fiche S** (0 à 3 icônes 🎯, détail des malus au toucher) ;
   * **Balise** 📡 tant que `[T4-06]` est en soute ;
   * **Prochaine collecte de Viktor** (date et montant estimé ; apparaît une fois la dette initiale soldée).
-* **Briefing de 06h00 :** chaque matin, un encadré refermable récapitule la nuit et la routine : gains de sommeil, PV perdus en cellule, dette après intérêts, passage en retard, collecte de Viktor (et reliquat ajouté à la dette), intérêts offshore. Chaque montant est détaillable.
 * **Compte à rebours de l'audit** (à partir de `AUDIT_COUNTDOWN_DAY`, [`balance.ts`](../src/data/balance.ts)) : *« Dernier dépôt offshore possible : J30, 19h59 »* et *« Dernier remboursement possible : J30, 19h59 »*.
 
 ### Couleur de l'ICC
 Dans le bandeau, l'ICC prend la couleur de son palier (chap. 1), avec le nom du palier : **vert** Citoyen Or, **jaune** Citoyen ordinaire, **orange** Citoyen sous réserve, **rouge** Déviant notoire. L'interface ne définit aucun seuil propre.
+
+## Onglet « Le Fil »
+Tout ce qui compte aujourd'hui, à lire avant d'aller au marché puis sur la carte. Chaque bloc est un panneau repliable.
+* **Briefing de 06h00 :** chaque matin, un encadré refermable récapitule la nuit et la routine : gains de sommeil, PV perdus en cellule, dette après intérêts, passage en retard, collecte de Viktor (et reliquat ajouté à la dette), intérêts offshore. Chaque montant est détaillable.
+* **Actualités :**
+  * le **téléscripteur d'Aeterna (Flash Info)**, en bandeau défilant (fixe si le système réduit les animations) : un message passif-agressif par demi-journée (jour, puis nuit ; le catalogue, rangé par thèmes, est parcouru en sautant d'un thème à l'autre et passe en entier en une partie) ;
+  * l'événement global et les événements locaux du jour, les contrecoups, le tirage de la Loterie (le promu, et le déclassé seulement s'il y en a un) et ses vices en cours, la panique de Karma-Cham, et la **rumeur** du lendemain avec sa fiabilité (ou la prophétie de Cassandre-88). Chaque événement s'ouvre sur ses effets exacts (produits et facteurs, risque, tags, stocks).
+* **Aujourd'hui & ce soir :** la livraison officielle proposée ou en cours, la mission de nuit proposée ce soir, l'after du couvre-feu, la ronde renforcée révélée par `[CREW-01]`, les districts en pic suspect. Les boutons d'acceptation restent sur la carte et au panneau du soir.
+* **Alertes de soute :** caisses qui pourrissent demain matin, caisses abîmées, ce qu'une saisie coûterait (comme sur la carte), places libres au double fond quand il reste de l'illégal à cacher.
+* **Agenda :** les échéances, de la plus proche à la plus lointaine : dette (ou retard), collecte de Viktor, fin de l'Exemption (ou Sédation en cours), tirage de la Loterie, fin d'un vice, retour des services en attente (Karma-Cham, chirurgie, certificat, enchères, chantage, commande VIP), trappe de largage rechargée, audit.
+* **Bonnes affaires connues :** pour chaque produit en soute, le meilleur cours vu ailleurs (district, ancienneté, marge estimée comme sur la carte) et les districts en Forte demande ; pour la boutique d'ici, les seuls produits dont on sait où les revendre (cours vu ailleurs ou Forte demande).
+* **Objectifs du Jour 30** (voir plus bas).
+* **Bilan & carnet de route :** le bilan de la veille (écart de patrimoine, achats et ventes, faits marquants), puis tout le carnet sur demande, du plus récent au plus ancien.
+
+### Carnet de route
+Le moteur tient un carnet de la partie, sauvegardé avec elle : une entrée par jour joué.
+* **Patrimoine du matin** (Cash-Puce, solde offshore, dette), après la routine de 06h00 ; celui du lendemain matin ferme la journée. Le patrimoine net (cash + offshore − dette) donne l'écart du jour.
+* **Achats et ventes** au marché, en Cash-Puce.
+* **Faits marquants**, dans l'ordre : trajets (de jour ou de nuit), barrages réglés (forme, dernière option jouée, issue, caisses perdues, garde à vue), aléas routiers, commandes livrées ou écarts de nuit, injections du serveur, châssis, modules et équipiers acquis, dette initiale soldée, montée de la Fiche S, changement de palier d'ICC, fin de partie. Un trajet ou un barrage de nuit reste dans la journée où il a commencé ; des jours sautés (garde à vue) n'ont pas d'entrée.
+* **Fin de partie :** l'écran de fin reprend tous les faits marquants de la partie, jour par jour, sans les simples trajets.
 
 ## Vue « Véhicule, soute & équipage »
 * **Véhicule & équipage :** image et nom du châssis, jauges de châssis et de Synthanol, modules montés sur les slots du châssis (avec leur image ; ils se changent au garage), équipier actif.
@@ -89,8 +107,8 @@ Comme le barrage, il occupe tout l'écran jusqu'au choix : la situation, puis le
 ## Écran d'interception
 Options numérotées **0** Fouille · **1** Bluff · **2** Corruption · **3** Fuite · **4** Éjection (masquée dès qu'une autre action a été tentée). Le barrage occupe tout l'écran : aucune autre action n'est possible avant de l'avoir réglé. Face aux milices de `[D4]` : Payer le péage · Forcer le passage · Refuser. Si la fouille effective serait fatale (`[T4-06]` en soute), l'écran l'annonce. Face à la BRC, l'écran annonce le double fond : caisses cachées et chance que les agents le trouvent (détaillable) ; le compte rendu dit s'il a été trouvé et combien de caisses il a sauvées. L'annonce dit la forme du contrôle : un **barrage fixe** se voit **à 300 m** (il est encore temps d'éjecter la cargaison ou de tourner les talons) ; un **contrôle volant** arrête le véhicule sur place, l'écran le dit et ne propose ni fuite ni éjection. Chaque option affiche sa **probabilité détaillable** et ses **conséquences en cas de succès et d'échec**. Pour la corruption, l'offre se compose de Cash-Puce (raccourcis aux paliers de bonus, du minimum accepté au dernier palier) et de caisses de la soute. Pour chaque produit en soute : la valeur en paiement d'une caisse, son prix d'achat, le gain ou la perte face au cash, et la mention « connivence » si les agents l'apprécient. La valeur totale de l'offre et la chance détaillée se mettent à jour en temps réel. Le bluff propose les aides possibles (caisses à donner ou sacrifier) et la fuite le largage offensif (libellé avec son effet : une caisse jetée derrière soi aveugle les poursuivants) et le dopage, chance recalculée à chaque choix ; le compte rendu compte à part les caisses sacrifiées ; la fuite annonce aussi les risques de casse et d'explosion de la soute. Face aux milices, l'option « Payer en caisses » annonce à l'avance les caisses qui seraient prises et leur valeur.
 
-## Modale « Objectifs du Jour 30 »
-Accessible une fois la dette initiale soldée : les grandes fins et la progression vers chacune (score, `[T4-06]` en soute et position en `[D4]` à minuit, injections de Glitch, commandes VIP du parrain, statut Citoyen Or).
+## Objectifs du Jour 30
+Panneau du Fil, affiché une fois la dette initiale soldée : les grandes fins et la progression vers chacune (score, `[T4-06]` en soute et position en `[D4]` à minuit, injections de Glitch, commandes VIP du parrain, statut Citoyen Or).
 * **Suivi en route :** le bureau de Glitch et la tournée clandestine du soir annoncent l'injection à venir (« 2/3 ») quand le serveur est à bord et Glitch au travail ; le compte rendu du trajet la confirme. Le guichet VIP du Velvet-Silo affiche le parrainage.
 
 ## Manuel en jeu

@@ -7,7 +7,7 @@ import { demandQuota, quoteBreakdown } from './market.ts'
 import { riskBreakdown } from './risk.ts'
 import { createRng, seedRng } from './rng.ts'
 import { sleep } from './routine.ts'
-import { auctionPrice, blackmailCost, forgeryCost, karmaCost, morgueCost } from './services.ts'
+import { auctionPrice, blackmailCost, forgeryCost, karmaCost, morgueCost, pendingServices } from './services.ts'
 import { defined, EARNED, errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
 import type { CargoLot, GameState, ProductId } from './types.ts'
 
@@ -137,5 +137,12 @@ describe('Velvet-Silo', () => {
     expect(missed.briefing?.vipFailed).toBe(true)
     expect(missed.velvetLock).toBe(missed.day + VELVET.vip.lockDays - 1)
     expect(missed.icc).toBeLessThan(ICC_MAX)
+  })
+})
+
+describe('agenda des services (chap. 7)', () => {
+  it('donne le jour où chaque service utilisé redevient disponible', () => {
+    const state = gameAt(10, { services: { uses: { influence: 1, blackmail: 1 }, lastDay: { influence: 9, blackmail: 2 } } })
+    expect(pendingServices(state)).toEqual([{ key: 'influence', day: 9 + KARMA.cooldownDays }])
   })
 })

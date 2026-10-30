@@ -31,6 +31,7 @@ import { keysOf } from './records.ts'
 import { risk } from './risk.ts'
 import { checkRoadChoice, resolveRoadChoice, type RoadChoiceId } from './road.ts'
 import { checkCompartment, setCompartment, settleCompartment } from './compartment.ts'
+import { recordJournal } from './journal.ts'
 import { createRng } from './rng.ts'
 import { sleep } from './routine.ts'
 import { remember } from './state.ts'
@@ -498,7 +499,9 @@ function atService(state: GameState, service: LocationService, run: () => Action
 export function applyAction(state: GameState, action: Action): ActionResult {
   const result = resolveAction(state, action)
   // Double fond tenu à jour : caisses parties, caisses arrivées, changement de châssis (chap. 4)
-  return result.ok ? { ok: true, state: settleCompartment(state, result.state) } : result
+  if (!result.ok) return result
+  // Puis le carnet de route note ce que l'action a changé (chap. 7)
+  return { ok: true, state: recordJournal(state, settleCompartment(state, result.state), action) }
 }
 
 function resolveAction(state: GameState, action: Action): ActionResult {

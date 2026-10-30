@@ -35,6 +35,25 @@ export function availableFrom(state: GameState, key: ServiceKey, cooldownDays: n
   return last !== undefined && state.day < last + cooldownDays ? last + cooldownDays : null
 }
 
+/** Délai d'attente de chaque service qui en a un, lu dans les données des lieux (chap. 3) */
+const COOLDOWNS: Partial<Record<ServiceKey, number>> = {
+  influence: KARMA.cooldownDays,
+  surgery: MORGUE.surgery.cooldownDays,
+  certificate: MORGUE.certificate.cooldownDays,
+  auction: VELVET.auction.cooldownDays,
+  blackmail: VELVET.blackmail.cooldownDays,
+  vip: VELVET.vip.cooldownDays,
+}
+
+/** Services en attente, avec le jour où chacun redevient disponible (agenda, chap. 7) */
+export function pendingServices(state: GameState): { key: ServiceKey; day: number }[] {
+  const keys: ServiceKey[] = ['influence', 'surgery', 'certificate', 'auction', 'blackmail', 'vip']
+  return keys.flatMap((key) => {
+    const day = availableFrom(state, key, COOLDOWNS[key] ?? 0)
+    return day === null ? [] : [{ key, day }]
+  })
+}
+
 /** Compte un usage : coût croissant et départ du cooldown */
 function used(state: GameState, key: ServiceKey): GameState {
   return {

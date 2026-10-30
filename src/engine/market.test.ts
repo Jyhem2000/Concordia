@@ -4,7 +4,7 @@ import { DISTRICT_IDS, DISTRICTS } from '../data/districts.ts'
 import { EVENT_MULT_CAP } from '../data/events.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import { NO_EVENTS, type EventContext } from './events.ts'
-import { demandQuota, demandRefill, drawMarket, productStatus, quoteBreakdown, saleQuote, shopProducts } from './market.ts'
+import { bestRemembered, demandQuota, demandRefill, drawMarket, productStatus, quoteBreakdown, saleQuote, shopProducts } from './market.ts'
 import { createRng, seedRng } from './rng.ts'
 import { createInitialState } from './state.ts'
 import { defined } from './test-helpers.ts'
@@ -143,5 +143,14 @@ describe('prix de vente', () => {
     // Le joueur est à Hives (D1)
     expect(night('D1')).toBeGreaterThan(night('D2'))
     expect(night('D1', 'day')).toBe(night('D2', 'day'))
+  })
+})
+
+describe('mémoire de marché (chap. 2)', () => {
+  it('donne le meilleur cours vu ailleurs qu’ici, avec son ancienneté', () => {
+    const base = createInitialState(3)
+    const seen = (day: number, quote: number) => ({ day, quotes: { ...defined(base.memory.D1?.[0]).quotes, 'T1-01': quote } })
+    const state: GameState = { ...base, day: 5, districtId: 'D1', memory: { D1: [seen(5, 900)], D2: [seen(2, 300)], D3: [seen(4, 400)] } }
+    expect(bestRemembered(state, 'T1-01')).toEqual({ districtId: 'D3', quote: 400, age: 1 })
   })
 })
