@@ -8,6 +8,7 @@ import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import Detailed from '../shared/Detailed.tsx'
 import Panel from '../shared/Panel.tsx'
+import { allPlacesHere } from '../places/placesHere.ts'
 
 type BriefingLinesProps = {
   briefing: MorningBriefing
@@ -28,7 +29,7 @@ export default function BriefingPanel() {
   // Briefing refermé par le joueur : état d'interface éphémère, le suivant s'affichera de nouveau
   const [dismissedDay, setDismissedDay] = useState<number | null>(null)
 
-  if (!briefing || briefing.day !== day || !isDay || dismissedDay === day || isEmpty(briefing)) return null
+  if (!briefing || briefing.day !== day || !isDay || dismissedDay === day) return null
 
   return (
     <Panel tone="highlight" icon={Sunrise} title={t.briefing.title(briefing.day)}>
@@ -42,27 +43,6 @@ export default function BriefingPanel() {
 
 function hasSleepGains({ sleep }: MorningBriefing): boolean {
   return sleep !== null && (sleep.icc > 0 || sleep.health > 0)
-}
-
-/** Vrai si la nuit n'a rien changé qui mérite d'être signalé */
-function isEmpty(briefing: MorningBriefing): boolean {
-  return (
-    !hasSleepGains(briefing) &&
-    briefing.custodyHealth === 0 &&
-    briefing.rotten === 0 &&
-    !briefing.heat &&
-    !briefing.lockedIn &&
-    !briefing.recovered &&
-    !briefing.crew &&
-    !briefing.crewLost &&
-    !briefing.vipFailed &&
-    briefing.missionReclaimed === 0 &&
-    !briefing.informant &&
-    !briefing.debtInterest &&
-    !briefing.debtLate &&
-    !briefing.protection &&
-    !briefing.offshoreInterest
-  )
 }
 
 /** Salaire du matin : payé (en caisses ou non), dispensé en cellule, ou impayé */
@@ -85,9 +65,16 @@ function BriefingLines({ briefing }: BriefingLinesProps) {
   // Effet de canicule du jour, pour nommer le produit qui fond
   const heat = useGameStore((s) => (briefing.heat ? heatWave(s.game) : null))
   const { sleep, custodyHealth, debtInterest, debtLate, protection, offshoreInterest } = briefing
+  const wokeIn = t.district[briefing.districtId].name
+  const places = allPlacesHere(briefing.districtId).map((id) => t.location[id].name)
 
   return (
     <ul className="space-y-0.5">
+      {/* Où la journée commence, et ce qu'on peut y faire */}
+      <li className="font-bold">
+        {custodyHealth > 0 ? t.briefing.nightCell(wokeIn) : sleep ? t.briefing.nightRelay(wokeIn) : t.briefing.nightBivouac(wokeIn)}
+      </li>
+      <li className="text-ink-muted">{places.length > 0 ? t.briefing.places(places.join(', ')) : t.briefing.noPlace}</li>
       {sleep && hasSleepGains(briefing) && <li>{t.briefing.sleep(signedPercent(sleep.icc / ICC_MAX, 0), sleep.health)}</li>}
       {custodyHealth > 0 && <li className="text-danger">{t.briefing.custody(custodyHealth)}</li>}
       {briefing.rotten > 0 && <li className="text-danger">{t.briefing.rotten(briefing.rotten)}</li>}

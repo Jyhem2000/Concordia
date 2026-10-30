@@ -156,7 +156,7 @@ export const fr = {
     market: 'Marché',
     places: 'Lieux',
     fil: 'Le Fil',
-    cargo: 'Soute',
+    vehicle: 'Véhicule',
     map: 'Carte',
   },
 
@@ -247,6 +247,7 @@ export const fr = {
     modules: (mounted: number, slots: number) => `Modules ${mounted}/${slots}`,
     noModule: 'Aucun module monté : ils se montent au garage.',
     noCrew: 'Aucun équipier : ils se recrutent à la Cantine.',
+    garageAt: (district: string) => `Garage de Mécano-Mitch à ${district}, de jour : modules, châssis et réparations s'y font, dans cet onglet.`,
     title: (used: number, capacity: number) => `Soute ${used}/${capacity}`,
     empty: 'Soute vide.',
     cargoSlots: (used: number, capacity: number) => `Soute ${used}/${capacity}`,
@@ -277,6 +278,9 @@ export const fr = {
     nextDeadline: (day: number) => `échéance J${day}`,
     nextProtection: (day: number, amount: string) => `Collecte de Viktor J${day} : ≈ ${amount}`,
     exemption: (days: number) => `Exemption ${days} j`,
+    exemptionInfo: (days: number, district: string, penalty: string) =>
+      `Exemption Métabolique : l'eau sans sédatifs des routiers garde l'esprit clair. Elle perd un jour chaque matin et revient à ${days} jours en passant à ${district} de jour. Épuisée, c'est la Sédation : bluff, corruption et fuite à −${penalty}, et les cours mémorisés des autres districts brouillés en fourchette.`,
+    offshore: 'Offshore',
     sedationTomorrow: (district: string) => `Sédation demain : passez à ${district} de jour`,
     sedated: 'Sédation : bluff, corruption et fuite réduits, mémoire de marché brouillée',
     crew: (name: string) => name,
@@ -349,6 +353,11 @@ export const fr = {
 
   briefing: {
     title: (day: number) => `Briefing de 06h00 — Jour ${day}`,
+    nightRelay: (district: string) => `Réveil à ${district}, après une nuit au relais routier.`,
+    nightBivouac: (district: string) => `Réveil à ${district}, après une nuit en bivouac.`,
+    nightCell: (district: string) => `Réveil à ${district}, au sortir de la cellule.`,
+    places: (names: string) => `Ouverts ici de jour : ${names}.`,
+    noPlace: 'Aucun lieu spécial ici : marché et route seulement.',
     dismiss: 'Compris',
     sleep: (icc: string, health: number) => `Nuit au relais : ICC ${icc}, Santé +${health}`,
     custody: (health: number) => `Nuit en caisson blanc, hymnes à 90 décibels : −${health} PV.`,
@@ -663,6 +672,7 @@ export const fr = {
 
   market: {
     title: 'Marché noir',
+    localEconomy: (district: string) => `Chaque district a sa propre économie : ces cours, stocks et rachats ne valent qu'à ${district}.`,
     filters: 'Filtrer les produits',
     filterTierLabel: 'Filtrer par tier',
     filterTagLabel: 'Filtrer par tag',
@@ -709,10 +719,10 @@ export const fr = {
 
   sheet: {
     title: 'Fiche',
-    quotesTitle: 'Cours observés',
+    quotesTitle: 'Cours observés, district par district',
     historyDistrict: 'District de la courbe',
     trendRule: (persistence: string, shock: string, max: string) =>
-      `Chaque matin, le cours de chaque district garde ${persistence} de son écart de la veille au cours normal, plus un choc tiré au hasard (jusqu'à ±${shock}), sans s'écarter de plus de ±${max} : une baisse dure souvent quelques jours, puis le cours revient vers la normale. Les événements s'y ajoutent.`,
+      `Chaque district a sa propre économie : un produit n'a pas le même cours d'un district à l'autre, ni la même tendance. Chaque matin, le cours de chaque district garde ${persistence} de son écart de la veille au cours normal, plus un choc tiré au hasard (jusqu'à ±${shock}), sans s'écarter de plus de ±${max} : une baisse dure souvent quelques jours, puis le cours revient vers la normale. Les événements s'y ajoutent.`,
     tagsTitle: 'Tags',
     actionsTitle: 'Actions',
     seizureTitle: 'Contrôle',
@@ -874,7 +884,7 @@ export const fr = {
     title: 'Carte',
     fuelPrice: (price: string) => `Synthanol ${price} la ration`,
     places: (names: string) => `Lieux : ${names}`,
-    mapHint: 'Touchez un district pour voir son itinéraire et son trajet dans la liste.',
+    mapHint: 'Survolez ou touchez un district : sa fiche et son itinéraire s’affichent ; toutes les destinations sont détaillées plus bas.',
     here: 'Vous êtes ici',
     direct: 'Liaison directe',
     via: (names: string) => `Via ${names}`,

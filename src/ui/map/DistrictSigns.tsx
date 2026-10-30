@@ -10,6 +10,8 @@ type DistrictSignsProps = {
   districtId: DistrictId
   /** Ajoute l'icône de l'événement local du jour (sur la carte, où son nom ne tient pas) */
   withEvent?: boolean
+  /** Liste avec les libellés écrits (fiche du district) plutôt que des icônes à infobulle */
+  labelled?: boolean
 }
 
 type Sign = {
@@ -20,7 +22,7 @@ type Sign = {
 }
 
 /** Bulles d'indices d'un district (chap. 7) : mission de nuit, ronde renforcée, after du couvre-feu, pic suspect, événement */
-export default function DistrictSigns({ districtId, withEvent = false }: DistrictSignsProps) {
+export default function DistrictSigns({ districtId, withEvent = false, labelled = false }: DistrictSignsProps) {
   // Destination de la mission de nuit acceptée
   const missionHere = useGameStore((s) => s.game.phase === 'night' && s.game.mission?.to === districtId)
   // Vance révèle chaque matin le district de la ronde renforcée
@@ -40,6 +42,17 @@ export default function DistrictSigns({ districtId, withEvent = false }: Distric
   ]
   const signs = candidates.filter((sign): sign is Sign => sign !== false)
   if (signs.length === 0) return null
+  if (labelled)
+    return (
+      <ul className="flex flex-col gap-0.5 text-xs">
+        {signs.map(({ key, icon: Icon, label, tone }) => (
+          <li key={key} className={`flex items-center gap-1.5 ${TONE_TEXT[tone]}`}>
+            <Icon size={14} aria-hidden="true" />
+            {label}
+          </li>
+        ))}
+      </ul>
+    )
 
   return (
     <span className="inline-flex gap-1">

@@ -1,4 +1,5 @@
 import { MapPin } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useState } from 'react'
 import { ENDINGS, WANTED } from '../../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
@@ -20,8 +21,9 @@ import EventDetails from '../events/EventDetails.tsx'
 import DistrictMap from './DistrictMap.tsx'
 import Exposure from './Exposure.tsx'
 import DistrictSigns from './DistrictSigns.tsx'
-import { placesHere } from '../places/placesHere.ts'
+import { allPlacesHere } from '../places/placesHere.ts'
 import Detailed from '../shared/Detailed.tsx'
+import { APPEAR } from '../shared/motion.ts'
 import Tip from '../shared/Tip.tsx'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
@@ -33,6 +35,10 @@ type DistrictRowProps = {
   selected: boolean
 }
 
+type DistrictCardProps = {
+  districtId: DistrictId
+}
+
 type DestinationFactsProps = {
   districtId: DistrictId
 }
@@ -41,9 +47,6 @@ type TravelButtonProps = {
   to: DistrictId
 }
 
-/** Ancre de la ligne d'un district, pour y amener la carte */
-const rowId = (districtId: DistrictId) => `district-${districtId}`
-
 /** Ordre d'affichage : de la périphérie au sommet de la pyramide (carte du chap. 3) */
 const order = [...DISTRICT_IDS].sort((a, b) => DISTRICTS[a].echelon - DISTRICTS[b].echelon)
 
@@ -51,17 +54,17 @@ const order = [...DISTRICT_IDS].sort((a, b) => DISTRICTS[a].echelon - DISTRICTS[
 export default function TravelPanel() {
   const tripDone = useGameStore((s) => (s.game.phase === 'day' ? s.game.dayTripDone : s.game.nightTripDone))
   const { t } = useI18n()
-  // Destination touchée sur la carte : état d'interface éphémère
+  // District touché et district survolé sur la carte : états d'interface éphémères
   const [selected, setSelected] = useState<DistrictId | null>(null)
-  const select = (districtId: DistrictId) => {
-    setSelected(districtId)
-    document.getElementById(rowId(districtId))?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-  }
+  const [hovered, setHovered] = useState<DistrictId | null>(null)
+  const here = useGameStore((s) => s.game.districtId)
+  const focus = hovered ?? selected ?? here
   return (
     <Panel title={t.travel.title} collapseId="travel" flush>
       <div className="p-3 pb-0">
-        <DistrictMap selected={selected} onSelect={select} />
+        <DistrictMap selected={selected} onSelect={setSelected} onHover={setHovered} />
         <Hint className="mt-1">{t.travel.mapHint}</Hint>
+        <DistrictCard districtId={focus} />
       </div>
       {/* Raison commune à toutes les destinations : dite une fois plutôt que sous chaque bouton */}
       {tripDone && <Hint className="px-3 pt-2">{t.error['trip-done']}</Hint>}
@@ -164,7 +167,6 @@ function DistrictRow({ districtId, selected }: DistrictRowProps) {
 
   return (
     <li
-      id={rowId(districtId)}
       className={`scroll-mt-4 border-l-4 px-3 py-2 text-sm md:scroll-mt-40 ${selected ? 'border-l-accent bg-accent/10' : here ? 'border-l-transparent bg-accent/5' : 'border-l-transparent'}`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -234,12 +236,58 @@ function DistrictRow({ districtId, selected }: DistrictRowProps) {
   )
 }
 
+/** Fiche du district désigné sur la carte : indices, événement, Synthanol, lieux, mémoire et départ (chap. 7) */
+function DistrictCard({ districtId }: DistrictCardProps) {
+  const here = useGameStore((s) => s.game.districtId === districtId)
+  const event = useGameStore((s) => s.game.events.local[districtId])
+  const memory = useGameStore((s) => lastSeen(s.game, districtId))
+  const day = useGameStore((s) => s.game.day)
+  const { t } = useI18n()
+  const security = DISTRICTS[districtId].security
+
+  return (
+    <motion.div key={districtId} {...APPEAR} className="mt-2 rounded-lg border border-accent/40 bg-accent/5 p-3">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="font-bold text-accent">
+            {t.district[districtId].name}
+            <span className="ml-2" aria-hidden="true">
+              {'★'.repeat(security)}
+            </span>
+            <span className="sr-only">{t.travel.security(security)}</span>
+          </p>
+          <p className="text-xs text-ink-muted">{t.district[districtId].subtitle}</p>
+        </div>
+        {here && (
+          <span className="flex shrink-0 items-center gap-1 text-xs text-accent">
+            <MapPin size={12} aria-hidden="true" />
+            {t.travel.here}
+          </span>
+        )}
+      </div>
+      <div className="mt-2 flex flex-col gap-1 text-xs">
+        <DistrictSigns districtId={districtId} labelled />
+        {event && <EventDetails event={event} className="text-accent" />}
+        <div className="text-ink-muted">
+          <DestinationFacts districtId={districtId} />
+          {!here && (!memory ? t.travel.memoryNever : memory.day === day ? t.travel.memoryToday : t.travel.memoryDaysAgo(day - memory.day))}
+        </div>
+      </div>
+      {!here && (
+        <div className="mt-2 border-t border-line pt-2">
+          <TravelButton to={districtId} />
+        </div>
+      )}
+    </motion.div>
+  )
+}
+
 /** Prix du Synthanol à l'arrivée et lieux spéciaux du district (panneau de prévision, chap. 7) */
 function DestinationFacts({ districtId }: DestinationFactsProps) {
   // Le prix du Synthanol dépend du moment et du district : état entier, placé à destination
   const game = useGameStore((s) => s.game)
   const { t, credits } = useI18n()
-  const places = placesHere(districtId).map((id) => t.location[id].name)
+  const places = allPlacesHere(districtId).map((id) => t.location[id].name)
   return (
     <div className="mb-0.5 flex flex-wrap items-center gap-x-1.5">
       <Detailed breakdown={fuelPriceBreakdown({ ...game, districtId })} format={(price) => t.travel.fuelPrice(credits(price))} />

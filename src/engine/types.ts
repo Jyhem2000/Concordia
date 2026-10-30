@@ -467,6 +467,8 @@ export type TripReport = {
 /** Ce que la nuit et la routine de 06h00 ont changé, pour le briefing du matin (chap. 1 et 7) */
 export type MorningBriefing = {
   day: number
+  /** District du réveil : où la nuit s'est passée */
+  districtId: DistrictId
   /** Gains de la nuit au relais routier (après plafond d'ICC) ; null au bivouac */
   sleep: { icc: number; health: number } | null
   debtInterest: Breakdown | null

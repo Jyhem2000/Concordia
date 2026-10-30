@@ -1,7 +1,7 @@
 # 7. Interface (UI / UX)
 
 * **Single-Page Application** réactive, écran unique responsive : mobile-first en portrait, panneaux côte à côte sur desktop / paysage.
-  * **Onglets en bas d'écran (téléphone) :** Le Fil (tout ce qui compte aujourd'hui, voir plus bas), Marché (cours et ventes), Lieux (services du district, garage, Cantine ; absent dans un district sans lieu spécial), Soute (véhicule, soute et équipage), Carte (plein, panneau du soir, livraison officielle, carte et départs). Le bandeau supérieur et les comptes rendus restent au-dessus de l'onglet ouvert. Un nouveau matin ouvre Le Fil ; un trajet ou la tombée de la nuit ouvre le Marché.
+  * **Onglets en bas d'écran (téléphone) :** Le Fil (tout ce qui compte aujourd'hui, voir plus bas), Marché (cours et ventes), Lieux (services du district, Cantine), Véhicule (véhicule, soute et équipage, et le garage quand on s'y trouve), Carte (plein, panneau du soir, livraison officielle, carte et départs). Lieux est grisé dans un district sans autre lieu spécial que le garage. Le bandeau supérieur et les comptes rendus restent au-dessus de l'onglet ouvert. Un nouveau matin ouvre Le Fil ; un trajet ou la tombée de la nuit ouvre le Marché.
   * **Desktop :** tous les panneaux visibles, sans onglets : Le Fil en bande pleine largeur (en colonnes), puis le marché à gauche et le reste à droite.
 * **Aucun chiffre codé en dur :** boutons et panneaux affichent les valeurs calculées depuis les règles du jour.
 * **Principe de transparence — « zéro calculatrice, zéro boîte noire » :** chaque probabilité, prix ou coût affiché peut être touché pour révéler son **détail ligne par ligne**, avec la source de chaque ligne (district, tag, module, équipier, événement…). Le joueur occasionnel lit le total ; le joueur optimisateur lit le détail et ajuste son build.
@@ -22,15 +22,10 @@ Chaque panneau (marché, carte, lieux spéciaux, plein, couvre-feu, objectifs) e
 **Retour en haut de page** à chaque changement de scène : arrivée d'un trajet, matin, soirée, barrage et chaque option jouée, aléa routier, comptes rendus, fin de partie. Le briefing et les comptes rendus sont en haut de l'écran.
 
 ## Bandeau supérieur permanent
-* **Barres d'état (toujours visibles) :** une rangée de tête (Jour, Cash-Puce, Dette et son échéance, ICC et son palier, Santé), puis le district et le moment, les jauges en barre du châssis et du Synthanol, et le reste en petit.
-  * Jour X / 30 + ☀️ ou 🌙, et le moment de la journée (Journée, 20h00, Nuit, chap. 1) avec l'état du trajet du moment (disponible ou effectué) ;
-  * Cash-Puce (jaune) · Compte offshore (cyan, cadenas, taux effectif) · Dette (rouge, prochaine échéance : retard si la dette initiale n'a jamais été soldée, puis audit ; mention « en retard » une fois le retard acquis) ;
-  * ICC (couleur selon le palier ci-dessous, avec le prochain seuil de crédit social et le **reste du plafond de gains du jour**) ;
-  * Santé ❤️ · Châssis 🔧 (sur le max du véhicule) · Synthanol ⛽ (sur la capacité du véhicule, + achat rapide au prix local) ;
-  * **Exemption Métabolique** 💧 (jours de protection restants ; alerte la veille, icône de Sédation une fois à 0) ;
-  * **Fiche S** (0 à 3 icônes 🎯, détail des malus au toucher) ;
-  * **Balise** 📡 tant que `[T4-06]` est en soute ;
-  * **Prochaine collecte de Viktor** (date et montant estimé ; apparaît une fois la dette initiale soldée).
+* **Rangée de tête** (trois cases par ligne sur téléphone, six sur desktop) : Jour X / 30 avec ☀️ ou 🌙 · Cash-Puce (jaune) · Compte offshore (cyan, cadenas, taux effectif) · Dette (rouge, prochaine échéance : retard si la dette initiale n'a jamais été soldée, puis audit ; « en retard » une fois le retard acquis ; le détail en infobulle) · ICC (couleur et nom du palier, voir plus bas) · Santé.
+* **Ligne du moment :** district actuel, moment de la journée (Journée, 20h00, Nuit, chap. 1) et état du trajet du moment (disponible ou effectué), bouton de nouvelle partie.
+* **États du chauffeur, en petit :** **Exemption Métabolique** (jours de protection restants, alerte la veille, Sédation à zéro ; la règle en infobulle) · **Fiche S** · équipier actif (et salaire impayé) · **prochaine collecte de Viktor** (date et montant estimé, une fois la dette initiale soldée).
+* Les jauges du véhicule (châssis, Synthanol) et le remplissage de la soute sont dans l'onglet Véhicule.
 * **Compte à rebours de l'audit** (à partir de `AUDIT_COUNTDOWN_DAY`, [`balance.ts`](../src/data/balance.ts)) : *« Dernier dépôt offshore possible : J30, 19h59 »* et *« Dernier remboursement possible : J30, 19h59 »*.
 
 ### Couleur de l'ICC
@@ -38,7 +33,7 @@ Dans le bandeau, l'ICC prend la couleur de son palier (chap. 1), avec le nom du 
 
 ## Onglet « Le Fil »
 Tout ce qui compte aujourd'hui, à lire avant d'aller au marché puis sur la carte. Chaque bloc est un panneau repliable.
-* **Briefing de 06h00 :** chaque matin, un encadré refermable récapitule la nuit et la routine : gains de sommeil, PV perdus en cellule, dette après intérêts, passage en retard, collecte de Viktor (et reliquat ajouté à la dette), intérêts offshore. Chaque montant est détaillable.
+* **Briefing de 06h00 :** chaque matin, un encadré refermable dit où la journée commence (district du réveil, nuit au relais, en bivouac ou en cellule) et quels lieux spéciaux y sont ouverts de jour, puis récapitule la nuit et la routine : gains de sommeil, PV perdus en cellule, dette après intérêts, passage en retard, collecte de Viktor (et reliquat ajouté à la dette), intérêts offshore. Chaque montant est détaillable.
 * **Actualités :**
   * le **téléscripteur d'Aeterna (Flash Info)**, en bandeau défilant (fixe si le système réduit les animations) : un message passif-agressif par demi-journée (jour, puis nuit ; le catalogue, rangé par thèmes, est parcouru en sautant d'un thème à l'autre et passe en entier en une partie) ;
   * l'événement global et les événements locaux du jour, les contrecoups, le tirage de la Loterie (le promu, et le déclassé seulement s'il y en a un) et ses vices en cours, la panique de Karma-Cham, et la **rumeur** du lendemain avec sa fiabilité (ou la prophétie de Cassandre-88). Chaque événement s'ouvre sur ses effets exacts (produits et facteurs, risque, tags, stocks).
@@ -57,13 +52,14 @@ Le moteur tient un carnet de la partie, sauvegardé avec elle : une entrée par 
 * **Fin de partie :** l'écran de fin reprend tous les faits marquants de la partie, jour par jour, sans les simples trajets.
 
 ## Vue « Véhicule, soute & équipage »
-* **Véhicule & équipage :** image et nom du châssis, jauges de châssis et de Synthanol, modules montés sur les slots du châssis (avec leur image ; ils se changent au garage), équipier actif.
+* **Véhicule & équipage :** image et nom du châssis, jauges de châssis et de Synthanol, modules montés sur les slots du châssis (avec leur image), équipier actif. Hors du district du garage, une ligne dit où il se trouve ; dans ce district, le **garage** (réparation, modules, châssis) s'affiche dans cet onglet, sous la soute.
 * **Soute :** deux rangées de cases, une par emplacement, dans la couleur du tier de sa caisse : les places à découvert (« Soute 6/8 »), puis celles du double fond, encadrées (« Double fond 1/2 ») ; une caisse cachée est en pointillés, une place libre est vide. Puis une ligne par produit, du plus haut tier au plus bas : image, quantité, tags, état (fraîcheur, caisses abîmées, délai avant pourriture).
 * **Double fond, sur chaque ligne illégale :** la pastille « N au double fond » si le produit y est, avec le bouton **Retirer du double fond** ; le bouton **Cacher au double fond** s'il reste des caisses visibles, actif seulement s'il y a une place libre (sinon, la raison s'affiche). Les caisses délogées par un achat sont annoncées dans la soute et au marché (chap. 4). Au marché, la même pastille marque les produits cachés.
 * **Profil de la cargaison :** une jauge par tag qui pèse sur le risque (ceux qui ajoutent du risque au trajet ou à la détection, et la couverture du Légal), avec la part dans la soute et les caisses masquées par un Tier 0.
 
 ## Vue « Marché noir & lieux spéciaux »
 * **Ventes groupées :** « Vendre tout ce qui marge » (chaque produit dont la vente entière, saturation comprise, rapporte plus que son prix d'achat) et « Vendre tout », chacun avec le produit annoncé ; les caisses scellées n'en font pas partie.
+* **Économie locale :** sous le titre du marché, un rappel : chaque district a sa propre économie, ces cours, stocks et rachats ne valent que là (chap. 2). La fiche produit le redit au-dessus de la courbe.
 * **Tableau des cours :** la boutique du jour et tous les produits en soute (vente toujours possible), dans un ordre fixe (tier, puis ID) : acheter ou vendre ne déplace aucune ligne. Le prix de vente affiché est le **prix net** (commission, fraîcheur, nuit… comprises), détaillable.
 * **Indicateurs :**
   * 📉 vert (prix très bas / production locale, « se revend mal ici ») · 🔥 orange (forte demande) · 🚀 rouge clignotant (explosion liée à un événement) ;
@@ -89,7 +85,8 @@ Le moteur tient un carnet de la partie, sauvegardé avec elle : une entrée par 
 ## Vue « Carte tactique & navigation »
 * **Récapitulatif de la soute :** en haut de la carte, l'occupation (caisses / capacité) et chaque produit avec sa quantité, dont la part cachée dans le double fond, pour choisir la destination sans revenir au marché.
 * **Livraison officielle du jour** (chap. 1) : en haut de la carte, de jour, l'offre de la plateforme (district, caisses scellées, prime) avec son bouton d'acceptation, puis la livraison en cours ; la confiance du DSC (commandes livrées, multiplicateur de prime) l'accompagne.
-* **Carte schématique** des six districts et de leurs liaisons (chap. 3), de la périphérie en bas à gauche au sommet de la pyramide en haut à droite : position actuelle, étoiles de sécurité et bulles d'indices sous chaque district. Toucher un district trace l'itinéraire le plus court et amène à sa ligne dans la liste des destinations, mise en avant.
+* **Carte schématique** des six districts et de leurs liaisons (chap. 3), sur un quadrillage de terminal, de la périphérie en bas à gauche au sommet de la pyramide en haut à droite : position actuelle (anneau qui pulse), étoiles de sécurité et bulles d'indices sous chaque district (chacune en infobulle). Toucher un district trace l'itinéraire le plus court, en surbrillance.
+* **Fiche du district,** sous la carte : celui que survole la souris, sinon celui touché, sinon le district actuel. Nom, description et étoiles, indices écrits en clair, événement local (effets en infobulle), prix du Synthanol et lieux spéciaux, ancienneté des cours mémorisés, puis l'itinéraire, les rations, le risque détaillable et le bouton de départ. La liste de toutes les destinations suit.
 * **Soute exposée :** en tête de carte, le nombre de caisses illégales en soute (dont celles du double fond), ce qu'elles ont coûté, et la sanction de base d'une saisie (garde à vue si du haut tier est à bord).
 * **Produits en soute par district :** sous chaque district, chaque produit en soute avec son statut public (Forte demande, Production) et son cours mémorisé, ou « jamais vu ».
 * **Marge estimée :** sous chaque district, les cours mémorisés des produits en soute portent la même icône de marge, estimée sur le cours vu moins la commission de puce (sans savoir-faire ni saturation).

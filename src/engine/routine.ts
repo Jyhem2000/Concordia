@@ -91,6 +91,7 @@ function morningRoutine(state: GameState, night: Night): GameState {
   }
   const briefing: MorningBriefing = {
     day,
+    districtId: spent.state.districtId,
     sleep: spent.sleep,
     custodyHealth: spent.custodyHealth,
     rotten: 0,

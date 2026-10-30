@@ -16,6 +16,7 @@ import Gauge from '../shared/Gauge.tsx'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
 import { TIER_STYLES } from '../shared/styles.ts'
+import { garageDistrict } from '../places/placesHere.ts'
 import CompartmentNotice from './CompartmentNotice.tsx'
 import Thumb from '../shared/Thumb.tsx'
 import { useConditions } from '../shared/useConditions.ts'
@@ -57,8 +58,10 @@ function VehiclePanel() {
   const fuel = useGameStore((s) => s.game.fuel)
   const mounted = useGameStore((s) => s.game.modules.mounted)
   const crew = useGameStore((s) => s.game.crew.active)
+  const districtId = useGameStore((s) => s.game.districtId)
   const { t } = useI18n()
   const vehicle = VEHICLES[vehicleId]
+  const garage = garageDistrict()
 
   return (
     <Panel title={t.hold.vehicleTitle} collapseId="vehicle">
@@ -85,6 +88,7 @@ function VehiclePanel() {
           ))}
         </ul>
       )}
+      {garage !== null && garage !== districtId && <Hint className="mt-2">{t.hold.garageAt(t.district[garage].name)}</Hint>}
       <p className="mt-3 flex items-center gap-1.5">
         <UserRound size={14} aria-hidden="true" className="text-ink-muted" />
         {crew ? t.crew[crew].name : <span className="text-xs text-ink-muted">{t.hold.noCrew}</span>}

@@ -33,10 +33,15 @@ type ServiceDeskProps = {
   service: LocationService
 }
 
+type PlacesPanelProps = {
+  /** Vrai pour le garage, affiché dans l'onglet Véhicule ; faux pour les autres lieux */
+  garage?: boolean
+}
+
 /** Guichets des lieux spéciaux du district courant ; rien s'il n'y en a pas */
-export default function PlacesPanel() {
+export default function PlacesPanel({ garage = false }: PlacesPanelProps) {
   const districtId = useGameStore((s) => s.game.districtId)
-  const here = placesHere(districtId)
+  const here = placesHere(districtId, garage)
   if (here.length === 0) return null
 
   return (

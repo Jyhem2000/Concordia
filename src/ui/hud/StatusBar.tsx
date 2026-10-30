@@ -1,31 +1,13 @@
-import {
-  Crosshair,
-  Droplet,
-  Fuel,
-  HandCoins,
-  Hourglass,
-  Lock,
-  MapPin,
-  Moon,
-  Package,
-  RotateCcw,
-  Sun,
-  UserRound,
-  Wrench,
-  type LucideIcon,
-} from 'lucide-react'
+import { Crosshair, Droplet, HandCoins, Hourglass, Lock, MapPin, Moon, RotateCcw, Sun, UserRound, type LucideIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
-import { AUDIT_COUNTDOWN_DAY, GAME_LENGTH_DAYS, HEALTH_MAX, ICC_MAX, WANTED } from '../../data/balance.ts'
-import { VEHICLES } from '../../data/vehicles.ts'
-import { cargoUsed } from '../../engine/cargo.ts'
+import { AUDIT_COUNTDOWN_DAY, GAME_LENGTH_DAYS, HEALTH_MAX, ICC_MAX, SEDATION, WANTED } from '../../data/balance.ts'
 import { cantineDistrict, crewEffect } from '../../engine/crew.ts'
 import { effectiveOffshoreRate, nextDebtDeadline, nextProtectionDay, offshoreBalance, protectionBreakdown } from '../../engine/finance.ts'
 import { iccTier } from '../../engine/gauges.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import { FOCUS_RING } from '../shared/focus.ts'
-import Gauge from '../shared/Gauge.tsx'
 import { APPEAR } from '../shared/motion.ts'
 import Tip from '../shared/Tip.tsx'
 import { ICC_TONE, TONE_TEXT, type Tone } from '../shared/styles.ts'
@@ -49,19 +31,22 @@ type StatProps = {
   /** Précision entre parenthèses (taux, alerte…) */
   note?: string
   tone?: Tone
+  /** Explication de la règle, en infobulle */
+  info?: string
 }
 
 /** Sous ce seuil, la Santé passe au rouge (repère visuel seulement, aucun effet de jeu) */
 const LOW_HEALTH = 0.25
 
-/** Bandeau supérieur permanent : jour, argent, ICC et Santé en tête, puis jauges et états (chap. 7) */
+/** Bandeau supérieur permanent : jour, argent, ICC et Santé en tête, puis district, moment et états du chauffeur (chap. 7) */
 export default function StatusBar() {
   // Les échéances et la collecte se calculent sur l'état entier de la partie
   const game = useGameStore((s) => s.game)
   const lastError = useGameStore((s) => s.lastError)
   const newGame = useGameStore((s) => s.newGame)
   const { t, credits, number, percent } = useI18n()
-  const vehicle = VEHICLES[game.vehicleId]
+  const offshore = offshoreBalance(game.offshore)
+  const offshoreRate = effectiveOffshoreRate(game.offshore, crewEffect(game, 'offshoreBonus') ?? 0)
   const tier = iccTier(game.icc)
   const deadline = nextDebtDeadline(game)
   const protectionDay = nextProtectionDay(game)
@@ -78,37 +63,34 @@ export default function StatusBar() {
   return (
     <header className="z-20 border-b border-line bg-base/95 backdrop-blur md:sticky md:top-0">
       <div className="mx-auto max-w-7xl px-3 py-2 text-sm">
-        {/* Desktop : jauges à droite des cases */}
-        <div className="md:flex md:items-center md:gap-6">
-          <div className="grid flex-1 grid-cols-5 divide-x divide-line">
-            <Cell label={t.hud.day} tone="accent" valueKey={`${game.day}-${game.phase}`}>
-              <PhaseIcon size={14} aria-hidden="true" />
-              {t.format.dayShort(game.day, GAME_LENGTH_DAYS)}
-            </Cell>
-            <Cell label={t.hud.cash} tone="cash" valueKey={game.cash}>
-              {credits(game.cash)}
-            </Cell>
-            <Cell
-              label={t.gauge.debt}
-              valueKey={game.debt}
-              tone="danger"
-              note={game.debtLate ? t.hud.debtLate : deadline === null ? undefined : t.hud.deadlineShort(deadline)}
-              info={debtNotes.length > 0 ? debtNotes.join(' · ') : undefined}
-            >
-              {credits(game.debt)}
-            </Cell>
-            <Cell label={t.gauge.icc} tone={ICC_TONE[tier]} note={t.iccTier[tier]} valueKey={game.icc}>
-              {percent(game.icc / ICC_MAX, 0)}
-            </Cell>
-            <Cell label={t.gauge.health} tone={game.health <= HEALTH_MAX * LOW_HEALTH ? 'danger' : 'success'} valueKey={game.health}>
-              {number(game.health, 0)}
-            </Cell>
-          </div>
-
-          <div className="mt-2 flex gap-4 md:mt-0 md:w-96">
-            <Gauge icon={Wrench} label={t.gauge.chassis} value={game.chassis} max={vehicle.maxChassis} />
-            <Gauge icon={Fuel} label={t.gauge.fuel} value={game.fuel} max={vehicle.tank} />
-          </div>
+        {/* Téléphone : deux rangées de trois cases ; desktop : une rangée de six */}
+        <div className="grid grid-cols-3 gap-y-2 sm:grid-cols-6 sm:divide-x sm:divide-line">
+          <Cell label={t.hud.day} tone="accent" valueKey={`${game.day}-${game.phase}`}>
+            <PhaseIcon size={14} aria-hidden="true" />
+            {t.format.dayShort(game.day, GAME_LENGTH_DAYS)}
+          </Cell>
+          <Cell label={t.hud.cash} tone="cash" valueKey={game.cash}>
+            {credits(game.cash)}
+          </Cell>
+          <Cell label={t.hud.offshore} tone="offshore" valueKey={offshore} note={t.hud.offshoreRate(percent(offshoreRate, 2))}>
+            <Lock size={12} aria-hidden="true" />
+            {credits(offshore)}
+          </Cell>
+          <Cell
+            label={t.gauge.debt}
+            valueKey={game.debt}
+            tone="danger"
+            note={game.debtLate ? t.hud.debtLate : deadline === null ? undefined : t.hud.deadlineShort(deadline)}
+            info={debtNotes.length > 0 ? debtNotes.join(' · ') : undefined}
+          >
+            {credits(game.debt)}
+          </Cell>
+          <Cell label={t.gauge.icc} tone={ICC_TONE[tier]} note={t.iccTier[tier]} valueKey={game.icc}>
+            {percent(game.icc / ICC_MAX, 0)}
+          </Cell>
+          <Cell label={t.gauge.health} tone={game.health <= HEALTH_MAX * LOW_HEALTH ? 'danger' : 'success'} valueKey={game.health}>
+            {number(game.health, 0)}
+          </Cell>
         </div>
         <div className="mt-2 flex items-center gap-2 text-xs">
           <span className="flex shrink-0 items-center gap-1 font-bold text-ink-soft">
@@ -134,14 +116,6 @@ export default function StatusBar() {
         </div>
 
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-          <Stat icon={Package} label={t.hud.cargo} value={`${cargoUsed(game.cargo)}/${vehicle.cargo}`} />
-          <Stat
-            icon={Lock}
-            label={t.gauge.offshore}
-            value={credits(offshoreBalance(game.offshore))}
-            note={t.hud.offshoreRate(percent(effectiveOffshoreRate(game.offshore, crewEffect(game, 'offshoreBonus') ?? 0), 2))}
-            tone="offshore"
-          />
           {/* Exemption Métabolique : jours de protection, alerte la veille, Sédation à 0 (chap. 1) */}
           <Stat
             icon={Droplet}
@@ -150,6 +124,7 @@ export default function StatusBar() {
               game.exemption === 0 ? t.hud.sedated : game.exemption === 1 ? t.hud.sedationTomorrow(t.district[cantineDistrict()].name) : undefined
             }
             tone={game.exemption <= 1 ? 'danger' : 'info'}
+            info={t.hud.exemptionInfo(SEDATION.protectionDays, t.district[cantineDistrict()].name, percent(SEDATION.penalty, 0))}
           />
           {game.wanted > 0 && <Stat icon={Crosshair} label={t.hud.wanted(game.wanted, WANTED.maxLevel)} tone="danger" />}
           {game.crew.active && (
@@ -202,13 +177,14 @@ function Cell({ label, tone = 'neutral', note, info, valueKey, children }: CellP
   )
 }
 
-function Stat({ icon: Icon, label, value, note, tone = 'neutral' }: StatProps) {
+function Stat({ icon: Icon, label, value, note, tone = 'neutral', info }: StatProps) {
   return (
     <span className={`flex items-center gap-1 ${TONE_TEXT[tone]}`}>
       <Icon size={12} aria-hidden="true" />
       <span className="text-ink-muted">{label}</span>
       {value && <span className="font-bold">{value}</span>}
       {note && <span className="opacity-75">({note})</span>}
+      {info && <Tip label={label} content={info} />}
     </span>
   )
 }

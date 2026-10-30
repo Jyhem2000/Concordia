@@ -75,7 +75,12 @@ export default function MarketPanel() {
   const shown = rows.filter((id) => passesFilter(filter, id))
 
   return (
-    <Panel title={`${t.market.title} — ${t.district[game.districtId].name}`} collapseId="market" flush>
+    <Panel
+      title={`${t.market.title} — ${t.district[game.districtId].name}`}
+      subtitle={t.market.localEconomy(t.district[game.districtId].name)}
+      collapseId="market"
+      flush
+    >
       {(game.phase === 'night' || game.dayOver) && (
         <Hint tone="night" className="px-3 pt-2">
           {t.market.streetOnly}

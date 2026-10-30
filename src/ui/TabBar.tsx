@@ -1,14 +1,16 @@
-import { Landmark, Map as MapIcon, Newspaper, Package, Store, type LucideIcon } from 'lucide-react'
+import { Landmark, Map as MapIcon, Newspaper, Store, Truck, type LucideIcon } from 'lucide-react'
 import { useI18n } from '../i18n/useI18n.ts'
 import { FOCUS_RING } from './shared/focus.ts'
 
 /** Onglets du téléphone (chap. 7) ; sur desktop, tous les panneaux sont visibles */
-export type Tab = 'fil' | 'market' | 'places' | 'cargo' | 'map'
+export type Tab = 'fil' | 'market' | 'places' | 'vehicle' | 'map'
 
 type TabBarProps = {
   current: Tab
   /** Onglets proposés, dans l'ordre d'affichage */
   tabs: readonly Tab[]
+  /** Onglets grisés : rien à y faire ici (Lieux dans un district sans lieu spécial) */
+  disabled: readonly Tab[]
   onPick: (tab: Tab) => void
 }
 
@@ -16,12 +18,12 @@ const icons: Record<Tab, LucideIcon> = {
   fil: Newspaper,
   market: Store,
   places: Landmark,
-  cargo: Package,
+  vehicle: Truck,
   map: MapIcon,
 }
 
 /** Barre d'onglets fixée en bas de l'écran du téléphone, masquée sur desktop */
-export default function TabBar({ current, tabs, onPick }: TabBarProps) {
+export default function TabBar({ current, tabs, disabled, onPick }: TabBarProps) {
   const { t } = useI18n()
   return (
     <nav aria-label={t.tabs.label} className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-panel/95 backdrop-blur md:hidden">
@@ -34,8 +36,9 @@ export default function TabBar({ current, tabs, onPick }: TabBarProps) {
               <button
                 type="button"
                 aria-pressed={active}
+                disabled={disabled.includes(tab)}
                 onClick={() => onPick(tab)}
-                className={`flex w-full flex-col items-center gap-0.5 border-t-2 py-2 text-xs uppercase ${FOCUS_RING} ${
+                className={`flex w-full flex-col items-center gap-0.5 border-t-2 py-2 text-xs uppercase disabled:opacity-35 ${FOCUS_RING} ${
                   active ? 'border-accent text-accent' : 'border-transparent text-ink-muted'
                 }`}
               >

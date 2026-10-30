@@ -38,9 +38,11 @@ export default function GameScreen() {
   // Onglet choisi pour la scène en cours : un trajet ou une nouvelle demi-journée ramène au marché
   const scene = `${day}-${phase}-${districtId}`
   const [picked, setPicked] = useState<{ tab: Tab; scene: string; day: number }>({ tab: 'fil', scene, day })
-  const tabs: Tab[] = placesHere(districtId).length > 0 ? ['fil', 'market', 'places', 'cargo', 'map'] : ['fil', 'market', 'cargo', 'map']
+  const tabs: Tab[] = ['fil', 'market', 'places', 'vehicle', 'map']
+  // Lieux grisé dans un district sans autre lieu spécial que le garage
+  const disabled: Tab[] = placesHere(districtId).length > 0 ? [] : ['places']
   // Nouvelle scène : un nouveau matin ouvre Le Fil, un trajet le marché
-  const tab = picked.scene === scene && tabs.includes(picked.tab) ? picked.tab : picked.day !== day ? 'fil' : 'market'
+  const tab = picked.scene === scene && !disabled.includes(picked.tab) ? picked.tab : picked.day !== day ? 'fil' : 'market'
   const pick = (next: Tab) => {
     setPicked({ tab: next, scene, day })
     window.scrollTo({ top: 0 })
@@ -76,8 +78,9 @@ export default function GameScreen() {
             </div>
             {/* Colonne de droite sur desktop ; sur téléphone, ses blocs se rangent directement dans la page */}
             <div className="contents md:col-span-2 md:flex md:min-w-0 md:flex-col md:gap-4">
-              <div className={`flex-col gap-4 ${shown('cargo')}`}>
+              <div className={`flex-col gap-4 ${shown('vehicle')}`}>
                 <CargoView />
+                <PlacesPanel garage />
               </div>
               <div className={`flex-col gap-4 ${shown('places')}`}>
                 <PlacesPanel />
@@ -88,7 +91,7 @@ export default function GameScreen() {
               </div>
             </div>
           </main>
-          <TabBar current={tab} tabs={tabs} onPick={pick} />
+          <TabBar current={tab} tabs={tabs} disabled={disabled} onPick={pick} />
         </>
       )}
     </div>
