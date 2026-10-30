@@ -2,25 +2,35 @@ import { EyeOff, Fuel, Package, Tag, UserRound, Wrench } from 'lucide-react'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
 import { VEHICLES } from '../../data/vehicles.ts'
-import { cargoUsed, maskedQty, ownedQty, tagShare } from '../../engine/cargo.ts'
-import { checkCompartment, displacedBy } from '../../engine/compartment.ts'
+import { canHide, cargoUsed, maskedQty, ownedQty, tagShare } from '../../engine/cargo.ts'
+import { checkCompartment } from '../../engine/compartment.ts'
 import { hiddenCargo } from '../../engine/interception.ts'
 import { keysOf } from '../../engine/records.ts'
-import type { ProductId } from '../../engine/types.ts'
+import type { ProductId, Tier } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import Chip from '../shared/Chip.tsx'
-import { FOCUS_RING } from '../shared/focus.ts'
 import Gauge from '../shared/Gauge.tsx'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
-import { POPOVER, TIER_STYLES } from '../shared/styles.ts'
+import { TIER_STYLES } from '../shared/styles.ts'
+import CompartmentNotice from './CompartmentNotice.tsx'
 import Thumb from '../shared/Thumb.tsx'
 import { useConditions } from '../shared/useConditions.ts'
 
 type HoldRowProps = {
   productId: ProductId
+}
+
+/** Emplacement de soute : caisse d'un tier, cachée ou non ; `null` pour une place libre */
+type Slot = { tier: Tier; hidden: boolean } | null
+
+type SlotRowProps = {
+  label: string
+  slots: readonly Slot[]
+  /** Rangée du double fond : encadrée en pointillés */
+  compartment?: boolean
 }
 
 /** Tags qui pèsent sur le risque de contrôle : ceux du profil de la cargaison (chap. 5) */
@@ -82,43 +92,36 @@ function VehiclePanel() {
   )
 }
 
-/** Emplacements de la soute, produits en soute et double fond */
+/** Emplacements de la soute, double fond et produits en soute */
 function HoldPanel() {
-  // Le double fond dépend du véhicule, de la soute et du choix du joueur : état entier
+  // Le double fond dépend du véhicule et de la soute : état entier
   const game = useGameStore((s) => s.game)
   const { t } = useI18n()
   const vehicle = VEHICLES[game.vehicleId]
   const used = cargoUsed(game.cargo)
   const { hidden, visible } = hiddenCargo(game)
   const products = [...new Set(game.cargo.map((lot) => lot.productId))].sort((a, b) => PRODUCTS[b].tier - PRODUCTS[a].tier || a.localeCompare(b))
-  // Une case par emplacement : les caisses cachées d'abord, puis les visibles
-  const slots = [...hidden.map((lot) => ({ lot, hidden: true })), ...visible.map((lot) => ({ lot, hidden: false }))].flatMap(({ lot, hidden }) =>
-    Array.from({ length: lot.qty }, () => ({ tier: PRODUCTS[lot.productId].tier, hidden })),
-  )
-  const free = Math.max(0, vehicle.cargo - used)
+  // Places hors double fond, remplies par les caisses visibles ; le surplus visible occupe les places du double fond
+  const open = vehicle.cargo - vehicle.hiddenCompartment
+  const visibleTiers = visible.flatMap((lot) => Array.from({ length: lot.qty }, () => PRODUCTS[lot.productId].tier))
+  const hiddenTiers = hidden.flatMap((lot) => Array.from({ length: lot.qty }, () => PRODUCTS[lot.productId].tier))
+  const cargoSlots = Array.from({ length: open }, (_, i): Slot => (i < visibleTiers.length ? { tier: visibleTiers[i], hidden: false } : null))
+  const compartmentSlots: Slot[] = [
+    ...hiddenTiers.map((tier): Slot => ({ tier, hidden: true })),
+    ...visibleTiers.slice(open).map((tier): Slot => ({ tier, hidden: false })),
+  ]
+  const compartmentFree = Math.max(0, vehicle.hiddenCompartment - compartmentSlots.length)
 
   return (
     <Panel icon={Package} title={t.hold.title(used, vehicle.cargo)} collapseId="hold">
-      <ul aria-hidden="true" className="flex flex-wrap gap-1">
-        {/* Cases figées, recalculées à chaque rendu et sans identité propre : la position sert de clé */}
-        {slots.map(({ tier, hidden }, position) => (
-          <li
-            key={position}
-            className={`h-4 w-4 rounded-sm ${hidden ? `border border-dashed ${TIER_STYLES[tier].hiddenSlot}` : TIER_STYLES[tier].slot}`}
-          />
-        ))}
-        {Array.from({ length: free }, (_, slot) => (
-          <li key={`free-${slot}`} className="h-4 w-4 rounded-sm border border-line-strong" />
-        ))}
-      </ul>
-      <p className="mt-2 flex flex-wrap gap-x-3 text-xs text-ink-muted">
-        <span className="flex items-center gap-1 text-night">
-          <EyeOff size={12} aria-hidden="true" />
-          {t.hold.compartment(cargoUsed(hidden), vehicle.hiddenCompartment)}
-        </span>
-        <span>{t.hold.free(free)}</span>
-      </p>
-      <Hint className="mt-1">{t.hold.compartmentRule}</Hint>
+      <SlotRow label={t.hold.cargoSlots(Math.min(visibleTiers.length, open), open)} slots={cargoSlots} />
+      <SlotRow
+        label={t.hold.compartment(hiddenTiers.length, vehicle.hiddenCompartment)}
+        slots={[...compartmentSlots, ...Array.from({ length: compartmentFree }, (): Slot => null)]}
+        compartment
+      />
+      <Hint className="mt-2">{t.hold.compartmentRule}</Hint>
+      <CompartmentNotice />
       {products.length === 0 ? (
         <Hint className="mt-3">{t.hold.empty}</Hint>
       ) : (
@@ -132,70 +135,87 @@ function HoldPanel() {
   )
 }
 
-/** Un produit en soute ; le toucher ouvre le menu du double fond (chap. 4) */
+/** Une rangée d'emplacements : caisse visible (pleine), cachée (pointillés) ou place libre */
+function SlotRow({ label, slots, compartment = false }: SlotRowProps) {
+  return (
+    <div className="mt-2 first:mt-0">
+      <p className={`flex items-center gap-1 text-xs ${compartment ? 'text-night' : 'text-ink-muted'}`}>
+        {compartment && <EyeOff size={12} aria-hidden="true" />}
+        {label}
+      </p>
+      <ul
+        aria-hidden="true"
+        className={`mt-1 flex w-fit flex-wrap gap-1 ${compartment ? 'rounded-md border border-dashed border-night/40 p-1' : ''}`}
+      >
+        {/* Cases figées, recalculées à chaque rendu et sans identité propre : la position sert de clé */}
+        {slots.map((slot, position) => (
+          <li
+            key={position}
+            className={`h-4 w-4 rounded-sm ${
+              slot === null
+                ? 'border border-line-strong'
+                : slot.hidden
+                  ? `border border-dashed ${TIER_STYLES[slot.tier].hiddenSlot}`
+                  : TIER_STYLES[slot.tier].slot
+            }`}
+          />
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+/** Un produit en soute : quantité, état, et sa place au double fond avec le bouton qui la change (chap. 4) */
 function HoldRow({ productId }: HoldRowProps) {
-  // Le double fond et les caisses délogées se calculent sur l'état entier
+  // Le double fond se calcule sur l'état entier
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
   const { t } = useI18n()
   const conditions = useConditions(productId)
   const product = PRODUCTS[productId]
   const qty = ownedQty(game.cargo, productId)
-  const hiddenQty = ownedQty(hiddenCargo(game).hidden, productId)
-  const pinned = game.compartment.pinned.includes(productId)
-  const excluded = game.compartment.excluded.includes(productId)
-  const displaced = displacedBy(game, productId)
-  const error = checkCompartment(game, productId)
+  const hiddenQty = game.compartment[productId] ?? 0
+  const hideError = checkCompartment(game, productId, true)
 
   return (
-    <li className={`rounded-md border border-l-4 border-line bg-raised/60 ${TIER_STYLES[product.tier].stripe}`}>
-      <details className="group relative">
-        <summary className={`flex cursor-pointer list-none items-start gap-2 rounded-md px-3 py-2 ${FOCUS_RING}`}>
-          <Thumb id={productId} tier={product.tier} />
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className={`text-xs font-bold ${TIER_STYLES[product.tier].text}`}>T{product.tier}</span>
-              <span className="font-bold">{t.product[productId].name}</span>
-              <span className="ml-auto font-bold">×{qty}</span>
-            </div>
-            <div className="mt-1 flex flex-wrap gap-1">
-              {hiddenQty > 0 && (
+    <li className={`flex items-start gap-2 rounded-md border border-l-4 border-line bg-raised/60 px-3 py-2 ${TIER_STYLES[product.tier].stripe}`}>
+      <Thumb id={productId} tier={product.tier} />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className={`text-xs font-bold ${TIER_STYLES[product.tier].text}`}>T{product.tier}</span>
+          <span className="font-bold">{t.product[productId].name}</span>
+          <span className="ml-auto font-bold">×{qty}</span>
+        </div>
+        <div className="mt-1 flex flex-wrap gap-1">
+          {product.tags.map((tag) => (
+            <Chip key={tag}>{t.tag[tag].name}</Chip>
+          ))}
+        </div>
+        {conditions.length > 0 && <Hint className="mt-1">{conditions.join(' · ')}</Hint>}
+        {canHide(productId) && (
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {hiddenQty > 0 && (
+              <>
                 <Chip tone="night" icon={EyeOff}>
                   {t.hold.hidden(hiddenQty)}
                 </Chip>
-              )}
-              {pinned && <Chip tone="night">{t.hold.pinned}</Chip>}
-              {excluded && <Chip tone="muted">{t.hold.excluded}</Chip>}
-              {product.tags.map((tag) => (
-                <Chip key={tag}>{t.tag[tag].name}</Chip>
-              ))}
-            </div>
-            {conditions.length > 0 && <Hint className="mt-1">{conditions.join(' · ')}</Hint>}
-          </div>
-        </summary>
-        <div className={`right-2 left-2 flex flex-col items-start gap-1.5 ${POPOVER}`}>
-          {error ? (
-            <Hint>{t.error[error]}</Hint>
-          ) : (
-            <>
-              {game.compartment.pinned[0] !== productId && hiddenQty < qty && (
-                <Button size="sm" variant="primary" onClick={() => dispatch({ type: 'compartment', productId, hide: true })}>
-                  <EyeOff size={12} aria-hidden="true" />
-                  {t.hold.hide}
-                </Button>
-              )}
-              {hiddenQty < qty && displaced.length > 0 && (
-                <Hint tone="warning">{t.hold.displaces(displaced.map((crate) => `${crate.qty} ${t.product[crate.productId].name}`).join(', '))}</Hint>
-              )}
-              {hiddenQty > 0 && (
                 <Button size="sm" onClick={() => dispatch({ type: 'compartment', productId, hide: false })}>
                   {t.hold.unhide}
                 </Button>
-              )}
-            </>
-          )}
-        </div>
-      </details>
+              </>
+            )}
+            {hiddenQty < qty && (
+              <>
+                <Button size="sm" disabled={hideError !== null} onClick={() => dispatch({ type: 'compartment', productId, hide: true })}>
+                  <EyeOff size={12} aria-hidden="true" />
+                  {t.hold.hide}
+                </Button>
+                {hideError && <Hint>{t.error[hideError]}</Hint>}
+              </>
+            )}
+          </div>
+        )}
+      </div>
     </li>
   )
 }

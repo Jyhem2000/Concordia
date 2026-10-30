@@ -1,3 +1,4 @@
+import { EyeOff, Filter, RotateCcw } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
@@ -5,7 +6,7 @@ import { bulkSales, checkUseProduct, maxBuy } from '../../engine/actions.ts'
 import { averageCost, ownedQty } from '../../engine/cargo.ts'
 import { demandQuota, demandRefill, productStatus, quote, quoteBreakdown, saleQuote, shopProducts } from '../../engine/market.ts'
 import { keysOf } from '../../engine/records.ts'
-import type { ProductId } from '../../engine/types.ts'
+import type { ProductId, TagId, Tier } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
@@ -14,17 +15,19 @@ import Chip from '../shared/Chip.tsx'
 import Hint from '../shared/Hint.tsx'
 import Margin from '../shared/Margin.tsx'
 import Panel from '../shared/Panel.tsx'
-import { TIER_STYLES } from '../shared/styles.ts'
+import { FIELD, TIER_STYLES } from '../shared/styles.ts'
 import Thumb from '../shared/Thumb.tsx'
+import CompartmentNotice from '../cargo/CompartmentNotice.tsx'
 import Tip from '../shared/Tip.tsx'
 import { useConditions } from '../shared/useConditions.ts'
-import { filterKey, passesFilter, type MarketFilter } from './marketFilter.ts'
+import { NO_FILTER, passesFilter, type MarketFilter } from './marketFilter.ts'
 import ProductSheet from './ProductSheet.tsx'
 
 type FilterBarProps = {
-  filters: readonly MarketFilter[]
+  /** Tiers et tags présents dans le tableau */
+  tiers: readonly Tier[]
+  tags: readonly TagId[]
   current: MarketFilter
-  ownedCount: number
   onPick: (filter: MarketFilter) => void
 }
 
@@ -49,9 +52,6 @@ type QuantityButtonsProps = {
   variant: 'primary' | 'danger'
 }
 
-/** Filtre par défaut : tout le tableau */
-const ALL: MarketFilter = { kind: 'all' }
-
 /** Tableau des cours : la boutique du jour, plus tous les produits en soute (chap. 7) */
 export default function MarketPanel() {
   const game = useGameStore((s) => s.game)
@@ -63,22 +63,16 @@ export default function MarketPanel() {
   const sealed = game.cargo.reduce((total, lot) => (PRODUCTS[lot.productId].sealed ? total + lot.qty : total), 0)
   // Ordre fixe, par tier puis par ID : acheter ou vendre ne déplace jamais une ligne (la page ne saute pas)
   const rows = [...new Set([...owned, ...shop])].sort((a, b) => PRODUCTS[a].tier - PRODUCTS[b].tier || a.localeCompare(b))
-  const isOwned = (id: ProductId) => ownedQty(game.cargo, id) > 0
-  const ownedCount = rows.filter(isOwned).length
-
-  // Filtres proposés : ceux qui gardent au moins un produit du tableau, tiers puis tags dans l'ordre des données
+  // Choix proposés : les tiers et les tags présents dans le tableau, dans l'ordre des données
   const tiers = [...new Set(rows.map((id) => PRODUCTS[id].tier))].sort((a, b) => a - b)
   const tags = keysOf(TAGS).filter((tag) => rows.some((id) => PRODUCTS[id].tags.includes(tag)))
-  const filters: MarketFilter[] = [
-    ALL,
-    ...(ownedCount > 0 ? [{ kind: 'owned' } satisfies MarketFilter] : []),
-    ...tiers.map((tier): MarketFilter => ({ kind: 'tier', tier })),
-    ...tags.map((tag): MarketFilter => ({ kind: 'tag', tag })),
-  ]
-  // Filtre choisi : état d'interface éphémère ; s'il ne garde plus rien ici (autre district, soute vidée), tout s'affiche
-  const [picked, setPicked] = useState<MarketFilter>(ALL)
-  const filter = filters.some((candidate) => filterKey(candidate) === filterKey(picked)) ? picked : ALL
-  const shown = rows.filter((id) => passesFilter(filter, id, isOwned(id)))
+  // Filtres choisis : état d'interface éphémère ; un choix absent du tableau ici (autre district) ne filtre pas
+  const [picked, setPicked] = useState<MarketFilter>(NO_FILTER)
+  const filter: MarketFilter = {
+    tier: picked.tier !== null && tiers.includes(picked.tier) ? picked.tier : null,
+    tag: picked.tag !== null && tags.includes(picked.tag) ? picked.tag : null,
+  }
+  const shown = rows.filter((id) => passesFilter(filter, id))
 
   return (
     <Panel title={`${t.market.title} — ${t.district[game.districtId].name}`} collapseId="market" flush>
@@ -92,8 +86,9 @@ export default function MarketPanel() {
           {t.travel.sealed(sealed, t.district[game.mission.to].name)}
         </Hint>
       )}
+      <CompartmentNotice className="px-3 pt-2" />
       <BulkSales />
-      <FilterBar filters={filters} current={filter} ownedCount={ownedCount} onPick={setPicked} />
+      <FilterBar tiers={tiers} tags={tags} current={filter} onPick={setPicked} />
       {shown.length === 0 && <Hint className="px-3 pt-2">{t.market.noMatch}</Hint>}
       <ul className="space-y-2 p-2">
         {shown.map((id) => (
@@ -104,28 +99,45 @@ export default function MarketPanel() {
   )
 }
 
-/** Filtres par soute, tier et tag (chap. 7) : une rangée de pastilles qui défile sur téléphone */
-function FilterBar({ filters, current, ownedCount, onPick }: FilterBarProps) {
+/** Filtres par tier et par tag, cumulables, avec leur remise à zéro (chap. 7) */
+function FilterBar({ tiers, tags, current, onPick }: FilterBarProps) {
   const { t } = useI18n()
-  const label = (filter: MarketFilter) => {
-    switch (filter.kind) {
-      case 'all':
-        return t.market.filterAll
-      case 'owned':
-        return t.market.filterOwned(ownedCount)
-      case 'tier':
-        return t.market.filterTier(filter.tier)
-      case 'tag':
-        return t.tag[filter.tag].name
-    }
-  }
+  const active = current.tier !== null || current.tag !== null
   return (
-    <div role="group" aria-label={t.market.filters} className="flex gap-1.5 overflow-x-auto px-3 pt-3 pb-1">
-      {filters.map((filter) => (
-        <Chip key={filterKey(filter)} pressed={filterKey(filter) === filterKey(current)} onClick={() => onPick(filter)}>
-          {label(filter)}
-        </Chip>
-      ))}
+    <div role="group" aria-label={t.market.filters} className="flex flex-wrap items-center gap-2 px-3 pt-3">
+      <Filter size={14} aria-hidden="true" className="text-ink-muted" />
+      <select
+        aria-label={t.market.filterTierLabel}
+        value={current.tier ?? ''}
+        onChange={(event) => onPick({ ...current, tier: tiers.find((tier) => String(tier) === event.target.value) ?? null })}
+        className={FIELD}
+      >
+        <option value="">{t.market.allTiers}</option>
+        {tiers.map((tier) => (
+          <option key={tier} value={tier}>
+            {t.market.filterTier(tier)}
+          </option>
+        ))}
+      </select>
+      <select
+        aria-label={t.market.filterTagLabel}
+        value={current.tag ?? ''}
+        onChange={(event) => onPick({ ...current, tag: tags.find((tag) => tag === event.target.value) ?? null })}
+        className={FIELD}
+      >
+        <option value="">{t.market.allTags}</option>
+        {tags.map((tag) => (
+          <option key={tag} value={tag}>
+            {t.tag[tag].name}
+          </option>
+        ))}
+      </select>
+      {active && (
+        <Button size="sm" onClick={() => onPick(NO_FILTER)}>
+          <RotateCcw size={12} aria-hidden="true" />
+          {t.market.resetFilters}
+        </Button>
+      )}
     </div>
   )
 }
@@ -162,6 +174,7 @@ function MarketRow({ productId }: MarketRowProps) {
   const district = game.districtId
   const stock = game.markets[district].stock[productId]
   const owned = ownedQty(game.cargo, productId)
+  const hiddenQty = game.compartment[productId] ?? 0
   const cost = averageCost(game.cargo, productId)
   const status = productStatus(game, district, productId)
   // Pourquoi il est en boutique : socle officiel, arrivage du jour (complément neutre), ou arrivage d'un événement (chap. 2)
@@ -196,6 +209,11 @@ function MarketRow({ productId }: MarketRowProps) {
             <span className="mr-1 font-bold">{t.product[productId].name}</span>
             {status !== 'neutral' && <Chip tone={status === 'strong' ? 'warning' : 'success'}>{t.market.status[status]}</Chip>}
             {origin && <span className="text-xs text-ink-muted">{t.market.origin[origin]}</span>}
+            {hiddenQty > 0 && (
+              <Chip tone="night" icon={EyeOff}>
+                {t.hold.hidden(hiddenQty)}
+              </Chip>
+            )}
           </div>
           <div className="mt-1 flex flex-wrap gap-1">
             {product.tags.map((tag) => (

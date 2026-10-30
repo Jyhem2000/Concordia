@@ -1,55 +1,55 @@
 import { describe, expect, it } from 'vitest'
 import { VEHICLES } from '../data/vehicles.ts'
 import { ownedQty } from './cargo.ts'
-import { displacedBy } from './compartment.ts'
+import { fillCompartment } from './compartment.ts'
 import { hiddenCargo } from './interception.ts'
 import { errorOf, gameAt, run } from './test-helpers.ts'
-import type { CargoLot, ProductId } from './types.ts'
+import type { CargoLot, GameState, ProductId } from './types.ts'
 
 const lot = (productId: ProductId, qty: number): CargoLot => ({ productId, qty, unitCost: 1, travelled: true, boughtDay: 2, damaged: false })
 
 // VEH-01 : un double fond plus petit que la soute de ces tests
 const capacity = VEHICLES['VEH-01'].hiddenCompartment
-const cargo = [lot('T1-01', capacity), lot('T2-03', 1), lot('T3-01', capacity)]
-const hiddenQty = (state: Parameters<typeof hiddenCargo>[0], id: ProductId) => ownedQty(hiddenCargo(state).hidden, id)
+const hiddenQty = (state: GameState, id: ProductId) => ownedQty(hiddenCargo(state).hidden, id)
+/** Boutique de Hives au Jour 1, assez riche pour acheter */
+const shop = (patch: Partial<GameState> = {}) => gameAt(1, { cash: 100_000, ...patch })
 
-describe('choix du double fond (chap. 4)', () => {
-  it('cache par défaut les caisses illégales les plus chères', () => {
-    const state = gameAt(3, { cargo })
-    expect(hiddenQty(state, 'T3-01')).toBe(capacity)
-    expect(hiddenQty(state, 'T1-01')).toBe(0)
+describe('double fond (chap. 4)', () => {
+  it('range de lui-même les caisses illégales achetées, jamais le légal', () => {
+    const state = run(shop(), { type: 'buy', productId: 'T1-04', qty: capacity + 1 }, { type: 'buy', productId: 'T0-01', qty: 1 })
+    expect(state.compartment).toEqual({ 'T1-04': capacity })
+    expect(hiddenQty(state, 'T1-04')).toBe(capacity)
   })
 
-  it('fait passer le produit envoyé avant le remplissage par défaut, le dernier envoyé en premier', () => {
-    const sent = run(gameAt(3, { cargo }), { type: 'compartment', productId: 'T1-01', hide: true })
-    expect(hiddenQty(sent, 'T1-01')).toBe(capacity)
-    expect(hiddenQty(sent, 'T3-01')).toBe(0)
-    const both = run(sent, { type: 'compartment', productId: 'T2-03', hide: true })
-    expect(hiddenQty(both, 'T2-03')).toBe(1)
-    expect(hiddenQty(both, 'T1-01')).toBe(capacity - 1)
+  it('déloge les caisses cachées moins chères pour un produit plus cher, et l’annonce', () => {
+    const cheap = fillCompartment(gameAt(3, { cargo: [lot('T1-01', capacity)] }))
+    expect(cheap.compartment).toEqual({ 'T1-01': capacity })
+    const state = run({ ...cheap, cash: 100_000 }, { type: 'buy', productId: 'T1-04', qty: 1 })
+    expect(state.compartment).toEqual({ 'T1-01': capacity - 1, 'T1-04': 1 })
+    expect(state.compartmentNotice).toEqual({ productId: 'T1-04', displaced: [{ productId: 'T1-01', qty: 1 }] })
+    // L'avertissement ne dure qu'une action
+    expect(run(state, { type: 'buy', productId: 'T0-01', qty: 1 }).compartmentNotice).toBeNull()
   })
 
-  it('annonce les caisses que l’envoi délogerait', () => {
-    expect(displacedBy(gameAt(3, { cargo }), 'T1-01')).toEqual([{ productId: 'T3-01', qty: capacity }])
-  })
-
-  it('ne cache plus un produit retiré, même le plus cher', () => {
-    const removed = run(gameAt(3, { cargo }), { type: 'compartment', productId: 'T3-01', hide: false })
-    expect(hiddenQty(removed, 'T3-01')).toBe(0)
-    expect(hiddenQty(removed, 'T2-03')).toBe(1)
+  it('libère les places au retrait, et ne cache à la main que dans une place libre', () => {
+    const full = fillCompartment(gameAt(3, { cargo: [lot('T1-01', capacity), lot('T2-03', 1)] }))
+    expect(errorOf(full, { type: 'compartment', productId: 'T1-01', hide: true })).toBe('compartment-full')
+    const removed = run(full, { type: 'compartment', productId: 'T2-03', hide: false })
+    expect(removed.compartment['T2-03']).toBeUndefined()
+    const hidden = run(removed, { type: 'compartment', productId: 'T1-01', hide: true })
+    expect(hiddenQty(hidden, 'T1-01')).toBe(capacity)
   })
 
   it('refuse le légal, l’encombrant et ce qui n’est pas en soute', () => {
-    const state = gameAt(3, { cargo: [...cargo, lot('T0-01', 1), lot('T4-06', 1)] })
+    const state = gameAt(3, { cargo: [lot('T0-01', 1), lot('T4-06', 1)] })
     expect(errorOf(state, { type: 'compartment', productId: 'T0-01', hide: true })).toBe('cannot-hide')
     expect(errorOf(state, { type: 'compartment', productId: 'T4-06', hide: true })).toBe('cannot-hide')
     expect(errorOf(state, { type: 'compartment', productId: 'T2-01', hide: true })).toBe('not-enough-cargo')
   })
 
-  it('oublie le choix quand le produit quitte la soute', () => {
-    const sent = run(gameAt(3, { cargo }), { type: 'compartment', productId: 'T2-03', hide: true })
-    expect(sent.compartment.pinned).toEqual(['T2-03'])
-    const sold = run(sent, { type: 'sell', productId: 'T2-03', qty: 1 })
-    expect(sold.compartment.pinned).toEqual([])
+  it('vend les caisses visibles d’abord, et ne garde que des caisses encore en soute', () => {
+    const state = fillCompartment(gameAt(3, { cargo: [lot('T1-04', capacity + 1)] }))
+    const sold = run(state, { type: 'sell', productId: 'T1-04', qty: 2 })
+    expect(sold.compartment).toEqual({ 'T1-04': capacity - 1 })
   })
 })

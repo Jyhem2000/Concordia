@@ -146,6 +146,10 @@ export const fr = {
 
   // ─── Interface ───
 
+  modal: {
+    close: 'Fermer',
+  },
+
   /** Onglets en bas d'écran du téléphone (chap. 7) */
   tabs: {
     label: 'Écrans',
@@ -163,15 +167,14 @@ export const fr = {
     noCrew: 'Aucun équipier : ils se recrutent à la Cantine.',
     title: (used: number, capacity: number) => `Soute ${used}/${capacity}`,
     empty: 'Soute vide.',
-    free: (slots: number) => `${slots} emplacement${slots > 1 ? 's' : ''} libre${slots > 1 ? 's' : ''}`,
+    cargoSlots: (used: number, capacity: number) => `Soute ${used}/${capacity}`,
     compartment: (used: number, capacity: number) => `Double fond ${used}/${capacity}`,
-    compartmentRule: 'Par défaut, les caisses illégales les plus chères. Touchez un produit pour changer.',
+    compartmentRule:
+      "Les caisses illégales qui arrivent s'y rangent d'elles-mêmes, et prennent la place des moins chères. Le double fond fait partie de la soute : quand il n'y a rien à cacher, ses places reçoivent des caisses visibles.",
     hidden: (qty: number) => `${qty} au double fond`,
-    pinned: 'envoyé au double fond',
-    excluded: 'retiré du double fond',
-    hide: 'Envoyer au double fond',
+    hide: 'Cacher au double fond',
     unhide: 'Retirer du double fond',
-    displaces: (crates: string) => `Délogera : ${crates}.`,
+    notice: (product: string, crates: string) => `Double fond : ${product} prend la place de ${crates}.`,
     profile: 'Profil de la cargaison',
     profileRule: 'Ces parts pilotent le risque de contrôle ; une caisse masquée par un Tier 0 compte moins.',
     masked: (qty: number) => `${qty} masquée${qty > 1 ? 's' : ''}`,
@@ -579,9 +582,12 @@ export const fr = {
   market: {
     title: 'Marché noir',
     filters: 'Filtrer les produits',
-    filterAll: 'Tous',
-    filterOwned: (qty: number) => `En soute (${qty})`,
-    filterTier: (tier: number) => `T${tier}`,
+    filterTierLabel: 'Filtrer par tier',
+    filterTagLabel: 'Filtrer par tag',
+    allTiers: 'Tous les tiers',
+    allTags: 'Tous les tags',
+    filterTier: (tier: number) => `Tier ${tier}`,
+    resetFilters: 'Effacer',
     noMatch: 'Aucun produit de ce filtre ici.',
     streetOnly: 'Passé 20h00 : seul le marché de rue est ouvert.',
     sellAll: (amount: string) => `Vendre tout (${amount})`,
@@ -621,6 +627,14 @@ export const fr = {
 
   sheet: {
     title: 'Fiche',
+    quotesTitle: 'Cours observés',
+    historyDistrict: 'District de la courbe',
+    trendRule: (persistence: string, shock: string, max: string) =>
+      `Chaque matin, le cours de chaque district garde ${persistence} de son écart de la veille au cours normal, plus un choc tiré au hasard (jusqu'à ±${shock}), sans s'écarter de plus de ±${max} : une baisse dure souvent quelques jours, puis le cours revient vers la normale. Les événements s'y ajoutent.`,
+    tagsTitle: 'Tags',
+    actionsTitle: 'Actions',
+    seizureTitle: 'Contrôle',
+    saleTitle: 'Où le vendre',
     cover: (risk: string, offGrid: string) => `couverture, −${risk} de risque de contrôle × sa part dans la soute (sauf ${offGrid})`,
     tripRisk: (risk: string, offGrid: string, doubled: string) =>
       `+${risk} de risque de contrôle × sa part dans la soute, à chaque trajet (sauf ${offGrid}${doubled ? ` ; doublé à ${doubled}` : ''})`,
@@ -652,7 +666,7 @@ export const fr = {
     best: (quote: string, district: string, age: number) =>
       `Meilleur cours vu ailleurs : ${quote} à ${district} (${age === 0 ? "aujourd'hui" : `il y a ${age} jour${age > 1 ? 's' : ''}`})`,
     noMemory: 'Aucun cours vu ailleurs pour ce produit',
-    historyEmpty: 'Historique des cours : il faut au moins deux relevés dans ce district.',
+    historyEmpty: 'Jamais observé dans ce district.',
     historyLabel: (district: string) => `Cours observés à ${district}, jour par jour, avec le cours normal en pointillé`,
     historyReadout: (district: string, day: number, quote: string, normal: string) => `${district}, J${day} : ${quote} (cours normal ${normal})`,
   },
@@ -916,6 +930,7 @@ export const fr = {
     'not-enough-cash': 'Cash-Puce insuffisant.',
     'not-enough-cargo': 'Pas assez de caisses en soute.',
     'cannot-hide': 'Rien à cacher : seules les caisses illégales, hors encombrantes, vont au double fond.',
+    'compartment-full': "Double fond plein : retirez d'abord un produit.",
     'tank-full': 'Réservoir plein.',
     'same-district': 'Vous y êtes déjà.',
     'trip-done': 'Trajet déjà effectué pour cette phase.',

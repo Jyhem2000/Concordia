@@ -39,8 +39,8 @@ Dans le bandeau, l'ICC prend la couleur de son palier (chap. 1), avec le nom du 
 
 ## Vue « Véhicule, soute & équipage »
 * **Véhicule & équipage :** image et nom du châssis, jauges de châssis et de Synthanol, modules montés sur les slots du châssis (avec leur image ; ils se changent au garage), équipier actif.
-* **Soute :** une case par emplacement, dans la couleur du tier de sa caisse (en pointillés si elle est au double fond, vide si l'emplacement est libre), puis une ligne par produit, du plus haut tier au plus bas : image, quantité, tags, état (fraîcheur, caisses abîmées, délai avant pourriture) et caisses cachées au double fond.
-* **Double fond :** son occupation sur sa capacité. Toucher un produit illégal ouvre un menu pour l'**envoyer au double fond**, avec les caisses qu'il délogerait ; toucher un produit caché, pour l'en **retirer** (chap. 4). Un produit envoyé ou retiré le reste affiché ; un produit légal ou encombrant dit pourquoi il n'y va pas.
+* **Soute :** deux rangées de cases, une par emplacement, dans la couleur du tier de sa caisse : les places à découvert (« Soute 6/8 »), puis celles du double fond, encadrées (« Double fond 1/2 ») ; une caisse cachée est en pointillés, une place libre est vide. Puis une ligne par produit, du plus haut tier au plus bas : image, quantité, tags, état (fraîcheur, caisses abîmées, délai avant pourriture).
+* **Double fond, sur chaque ligne illégale :** la pastille « N au double fond » si le produit y est, avec le bouton **Retirer du double fond** ; le bouton **Cacher au double fond** s'il reste des caisses visibles, actif seulement s'il y a une place libre (sinon, la raison s'affiche). Les caisses délogées par un achat sont annoncées dans la soute et au marché (chap. 4). Au marché, la même pastille marque les produits cachés.
 * **Profil de la cargaison :** une jauge par tag qui pèse sur le risque (ceux qui ajoutent du risque au trajet ou à la détection, et la couverture du Légal), avec la part dans la soute et les caisses masquées par un Tier 0.
 
 ## Vue « Marché noir & lieux spéciaux »
@@ -56,14 +56,14 @@ Dans le bandeau, l'ICC prend la couleur de son palier (chap. 1), avec le nom du 
   * **Tendance** : variation du cours depuis la dernière observation dans ce district, si elle date de la veille.
   * **Utiliser** sur les produits qui ont une action joueur (`[T4-03]`), avec son effet ou la raison d'un refus.
   * **Marge** sur chaque ligne possédée : gain net de la prochaine caisse vendue (₡/u et % de son prix d'achat), et gain net si l'on vend tout (saturation comprise). Icône verte (rentable), ambre (marge faible, sous un seuil d'affichage fixé dans `Margin.tsx`) ou rouge (à perte).
-* **Fiche produit :** sous le nom, les tags du produit en pastilles ; une fiche dépliable détaille, sans rien cacher :
+* **Fiche produit :** sous le nom, les tags du produit en pastilles ; le bouton « Fiche » ouvre une fenêtre (image, tier, tags) qui détaille, sans rien cacher :
   * l'effet de chaque tag (risque ajouté ou retiré et où, malus de bluff, fraîcheur, casse, explosion, largage), le masquage d'un Tier 0 ;
   * les actions du produit (aide au bluff, dopage, nuit blanche, refroidissement, pass d'identité, balise) ;
   * la sanction en cas de saisie (formalité, amende sur la valeur saisie, ou garde à vue pour le haut tier) ;
   * les agents qui l'apprécient (connivence) et les milices qui le prennent en premier ;
   * où le vendre : districts en Forte demande (jamais en boutique là-bas, sauf événement) et districts producteurs (en boutique chaque jour, moins cher) (profil public, chap. 2, vices de la Loterie compris), et le meilleur cours mémorisé ailleurs avec son ancienneté ;
-  * l'**historique des cours** observés dans le district actuel, en courbe, avec le cours normal (sans tendance ni événement) en repère ; la valeur de chaque jour au survol ou au toucher, et le tableau des valeurs pour les lecteurs d'écran.
-* **Filtres** en pastilles, un seul à la fois : Tous, En soute, chaque tier et chaque tag présents dans le tableau. Le filtre choisi reste d'un district à l'autre ; s'il ne garde plus aucun produit ici, tout s'affiche.
+  * les **cours observés**, en courbe, du Jour 1 à aujourd'hui, dans le district choisi parmi ceux dont le joueur a vu le marché (le district actuel par défaut) : un point par jour de visite, la courbe s'interrompt entre deux visites espacées ; le cours normal (sans tendance ni événement) en repère ; la valeur de chaque jour au survol ou au toucher, et le tableau des valeurs pour les lecteurs d'écran. Sous la courbe, la règle de la tendance (chap. 2) avec ses chiffres.
+* **Filtres :** deux listes déroulantes cumulables, le tier et le tag (parmi ceux présents dans le tableau), et un bouton qui les efface. Le choix reste d'un district à l'autre ; un tier ou un tag absent du tableau ici ne filtre pas.
 * **Curseurs d'achat / vente :** 1, 5, MAX.
 * **Onglet lieux spéciaux :** accès direct aux services du district, coûts et cooldowns affichés. À la Laverie, le Cash-Puce reçu pour un retrait (commission déduite) et le nombre de jours qu'il faut à un dépôt pour couvrir cette commission au taux du jour.
 

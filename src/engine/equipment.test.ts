@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { fillCompartment } from './compartment.ts'
 import { EJECT, FLEE, NIGHT_TRIP_RISK } from '../data/balance.ts'
 import { GARAGE } from '../data/locations.ts'
 import { MODULES, VEHICLES } from '../data/vehicles.ts'
@@ -125,7 +126,10 @@ describe('barrage et équipement', () => {
   })
 
   it('largue par la trappe sans dégât, puis récupère une part des caisses au matin', () => {
-    const state = withModules(['MOD-07'], { districtId: 'D2', interception: brc, cargo: [lot('T2-03', 6), lot('T0-01', 2)], rng: LOW_ROLL_RNG })
+    // Double fond rempli comme à l'arrivée des caisses
+    const state = fillCompartment(
+      withModules(['MOD-07'], { districtId: 'D2', interception: brc, cargo: [lot('T2-03', 6), lot('T0-01', 2)], rng: LOW_ROLL_RNG }),
+    )
     const dumped = run(state, { type: 'intercept', move: 'eject' })
     expect(dumped).toMatchObject({ trapdoorDay: 3, chassis: VEHICLES['VEH-01'].maxChassis })
     // Le double fond reste fermé : seules les caisses visibles sont larguées

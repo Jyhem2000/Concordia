@@ -1,47 +1,63 @@
 import { useState } from 'react'
 import { normalQuote } from '../../engine/market.ts'
-import type { ProductId } from '../../engine/types.ts'
+import type { DistrictId, ProductId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 
 type QuoteChartProps = {
   productId: ProductId
+  districtId: DistrictId
 }
 
-/** Géométrie du tracé (viewBox SVG), marges comprises pour les libellés d'axes */
-const WIDTH = 300
-const HEIGHT = 110
-const MARGIN = { top: 10, right: 12, bottom: 20, left: 44 }
+type Point = { day: number; quote: number }
 
-/** Historique des cours observés dans le district actuel, avec le cours normal en repère (chap. 2 et 7) */
-export default function QuoteChart({ productId }: QuoteChartProps) {
+/** Géométrie du tracé (viewBox SVG), marges comprises pour les libellés d'axes */
+const WIDTH = 320
+const HEIGHT = 140
+const MARGIN = { top: 10, right: 12, bottom: 20, left: 48 }
+
+/**
+ * Cours observés d'un produit dans un district, du Jour 1 à aujourd'hui, avec le cours normal en repère (chap. 2 et 7).
+ * Seuls les jours où le joueur a vu ce marché ont un point ; la courbe s'interrompt entre deux visites espacées.
+ */
+export default function QuoteChart({ productId, districtId }: QuoteChartProps) {
+  // Mémoire de marché et cours normal du district : état entier
   const game = useGameStore((s) => s.game)
   const { t, credits } = useI18n()
-  // Relevé survolé : état d'interface éphémère
-  const [hovered, setHovered] = useState<number | null>(null)
+  // Relevé désigné (survol ou toucher) : état d'interface éphémère
+  const [pointed, setPointed] = useState<number | null>(null)
 
-  const district = game.districtId
-  const points = (game.memory[district] ?? []).map((seen) => ({ day: seen.day, quote: seen.quotes[productId] }))
-  if (points.length < 2) return <p className="text-ink-faint">{t.sheet.historyEmpty}</p>
+  const points = (game.memory[districtId] ?? []).flatMap((seen): Point[] => {
+    const quote = seen.quotes[productId]
+    return quote === undefined ? [] : [{ day: seen.day, quote }]
+  })
+  if (points.length === 0) return <p className="text-xs text-ink-faint">{t.sheet.historyEmpty}</p>
 
-  const normal = normalQuote(game, district, productId)
+  const normal = normalQuote(game, districtId, productId)
   const values = [...points.map((point) => point.quote), normal]
   const low = Math.min(...values)
   const high = Math.max(...values)
-  const first = points[0].day
-  const last = points[points.length - 1].day
-  const x = (day: number) => MARGIN.left + ((day - first) / Math.max(1, last - first)) * (WIDTH - MARGIN.left - MARGIN.right)
+  // Axe du temps : toute la partie jusqu'à aujourd'hui
+  const first = 1
+  const last = Math.max(2, game.day)
+  const x = (day: number) => MARGIN.left + ((day - first) / (last - first)) * (WIDTH - MARGIN.left - MARGIN.right)
   const y = (value: number) => HEIGHT - MARGIN.bottom - ((value - low) / Math.max(1, high - low)) * (HEIGHT - MARGIN.top - MARGIN.bottom)
-  const line = points.map((point, i) => `${i === 0 ? 'M' : 'L'}${x(point.day)},${y(point.quote)}`).join(' ')
-  const shown = points.find((point) => point.day === hovered) ?? points[points.length - 1]
-  const step = (WIDTH - MARGIN.left - MARGIN.right) / Math.max(1, last - first)
+  // Tronçons de jours consécutifs : pas de trait inventé entre deux visites
+  const runs = points.reduce<Point[][]>((all, point) => {
+    const run = all[all.length - 1]
+    if (run && run[run.length - 1].day === point.day - 1) run.push(point)
+    else all.push([point])
+    return all
+  }, [])
+  const shown = points.find((point) => point.day === pointed) ?? points[points.length - 1]
+  const step = (WIDTH - MARGIN.left - MARGIN.right) / (last - first)
 
   return (
-    <figure className="mt-1">
-      <figcaption className="mb-1 text-ink-soft">
-        {t.sheet.historyReadout(t.district[district].name, shown.day, credits(shown.quote), credits(normal))}
+    <figure>
+      <figcaption className="mb-1 text-xs text-ink-soft">
+        {t.sheet.historyReadout(t.district[districtId].name, shown.day, credits(shown.quote), credits(normal))}
       </figcaption>
-      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full max-w-sm" role="img" aria-label={t.sheet.historyLabel(t.district[district].name)}>
+      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full" role="img" aria-label={t.sheet.historyLabel(t.district[districtId].name)}>
         {/* Cours normal : repère pointillé, récessif */}
         <line
           x1={MARGIN.left}
@@ -63,7 +79,17 @@ export default function QuoteChart({ productId }: QuoteChartProps) {
           </text>
         ))}
 
-        <path d={line} fill="none" className="stroke-accent" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+        {runs.map((run) => (
+          <path
+            key={run[0].day}
+            d={run.map((point, i) => `${i === 0 ? 'M' : 'L'}${x(point.day)},${y(point.quote)}`).join(' ')}
+            fill="none"
+            className="stroke-accent"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        ))}
         {points.map((point) => (
           <circle
             key={point.day}
@@ -75,23 +101,23 @@ export default function QuoteChart({ productId }: QuoteChartProps) {
           />
         ))}
 
-        {/* Zones de survol plus larges que les points : une colonne par relevé */}
+        {/* Zones plus larges que les points, une colonne par relevé : survol à la souris, toucher sur mobile */}
         {points.map((point) => (
           <rect
             key={point.day}
-            x={x(point.day) - step / 2}
+            x={x(point.day) - Math.max(step, 8) / 2}
             y={MARGIN.top}
-            width={step}
+            width={Math.max(step, 8)}
             height={HEIGHT - MARGIN.top - MARGIN.bottom}
             fill="transparent"
-            onPointerEnter={() => setHovered(point.day)}
-            onPointerLeave={() => setHovered(null)}
+            onPointerEnter={() => setPointed(point.day)}
+            onPointerDown={() => setPointed(point.day)}
           />
         ))}
       </svg>
       {/* Vue tableau pour les lecteurs d'écran */}
       <table className="sr-only">
-        <caption>{t.sheet.historyLabel(t.district[district].name)}</caption>
+        <caption>{t.sheet.historyLabel(t.district[districtId].name)}</caption>
         <tbody>
           {points.map((point) => (
             <tr key={point.day}>

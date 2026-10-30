@@ -1,32 +1,14 @@
 import { PRODUCTS } from '../../data/products.ts'
 import type { ProductId, TagId, Tier } from '../../engine/types.ts'
 
-/** Filtre du tableau des cours (chap. 7) : un seul à la fois */
-export type MarketFilter = { kind: 'all' } | { kind: 'owned' } | { kind: 'tier'; tier: Tier } | { kind: 'tag'; tag: TagId }
+/** Filtres du tableau des cours (chap. 7) : un tier et un tag, cumulables ; `null` garde tout */
+export type MarketFilter = { tier: Tier | null; tag: TagId | null }
 
-/** Le produit passe-t-il le filtre ? `owned` : le joueur en a en soute */
-export function passesFilter(filter: MarketFilter, productId: ProductId, owned: boolean): boolean {
-  switch (filter.kind) {
-    case 'all':
-      return true
-    case 'owned':
-      return owned
-    case 'tier':
-      return PRODUCTS[productId].tier === filter.tier
-    case 'tag':
-      return PRODUCTS[productId].tags.includes(filter.tag)
-  }
-}
+/** Aucun filtre */
+export const NO_FILTER: MarketFilter = { tier: null, tag: null }
 
-/** Identifiant du filtre : clé de sa pastille et comparaison avec le filtre choisi */
-export function filterKey(filter: MarketFilter): string {
-  switch (filter.kind) {
-    case 'all':
-    case 'owned':
-      return filter.kind
-    case 'tier':
-      return `tier-${filter.tier}`
-    case 'tag':
-      return filter.tag
-  }
+/** Le produit passe-t-il les deux filtres ? */
+export function passesFilter(filter: MarketFilter, productId: ProductId): boolean {
+  const product = PRODUCTS[productId]
+  return (filter.tier === null || product.tier === filter.tier) && (filter.tag === null || product.tags.includes(filter.tag))
 }

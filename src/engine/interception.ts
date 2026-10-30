@@ -31,7 +31,6 @@ import { noteControlPassed, raiseWanted } from './progress.ts'
 import { serveCustody } from './routine.ts'
 import { loseHalfDay } from './time.ts'
 import type {
-  CompartmentChoice,
   CargoLot,
   CrateCount,
   DistrictId,
@@ -263,9 +262,9 @@ export function ejectChance(state: GameState): Breakdown {
   }
 }
 
-/** Caisses du double fond du véhicule et reste de la soute (chap. 4), selon le choix du joueur ou un choix envisagé */
-export function hiddenCargo(state: GameState, choice: CompartmentChoice = state.compartment): { hidden: CargoLot[]; visible: CargoLot[] } {
-  return splitHidden(state.cargo, VEHICLES[state.vehicleId].hiddenCompartment, choice)
+/** Caisses du double fond du véhicule et reste de la soute (chap. 4) */
+export function hiddenCargo(state: GameState): { hidden: CargoLot[]; visible: CargoLot[] } {
+  return splitHidden(state.cargo, state.compartment)
 }
 
 /**

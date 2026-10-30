@@ -30,7 +30,7 @@ import { fuelPriceBreakdown, quote, saleQuote } from './market.ts'
 import { keysOf } from './records.ts'
 import { risk } from './risk.ts'
 import { checkRoadChoice, resolveRoadChoice, type RoadChoiceId } from './road.ts'
-import { checkCompartment, forgetCompartment, setCompartment } from './compartment.ts'
+import { checkCompartment, setCompartment, settleCompartment } from './compartment.ts'
 import { createRng } from './rng.ts'
 import { sleep } from './routine.ts'
 import { remember } from './state.ts'
@@ -110,6 +110,7 @@ export type ActionError =
   | 'not-enough-cash'
   | 'not-enough-cargo'
   | 'cannot-hide'
+  | 'compartment-full'
   | 'tank-full'
   | 'same-district'
   | 'trip-done'
@@ -496,8 +497,8 @@ function atService(state: GameState, service: LocationService, run: () => Action
 /** Applique une action du joueur : nouvel état, ou raison du refus */
 export function applyAction(state: GameState, action: Action): ActionResult {
   const result = resolveAction(state, action)
-  // Un produit sorti de la soute (vendu, saisi, pourri…) perd le choix du double fond qui le concernait
-  return result.ok ? { ok: true, state: forgetCompartment(result.state) } : result
+  // Double fond tenu à jour : caisses parties, caisses arrivées, changement de châssis (chap. 4)
+  return result.ok ? { ok: true, state: settleCompartment(state, result.state) } : result
 }
 
 function resolveAction(state: GameState, action: Action): ActionResult {
@@ -573,7 +574,7 @@ function resolveAction(state: GameState, action: Action): ActionResult {
     case 'setAutoCooling':
       return { ok: true, state: { ...state, autoCooling: action.enabled } }
     case 'compartment': {
-      const error = checkCompartment(state, action.productId)
+      const error = checkCompartment(state, action.productId, action.hide)
       return error ? fail(error) : { ok: true, state: setCompartment(state, action.productId, action.hide) }
     }
     case 'sleep':

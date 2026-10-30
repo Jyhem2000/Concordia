@@ -1,6 +1,6 @@
 import { MASKED_CRATE_WEIGHT } from '../data/balance.ts'
 import { PRODUCTS } from '../data/products.ts'
-import type { CargoLot, CompartmentChoice, CrateCount, ProductId, TagId, Tier } from './types.ts'
+import type { CargoLot, Compartment, CrateCount, ProductId, TagId, Tier } from './types.ts'
 
 /** Emplacements de soute occupés (1 caisse = 1 emplacement) */
 export function cargoUsed(cargo: readonly CargoLot[]): number {
@@ -81,39 +81,19 @@ export function canHide(productId: ProductId): boolean {
   return isIllegalProduct(productId) && !PRODUCTS[productId].bulky
 }
 
-/**
- * Double fond (chap. 4) : les produits envoyés par le joueur d'abord (le dernier envoyé en premier), puis les caisses
- * illégales les plus chères au prix de base, sans les produits retirés, dans la capacité donnée.
- * Les deux parts gardent l'ordre des lots de la soute.
- */
-export function splitHidden(
-  cargo: readonly CargoLot[],
-  capacity: number,
-  choice: CompartmentChoice = { pinned: [], excluded: [] },
-): { hidden: CargoLot[]; visible: CargoLot[] } {
-  // Rang de priorité : position dans les produits envoyés, après eux le prix de base décroissant
-  const rank = (productId: ProductId) => {
-    const pin = choice.pinned.indexOf(productId)
-    return pin === -1 ? choice.pinned.length : pin
-  }
-  const hiddenQty = new Map<number, number>()
-  let left = capacity
-  const candidates = cargo
-    .map((lot, index) => ({ lot, index }))
-    .filter(({ lot }) => canHide(lot.productId) && !choice.excluded.includes(lot.productId))
-    .sort((a, b) => rank(a.lot.productId) - rank(b.lot.productId) || PRODUCTS[b.lot.productId].basePrice - PRODUCTS[a.lot.productId].basePrice)
-  for (const { lot, index } of candidates) {
-    const qty = Math.min(lot.qty, left)
-    if (qty > 0) hiddenQty.set(index, qty)
-    left -= qty
-  }
+/** Double fond (chap. 4) : les caisses cachées de chaque produit, prises dans ses lots dans l'ordre de la soute */
+export function splitHidden(cargo: readonly CargoLot[], compartment: Compartment): { hidden: CargoLot[]; visible: CargoLot[] } {
+  // Caisses déjà prises par produit, pour ne pas en cacher plus que le double fond n'en compte
+  const taken = new Map<ProductId, number>()
   const hidden: CargoLot[] = []
   const visible: CargoLot[] = []
-  cargo.forEach((lot, index) => {
-    const qty = hiddenQty.get(index) ?? 0
+  for (const lot of cargo) {
+    const already = taken.get(lot.productId) ?? 0
+    const qty = Math.max(0, Math.min(lot.qty, (compartment[lot.productId] ?? 0) - already))
+    taken.set(lot.productId, already + qty)
     if (qty > 0) hidden.push({ ...lot, qty })
     if (qty < lot.qty) visible.push({ ...lot, qty: lot.qty - qty })
-  })
+  }
   return { hidden, visible }
 }
 

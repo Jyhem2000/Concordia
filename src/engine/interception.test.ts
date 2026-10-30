@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { fillCompartment } from './compartment.ts'
 import {
   BLUFF,
   BRIBE,
@@ -46,8 +47,9 @@ const brc: Interception = { kind: 'brc', acted: false, bluffFailed: false }
 const racket: Interception = { kind: 'racket', acted: false, bluffFailed: false }
 
 /** Joueur arrêté à un barrage de Pastel-Heights, avec 10 000 ₡ et la soute donnée */
+// Le double fond est rempli comme à l'arrivée des caisses : les illégales les plus chères
 const stopped = (cargo: CargoLot[], patch: Partial<GameState> = {}): GameState =>
-  gameAt(5, { districtId: 'D2', cash: 10_000, cargo, interception: brc, dayTripDone: true, ...patch })
+  fillCompartment(gameAt(5, { districtId: 'D2', cash: 10_000, cargo, interception: brc, dayTripDone: true, ...patch }))
 
 describe('arrivée au barrage', () => {
   it('arrête le joueur à destination sur un tirage bas, et bloque toute autre action', () => {
