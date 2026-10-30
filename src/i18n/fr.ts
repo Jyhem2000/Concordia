@@ -51,7 +51,7 @@ export const fr = {
     /** `amount` est déjà formaté selon la langue ; espace insécable avant le symbole */
     credits: (amount: string) => `${amount}${NBSP}₡`,
     multiplier: (factor: string) => `×${factor}`,
-    day: (day: number, total: number) => `Jour ${day} / ${total}`,
+    dayShort: (day: number, total: number) => `${day}/${total}`,
   },
 
   /** Moment de la journée (chap. 1) : Journée, 20h00, Nuit */
@@ -146,7 +146,19 @@ export const fr = {
 
   // ─── Interface ───
 
+  /** Onglets en bas d'écran du téléphone (chap. 7) */
+  tabs: {
+    label: 'Écrans',
+    market: 'Marché',
+    places: 'Lieux',
+    map: 'Carte',
+  },
+
   hud: {
+    day: 'Jour',
+    /** Libellé court du Cash-Puce dans la rangée de tête du bandeau */
+    cash: 'Cash',
+    deadlineShort: (day: number) => `J${day}`,
     cargo: 'Soute',
     newGame: 'Nouvelle partie',
     newGameConfirm: 'Abandonner la partie en cours et recommencer au Jour 1 ?',

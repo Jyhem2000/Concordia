@@ -4,7 +4,6 @@ import { SURVIVAL_ADVANCE } from '../../data/balance.ts'
 import { LOCATIONS } from '../../data/locations.ts'
 import { maxRepay } from '../../engine/actions.ts'
 import { crewEffect } from '../../engine/crew.ts'
-import { keysOf } from '../../engine/records.ts'
 import {
   breakEvenDays,
   effectiveOffshoreRate,
@@ -22,6 +21,7 @@ import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
 import CrewDesk from './CrewDesk.tsx'
 import GarageDesk from './GarageDesk.tsx'
+import { placesHere } from './placesHere.ts'
 import { CassandreDesk, ForgeryDesk, KarmaDesk, MorgueDesk, VelvetDesk } from './SpecialDesks.tsx'
 
 type PlaceProps = {
@@ -33,10 +33,10 @@ type ServiceDeskProps = {
   service: LocationService
 }
 
-/** Guichets des lieux spéciaux du district courant qui rendent un service implémenté ; rien sinon */
+/** Guichets des lieux spéciaux du district courant ; rien s'il n'y en a pas */
 export default function PlacesPanel() {
   const districtId = useGameStore((s) => s.game.districtId)
-  const here = keysOf(LOCATIONS).filter((id) => LOCATIONS[id].district === districtId && LOCATIONS[id].services.length > 0)
+  const here = placesHere(districtId)
   if (here.length === 0) return null
 
   return (

@@ -47,7 +47,7 @@ Toutes les règles des chap. 1 à 6 sont en jeu. Ce tableau dit ce qui reste à 
 
 | Chap. | À venir |
 | :---: | :--- |
-| 7 | Charte graphique et composants partagés, onglets en bas d'écran (téléphone), vue véhicule et soute (dont le choix du contenu du double fond), carte schématique, filtres du marché, couleur de l'ICC selon le palier, images des produits, véhicules et modules, manuel en jeu |
+| 7 | Onglet Soute du téléphone avec la vue véhicule et soute (dont le choix du contenu du double fond), carte schématique, filtres du marché, images des produits, véhicules et modules, manuel en jeu |
 | 8 | Spéculation sur l'événement de demain (Cassandre-88, rumeur) et faux dossier de Loterie dans les bots, optimiseur et campagne 5 (reportés après l'interface, comme contrôle final) |
 
 ## Feuille de route

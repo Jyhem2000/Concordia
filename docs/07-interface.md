@@ -1,7 +1,7 @@
 # 7. Interface (UI / UX)
 
 * **Single-Page Application** réactive, écran unique responsive : mobile-first en portrait, panneaux côte à côte sur desktop / paysage.
-  * **Onglets en bas d'écran (téléphone) :** Marché (cours et ventes), Lieux (services du district, garage, Cantine), Soute (véhicule, soute et équipage), Carte (livraison officielle, carte, panneau du soir et départs). Le bandeau supérieur, le briefing et les comptes rendus restent au-dessus de l'onglet ouvert. Un trajet ramène à l'onglet Marché.
+  * **Onglets en bas d'écran (téléphone) :** Marché (cours et ventes), Lieux (services du district, garage, Cantine ; absent dans un district sans lieu spécial), Soute (véhicule, soute et équipage), Carte (plein, panneau du soir, objectifs, livraison officielle, carte et départs). Le bandeau supérieur, le briefing et les comptes rendus restent au-dessus de l'onglet ouvert. Un trajet ou une nouvelle demi-journée ramène à l'onglet Marché.
   * **Desktop :** tous les panneaux visibles, marché à gauche, le reste à droite, sans onglets.
 * **Aucun chiffre codé en dur :** boutons et panneaux affichent les valeurs calculées depuis les règles du jour.
 * **Principe de transparence — « zéro calculatrice, zéro boîte noire » :** chaque probabilité, prix ou coût affiché peut être touché pour révéler son **détail ligne par ligne**, avec la source de chaque ligne (district, tag, module, équipier, événement…). Le joueur occasionnel lit le total ; le joueur optimisateur lit le détail et ajuste son build.
@@ -21,7 +21,7 @@ Chaque panneau (marché, carte, lieux spéciaux, plein, couvre-feu, objectifs) e
 
 ## Bandeau supérieur permanent & briefing de 06h00
 * **Téléscripteur d'Aeterna (Flash Info TV) :** sous les barres d'état, un message passif-agressif par demi-journée (jour, puis nuit ; le catalogue, rangé par thèmes, est parcouru en sautant d'un thème à l'autre et passe en entier en une partie), l'événement global et les événements locaux du jour, les contrecoups, le tirage de la Loterie (le promu, et le déclassé seulement s'il y en a un) et ses vices en cours, et la **rumeur** du lendemain avec sa fiabilité. Chaque événement se déplie sur ses effets exacts (produits et facteurs, risque, tags, stocks).
-* **Barres d'état (toujours visibles) :**
+* **Barres d'état (toujours visibles) :** une rangée de tête (Jour, Cash-Puce, Dette et son échéance, ICC et son palier, Santé), puis le district et le moment, les jauges en barre du châssis et du Synthanol, et le reste en petit.
   * Jour X / 30 + ☀️ ou 🌙, et le moment de la journée (Journée, 20h00, Nuit, chap. 1) avec l'état du trajet du moment (disponible ou effectué) ;
   * Cash-Puce (jaune) · Compte offshore (cyan, cadenas, taux effectif) · Dette (rouge, prochaine échéance : retard si la dette initiale n'a jamais été soldée, puis audit ; mention « en retard » une fois le retard acquis) ;
   * ICC (couleur selon le palier ci-dessous, avec le prochain seuil de crédit social et le **reste du plafond de gains du jour**) ;
