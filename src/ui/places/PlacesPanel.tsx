@@ -22,6 +22,7 @@ import Panel from '../shared/Panel.tsx'
 import CrewDesk from './CrewDesk.tsx'
 import GarageDesk from './GarageDesk.tsx'
 import { placesHere } from './placesHere.ts'
+import PumpPanel from './PumpPanel.tsx'
 import { CassandreDesk, ForgeryDesk, KarmaDesk, MorgueDesk, VelvetDesk } from './SpecialDesks.tsx'
 
 type PlaceProps = {
@@ -38,14 +39,15 @@ type PlacesPanelProps = {
   garage?: boolean
 }
 
-/** Guichets des lieux spéciaux du district courant ; rien s'il n'y en a pas */
+/** Pompe à Synthanol et guichets des lieux spéciaux du district courant */
 export default function PlacesPanel({ garage = false }: PlacesPanelProps) {
   const districtId = useGameStore((s) => s.game.districtId)
   const here = placesHere(districtId, garage)
-  if (here.length === 0) return null
 
   return (
     <>
+      {/* Chaque district a sa pompe ; elle n'a rien à voir avec le garage */}
+      {!garage && <PumpPanel />}
       {here.map((id) => (
         <Place key={id} locationId={id}>
           {LOCATIONS[id].services.map((service) => (

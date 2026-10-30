@@ -1,4 +1,4 @@
-import { EyeOff, Fuel, Package, Tag, UserRound, Wrench } from 'lucide-react'
+import { EyeOff, Fuel, Package, RadioTower, Tag, UserRound, Wrench } from 'lucide-react'
 import { motion } from 'motion/react'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
@@ -195,6 +195,11 @@ function HoldRow({ productId }: HoldRowProps) {
           <span className="ml-auto font-bold">×{qty}</span>
         </div>
         <div className="mt-1 flex flex-wrap gap-1">
+          {product.beaconRisk !== undefined && (
+            <Chip tone="danger" icon={RadioTower}>
+              {t.hold.beacon}
+            </Chip>
+          )}
           {product.tags.map((tag) => (
             <Chip key={tag}>{t.tag[tag].name}</Chip>
           ))}

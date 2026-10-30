@@ -1,10 +1,20 @@
 import { Crosshair, Droplet, HandCoins, Hourglass, MapPin, Moon, RotateCcw, Sun, UserRound, type LucideIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
-import { AUDIT_COUNTDOWN_DAY, GAME_LENGTH_DAYS, HEALTH_MAX, ICC_MAX, SEDATION, WANTED } from '../../data/balance.ts'
+import {
+  AUDIT_COUNTDOWN_DAY,
+  DEBT_LATE,
+  GAME_LENGTH_DAYS,
+  HEALTH_MAX,
+  ICC_DAILY_ROUTE_GAIN_CAP,
+  ICC_MAX,
+  SEDATION,
+  WANTED,
+} from '../../data/balance.ts'
 import { cantineDistrict, crewEffect } from '../../engine/crew.ts'
 import { effectiveOffshoreRate, nextDebtDeadline, nextProtectionDay, offshoreBalance, protectionBreakdown } from '../../engine/finance.ts'
-import { iccTier } from '../../engine/gauges.ts'
+import { checkForceCurfew } from '../../engine/actions.ts'
+import { iccRouteGainLeft, iccTier } from '../../engine/gauges.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import { FOCUS_RING } from '../shared/focus.ts'
@@ -17,7 +27,9 @@ type CellProps = {
   tone?: Tone
   /** Précision sous la valeur (échéance, palier…) */
   note?: string
-  /** Texte complet en infobulle, quand la case est abrégée */
+  /** Couleur de la précision, si elle diffère de la valeur */
+  noteTone?: Tone
+  /** Explication de la règle, en infobulle */
   info?: string
   /** Valeur affichée : quand elle change, la case le montre */
   valueKey: string | number
@@ -35,8 +47,9 @@ type StatProps = {
   info?: string
 }
 
-/** Sous ce seuil, la Santé passe au rouge (repère visuel seulement, aucun effet de jeu) */
+/** Seuils de couleur de la Santé : rouge, puis orange (repères visuels seulement, aucun effet de jeu) */
 const LOW_HEALTH = 0.25
+const MEDIUM_HEALTH = 0.5
 
 /** Bandeau supérieur permanent : jour, argent, ICC et Santé en tête, puis district, moment et états du chauffeur (chap. 7) */
 export default function StatusBar() {
@@ -44,7 +57,7 @@ export default function StatusBar() {
   const game = useGameStore((s) => s.game)
   const lastError = useGameStore((s) => s.lastError)
   const newGame = useGameStore((s) => s.newGame)
-  const { t, credits, number, percent } = useI18n()
+  const { t, credits, signedCredits, number, percent } = useI18n()
   const offshore = offshoreBalance(game.offshore)
   const offshoreRate = effectiveOffshoreRate(game.offshore, crewEffect(game, 'offshoreBonus') ?? 0)
   const tier = iccTier(game.icc)
@@ -53,7 +66,10 @@ export default function StatusBar() {
   // Moment de la journée : Journée, 20h00 (journée finie avant l'heure), Nuit (chap. 1)
   const moment = game.phase === 'night' ? 'night' : game.dayOver ? 'curfew' : 'day'
   const tripDone = game.phase === 'day' ? game.dayTripDone : game.nightTripDone
-  const debtNotes = [...(game.debtLate ? [t.hud.debtLate] : []), ...(deadline === null ? [] : [t.hud.nextDeadline(deadline)])]
+  // Écart du Cash-Puce depuis 06h00, d'après le carnet de route
+  const cashToday = game.cash - (game.journal.at(-1)?.start.cash ?? game.cash)
+  // Épuisé : tournée de nuit la veille, pas de nouvelle nuit sur la route ce soir (chap. 1)
+  const exhausted = checkForceCurfew(game) === 'exhausted'
   const PhaseIcon = game.phase === 'day' ? Sun : Moon
 
   const restart = () => {
@@ -65,11 +81,17 @@ export default function StatusBar() {
       <div className="mx-auto max-w-7xl px-3 py-2 text-sm">
         {/* Téléphone : deux rangées de trois cases ; desktop : une rangée de six */}
         <div className="grid grid-cols-3 gap-y-2 sm:grid-cols-6 sm:divide-x sm:divide-line">
-          <Cell label={t.hud.day} tone="accent" valueKey={`${game.day}-${game.phase}`}>
+          <Cell label={t.hud.day} tone="accent" valueKey={`${game.day}-${game.phase}`} note={t.moment.short[moment]}>
             <PhaseIcon size={14} aria-hidden="true" />
             {t.format.dayShort(game.day, GAME_LENGTH_DAYS)}
           </Cell>
-          <Cell label={t.hud.cash} tone="cash" valueKey={game.cash}>
+          <Cell
+            label={t.hud.cash}
+            tone="cash"
+            valueKey={game.cash}
+            note={cashToday === 0 ? undefined : t.hud.cashToday(signedCredits(cashToday))}
+            noteTone={cashToday > 0 ? 'success' : 'danger'}
+          >
             {credits(game.cash)}
           </Cell>
           <Cell label={t.hud.offshore} tone="offshore" valueKey={offshore} note={t.hud.offshoreRate(percent(offshoreRate, 2))}>
@@ -79,16 +101,29 @@ export default function StatusBar() {
             label={t.gauge.debt}
             valueKey={game.debt}
             tone="danger"
-            note={game.debtLate ? t.hud.debtLate : deadline === null ? undefined : t.hud.deadlineShort(deadline)}
-            info={debtNotes.length > 0 ? debtNotes.join(' · ') : undefined}
+            note={game.debtLate ? t.hud.debtLate : deadline === null ? undefined : t.hud.daysLeft(deadline - game.day)}
+            info={t.hud.debtInfo(DEBT_LATE.day, GAME_LENGTH_DAYS)}
           >
             {credits(game.debt)}
           </Cell>
-          <Cell label={t.gauge.icc} tone={ICC_TONE[tier]} note={t.iccTier[tier]} valueKey={game.icc}>
+          <Cell
+            label={t.gauge.icc}
+            tone={ICC_TONE[tier]}
+            note={t.iccTier[tier]}
+            valueKey={game.icc}
+            info={t.hud.iccInfo(iccRouteGainLeft(game), ICC_DAILY_ROUTE_GAIN_CAP)}
+          >
             {percent(game.icc / ICC_MAX, 0)}
           </Cell>
-          <Cell label={t.gauge.health} tone={game.health <= HEALTH_MAX * LOW_HEALTH ? 'danger' : 'success'} valueKey={game.health}>
-            {number(game.health, 0)}
+          <Cell
+            label={t.gauge.health}
+            tone={game.health <= HEALTH_MAX * LOW_HEALTH ? 'danger' : game.health <= HEALTH_MAX * MEDIUM_HEALTH ? 'warning' : 'success'}
+            valueKey={game.health}
+            note={exhausted ? t.hud.exhausted : undefined}
+            noteTone="warning"
+            info={exhausted ? t.hud.exhaustedInfo : t.hud.healthInfo}
+          >
+            {t.hud.healthValue(number(game.health, 0))}
           </Cell>
         </div>
         <div className="mt-2 flex items-center gap-2 text-xs">
@@ -96,10 +131,7 @@ export default function StatusBar() {
             <MapPin size={12} aria-hidden="true" />
             {t.district[game.districtId].name}
           </span>
-          <span className="min-w-0 flex-1 truncate text-ink-muted">
-            {t.moment[moment]}
-            {moment !== 'curfew' && <> · {tripDone ? t.moment.tripDone : t.moment.tripLeft}</>}
-          </span>
+          <span className="min-w-0 flex-1 truncate text-ink-muted">{moment !== 'curfew' && (tripDone ? t.moment.tripDone : t.moment.tripLeft)}</span>
           <button
             type="button"
             onClick={restart}
@@ -160,18 +192,23 @@ export default function StatusBar() {
 }
 
 /** Case de la rangée de tête : libellé en petit, valeur en gras, précision dessous */
-function Cell({ label, tone = 'neutral', note, info, valueKey, children }: CellProps) {
+function Cell({ label, tone = 'neutral', note, noteTone, info, valueKey, children }: CellProps) {
   return (
-    <div className="min-w-0 px-1 text-center first:pl-0 last:pr-0">
+    <div className="flex min-w-0 flex-col px-1 text-center first:pl-0 last:pr-0">
       <div className="flex items-center justify-center gap-0.5 text-xs text-ink-muted uppercase">
         <span className="truncate">{label}</span>
         {info && <Tip label={label} content={info} />}
       </div>
       {/* Nouvelle valeur, nouvelle clé : Motion rejoue l'apparition */}
-      <motion.div key={valueKey} {...APPEAR} className={`flex items-center justify-center gap-1 font-bold whitespace-nowrap ${TONE_TEXT[tone]}`}>
+      {/* Sans précision, la valeur occupe toute la case, plus grande */}
+      <motion.div
+        key={valueKey}
+        {...APPEAR}
+        className={`flex items-center justify-center gap-1 font-bold whitespace-nowrap ${TONE_TEXT[tone]} ${note ? '' : 'flex-1 text-base'}`}
+      >
         {children}
       </motion.div>
-      {note && <div className={`truncate text-xs leading-tight opacity-80 ${TONE_TEXT[tone]}`}>{note}</div>}
+      {note && <div className={`truncate text-xs leading-tight opacity-80 ${TONE_TEXT[noteTone ?? tone]}`}>{note}</div>}
     </div>
   )
 }

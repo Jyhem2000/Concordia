@@ -14,7 +14,7 @@
            \— [D3] —/
 ```
   Liaisons : `MAP_LINKS` dans [`districts.ts`](../src/data/districts.ts) (le schéma n'est qu'une illustration). *Ex. :* `[D4]` → `[D6]` traverse `[D1]`, `[D2]` et `[D5]` : trois districts traversés.
-* **Pompes :** *officielle* = connectée à Aeterna, **fermée la nuit** sous un seuil d'ICC (`PUMP_NIGHT_MIN_ICC` dans [`balance.ts`](../src/data/balance.ts)) ; *fixe* = toujours ouverte.
+* **Pompes :** chaque district a la sienne, où se fait le plein (onglet Lieux, chap. 7). *Officielle* = connectée à Aeterna, **fermée la nuit** sous un seuil d'ICC (`PUMP_NIGHT_MIN_ICC` dans [`balance.ts`](../src/data/balance.ts)) ; *fixe* (pirate) = toujours ouverte.
 * **Lieux spéciaux :** ouverts de jour seulement (06h00 – 20h00, chap. 1). **Cooldown :** un service utilisé le jour J redevient disponible le jour J + cooldown. Chiffres : [`locations.ts`](../src/data/locations.ts).
 * **Services réservés (deux voies) :** certains services ne s'ouvrent qu'à qui s'est fait une place (`SERVICE_REQUIREMENTS` dans [`locations.ts`](../src/data/locations.ts)). Le lieu les affiche quand même, avec leur condition et la progression vers elle.
   * **Voie officielle**, pour les citoyens présentables et solvables : panique de Karma-Cham (palier d'ICC et patrimoine), faux dossier de la Laverie (patrimoine), Velvet-Silo sur invitation (palier d'ICC et patrimoine).

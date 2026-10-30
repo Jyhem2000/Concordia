@@ -10,7 +10,6 @@ import StatusBar from './hud/StatusBar.tsx'
 import TravelPanel from './map/TravelPanel.tsx'
 import MarketPanel from './market/MarketPanel.tsx'
 import PlacesPanel from './places/PlacesPanel.tsx'
-import { placesHere } from './places/placesHere.ts'
 import RoadEventScreen from './road/RoadEventScreen.tsx'
 import RoadReportPanel from './road/RoadReportPanel.tsx'
 import TabBar, { type Tab } from './TabBar.tsx'
@@ -39,10 +38,8 @@ export default function GameScreen() {
   const scene = `${day}-${phase}-${districtId}`
   const [picked, setPicked] = useState<{ tab: Tab; scene: string; day: number }>({ tab: 'fil', scene, day })
   const tabs: Tab[] = ['fil', 'market', 'places', 'vehicle', 'map']
-  // Lieux grisé dans un district sans autre lieu spécial que le garage
-  const disabled: Tab[] = placesHere(districtId).length > 0 ? [] : ['places']
   // Nouvelle scène : un nouveau matin ouvre Le Fil, un trajet le marché
-  const tab = picked.scene === scene && !disabled.includes(picked.tab) ? picked.tab : picked.day !== day ? 'fil' : 'market'
+  const tab = picked.scene === scene ? picked.tab : picked.day !== day ? 'fil' : 'market'
   const pick = (next: Tab) => {
     setPicked({ tab: next, scene, day })
     window.scrollTo({ top: 0 })
@@ -91,7 +88,7 @@ export default function GameScreen() {
               </div>
             </div>
           </main>
-          <TabBar current={tab} tabs={tabs} disabled={disabled} onPick={pick} />
+          <TabBar current={tab} tabs={tabs} onPick={pick} />
         </>
       )}
     </div>

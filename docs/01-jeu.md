@@ -59,7 +59,7 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 | 3 | Citoyen sous réserve | Pompes officielles **fermées la nuit**. `[LOC-D6-1]` inaccessible (services réservés, chap. 3). |
 | 4 | Déviant notoire | Effets du palier précédent, et toute entrée en `[D6]` déclenche **automatiquement** une interception. |
 
-* **Gains de route :** sommeil au relais routier, contrôle avec soute légale, bluff réussi, certains aléas routiers. **Plafond quotidien** (`ICC_DAILY_ROUTE_GAIN_CAP` dans [`balance.ts`](../src/data/balance.ts), de 06h00 à 06h00), au-delà les gains de route sont perdus. Le reste du plafond du jour est affiché dans le bandeau (chap. 7).
+* **Gains de route :** sommeil au relais routier, contrôle avec soute légale, bluff réussi, certains aléas routiers. **Plafond quotidien** (`ICC_DAILY_ROUTE_GAIN_CAP` dans [`balance.ts`](../src/data/balance.ts), de 06h00 à 06h00), au-delà les gains de route sont perdus. Le reste du plafond du jour est donné par l'infobulle de l'ICC, dans le bandeau (chap. 7).
 * **Gains hors plafond** (le chemin cher) : `[LOC-D3-1]`, `[LOC-D5-1]`, `[LOC-D6-1]`, `[T4-03]`.
 * **Atténuateurs de pertes :** `[MOD-05]`, `[VEH-03]` (inutiles en `[D4]`, où la fuite ne coûte pas d'ICC).
 

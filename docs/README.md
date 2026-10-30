@@ -47,7 +47,7 @@ Toutes les règles des chap. 1 à 6 sont en jeu. Ce tableau dit ce qui reste à 
 
 | Chap. | À venir |
 | :---: | :--- |
-| 7 | Manuel en jeu ; dans le bandeau, le reste du plafond de gains d'ICC du jour et l'icône de balise tant que `[T4-06]` est en soute |
+| 7 | Manuel en jeu |
 | 8 | Spéculation sur l'événement de demain (Cassandre-88, rumeur) et faux dossier de Loterie dans les bots, optimiseur et campagne 5 (reportés après l'interface, comme contrôle final) |
 
 ## Feuille de route

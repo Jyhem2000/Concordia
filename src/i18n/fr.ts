@@ -56,9 +56,7 @@ export const fr = {
 
   /** Moment de la journée (chap. 1) : Journée, 20h00, Nuit */
   moment: {
-    day: 'Journée (06h00 – 20h00)',
-    curfew: '20h00 : couvre-feu',
-    night: 'Nuit (tournée de nuit)',
+    short: { day: 'Journée', curfew: '20h00', night: 'Nuit' },
     tripLeft: 'trajet disponible',
     tripDone: 'trajet effectué',
   },
@@ -146,6 +144,16 @@ export const fr = {
 
   // ─── Interface ───
 
+  /** Pompe à Synthanol du district (chap. 3) */
+  pump: {
+    name: { official: 'Pompe officielle Aeterna', fixed: 'Pompe pirate' },
+    rule: {
+      official: "Connectée à Aeterna : fermée la nuit sous un certain niveau d'ICC.",
+      fixed: 'Hors réseau : toujours ouverte.',
+    },
+    reserve: (fuel: number, tank: number) => `${fuel}/${tank}`,
+  },
+
   modal: {
     close: 'Fermer',
   },
@@ -206,10 +214,16 @@ export const fr = {
       `${quote} à ${district} (${age === 0 ? "aujourd'hui" : `il y a ${age} jour${age > 1 ? 's' : ''}`})`,
     neverSeen: 'jamais vu ailleurs',
     strongAt: (districts: string) => `Forte demande : ${districts}`,
-    alerts: 'Alertes de soute',
-    noAlert: 'Rien à signaler en soute.',
+    alerts: 'Alertes',
+    noAlert: 'Rien à signaler.',
     rotsTomorrow: (qty: number, product: string) => `${qty} ${product} pourri${qty > 1 ? 'ssent' : 't'} demain matin`,
     damaged: (qty: number, product: string) => `${qty} ${product} abîmée${qty > 1 ? 's' : ''}`,
+    fuelLow: (fuel: number, longest: number) =>
+      `Synthanol bas : ${fuel} ration${fuel > 1 ? 's' : ''}, le trajet le plus long d'ici en coûte ${longest}`,
+    fuelOut: (fuel: number, shortest: number) =>
+      `Synthanol : ${fuel} ration${fuel > 1 ? 's' : ''}, pas assez pour quitter le district (${shortest} au minimum)`,
+    beacon: (product: string, risk: string) => `${product} à bord : sa balise ajoute ${risk} de risque de contrôle partout`,
+    beaconJammed: (product: string) => `${product} à bord : sa balise est brouillée par votre équipière`,
     compartmentRoom: (room: number) => `${room} place${room > 1 ? 's' : ''} libre${room > 1 ? 's' : ''} au double fond`,
     journal: 'Bilan & carnet de route',
     yesterday: (day: number) => `Bilan du J${day}`,
@@ -255,6 +269,7 @@ export const fr = {
     compartmentRule:
       "Les caisses illégales qui arrivent s'y rangent d'elles-mêmes, et prennent la place des moins chères. Le double fond fait partie de la soute : quand il n'y a rien à cacher, ses places reçoivent des caisses visibles.",
     hidden: (qty: number) => `${qty} au double fond`,
+    beacon: 'Balise',
     hide: 'Cacher au double fond',
     unhide: 'Retirer du double fond',
     notice: (product: string, crates: string) => `Double fond : ${product} prend la place de ${crates}.`,
@@ -267,15 +282,24 @@ export const fr = {
     day: 'Jour',
     /** Libellé court du Cash-Puce dans la rangée de tête du bandeau */
     cash: 'Cash',
-    deadlineShort: (day: number) => `J${day}`,
-    cargo: 'Soute',
+    daysLeft: (days: number) => (days <= 0 ? "aujourd'hui" : `dans ${days} j`),
+    debtInfo: (lateDay: number, auditDay: number) =>
+      `Dette de Viktor, à intérêts chaque matin. Si la dette initiale n'est pas soldée avant le matin du J${lateDay}, elle passe en retard pour toute la partie : taux majoré et embuscades (risque de contrôle accru partout). À l'audit du J${auditDay} à minuit, le solde doit être nul. Remboursement à l'Arrière-Salle, de jour.`,
+    cashToday: (delta: string) => `${delta} aujourd'hui`,
+    iccInfo: (left: number, cap: number) =>
+      `Gains d'ICC « de route » (relais, contrôle avec soute légale, bluff réussi, certains aléas) : ${left} sur ${cap} encore possibles aujourd'hui ; au-delà, ils sont perdus jusqu'au lendemain 06h00. Les services payants n'ont pas de plafond.`,
+    healthValue: (health: string) => `${health} PV`,
+    exhausted: 'Épuisé',
+    exhaustedInfo:
+      "Tournée de nuit hier : pas de nouvelle nuit sur la route ce soir, sauf boisson pour une nuit blanche. Une nuit au relais ou en bivouac efface l'épuisement.",
+    healthInfo:
+      'Santé du chauffeur : à zéro, la partie est perdue. Fuite ratée, racket, aléas, canicule et cellule en coûtent ; le relais et la Morgue en rendent.',
     newGame: 'Nouvelle partie',
     newGameConfirm: 'Abandonner la partie en cours et recommencer au Jour 1 ?',
     offshoreRate: (rate: string) => `${rate}/j`,
     wanted: (level: number, max: number) => `Fiche S ${level}/${max}`,
     wantedGain: (levels: number) => `+${levels} niveau${levels > 1 ? 'x' : ''} de Fiche S`,
     debtLate: 'en retard',
-    nextDeadline: (day: number) => `échéance J${day}`,
     nextProtection: (day: number, amount: string) => `Collecte de Viktor J${day} : ≈ ${amount}`,
     exemption: (days: number) => `Exemption ${days} j`,
     exemptionInfo: (days: number, district: string, penalty: string) =>
@@ -884,6 +908,7 @@ export const fr = {
     title: 'Carte',
     fuelPrice: (price: string) => `Synthanol ${price} la ration`,
     places: (names: string) => `Lieux : ${names}`,
+    fuelReminder: (fuel: number, tank: number) => `Synthanol ${fuel}/${tank} : le plein se fait à la pompe, onglet Lieux.`,
     mapHint: 'Survolez ou touchez un district : sa fiche et son itinéraire s’affichent ; toutes les destinations sont détaillées plus bas.',
     here: 'Vous êtes ici',
     direct: 'Liaison directe',
@@ -930,7 +955,6 @@ export const fr = {
   },
 
   evening: {
-    fuelTitle: 'Synthanol',
     pricePerRation: (price: string) => `${price} la ration`,
     refuelOne: '+1 ration',
     refuelFull: 'Plein',

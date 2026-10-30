@@ -4,10 +4,11 @@ import { DISTRICT_IDS } from '../../data/districts.ts'
 import { LOTTERY } from '../../data/events.ts'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
-import { averageCost, canHide, cargoUsed, ownedQty } from '../../engine/cargo.ts'
+import { averageCost, canHide, ownedQty } from '../../engine/cargo.ts'
 import { compartmentRoom } from '../../engine/compartment.ts'
 import { daysBeforeRot } from '../../engine/condition.ts'
-import { crewEffect, isMemoryBlurred } from '../../engine/crew.ts'
+import { planTravel } from '../../engine/actions.ts'
+import { crewEffect, isMemoryBlurred, workingCrew } from '../../engine/crew.ts'
 import { deliveryCrates, deliveryFee, deliveryOffer } from '../../engine/delivery.ts'
 import { trapdoorReadyDay } from '../../engine/equipment.ts'
 import { nextDebtDeadline, nextProtectionDay, protectionBreakdown } from '../../engine/finance.ts'
@@ -121,11 +122,11 @@ function TodayPanel() {
   )
 }
 
-/** Caisses qui pourrissent demain, caisses abîmées, ce qu'une saisie coûterait, places libres au double fond */
+/** Synthanol bas, balise à bord, caisses qui pourrissent demain, caisses abîmées, ce qu'une saisie coûterait, places libres au double fond */
 function AlertsPanel() {
-  // Fraîcheur, saisie et double fond se calculent sur l'état entier
+  // Fraîcheur, saisie, double fond et trajets se calculent sur l'état entier
   const game = useGameStore((s) => s.game)
-  const { t } = useI18n()
+  const { t, percent } = useI18n()
   const products = [...new Set(game.cargo.map((lot) => lot.productId))]
   const rotting = products.flatMap((id) => {
     const qty = game.cargo.reduce((total, lot) => (lot.productId === id && (daysBeforeRot(game, lot) ?? Infinity) <= 1 ? total + lot.qty : total), 0)
@@ -138,12 +139,32 @@ function AlertsPanel() {
   // Places libres utiles : seulement s'il reste des caisses illégales visibles à cacher
   const hideable = products.some((id) => canHide(id) && ownedQty(game.cargo, id) > (game.compartment[id] ?? 0))
   const room = hideable ? compartmentRoom(game) : 0
+  // Synthanol : trajets d'ici vers chaque autre district
+  const costs = DISTRICT_IDS.filter((id) => id !== game.districtId).map((id) => planTravel(game, id).fuelCost)
+  const shortest = Math.min(...costs)
+  const longest = Math.max(...costs)
+  const fuelLine: Line[] =
+    game.fuel < shortest
+      ? [line('fuel', t.fil.fuelOut(game.fuel, shortest), 'danger')]
+      : game.fuel < longest
+        ? [line('fuel', t.fil.fuelLow(game.fuel, longest), 'warning')]
+        : []
+  // Balise d'un produit à bord : risque ajouté partout, sauf si l'équipière la brouille
+  const beacons = products.flatMap((id) => {
+    const beacon = PRODUCTS[id].beaconRisk
+    if (!beacon) return []
+    return [
+      crewEffect(game, 'masksBeacon') && workingCrew(game)
+        ? line(id, t.fil.beaconJammed(t.product[id].name), 'info')
+        : line(id, t.fil.beacon(t.product[id].name, percent(beacon, 0)), 'danger'),
+    ]
+  })
   const lines: Line[] = [
+    ...fuelLine,
+    ...beacons,
     ...rotting.map((text): Line => ({ key: text, text, tone: 'danger' })),
     ...damaged.map((text): Line => ({ key: text, text, tone: 'warning' })),
   ]
-  if (cargoUsed(game.cargo) === 0) return null
-
   return (
     <Panel icon={AlertTriangle} title={t.fil.alerts} collapseId="fil-alerts">
       <ul className="flex flex-col gap-1 text-xs">

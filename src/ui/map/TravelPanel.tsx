@@ -58,6 +58,8 @@ export default function TravelPanel() {
   const [selected, setSelected] = useState<DistrictId | null>(null)
   const [hovered, setHovered] = useState<DistrictId | null>(null)
   const here = useGameStore((s) => s.game.districtId)
+  const fuel = useGameStore((s) => s.game.fuel)
+  const tank = useGameStore((s) => VEHICLES[s.game.vehicleId].tank)
   const focus = hovered ?? selected ?? here
   return (
     <Panel title={t.travel.title} collapseId="travel" flush>
@@ -66,6 +68,7 @@ export default function TravelPanel() {
         <Hint className="mt-1">{t.travel.mapHint}</Hint>
         <DistrictCard districtId={focus} />
       </div>
+      <Hint className="px-3 pt-2">{t.travel.fuelReminder(fuel, tank)}</Hint>
       {/* Raison commune à toutes les destinations : dite une fois plutôt que sous chaque bouton */}
       {tripDone && <Hint className="px-3 pt-2">{t.error['trip-done']}</Hint>}
       <LastTrip />
