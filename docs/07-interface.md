@@ -12,7 +12,7 @@
 Terminal de livraison d'Aeterna : fond ardoise sombre, cartes à bords arrondis, titres en capitales, chiffres alignés (chiffres tabulaires). Un seul thème, sombre.
 * **Couleurs par rôle, jamais par écran :** Cash-Puce jaune, offshore cyan, dette rouge, gain vert, perte rouge, nuit indigo, action principale ambre, action risquée ou destructrice rouge. Les tiers gardent leur couleur partout : **vert** 0, **jaune** 1, **orange** 2, **rouge** 3, **violet** 4 (liseré à gauche de chaque ligne de produit, case d'image). Ces couleurs sont des variables du thème (`src/index.css`), utilisées par leur nom de rôle.
 * **Composants partagés** (`src/ui/shared/`) : panneau repliable, bouton, pastille (tag, statut, indicateur), jauge, statistique, encadré d'information, image de produit. Un style qui sert à deux endroits devient un composant ou une variante, jamais une copie.
-* **Images :** produits, véhicules et modules ont une image dans une case carrée. Sans fichier d'image, une icône vectorielle (lucide) dans la couleur du tier la remplace. Déposer une image 32×32 (pixel art) sous le nom de l'ID de la donnée suffit à la remplacer, sans toucher au code. Le reste de l'interface reste en icônes vectorielles.
+* **Images :** produits, véhicules et modules ont une image dans une case carrée. Sans fichier d'image, une icône vectorielle (lucide) dans la couleur du tier la remplace. Déposer une image 32×32 (pixel art) dans `src/assets/images/`, sous le nom de l'ID de la donnée (`T1-03.png`), suffit à la remplacer, sans toucher au code ; elle s'affiche à 32 px dans les listes et doublée sans flou dans la carte du véhicule. Le reste de l'interface reste en icônes vectorielles.
 
 ## Panneaux repliables
 Chaque panneau (marché, carte, lieux spéciaux, plein, couvre-feu, objectifs) et les longues sous-parties du garage (modules, châssis) se replient d'un clic sur leur titre, pour faire de la place. Le choix est mémorisé dans les réglages du joueur, d'une partie à l'autre.
@@ -37,11 +37,10 @@ Chaque panneau (marché, carte, lieux spéciaux, plein, couvre-feu, objectifs) e
 Dans le bandeau, l'ICC prend la couleur de son palier (chap. 1), avec le nom du palier : **vert** Citoyen Or, **jaune** Citoyen ordinaire, **orange** Citoyen sous réserve, **rouge** Déviant notoire. L'interface ne définit aucun seuil propre.
 
 ## Vue « Véhicule, soute & équipage »
-* **Véhicule :** image du châssis, jauges de châssis et de Synthanol, modules montés.
-* **Soute :** une ligne par produit, dans la couleur de son tier, avec son image, sa quantité, ses tags, son état (fraîcheur, caisses abîmées, masquage) et les caisses cachées au double fond ; les emplacements libres se voient.
-* **Profil de la cargaison :** jauges de part odorante, Tech, chimique, culturelle et légale (ce sont elles qui pilotent le risque), avec les masquages actifs.
-* **Double fond :** sa capacité et son contenu, séparés du reste de la soute. Un clic sur un produit illégal de la soute ouvre un menu pour l'**envoyer au double fond** ; un clic sur un produit caché, pour l'en **retirer** (chap. 4). Le menu dit quelles caisses seraient délogées.
-* **Modules & équipage :** slots du châssis (modifiables seulement au garage de `[D4]`), canal radio / portrait de l'équipier actif.
+* **Véhicule & équipage :** image et nom du châssis, jauges de châssis et de Synthanol, modules montés sur les slots du châssis (avec leur image ; ils se changent au garage), équipier actif.
+* **Soute :** une case par emplacement, dans la couleur du tier de sa caisse (en pointillés si elle est au double fond, vide si l'emplacement est libre), puis une ligne par produit, du plus haut tier au plus bas : image, quantité, tags, état (fraîcheur, caisses abîmées, délai avant pourriture) et caisses cachées au double fond.
+* **Double fond :** son occupation sur sa capacité. Toucher un produit illégal ouvre un menu pour l'**envoyer au double fond**, avec les caisses qu'il délogerait ; toucher un produit caché, pour l'en **retirer** (chap. 4). Un produit envoyé ou retiré le reste affiché ; un produit légal ou encombrant dit pourquoi il n'y va pas.
+* **Profil de la cargaison :** une jauge par tag qui pèse sur le risque (ceux qui ajoutent du risque au trajet ou à la détection, et la couverture du Légal), avec la part dans la soute et les caisses masquées par un Tier 0.
 
 ## Vue « Marché noir & lieux spéciaux »
 * **Ventes groupées :** « Vendre tout ce qui marge » (chaque produit dont la vente entière, saturation comprise, rapporte plus que son prix d'achat) et « Vendre tout », chacun avec le produit annoncé ; les caisses scellées n'en font pas partie.

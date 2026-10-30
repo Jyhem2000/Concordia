@@ -19,6 +19,21 @@ export const TONE_TEXT: Record<Tone, string> = {
   offshore: 'text-offshore',
 }
 
+/** Fond plein d'un rôle (barre de jauge) */
+export const TONE_BG: Record<Tone, string> = {
+  neutral: 'bg-ink',
+  muted: 'bg-ink-muted',
+  accent: 'bg-accent',
+  danger: 'bg-danger',
+  success: 'bg-success',
+  warning: 'bg-warning',
+  info: 'bg-info',
+  night: 'bg-night',
+  event: 'bg-event',
+  cash: 'bg-cash',
+  offshore: 'bg-offshore',
+}
+
 /** Pastille teintée d'un rôle : bord, fond et texte */
 export const TONE_CHIP: Record<Tone, string> = {
   neutral: 'border-line-strong bg-raised text-ink-soft',
@@ -34,13 +49,43 @@ export const TONE_CHIP: Record<Tone, string> = {
   offshore: 'border-offshore/40 bg-offshore/10 text-offshore',
 }
 
-/** Couleur de chaque tier (chap. 7) : texte, liseré gauche des lignes de produit, case d'image */
-export const TIER_STYLES: Record<Tier, { text: string; stripe: string; tile: string }> = {
-  0: { text: 'text-tier-0', stripe: 'border-l-tier-0', tile: 'border-tier-0/50 bg-tier-0/10 text-tier-0' },
-  1: { text: 'text-tier-1', stripe: 'border-l-tier-1', tile: 'border-tier-1/50 bg-tier-1/10 text-tier-1' },
-  2: { text: 'text-tier-2', stripe: 'border-l-tier-2', tile: 'border-tier-2/50 bg-tier-2/10 text-tier-2' },
-  3: { text: 'text-tier-3', stripe: 'border-l-tier-3', tile: 'border-tier-3/50 bg-tier-3/10 text-tier-3' },
-  4: { text: 'text-tier-4', stripe: 'border-l-tier-4', tile: 'border-tier-4/50 bg-tier-4/10 text-tier-4' },
+/** Couleur de chaque tier (chap. 7) : texte, liseré gauche des lignes de produit, case d'image, emplacement de soute (plein ou caché) */
+export const TIER_STYLES: Record<Tier, { text: string; stripe: string; tile: string; slot: string; hiddenSlot: string }> = {
+  0: {
+    text: 'text-tier-0',
+    stripe: 'border-l-tier-0',
+    tile: 'border-tier-0/50 bg-tier-0/10 text-tier-0',
+    slot: 'bg-tier-0',
+    hiddenSlot: 'border-tier-0 bg-tier-0/25',
+  },
+  1: {
+    text: 'text-tier-1',
+    stripe: 'border-l-tier-1',
+    tile: 'border-tier-1/50 bg-tier-1/10 text-tier-1',
+    slot: 'bg-tier-1',
+    hiddenSlot: 'border-tier-1 bg-tier-1/25',
+  },
+  2: {
+    text: 'text-tier-2',
+    stripe: 'border-l-tier-2',
+    tile: 'border-tier-2/50 bg-tier-2/10 text-tier-2',
+    slot: 'bg-tier-2',
+    hiddenSlot: 'border-tier-2 bg-tier-2/25',
+  },
+  3: {
+    text: 'text-tier-3',
+    stripe: 'border-l-tier-3',
+    tile: 'border-tier-3/50 bg-tier-3/10 text-tier-3',
+    slot: 'bg-tier-3',
+    hiddenSlot: 'border-tier-3 bg-tier-3/25',
+  },
+  4: {
+    text: 'text-tier-4',
+    stripe: 'border-l-tier-4',
+    tile: 'border-tier-4/50 bg-tier-4/10 text-tier-4',
+    slot: 'bg-tier-4',
+    hiddenSlot: 'border-tier-4 bg-tier-4/25',
+  },
 }
 
 /** Couleur de l'ICC selon son palier (chap. 7) */

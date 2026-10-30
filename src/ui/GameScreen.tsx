@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useGameStore } from '../stores/gameStore.ts'
 import BriefingPanel from './briefing/BriefingPanel.tsx'
+import CargoView from './cargo/CargoView.tsx'
 import EndScreen from './modals/EndScreen.tsx'
 import EveningPanel from './evening/EveningPanel.tsx'
 import InterceptionReportPanel from './interception/InterceptionReportPanel.tsx'
@@ -38,7 +39,7 @@ export default function GameScreen() {
   // Onglet choisi pour la scène en cours : un trajet ou une nouvelle demi-journée ramène au marché
   const scene = `${day}-${phase}-${districtId}`
   const [picked, setPicked] = useState<{ tab: Tab; scene: string }>({ tab: 'market', scene })
-  const tabs: Tab[] = placesHere(districtId).length > 0 ? ['market', 'places', 'map'] : ['market', 'map']
+  const tabs: Tab[] = placesHere(districtId).length > 0 ? ['market', 'places', 'cargo', 'map'] : ['market', 'cargo', 'map']
   const tab = picked.scene === scene && tabs.includes(picked.tab) ? picked.tab : 'market'
   const pick = (next: Tab) => {
     setPicked({ tab: next, scene })
@@ -69,6 +70,9 @@ export default function GameScreen() {
                 <InterceptionReportPanel />
                 <RoadReportPanel />
                 <BriefingPanel />
+              </div>
+              <div className={`flex-col gap-4 ${shown('cargo')}`}>
+                <CargoView />
               </div>
               <div className={`flex-col gap-4 ${shown('places')}`}>
                 <PlacesPanel />

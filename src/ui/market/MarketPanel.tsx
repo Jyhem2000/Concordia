@@ -1,10 +1,9 @@
 import type { ReactNode } from 'react'
 import { PRODUCTS } from '../../data/products.ts'
 import { bulkSales, checkUseProduct, maxBuy } from '../../engine/actions.ts'
-import { daysBeforeRot, freshnessOf } from '../../engine/condition.ts'
 import { averageCost, ownedQty } from '../../engine/cargo.ts'
 import { demandQuota, demandRefill, productStatus, quote, quoteBreakdown, saleQuote, shopProducts } from '../../engine/market.ts'
-import type { FreshnessStage, ProductId } from '../../engine/types.ts'
+import type { ProductId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
@@ -14,6 +13,8 @@ import Hint from '../shared/Hint.tsx'
 import Margin from '../shared/Margin.tsx'
 import Panel from '../shared/Panel.tsx'
 import { TIER_STYLES } from '../shared/styles.ts'
+import Thumb from '../shared/Thumb.tsx'
+import { useConditions } from '../shared/useConditions.ts'
 import ProductSheet from './ProductSheet.tsx'
 
 type MarketRowProps = {
@@ -36,9 +37,6 @@ type QuantityButtonsProps = {
   onPick: (qty: number) => void
   variant: 'primary' | 'danger'
 }
-
-/** Ordre d'affichage des états de fraîcheur */
-const FRESHNESS_ORDER: readonly FreshnessStage[] = ['extra', 'standard', 'gamey', 'spoiled']
 
 /** Tableau des cours : la boutique du jour, plus tous les produits en soute (chap. 7) */
 export default function MarketPanel() {
@@ -125,16 +123,7 @@ function MarketRow({ productId }: MarketRowProps) {
   const saleAll = owned > 0 ? saleQuote(game, productId, owned) : null
 
   // État des caisses en soute : fraîcheur des périssables, casse des fragiles (chap. 2)
-  const lots = game.cargo.filter((lot) => lot.productId === productId)
-  const stages = FRESHNESS_ORDER.flatMap((stage) => {
-    const qty = lots.reduce((total, lot) => (freshnessOf(game, lot) === stage ? total + lot.qty : total), 0)
-    return qty > 0 ? [`${qty} ${t.market.freshness[stage]}`] : []
-  })
-  const damaged = lots.reduce((total, lot) => (lot.damaged ? total + lot.qty : total), 0)
-  // Délai avant que le lot le plus ancien pourrisse, équipement compris (caisson cryo, chaîne du froid)
-  const rotDelays = lots.flatMap((lot) => daysBeforeRot(game, lot) ?? [])
-  const rotsIn = rotDelays.length > 0 ? Math.min(...rotDelays) : null
-  const conditions = [...stages, ...(damaged > 0 ? [`${damaged} ${t.market.damaged}`] : []), ...(rotsIn !== null ? [t.market.rotsIn(rotsIn)] : [])]
+  const conditions = useConditions(productId)
   const iccRestore = PRODUCTS[productId].iccRestore
   const useError = useGameStore((s) => checkUseProduct(s.game, productId))
 
@@ -143,16 +132,21 @@ function MarketRow({ productId }: MarketRowProps) {
 
   return (
     <li className={`rounded-md border border-l-4 border-line bg-raised/60 px-3 py-2 ${TIER_STYLES[product.tier].stripe}`}>
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span className={`text-xs font-bold ${TIER_STYLES[product.tier].text}`}>T{product.tier}</span>
-        <span className="mr-1 font-bold">{t.product[productId].name}</span>
-        {status !== 'neutral' && <Chip tone={status === 'strong' ? 'warning' : 'success'}>{t.market.status[status]}</Chip>}
-        {origin && <span className="text-xs text-ink-muted">{t.market.origin[origin]}</span>}
-      </div>
-      <div className="mt-1 flex flex-wrap gap-1">
-        {product.tags.map((tag) => (
-          <Chip key={tag}>{t.tag[tag].name}</Chip>
-        ))}
+      <div className="flex items-start gap-2">
+        <Thumb id={productId} tier={product.tier} />
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className={`text-xs font-bold ${TIER_STYLES[product.tier].text}`}>T{product.tier}</span>
+            <span className="mr-1 font-bold">{t.product[productId].name}</span>
+            {status !== 'neutral' && <Chip tone={status === 'strong' ? 'warning' : 'success'}>{t.market.status[status]}</Chip>}
+            {origin && <span className="text-xs text-ink-muted">{t.market.origin[origin]}</span>}
+          </div>
+          <div className="mt-1 flex flex-wrap gap-1">
+            {product.tags.map((tag) => (
+              <Chip key={tag}>{t.tag[tag].name}</Chip>
+            ))}
+          </div>
+        </div>
       </div>
 
       <dl className="mt-1 grid grid-cols-2 gap-x-4 gap-y-0.5 text-sm sm:grid-cols-4">

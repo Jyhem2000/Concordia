@@ -60,3 +60,8 @@
     color-scheme: dark;
   }
 }
+
+/* Images en pixel art : agrandies sans flou (chap. 7) */
+@utility pixelated {
+  image-rendering: pixelated;
+}

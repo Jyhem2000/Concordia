@@ -151,7 +151,30 @@ export const fr = {
     label: 'Écrans',
     market: 'Marché',
     places: 'Lieux',
+    cargo: 'Soute',
     map: 'Carte',
+  },
+
+  /** Vue véhicule, soute et équipage (chap. 7) */
+  hold: {
+    vehicleTitle: 'Véhicule & équipage',
+    modules: (mounted: number, slots: number) => `Modules ${mounted}/${slots}`,
+    noModule: 'Aucun module monté : ils se montent au garage.',
+    noCrew: 'Aucun équipier : ils se recrutent à la Cantine.',
+    title: (used: number, capacity: number) => `Soute ${used}/${capacity}`,
+    empty: 'Soute vide.',
+    free: (slots: number) => `${slots} emplacement${slots > 1 ? 's' : ''} libre${slots > 1 ? 's' : ''}`,
+    compartment: (used: number, capacity: number) => `Double fond ${used}/${capacity}`,
+    compartmentRule: 'Par défaut, les caisses illégales les plus chères. Touchez un produit pour changer.',
+    hidden: (qty: number) => `${qty} au double fond`,
+    pinned: 'envoyé au double fond',
+    excluded: 'retiré du double fond',
+    hide: 'Envoyer au double fond',
+    unhide: 'Retirer du double fond',
+    displaces: (crates: string) => `Délogera : ${crates}.`,
+    profile: 'Profil de la cargaison',
+    profileRule: 'Ces parts pilotent le risque de contrôle ; une caisse masquée par un Tier 0 compte moins.',
+    masked: (qty: number) => `${qty} masquée${qty > 1 ? 's' : ''}`,
   },
 
   hud: {
@@ -884,6 +907,7 @@ export const fr = {
     'cargo-full': 'Soute pleine.',
     'not-enough-cash': 'Cash-Puce insuffisant.',
     'not-enough-cargo': 'Pas assez de caisses en soute.',
+    'cannot-hide': 'Rien à cacher : seules les caisses illégales, hors encombrantes, vont au double fond.',
     'tank-full': 'Réservoir plein.',
     'same-district': 'Vous y êtes déjà.',
     'trip-done': 'Trajet déjà effectué pour cette phase.',

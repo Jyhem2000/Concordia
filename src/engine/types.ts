@@ -556,6 +556,14 @@ export type RoadReport = {
 export type FreshnessStage = 'extra' | 'standard' | 'gamey' | 'spoiled'
 
 /** Caisses d'un même produit achetées ensemble */
+/** Choix du joueur pour le double fond (chap. 4), produit par produit ; oublié quand le produit quitte la soute */
+export type CompartmentChoice = {
+  /** Produits envoyés au double fond, le dernier envoyé en premier : ils passent avant le remplissage par défaut */
+  pinned: readonly ProductId[]
+  /** Produits retirés du double fond : ils n'y entrent plus */
+  excluded: readonly ProductId[]
+}
+
 export type CargoLot = {
   productId: ProductId
   qty: number
@@ -713,6 +721,8 @@ export type GameState = {
   iccRestoreUsed: boolean
   /** Refroidissement moteur automatique par les caisses qui le permettent (réglage du joueur) */
   autoCooling: boolean
+  /** Contenu du double fond choisi par le joueur (chap. 4) */
+  compartment: CompartmentChoice
   /** Briefing de la dernière routine matinale ; null au Jour 1 */
   briefing: MorningBriefing | null
   /** Fin de partie, une fois `status` à `finished` */

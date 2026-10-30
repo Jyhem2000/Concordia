@@ -74,6 +74,7 @@ export function createInitialState(seed: number): GameState {
     lastDopingDay: null,
     iccRestoreUsed: false,
     autoCooling: true,
+    compartment: { pinned: [], excluded: [] },
     briefing: null,
     ending: null,
     rng: rng.state,

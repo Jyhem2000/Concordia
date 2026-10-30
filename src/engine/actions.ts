@@ -30,6 +30,7 @@ import { fuelPriceBreakdown, quote, saleQuote } from './market.ts'
 import { keysOf } from './records.ts'
 import { risk } from './risk.ts'
 import { checkRoadChoice, resolveRoadChoice, type RoadChoiceId } from './road.ts'
+import { checkCompartment, forgetCompartment, setCompartment } from './compartment.ts'
 import { createRng } from './rng.ts'
 import { sleep } from './routine.ts'
 import { remember } from './state.ts'
@@ -81,6 +82,8 @@ export type Action =
   | { type: 'buyModule'; moduleId: ModuleId }
   /** Monter (`mount` vrai) ou démonter un module possédé */
   | { type: 'mountModule'; moduleId: ModuleId; mount: boolean }
+  /** Envoyer un produit au double fond (`hide` vrai) ou l'en retirer (chap. 4) */
+  | { type: 'compartment'; productId: ProductId; hide: boolean }
   | { type: 'repair'; pv: number }
   | { type: 'hireCrew'; crewId: CrewId }
   | { type: 'influence'; tag: TagId }
@@ -106,6 +109,7 @@ export type ActionError =
   | 'cargo-full'
   | 'not-enough-cash'
   | 'not-enough-cargo'
+  | 'cannot-hide'
   | 'tank-full'
   | 'same-district'
   | 'trip-done'
@@ -489,7 +493,14 @@ function atService(state: GameState, service: LocationService, run: () => Action
 
 // ─── Point d'entrée ───
 
+/** Applique une action du joueur : nouvel état, ou raison du refus */
 export function applyAction(state: GameState, action: Action): ActionResult {
+  const result = resolveAction(state, action)
+  // Un produit sorti de la soute (vendu, saisi, pourri…) perd le choix du double fond qui le concernait
+  return result.ok ? { ok: true, state: forgetCompartment(result.state) } : result
+}
+
+function resolveAction(state: GameState, action: Action): ActionResult {
   if (state.status !== 'playing') return fail('game-over')
   // Un barrage, puis un aléa routier, se règlent avant toute autre action
   if (state.interception && action.type !== 'intercept') return fail('intercepted')
@@ -561,6 +572,10 @@ export function applyAction(state: GameState, action: Action): ActionResult {
       return applyProduct(state, action.productId)
     case 'setAutoCooling':
       return { ok: true, state: { ...state, autoCooling: action.enabled } }
+    case 'compartment': {
+      const error = checkCompartment(state, action.productId)
+      return error ? fail(error) : { ok: true, state: setCompartment(state, action.productId, action.hide) }
+    }
     case 'sleep':
       return { ok: true, state: sleep(state) }
     case 'siphon':

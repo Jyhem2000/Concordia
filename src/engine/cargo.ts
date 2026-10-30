@@ -1,6 +1,6 @@
 import { MASKED_CRATE_WEIGHT } from '../data/balance.ts'
 import { PRODUCTS } from '../data/products.ts'
-import type { CargoLot, CrateCount, ProductId, TagId, Tier } from './types.ts'
+import type { CargoLot, CompartmentChoice, CrateCount, ProductId, TagId, Tier } from './types.ts'
 
 /** Emplacements de soute occupés (1 caisse = 1 emplacement) */
 export function cargoUsed(cargo: readonly CargoLot[]): number {
@@ -66,22 +66,42 @@ export function tierShare(cargo: readonly CargoLot[], tier: Tier): number {
   return cargo.reduce((sum, lot) => (PRODUCTS[lot.productId].tier === tier ? sum + lot.qty : sum), 0) / total
 }
 
+/** Produit illégal : tout ce qui ne porte pas le tag Légal */
+export function isIllegalProduct(productId: ProductId): boolean {
+  return !PRODUCTS[productId].tags.includes('TAG-LEGAL')
+}
+
 /** Caisses illégales : tout ce qui ne porte pas le tag Légal */
 export function isIllegal(lot: CargoLot): boolean {
-  return !PRODUCTS[lot.productId].tags.includes('TAG-LEGAL')
+  return isIllegalProduct(lot.productId)
+}
+
+/** Le produit peut-il aller au double fond ? Seulement les caisses illégales, sans les encombrantes (chap. 4) */
+export function canHide(productId: ProductId): boolean {
+  return isIllegalProduct(productId) && !PRODUCTS[productId].bulky
 }
 
 /**
- * Double fond (chap. 4) : les caisses illégales les plus chères au prix de base, sans les encombrantes,
- * dans la capacité donnée. Les deux parts gardent l'ordre des lots de la soute.
+ * Double fond (chap. 4) : les produits envoyés par le joueur d'abord (le dernier envoyé en premier), puis les caisses
+ * illégales les plus chères au prix de base, sans les produits retirés, dans la capacité donnée.
+ * Les deux parts gardent l'ordre des lots de la soute.
  */
-export function splitHidden(cargo: readonly CargoLot[], capacity: number): { hidden: CargoLot[]; visible: CargoLot[] } {
+export function splitHidden(
+  cargo: readonly CargoLot[],
+  capacity: number,
+  choice: CompartmentChoice = { pinned: [], excluded: [] },
+): { hidden: CargoLot[]; visible: CargoLot[] } {
+  // Rang de priorité : position dans les produits envoyés, après eux le prix de base décroissant
+  const rank = (productId: ProductId) => {
+    const pin = choice.pinned.indexOf(productId)
+    return pin === -1 ? choice.pinned.length : pin
+  }
   const hiddenQty = new Map<number, number>()
   let left = capacity
   const candidates = cargo
     .map((lot, index) => ({ lot, index }))
-    .filter(({ lot }) => isIllegal(lot) && !PRODUCTS[lot.productId].bulky)
-    .sort((a, b) => PRODUCTS[b.lot.productId].basePrice - PRODUCTS[a.lot.productId].basePrice)
+    .filter(({ lot }) => canHide(lot.productId) && !choice.excluded.includes(lot.productId))
+    .sort((a, b) => rank(a.lot.productId) - rank(b.lot.productId) || PRODUCTS[b.lot.productId].basePrice - PRODUCTS[a.lot.productId].basePrice)
   for (const { lot, index } of candidates) {
     const qty = Math.min(lot.qty, left)
     if (qty > 0) hiddenQty.set(index, qty)
