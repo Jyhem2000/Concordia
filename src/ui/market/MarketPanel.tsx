@@ -1,8 +1,10 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { PRODUCTS } from '../../data/products.ts'
+import { TAGS } from '../../data/tags.ts'
 import { bulkSales, checkUseProduct, maxBuy } from '../../engine/actions.ts'
 import { averageCost, ownedQty } from '../../engine/cargo.ts'
 import { demandQuota, demandRefill, productStatus, quote, quoteBreakdown, saleQuote, shopProducts } from '../../engine/market.ts'
+import { keysOf } from '../../engine/records.ts'
 import type { ProductId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -15,7 +17,15 @@ import Panel from '../shared/Panel.tsx'
 import { TIER_STYLES } from '../shared/styles.ts'
 import Thumb from '../shared/Thumb.tsx'
 import { useConditions } from '../shared/useConditions.ts'
+import { filterKey, passesFilter, type MarketFilter } from './marketFilter.ts'
 import ProductSheet from './ProductSheet.tsx'
+
+type FilterBarProps = {
+  filters: readonly MarketFilter[]
+  current: MarketFilter
+  ownedCount: number
+  onPick: (filter: MarketFilter) => void
+}
 
 type MarketRowProps = {
   productId: ProductId
@@ -38,6 +48,9 @@ type QuantityButtonsProps = {
   variant: 'primary' | 'danger'
 }
 
+/** Filtre par défaut : tout le tableau */
+const ALL: MarketFilter = { kind: 'all' }
+
 /** Tableau des cours : la boutique du jour, plus tous les produits en soute (chap. 7) */
 export default function MarketPanel() {
   const game = useGameStore((s) => s.game)
@@ -51,6 +64,22 @@ export default function MarketPanel() {
   const rows = [...new Set([...owned, ...shop])].sort(
     (a, b) => Number(ownedQty(game.cargo, b) > 0) - Number(ownedQty(game.cargo, a) > 0) || PRODUCTS[a].tier - PRODUCTS[b].tier || a.localeCompare(b),
   )
+  const isOwned = (id: ProductId) => ownedQty(game.cargo, id) > 0
+  const ownedCount = rows.filter(isOwned).length
+
+  // Filtres proposés : ceux qui gardent au moins un produit du tableau, tiers puis tags dans l'ordre des données
+  const tiers = [...new Set(rows.map((id) => PRODUCTS[id].tier))].sort((a, b) => a - b)
+  const tags = keysOf(TAGS).filter((tag) => rows.some((id) => PRODUCTS[id].tags.includes(tag)))
+  const filters: MarketFilter[] = [
+    ALL,
+    ...(ownedCount > 0 ? [{ kind: 'owned' } satisfies MarketFilter] : []),
+    ...tiers.map((tier): MarketFilter => ({ kind: 'tier', tier })),
+    ...tags.map((tag): MarketFilter => ({ kind: 'tag', tag })),
+  ]
+  // Filtre choisi : état d'interface éphémère ; s'il ne garde plus rien ici (autre district, soute vidée), tout s'affiche
+  const [picked, setPicked] = useState<MarketFilter>(ALL)
+  const filter = filters.some((candidate) => filterKey(candidate) === filterKey(picked)) ? picked : ALL
+  const shown = rows.filter((id) => passesFilter(filter, id, isOwned(id)))
 
   return (
     <Panel title={`${t.market.title} — ${t.district[game.districtId].name}`} collapseId="market" flush>
@@ -65,12 +94,40 @@ export default function MarketPanel() {
         </Hint>
       )}
       <BulkSales />
+      <FilterBar filters={filters} current={filter} ownedCount={ownedCount} onPick={setPicked} />
+      {shown.length === 0 && <Hint className="px-3 pt-2">{t.market.noMatch}</Hint>}
       <ul className="space-y-2 p-2">
-        {rows.map((id) => (
+        {shown.map((id) => (
           <MarketRow key={id} productId={id} />
         ))}
       </ul>
     </Panel>
+  )
+}
+
+/** Filtres par soute, tier et tag (chap. 7) : une rangée de pastilles qui défile sur téléphone */
+function FilterBar({ filters, current, ownedCount, onPick }: FilterBarProps) {
+  const { t } = useI18n()
+  const label = (filter: MarketFilter) => {
+    switch (filter.kind) {
+      case 'all':
+        return t.market.filterAll
+      case 'owned':
+        return t.market.filterOwned(ownedCount)
+      case 'tier':
+        return t.market.filterTier(filter.tier)
+      case 'tag':
+        return t.tag[filter.tag].name
+    }
+  }
+  return (
+    <div role="group" aria-label={t.market.filters} className="flex gap-1.5 overflow-x-auto px-3 pt-3 pb-1">
+      {filters.map((filter) => (
+        <Chip key={filterKey(filter)} pressed={filterKey(filter) === filterKey(current)} onClick={() => onPick(filter)}>
+          {label(filter)}
+        </Chip>
+      ))}
+    </div>
   )
 }
 

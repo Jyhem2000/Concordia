@@ -62,7 +62,8 @@ Dans le bandeau, l'ICC prend la couleur de son palier (chap. 1), avec le nom du 
   * les agents qui l'apprécient (connivence) et les milices qui le prennent en premier ;
   * où le vendre : districts en Forte demande (jamais en boutique là-bas, sauf événement) et districts producteurs (en boutique chaque jour, moins cher) (profil public, chap. 2, vices de la Loterie compris), et le meilleur cours mémorisé ailleurs avec son ancienneté ;
   * l'**historique des cours** observés dans le district actuel, en courbe, avec le cours normal (sans tendance ni événement) en repère ; la valeur de chaque jour au survol, et le tableau des valeurs pour les lecteurs d'écran.
-* **Filtres** par tag et par tier (Tous, En soute, chaque tag) ; curseurs d'achat / vente (+1, +5, MAX).
+* **Filtres** en pastilles, un seul à la fois : Tous, En soute, chaque tier et chaque tag présents dans le tableau. Le filtre choisi reste d'un district à l'autre ; s'il ne garde plus aucun produit ici, tout s'affiche.
+* **Curseurs d'achat / vente :** 1, 5, MAX.
 * **Onglet lieux spéciaux :** accès direct aux services du district, coûts et cooldowns affichés. À la Laverie, le Cash-Puce reçu pour un retrait (commission déduite) et le nombre de jours qu'il faut à un dépôt pour couvrir cette commission au taux du jour.
 
 ## Vue « Carte tactique & navigation »

@@ -578,6 +578,11 @@ export const fr = {
 
   market: {
     title: 'Marché noir',
+    filters: 'Filtrer les produits',
+    filterAll: 'Tous',
+    filterOwned: (qty: number) => `En soute (${qty})`,
+    filterTier: (tier: number) => `T${tier}`,
+    noMatch: 'Aucun produit de ce filtre ici.',
     streetOnly: 'Passé 20h00 : seul le marché de rue est ouvert.',
     sellAll: (amount: string) => `Vendre tout (${amount})`,
     sellProfitable: (amount: string) => `Vendre tout ce qui marge (${amount})`,
