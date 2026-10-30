@@ -501,3 +501,14 @@ Les multiplicateurs d'événement se multiplient (chaque événement par sa lign
 - `[MOD-08]` et `[CREW-01]` sont positifs ; aucun autre élément n'est négatif.
 
 **Campagne Plans :** peu de changement, les bots utilisent peu les lieux ; l'Opportuniste (qui s'en sert) rejoint le Sans build (53 / 126k contre 55 / 125k).
+
+## Placement du Cartel, contrats de la Pègre, taux offshore unique
+**Changements :** taux offshore unique ; placement du Cartel à la Laverie (`VENTURE`) ; contrats de la Pègre chez Viktor (`CONTRACT`). Les bots placent une part de leur épargne selon le tempérament (rien en Prudent, un quart en Équilibré, la moitié en Casse-cou) et prennent un contrat une fois la dette initiale soldée, s'il est achetable sur place, non périssable et sous leur risque. Le tirage quotidien d'un contrat décale le générateur : toutes les parties changent, le bruit est plus fort que d'habitude.
+
+**Sondes à graines égales (Sans build, 200 parties) :**
+- Contrats pris sans précaution (dès le Jour 1, tout risque accepté) : −10 points de survie et −15 à −20 % de score. Le bot achète tôt, la saisie des caisses le ruine. C'est une mauvaise façon de jouer, pas un défaut de la règle : un bot prudent les joue à l'équilibre (Prudent +2 %, Équilibré −5 %, Casse-cou −1 % de score ; −1 à −5 points de survie). Un joueur qui choisit ses contrats (destination sur sa route) y gagne. Les chiffres d'origine (prime ×1,6, pénalité de moitié) sont gardés.
+- Placement : neutre à légèrement positif pour Équilibré et Casse-cou.
+
+**Campagne Plans :** Prudent et Équilibré restent dans le bruit. Casse-cou bouge davantage dans les deux sens : Corruption +17 000 ₡, Haut tier +12 000 ₡ ; Nuit festive −32 000 ₡, Citoyen modèle −34 000 ₡, Saboteur −64 000 ₡ (écart-type de ces scores autour de 200 000 ₡, soit ±15 000 ₡ sur la moyenne). Les plus fortes baisses touchent les plans Casse-cou qui placent la moitié de leur épargne : un coup de filet tardif coûte cher au score. C'est le prix du risque, laissé au joueur.
+
+**Parcours type :** nouveau tableau du rapport, lu dans le carnet de route (patrimoine médian à J5, J10, J20, J30, premier équipement, contrôles avec pertes, contrats, coups de filet).
