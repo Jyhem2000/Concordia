@@ -31,6 +31,7 @@ import { keysOf } from './records.ts'
 import { risk } from './risk.ts'
 import { checkRoadChoice, resolveRoadChoice, type RoadChoiceId } from './road.ts'
 import { checkCompartment, setCompartment, settleCompartment } from './compartment.ts'
+import { acceptContract, checkAcceptContract, checkDeliverContract, deliverContract } from './contracts.ts'
 import { recordJournal } from './journal.ts'
 import { createRng } from './rng.ts'
 import { sleep } from './routine.ts'
@@ -80,6 +81,9 @@ export type Action =
   /** Placement du Cartel : dépôt depuis le Cash-Puce, retrait avec commission (chap. 1) */
   | { type: 'invest'; amount: number }
   | { type: 'divest'; amount: number }
+  /** Contrat de la Pègre : accepter l'offre du jour chez Viktor, livrer à destination (chap. 3) */
+  | { type: 'acceptContract' }
+  | { type: 'deliverContract' }
   /** Option de l'écran d'interception ; `offer` pour la corruption */
   | { type: 'intercept'; move: InterceptionMove; offer?: Offer; tactics?: Tactics }
   | { type: 'buyVehicle'; vehicleId: VehicleId }
@@ -129,6 +133,7 @@ export type ActionError =
   | 'advance-used'
   | 'not-enough-offshore'
   | 'not-enough-venture'
+  | 'not-contract-district'
   | 'intercepted'
   | 'not-intercepted'
   | 'move-unavailable'
@@ -611,6 +616,14 @@ function resolveAction(state: GameState, action: Action): ActionResult {
       return isQuantity(action.amount) ? deposit(state, action.amount) : fail('invalid-amount')
     case 'withdraw':
       return isQuantity(action.amount) ? withdraw(state, action.amount) : fail('invalid-amount')
+    case 'acceptContract': {
+      const error = checkService(state, 'debt') ?? checkAcceptContract(state)
+      return error ? fail(error) : { ok: true, state: acceptContract(state) }
+    }
+    case 'deliverContract': {
+      const error = checkDeliverContract(state)
+      return error ? fail(error) : { ok: true, state: deliverContract(state) }
+    }
     case 'invest':
       return isQuantity(action.amount) ? invest(state, action.amount) : fail('invalid-amount')
     case 'divest':

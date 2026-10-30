@@ -42,6 +42,10 @@ export function useHighlightText(): (highlight: Highlight) => string {
         return j.ending(t.end.endings[highlight.id].title, credits(highlight.score))
       case 'raid':
         return j.raid(credits(highlight.loss))
+      case 'contractDone':
+        return j.contractDone(credits(highlight.reward))
+      case 'contractFailed':
+        return j.contractFailed(credits(highlight.penalty))
     }
   }
 }

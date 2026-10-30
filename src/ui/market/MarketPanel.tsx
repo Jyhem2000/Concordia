@@ -1,4 +1,4 @@
-import { EyeOff, Filter, RotateCcw } from 'lucide-react'
+import { ArrowUpDown, EyeOff, Filter, RotateCcw } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
@@ -19,9 +19,10 @@ import Panel from '../shared/Panel.tsx'
 import { FIELD, TIER_STYLES } from '../shared/styles.ts'
 import Thumb from '../shared/Thumb.tsx'
 import CompartmentNotice from '../cargo/CompartmentNotice.tsx'
+import ContractCard from '../places/ContractCard.tsx'
 import Tip from '../shared/Tip.tsx'
 import { useConditions } from '../shared/useConditions.ts'
-import { NO_FILTER, passesFilter, type MarketFilter } from './marketFilter.ts'
+import { MARKET_SORTS, NO_FILTER, passesFilter, sortProducts, type MarketFilter, type MarketSort } from './marketFilter.ts'
 import ProductSheet from './ProductSheet.tsx'
 
 type FilterBarProps = {
@@ -30,6 +31,8 @@ type FilterBarProps = {
   tags: readonly TagId[]
   current: MarketFilter
   onPick: (filter: MarketFilter) => void
+  sort: MarketSort
+  onSort: (sort: MarketSort) => void
 }
 
 type MarketRowProps = {
@@ -59,11 +62,13 @@ export default function MarketPanel() {
   const { t } = useI18n()
 
   const shop = shopProducts(game.markets[game.districtId])
+  // Contrat de la Pègre à livrer ici
+  const contractHere = game.contract?.to === game.districtId
   // Les caisses scellées d'une mission ne se vendent pas : elles ont leur propre ligne
   const owned = game.cargo.map((lot) => lot.productId).filter((id) => !PRODUCTS[id].sealed)
   const sealed = game.cargo.reduce((total, lot) => (PRODUCTS[lot.productId].sealed ? total + lot.qty : total), 0)
-  // Ordre fixe, par tier puis par ID : acheter ou vendre ne déplace jamais une ligne (la page ne saute pas)
-  const rows = [...new Set([...owned, ...shop])].sort((a, b) => PRODUCTS[a].tier - PRODUCTS[b].tier || a.localeCompare(b))
+  // Boutique et soute, sans doublon ; le tri choisi s'applique plus bas
+  const rows = [...new Set([...owned, ...shop])]
   // Choix proposés : les tiers et les tags présents dans le tableau, dans l'ordre des données
   const tiers = [...new Set(rows.map((id) => PRODUCTS[id].tier))].sort((a, b) => a - b)
   const tags = keysOf(TAGS).filter((tag) => rows.some((id) => PRODUCTS[id].tags.includes(tag)))
@@ -73,7 +78,14 @@ export default function MarketPanel() {
     tier: picked.tier !== null && tiers.includes(picked.tier) ? picked.tier : null,
     tag: picked.tag !== null && tags.includes(picked.tag) ? picked.tag : null,
   }
-  const shown = rows.filter((id) => passesFilter(filter, id))
+  // Tri choisi : état d'interface éphémère ; il ne bouge pas à l'achat (le cours du jour reste le même)
+  const [sort, setSort] = useState<MarketSort>('tier')
+  const shown = sortProducts(
+    rows.filter((id) => passesFilter(filter, id)),
+    sort,
+    (id) => quote(game, game.districtId, id),
+    (id) => t.product[id].name,
+  )
 
   return (
     <Panel
@@ -93,8 +105,13 @@ export default function MarketPanel() {
         </Hint>
       )}
       <CompartmentNotice className="px-3 pt-2" />
+      {contractHere && (
+        <div className="px-3 pt-3">
+          <ContractCard kind="active" />
+        </div>
+      )}
       <BulkSales />
-      <FilterBar tiers={tiers} tags={tags} current={filter} onPick={setPicked} />
+      <FilterBar tiers={tiers} tags={tags} current={filter} onPick={setPicked} sort={sort} onSort={setSort} />
       {shown.length === 0 && <Hint className="px-3 pt-2">{t.market.noMatch}</Hint>}
       <ul className="space-y-2 p-2">
         {shown.map((id) => (
@@ -106,7 +123,7 @@ export default function MarketPanel() {
 }
 
 /** Filtres par tier et par tag, cumulables, avec leur remise à zéro (chap. 7) */
-function FilterBar({ tiers, tags, current, onPick }: FilterBarProps) {
+function FilterBar({ tiers, tags, current, onPick, sort, onSort }: FilterBarProps) {
   const { t } = useI18n()
   const active = current.tier !== null || current.tag !== null
   return (
@@ -144,6 +161,21 @@ function FilterBar({ tiers, tags, current, onPick }: FilterBarProps) {
           {t.market.resetFilters}
         </Button>
       )}
+      <span className="ml-auto flex items-center gap-1.5">
+        <ArrowUpDown size={14} aria-hidden="true" className="text-ink-muted" />
+        <select
+          aria-label={t.market.sortLabel}
+          value={sort}
+          onChange={(event) => onSort(MARKET_SORTS.find((option) => option === event.target.value) ?? 'tier')}
+          className={FIELD}
+        >
+          {MARKET_SORTS.map((option) => (
+            <option key={option} value={option}>
+              {t.market.sort[option]}
+            </option>
+          ))}
+        </select>
+      </span>
     </div>
   )
 }

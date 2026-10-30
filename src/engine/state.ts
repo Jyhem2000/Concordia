@@ -4,6 +4,7 @@ import { DISTRICT_IDS } from '../data/districts.ts'
 import { crewEffect } from './crew.ts'
 import { drawEvents, NO_EVENTS } from './events.ts'
 import { drawMarkets, observeMarket } from './market.ts'
+import { drawContract } from './contracts.ts'
 import { drawDayOffer } from './delivery.ts'
 import { drawAfter, drawNightOffer } from './night.ts'
 import { drawPatrol } from './risk.ts'
@@ -48,6 +49,8 @@ export function createInitialState(seed: number): GameState {
     morguePass: null,
     influence: null,
     vip: null,
+    contractOffer: drawContract(rng, 1),
+    contract: null,
     velvetLock: null,
     dayOffer: drawDayOffer(rng),
     delivery: null,

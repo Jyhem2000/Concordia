@@ -114,6 +114,7 @@ function BriefingLines({ briefing }: BriefingLinesProps) {
         </li>
       )}
       {ventureRaid > 0 && <li className="text-danger">{t.briefing.ventureRaid(credits(ventureRaid))}</li>}
+      {briefing.contractFailed > 0 && <li className="text-danger">{t.briefing.contractFailed(credits(briefing.contractFailed))}</li>}
       {ventureInterest && (
         <li>
           <BriefingRow label={t.briefing.ventureInterest} className="text-warning">

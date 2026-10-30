@@ -143,6 +143,22 @@ export const fr = {
 
   // ─── Interface ───
 
+  /** Contrats de la Pègre, chez Viktor (chap. 3) */
+  contract: {
+    offerTitle: 'Contrat de la Pègre proposé',
+    activeTitle: 'Contrat de la Pègre en cours',
+    terms: (qty: number, product: string, district: string, deadline: number, reward: string) =>
+      `${qty} ${product} à livrer à ${district} avant la fin du J${deadline}, prime ${reward}.`,
+    owned: (owned: number, needed: number) => `En soute : ${owned}/${needed}`,
+    rule: (penalty: string) => `Un seul contrat à la fois. Délai manqué : Viktor ajoute ${penalty} de la prime à la dette.`,
+    accept: 'Accepter le contrat',
+    deliver: (reward: string) => `Livrer (${reward})`,
+    fil: (qty: number, product: string, district: string, deadline: number) =>
+      `Contrat de la Pègre : ${qty} ${product} à livrer à ${district} avant la fin du J${deadline}`,
+    offerFil: (product: string, reward: string) =>
+      `Viktor propose un contrat aujourd'hui (${product}, prime ${reward}) : à accepter à son guichet, de jour`,
+  },
+
   /** Pompe à Synthanol du district (chap. 3) */
   pump: {
     name: { official: 'Pompe officielle Aeterna', fixed: 'Pompe pirate' },
@@ -195,6 +211,7 @@ export const fr = {
     viceEnd: (product: string, district: string) => `Fin du vice : ${product} en Forte demande à ${district}`,
     serviceReady: (service: string) => `${service} : de nouveau disponible`,
     trapdoorReady: 'Trappe de largage rechargée',
+    agendaContract: (district: string) => `Dernier jour du contrat de la Pègre (livraison à ${district})`,
     service: {
       influence: 'Karma-Cham',
       pass: 'Laissez-passer',
@@ -266,6 +283,8 @@ export const fr = {
     iccTier: (tier: string) => `Nouveau statut : ${tier}`,
     ending: (title: string, score: string) => `Fin : ${title} (${score})`,
     raid: (loss: string) => `Coup de filet sur le placement du Cartel : −${loss}`,
+    contractDone: (reward: string) => `Contrat de la Pègre livré (prime ${reward})`,
+    contractFailed: (penalty: string) => `Contrat de la Pègre manqué : +${penalty} de dette`,
     highlights: 'Faits marquants',
     noHighlight: 'Aucun fait marquant.',
   },
@@ -398,6 +417,7 @@ export const fr = {
     title: (day: number) => `Briefing de 06h00 — Jour ${day}`,
     ventureRaid: (loss: string) => `Coup de filet de la BRC sur une filière du Cartel : le placement perd ${loss}.`,
     ventureInterest: 'Intérêts du placement',
+    contractFailed: (penalty: string) => `Contrat de la Pègre manqué : Viktor ajoute ${penalty} à la dette.`,
     nightRelay: (district: string) => `Réveil à ${district}, après une nuit au relais routier.`,
     nightBivouac: (district: string) => `Réveil à ${district}, après une nuit en bivouac.`,
     nightCell: (district: string) => `Réveil à ${district}, au sortir de la cellule.`,
@@ -730,6 +750,8 @@ export const fr = {
     allTags: 'Tous les tags',
     filterTier: (tier: number) => `Tier ${tier}`,
     resetFilters: 'Effacer',
+    sortLabel: 'Trier les produits',
+    sort: { tier: 'Tier puis nom', priceAsc: 'Prix croissant', priceDesc: 'Prix décroissant', name: 'Nom (A → Z)' },
     noMatch: 'Aucun produit de ce filtre ici.',
     streetOnly: 'Passé 20h00 : seul le marché de rue est ouvert.',
     sellAll: (amount: string) => `Vendre tout (${amount})`,
@@ -1127,6 +1149,7 @@ export const fr = {
     'location-locked': 'Lieu verrouillé.',
     'contract-active': 'Une commande est déjà en cours.',
     'no-contract': 'Aucune commande en cours.',
+    'not-contract-district': 'Le contrat se livre dans son district de destination.',
   } satisfies Record<ActionError, string>,
 
   // ─── Données de jeu (chap. 2 à 6) ───

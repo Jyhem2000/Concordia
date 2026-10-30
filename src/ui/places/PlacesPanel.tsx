@@ -21,6 +21,7 @@ import Detailed from '../shared/Detailed.tsx'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
 import CrewDesk from './CrewDesk.tsx'
+import ContractCard from './ContractCard.tsx'
 import GarageDesk from './GarageDesk.tsx'
 import { placesHere } from './placesHere.ts'
 import PumpPanel from './PumpPanel.tsx'
@@ -118,6 +119,8 @@ function DebtDesk() {
       <Hint>
         {t.place.loanRoom(credits(room))} · {t.place.advanceRule(credits(SURVIVAL_ADVANCE))}
       </Hint>
+      <ContractCard kind="offer" />
+      <ContractCard kind="active" />
     </>
   )
 }

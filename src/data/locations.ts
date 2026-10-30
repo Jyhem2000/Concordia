@@ -33,6 +33,17 @@ export const CASSANDRE = { cost: 2_500, costStep: 1_250, crate: 'T3-03' as Produ
 /** Faux dossier de Loterie à la Laverie (hausse par usage) et effets des cartes */
 export const FORGERY = { cost: 12_000, costStep: 12_000, chance: 0.6, failIccLoss: 10, captainRisk: -0.15, competitorQuota: 1.5, informantIcc: 5 }
 
+/** Contrats de la Pègre, chez Viktor (chap. 3) : produits proposés par tier, caisses par tier, délai en jours, prime et pénalité */
+export const CONTRACT = {
+  tiers: [1, 2, 3] as readonly Tier[],
+  crates: { 1: 6, 2: 4, 3: 3 } as Readonly<Partial<Record<Tier, number>>>,
+  delayDays: { min: 2, max: 4 },
+  /** Prime : valeur de base des caisses × ce facteur */
+  factor: 1.6,
+  /** Pénalité d'un contrat manqué, ajoutée à la dette : part de la prime */
+  failDebtShare: 0.5,
+}
+
 /** Velvet-Silo : enchères, chantage, commande VIP */
 export const VELVET = {
   auction: { cooldownDays: 3, factor: 2, minTier: 3 },

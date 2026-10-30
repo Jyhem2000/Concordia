@@ -42,6 +42,12 @@ Les stats de chaque district sont dans [`districts.ts`](../src/data/districts.ts
 ### `[LOC-D1-1]` L'Arrière-Salle de Viktor Varga (usurier mafieux)
 Boucherie clandestine de Viktor Varga et de ses « Bouchers ».
 * **Dette :** remboursement, et avance de survie (dans la limite d'un total fixe sur toute la partie, chap. 1, *Dette mafieuse*).
+* **Contrats de la Pègre** — les Bouchers ont des clients dans toute la ville, et pas de camion. Chiffres : `CONTRACT` dans [`locations.ts`](../src/data/locations.ts).
+  * **Offre :** chaque matin, tant qu'aucun contrat n'est en cours, Viktor en propose un, dès le Jour 1 : un produit de Tier 1 à 3 tiré au hasard, un nombre de caisses selon le tier, un district de destination (jamais `[D1]`) et un délai de quelques jours. La **prime** est fixée d'avance : la valeur de base des caisses, multipliée par un facteur. L'offre du jour disparaît le lendemain matin.
+  * **Acceptation :** au guichet, de jour. Un seul contrat à la fois. Les caisses s'achètent où l'on veut, au prix du marché.
+  * **Livraison :** dans le district de destination, de jour comme de nuit, jusqu'au dernier jour du délai inclus, avec assez de caisses du produit en soute. Les caisses partent (les plus anciennes d'abord), la prime arrive en Cash-Puce, sans commission ni saturation.
+  * **Échec :** le délai passé, à la routine matinale, Viktor ajoute une pénalité à la dette, une part de la prime. Pas de pardon.
+  * *Intention :* un objectif à quelques jours, accessible à tous dès le début, qui fait planifier un achat et un trajet ; la prime ne bouge pas avec le marché, mais il faut traverser la ville avec la marchandise.
 
 ### `[LOC-D1-2]` La Cantine des Chauffeurs (« Chez Borg »)
 Bar enfumé réservé aux routiers, où l'on sert l'eau de l'Exemption Métabolique.

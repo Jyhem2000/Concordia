@@ -15,6 +15,7 @@ import {
 } from './finance.ts'
 import { isPerishable, removeRotten } from './condition.ts'
 import { expireVip } from './services.ts'
+import { drawContract, expireContract } from './contracts.ts'
 import { drawDayOffer } from './delivery.ts'
 import { drawAfter, drawNightOffer, reclaimSealed } from './night.ts'
 import { mountedEffect, recoverDumped } from './equipment.ts'
@@ -117,6 +118,7 @@ function morningRoutine(state: GameState, night: Night): GameState {
     offshoreInterest: null,
     ventureRaid: 0,
     ventureInterest: null,
+    contractFailed: 0,
   }
 
   // 1. Salaire de l'équipier, payé d'avance (rien en cellule)
@@ -179,6 +181,11 @@ function morningRoutine(state: GameState, night: Night): GameState {
   s = vip.state
   briefing.vipFailed = vip.failed
 
+  // Contrat de la Pègre dont le délai est passé : pénalité sur la dette
+  const contract = expireContract(s)
+  s = contract.state
+  briefing.contractFailed = contract.penalty
+
   // 5. Fraîcheur : les périssables pourris sont détruits
   const rot = removeRotten(s)
   briefing.rotten = rot.rotten
@@ -189,6 +196,8 @@ function morningRoutine(state: GameState, night: Night): GameState {
   const patrolDistrict = drawPatrol(rng)
   const events = drawEvents(s.events, day, rng)
   s = { ...s, patrolDistrict, events, dayOffer: drawDayOffer(rng), nightOffer: drawNightOffer(rng) }
+  // Viktor propose un contrat chaque matin, tant qu'aucun n'est en cours
+  s = { ...s, contractOffer: s.contract ? null : drawContract(rng, day) }
   // La Loterie peut désigner l'équipier actif : il disparaît pour de bon (chap. 6)
   // Un faux dossier accepté protège l'équipier de ce tirage ; celui de l'indic efface la Fiche S
   const forged = events.lottery?.day === day && events.lottery.card !== null

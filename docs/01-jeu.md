@@ -145,9 +145,9 @@ Le Jour 1 commence sans routine : pas d'intérêts, boutiques et événements ti
 1. Paiement d'avance du salaire de l'équipier actif (chap. 4) — sauf si le joueur était en garde à vue cette nuit-là ; consommation éventuelle d'une caisse par `[CREW-01]`. Reprise des caisses scellées d'une commande du DSC non livrée, livraison du jour ou mission de nuit (voir *Livraison officielle du jour* et *Tournée de nuit*).
 2. Intérêts et échéances de la dette ; **collecte de protection** (chap. 1).
 3. Intérêts du compte offshore ; coup de filet éventuel sur le placement du Cartel, puis ses intérêts.
-4. Récupération des caisses larguées la veille via `[MOD-07]` ; échéance d'une commande VIP de `[LOC-D6-1]` dépassée (chap. 3).
+4. Récupération des caisses larguées la veille via `[MOD-07]` ; échéance d'une commande VIP de `[LOC-D6-1]` ou d'un contrat de la Pègre de `[LOC-D1-1]` dépassée (chap. 3).
 5. Dégradation de fraîcheur des caisses `[TAG-PERISHABLE]`, caisses récupérées comprises (chap. 2).
-6. Tirage de la livraison officielle du jour et de la mission de nuit proposée pour ce soir ; tirage de la ronde renforcée ; entrée en vigueur de l'événement global tiré la veille, tirage des événements locaux, de la Loterie les jours de tirage, de l'événement global du lendemain et de sa rumeur ; contrecoups (chap. 6). Puis, parce que les événements les modifient : reconstitution des quotas de demande, cours et boutiques (chap. 2) ; enfin, tirage de l'after du couvre-feu de ce soir (voir *Tournée de nuit*).
+6. Tirage de la livraison officielle du jour, de la mission de nuit proposée pour ce soir et du contrat de la Pègre proposé (s'il n'y en a pas en cours) ; tirage de la ronde renforcée ; entrée en vigueur de l'événement global tiré la veille, tirage des événements locaux, de la Loterie les jours de tirage, de l'événement global du lendemain et de sa rumeur ; contrecoups (chap. 6). Puis, parce que les événements les modifient : reconstitution des quotas de demande, cours et boutiques (chap. 2) ; enfin, tirage de l'after du couvre-feu de ce soir (voir *Tournée de nuit*).
 7. Effets du matin des événements : canicule sur les périssables, sas de `[EVT-D3-01]` si le joueur se trouve en `[D3]` (chap. 6). Enfin, protection de l'Exemption Métabolique **−1 jour**.
 
 ### Service de jour (06h00 – 20h00)

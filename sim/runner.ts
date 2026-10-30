@@ -64,6 +64,9 @@ const SERVICE_ACTIONS: readonly Action['type'][] = [
   'vipRequest',
   'vipDeliver',
   'repair',
+  'acceptContract',
+  'deliverContract',
+  'invest',
 ]
 
 /** Plafond d'actions dans une même journée avant de forcer le sommeil */

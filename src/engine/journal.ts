@@ -56,6 +56,7 @@ export function recordJournal(before: GameState, after: GameState, action: Actio
   note(after.wanted > before.wanted && { kind: 'wanted', level: after.wanted })
   note(iccTier(after.icc) !== iccTier(before.icc) && { kind: 'iccTier', tier: iccTier(after.icc) })
   note(after.ending !== null && before.ending === null && { kind: 'ending', id: after.ending.id, score: after.ending.score })
+  note(action.type === 'deliverContract' && before.contract !== null && { kind: 'contractDone', reward: before.contract.reward })
 
   // Flux de marchandise : seules les actions d'achat et de vente au marché comptent
   const spent = action.type === 'buy' ? before.cash - after.cash : 0
@@ -68,8 +69,10 @@ export function recordJournal(before: GameState, after: GameState, action: Actio
   const updated: DayLog = { ...today, bought: today.bought + spent, sold: today.sold + earned, highlights: [...today.highlights, ...highlights] }
   // Nouveau matin : la journée suivante s'ouvre sur le patrimoine après la routine
   // Ce que la routine du matin a changé appartient à la nouvelle journée
-  const morning: Highlight[] =
-    after.briefing && after.briefing !== before.briefing && after.briefing.ventureRaid > 0 ? [{ kind: 'raid', loss: after.briefing.ventureRaid }] : []
+  const fresh = after.briefing && after.briefing !== before.briefing ? after.briefing : null
+  const morning: Highlight[] = []
+  if (fresh && fresh.ventureRaid > 0) morning.push({ kind: 'raid', loss: fresh.ventureRaid })
+  if (fresh && fresh.contractFailed > 0) morning.push({ kind: 'contractFailed', penalty: fresh.contractFailed })
   const opened: DayLog[] = after.day > today.day ? [{ day: after.day, start: wealthOf(after), bought: 0, sold: 0, highlights: morning }] : []
   return { ...after, journal: [...past, updated, ...opened] }
 }

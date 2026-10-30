@@ -500,6 +500,8 @@ export type MorningBriefing = {
   /** Placement du Cartel : ₡ perdus dans un coup de filet (0 sans coup de filet), puis intérêts du jour */
   ventureRaid: number
   ventureInterest: Breakdown | null
+  /** Contrat de la Pègre manqué : pénalité ajoutée à la dette, 0 sinon */
+  contractFailed: number
 }
 
 /** Événements en cours et tirages à venir (chap. 6) */
@@ -586,6 +588,8 @@ export type Highlight =
   | { kind: 'iccTier'; tier: IccTier }
   | { kind: 'ending'; id: EndingId; score: number }
   | { kind: 'raid'; loss: number }
+  | { kind: 'contractDone'; reward: number }
+  | { kind: 'contractFailed'; penalty: number }
 
 /** Une journée du carnet de route (chap. 7) */
 export type DayLog = {
@@ -596,6 +600,16 @@ export type DayLog = {
   bought: number
   sold: number
   highlights: readonly Highlight[]
+}
+
+/** Contrat de la Pègre (chap. 3) : caisses à livrer, destination, dernier jour, prime */
+export type Contract = {
+  productId: ProductId
+  qty: number
+  to: DistrictId
+  /** Dernier jour pour livrer, inclus */
+  deadline: number
+  reward: number
 }
 
 /** Contenu du double fond (chap. 4) : caisses cachées par produit */
@@ -699,6 +713,9 @@ export type GameState = {
   influence: { tag: TagId; day: number } | null
   /** Commande VIP du Velvet-Silo : produit et jour de la commande */
   vip: { productId: ProductId; day: number } | null
+  /** Contrat de la Pègre proposé ce jour chez Viktor, et contrat accepté en cours (chap. 3) */
+  contractOffer: Contract | null
+  contract: Contract | null
   /** Velvet-Silo verrouillé jusqu'à ce jour inclus (commande VIP manquée) */
   velvetLock: number | null
   /** Livraison officielle proposée ce matin (district), jusqu'à son acceptation */

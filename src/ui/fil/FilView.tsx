@@ -94,6 +94,18 @@ function TodayPanel() {
   const lines: Line[] = [
     ...(game.delivery ? [line('delivery', t.fil.deliveryActive(t.district[game.delivery.to].name), 'info')] : []),
     ...(delivery ? [line('delivery', t.fil.deliveryOffer(t.district[delivery].name, deliveryCrates(game), credits(deliveryFee(game))), 'info')] : []),
+    ...(game.contract
+      ? [
+          line(
+            'contract',
+            t.contract.fil(game.contract.qty, t.product[game.contract.productId].name, t.district[game.contract.to].name, game.contract.deadline),
+            'warning',
+          ),
+        ]
+      : []),
+    ...(game.contractOffer && game.phase === 'day'
+      ? [line('contractOffer', t.contract.offerFil(t.product[game.contractOffer.productId].name, credits(game.contractOffer.reward)), 'warning')]
+      : []),
     ...(mission ? [line('mission', t.fil.missionTonight(t.district[mission].name, sealedCount(game), credits(missionFee(game))), 'info')] : []),
     line(
       'after',
@@ -205,6 +217,7 @@ function AgendaPanel() {
       ? [entry('vice', vice.viceUntil, t.fil.viceEnd(t.product[vice.vice].name, t.district[vice.viceDistrict].name), 'neutral')]
       : []),
     ...pendingServices(game).map(({ key, day }): AgendaEntry => ({ key, day, label: t.fil.serviceReady(t.fil.service[key]), tone: 'muted' })),
+    ...(game.contract ? [entry('contract', game.contract.deadline, t.fil.agendaContract(t.district[game.contract.to].name), 'warning')] : []),
     ...(trapdoor !== null ? [entry('trapdoor', trapdoor, t.fil.trapdoorReady, 'muted')] : []),
     entry('audit', GAME_LENGTH_DAYS, t.fil.audit(GAME_LENGTH_DAYS), 'accent'),
   ]

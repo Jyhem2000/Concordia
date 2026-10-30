@@ -13,7 +13,7 @@ import {
   SURVIVAL_ADVANCE,
 } from '../../src/data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../src/data/districts.ts'
-import { KARMA, SERVICE_REQUIREMENTS, VELVET } from '../../src/data/locations.ts'
+import { CONTRACT, KARMA, SERVICE_REQUIREMENTS, VELVET } from '../../src/data/locations.ts'
 import { EVENT_MULT_CAP, ROAD_EVENTS } from '../../src/data/events.ts'
 import { PRODUCT_IDS, PRODUCTS, SEALED_PRODUCT } from '../../src/data/products.ts'
 import { CREW, MODULES, VEHICLES } from '../../src/data/vehicles.ts'
@@ -51,6 +51,7 @@ import {
   shopProducts,
   unitSaleBreakdown,
 } from '../../src/engine/market.ts'
+import { checkDeliverContract } from '../../src/engine/contracts.ts'
 import { checkDelivery, deliveryCrates, deliveryFee, deliveryOffer } from '../../src/engine/delivery.ts'
 import { canInject, checkMission, missionOffer } from '../../src/engine/night.ts'
 import { checkRoadChoice } from '../../src/engine/road.ts'
@@ -74,6 +75,7 @@ import type {
   CrateCount,
   CrewId,
   DistrictId,
+  Contract,
   GameState,
   InterceptionMove,
   ModuleId,
@@ -186,6 +188,9 @@ const VALUE = {
   sponsorOrder: 10_000,
 }
 
+/** Contrat accepté seulement si le Cash-Puce, réserve gardée, couvre la valeur de base de ses caisses × ce facteur */
+const CONTRACT_MARGIN = 1.2
+
 /** Marge minimale espérée pour acheter, en part du prix d'achat */
 const MIN_MARGIN = 0.15
 
@@ -269,6 +274,23 @@ function huntReserve(view: GameState, objective: Objective): number {
   return ownedQty(view.cargo, SERVER) > 0 ? value * 0.3 : value * 1.5
 }
 
+/** Risque du trajet vers la destination d'un contrat, ses caisses à bord */
+function contractRisk(view: GameState, contract: Contract): number {
+  const crates = { productId: contract.productId, qty: contract.qty, unitCost: 0, travelled: false, boughtDay: view.day, damaged: false }
+  return risk({ ...view, cargo: [...view.cargo, crates] }, contract.to, { includePatrol: false })
+}
+
+/** Caisses d'un contrat de la Pègre à acheter ici : celles qui manquent, si la boutique les a et que la prime couvre leur prix */
+function contractPurchase(view: GameState): Action | null {
+  if (!view.contract) return null
+  const { productId, qty, reward } = view.contract
+  const missing = qty - ownedQty(view.cargo, productId)
+  if (missing <= 0 || !shopProducts(view.markets[view.districtId]).includes(productId)) return null
+  const buyable = Math.min(missing, maxBuy(view, productId))
+  if (buyable < 1 || quote(view, view.districtId, productId) * qty > reward) return null
+  return { type: 'buy', productId, qty: buyable }
+}
+
 /** Un trajet vers ce district, s'il reste un trajet dans la phase, carburant compris */
 function travelTo(view: GameState, to: DistrictId): Action | null {
   const left = view.phase === 'night' ? !view.nightTripDone : !view.dayTripDone && !view.dayOver
@@ -331,6 +353,9 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
   const tripLeft = night ? !view.nightTripDone : !view.dayTripDone && !view.dayOver
   const endgame = view.day >= ENDGAME_DAY
 
+  // Contrat de la Pègre : livrer dès qu'on est à destination avec les caisses
+  if (!checkDeliverContract(view)) return { type: 'deliverContract' }
+
   const hunt = serverHunt(view, objective)
   const sale = sell(view, plan, endgame, hunt)
   if (sale) return sale
@@ -346,6 +371,9 @@ function decide(view: GameState, plan: Plan, temperament: Temperament, objective
     // Résident, serveur à bord : chaque nuit passée sans garde à vue est une injection
     if (canInject(view) || (view.phase === 'night' && ownedQty(view.cargo, SERVER) > 0)) return injectionMove(view)
   }
+
+  const forContract = open ? contractPurchase(view) : null
+  if (forContract) return forContract
 
   if (tripLeft) {
     // À sec, sans marchandise : rentrer à Hives prendre l'avance de survie de Viktor
@@ -489,6 +517,7 @@ function sell(view: GameState, plan: Plan, endgame: boolean, hunt: boolean): Act
     if (owned === 0) continue
     if (hunt && productId === ENDINGS.saboteur.requiredProduct) continue
     if (view.vip?.productId === productId && !endgame && ownedQty(view.cargo, productId) <= VELVET.vip.crates) continue
+    if (view.contract?.productId === productId && ownedQty(view.cargo, productId) <= view.contract.qty) continue
     const first = saleQuote(view, productId, 1)
     const lot = view.cargo.find((entry) => entry.productId === productId)
     const rotting = lot ? (daysBeforeRot(view, lot) ?? Infinity) <= 1 : false
@@ -518,6 +547,21 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
   const reserve = reserveOf(view, temperament)
   const places = plan.places ?? DEFAULT_PLACES
   const uses = (place: PlaceUse) => places.includes(place)
+
+  // Contrat de la Pègre : l'accepter si la boutique d'ici a toutes ses caisses, qu'elles ne pourrissent pas en route,
+  // que le trajet reste dans le risque accepté et qu'on peut les payer en gardant sa réserve
+  const offer = view.contractOffer
+  if (
+    offer &&
+    !view.contract &&
+    !checkService(view, 'debt') &&
+    (view.markets[view.districtId].stock[offer.productId] ?? 0) >= offer.qty &&
+    !PRODUCTS[offer.productId].tags.includes('TAG-PERISHABLE') &&
+    contractRisk(view, offer) <= temperament.maxRisk &&
+    view.cash - reserve >= offer.qty * PRODUCTS[offer.productId].basePrice * CONTRACT_MARGIN
+  ) {
+    return { type: 'acceptContract' }
+  }
 
   // Dette : à intérêts quotidiens, la rembourser passe avant tout, en gardant de quoi travailler
   if (!checkService(view, 'debt') && view.debt > 0) {
@@ -754,6 +798,14 @@ function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route
         if (plan.vipErrand && view.vip && DISTRICTS[to].production.includes(view.vip.productId)) value += VALUE.sponsorVisit
         if (to === 'D4' && pendingEquipment(view, plan)) value += 2_000
         if (vipDelivery) value += (vipValue({ ...view, cargo: planned }) ?? 0) + (plan.sponsorOrder ? VALUE.sponsorOrder : 0)
+        // Contrat de la Pègre : la prime à destination, caisses à bord ; sinon un détour par un district qui les produit
+        if (view.contract) {
+          const { productId, qty, to: target, reward } = view.contract
+          // La veille de l'échéance, la pénalité évitée s'ajoute à la prime
+          const urgent = view.contract.deadline - view.day <= 1 ? reward * CONTRACT.failDebtShare : 0
+          if (to === target && ownedQty(planned, productId) >= qty) value += reward + urgent
+          else if (ownedQty(planned, productId) < qty && DISTRICTS[to].production.includes(productId)) value += reward * 0.3
+        }
         // Livraison : la prime, plus la confiance du DSC qu'attend l'équipement de la voie officielle
         if (contract) value += deliveryFee(view) + (trustWanted(view, plan) ? VALUE.trustDelivery : 0)
         if (!best || value > best.value) best = { to, buys: [...legalBuys.filter((buy) => buy.qty > 0), ...buys], value, accept: contract }
