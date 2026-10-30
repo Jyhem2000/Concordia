@@ -6,8 +6,6 @@ import { TONE_CHIP, type Tone } from './styles.ts'
 type ChipProps = {
   tone?: Tone
   icon?: LucideIcon
-  /** Explication au survol */
-  title?: string
   /** Pastille cliquable (filtre) : bouton à bascule, en couleur d'accent quand il est enfoncé */
   onClick?: () => void
   pressed?: boolean
@@ -17,7 +15,7 @@ type ChipProps = {
 const BASE = 'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs whitespace-nowrap'
 
 /** Pastille : tag d'un produit, statut d'un district, indicateur, filtre */
-export default function Chip({ tone = 'neutral', icon: Icon, title, onClick, pressed = false, children }: ChipProps) {
+export default function Chip({ tone = 'neutral', icon: Icon, onClick, pressed = false, children }: ChipProps) {
   const content = (
     <>
       {Icon && <Icon size={12} aria-hidden="true" className="shrink-0" />}
@@ -26,19 +24,9 @@ export default function Chip({ tone = 'neutral', icon: Icon, title, onClick, pre
   )
   if (onClick)
     return (
-      <button
-        type="button"
-        title={title}
-        aria-pressed={pressed}
-        onClick={onClick}
-        className={`${BASE} ${FOCUS_RING} ${TONE_CHIP[pressed ? 'accent' : tone]}`}
-      >
+      <button type="button" aria-pressed={pressed} onClick={onClick} className={`${BASE} ${FOCUS_RING} ${TONE_CHIP[pressed ? 'accent' : tone]}`}>
         {content}
       </button>
     )
-  return (
-    <span title={title} className={`${BASE} ${TONE_CHIP[tone]}`}>
-      {content}
-    </span>
-  )
+  return <span className={`${BASE} ${TONE_CHIP[tone]}`}>{content}</span>
 }

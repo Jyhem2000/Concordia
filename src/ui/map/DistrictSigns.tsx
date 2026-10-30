@@ -4,6 +4,7 @@ import type { DistrictId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import { TONE_TEXT, type Tone } from '../shared/styles.ts'
+import Tip from '../shared/Tip.tsx'
 
 type DistrictSignsProps = {
   districtId: DistrictId
@@ -43,10 +44,10 @@ export default function DistrictSigns({ districtId, withEvent = false }: Distric
   return (
     <span className="inline-flex gap-1">
       {signs.map(({ key, icon: Icon, label, tone }) => (
-        <span key={key} title={label} className={`inline-flex ${TONE_TEXT[tone]}`}>
+        <Tip key={key} content={label} className={TONE_TEXT[tone]}>
           <Icon size={14} aria-hidden="true" />
           <span className="sr-only">{label}</span>
-        </span>
+        </Tip>
       ))}
     </span>
   )

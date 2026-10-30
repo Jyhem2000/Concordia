@@ -21,6 +21,7 @@ import DistrictMap from './DistrictMap.tsx'
 import DistrictSigns from './DistrictSigns.tsx'
 import { placesHere } from '../places/placesHere.ts'
 import Detailed from '../shared/Detailed.tsx'
+import Tip from '../shared/Tip.tsx'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
 import Margin from '../shared/Margin.tsx'
@@ -212,10 +213,13 @@ function DistrictRow({ districtId, selected }: DistrictRowProps) {
       {!here && (
         <div className="mt-1 text-xs text-ink-muted">
           <DestinationFacts districtId={districtId} />
-          {memoryLabel}
+          <span className="flex items-center gap-1">
+            {memoryLabel}
+            {owned.length > 0 && <Tip label={memoryLabel} content={t.travel.estimateHint} />}
+          </span>
           {/* Produits en soute : statut public du district (chap. 2) et cours mémorisé, pour décider où vendre */}
           {owned.length > 0 && (
-            <ul className="mt-0.5 text-ink-soft" title={t.travel.estimateHint}>
+            <ul className="mt-0.5 text-ink-soft">
               {owned.map((id) => {
                 const status = productStatus({ day, phase, events }, districtId, id)
                 return (
@@ -280,9 +284,10 @@ function TravelButton({ to }: TravelButtonProps) {
       <div className="mt-0.5 text-xs text-ink-muted">
         {route} · {t.travel.fuel(plan.fuelCost)}
       </div>
-      <div className="flex justify-end gap-1.5 text-xs" title={revealed ? t.travel.riskHintRevealed : t.travel.riskHint}>
+      <div className="flex items-center justify-end gap-1.5 text-xs">
         <span className="text-ink-muted">{t.travel.risk}</span>
-        <Detailed breakdown={riskBreakdown(game, to, { includePatrol: revealed })} format={(risk) => percent(risk, 0)} align="right" />
+        <Tip label={t.travel.risk} content={revealed ? t.travel.riskHintRevealed : t.travel.riskHint} />
+        <Detailed breakdown={riskBreakdown(game, to, { includePatrol: revealed })} format={(risk) => percent(risk, 0)} />
       </div>
       {flying > 0 && <div className="text-xs text-ink-muted">{t.travel.flyingShare(percent(flying, 0))}</div>}
       {plan.error && plan.error !== 'trip-done' && <div className="text-xs text-danger">{t.error[plan.error]}</div>}

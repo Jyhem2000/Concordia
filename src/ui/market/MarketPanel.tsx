@@ -16,6 +16,7 @@ import Margin from '../shared/Margin.tsx'
 import Panel from '../shared/Panel.tsx'
 import { TIER_STYLES } from '../shared/styles.ts'
 import Thumb from '../shared/Thumb.tsx'
+import Tip from '../shared/Tip.tsx'
 import { useConditions } from '../shared/useConditions.ts'
 import { filterKey, passesFilter, type MarketFilter } from './marketFilter.ts'
 import ProductSheet from './ProductSheet.tsx'
@@ -33,7 +34,7 @@ type MarketRowProps = {
 
 type FieldProps = {
   label: string
-  /** Explication au survol */
+  /** Explication en infobulle, derrière une icône « i » */
   hint?: string
   /** Occupe deux colonnes de la grille */
   wide?: boolean
@@ -60,10 +61,8 @@ export default function MarketPanel() {
   // Les caisses scellées d'une mission ne se vendent pas : elles ont leur propre ligne
   const owned = game.cargo.map((lot) => lot.productId).filter((id) => !PRODUCTS[id].sealed)
   const sealed = game.cargo.reduce((total, lot) => (PRODUCTS[lot.productId].sealed ? total + lot.qty : total), 0)
-  // Produits en soute d'abord, puis la boutique ; par tier puis par ID
-  const rows = [...new Set([...owned, ...shop])].sort(
-    (a, b) => Number(ownedQty(game.cargo, b) > 0) - Number(ownedQty(game.cargo, a) > 0) || PRODUCTS[a].tier - PRODUCTS[b].tier || a.localeCompare(b),
-  )
+  // Ordre fixe, par tier puis par ID : acheter ou vendre ne déplace jamais une ligne (la page ne saute pas)
+  const rows = [...new Set([...owned, ...shop])].sort((a, b) => PRODUCTS[a].tier - PRODUCTS[b].tier || a.localeCompare(b))
   const isOwned = (id: ProductId) => ownedQty(game.cargo, id) > 0
   const ownedCount = rows.filter(isOwned).length
 
@@ -267,8 +266,11 @@ function MarketRow({ productId }: MarketRowProps) {
 
 function Field({ label, hint, wide = false, children }: FieldProps) {
   return (
-    <div className={`flex gap-1.5 ${wide ? 'col-span-2' : ''}`} title={hint}>
-      <dt className="text-ink-faint">{label}</dt>
+    <div className={`flex gap-1.5 ${wide ? 'col-span-2' : ''}`}>
+      <dt className="flex items-center gap-1 text-ink-faint">
+        {label}
+        {hint && <Tip label={label} content={hint} />}
+      </dt>
       <dd className="flex flex-wrap items-baseline">{children}</dd>
     </div>
   )

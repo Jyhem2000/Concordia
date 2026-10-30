@@ -12,6 +12,7 @@
 Terminal de livraison d'Aeterna : fond ardoise sombre, cartes à bords arrondis, titres en capitales, chiffres alignés (chiffres tabulaires). Un seul thème, sombre.
 * **Couleurs par rôle, jamais par écran :** Cash-Puce jaune, offshore cyan, dette rouge, gain vert, perte rouge, nuit indigo, action principale ambre, action risquée ou destructrice rouge. Les tiers gardent leur couleur partout : **vert** 0, **jaune** 1, **orange** 2, **rouge** 3, **violet** 4 (liseré à gauche de chaque ligne de produit, case d'image). Ces couleurs sont des variables du thème (`src/index.css`), utilisées par leur nom de rôle.
 * **Composants partagés** (`src/ui/shared/`) : panneau repliable, bouton, pastille (tag, statut, indicateur), jauge, statistique, encadré d'information, image de produit. Un style qui sert à deux endroits devient un composant ou une variante, jamais une copie.
+* **Infobulles :** une explication s'ouvre derrière une icône « i » placée à côté de la donnée ; une valeur détaillable (soulignée en pointillés), un événement ou un indice ouvre la sienne en le désignant. Au survol de la souris sur desktop, au toucher sur mobile, au focus clavier ; elle se ferme en quittant, en touchant ailleurs ou avec Échap (composant `Tip`, sur Floating UI). Aucune info n'est confiée à l'attribut `title`, invisible au toucher.
 * **Images :** produits, véhicules et modules ont une image dans une case carrée. Sans fichier d'image, une icône vectorielle (lucide) dans la couleur du tier la remplace. Déposer une image 32×32 (pixel art) dans `src/assets/images/`, sous le nom de l'ID de la donnée (`T1-03.png`), suffit à la remplacer, sans toucher au code ; elle s'affiche à 32 px dans les listes et doublée sans flou dans la carte du véhicule. Le reste de l'interface reste en icônes vectorielles.
 
 ## Panneaux repliables
@@ -44,12 +45,12 @@ Dans le bandeau, l'ICC prend la couleur de son palier (chap. 1), avec le nom du 
 
 ## Vue « Marché noir & lieux spéciaux »
 * **Ventes groupées :** « Vendre tout ce qui marge » (chaque produit dont la vente entière, saturation comprise, rapporte plus que son prix d'achat) et « Vendre tout », chacun avec le produit annoncé ; les caisses scellées n'en font pas partie.
-* **Tableau des cours :** la boutique du jour, plus, en haut de liste, tous les produits en soute (vente toujours possible). Le prix de vente affiché est le **prix net** (commission, fraîcheur, nuit… comprises), détaillable.
+* **Tableau des cours :** la boutique du jour et tous les produits en soute (vente toujours possible), dans un ordre fixe (tier, puis ID) : acheter ou vendre ne déplace aucune ligne. Le prix de vente affiché est le **prix net** (commission, fraîcheur, nuit… comprises), détaillable.
 * **Indicateurs :**
   * 📉 vert (prix très bas / production locale, « se revend mal ici ») · 🔥 orange (forte demande) · 🚀 rouge clignotant (explosion liée à un événement) ;
   * **origine** de chaque produit en boutique : production locale, socle officiel (Tier 0), arrivage du jour (complément neutre) ou arrivage d'événement ;
   * tags de vente de nuit (Festif, Diurne) parmi les tags du produit ;
-  * **rachat au cours** sur chaque ligne : les caisses que ce district rachète encore aujourd'hui au plein cours (côté acheteurs, indépendant du stock de la boutique), avec sa reconstitution du lendemain (*« 5 (+2 demain) »*) et une explication au survol ; au-delà, le prix saturé s'affiche ;
+  * **rachat au cours** sur chaque ligne : les caisses que ce district rachète encore aujourd'hui au plein cours (côté acheteurs, indépendant du stock de la boutique), avec sa reconstitution du lendemain (*« 5 (+2 demain) »*) et une explication en infobulle ; au-delà, le prix saturé s'affiche ;
   * **PMA** sur chaque ligne possédée, ex. *« En soute : 8 (acheté à 410 ₡/u) »*.
   * **État** sur chaque ligne possédée : caisses par état de fraîcheur, caisses abîmées, et délai avant que le lot le plus ancien pourrisse.
   * **Tendance** : variation du cours depuis la dernière observation dans ce district, si elle date de la veille.
@@ -61,7 +62,7 @@ Dans le bandeau, l'ICC prend la couleur de son palier (chap. 1), avec le nom du 
   * la sanction en cas de saisie (formalité, amende sur la valeur saisie, ou garde à vue pour le haut tier) ;
   * les agents qui l'apprécient (connivence) et les milices qui le prennent en premier ;
   * où le vendre : districts en Forte demande (jamais en boutique là-bas, sauf événement) et districts producteurs (en boutique chaque jour, moins cher) (profil public, chap. 2, vices de la Loterie compris), et le meilleur cours mémorisé ailleurs avec son ancienneté ;
-  * l'**historique des cours** observés dans le district actuel, en courbe, avec le cours normal (sans tendance ni événement) en repère ; la valeur de chaque jour au survol, et le tableau des valeurs pour les lecteurs d'écran.
+  * l'**historique des cours** observés dans le district actuel, en courbe, avec le cours normal (sans tendance ni événement) en repère ; la valeur de chaque jour au survol ou au toucher, et le tableau des valeurs pour les lecteurs d'écran.
 * **Filtres** en pastilles, un seul à la fois : Tous, En soute, chaque tier et chaque tag présents dans le tableau. Le filtre choisi reste d'un district à l'autre ; s'il ne garde plus aucun produit ici, tout s'affiche.
 * **Curseurs d'achat / vente :** 1, 5, MAX.
 * **Onglet lieux spéciaux :** accès direct aux services du district, coûts et cooldowns affichés. À la Laverie, le Cash-Puce reçu pour un retrait (commission déduite) et le nombre de jours qu'il faut à un dépôt pour couvrir cette commission au taux du jour.
@@ -74,7 +75,7 @@ Dans le bandeau, l'ICC prend la couleur de son palier (chap. 1), avec le nom du 
 * **Produits en soute par district :** sous chaque district, chaque produit en soute avec son statut public (Forte demande, Production) et son cours mémorisé, ou « jamais vu ».
 * **Marge estimée :** sous chaque district, les cours mémorisés des produits en soute portent la même icône de marge, estimée sur le cours vu moins la commission de puce (sans savoir-faire ni saturation).
 * **Mémoire de marché :** au toucher d'un district, derniers cours observés avec leur ancienneté (*« vu il y a 3 jours »*), en fourchette en cas de Sédation ; cours en temps réel avec `[CREW-02]`.
-* **Bulles d'indices :** sur la carte et dans la liste, mission de nuit acceptée, ronde renforcée révélée par `[CREW-01]`, after du couvre-feu de ce soir, pic suspect de la veille ; sur la carte, l'événement local du jour (son nom au survol), et dans la liste son nom, avec ses effets au toucher.
+* **Bulles d'indices :** sur la carte et dans la liste, mission de nuit acceptée, ronde renforcée révélée par `[CREW-01]`, after du couvre-feu de ce soir, pic suspect de la veille ; sur la carte, l'événement local du jour (son nom en infobulle), et dans la liste son nom, avec ses effets au toucher.
 * **Prévision (ligne de chaque destination) :** itinéraire et districts traversés, rations nécessaires, étoiles de sécurité, prix du Synthanol à l'arrivée (détaillable), lieux spéciaux, et le **risque d'interception** pour la soute actuelle (détaillable), avec la part de contrôles volants du district (fuite impossible), avant validation. La ronde renforcée, cachée, n'y figure pas ; tout le reste est exact.
 * **Dernier trajet :** ce que le dernier trajet a coûté hors barrage (usure du châssis ou caisses consommées pour refroidir le moteur).
 * **Verrous de progression :** tout ce qui n'est pas encore débloqué s'affiche quand même, avec sa condition et la progression vers elle (équipiers à la Cantine, mission de nuit au panneau du soir, modules et châssis au garage, services réservés des lieux spéciaux).

@@ -25,6 +25,7 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import { FOCUS_RING } from '../shared/focus.ts'
 import Gauge from '../shared/Gauge.tsx'
+import Tip from '../shared/Tip.tsx'
 import { ICC_TONE, TONE_TEXT, type Tone } from '../shared/styles.ts'
 import EventsTicker from './EventsTicker.tsx'
 import Ticker from './Ticker.tsx'
@@ -34,8 +35,8 @@ type CellProps = {
   tone?: Tone
   /** Précision sous la valeur (échéance, palier…) */
   note?: string
-  /** Texte complet au survol, quand la case est abrégée */
-  title?: string
+  /** Texte complet en infobulle, quand la case est abrégée */
+  info?: string
   children: ReactNode
 }
 
@@ -82,18 +83,18 @@ export default function StatusBar() {
               <PhaseIcon size={14} aria-hidden="true" />
               {t.format.dayShort(game.day, GAME_LENGTH_DAYS)}
             </Cell>
-            <Cell label={t.hud.cash} title={t.gauge.cash} tone="cash">
+            <Cell label={t.hud.cash} tone="cash">
               {credits(game.cash)}
             </Cell>
             <Cell
               label={t.gauge.debt}
               tone="danger"
               note={game.debtLate ? t.hud.debtLate : deadline === null ? undefined : t.hud.deadlineShort(deadline)}
-              title={debtNotes.join(' · ')}
+              info={debtNotes.length > 0 ? debtNotes.join(' · ') : undefined}
             >
               {credits(game.debt)}
             </Cell>
-            <Cell label={t.gauge.icc} tone={ICC_TONE[tier]} note={t.iccTier[tier]} title={t.iccTier[tier]}>
+            <Cell label={t.gauge.icc} tone={ICC_TONE[tier]} note={t.iccTier[tier]}>
               {percent(game.icc / ICC_MAX, 0)}
             </Cell>
             <Cell label={t.gauge.health} tone={game.health <= HEALTH_MAX * LOW_HEALTH ? 'danger' : 'success'}>
@@ -118,11 +119,14 @@ export default function StatusBar() {
           <button
             type="button"
             onClick={restart}
-            title={t.hud.newGame}
             aria-label={t.hud.newGame}
-            className={`shrink-0 rounded-md border border-line-strong p-1 text-ink-muted hover:text-ink ${FOCUS_RING}`}
+            className={`flex shrink-0 items-center gap-1 rounded-md border border-line-strong p-1 text-ink-muted hover:text-ink ${FOCUS_RING}`}
           >
             <RotateCcw size={14} aria-hidden="true" />
+            {/* Libellé visible là où il y a la place ; le nom accessible vient de aria-label */}
+            <span aria-hidden="true" className="hidden md:inline">
+              {t.hud.newGame}
+            </span>
           </button>
         </div>
 
@@ -176,10 +180,13 @@ export default function StatusBar() {
 }
 
 /** Case de la rangée de tête : libellé en petit, valeur en gras, précision dessous */
-function Cell({ label, tone = 'neutral', note, title, children }: CellProps) {
+function Cell({ label, tone = 'neutral', note, info, children }: CellProps) {
   return (
-    <div title={title} className="min-w-0 px-1 text-center first:pl-0 last:pr-0">
-      <div className="truncate text-xs text-ink-muted uppercase">{label}</div>
+    <div className="min-w-0 px-1 text-center first:pl-0 last:pr-0">
+      <div className="flex items-center justify-center gap-0.5 text-xs text-ink-muted uppercase">
+        <span className="truncate">{label}</span>
+        {info && <Tip label={label} content={info} />}
+      </div>
       <div className={`flex items-center justify-center gap-1 font-bold whitespace-nowrap ${TONE_TEXT[tone]}`}>{children}</div>
       {note && <div className={`truncate text-xs leading-tight opacity-80 ${TONE_TEXT[tone]}`}>{note}</div>}
     </div>

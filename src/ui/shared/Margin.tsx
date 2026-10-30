@@ -1,5 +1,6 @@
 import { Minus, TrendingDown, TrendingUp, type LucideIcon } from 'lucide-react'
 import { useI18n } from '../../i18n/useI18n.ts'
+import Tip from './Tip.tsx'
 
 type MarginProps = {
   /** Produit de la vente */
@@ -37,8 +38,10 @@ export default function Margin({ revenue, cost, showAmount = true, unit = '', cl
   const margin = revenue - cost
 
   return (
-    <span className={`inline-flex items-center gap-1 ${color} ${className}`} title={t.margin.trend[trend]}>
-      <Icon size={14} aria-hidden="true" />
+    <span className={`inline-flex items-center gap-1 ${color} ${className}`}>
+      <Tip content={t.margin.trend[trend]}>
+        <Icon size={14} aria-hidden="true" />
+      </Tip>
       {/* La couleur et l'icône ne suffisent pas : le verdict est aussi donné en texte aux lecteurs d'écran */}
       <span className="sr-only">{t.margin.trend[trend]}</span>
       {showAmount && (
