@@ -44,7 +44,7 @@ export function createInitialState(seed: number): GameState {
     dumped: [],
     plateDay: null,
     crew: { active: null, paidDay: null, hires: 0, lost: [], freeHire: false, payInKind: true },
-    exemption: SEDATION.protectionDays,
+    lucidity: SEDATION.lucidityDays,
     services: { uses: {}, lastDay: {} },
     morguePass: null,
     influence: null,

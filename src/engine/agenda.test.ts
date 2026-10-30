@@ -6,7 +6,7 @@ import { gameAt } from './test-helpers.ts'
 
 describe('agenda (chap. 7)', () => {
   it('liste les échéances sûres, triées, jusqu’à l’audit', () => {
-    const items = agenda(gameAt(3, { initialDebtPaid: true, debt: 0, exemption: 2 }))
+    const items = agenda(gameAt(3, { initialDebtPaid: true, debt: 0, lucidity: 2 }))
     const days = items.map((item) => item.day)
     expect(days).toEqual([...days].sort((a, b) => a - b))
     expect(items.filter((item) => item.kind === 'protection').map((item) => item.day)).toEqual(PROTECTION.days.filter((day) => day > 3))

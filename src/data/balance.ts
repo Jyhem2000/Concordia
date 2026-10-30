@@ -16,8 +16,8 @@ export const START_DISTRICT: DistrictId = 'D1'
 /** Cash-Puce de départ (chap. 1) */
 export const START_CASH = 2_000
 
-/** Exemption Métabolique (chap. 1) : jours de protection, malus de Sédation, fourchette de la mémoire brouillée */
-export const SEDATION = { protectionDays: 4, penalty: 0.1, memoryBlur: 0.2 }
+/** Lucidité (chap. 1) : jours avant la Sédation, malus de Sédation, fourchette de la mémoire brouillée */
+export const SEDATION = { lucidityDays: 4, penalty: 0.1, memoryBlur: 0.2 }
 
 /** Pompes officielles : fermées la nuit sous ce seuil d'ICC (chap. 3) */
 export const PUMP_NIGHT_MIN_ICC = 50

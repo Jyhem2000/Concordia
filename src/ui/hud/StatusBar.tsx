@@ -79,7 +79,7 @@ export default function StatusBar() {
   // Épuisé : tournée de nuit la veille, pas de nouvelle nuit sur la route ce soir (chap. 1)
   const exhausted = checkForceCurfew(game) === 'exhausted'
   const debtStatus = game.debtLate ? t.hud.debtLate : deadline === null ? undefined : t.hud.debtDue(t.hud.daysLeft(deadline - game.day))
-  const sedation = game.exemption === 0 ? t.hud.sedated : game.exemption === 1 ? t.hud.sedationTomorrow : undefined
+  const sedation = game.lucidity === 0 ? t.hud.sedated : game.lucidity === 1 ? t.hud.sedationTomorrow : undefined
   const PhaseIcon = game.phase === 'day' ? Sun : Moon
 
   return (
@@ -114,19 +114,19 @@ export default function StatusBar() {
           {/* Lucidité : jours avant la Sédation (chap. 1) */}
           <Cell
             label={t.hud.lucidity}
-            tone={game.exemption <= 1 ? 'danger' : 'info'}
-            valueKey={game.exemption}
+            tone={game.lucidity <= 1 ? 'danger' : 'info'}
+            valueKey={game.lucidity}
             alert={sedation ? 'danger' : undefined}
             info={
               <CellInfo
                 status={sedation ? [sedation] : undefined}
                 statusTone="danger"
-                text={t.hud.lucidityInfo(SEDATION.protectionDays, t.district[cantineDistrict()].name, percent(SEDATION.penalty, 0))}
+                text={t.hud.lucidityInfo(SEDATION.lucidityDays, t.district[cantineDistrict()].name, percent(SEDATION.penalty, 0))}
               />
             }
           >
             <Droplet size={14} aria-hidden="true" />
-            {t.hud.lucidityDays(game.exemption)}
+            {t.hud.lucidityDays(game.lucidity)}
           </Cell>
           <Cell
             label={t.gauge.icc}

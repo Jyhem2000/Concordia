@@ -705,8 +705,8 @@ export type GameState = {
     /** Le joueur permet de payer un salaire réduit en caisses (réglage) */
     payInKind: boolean
   }
-  /** Jours de protection de l'Exemption Métabolique ; 0 = Sédation (chap. 1) */
-  exemption: number
+  /** Jours de Lucidité ; 0 = Sédation (chap. 1) */
+  lucidity: number
   /** Lieux spéciaux : utilisations passées (coûts croissants) et dernier jour d'usage (cooldowns) */
   services: { uses: Partial<Record<ServiceKey, number>>; lastDay: Partial<Record<ServiceKey, number>> }
   /** Dernier jour de validité du laissez-passer de la Morgue */

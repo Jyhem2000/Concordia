@@ -22,7 +22,7 @@ export type AgendaItem =
 
 /**
  * Échéances d'aujourd'hui à l'audit, triées par jour : dette, collectes de Viktor (dette initiale soldée), fin de
- * l'Exemption (si l'on ne repasse pas à la Cantine), tirages de la Loterie, fin d'un vice, prophétie de Cassandre-88,
+ * la Lucidité (si l'on ne repasse pas à la Cantine), tirages de la Loterie, fin d'un vice, prophétie de Cassandre-88,
  * services et trappe de nouveau disponibles, dernier jour d'un contrat, audit.
  */
 export function agenda(state: GameState): AgendaItem[] {
@@ -35,7 +35,7 @@ export function agenda(state: GameState): AgendaItem[] {
   if (debt !== null) items.push({ kind: 'debt', day: debt })
   if (state.debtLate) items.push({ kind: 'debtLate', day })
   if (state.initialDebtPaid) for (const d of PROTECTION.days) if (d > day) items.push({ kind: 'protection', day: d })
-  items.push(state.exemption === 0 ? { kind: 'sedated', day } : { kind: 'sedation', day: day + state.exemption })
+  items.push(state.lucidity === 0 ? { kind: 'sedated', day } : { kind: 'sedation', day: day + state.lucidity })
   for (const d of LOTTERY.days) if (d > day) items.push({ kind: 'lottery', day: d })
   if (vice?.vice && vice.viceDistrict && day <= vice.viceUntil)
     items.push({ kind: 'vice', day: vice.viceUntil, productId: vice.vice, districtId: vice.viceDistrict })

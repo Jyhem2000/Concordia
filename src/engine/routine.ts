@@ -20,7 +20,7 @@ import { drawDayOffer } from './delivery.ts'
 import { drawAfter, drawNightOffer, reclaimSealed } from './night.ts'
 import { mountedEffect, recoverDumped } from './equipment.ts'
 import { changeHealth, gainRouteIcc, iccTier } from './gauges.ts'
-import { crewEffect, payCrew, refreshExemption } from './crew.ts'
+import { crewEffect, payCrew, refreshLucidity } from './crew.ts'
 import { drawEvents, hasEffect, heatWave } from './events.ts'
 import { drawMarkets } from './market.ts'
 import { drawPatrol } from './risk.ts'
@@ -226,9 +226,9 @@ function morningRoutine(state: GameState, night: Night): GameState {
     briefing.lockedIn = true
   }
 
-  // Exemption Métabolique : un jour de protection en moins, rendu au maximum en D1 de jour
-  s = { ...s, exemption: Math.max(0, s.exemption - 1) }
-  if (night !== 'cell') s = refreshExemption(s)
+  // Lucidité : un jour de moins, rendue au maximum en D1 de jour
+  s = { ...s, lucidity: Math.max(0, s.lucidity - 1) }
+  if (night !== 'cell') s = refreshLucidity(s)
 
   return remember({ ...s, briefing }, s.districtId)
 }

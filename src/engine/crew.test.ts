@@ -90,17 +90,17 @@ describe('bonus des équipiers', () => {
   })
 })
 
-describe('Exemption Métabolique et Sédation', () => {
+describe('Lucidité et Sédation', () => {
   it('perd un jour de protection par matin hors de D1, et revient au maximum en D1', () => {
-    const away = sleep(gameAt(3, { districtId: 'D2', exemption: 1 }))
-    expect(away.exemption).toBe(0)
+    const away = sleep(gameAt(3, { districtId: 'D2', lucidity: 1 }))
+    expect(away.lucidity).toBe(0)
     expect(isSedated(away)).toBe(true)
-    expect(sleep(gameAt(3, { exemption: 1 })).exemption).toBe(SEDATION.protectionDays)
+    expect(sleep(gameAt(3, { lucidity: 1 })).lucidity).toBe(SEDATION.lucidityDays)
   })
 
   it('réduit le bluff et brouille la mémoire, sauf avec le flux de Glitch', () => {
-    const sedated = gameAt(3, { districtId: 'D2', exemption: 0, interception: brc, cargo: [lot('T2-03', 2)] })
-    const clear = { ...sedated, exemption: 2 }
+    const sedated = gameAt(3, { districtId: 'D2', lucidity: 0, interception: brc, cargo: [lot('T2-03', 2)] })
+    const clear = { ...sedated, lucidity: 2 }
     expect(bluffChance(sedated).total).toBeCloseTo(bluffChance(clear).total - SEDATION.penalty)
     expect(isMemoryBlurred(sedated, 'D5')).toBe(true)
     expect(isMemoryBlurred(sedated, 'D2')).toBe(false)

@@ -9,7 +9,7 @@ import { keysOf } from './records.ts'
 import type { Crew, CrewId, DistrictId, GameState, ProductId } from './types.ts'
 
 /*
- * Équipage (chap. 4) et Exemption Métabolique (chap. 1) : recrutement à la Cantine, salaires
+ * Équipage (chap. 4) et Lucidité (chap. 1) : recrutement à la Cantine, salaires
  * payés d'avance, bonus des équipiers qui travaillent, Sédation.
  */
 
@@ -94,20 +94,20 @@ export function payCrew(state: GameState, inCell: boolean): { state: GameState; 
   return { state: { ...state, cash: state.cash - due, cargo, crew: { ...state.crew, paidDay: state.day } }, paid: due, crate }
 }
 
-// ─── Exemption Métabolique et Sédation (chap. 1) ───
+// ─── Lucidité et Sédation (chap. 1) ───
 
 /** Sédation : protection épuisée */
 export function isSedated(state: GameState): boolean {
-  return state.exemption === 0
+  return state.lucidity === 0
 }
 
-/** District de la Cantine des Chauffeurs, où l'Exemption Métabolique se recharge */
+/** District de la Cantine des Chauffeurs, où la Lucidité se recharge */
 export const cantineDistrict = (): DistrictId => LOCATIONS['LOC-D1-2'].district
 
 /** Se trouver au district de la Cantine de jour remet la protection au maximum */
-export function refreshExemption(state: GameState): GameState {
+export function refreshLucidity(state: GameState): GameState {
   const atCantine = state.districtId === cantineDistrict() && state.phase === 'day' && !state.dayOver
-  return atCantine ? { ...state, exemption: SEDATION.protectionDays } : state
+  return atCantine ? { ...state, lucidity: SEDATION.lucidityDays } : state
 }
 
 /** Mémoire de marché brouillée : Sédation, sauf flux pirate de Glitch, jamais dans le district actuel */

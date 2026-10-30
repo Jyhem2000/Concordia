@@ -4,7 +4,7 @@ import { PRODUCTS } from '../data/products.ts'
 import type { BreakdownSource } from './breakdown.ts'
 import { keysOf } from './records.ts'
 import type { Rng } from './rng.ts'
-import { refreshExemption } from './crew.ts'
+import { refreshLucidity } from './crew.ts'
 import { deliverDay } from './delivery.ts'
 import { deliverMission, injectServer, isOnMission } from './night.ts'
 import { loseHalfDay } from './time.ts'
@@ -191,9 +191,9 @@ export function arrive(state: GameState): GameState {
   const halted = hasEffect(state, state.districtId, 'halfDay') ? loseHalfDay(state) : state
   // Tournée de nuit hors mission arrivée sans garde à vue (contrôle franchi compris) : injection du Fantôme (chap. 4)
   const arrived = halted.phase === 'night' && !isOnMission(halted, halted.districtId) ? injectServer(halted) : halted
-  // Arriver en D1 de jour, c'est passer à la Cantine : l'Exemption Métabolique revient au maximum ;
+  // Arriver en D1 de jour, c'est passer à la Cantine : la Lucidité revient au maximum ;
   // arriver dans le district d'une commande du DSC (livraison du jour, mission de nuit), c'est livrer les caisses scellées
-  return refreshExemption(deliverDay(deliverMission(arrived)))
+  return refreshLucidity(deliverDay(deliverMission(arrived)))
 }
 
 // ─── Loterie ───
