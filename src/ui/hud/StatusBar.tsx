@@ -10,11 +10,12 @@ import {
   ICC_MAX,
   SEDATION,
   WANTED,
+  WORN,
 } from '../../data/balance.ts'
 import { cantineDistrict, crewEffect } from '../../engine/crew.ts'
 import { effectiveOffshoreRate, nextDebtDeadline, nextProtectionDay, offshoreBalance, protectionBreakdown } from '../../engine/finance.ts'
 import { checkForceCurfew } from '../../engine/actions.ts'
-import { iccRouteGainLeft, iccTier } from '../../engine/gauges.ts'
+import { iccRouteGainLeft, iccTier, isWorn } from '../../engine/gauges.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import ConfirmButton from '../shared/ConfirmButton.tsx'
@@ -54,8 +55,7 @@ type StatProps = {
   info?: string
 }
 
-/** Seuils de couleur de la Santé : rouge, puis orange (repères visuels seulement, aucun effet de jeu) */
-const LOW_HEALTH = 0.25
+/** Santé en orange sous cette part du maximum (repère visuel seulement) ; en rouge, chauffeur à bout (règle du chap. 1) */
 const MEDIUM_HEALTH = 0.5
 
 /** Bandeau supérieur permanent : huit cases (jour, lieu, Lucidité, ICC, argent, dette, Santé), puis Fiche S, équipier, collecte (chap. 7) */
@@ -78,6 +78,7 @@ export default function StatusBar() {
   const cashToday = game.cash - (game.journal.at(-1)?.start.cash ?? game.cash)
   // Épuisé : tournée de nuit la veille, pas de nouvelle nuit sur la route ce soir (chap. 1)
   const exhausted = checkForceCurfew(game) === 'exhausted'
+  const worn = isWorn(game)
   const debtStatus = game.debtLate ? t.hud.debtLate : deadline === null ? undefined : t.hud.debtDue(t.hud.daysLeft(deadline - game.day))
   const sedation = game.lucidity === 0 ? t.hud.sedated : game.lucidity === 1 ? t.hud.sedationTomorrow : undefined
   const PhaseIcon = game.phase === 'day' ? Sun : Moon
@@ -183,14 +184,14 @@ export default function StatusBar() {
           </Cell>
           <Cell
             label={t.gauge.health}
-            tone={game.health <= HEALTH_MAX * LOW_HEALTH ? 'danger' : game.health <= HEALTH_MAX * MEDIUM_HEALTH ? 'warning' : 'success'}
+            tone={worn ? 'danger' : game.health <= HEALTH_MAX * MEDIUM_HEALTH ? 'warning' : 'success'}
             valueKey={game.health}
-            alert={exhausted ? 'warning' : undefined}
+            alert={worn ? 'danger' : exhausted ? 'warning' : undefined}
             info={
               <CellInfo
-                status={exhausted ? [t.hud.exhausted] : undefined}
-                statusTone="warning"
-                text={exhausted ? t.hud.exhaustedInfo : t.hud.healthInfo}
+                status={[...(worn ? [t.hud.worn] : []), ...(exhausted ? [t.hud.exhausted] : [])]}
+                statusTone={worn ? 'danger' : 'warning'}
+                text={`${t.hud.healthInfo(WORN.healthBelow, percent(WORN.penalty, 0))}${exhausted ? ` ${t.hud.exhaustedInfo}` : ''}`}
               />
             }
           >
@@ -279,7 +280,7 @@ function CellInfo({ status, statusTone = 'neutral', text }: CellInfoProps) {
           {line}
         </p>
       ))}
-      <p className={status ? 'mt-1' : ''}>{text}</p>
+      <p className={status && status.length > 0 ? 'mt-1' : ''}>{text}</p>
     </div>
   )
 }

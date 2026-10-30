@@ -138,6 +138,7 @@ export const fr = {
     'rule.repair': 'Réparation (par PV)',
     'rule.refining': 'Affinage de Mama Rosa (Standard vendu Extra-Frais)',
     'rule.sedation': 'Sédation',
+    'rule.worn': 'Chauffeur à bout',
     'rule.cantine': 'Tarif syndical',
   } satisfies Record<RuleSource, string>,
 
@@ -247,6 +248,8 @@ export const fr = {
     neverSeen: 'jamais vu ailleurs',
     strongAt: (districts: string) => `Forte demande : ${districts}`,
     alerts: 'Alertes',
+    worn: (below: number, penalty: string) =>
+      `Chauffeur à bout (moins de ${below} PV) : bluff et fuite à −${penalty}. Le relais et la Morgue soignent.`,
     noAlert: 'Rien à signaler.',
     rotsTomorrow: (qty: number, product: string) => `${qty} ${product} pourri${qty > 1 ? 'ssent' : 't'} demain matin`,
     damaged: (qty: number, product: string) => `${qty} ${product} abîmée${qty > 1 ? 's' : ''}`,
@@ -348,8 +351,9 @@ export const fr = {
     exhausted: 'Épuisé',
     exhaustedInfo:
       "Tournée de nuit hier : pas de nouvelle nuit sur la route ce soir, sauf boisson pour une nuit blanche. Une nuit au relais ou en bivouac efface l'épuisement.",
-    healthInfo:
-      'Santé du chauffeur : à zéro, la partie est perdue. Fuite ratée, racket, aléas, canicule et cellule en coûtent ; le relais et la Morgue en rendent.',
+    healthInfo: (below: number, penalty: string) =>
+      `Santé du chauffeur : à zéro, la partie est perdue. Sous ${below} PV, chauffeur à bout : bluff et fuite à −${penalty}. Fuite ratée, racket, aléas, canicule et cellule en coûtent ; le relais et la Morgue en rendent.`,
+    worn: 'À bout : bluff et fuite diminués',
     newGame: 'Nouvelle partie',
     newGameConfirm: 'Abandonner la partie en cours et recommencer au Jour 1 ? Elle ne comptera pas au palmarès.',
     newGameAction: 'Abandonner et recommencer',

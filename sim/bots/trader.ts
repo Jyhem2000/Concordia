@@ -1,3 +1,4 @@
+import { isWorn } from '../../src/engine/gauges.ts'
 import {
   AFTER,
   DEBT_DAILY_RATE,
@@ -132,11 +133,8 @@ export type PlaceUse = 'advance' | 'surgery' | 'certificate' | 'pass' | 'influen
 
 const DEFAULT_PLACES: readonly PlaceUse[] = ['advance']
 
-/**
- * Seuils d'usage des lieux : chirurgie sous cette Santé (seul un coup dur près de zéro menace la partie), certificat et
- * chantage sous cet ICC
- */
-const PLACE_THRESHOLDS = { surgeryBelowHealth: 30, iccBelow: 60 }
+/** Seuil d'usage des lieux : certificat et chantage sous cet ICC (la chirurgie, elle, soigne le chauffeur à bout) */
+const PLACE_THRESHOLDS = { iccBelow: 60 }
 
 /** Karma-Cham : le surplus de revente des caisses gardées pour demain doit dépasser le prix de la panique d'autant */
 const KARMA_MARGIN = 1.2
@@ -665,7 +663,7 @@ function karmaOrder(view: GameState, plan: Plan, temperament: Temperament): Acti
 function specialPlaces(view: GameState, uses: (place: PlaceUse) => boolean, reserve: number, iccFloor: number): Action | null {
   const spare = (cost: number) => view.cash - cost >= reserve + CAPITAL
   if (!checkService(view, 'morgue')) {
-    if (uses('surgery') && view.health < PLACE_THRESHOLDS.surgeryBelowHealth && !checkMorgue(view, 'surgery') && spare(morgueCost(view, 'surgery'))) {
+    if (uses('surgery') && isWorn(view) && !checkMorgue(view, 'surgery') && spare(morgueCost(view, 'surgery'))) {
       return { type: 'morgue', service: 'surgery' }
     }
     if (uses('certificate') && view.icc < iccFloor && !checkMorgue(view, 'certificate') && spare(morgueCost(view, 'certificate'))) {

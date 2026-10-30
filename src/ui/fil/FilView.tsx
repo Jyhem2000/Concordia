@@ -1,5 +1,5 @@
 import { AlertTriangle, ArrowRight, Megaphone, TrendingUp } from 'lucide-react'
-import { AFTER } from '../../data/balance.ts'
+import { AFTER, WORN } from '../../data/balance.ts'
 import { DISTRICT_IDS } from '../../data/districts.ts'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
@@ -8,6 +8,7 @@ import { compartmentRoom } from '../../engine/compartment.ts'
 import { daysBeforeRot } from '../../engine/condition.ts'
 import { maxBuy, planTravel } from '../../engine/actions.ts'
 import { crewEffect, isMemoryBlurred, workingCrew } from '../../engine/crew.ts'
+import { isWorn } from '../../engine/gauges.ts'
 import { deliveryCrates, deliveryFee, deliveryOffer } from '../../engine/delivery.ts'
 import { bestRemembered, blurredQuote, estimatedUnitSale, productStatus, quote, shopProducts } from '../../engine/market.ts'
 import { missionFee, missionOffer, sealedCount } from '../../engine/night.ts'
@@ -205,6 +206,7 @@ function AlertsPanel({ onGo }: GoProps) {
     ]
   })
   const lines: Line[] = [
+    ...(isWorn(game) ? [line('worn', t.fil.worn(WORN.healthBelow, percent(WORN.penalty, 0)), 'danger')] : []),
     ...fuelLine,
     ...beacons,
     ...rotting.map((text): Line => ({ key: text, text, tone: 'danger', go: 'market' })),

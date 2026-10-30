@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { FRESHNESS, PUMP_NIGHT_MIN_ICC, SEDATION } from '../data/balance.ts'
+import { FRESHNESS, PUMP_NIGHT_MIN_ICC, SEDATION, WORN } from '../data/balance.ts'
 import { CANTINE } from '../data/locations.ts'
 import { CREW, CREW_HIRE_FEE } from '../data/vehicles.ts'
 import { fuelPrice } from './actions.ts'
 import { hireFee, isMemoryBlurred, isSedated, salary } from './crew.ts'
 import { NO_EVENTS } from './events.ts'
 import { offshoreInterestBreakdown } from './finance.ts'
-import { bluffChance, bribeChance, NO_OFFER } from './interception.ts'
+import { bluffChance, bribeChance, fleeChance, NO_OFFER } from './interception.ts'
 import { demandQuota, saleQuote } from './market.ts'
 import { riskBreakdown } from './risk.ts'
 import { sleep } from './routine.ts'
@@ -105,6 +105,16 @@ describe('Lucidité et Sédation', () => {
     expect(isMemoryBlurred(sedated, 'D5')).toBe(true)
     expect(isMemoryBlurred(sedated, 'D2')).toBe(false)
     expect(isMemoryBlurred({ ...sedated, crew: { ...sedated.crew, active: 'CREW-02', paidDay: 3 } }, 'D5')).toBe(false)
+  })
+})
+
+describe('chauffeur à bout (chap. 1)', () => {
+  it('réduit le bluff et la fuite sous le seuil de Santé', () => {
+    const fit = gameAt(3, { districtId: 'D2', interception: brc, cargo: [lot('T2-03', 2)] })
+    const worn = { ...fit, health: WORN.healthBelow - 1 }
+    expect(bluffChance(worn).total).toBeCloseTo(bluffChance(fit).total - WORN.penalty)
+    expect(fleeChance(worn).total).toBeCloseTo(fleeChance(fit).total - WORN.penalty)
+    expect(bluffChance({ ...fit, health: WORN.healthBelow }).total).toBeCloseTo(bluffChance(fit).total)
   })
 })
 

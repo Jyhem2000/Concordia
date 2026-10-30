@@ -10,7 +10,8 @@ const DEPOSIT = 10_000
 const atLaundry = (patch: Partial<GameState> = {}) => gameAt(4, { districtId: 'D5', cash: 50_000, ...patch })
 
 /** Nuit au bivouac depuis un placement plein, avec la graine donnée */
-const morningAfter = (seed: number) => run(atLaundry({ venture: { deposited: DEPOSIT, interest: 0 }, rng: seedRng(seed) }), { type: 'waitEvening' }, { type: 'sleep' })
+const morningAfter = (seed: number) =>
+  run(atLaundry({ venture: { deposited: DEPOSIT, interest: 0 }, rng: seedRng(seed) }), { type: 'waitEvening' }, { type: 'sleep' })
 
 describe('placement du Cartel (chap. 1)', () => {
   it('se remplit depuis le Cash-Puce et se vide avec la commission de la Laverie', () => {

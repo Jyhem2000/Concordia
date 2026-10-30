@@ -1,4 +1,4 @@
-import { HEALTH_MAX, ICC_DAILY_ROUTE_GAIN_CAP, ICC_MAX, ICC_TIERS } from '../data/balance.ts'
+import { HEALTH_MAX, ICC_DAILY_ROUTE_GAIN_CAP, ICC_MAX, ICC_TIERS, WORN } from '../data/balance.ts'
 import type { GameState, IccTier } from './types.ts'
 
 /** Palier de crédit social d'un ICC (chap. 1) */
@@ -21,4 +21,9 @@ export function gainRouteIcc(state: GameState, amount: number): { state: GameSta
 export function changeHealth(state: GameState, delta: number, floor = 0): { state: GameState; delta: number } {
   const health = Math.min(HEALTH_MAX, Math.max(Math.min(floor, state.health), state.health + delta))
   return { state: { ...state, health }, delta: health - state.health }
+}
+
+/** Chauffeur à bout (chap. 1) : Santé sous le seuil, malus au bluff et à la fuite */
+export function isWorn(state: Pick<GameState, 'health'>): boolean {
+  return state.health < WORN.healthBelow
 }

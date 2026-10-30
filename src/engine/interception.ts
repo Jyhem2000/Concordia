@@ -12,6 +12,7 @@ import {
   SEARCH,
   SEDATION,
   WANTED,
+  WORN,
 } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
 import { PRODUCTS } from '../data/products.ts'
@@ -22,6 +23,7 @@ import { breakdown, type Breakdown } from './breakdown.ts'
 import { baseValue, cargoUsed, giveCrates, isIllegal, maskedQty, ownedQty, ownsCrates, splitHidden, tagShare, tierShare } from './cargo.ts'
 import { breakOnFlee, breakOnShock, crateValue, explodeFlammable, paymentValue } from './condition.ts'
 import { crewEffect, isSedated, workingCrew } from './crew.ts'
+import { isWorn } from './gauges.ts'
 import { ejectMode, moduleTagFactor, mountedEffect, mountedWith } from './equipment.ts'
 import { arrive, tagFactor } from './events.ts'
 import { changeHealth, gainRouteIcc } from './gauges.ts'
@@ -152,6 +154,7 @@ export function bluffChance(state: GameState, { bluffAids = [] }: Tactics = NO_T
   const terminal = mountedWith(state, 'fakeTerminal')
   if (terminal) chance.add(terminal, MODULES[terminal].fakeTerminal?.bluffBonus ?? 0)
   chance.add('rule.sedation', sedation(state))
+  chance.add('rule.worn', worn(state))
   return chance.clamp(0, BLUFF.cap).build()
 }
 
@@ -213,6 +216,7 @@ export function fleeChance(state: GameState, { drop, dope }: Tactics = NO_TACTIC
   if (transponder) chance.add(state.vehicleId, transponder.fleeBonus)
   chance.add(workingCrew(state) ?? 'rule.sedation', crewEffect(state, 'fleeBonus') ?? 0)
   chance.add('rule.sedation', sedation(state))
+  chance.add('rule.worn', worn(state))
   return chance.clamp(0, cap, 'rule.flee-cap').build()
 }
 
@@ -243,6 +247,9 @@ export function checkpointPlace(state: GameState): 'street' | 'gallery' | 'docks
 
 /** Malus de Sédation (chap. 1), 0 sous protection */
 const sedation = (state: GameState) => (isSedated(state) ? -SEDATION.penalty : 0)
+
+/** Malus du chauffeur à bout (chap. 1), 0 au-dessus du seuil de Santé */
+const worn = (state: GameState) => (isWorn(state) ? -WORN.penalty : 0)
 
 /** Transpondeur d'urgence du véhicule, s'il agit dans le district actuel */
 function activeTransponder(state: GameState) {

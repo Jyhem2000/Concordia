@@ -67,6 +67,7 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 * **Échelle :** 0 à 100 PV. **Départ :** [`balance.ts`](../src/data/balance.ts). **À 0 PV :** mort (Game Over).
 * **Pertes létales :** échec de fuite (chap. 5), racket des milices de `[D4]`.
 * **Pertes non-létales** (plancher à 1 PV, ou défini à la source) : aléas routiers, coup de chaleur de `[EVT-G01]`, garde à vue, nuit blanche sous `[T2-05]`.
+* **Chauffeur à bout :** sous un seuil de PV, malus au bluff et à la fuite (`WORN` dans [`balance.ts`](../src/data/balance.ts)), jusqu'à ce que la Santé remonte.
 * **Soins :** sommeil au relais routier, `[LOC-D3-1]`.
 
 ### Intégrité du châssis (PV véhicule)
