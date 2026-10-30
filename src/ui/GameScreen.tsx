@@ -13,7 +13,8 @@ import MarketPanel from './market/MarketPanel.tsx'
 import PlacesPanel from './places/PlacesPanel.tsx'
 import RoadEventScreen from './road/RoadEventScreen.tsx'
 import RoadReportPanel from './road/RoadReportPanel.tsx'
-import TabBar, { type Tab } from './TabBar.tsx'
+import TabBar, { DesktopTabs, type Tab } from './TabBar.tsx'
+import { TAB_GROUP } from './tabs.ts'
 
 type Picked = {
   tab: Tab
@@ -27,7 +28,7 @@ type Picked = {
 
 /**
  * Écran unique (chap. 7). Téléphone : bandeau, comptes rendus, puis l'onglet ouvert (En bref, Marché, Lieux, Véhicule, Carte).
- * Desktop : En bref en bande pleine largeur, puis le marché à gauche et le reste à droite, sans onglets. Un barrage ou un aléa routier prend tout l'écran.
+ * Grand écran : trois onglets (En bref ; Marché & véhicule ; Carte & lieux), chacun en colonnes côte à côte. Un barrage ou un aléa routier prend tout l'écran.
  */
 export default function GameScreen() {
   const finished = useGameStore((s) => s.game.status === 'finished')
@@ -67,8 +68,9 @@ export default function GameScreen() {
     setReportsAt({ interceptionReport, roadReport, scene })
   }
   const reportsShown = reportsAt.scene === scene && !(picked.scene === scene && picked.byPlayer)
-  // Téléphone : seul l'onglet ouvert s'affiche ; desktop : tout
-  const shown = (of: Tab) => (tab === of ? 'flex motion-safe:animate-fade-in md:animate-none' : 'hidden md:flex')
+  // Téléphone : seul l'onglet ouvert s'affiche ; grand écran : tout son groupe, côte à côte
+  const shown = (of: Tab) =>
+    `${tab === of ? 'flex' : 'hidden'} ${TAB_GROUP[tab] === TAB_GROUP[of] ? 'md:flex' : 'md:hidden'} motion-safe:animate-fade-in`
 
   return (
     <div className="flex min-h-full flex-col">
@@ -81,7 +83,8 @@ export default function GameScreen() {
         <RoadEventScreen />
       ) : (
         <>
-          <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-4 p-4 pb-24 md:grid md:grid-cols-5 md:items-start md:pb-4">
+          <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-4 p-4 pb-24 md:grid md:grid-cols-5 md:content-start md:items-start md:pb-4">
+            <DesktopTabs current={tab} onPick={pick} />
             {/* Comptes rendus : au-dessus de tout, sur toute la largeur */}
             {reportsShown && (
               <div className="flex flex-col gap-4 empty:hidden md:col-span-5">
@@ -89,28 +92,26 @@ export default function GameScreen() {
                 <RoadReportPanel />
               </div>
             )}
-            {/* En bref : sur desktop, une bande pleine largeur en colonnes */}
+            {/* En bref : sur grand écran, ses colonnes thématiques */}
             <div
-              className={`${tab === 'fil' ? 'flex' : 'hidden'} min-w-0 flex-col gap-4 md:col-span-5 md:block md:columns-2 md:gap-4 md:*:mb-4 md:*:break-inside-avoid xl:columns-3`}
+              className={`min-w-0 flex-col gap-4 motion-safe:animate-fade-in md:col-span-5 md:grid-cols-2 md:items-start xl:grid-cols-3 ${tab === 'fil' ? 'flex' : 'hidden'} ${TAB_GROUP[tab] === 'brief' ? 'md:grid' : 'md:hidden'}`}
             >
               <FilView onGo={go} />
             </div>
+            {/* Marché & véhicule, puis Carte & lieux : le bloc principal à gauche, l'autre à droite */}
             <div id="tab-market" className={`min-w-0 scroll-mt-4 flex-col md:col-span-3 md:scroll-mt-48 ${shown('market')}`}>
               <MarketPanel />
             </div>
-            {/* Colonne de droite sur desktop ; sur téléphone, ses blocs se rangent directement dans la page */}
-            <div className="contents md:col-span-2 md:flex md:min-w-0 md:flex-col md:gap-4">
-              <div id="tab-vehicle" className={`scroll-mt-4 flex-col gap-4 md:scroll-mt-48 ${shown('vehicle')}`}>
-                <CargoView />
-                <PlacesPanel garage />
-              </div>
-              <div id="tab-places" className={`scroll-mt-4 flex-col gap-4 md:scroll-mt-48 ${shown('places')}`}>
-                <PlacesPanel />
-              </div>
-              <div id="tab-map" className={`scroll-mt-4 flex-col gap-4 md:scroll-mt-48 ${shown('map')}`}>
-                <EveningPanel />
-                <TravelPanel />
-              </div>
+            <div id="tab-vehicle" className={`min-w-0 scroll-mt-4 flex-col gap-4 md:col-span-2 md:scroll-mt-48 ${shown('vehicle')}`}>
+              <CargoView />
+              <PlacesPanel garage />
+            </div>
+            <div id="tab-map" className={`min-w-0 scroll-mt-4 flex-col gap-4 md:col-span-3 md:scroll-mt-48 ${shown('map')}`}>
+              <EveningPanel />
+              <TravelPanel />
+            </div>
+            <div id="tab-places" className={`min-w-0 scroll-mt-4 flex-col gap-4 md:col-span-2 md:scroll-mt-48 ${shown('places')}`}>
+              <PlacesPanel />
             </div>
           </main>
           <TabBar current={tab} tabs={tabs} onPick={pick} />

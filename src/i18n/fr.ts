@@ -182,6 +182,7 @@ export const fr = {
     fil: 'En bref',
     vehicle: 'Véhicule',
     map: 'Carte',
+    groups: { brief: 'En bref', trade: 'Marché & véhicule', road: 'Carte & lieux' },
   },
 
   /** Onglet En bref : tout ce qui compte aujourd'hui, avant d'aller au marché puis sur la carte (chap. 7) */

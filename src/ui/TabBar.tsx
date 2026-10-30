@@ -1,9 +1,16 @@
 import { Landmark, Map as MapIcon, Newspaper, Store, Truck, type LucideIcon } from 'lucide-react'
 import { useI18n } from '../i18n/useI18n.ts'
 import { FOCUS_RING } from './shared/focus.ts'
+import { TAB_GROUP, type Tab, type TabGroup } from './tabs.ts'
 
-/** Onglets du téléphone (chap. 7) ; sur desktop, tous les panneaux sont visibles */
-export type Tab = 'fil' | 'market' | 'places' | 'vehicle' | 'map'
+export type { Tab, TabGroup } from './tabs.ts'
+
+/** Onglet ouvert en choisissant un groupe : le premier de ses blocs */
+const GROUP_TAB: Record<TabGroup, Tab> = { brief: 'fil', trade: 'market', road: 'map' }
+
+const GROUPS: readonly TabGroup[] = ['brief', 'trade', 'road']
+
+const groupIcons: Record<TabGroup, LucideIcon> = { brief: Newspaper, trade: Store, road: MapIcon }
 
 type TabBarProps = {
   current: Tab
@@ -20,7 +27,7 @@ const icons: Record<Tab, LucideIcon> = {
   map: MapIcon,
 }
 
-/** Barre d'onglets fixée en bas de l'écran du téléphone, masquée sur desktop */
+/** Barre d'onglets fixée en bas de l'écran du téléphone, masquée sur grand écran */
 export default function TabBar({ current, tabs, onPick }: TabBarProps) {
   const { t } = useI18n()
   return (
@@ -41,6 +48,37 @@ export default function TabBar({ current, tabs, onPick }: TabBarProps) {
               >
                 <Icon size={20} aria-hidden="true" />
                 {t.tabs[tab]}
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+    </nav>
+  )
+}
+
+/** Onglets du grand écran, sous le bandeau, masqués sur téléphone */
+export function DesktopTabs({ current, onPick }: Omit<TabBarProps, 'tabs'>) {
+  const { t } = useI18n()
+  const group = TAB_GROUP[current]
+  return (
+    <nav aria-label={t.tabs.label} className="hidden md:col-span-5 md:block">
+      <ul className="flex gap-2 border-b border-line">
+        {GROUPS.map((id) => {
+          const Icon = groupIcons[id]
+          const active = id === group
+          return (
+            <li key={id}>
+              <button
+                type="button"
+                aria-pressed={active}
+                onClick={() => onPick(GROUP_TAB[id])}
+                className={`-mb-px flex items-center gap-2 border-b-2 px-4 py-2 text-sm uppercase ${FOCUS_RING} ${
+                  active ? 'border-accent font-bold text-accent' : 'border-transparent text-ink-muted hover:text-ink-soft'
+                }`}
+              >
+                <Icon size={16} aria-hidden="true" />
+                {t.tabs.groups[id]}
               </button>
             </li>
           )
