@@ -194,7 +194,9 @@ export const fr = {
     newsInfluence: 'Karma-Cham',
     newsTomorrow: 'Demain',
     noNews: "Rien à signaler aujourd'hui.",
-    today: "Aujourd'hui & ce soir",
+    today: "Aujourd'hui",
+    forYou: 'Pour vous',
+    goTo: (tab: string) => `Aller à l'onglet ${tab}`,
     deliveryOffer: (district: string, crates: number, fee: string) =>
       `Livraison officielle : ${crates} caisses scellées pour ${district}, prime ${fee} (à accepter sur la carte)`,
     deliveryActive: (district: string) => `Livraison officielle en cours vers ${district}`,

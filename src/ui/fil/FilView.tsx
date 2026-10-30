@@ -1,4 +1,4 @@
-import { AlertTriangle, Megaphone, Newspaper, TrendingUp } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Megaphone, TrendingUp } from 'lucide-react'
 import { AFTER } from '../../data/balance.ts'
 import { DISTRICT_IDS } from '../../data/districts.ts'
 import { PRODUCTS } from '../../data/products.ts'
@@ -14,9 +14,11 @@ import { missionFee, missionOffer, sealedCount } from '../../engine/night.ts'
 import type { ProductId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
+import type { Tab } from '../TabBar.tsx'
 import BriefingPanel from '../briefing/BriefingPanel.tsx'
 import Exposure from '../map/Exposure.tsx'
 import ObjectivesPanel from '../objectives/ObjectivesPanel.tsx'
+import Button from '../shared/Button.tsx'
 import Hint from '../shared/Hint.tsx'
 import Margin from '../shared/Margin.tsx'
 import Panel from '../shared/Panel.tsx'
@@ -31,23 +33,31 @@ type Line = {
   key: string
   text: string
   tone: Tone
+  /** Onglet où agir sur cette information */
+  go?: Tab
 }
 
+type FilViewProps = {
+  /** Ouvre un onglet (téléphone) ou amène à son bloc (desktop) */
+  onGo: (tab: Tab) => void
+}
+
+type GoProps = FilViewProps
+
 /** Ligne colorée d'un panneau du Fil */
-const line = (key: string, text: string, tone: Tone): Line => ({ key, text, tone })
+const line = (key: string, text: string, tone: Tone, go?: Tab): Line => ({ key, text, tone, go })
 
 type DealRowProps = {
   productId: ProductId
 }
 
-/** Onglet Le Fil (chap. 7) : ce qui compte aujourd'hui, avant d'aller au marché puis sur la carte */
-export default function FilView() {
+/** Onglet En bref (chap. 7) : ce qui compte aujourd'hui, avant d'aller au marché puis sur la carte */
+export default function FilView({ onGo }: FilViewProps) {
   return (
     <>
       <BriefingPanel />
-      <NewsPanel />
-      <TodayPanel />
-      <AlertsPanel />
+      <TodayPanel onGo={onGo} />
+      <AlertsPanel onGo={onGo} />
       <CalendarPanel />
       <DealsPanel />
       <ObjectivesPanel />
@@ -57,21 +67,11 @@ export default function FilView() {
   )
 }
 
-/** Flash Info d'Aeterna, puis les événements du jour, la Loterie et la rumeur du lendemain */
-function NewsPanel() {
-  const { t } = useI18n()
-  return (
-    <Panel icon={Newspaper} title={t.fil.news} collapseId="fil-news">
-      <FlashInfo />
-      <div className="mt-2">
-        <EventsList />
-      </div>
-    </Panel>
-  )
-}
-
-/** Commandes du jour et du soir, after du couvre-feu, ronde renforcée et pics suspects */
-function TodayPanel() {
+/**
+ * Aujourd'hui : le Message Aeterna, ce qui concerne le joueur (commandes du jour et du soir, contrat, after, ronde renforcée,
+ * pics suspects), chacun avec son raccourci vers l'onglet où agir, puis les actualités de la ville
+ */
+function TodayPanel({ onGo }: GoProps) {
   // Offres et primes se calculent sur l'état entier de la partie
   const game = useGameStore((s) => s.game)
   const { t, credits, multiplier, percent } = useI18n()
@@ -79,21 +79,33 @@ function TodayPanel() {
   const mission = game.phase === 'day' ? missionOffer(game) : null
   const patrol = crewEffect(game, 'revealsPatrol') ? game.patrolDistrict : null
   const lines: Line[] = [
-    ...(game.delivery ? [line('delivery', t.fil.deliveryActive(t.district[game.delivery.to].name), 'info')] : []),
-    ...(delivery ? [line('delivery', t.fil.deliveryOffer(t.district[delivery].name, deliveryCrates(game), credits(deliveryFee(game))), 'info')] : []),
+    ...(game.delivery ? [line('delivery', t.fil.deliveryActive(t.district[game.delivery.to].name), 'info', 'map')] : []),
+    ...(delivery
+      ? [line('delivery', t.fil.deliveryOffer(t.district[delivery].name, deliveryCrates(game), credits(deliveryFee(game))), 'info', 'map')]
+      : []),
     ...(game.contract
       ? [
           line(
             'contract',
             t.contract.fil(game.contract.qty, t.product[game.contract.productId].name, t.district[game.contract.to].name, game.contract.deadline),
             'warning',
+            game.districtId === game.contract.to ? 'market' : 'map',
           ),
         ]
       : []),
     ...(game.contractOffer && game.phase === 'day'
-      ? [line('contractOffer', t.contract.offerFil(t.product[game.contractOffer.productId].name, credits(game.contractOffer.reward)), 'warning')]
+      ? [
+          line(
+            'contractOffer',
+            t.contract.offerFil(t.product[game.contractOffer.productId].name, credits(game.contractOffer.reward)),
+            'warning',
+            'places',
+          ),
+        ]
       : []),
-    ...(mission ? [line('mission', t.fil.missionTonight(t.district[mission].name, sealedCount(game), credits(missionFee(game))), 'info')] : []),
+    ...(mission
+      ? [line('mission', t.fil.missionTonight(t.district[mission].name, sealedCount(game), credits(missionFee(game))), 'info', 'map')]
+      : []),
     line(
       'after',
       t.evening.after(
@@ -103,28 +115,27 @@ function TodayPanel() {
         percent(1 - AFTER.nightRiskFactor, 0),
       ),
       'event',
+      'map',
     ),
-    ...(patrol ? [line('patrol', t.fil.patrol(t.district[patrol].name), 'info')] : []),
+    ...(patrol ? [line('patrol', t.fil.patrol(t.district[patrol].name), 'info', 'map')] : []),
     ...(game.suspiciousPeaks.length > 0
-      ? [line('peaks', t.fil.peaks(game.suspiciousPeaks.map((id) => t.district[id].name).join(', ')), 'danger')]
+      ? [line('peaks', t.fil.peaks(game.suspiciousPeaks.map((id) => t.district[id].name).join(', ')), 'danger', 'map')]
       : []),
   ]
 
   return (
     <Panel icon={Megaphone} title={t.fil.today} collapseId="fil-today">
-      <ul className="flex flex-col gap-1 text-xs">
-        {lines.map(({ key, text, tone }) => (
-          <li key={key} className={TONE_TEXT[tone]}>
-            {text}
-          </li>
-        ))}
-      </ul>
+      <FlashInfo />
+      <h3 className="mt-3 mb-1.5 border-t border-line pt-2 text-xs font-bold text-ink-soft uppercase">{t.fil.forYou}</h3>
+      <Lines lines={lines} onGo={onGo} />
+      <h3 className="mt-3 mb-1.5 border-t border-line pt-2 text-xs font-bold text-ink-soft uppercase">{t.fil.news}</h3>
+      <EventsList />
     </Panel>
   )
 }
 
 /** Synthanol bas, balise à bord, caisses qui pourrissent demain, caisses abîmées, ce qu'une saisie coûterait, places libres au double fond */
-function AlertsPanel() {
+function AlertsPanel({ onGo }: GoProps) {
   // Fraîcheur, saisie, double fond et trajets se calculent sur l'état entier
   const game = useGameStore((s) => s.game)
   const { t, percent } = useI18n()
@@ -146,9 +157,9 @@ function AlertsPanel() {
   const longest = Math.max(...costs)
   const fuelLine: Line[] =
     game.fuel < shortest
-      ? [line('fuel', t.fil.fuelOut(game.fuel, shortest), 'danger')]
+      ? [line('fuel', t.fil.fuelOut(game.fuel, shortest), 'danger', 'places')]
       : game.fuel < longest
-        ? [line('fuel', t.fil.fuelLow(game.fuel, longest), 'warning')]
+        ? [line('fuel', t.fil.fuelLow(game.fuel, longest), 'warning', 'places')]
         : []
   // Balise d'un produit à bord : risque ajouté partout, sauf si l'équipière la brouille
   const beacons = products.flatMap((id) => {
@@ -163,19 +174,12 @@ function AlertsPanel() {
   const lines: Line[] = [
     ...fuelLine,
     ...beacons,
-    ...rotting.map((text): Line => ({ key: text, text, tone: 'danger' })),
-    ...damaged.map((text): Line => ({ key: text, text, tone: 'warning' })),
+    ...rotting.map((text): Line => ({ key: text, text, tone: 'danger', go: 'market' })),
+    ...damaged.map((text): Line => ({ key: text, text, tone: 'warning', go: 'market' })),
   ]
   return (
     <Panel icon={AlertTriangle} title={t.fil.alerts} collapseId="fil-alerts">
-      <ul className="flex flex-col gap-1 text-xs">
-        {lines.map(({ key, text, tone }) => (
-          <li key={key} className={TONE_TEXT[tone]}>
-            {text}
-          </li>
-        ))}
-        {room > 0 && <li className="text-night">{t.fil.compartmentRoom(room)}</li>}
-      </ul>
+      <Lines lines={[...lines, ...(room > 0 ? [line('room', t.fil.compartmentRoom(room), 'night', 'vehicle')] : [])]} onGo={onGo} />
       <Exposure className="mt-1" />
       {lines.length === 0 && room === 0 && <Hint>{t.fil.noAlert}</Hint>}
     </Panel>
@@ -250,5 +254,29 @@ function DealRow({ productId }: DealRowProps) {
         {strong.length > 0 && <span className="text-warning">· {t.fil.strongAt(strong.map((id) => t.district[id].name).join(', '))}</span>}
       </span>
     </li>
+  )
+}
+
+type LinesProps = GoProps & {
+  lines: readonly Line[]
+}
+
+/** Lignes d'information, chacune avec son raccourci vers l'onglet où agir */
+function Lines({ lines, onGo }: LinesProps) {
+  const { t } = useI18n()
+  return (
+    <ul className="flex flex-col gap-1.5 text-xs">
+      {lines.map(({ key, text, tone, go }) => (
+        <li key={key} className="flex items-start justify-between gap-2">
+          <span className={TONE_TEXT[tone]}>{text}</span>
+          {go && (
+            <Button size="sm" className="shrink-0" aria-label={t.fil.goTo(t.tabs[go])} onClick={() => onGo(go)}>
+              {t.tabs[go]}
+              <ArrowRight size={12} aria-hidden="true" />
+            </Button>
+          )}
+        </li>
+      ))}
+    </ul>
   )
 }

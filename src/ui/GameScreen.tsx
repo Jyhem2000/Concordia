@@ -40,6 +40,11 @@ export default function GameScreen() {
   const tabs: Tab[] = ['fil', 'market', 'places', 'vehicle', 'map']
   // Nouvelle scène : un nouveau matin ouvre Le Fil, un trajet le marché
   const tab = picked.scene === scene ? picked.tab : picked.day !== day ? 'fil' : 'market'
+  // Raccourci d'En bref : ouvre l'onglet sur téléphone, amène à son bloc sur desktop
+  const go = (next: Tab) => {
+    setPicked({ tab: next, scene, day })
+    requestAnimationFrame(() => document.getElementById(`tab-${next}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }
   const pick = (next: Tab) => {
     setPicked({ tab: next, scene, day })
     window.scrollTo({ top: 0 })
@@ -68,21 +73,21 @@ export default function GameScreen() {
             <div
               className={`${tab === 'fil' ? 'flex' : 'hidden'} min-w-0 flex-col gap-4 md:col-span-5 md:block md:columns-2 md:gap-4 md:*:mb-4 md:*:break-inside-avoid xl:columns-3`}
             >
-              <FilView />
+              <FilView onGo={go} />
             </div>
-            <div className={`min-w-0 flex-col md:col-span-3 ${shown('market')}`}>
+            <div id="tab-market" className={`min-w-0 scroll-mt-4 flex-col md:col-span-3 md:scroll-mt-48 ${shown('market')}`}>
               <MarketPanel />
             </div>
             {/* Colonne de droite sur desktop ; sur téléphone, ses blocs se rangent directement dans la page */}
             <div className="contents md:col-span-2 md:flex md:min-w-0 md:flex-col md:gap-4">
-              <div className={`flex-col gap-4 ${shown('vehicle')}`}>
+              <div id="tab-vehicle" className={`scroll-mt-4 flex-col gap-4 md:scroll-mt-48 ${shown('vehicle')}`}>
                 <CargoView />
                 <PlacesPanel garage />
               </div>
-              <div className={`flex-col gap-4 ${shown('places')}`}>
+              <div id="tab-places" className={`scroll-mt-4 flex-col gap-4 md:scroll-mt-48 ${shown('places')}`}>
                 <PlacesPanel />
               </div>
-              <div className={`flex-col gap-4 ${shown('map')}`}>
+              <div id="tab-map" className={`scroll-mt-4 flex-col gap-4 md:scroll-mt-48 ${shown('map')}`}>
                 <EveningPanel />
                 <TravelPanel />
               </div>
