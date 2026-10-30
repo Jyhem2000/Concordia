@@ -1,3 +1,4 @@
+import { countOf, lostCrates, purchasesOf, WEALTH_DAYS, wealthOn } from './journey.ts'
 import type { GameRecord } from './runner.ts'
 
 /*
@@ -31,6 +32,15 @@ export type BotSummary = {
   refused: number
   forcedSleeps: number
   violations: string[]
+  /** Parcours type, lu dans le carnet de route : patrimoine net médian au matin de jours repères */
+  wealthOn: Record<(typeof WEALTH_DAYS)[number], number | null>
+  /** Jour médian du premier équipement acquis, null si aucun */
+  firstEquipmentDay: number | null
+  /** Par partie : contrôles avec des caisses perdues, contrats livrés et manqués, coups de filet */
+  lossyControls: number
+  contractsDone: number
+  contractsFailed: number
+  raids: number
 }
 
 const quantile = (sorted: readonly number[], q: number) =>
@@ -71,11 +81,32 @@ export function summarize(records: readonly GameRecord[]): BotSummary {
     meanCustodyDays: mean(records.map((record) => record.custodyDays)),
     medianDebtPaidDay: paidDays.length > 0 ? quantile(paidDays, 0.5) : null,
     debtPaidShare: paidDays.length / Math.max(1, records.length),
-    purchases: count(records.flatMap((record) => [...new Set(record.purchases.map((purchase) => purchase.item))])),
+    purchases: count(records.flatMap((record) => [...new Set(purchasesOf(record).map((purchase) => purchase.item))])),
     refused: records.reduce((total, record) => total + record.refused, 0),
     forcedSleeps: records.reduce((total, record) => total + record.forcedSleeps, 0),
     violations: [...new Set(records.flatMap((record) => record.violations.map((violation) => `graine ${record.seed} — ${violation}`)))].slice(0, 20),
+    wealthOn: {
+      5: medianOrNull(records.flatMap((record) => wealthOn(record, 5) ?? [])),
+      10: medianOrNull(records.flatMap((record) => wealthOn(record, 10) ?? [])),
+      20: medianOrNull(records.flatMap((record) => wealthOn(record, 20) ?? [])),
+      30: medianOrNull(records.flatMap((record) => wealthOn(record, 30) ?? [])),
+    },
+    firstEquipmentDay: medianOrNull(records.flatMap((record) => purchasesOf(record)[0]?.day ?? [])),
+    lossyControls: mean(records.map((record) => countOf(record, 'control', lostCrates))),
+    contractsDone: mean(records.map((record) => countOf(record, 'contractDone'))),
+    contractsFailed: mean(records.map((record) => countOf(record, 'contractFailed'))),
+    raids: mean(records.map((record) => countOf(record, 'raid'))),
   }
+}
+
+/** Médiane d'une liste, ou null si elle est vide */
+function medianOrNull(values: readonly number[]): number | null {
+  return values.length === 0
+    ? null
+    : quantile(
+        [...values].sort((a, b) => a - b),
+        0.5,
+      )
 }
 
 const pct = (share: number) => `${Math.round(share * 100)} %`
@@ -146,6 +177,17 @@ export function renderReport(title: string, notes: readonly string[], summaries:
     '| Bot | Parties | Survie | dont ruinés à 0 ₡ | Défaites | Fins | Score moyen | Score p10 / médiane / p90 | Score médian des survivants | Dette soldée (jour médian) | Interceptions | Jours de garde à vue | Équipement acheté |',
     '| :--- | ---: | ---: | ---: | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |',
     ...rows,
+    '',
+    '## Parcours type',
+    '',
+    'Lu dans le carnet de route de chaque partie : patrimoine net médian (cash + offshore + placement − dette) au matin des jours repères, parmi les parties encore en cours ; jour médian du premier équipement ; moyennes par partie.',
+    '',
+    `| Bot | ${WEALTH_DAYS.map((day) => `Patrimoine J${day}`).join(' | ')} | 1er équipement | Contrôles avec pertes | Contrats livrés / manqués | Coups de filet |`,
+    `| :--- | ${WEALTH_DAYS.map(() => '---:').join(' | ')} | ---: | ---: | ---: | ---: |`,
+    ...summaries.map(
+      (s) =>
+        `| ${s.bot} | ${WEALTH_DAYS.map((day) => (s.wealthOn[day] === null ? '—' : credits(s.wealthOn[day] ?? 0))).join(' | ')} | ${s.firstEquipmentDay === null ? '—' : `J${s.firstEquipmentDay}`} | ${s.lossyControls.toFixed(1)} | ${s.contractsDone.toFixed(1)} / ${s.contractsFailed.toFixed(1)} | ${s.raids.toFixed(1)} |`,
+    ),
     '',
     '## Défauts relevés',
     defects.length > 0 ? defects.join('\n') : 'Aucun : pas d’action refusée, pas de sommeil forcé, aucun invariant violé.',

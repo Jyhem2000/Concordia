@@ -1,9 +1,8 @@
 import { ROAD_EVENTS } from '../src/data/events.ts'
 import { applyAction, type Action } from '../src/engine/actions.ts'
-import { scoreOf } from '../src/engine/finance.ts'
 import { isDefeat } from '../src/engine/routine.ts'
 import { createInitialState } from '../src/engine/state.ts'
-import type { EndingId, GameState, InterceptionMove } from '../src/engine/types.ts'
+import type { DayLog, EndingId, GameState, InterceptionMove } from '../src/engine/types.ts'
 import { violations } from './invariants.ts'
 import { publicView } from './view.ts'
 
@@ -38,8 +37,6 @@ export type GameRecord = {
   nightTrips: number
   /** Services des lieux spéciaux utilisés (par type d'action) */
   services: Record<string, number>
-  /** Achats d'équipement, avec leur jour */
-  purchases: { item: string; day: number }[]
   /** Actions refusées par le moteur : défauts du bot */
   refused: number
   /** Journées où le plafond d'actions a forcé le sommeil */
@@ -48,8 +45,8 @@ export type GameRecord = {
   violations: string[]
   /** Progression des grandes fins à la dernière journée : commandes VIP, injections, ICC */
   progress: { vipOrders: number; injections: number; icc: number }
-  /** Fin de chaque journée : Cash-Puce, offshore, dette, ICC */
-  daily: { day: number; cash: number; offshore: number; debt: number; icc: number }[]
+  /** Carnet de route de la partie, tenu par le moteur : patrimoine de chaque matin, achats, ventes, faits marquants */
+  journal: readonly DayLog[]
 }
 
 /** Actions des lieux spéciaux comptées dans les mesures */
@@ -90,12 +87,11 @@ export function playGame(bot: Bot, seed: number): GameRecord {
     roadEvents: 0,
     nightTrips: 0,
     services: {},
-    purchases: [],
     refused: 0,
     forcedSleeps: 0,
     violations: [],
     progress: { vipOrders: 0, injections: 0, icc: state.icc },
-    daily: [],
+    journal: [],
   }
   let actionsToday = 0
 
@@ -123,6 +119,7 @@ export function playGame(bot: Bot, seed: number): GameRecord {
   record.score = ending?.score ?? 0
   record.lastDay = state.day
   record.progress = { vipOrders: state.progress.vipOrders, injections: state.progress.injections, icc: state.icc }
+  record.journal = state.journal
   return record
 }
 
@@ -153,12 +150,5 @@ function observe(record: GameRecord, before: GameState, after: GameState, action
   if (SERVICE_ACTIONS.includes(action.type)) {
     const key = action.type === 'morgue' ? `morgue:${action.service}` : action.type
     record.services[key] = (record.services[key] ?? 0) + 1
-  }
-  if (after.vehicleId !== before.vehicleId) record.purchases.push({ item: after.vehicleId, day: after.day })
-  for (const id of after.modules.owned) if (!before.modules.owned.includes(id)) record.purchases.push({ item: id, day: after.day })
-  if (after.crew.active && after.crew.active !== before.crew.active) record.purchases.push({ item: after.crew.active, day: after.day })
-  // Fin de journée : la routine de 06h00 vient de passer (ou la partie s'achève)
-  if (after.day !== before.day || after.status !== 'playing') {
-    record.daily.push({ day: before.day, cash: before.cash, offshore: scoreOf(before), debt: before.debt, icc: before.icc })
   }
 }

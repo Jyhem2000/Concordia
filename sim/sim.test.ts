@@ -50,7 +50,7 @@ describe('parties simulées', () => {
     for (const seed of [1, 2, 3]) {
       const record = playGame(traderBot(PLANS[2], TEMPERAMENTS[1], 'score'), seed)
       expect(record).toMatchObject({ refused: 0, forcedSleeps: 0, violations: [] })
-      expect(record.daily.length).toBeGreaterThan(0)
+      expect(record.journal.length).toBeGreaterThan(0)
     }
   })
 

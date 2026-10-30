@@ -13,12 +13,12 @@ export function passesFilter(filter: MarketFilter, productId: ProductId): boolea
   return (filter.tier === null || product.tier === filter.tier) && (filter.tag === null || product.tags.includes(filter.tag))
 }
 
-/** Tris du tableau des cours (chap. 7) : tier puis nom, prix croissant ou décroissant, nom */
-export type MarketSort = 'tier' | 'priceAsc' | 'priceDesc' | 'name'
+/** Tris du tableau des cours (chap. 7) : par tier, par prix croissant ou décroissant */
+export type MarketSort = 'tier' | 'priceAsc' | 'priceDesc'
 
-export const MARKET_SORTS: readonly MarketSort[] = ['tier', 'priceAsc', 'priceDesc', 'name']
+export const MARKET_SORTS: readonly MarketSort[] = ['tier', 'priceAsc', 'priceDesc']
 
-/** Produits triés ; `price` : cours ici, `name` : nom affiché. Le nom départage toujours, pour un ordre stable */
+/** Produits triés ; `price` : cours ici, `name` : nom affiché, qui départage toujours (ordre stable, sans être un tri proposé) */
 export function sortProducts(
   ids: readonly ProductId[],
   sort: MarketSort,
@@ -30,7 +30,6 @@ export function sortProducts(
     tier: (a, b) => PRODUCTS[a].tier - PRODUCTS[b].tier || byName(a, b),
     priceAsc: (a, b) => price(a) - price(b) || byName(a, b),
     priceDesc: (a, b) => price(b) - price(a) || byName(a, b),
-    name: byName,
   }
   return [...ids].sort(compare[sort])
 }

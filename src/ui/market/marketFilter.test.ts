@@ -25,10 +25,9 @@ describe('tri du marché (chap. 7)', () => {
   const price = (id: string) => ({ 'T2-03': 500, 'T0-01': 10, 'T1-04': 90 })[id] ?? 0
   const name = (id: string) => ({ 'T2-03': 'Vinyles', 'T0-01': 'Bio-Briques', 'T1-04': 'Nouilles' })[id] ?? ''
 
-  it('trie par tier puis nom, par prix dans les deux sens, ou par nom', () => {
+  it('trie par tier, ou par prix dans les deux sens, le nom départageant', () => {
     expect(sortProducts(ids, 'tier', price, name)).toEqual(['T0-01', 'T1-04', 'T2-03'])
     expect(sortProducts(ids, 'priceAsc', price, name)).toEqual(['T0-01', 'T1-04', 'T2-03'])
     expect(sortProducts(ids, 'priceDesc', price, name)).toEqual(['T2-03', 'T1-04', 'T0-01'])
-    expect(sortProducts(ids, 'name', price, name)).toEqual(['T0-01', 'T1-04', 'T2-03'])
   })
 })

@@ -2,6 +2,7 @@ import type { ModuleId } from '../src/engine/types.ts'
 import { traderBot, type Objective, type PlaceUse, type Plan, type Temperament } from './bots/trader.ts'
 import { PLANS, TEMPERAMENTS } from './plans.ts'
 import { playGame, type Bot, type GameRecord } from './runner.ts'
+import { purchasesOf } from './journey.ts'
 
 /*
  * Tests par retrait (chap. 8, campagne 4) : chaque élément est mesuré dans le plan qui le vise,
@@ -30,7 +31,7 @@ const temperament = (name: string): Temperament => {
   return found
 }
 
-const bought = (item: string) => (record: GameRecord) => record.purchases.some((purchase) => purchase.item === item)
+const bought = (item: string) => (record: GameRecord) => purchasesOf(record).some((purchase) => purchase.item === item)
 const usedService = (key: string) => (record: GameRecord) => (record.services[key] ?? 0) > 0
 
 /** Une paire : le plan tel quel, puis le plan sans l'élément */

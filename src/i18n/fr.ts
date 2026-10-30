@@ -751,7 +751,7 @@ export const fr = {
     filterTier: (tier: number) => `Tier ${tier}`,
     resetFilters: 'Effacer',
     sortLabel: 'Trier les produits',
-    sort: { tier: 'Tier puis nom', priceAsc: 'Prix croissant', priceDesc: 'Prix décroissant', name: 'Nom (A → Z)' },
+    sort: { tier: 'Tier', priceAsc: 'Prix croissant', priceDesc: 'Prix décroissant' },
     noMatch: 'Aucun produit de ce filtre ici.',
     streetOnly: 'Passé 20h00 : seul le marché de rue est ouvert.',
     sellAll: (amount: string) => `Vendre tout (${amount})`,

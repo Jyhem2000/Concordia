@@ -83,6 +83,8 @@ L'objectif change surtout les décisions de fin de partie et quelques contrainte
 * **Synergies jouées par le marchand :** la revente espérée est celle que le moteur calcule (fraîcheur, savoir-faire de `[CREW-03]`, vente de nuit et after, casse), pas le seul cours ; la corruption offre une caisse appréciée des agents quand la soute en contient ; la fuite est estimée avec ses conséquences réelles (pare-buffles, transpondeur) et l'éjection avec la récupération moyenne de la trappe ; un plan « noctambule » (Nuit festive) tourne la nuit dès que la soute le justifie, et de jour garde (ou achète) le festif pour l'after du soir quand sa revente escomptée y vaut mieux, un plan « coureur » (pare-buffles, brouilleur) préfère la fuite à espérance proche ; le laissez-passer de la Morgue n'est acheté qu'avec du chimique illégal en soute ; aucun équipement n'est acheté après le Jour 18 (pas rentabilisé avant l'audit) ; la livraison officielle du jour est acceptée quand sa prime, avec moins de place pour acheter, vaut mieux que le meilleur trajet libre.
 * **Équipier à débloquer :** si l'équipier du plan attend une première Fiche S (Glitch), le marchand fait une tournée clandestine pour l'obtenir ; les autres arrivent d'eux-mêmes (premier contrôle franchi, ventes de périssables).
 * **Dette de fin de partie :** une dette apparue tard (collecte de Viktor sur un Cash-Puce vide) est soldée en retirant de la Laverie ce qui manque, puis en passant à Hives : sinon, une dette de quelques centaines de ₡ valait une défaite.
+* **Contrats de la Pègre :** le marchand accepte l'offre de Viktor si la boutique de Hives a toutes ses caisses, qu'elles ne sont pas périssables, que le trajet vers la destination reste sous son risque accepté et qu'il peut les payer en gardant sa réserve ; il les achète aussitôt, ne les revend pas, et la prime (plus la pénalité évitée la veille de l'échéance) pèse dans le choix de la route.
+* **Placement du Cartel :** une part de l'argent mis à l'abri selon le tempérament (rien en Prudent, un quart en Équilibré, la moitié en Casse-cou), le reste à l'offshore.
 * **Ne jamais rester garé sans raison :** rien de rentable sous le risque accepté, le marchand fait le trajet sans rien acheter, ou va relever les cours du district vu le moins récemment ; à sec, il garde le carburant et pas sa réserve, et ne vise Hives (avance de survie) que s'il peut payer le carburant du trajet, sinon un district plus proche ; ruiné (Cash-Puce et soute réunis sous la moitié de son fonds de roulement), il revend tout, même à perte, caisses de couverture comprises, et demande l'avance de survie ; un passage chez Viktor vaut les intérêts évités sur ce qu'il peut rembourser, plus le taux majoré évité s'il solde la dette initiale avant l'échéance du retard (il y engage alors tout sauf le carburant, jamais l'avance qu'il vient d'emprunter).
 * **Par étapes :**
   1. moteur, invariants, Novice et Aléatoire (contrôle), marchand avec les plans qui ne demandent qu'un réglage (Sans build, Chaîne du froid, Couverture légale, Électronique, Nuit festive, Corruption, Rentier, Haut tier), objectifs « score maximal » et « survivre » : campagnes Contrôle et 1 ;
@@ -124,13 +126,13 @@ Croiser tous les plans, tempéraments et objectifs donnerait plus d'une centaine
 | **Contrôle** | Novice et Aléatoire, à chaque version d'équilibrage | Le jeu reste-t-il jouable et robuste ? |
 
 ## Mesures relevées par partie
-* Fin obtenue et score offshore ; jour de la mort ou du Game Over le cas échéant.
+* Fin obtenue et score (offshore + placement du Cartel) ; jour de la mort ou du Game Over le cas échéant.
 * Survivant ruiné : partie finie sans défaite, mais à 0 ₡ d'offshore. Le rapport le compte dans la survie et le montre à part : un joueur ruiné a passé l'audit, sans rien gagner.
 * Jour où la dette initiale est soldée ; dette maximale atteinte.
 * Nombre d'interceptions, option choisie, issue, pertes (₡, caisses, ICC, Santé, châssis), jours de garde à vue.
 * Marge nette par trajet, ventes saturées, pics suspects déclenchés, caisses perdues (fraîcheur, casse, explosions).
-* Équipements achetés et jour d'achat ; services des lieux spéciaux utilisés.
-* Courbes journalières : Cash-Puce, offshore, dette, ICC, Santé, châssis.
+* Services des lieux spéciaux utilisés, contrats de la Pègre et placement du Cartel compris.
+* **Carnet de route de la partie** (chap. 7), tenu par le moteur et gardé tel quel par le simulateur, sans relevé en double (`sim/journey.ts`) : patrimoine de chaque matin, achats et ventes, faits marquants (équipements et leur jour, contrôles et pertes, contrats livrés ou manqués, coups de filet…). Le rapport en tire un tableau **Parcours type** par bot : patrimoine net médian au matin des J5, J10, J20 et J30 (parmi les parties encore en cours), jour médian du premier équipement, et par partie les contrôles avec pertes, les contrats livrés et manqués, les coups de filet.
 
 ## Critères d'équilibrage
 Cibles de départ, à recaler avec les premières mesures.
