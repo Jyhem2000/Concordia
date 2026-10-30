@@ -191,6 +191,9 @@ const VALUE = {
 /** Contrat accepté seulement si le Cash-Puce, réserve gardée, couvre la valeur de base de ses caisses × ce facteur */
 const CONTRACT_MARGIN = 1.2
 
+/** Risque maximal d'un trajet de contrat : des caisses saisies, c'est la prime perdue et une pénalité */
+const CONTRACT_MAX_RISK = 0.35
+
 /** Marge minimale espérée pour acheter, en part du prix d'achat */
 const MIN_MARGIN = 0.15
 
@@ -554,10 +557,11 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
   if (
     offer &&
     !view.contract &&
+    view.initialDebtPaid &&
     !checkService(view, 'debt') &&
     (view.markets[view.districtId].stock[offer.productId] ?? 0) >= offer.qty &&
     !PRODUCTS[offer.productId].tags.includes('TAG-PERISHABLE') &&
-    contractRisk(view, offer) <= temperament.maxRisk &&
+    contractRisk(view, offer) <= Math.min(temperament.maxRisk, CONTRACT_MAX_RISK) &&
     view.cash - reserve >= offer.qty * PRODUCTS[offer.productId].basePrice * CONTRACT_MARGIN
   ) {
     return { type: 'acceptContract' }

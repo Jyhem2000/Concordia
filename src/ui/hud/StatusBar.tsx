@@ -1,4 +1,4 @@
-import { Crosshair, Droplet, HandCoins, Hourglass, MapPin, Moon, RotateCcw, Sun, UserRound, type LucideIcon } from 'lucide-react'
+import { Crosshair, Droplet, HandCoins, Hourglass, Moon, RotateCcw, Sun, UserRound, type LucideIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
 import {
@@ -31,6 +31,8 @@ type CellProps = {
   noteTone?: Tone
   /** Explication de la règle, en infobulle */
   info?: string
+  /** Valeur longue (nom de district) : en plus petit, sur deux lignes au besoin */
+  wrap?: boolean
   /** Valeur affichée : quand elle change, la case le montre */
   valueKey: string | number
   children: ReactNode
@@ -51,7 +53,7 @@ type StatProps = {
 const LOW_HEALTH = 0.25
 const MEDIUM_HEALTH = 0.5
 
-/** Bandeau supérieur permanent : jour, argent, ICC et Santé en tête, puis district, moment et états du chauffeur (chap. 7) */
+/** Bandeau supérieur permanent : huit cases (jour, lieu, argent, ICC, Santé, Exemption), puis Fiche S, équipier, collecte (chap. 7) */
 export default function StatusBar() {
   // Les échéances et la collecte se calculent sur l'état entier de la partie
   const game = useGameStore((s) => s.game)
@@ -76,11 +78,21 @@ export default function StatusBar() {
   return (
     <header className="z-20 border-b border-line bg-base/95 backdrop-blur md:sticky md:top-0">
       <div className="mx-auto max-w-7xl px-3 py-2 text-sm">
-        {/* Téléphone : deux rangées de trois cases ; desktop : une rangée de six */}
-        <div className="grid grid-cols-3 gap-y-2 sm:grid-cols-6 sm:divide-x sm:divide-line">
+        {/* Téléphone : deux rangées de quatre cases ; desktop : une rangée de huit */}
+        <div className="grid grid-cols-4 gap-y-2 sm:grid-cols-8 sm:divide-x sm:divide-line">
           <Cell label={t.hud.day} tone="accent" valueKey={`${game.day}-${game.phase}`} note={t.moment.short[moment]}>
             <PhaseIcon size={14} aria-hidden="true" />
             {t.format.dayShort(game.day, GAME_LENGTH_DAYS)}
+          </Cell>
+          <Cell
+            label={t.hud.place}
+            tone="neutral"
+            valueKey={game.districtId}
+            note={moment === 'curfew' ? undefined : tripDone ? t.moment.tripDoneShort : t.moment.tripLeftShort}
+            noteTone={tripDone ? 'muted' : 'success'}
+            wrap
+          >
+            {t.district[game.districtId].name}
           </Cell>
           <Cell
             label={t.hud.cash}
@@ -128,38 +140,20 @@ export default function StatusBar() {
           >
             {t.hud.healthValue(number(game.health, 0))}
           </Cell>
-        </div>
-        <div className="mt-2 flex items-center gap-2 text-xs">
-          <span className="flex shrink-0 items-center gap-1 font-bold text-ink-soft">
-            <MapPin size={12} aria-hidden="true" />
-            {t.district[game.districtId].name}
-          </span>
-          <span className="min-w-0 flex-1 truncate text-ink-muted">{moment !== 'curfew' && (tripDone ? t.moment.tripDone : t.moment.tripLeft)}</span>
-          <ConfirmButton
-            size="sm"
-            onClick={newGame}
-            aria-label={t.hud.newGame}
-            confirm={{ title: t.hud.newGame, message: t.hud.newGameConfirm, action: t.hud.newGameAction }}
+          {/* Exemption Métabolique : jours de protection, alerte la veille, Sédation à zéro (chap. 1) */}
+          <Cell
+            label={t.hud.exemptionLabel}
+            tone={game.exemption <= 1 ? 'danger' : 'info'}
+            valueKey={game.exemption}
+            note={game.exemption === 0 ? t.hud.sedatedShort : game.exemption === 1 ? t.hud.sedationTomorrowShort : undefined}
+            info={t.hud.exemptionInfo(SEDATION.protectionDays, t.district[cantineDistrict()].name, percent(SEDATION.penalty, 0))}
           >
-            <RotateCcw size={14} aria-hidden="true" />
-            {/* Libellé visible là où il y a la place ; le nom accessible vient de aria-label */}
-            <span aria-hidden="true" className="hidden md:inline">
-              {t.hud.newGame}
-            </span>
-          </ConfirmButton>
+            <Droplet size={14} aria-hidden="true" />
+            {t.hud.exemptionDays(game.exemption)}
+          </Cell>
         </div>
 
-        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-          {/* Exemption Métabolique : jours de protection, alerte la veille, Sédation à 0 (chap. 1) */}
-          <Stat
-            icon={Droplet}
-            label={t.hud.exemption(game.exemption)}
-            note={
-              game.exemption === 0 ? t.hud.sedated : game.exemption === 1 ? t.hud.sedationTomorrow(t.district[cantineDistrict()].name) : undefined
-            }
-            tone={game.exemption <= 1 ? 'danger' : 'info'}
-            info={t.hud.exemptionInfo(SEDATION.protectionDays, t.district[cantineDistrict()].name, percent(SEDATION.penalty, 0))}
-          />
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
           {game.wanted > 0 && <Stat icon={Crosshair} label={t.hud.wanted(game.wanted, WANTED.maxLevel)} tone="danger" />}
           {game.crew.active && (
             <Stat
@@ -172,6 +166,19 @@ export default function StatusBar() {
           {protectionDay !== null && (
             <Stat icon={HandCoins} label={t.hud.nextProtection(protectionDay, credits(protectionBreakdown(game).total))} tone="warning" />
           )}
+          <ConfirmButton
+            className="ml-auto"
+            size="sm"
+            onClick={newGame}
+            aria-label={t.hud.newGame}
+            confirm={{ title: t.hud.newGame, message: t.hud.newGameConfirm, action: t.hud.newGameAction }}
+          >
+            <RotateCcw size={14} aria-hidden="true" />
+            {/* Libellé visible là où il y a la place ; le nom accessible vient de aria-label */}
+            <span aria-hidden="true" className="hidden md:inline">
+              {t.hud.newGame}
+            </span>
+          </ConfirmButton>
         </div>
       </div>
       {game.day >= AUDIT_COUNTDOWN_DAY && (
@@ -195,7 +202,7 @@ export default function StatusBar() {
 }
 
 /** Case de la rangée de tête : libellé en petit, valeur en gras, précision dessous */
-function Cell({ label, tone = 'neutral', note, noteTone, info, valueKey, children }: CellProps) {
+function Cell({ label, tone = 'neutral', note, noteTone, info, wrap = false, valueKey, children }: CellProps) {
   return (
     <div className="flex min-w-0 flex-col px-1 text-center first:pl-0 last:pr-0">
       <div className="flex items-center justify-center gap-0.5 text-xs text-ink-muted uppercase">
@@ -207,7 +214,7 @@ function Cell({ label, tone = 'neutral', note, noteTone, info, valueKey, childre
       <motion.div
         key={valueKey}
         {...APPEAR}
-        className={`flex items-center justify-center gap-1 font-bold whitespace-nowrap ${TONE_TEXT[tone]} ${note ? '' : 'flex-1 text-base'}`}
+        className={`flex items-center justify-center gap-1 font-bold ${wrap ? 'text-xs leading-tight' : 'whitespace-nowrap'} ${TONE_TEXT[tone]} ${note || wrap ? '' : 'flex-1 text-base'}`}
       >
         {children}
       </motion.div>

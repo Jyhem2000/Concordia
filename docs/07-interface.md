@@ -23,15 +23,16 @@ Chaque panneau (marché, carte, lieux spéciaux, plein, couvre-feu, objectifs) e
 **Retour en haut de page** à chaque changement de scène : arrivée d'un trajet, matin, soirée, barrage et chaque option jouée, aléa routier, comptes rendus, fin de partie. Le briefing et les comptes rendus sont en haut de l'écran.
 
 ## Bandeau supérieur permanent
-* **Rangée de tête** (trois cases par ligne sur téléphone, six sur desktop). Chaque case a sa valeur et, dessous, une précision ; sans précision, la valeur est plus grande et occupe la case. Un « i » explique la règle quand il y en a une.
+* **Rangée de tête** de huit cases (quatre par ligne sur téléphone, toutes sur une ligne sur desktop). Chaque case a sa valeur et, dessous, une précision ; sans précision, la valeur est plus grande et occupe la case. Un « i » explique la règle quand il y en a une.
   * **Jour** X / 30 avec ☀️ ou 🌙 ; dessous, le moment (Journée, 20h00, Nuit, chap. 1).
+  * **Lieu :** le district actuel ; dessous, l'état du trajet du moment (libre ou fait).
   * **Cash-Puce** (jaune) ; dessous, l'écart depuis 06h00 (vert ou rouge), tiré du carnet de route.
   * **Offshore** (cyan) ; dessous, le taux effectif, ou le solde du placement du Cartel s'il n'est pas vide ; le « i » rappelle à quoi il sert.
   * **Dette** (rouge) ; dessous, le compte à rebours jusqu'à la prochaine échéance (retard si la dette initiale n'a jamais été soldée, puis audit), ou « en retard » ; le « i » explique les échéances.
   * **ICC** (couleur et nom du palier, voir plus bas) ; le « i » donne les gains de route encore possibles aujourd'hui sous le plafond du jour (chap. 1).
   * **Santé** en PV, verte, orange puis rouge quand elle baisse ; dessous, « Épuisé » après une tournée de nuit (pas de nouvelle nuit sur la route ce soir, chap. 1) ; le « i » dit ce qui en coûte et ce qui en rend.
-* **Ligne du moment :** district actuel et état du trajet du moment (disponible ou effectué), bouton de nouvelle partie.
-* **États du chauffeur, en petit :** **Exemption Métabolique** (jours de protection restants, alerte la veille, Sédation à zéro ; la règle en infobulle) · **Fiche S** · équipier actif (et salaire impayé) · **prochaine collecte de Viktor** (date et montant estimé, une fois la dette initiale soldée).
+  * **Exemption Métabolique :** jours de protection restants ; dessous, « Sédation demain » la veille, puis « Sédation » ; le « i » explique la règle.
+* **États du chauffeur, en petit, quand ils existent :** **Fiche S** · équipier actif (et salaire impayé) · **prochaine collecte de Viktor** (date et montant estimé, une fois la dette initiale soldée) ; à droite, le bouton de nouvelle partie.
 * Les jauges du véhicule (châssis, Synthanol) et le remplissage de la soute sont dans l'onglet Véhicule.
 * **Compte à rebours de l'audit** (à partir de `AUDIT_COUNTDOWN_DAY`, [`balance.ts`](../src/data/balance.ts)) : *« Dernier dépôt offshore possible : J30, 19h59 »* et *« Dernier remboursement possible : J30, 19h59 »*.
 

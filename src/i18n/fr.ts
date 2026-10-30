@@ -57,8 +57,8 @@ export const fr = {
   /** Moment de la journée (chap. 1) : Journée, 20h00, Nuit */
   moment: {
     short: { day: 'Journée', curfew: '20h00', night: 'Nuit' },
-    tripLeft: 'trajet disponible',
-    tripDone: 'trajet effectué',
+    tripLeftShort: 'trajet libre',
+    tripDoneShort: 'trajet fait',
   },
 
   gauge: {
@@ -339,12 +339,14 @@ export const fr = {
     wantedGain: (levels: number) => `+${levels} niveau${levels > 1 ? 'x' : ''} de Fiche S`,
     debtLate: 'en retard',
     nextProtection: (day: number, amount: string) => `Collecte de Viktor J${day} : ≈ ${amount}`,
-    exemption: (days: number) => `Exemption ${days} j`,
+    place: 'Lieu',
+    exemptionLabel: 'Exemption',
+    exemptionDays: (days: number) => `${days} j`,
+    sedatedShort: 'Sédation',
+    sedationTomorrowShort: 'Sédation demain',
     exemptionInfo: (days: number, district: string, penalty: string) =>
       `Exemption Métabolique : l'eau sans sédatifs des routiers garde l'esprit clair. Elle perd un jour chaque matin et revient à ${days} jours en passant à ${district} de jour. Épuisée, c'est la Sédation : bluff, corruption et fuite à −${penalty}, et les cours mémorisés des autres districts brouillés en fourchette.`,
     offshore: 'Offshore',
-    sedationTomorrow: (district: string) => `Sédation demain : passez à ${district} de jour`,
-    sedated: 'Sédation : bluff, corruption et fuite réduits, mémoire de marché brouillée',
     crew: (name: string) => name,
     crewUnpaid: 'non payé, ne travaille pas',
     patrol: (district: string) => `Ronde renforcée : ${district}`,
