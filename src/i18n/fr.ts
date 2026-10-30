@@ -771,6 +771,9 @@ export const fr = {
 
   travel: {
     title: 'Carte',
+    fuelPrice: (price: string) => `Synthanol ${price} la ration`,
+    places: (names: string) => `Lieux : ${names}`,
+    mapHint: 'Touchez un district pour voir son itinéraire et son trajet dans la liste.',
     here: 'Vous êtes ici',
     direct: 'Liaison directe',
     via: (names: string) => `Via ${names}`,

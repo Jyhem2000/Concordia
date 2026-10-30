@@ -1,4 +1,5 @@
-import { Eye, MapPin, PartyPopper, Siren } from 'lucide-react'
+import { MapPin } from 'lucide-react'
+import { useState } from 'react'
 import { ENDINGS, WANTED } from '../../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
@@ -6,7 +7,7 @@ import { VEHICLES } from '../../data/vehicles.ts'
 import { planTravel } from '../../engine/actions.ts'
 import { averageCost, cargoUsed, ownedQty } from '../../engine/cargo.ts'
 import { crewEffect, isMemoryBlurred } from '../../engine/crew.ts'
-import { blurredQuote, estimatedUnitSale, lastSeen, productStatus } from '../../engine/market.ts'
+import { blurredQuote, estimatedUnitSale, fuelPriceBreakdown, lastSeen, productStatus } from '../../engine/market.ts'
 import { exposure, fineAmount, flyingCheckShare, hiddenCargo } from '../../engine/interception.ts'
 import { checkDelivery, deliveryCrates, deliveryFee, deliveryOffer } from '../../engine/delivery.ts'
 import { trustFactor } from '../../engine/progress.ts'
@@ -16,7 +17,9 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import EventDetails from '../events/EventDetails.tsx'
-import Chip from '../shared/Chip.tsx'
+import DistrictMap from './DistrictMap.tsx'
+import DistrictSigns from './DistrictSigns.tsx'
+import { placesHere } from '../places/placesHere.ts'
 import Detailed from '../shared/Detailed.tsx'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
@@ -24,11 +27,20 @@ import Margin from '../shared/Margin.tsx'
 
 type DistrictRowProps = {
   districtId: DistrictId
+  /** Destination touchée sur la carte */
+  selected: boolean
+}
+
+type DestinationFactsProps = {
+  districtId: DistrictId
 }
 
 type TravelButtonProps = {
   to: DistrictId
 }
+
+/** Ancre de la ligne d'un district, pour y amener la carte */
+const rowId = (districtId: DistrictId) => `district-${districtId}`
 
 /** Ordre d'affichage : de la périphérie au sommet de la pyramide (carte du chap. 3) */
 const order = [...DISTRICT_IDS].sort((a, b) => DISTRICTS[a].echelon - DISTRICTS[b].echelon)
@@ -37,8 +49,18 @@ const order = [...DISTRICT_IDS].sort((a, b) => DISTRICTS[a].echelon - DISTRICTS[
 export default function TravelPanel() {
   const tripDone = useGameStore((s) => (s.game.phase === 'day' ? s.game.dayTripDone : s.game.nightTripDone))
   const { t } = useI18n()
+  // Destination touchée sur la carte : état d'interface éphémère
+  const [selected, setSelected] = useState<DistrictId | null>(null)
+  const select = (districtId: DistrictId) => {
+    setSelected(districtId)
+    document.getElementById(rowId(districtId))?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }
   return (
     <Panel title={t.travel.title} collapseId="travel" flush>
+      <div className="p-3 pb-0">
+        <DistrictMap selected={selected} onSelect={select} />
+        <Hint className="mt-1">{t.travel.mapHint}</Hint>
+      </div>
       {/* Raison commune à toutes les destinations : dite une fois plutôt que sous chaque bouton */}
       {tripDone && <Hint className="px-3 pt-2">{t.error['trip-done']}</Hint>}
       <LastTrip />
@@ -47,7 +69,7 @@ export default function TravelPanel() {
       <Exposure />
       <ul className="mt-2 divide-y divide-line border-t border-line">
         {order.map((id) => (
-          <DistrictRow key={id} districtId={id} />
+          <DistrictRow key={id} districtId={id} selected={id === selected} />
         ))}
       </ul>
     </Panel>
@@ -140,21 +162,14 @@ function LastTrip() {
   )
 }
 
-function DistrictRow({ districtId }: DistrictRowProps) {
+function DistrictRow({ districtId, selected }: DistrictRowProps) {
   const here = useGameStore((s) => s.game.districtId === districtId)
   const day = useGameStore((s) => s.game.day)
   const cargo = useGameStore((s) => s.game.cargo)
   const memory = useGameStore((s) => lastSeen(s.game, districtId))
   const blurred = useGameStore((s) => isMemoryBlurred(s.game, districtId))
-  // Destination de la mission de nuit acceptée
-  const missionHere = useGameStore((s) => s.game.phase === 'night' && s.game.mission?.to === districtId)
-  // Vance révèle chaque matin le district de la ronde renforcée
-  const patrolled = useGameStore((s) => Boolean(crewEffect(s.game, 'revealsPatrol')) && s.game.patrolDistrict === districtId)
   const events = useGameStore((s) => s.game.events)
   const phase = useGameStore((s) => s.game.phase)
-  const peak = useGameStore((s) => s.game.suspiciousPeaks.includes(districtId))
-  // After du couvre-feu de ce soir, annoncée dès 06h00
-  const after = useGameStore((s) => s.game.after === districtId)
   const { t, credits } = useI18n()
 
   const memoryLabel = !memory ? t.travel.memoryNever : memory.day === day ? t.travel.memoryToday : t.travel.memoryDaysAgo(day - memory.day)
@@ -164,7 +179,10 @@ function DistrictRow({ districtId }: DistrictRowProps) {
   const owned = [...new Set(cargo.map((lot) => lot.productId))]
 
   return (
-    <li className={`px-3 py-2 text-sm ${here ? 'bg-accent/5' : ''}`}>
+    <li
+      id={rowId(districtId)}
+      className={`scroll-mt-4 border-l-4 px-3 py-2 text-sm md:scroll-mt-40 ${selected ? 'border-l-accent bg-accent/10' : here ? 'border-l-transparent bg-accent/5' : 'border-l-transparent'}`}
+    >
       <div className="flex items-start justify-between gap-2">
         <div>
           <div className="font-bold">
@@ -173,29 +191,9 @@ function DistrictRow({ districtId }: DistrictRowProps) {
               {'★'.repeat(security)}
             </span>
             <span className="sr-only">{t.travel.security(security)}</span>
-            {missionHere && (
-              <span className="ml-2 font-normal">
-                <Chip tone="info">{t.travel.mission}</Chip>
-              </span>
-            )}
-            {patrolled && (
-              <span className="ml-2 inline-flex text-info" title={t.travel.patrol}>
-                <Siren size={14} aria-hidden="true" />
-                <span className="sr-only">{t.travel.patrol}</span>
-              </span>
-            )}
-            {after && (
-              <span className="ml-2 inline-flex text-event" title={t.travel.after}>
-                <PartyPopper size={14} aria-hidden="true" />
-                <span className="sr-only">{t.travel.after}</span>
-              </span>
-            )}
-            {peak && (
-              <span className="ml-2 inline-flex text-danger" title={t.travel.peak}>
-                <Eye size={14} aria-hidden="true" />
-                <span className="sr-only">{t.travel.peak}</span>
-              </span>
-            )}
+            <span className="ml-2">
+              <DistrictSigns districtId={districtId} />
+            </span>
           </div>
           <div className="text-xs text-ink-muted">{t.district[districtId].subtitle}</div>
           {/* Événement local du jour, visible dès 06h00 (chap. 6) */}
@@ -213,6 +211,7 @@ function DistrictRow({ districtId }: DistrictRowProps) {
 
       {!here && (
         <div className="mt-1 text-xs text-ink-muted">
+          <DestinationFacts districtId={districtId} />
           {memoryLabel}
           {/* Produits en soute : statut public du district (chap. 2) et cours mémorisé, pour décider où vendre */}
           {owned.length > 0 && (
@@ -245,6 +244,20 @@ function DistrictRow({ districtId }: DistrictRowProps) {
         </div>
       )}
     </li>
+  )
+}
+
+/** Prix du Synthanol à l'arrivée et lieux spéciaux du district (panneau de prévision, chap. 7) */
+function DestinationFacts({ districtId }: DestinationFactsProps) {
+  // Le prix du Synthanol dépend du moment et du district : état entier, placé à destination
+  const game = useGameStore((s) => s.game)
+  const { t, credits } = useI18n()
+  const places = placesHere(districtId).map((id) => t.location[id].name)
+  return (
+    <div className="mb-0.5 flex flex-wrap items-center gap-x-1.5">
+      <Detailed breakdown={fuelPriceBreakdown({ ...game, districtId })} format={(price) => t.travel.fuelPrice(credits(price))} />
+      {places.length > 0 && <span>· {t.travel.places(places.join(', '))}</span>}
+    </div>
   )
 }
 
