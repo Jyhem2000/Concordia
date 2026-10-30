@@ -32,10 +32,10 @@ export const PLANS: readonly Plan[] = [
 ]
 
 export const TEMPERAMENTS: readonly Temperament[] = [
-  { name: 'Prudent', maxRisk: 0.25, maxTier: 2, reserve: 300, night: 'mission', boldness: 1.3 },
-  { name: 'Équilibré', maxRisk: 0.55, maxTier: 3, reserve: 100, night: 'margin', boldness: 0.85 },
-  { name: 'Casse-cou', maxRisk: 0.75, maxTier: 4, reserve: 0, night: 'always', boldness: 0.7 },
+  { name: 'Prudent', maxRisk: 0.25, maxTier: 2, reserve: 300, night: 'mission', boldness: 1.3, venture: 0 },
+  { name: 'Équilibré', maxRisk: 0.55, maxTier: 3, reserve: 100, night: 'margin', boldness: 0.85, venture: 0.25 },
+  { name: 'Casse-cou', maxRisk: 0.75, maxTier: 4, reserve: 0, night: 'always', boldness: 0.7, venture: 0.5 },
 ]
 
 /** Tempérament du Novice : prudent, sans tournée de nuit */
-export const NOVICE_TEMPERAMENT: Temperament = { name: 'Novice', maxRisk: 0.35, maxTier: 2, reserve: 200, night: 'never', boldness: 1 }
+export const NOVICE_TEMPERAMENT: Temperament = { name: 'Novice', maxRisk: 0.35, maxTier: 2, reserve: 200, night: 'never', boldness: 1, venture: 0 }

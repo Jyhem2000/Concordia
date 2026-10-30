@@ -77,6 +77,9 @@ export type Action =
   | { type: 'borrow'; amount: number }
   | { type: 'deposit'; amount: number }
   | { type: 'withdraw'; amount: number }
+  /** Placement du Cartel : dépôt depuis le Cash-Puce, retrait avec commission (chap. 1) */
+  | { type: 'invest'; amount: number }
+  | { type: 'divest'; amount: number }
   /** Option de l'écran d'interception ; `offer` pour la corruption */
   | { type: 'intercept'; move: InterceptionMove; offer?: Offer; tactics?: Tactics }
   | { type: 'buyVehicle'; vehicleId: VehicleId }
@@ -125,6 +128,7 @@ export type ActionError =
   | 'no-debt'
   | 'advance-used'
   | 'not-enough-offshore'
+  | 'not-enough-venture'
   | 'intercepted'
   | 'not-intercepted'
   | 'move-unavailable'
@@ -450,6 +454,21 @@ function withdraw(state: GameState, amount: number): ActionResult {
   return { ok: true, state: { ...state, cash: state.cash + withdrawalBreakdown(amount).total, offshore: withdrawFrom(state.offshore, amount) } }
 }
 
+function invest(state: GameState, amount: number): ActionResult {
+  const closed = checkService(state, 'offshore')
+  if (closed) return fail(closed)
+  if (amount > state.cash) return fail('not-enough-cash')
+  return { ok: true, state: { ...state, cash: state.cash - amount, venture: { ...state.venture, deposited: state.venture.deposited + amount } } }
+}
+
+function divest(state: GameState, amount: number): ActionResult {
+  const closed = checkService(state, 'offshore')
+  if (closed) return fail(closed)
+  if (amount > offshoreBalance(state.venture)) return fail('not-enough-venture')
+  // Même commission de la Laverie que l'offshore
+  return { ok: true, state: { ...state, cash: state.cash + withdrawalBreakdown(amount).total, venture: withdrawFrom(state.venture, amount) } }
+}
+
 // ─── Fin de journée ───
 
 /** La tournée de nuit du Jour J est verrouillée le soir du Jour J+1 (épuisement nerveux, chap. 1) */
@@ -592,5 +611,9 @@ function resolveAction(state: GameState, action: Action): ActionResult {
       return isQuantity(action.amount) ? deposit(state, action.amount) : fail('invalid-amount')
     case 'withdraw':
       return isQuantity(action.amount) ? withdraw(state, action.amount) : fail('invalid-amount')
+    case 'invest':
+      return isQuantity(action.amount) ? invest(state, action.amount) : fail('invalid-amount')
+    case 'divest':
+      return isQuantity(action.amount) ? divest(state, action.amount) : fail('invalid-amount')
   }
 }

@@ -39,6 +39,7 @@ export type RuleId =
   | 'cargo-value'
   | 'protection'
   | 'offshore-rate'
+  | 'venture-rate'
   | 'withdrawal'
   | 'laundry-fee'
   | 'suspicion'

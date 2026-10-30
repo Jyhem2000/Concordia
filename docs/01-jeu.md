@@ -117,7 +117,17 @@ Seuls les routiers boivent l'eau sans sédatifs de `[LOC-D1-2]` : c'est elle qui
   * *Intention :* le score déposé n'est jamais taxé ; seul l'aller-retour coûte. L'app affiche au guichet en combien de jours un dépôt couvre la commission d'un retrait, au taux du jour.
 * **Rendement — intérêts simples** (les intérêts versés ne produisent pas d'intérêts), versés à la routine matinale sur le solde déposé avant 20h00, à taux unique (`OFFSHORE_DAILY_RATE` dans [`balance.ts`](../src/data/balance.ts)).
 * **Modificateur :** `[CREW-02]`. L'app affiche le **taux effectif** du compte.
-* **Score final** = solde à l'audit.
+
+### Placement du Cartel (risqué)
+*« Les cartels de Rust Valley font travailler l'argent sale là où même Aeterna ne regarde pas. Quand la BRC ne regarde pas non plus. »*
+* **Guichet :** à `[LOC-D5-1]`, de jour, à côté du compte offshore. **Dépôt** depuis le Cash-Puce, crédité en entier ; **retrait** vers le Cash-Puce avec la même commission que l'offshore, intérêts versés d'abord.
+* **Rendement :** intérêts simples sur les dépôts, plus élevés que l'offshore, versés à la routine matinale (`VENTURE` dans [`balance.ts`](../src/data/balance.ts)). Aucun équipier ne les majore.
+* **Coup de filet :** chaque matin où le placement n'est pas vide, avant les intérêts, une chance que la BRC démantèle une filière : le placement perd une part de son solde, dépôts et intérêts dans la même proportion (`VENTURE`). Le briefing l'annonce.
+* Invisible pour Viktor, comme l'offshore.
+* *Intention :* le joueur qui accepte le risque gagne plus en moyenne que sur l'offshore, mais un coup de filet tardif peut coûter cher au score. Le choix se refait chaque jour : rien n'est bloqué.
+
+### Score
+* **Score final** = solde du compte offshore + solde du placement du Cartel, à l'audit.
 
 ---
 
@@ -134,7 +144,7 @@ Le bandeau affiche la date, le moment et si le trajet du moment est encore dispo
 Le Jour 1 commence sans routine : pas d'intérêts, boutiques et événements tirés une première fois.
 1. Paiement d'avance du salaire de l'équipier actif (chap. 4) — sauf si le joueur était en garde à vue cette nuit-là ; consommation éventuelle d'une caisse par `[CREW-01]`. Reprise des caisses scellées d'une commande du DSC non livrée, livraison du jour ou mission de nuit (voir *Livraison officielle du jour* et *Tournée de nuit*).
 2. Intérêts et échéances de la dette ; **collecte de protection** (chap. 1).
-3. Intérêts du compte offshore.
+3. Intérêts du compte offshore ; coup de filet éventuel sur le placement du Cartel, puis ses intérêts.
 4. Récupération des caisses larguées la veille via `[MOD-07]` ; échéance d'une commande VIP de `[LOC-D6-1]` dépassée (chap. 3).
 5. Dégradation de fraîcheur des caisses `[TAG-PERISHABLE]`, caisses récupérées comprises (chap. 2).
 6. Tirage de la livraison officielle du jour et de la mission de nuit proposée pour ce soir ; tirage de la ronde renforcée ; entrée en vigueur de l'événement global tiré la veille, tirage des événements locaux, de la Loterie les jours de tirage, de l'événement global du lendemain et de sa rumeur ; contrecoups (chap. 6). Puis, parce que les événements les modifient : reconstitution des quotas de demande, cours et boutiques (chap. 2) ; enfin, tirage de l'after du couvre-feu de ce soir (voir *Tournée de nuit*).
@@ -197,7 +207,7 @@ Si le joueur est parti en tournée de nuit le Jour J, la tournée est **verrouil
 Minuit sonne quand le joueur se couche le Jour 30, après un éventuel trajet de nuit, ou quand une garde à vue franchit cette nuit-là. La position « à minuit » est le district où il se trouve alors.
 1. Solde de dette supérieur à 0 → **Game Over « Recyclé en Bio-Briques »**.
 2. Sinon, **Formatage Brutal** : le Cash-Puce est remis à 0 et la soute ne peut plus être vendue.
-3. **Score final = solde du compte offshore.** Les fins sont évaluées de la plus prestigieuse à la plus modeste ; la première dont toutes les conditions sont remplies se déclenche.
+3. **Score final = solde du compte offshore + solde du placement du Cartel.** Les fins sont évaluées de la plus prestigieuse à la plus modeste ; la première dont toutes les conditions sont remplies se déclenche.
 
 > **Attention :** la dette se rembourse à `[LOC-D1-1]` et le compte offshore s'alimente à `[LOC-D5-1]`, tous deux **de jour uniquement**. Un compte à rebours s'affiche les derniers jours (`AUDIT_COUNTDOWN_DAY` dans [`balance.ts`](../src/data/balance.ts) ; chap. 7).
 

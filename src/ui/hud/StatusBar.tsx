@@ -59,6 +59,7 @@ export default function StatusBar() {
   const newGame = useGameStore((s) => s.newGame)
   const { t, credits, signedCredits, number, percent } = useI18n()
   const offshore = offshoreBalance(game.offshore)
+  const venture = offshoreBalance(game.venture)
   const offshoreRate = effectiveOffshoreRate(crewEffect(game, 'offshoreBonus') ?? 0)
   const tier = iccTier(game.icc)
   const deadline = nextDebtDeadline(game)
@@ -90,7 +91,13 @@ export default function StatusBar() {
           >
             {credits(game.cash)}
           </Cell>
-          <Cell label={t.hud.offshore} tone="offshore" valueKey={offshore} note={t.hud.offshoreRate(percent(offshoreRate, 2))}>
+          <Cell
+            label={t.hud.offshore}
+            tone="offshore"
+            valueKey={offshore}
+            note={venture > 0 ? t.hud.withVenture(credits(venture)) : t.hud.offshoreRate(percent(offshoreRate, 2))}
+            info={t.hud.offshoreInfo(percent(offshoreRate, 2))}
+          >
             {credits(offshore)}
           </Cell>
           <Cell

@@ -1,10 +1,18 @@
-import { ICC_MAX, CUSTODY, DEBT_LATE, ENDINGS, GAME_LENGTH_DAYS, PROTECTION, RELAY_SLEEP } from '../data/balance.ts'
+import { ICC_MAX, CUSTODY, DEBT_LATE, ENDINGS, GAME_LENGTH_DAYS, PROTECTION, RELAY_SLEEP, VENTURE } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
 import { LOTTERY } from '../data/events.ts'
 import { FORGERY } from '../data/locations.ts'
 import { MODULES } from '../data/vehicles.ts'
 import { ownedQty } from './cargo.ts'
-import { debtInterestBreakdown, offshoreBalance, offshoreInterestBreakdown, protectionBreakdown } from './finance.ts'
+import {
+  debtInterestBreakdown,
+  offshoreBalance,
+  offshoreInterestBreakdown,
+  protectionBreakdown,
+  raided,
+  scoreOf,
+  ventureInterestBreakdown,
+} from './finance.ts'
 import { isPerishable, removeRotten } from './condition.ts'
 import { expireVip } from './services.ts'
 import { drawDayOffer } from './delivery.ts'
@@ -107,6 +115,8 @@ function morningRoutine(state: GameState, night: Night): GameState {
     debtLate: false,
     protection: null,
     offshoreInterest: null,
+    ventureRaid: 0,
+    ventureInterest: null,
   }
 
   // 1. Salaire de l'équipier, payé d'avance (rien en cellule)
@@ -141,6 +151,19 @@ function morningRoutine(state: GameState, night: Night): GameState {
   // Glitch majore le rendement, sauf les matins en cellule
   briefing.offshoreInterest = offshoreInterestBreakdown(s.offshore, night === 'cell' ? 0 : (crewEffect(s, 'offshoreBonus') ?? 0))
   if (briefing.offshoreInterest) s = { ...s, offshore: { ...s.offshore, interest: s.offshore.interest + briefing.offshoreInterest.total } }
+
+  // Placement du Cartel : coup de filet éventuel, puis intérêts ; aucun tirage quand il est vide
+  if (offshoreBalance(s.venture) > 0) {
+    const raidRng = createRng(s.rng)
+    if (raidRng.chance(VENTURE.raidChance)) {
+      const after = raided(s.venture)
+      briefing.ventureRaid = offshoreBalance(s.venture) - offshoreBalance(after)
+      s = { ...s, venture: after }
+    }
+    s = { ...s, rng: raidRng.state }
+    briefing.ventureInterest = ventureInterestBreakdown(s.venture)
+    if (briefing.ventureInterest) s = { ...s, venture: { ...s.venture, interest: s.venture.interest + briefing.ventureInterest.total } }
+  }
 
   // 4. Les complices de la trappe rapportent une part des caisses larguées la veille
   const trapdoor = MODULES['MOD-07'].trapdoor
@@ -224,7 +247,7 @@ export function isDefeat(ending: EndingId): boolean {
 /** Fin évaluée de la plus prestigieuse à la plus modeste, dette soldée (chap. 1) */
 export function endingFor(state: GameState): Ending {
   if (state.debt > 0) return { id: 'bio-bricks', score: 0 }
-  const score = offshoreBalance(state.offshore)
+  const score = scoreOf(state)
   const { saboteur, resident, elite, mafia } = ENDINGS
   if (score >= saboteur.minScore && ownedQty(state.cargo, saboteur.requiredProduct) > 0 && state.districtId === saboteur.district) {
     return { id: 'saboteur', score }

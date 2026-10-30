@@ -64,7 +64,7 @@ function BriefingLines({ briefing }: BriefingLinesProps) {
   const districtId = useGameStore((s) => s.game.districtId)
   // Effet de canicule du jour, pour nommer le produit qui fond
   const heat = useGameStore((s) => (briefing.heat ? heatWave(s.game) : null))
-  const { sleep, custodyHealth, debtInterest, debtLate, protection, offshoreInterest } = briefing
+  const { sleep, custodyHealth, debtInterest, debtLate, protection, offshoreInterest, ventureRaid, ventureInterest } = briefing
   const wokeIn = t.district[briefing.districtId].name
   const places = allPlacesHere(briefing.districtId).map((id) => t.location[id].name)
 
@@ -110,6 +110,14 @@ function BriefingLines({ briefing }: BriefingLinesProps) {
         <li>
           <BriefingRow label={t.briefing.offshoreInterest} className="text-offshore">
             <Detailed breakdown={offshoreInterest} format={(amount) => `+${credits(amount)}`} />
+          </BriefingRow>
+        </li>
+      )}
+      {ventureRaid > 0 && <li className="text-danger">{t.briefing.ventureRaid(credits(ventureRaid))}</li>}
+      {ventureInterest && (
+        <li>
+          <BriefingRow label={t.briefing.ventureInterest} className="text-warning">
+            <Detailed breakdown={ventureInterest} format={(amount) => `+${credits(amount)}`} />
           </BriefingRow>
         </li>
       )}

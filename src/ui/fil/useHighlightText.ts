@@ -40,6 +40,8 @@ export function useHighlightText(): (highlight: Highlight) => string {
         return j.iccTier(t.iccTier[highlight.tier])
       case 'ending':
         return j.ending(t.end.endings[highlight.id].title, credits(highlight.score))
+      case 'raid':
+        return j.raid(credits(highlight.loss))
     }
   }
 }

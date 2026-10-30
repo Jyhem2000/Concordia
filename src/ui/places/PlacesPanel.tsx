@@ -1,6 +1,6 @@
 import { Landmark, Lock } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { SURVIVAL_ADVANCE } from '../../data/balance.ts'
+import { SURVIVAL_ADVANCE, VENTURE } from '../../data/balance.ts'
 import { LOCATIONS } from '../../data/locations.ts'
 import { maxRepay } from '../../engine/actions.ts'
 import { crewEffect } from '../../engine/crew.ts'
@@ -9,6 +9,7 @@ import {
   effectiveOffshoreRate,
   loanRoom,
   offshoreBalance,
+  ventureInterestBreakdown,
   offshoreInterestBreakdown,
   withdrawalBreakdown,
 } from '../../engine/finance.ts'
@@ -154,6 +155,36 @@ function OffshoreDesk() {
         onSubmit={(amount) => dispatch({ type: 'withdraw', amount })}
         preview={(amount) => `${t.place.received} ${credits(withdrawalBreakdown(amount).total)}`}
       />
+      <VentureDesk />
     </>
+  )
+}
+
+/** Placement du Cartel : plus rentable que l'offshore, exposé aux coups de filet (chap. 1) */
+function VentureDesk() {
+  const venture = useGameStore((s) => s.game.venture)
+  const cash = useGameStore((s) => s.game.cash)
+  const dispatch = useGameStore((s) => s.dispatch)
+  const { t, credits, percent } = useI18n()
+  const balance = offshoreBalance(venture)
+  const interest = ventureInterestBreakdown(venture)
+
+  return (
+    <div className="mt-2 flex flex-col gap-2 border-t border-line pt-2">
+      <p className="flex flex-wrap items-baseline gap-1.5">
+        <span className="text-ink-muted">{t.place.ventureTitle}</span>
+        <span className="font-bold text-warning">{credits(balance)}</span>
+        {interest && <Detailed breakdown={interest} format={(amount) => t.place.nextInterest(credits(amount))} />}
+      </p>
+      <Hint>{t.place.ventureRule(percent(VENTURE.dailyRate, 1), percent(VENTURE.raidChance, 0), percent(VENTURE.raidLoss, 0))}</Hint>
+      <AmountForm label={t.place.invest} variant="danger" max={cash} onSubmit={(amount) => dispatch({ type: 'invest', amount })} />
+      <AmountForm
+        label={t.place.divest}
+        variant="default"
+        max={balance}
+        onSubmit={(amount) => dispatch({ type: 'divest', amount })}
+        preview={(amount) => `${t.place.received} ${credits(withdrawalBreakdown(amount).total)}`}
+      />
+    </div>
   )
 }

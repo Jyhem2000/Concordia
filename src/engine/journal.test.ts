@@ -7,7 +7,9 @@ import { defined, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helper
 describe('carnet de route (chap. 7)', () => {
   it('s’ouvre au Jour 1 sur le patrimoine de départ', () => {
     const state = createInitialState(7)
-    expect(state.journal).toEqual([{ day: 1, start: { cash: state.cash, offshore: 0, debt: state.debt }, bought: 0, sold: 0, highlights: [] }])
+    expect(state.journal).toEqual([
+      { day: 1, start: { cash: state.cash, offshore: 0, venture: 0, debt: state.debt }, bought: 0, sold: 0, highlights: [] },
+    ])
   })
 
   it('compte les achats et les ventes de la journée en Cash-Puce', () => {
@@ -25,7 +27,7 @@ describe('carnet de route (chap. 7)', () => {
     const morning = run(traveled, { type: 'sleep' })
     const opened = defined(morning.journal.at(-1))
     expect(opened.day).toBe(morning.day)
-    expect(opened.start).toEqual({ cash: morning.cash, offshore: offshoreBalance(morning.offshore), debt: morning.debt })
+    expect(opened.start).toEqual({ cash: morning.cash, offshore: offshoreBalance(morning.offshore), venture: 0, debt: morning.debt })
     expect(morning.journal).toHaveLength(traveled.journal.length + 1)
   })
 
@@ -38,7 +40,7 @@ describe('carnet de route (chap. 7)', () => {
 })
 
 describe('patrimoine net (chap. 7)', () => {
-  it('ajoute le cash et l’offshore, retire la dette', () => {
-    expect(netWealth({ cash: 2_000, offshore: 500, debt: 5_000 })).toBe(-2_500)
+  it('ajoute le cash, l’offshore et le placement, retire la dette', () => {
+    expect(netWealth({ cash: 2_000, offshore: 500, venture: 300, debt: 5_000 })).toBe(-2_200)
   })
 })

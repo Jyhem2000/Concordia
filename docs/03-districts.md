@@ -120,7 +120,7 @@ Ancien analyste de données d'Aeterna, terré dans une caravane blindée sous le
 
 ### `[LOC-D5-1]` La Laverie « Crypto-Clean » (banque offshore ministérielle)
 Les vrais blanchisseurs ne sont pas les punks de `[D4]` mais les hauts fonctionnaires corrompus du Ministère des Finances, seuls à pouvoir créer des comptes fantômes dans le registre central pour y cacher leurs propres pots-de-vin. Ce sont aussi les superviseurs qui alimentent l'algorithme de la Loterie.
-* **Guichet du compte offshore** (chap. 1).
+* **Guichet du compte offshore** et **placement du Cartel** (chap. 1).
 * **Falsifier un dossier** (`[EVT-L01]`) — c'est Aeterna qui tire au sort : on ne choisit pas le gagnant, on glisse un faux dossier pour que l'algorithme le désigne. C'est un pari.
   * **Quand :** la veille d'un tirage (chap. 6), une fois.
   * **Coût :** une base, plus une hausse par utilisation précédente, perdu même en cas d'échec. **Réussite :** une chance fixe (bonus : `[CREW-02]`). Chiffres : `FORGERY` dans [`locations.ts`](../src/data/locations.ts).

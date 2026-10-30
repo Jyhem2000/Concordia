@@ -58,6 +58,7 @@ export function createInitialState(seed: number): GameState {
     jammerDay: null,
     debtLate: false,
     offshore: { deposited: 0, interest: 0 },
+    venture: { deposited: 0, interest: 0 },
     icc: START_ICC,
     iccRouteGains: 0,
     health: START_HEALTH,

@@ -1,6 +1,6 @@
 import { ROAD_EVENTS } from '../src/data/events.ts'
 import { applyAction, type Action } from '../src/engine/actions.ts'
-import { offshoreBalance } from '../src/engine/finance.ts'
+import { scoreOf } from '../src/engine/finance.ts'
 import { isDefeat } from '../src/engine/routine.ts'
 import { createInitialState } from '../src/engine/state.ts'
 import type { EndingId, GameState, InterceptionMove } from '../src/engine/types.ts'
@@ -156,6 +156,6 @@ function observe(record: GameRecord, before: GameState, after: GameState, action
   if (after.crew.active && after.crew.active !== before.crew.active) record.purchases.push({ item: after.crew.active, day: after.day })
   // Fin de journée : la routine de 06h00 vient de passer (ou la partie s'achève)
   if (after.day !== before.day || after.status !== 'playing') {
-    record.daily.push({ day: before.day, cash: before.cash, offshore: offshoreBalance(before.offshore), debt: before.debt, icc: before.icc })
+    record.daily.push({ day: before.day, cash: before.cash, offshore: scoreOf(before), debt: before.debt, icc: before.icc })
   }
 }

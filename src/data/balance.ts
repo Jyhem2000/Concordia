@@ -136,6 +136,9 @@ export const OFFSHORE_WITHDRAW_FACTOR = 0.95
 /** Intérêts simples par jour sur le solde déposé (chap. 1) */
 export const OFFSHORE_DAILY_RATE = 0.015
 
+/** Placement du Cartel (chap. 1) : intérêts simples par jour ; chaque matin, chance d'un coup de filet et part du solde perdue */
+export const VENTURE = { dailyRate: 0.03, raidChance: 0.03, raidLoss: 0.3 }
+
 // ─── Châssis (chap. 1) ───
 
 /** Usure du châssis par trajet de nuit (surchauffe des galeries) */

@@ -26,7 +26,7 @@ Chaque panneau (marché, carte, lieux spéciaux, plein, couvre-feu, objectifs) e
 * **Rangée de tête** (trois cases par ligne sur téléphone, six sur desktop). Chaque case a sa valeur et, dessous, une précision ; sans précision, la valeur est plus grande et occupe la case. Un « i » explique la règle quand il y en a une.
   * **Jour** X / 30 avec ☀️ ou 🌙 ; dessous, le moment (Journée, 20h00, Nuit, chap. 1).
   * **Cash-Puce** (jaune) ; dessous, l'écart depuis 06h00 (vert ou rouge), tiré du carnet de route.
-  * **Offshore** (cyan) ; dessous, le taux effectif.
+  * **Offshore** (cyan) ; dessous, le taux effectif, ou le solde du placement du Cartel s'il n'est pas vide ; le « i » rappelle à quoi il sert.
   * **Dette** (rouge) ; dessous, le compte à rebours jusqu'à la prochaine échéance (retard si la dette initiale n'a jamais été soldée, puis audit), ou « en retard » ; le « i » explique les échéances.
   * **ICC** (couleur et nom du palier, voir plus bas) ; le « i » donne les gains de route encore possibles aujourd'hui sous le plafond du jour (chap. 1).
   * **Santé** en PV, verte, orange puis rouge quand elle baisse ; dessous, « Épuisé » après une tournée de nuit (pas de nouvelle nuit sur la route ce soir, chap. 1) ; le « i » dit ce qui en coûte et ce qui en rend.
@@ -40,7 +40,7 @@ Dans le bandeau, l'ICC prend la couleur de son palier (chap. 1), avec le nom du 
 
 ## Onglet « Le Fil »
 Tout ce qui compte aujourd'hui, à lire avant d'aller au marché puis sur la carte. Chaque bloc est un panneau repliable.
-* **Briefing de 06h00 :** chaque matin, un encadré refermable dit où la journée commence (district du réveil, nuit au relais, en bivouac ou en cellule) et quels lieux spéciaux y sont ouverts de jour, puis récapitule la nuit et la routine : gains de sommeil, PV perdus en cellule, dette après intérêts, passage en retard, collecte de Viktor (et reliquat ajouté à la dette), intérêts offshore. Chaque montant est détaillable.
+* **Briefing de 06h00 :** chaque matin, un encadré refermable dit où la journée commence (district du réveil, nuit au relais, en bivouac ou en cellule) et quels lieux spéciaux y sont ouverts de jour, puis récapitule la nuit et la routine : gains de sommeil, PV perdus en cellule, dette après intérêts, passage en retard, collecte de Viktor (et reliquat ajouté à la dette), intérêts offshore, coup de filet et intérêts du placement du Cartel. Chaque montant est détaillable.
 * **Actualités :**
   * le **téléscripteur d'Aeterna (Flash Info)**, en bandeau défilant (fixe si le système réduit les animations) : un message passif-agressif par demi-journée (jour, puis nuit ; le catalogue, rangé par thèmes, est parcouru en sautant d'un thème à l'autre et passe en entier en une partie) ;
   * l'événement global et les événements locaux du jour, les contrecoups, le tirage de la Loterie (le promu, et le déclassé seulement s'il y en a un) et ses vices en cours, la panique de Karma-Cham, et la **rumeur** du lendemain avec sa fiabilité (ou la prophétie de Cassandre-88). Chaque événement s'ouvre sur ses effets exacts (produits et facteurs, risque, tags, stocks).
@@ -88,7 +88,7 @@ Le moteur tient un carnet de la partie, sauvegardé avec elle : une entrée par 
   * les **cours observés**, en courbe, du Jour 1 à aujourd'hui, dans le district choisi parmi ceux dont le joueur a vu le marché (le district actuel par défaut) : un point par jour de visite, la courbe s'interrompt entre deux visites espacées ; le cours normal (sans tendance ni événement) en repère ; la valeur de chaque jour au survol ou au toucher, et le tableau des valeurs pour les lecteurs d'écran. Sous la courbe, la règle de la tendance (chap. 2) avec ses chiffres.
 * **Filtres :** deux listes déroulantes cumulables, le tier et le tag (parmi ceux présents dans le tableau), et un bouton qui les efface. Le choix reste d'un district à l'autre ; un tier ou un tag absent du tableau ici ne filtre pas.
 * **Curseurs d'achat / vente :** 1, 5, MAX.
-* **Onglet lieux spéciaux :** en tête, la **pompe à Synthanol** du district (officielle ou pirate, sa règle d'ouverture, la réserve, le prix de la ration détaillable, +1 ration et plein, la corvée DSC en dernier recours), puis l'accès direct aux services du district, coûts et cooldowns affichés. À la Laverie, le Cash-Puce reçu pour un retrait (commission déduite) et le nombre de jours qu'il faut à un dépôt pour couvrir cette commission au taux du jour.
+* **Onglet lieux spéciaux :** en tête, la **pompe à Synthanol** du district (officielle ou pirate, sa règle d'ouverture, la réserve, le prix de la ration détaillable, +1 ration et plein, la corvée DSC en dernier recours), puis l'accès direct aux services du district, coûts et cooldowns affichés. À la Laverie, le Cash-Puce reçu pour un retrait (commission déduite) et le nombre de jours qu'il faut à un dépôt pour couvrir cette commission au taux du jour ; dessous, le **placement du Cartel** : solde, prochains intérêts (détaillables), sa règle avec ses chiffres (taux, risque et perte d'un coup de filet), placer et retirer.
 
 ## Vue « Carte tactique & navigation »
 * **Récapitulatif de la soute :** en haut de la carte, l'occupation (caisses / capacité) et chaque produit avec sa quantité, dont la part cachée dans le double fond, pour choisir la destination sans revenir au marché.

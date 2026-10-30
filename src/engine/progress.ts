@@ -2,7 +2,7 @@ import { DSC_TRUST, ICC_TIERS, WANTED } from '../data/balance.ts'
 import { PRODUCTS } from '../data/products.ts'
 import { CREW } from '../data/vehicles.ts'
 import type { ActionError } from './actions.ts'
-import { offshoreBalance } from './finance.ts'
+import { scoreOf } from './finance.ts'
 import type { CrewId, GameState, ProductId, Requirement } from './types.ts'
 
 /*
@@ -29,7 +29,7 @@ export function requirementProgress(state: GameState, requirement: Requirement):
       return { unlocked: state.icc >= min, done: Math.round(state.icc), needed: min }
     }
     case 'wealth': {
-      const wealth = state.cash + offshoreBalance(state.offshore)
+      const wealth = state.cash + scoreOf(state)
       return { unlocked: wealth >= requirement.amount, done: Math.round(wealth), needed: requirement.amount }
     }
     case 'tagSales':

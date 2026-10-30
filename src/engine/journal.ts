@@ -5,12 +5,12 @@ import type { DayLog, GameState, Highlight, WealthSnapshot } from './types.ts'
 
 /** Patrimoine de la partie à cet instant */
 export function wealthOf(state: GameState): WealthSnapshot {
-  return { cash: state.cash, offshore: offshoreBalance(state.offshore), debt: state.debt }
+  return { cash: state.cash, offshore: offshoreBalance(state.offshore), venture: offshoreBalance(state.venture), debt: state.debt }
 }
 
 /** Patrimoine net : Cash-Puce et offshore, moins la dette */
-export function netWealth({ cash, offshore, debt }: WealthSnapshot): number {
-  return cash + offshore - debt
+export function netWealth({ cash, offshore, venture, debt }: WealthSnapshot): number {
+  return cash + offshore + venture - debt
 }
 
 /** Première entrée du carnet : le Jour 1 au départ */
@@ -67,6 +67,9 @@ export function recordJournal(before: GameState, after: GameState, action: Actio
   const today = after.journal.at(-1) ?? firstDayLog(before)
   const updated: DayLog = { ...today, bought: today.bought + spent, sold: today.sold + earned, highlights: [...today.highlights, ...highlights] }
   // Nouveau matin : la journée suivante s'ouvre sur le patrimoine après la routine
-  const opened: DayLog[] = after.day > today.day ? [{ day: after.day, start: wealthOf(after), bought: 0, sold: 0, highlights: [] }] : []
+  // Ce que la routine du matin a changé appartient à la nouvelle journée
+  const morning: Highlight[] =
+    after.briefing && after.briefing !== before.briefing && after.briefing.ventureRaid > 0 ? [{ kind: 'raid', loss: after.briefing.ventureRaid }] : []
+  const opened: DayLog[] = after.day > today.day ? [{ day: after.day, start: wealthOf(after), bought: 0, sold: 0, highlights: morning }] : []
   return { ...after, journal: [...past, updated, ...opened] }
 }

@@ -57,6 +57,8 @@ function candidates(state: GameState): Action[] {
     { type: 'borrow', amount: 1_000 },
     { type: 'deposit', amount },
     { type: 'withdraw', amount: 1_000 },
+    { type: 'invest', amount },
+    { type: 'divest', amount: 1_000 },
     ...keysOf(VEHICLES).map((vehicleId): Action => ({ type: 'buyVehicle', vehicleId })),
     ...keysOf(MODULES).flatMap((moduleId): Action[] => [
       { type: 'buyModule', moduleId },

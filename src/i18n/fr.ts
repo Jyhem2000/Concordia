@@ -101,6 +101,7 @@ export const fr = {
     'rule.cargo-value': 'Soute (prix de base)',
     'rule.protection': 'Part de Viktor',
     'rule.offshore-rate': 'Taux offshore',
+    'rule.venture-rate': 'Taux du placement',
     'rule.withdrawal': 'Retrait',
     'rule.laundry-fee': 'Commission de la Laverie',
     'rule.suspicion': 'Suspicion (ICC)',
@@ -264,6 +265,7 @@ export const fr = {
     wanted: (level: number) => `Fiche S : niveau ${level}`,
     iccTier: (tier: string) => `Nouveau statut : ${tier}`,
     ending: (title: string, score: string) => `Fin : ${title} (${score})`,
+    raid: (loss: string) => `Coup de filet sur le placement du Cartel : −${loss}`,
     highlights: 'Faits marquants',
     noHighlight: 'Aucun fait marquant.',
   },
@@ -299,6 +301,9 @@ export const fr = {
     debtInfo: (lateDay: number, auditDay: number) =>
       `Dette de Viktor, à intérêts chaque matin. Si la dette initiale n'est pas soldée avant le matin du J${lateDay}, elle passe en retard pour toute la partie : taux majoré et embuscades (risque de contrôle accru partout). À l'audit du J${auditDay} à minuit, le solde doit être nul. Remboursement à l'Arrière-Salle, de jour.`,
     cashToday: (delta: string) => `${delta} aujourd'hui`,
+    withVenture: (amount: string) => `+ placement ${amount}`,
+    offshoreInfo: (rate: string) =>
+      `Compte offshore : à l'abri de la collecte de Viktor et de l'audit, ${rate} d'intérêts simples par jour. Avec le placement du Cartel, c'est le score de fin de partie. Guichet à la Laverie, de jour.`,
     iccInfo: (left: number, cap: number) =>
       `Gains d'ICC « de route » (relais, contrôle avec soute légale, bluff réussi, certains aléas) : ${left} sur ${cap} encore possibles aujourd'hui ; au-delà, ils sont perdus jusqu'au lendemain 06h00. Les services payants n'ont pas de plafond.`,
     healthValue: (health: string) => `${health} PV`,
@@ -391,6 +396,8 @@ export const fr = {
 
   briefing: {
     title: (day: number) => `Briefing de 06h00 — Jour ${day}`,
+    ventureRaid: (loss: string) => `Coup de filet de la BRC sur une filière du Cartel : le placement perd ${loss}.`,
+    ventureInterest: 'Intérêts du placement',
     nightRelay: (district: string) => `Réveil à ${district}, après une nuit au relais routier.`,
     nightBivouac: (district: string) => `Réveil à ${district}, après une nuit en bivouac.`,
     nightCell: (district: string) => `Réveil à ${district}, au sortir de la cellule.`,
@@ -671,6 +678,11 @@ export const fr = {
   },
 
   place: {
+    ventureTitle: 'Placement du Cartel',
+    ventureRule: (rate: string, chance: string, loss: string) =>
+      `Plus rentable que l'offshore (${rate} par jour), mais chaque matin ${chance} de risque de coup de filet : le placement perd alors ${loss} de son solde. Retrait avec la même commission. Compte dans le score.`,
+    invest: 'Placer',
+    divest: 'Retirer',
     closedAtNight: 'Fermé : ouvert de 06h00 à 20h00.',
     amount: 'Montant',
     max: 'MAX',
@@ -1082,6 +1094,7 @@ export const fr = {
     'location-closed': 'Fermé : les lieux spéciaux ouvrent de 06h00 à 20h00.',
     'no-debt': 'Aucune dette à rembourser.',
     'advance-used': 'Avance de survie épuisée : Viktor ne prête qu’une fois par partie.',
+    'not-enough-venture': 'Le placement ne contient pas autant.',
     'not-enough-offshore': 'Solde offshore insuffisant.',
     intercepted: "Un barrage vous attend : réglez d'abord le contrôle.",
     'not-intercepted': 'Aucun contrôle en cours.',

@@ -4,6 +4,7 @@ import {
   GAME_LENGTH_DAYS,
   OFFSHORE_WITHDRAW_FACTOR,
   OFFSHORE_DAILY_RATE,
+  VENTURE,
   PROTECTION,
   SURVIVAL_ADVANCE,
 } from '../data/balance.ts'
@@ -73,6 +74,25 @@ export function offshoreInterestBreakdown(account: OffshoreAccount, crewBonus = 
 /** Taux du jour servi sur les dépôts */
 export function effectiveOffshoreRate(crewBonus = 0): number {
   return OFFSHORE_DAILY_RATE + crewBonus
+}
+
+/** Intérêts simples du jour du placement du Cartel, sur les seuls dépôts ; null sans dépôt */
+export function ventureInterestBreakdown(account: OffshoreAccount): Breakdown | null {
+  if (account.deposited <= 0) return null
+  return breakdown('rule.venture-rate', account.deposited * VENTURE.dailyRate)
+    .round()
+    .build()
+}
+
+/** Placement après un coup de filet : dépôts et intérêts perdent la même part */
+export function raided(account: OffshoreAccount): OffshoreAccount {
+  const kept = 1 - VENTURE.raidLoss
+  return { deposited: Math.round(account.deposited * kept), interest: Math.round(account.interest * kept) }
+}
+
+/** Score : compte offshore et placement du Cartel (chap. 1) */
+export function scoreOf(state: GameState): number {
+  return offshoreBalance(state.offshore) + offshoreBalance(state.venture)
 }
 
 /** Cash-Puce reçu pour un retrait de `amount` ₡ débités du compte, commission déduite */

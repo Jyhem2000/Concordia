@@ -1,7 +1,7 @@
 import { Check, Target, X } from 'lucide-react'
 import { ENDINGS, GAME_LENGTH_DAYS } from '../../data/balance.ts'
 import { ownedQty } from '../../engine/cargo.ts'
-import { offshoreBalance } from '../../engine/finance.ts'
+import { scoreOf } from '../../engine/finance.ts'
 import { iccTier } from '../../engine/gauges.ts'
 import type { EndingId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
@@ -16,7 +16,7 @@ type Condition = {
 /** « Objectifs du Jour 30 » : les grandes fins et la progression vers chacune, une fois la dette initiale soldée (chap. 7) */
 export default function ObjectivesPanel() {
   const unlocked = useGameStore((s) => s.game.initialDebtPaid)
-  const score = useGameStore((s) => offshoreBalance(s.game.offshore))
+  const score = useGameStore((s) => scoreOf(s.game))
   const cargo = useGameStore((s) => s.game.cargo)
   const districtId = useGameStore((s) => s.game.districtId)
   const icc = useGameStore((s) => s.game.icc)

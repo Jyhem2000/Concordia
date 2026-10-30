@@ -23,7 +23,7 @@ import { daysBeforeRot, paymentValue } from '../../src/engine/condition.ts'
 import { checkHire, crewEffect, hireFee, salary } from '../../src/engine/crew.ts'
 import { checkBuyModule, checkBuyVehicle, ejectMode, missingChassis, mountedEffect, repairPrice } from '../../src/engine/equipment.ts'
 import { eventFactor } from '../../src/engine/events.ts'
-import { loanRoom, offshoreBalance } from '../../src/engine/finance.ts'
+import { loanRoom, offshoreBalance, scoreOf } from '../../src/engine/finance.ts'
 import {
   bluffChance,
   bribeChance,
@@ -145,6 +145,8 @@ export type Temperament = {
   night: 'never' | 'mission' | 'margin' | 'always'
   /** Facteur sur l'espérance de perte des options audacieuses (fuite, bluff) : < 1 les rend plus tentantes */
   boldness: number
+  /** Part de l'argent mis à l'abri confiée au placement du Cartel, le reste à l'offshore (chap. 1) */
+  venture: number
 }
 
 /** Objectif (chap. 8, axe 3) : survivre, score maximal, ou une grande fin (Baron, Élite, Résident Réécrit, Saboteur) */
@@ -214,7 +216,7 @@ function targetScore(objective: Objective): number | null {
 /** Seuil atteint : l'argent (offshore et Cash-Puce) couvre le score de la fin visée */
 function secured(view: GameState, objective: Objective): boolean {
   const target = targetScore(objective)
-  return target !== null && offshoreBalance(view.offshore) + view.cash >= target
+  return target !== null && scoreOf(view) + view.cash >= target
 }
 
 /** L'Élite défend son ICC au-dessus du palier Or (certificat, chantage, prudence au barrage) et sert les commandes VIP du Velvet-Silo (parrain) */
@@ -554,7 +556,12 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
     const kept = huntReserve(view, objective) + (objective === 'elite' ? morgueCost(view, 'certificate') + CAPITAL : 0)
     const working = (secured(view, objective) ? fuelPrice(view) * 2 : reserve + CAPITAL * 2) + kept
     const amount = endgame ? view.cash - kept : view.day >= (plan.offshoreFromDay ?? 15) || secured(view, objective) ? view.cash - working : 0
-    if (amount > 0) return { type: 'deposit', amount }
+    if (amount > 0) {
+      // Placement du Cartel : compléter sa part de l'argent à l'abri, le reste va à l'offshore
+      const sheltered = scoreOf(view) + amount
+      const toVenture = Math.min(amount, Math.round(sheltered * temperament.venture) - offshoreBalance(view.venture))
+      return toVenture > 0 ? { type: 'invest', amount: toVenture } : { type: 'deposit', amount }
+    }
   }
   return null
 }

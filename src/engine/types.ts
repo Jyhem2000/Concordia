@@ -497,6 +497,9 @@ export type MorningBriefing = {
   /** Collecte de protection : montant dû, part payée en Cash-Puce, reliquat ajouté à la dette */
   protection: { due: Breakdown; paid: number; toDebt: number } | null
   offshoreInterest: Breakdown | null
+  /** Placement du Cartel : ₡ perdus dans un coup de filet (0 sans coup de filet), puis intérêts du jour */
+  ventureRaid: number
+  ventureInterest: Breakdown | null
 }
 
 /** Événements en cours et tirages à venir (chap. 6) */
@@ -561,6 +564,8 @@ export type FreshnessStage = 'extra' | 'standard' | 'gamey' | 'spoiled'
 export type WealthSnapshot = {
   cash: number
   offshore: number
+  /** Solde du placement du Cartel */
+  venture: number
   debt: number
 }
 
@@ -580,6 +585,7 @@ export type Highlight =
   | { kind: 'wanted'; level: number }
   | { kind: 'iccTier'; tier: IccTier }
   | { kind: 'ending'; id: EndingId; score: number }
+  | { kind: 'raid'; loss: number }
 
 /** Une journée du carnet de route (chap. 7) */
 export type DayLog = {
@@ -725,6 +731,8 @@ export type GameState = {
   /** Échéance du retard franchie : taux majoré et embuscades jusqu'à la fin de la partie */
   debtLate: boolean
   offshore: OffshoreAccount
+  /** Placement du Cartel : mêmes comptes que l'offshore, rendement plus haut, coups de filet (chap. 1) */
+  venture: OffshoreAccount
   /** Indice de Conformité Civique, 0–100 */
   icc: number
   /** Gains de route d'ICC déjà reçus depuis 06h00 (plafond quotidien) */
