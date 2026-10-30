@@ -583,3 +583,10 @@ Les deux services restaient négatifs aux retraits. Le bot les jouait mal : pani
 - Karma-Cham (Sans build, Équilibré) : 51 % des parties, −3 500 ₡ ± 5 400, neutre (−4 000 ± 3 200 avec le bot précédent).
 
 **Sondes Karma-Cham** (même paire) : à moitié prix (2 000 ₡, +1 000 par usage), −4 600 ₡ ± 6 400 : le prix n'est pas le levier, le marchand commande plus souvent sans gagner davantage ; facteur ×1,75 au lieu de ×1,5, −600 ₡ ± 6 300, à l'équilibre.
+
+**Campagnes complètes après ces changements** (mêmes effectifs : 200 parties par bot, hasard 1000, retraits 400) :
+- **Contrôle :** Novice 80 % de survie, inchangé ; aucun refus, aucun sommeil forcé, aucun invariant violé.
+- **Plans :** tous les écarts restent dans le bruit (±1 000 ₡ en Prudent et Équilibré, quelques milliers en Casse-cou). Attendre le soir rend au marchand ce que la règle de nuit lui avait pris, sans trajet risqué. L'Opportuniste reste juste sous le Sans build (26 / 54 / 126k contre 26 / 54 / 143k).
+- **Fins visées :** le Fantôme gagne à attendre le soir plutôt que rouler de jour avec le serveur : survie 73 → 78 % (Fuite au sommet), 62 → 65 % (Rentier), exécutions 8 → 5 %.
+- **Hasard :** écart entre bots 43 700 ₡, entre graines 117 500 ₡, inchangés.
+- **Retraits :** Karma-Cham et la chirurgie neutres (voir plus haut) ; `[MOD-08]` +14 800 ₡ mais −5 points de survie (la corruption pousse à transporter plus d'illégal), `[VEH-03]` et `[VEH-04]` inchangés (arbitrage capacité / survie) ; aucun élément net négatif.
