@@ -29,6 +29,7 @@ export function createInitialState(seed: number): GameState {
     cargo: [],
     markets,
     memory: {},
+    bulletin: {},
     events,
     roadEvent: null,
     roadReport: null,
@@ -87,7 +88,7 @@ export function createInitialState(seed: number): GameState {
     journal: [],
   }
   // Le carnet de route s'ouvre sur le patrimoine de départ
-  return remember({ ...state, journal: [firstDayLog(state)] }, START_DISTRICT)
+  return remember(publishBulletin({ ...state, journal: [firstDayLog(state)] }), START_DISTRICT)
 }
 
 /** Mémorise les cours d'un district où se trouve le joueur : un relevé par jour, le dernier du jour l'emporte (chap. 2) */
@@ -97,4 +98,14 @@ export function remember(state: GameState, districtId: DistrictId): GameState {
   const memory = { ...state.memory }
   for (const id of seen) memory[id] = [...(memory[id] ?? []).filter((entry) => entry.day !== state.day), observeMarket(state, id)]
   return { ...state, memory }
+}
+
+/** Bulletin du Fil (chap. 2) : le cours du matin de chaque district, relevé une fois par jour */
+export function publishBulletin(state: GameState): GameState {
+  const bulletin = { ...state.bulletin }
+  for (const id of DISTRICT_IDS) {
+    const entries = bulletin[id] ?? []
+    if (!entries.some((entry) => entry.day === state.day)) bulletin[id] = [...entries, observeMarket(state, id)]
+  }
+  return { ...state, bulletin }
 }

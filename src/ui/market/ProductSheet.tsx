@@ -1,16 +1,17 @@
-import { BookOpen } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
+import { averageCost, ownedQty } from '../../engine/cargo.ts'
+import Margin from '../shared/Margin.tsx'
+import { useConditions } from '../shared/useConditions.ts'
 import { AFTER, DAMAGED_FACTOR, FRESHNESS } from '../../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
 import { isMemoryBlurred } from '../../engine/crew.ts'
 import { searchSanction } from '../../engine/interception.ts'
-import { bestRemembered, blurredQuote, productStatus } from '../../engine/market.ts'
+import { bestRemembered, blurredQuote, productStatus, saleQuote } from '../../engine/market.ts'
 import type { District, DistrictId, ProductId, TagId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
-import { FOCUS_RING } from '../shared/focus.ts'
 import Chip from '../shared/Chip.tsx'
 import Modal from '../shared/Modal.tsx'
 import { FIELD, TIER_STYLES } from '../shared/styles.ts'
@@ -18,6 +19,12 @@ import Thumb from '../shared/Thumb.tsx'
 import QuoteChart from './QuoteChart.tsx'
 
 type ProductSheetProps = {
+  productId: ProductId
+  open: boolean
+  onClose: () => void
+}
+
+type SheetBodyProps = {
   productId: ProductId
 }
 
@@ -30,27 +37,15 @@ type LinesProps = {
   lines: readonly string[]
 }
 
-/** Nom du produit sur sa ligne du marché : il ouvre la fiche produit en fenêtre (chap. 7) */
-export default function ProductSheet({ productId }: ProductSheetProps) {
+/** Fiche produit en fenêtre (chap. 7), ouverte depuis sa ligne du marché */
+export default function ProductSheet({ productId, open, onClose }: ProductSheetProps) {
   const { t } = useI18n()
-  // Fenêtre ouverte : état d'interface éphémère
-  const [open, setOpen] = useState(false)
   const product = PRODUCTS[productId]
   return (
     <>
-      <button
-        type="button"
-        aria-haspopup="dialog"
-        aria-label={t.sheet.open(t.product[productId].name)}
-        onClick={() => setOpen(true)}
-        className={`inline-flex items-center gap-1 rounded text-left font-bold text-ink hover:text-accent ${FOCUS_RING}`}
-      >
-        {t.product[productId].name}
-        <BookOpen size={12} aria-hidden="true" className="shrink-0 text-ink-faint" />
-      </button>
       <Modal
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={onClose}
         title={
           <div className="flex items-center gap-3">
             <Thumb id={productId} tier={product.tier} size="lg" />
@@ -73,8 +68,8 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
   )
 }
 
-/** Contenu de la fiche : cours, effets des tags, actions, saisie et où vendre, sans rien cacher (chap. 7) */
-function SheetBody({ productId }: ProductSheetProps) {
+/** Contenu de la fiche : ici aujourd'hui, tendance, effets des tags, actions, saisie et où vendre (chap. 7) */
+function SheetBody({ productId }: SheetBodyProps) {
   // Profil public (vices de la Loterie compris) et mémoire de marché se lisent sur la partie entière
   const game = useGameStore((s) => s.game)
   const here = game.districtId
@@ -87,7 +82,7 @@ function SheetBody({ productId }: ProductSheetProps) {
 
   // Effets de chaque tag, tels que les applique le moteur (chap. 2)
   const tagLines = (tag: TagId): string[] => {
-    const { cover, tripRisk, detectedRisk, bluffMalus, smell, perishable, breakage, explosion, fleeDropBonus, nightSale } = TAGS[tag]
+    const { cover, tripRisk, detectedRisk, bluffMalus, smell, perishable, breakage, explosion, fleeDropBonus, nightSale, bribeGift } = TAGS[tag]
     const smelly = smell ? names(where((district) => district.odorFactor > 1)) : ''
     return [
       ...(cover ? [t.sheet.cover(percent(cover, 0), offGrid)] : []),
@@ -100,6 +95,7 @@ function SheetBody({ productId }: ProductSheetProps) {
         : []),
       ...(explosion ? [t.sheet.explosion(percent(explosion.chance, 0), explosion.chassisLoss)] : []),
       ...(fleeDropBonus ? [t.sheet.drop(signedPercent(fleeDropBonus, 0))] : []),
+      ...(bribeGift ? [t.sheet.bribeGift] : []),
       ...(nightSale ? [t.sheet.nightSale(change(nightSale), tag === AFTER.tag ? change(AFTER.festiveFactor) : null)] : []),
     ].map((line) => `${t.tag[tag].name} : ${line}`)
   }
@@ -128,8 +124,7 @@ function SheetBody({ productId }: ProductSheetProps) {
     ? t.sheet.seizure(percent(sanction.fineRate, 0), sanction.iccLoss, sanction.custodyDays, sanction.custodyDays > 0)
     : t.sheet.legal
 
-  // Qui l'apprécie : connivence des agents, priorité des milices (chap. 2 et 5)
-  const bribes = where((district) => district.bribeFavorites.includes(productId))
+  // Qui le prend en premier : les milices (chap. 3)
   const tolls = where((district) => district.tollFavorites.includes(productId))
 
   // Où le vendre : profil public, puis meilleur cours mémorisé ailleurs (chap. 2)
@@ -137,10 +132,8 @@ function SheetBody({ productId }: ProductSheetProps) {
   const produced = DISTRICT_IDS.filter((id) => productStatus(game, id, productId) === 'production')
   const best = bestRemembered(game, productId)
 
-  // Districts dont le joueur a vu le marché, pour la courbe ; le district actuel d'abord
-  const observed = [here, ...DISTRICT_IDS.filter((id) => id !== here)].filter((id) =>
-    (game.memory[id] ?? []).some((seen) => seen.quotes[productId] !== undefined),
-  )
+  // Districts de la courbe : tous (le Fil publie la tendance partout), le district actuel d'abord
+  const observed = [here, ...DISTRICT_IDS.filter((id) => id !== here)]
   const [picked, setPicked] = useState<DistrictId>(here)
   const chartDistrict = observed.includes(picked) ? picked : (observed[0] ?? here)
 
@@ -157,14 +150,11 @@ function SheetBody({ productId }: ProductSheetProps) {
         )
       : t.sheet.noMemory,
   ]
-  const seizureLines = [
-    seizure,
-    ...(bribes.length > 0 ? [t.sheet.bribeFavorite(names(bribes))] : []),
-    ...(tolls.length > 0 ? [t.sheet.tollFavorite(names(tolls))] : []),
-  ]
+  const seizureLines = [seizure, ...(tolls.length > 0 ? [t.sheet.tollFavorite(names(tolls))] : [])]
 
   return (
     <div className="flex flex-col gap-4">
+      <HereToday productId={productId} />
       <Section title={t.sheet.quotesTitle}>
         {observed.length > 1 && (
           <select
@@ -200,6 +190,47 @@ function SheetBody({ productId }: ProductSheetProps) {
         <Lines lines={sale} />
       </Section>
     </div>
+  )
+}
+
+/** Ici aujourd'hui : ce qui ne tient pas sur la ligne du marché (origine, rachat, prix d'achat, état, vente de tout) */
+function HereToday({ productId }: SheetBodyProps) {
+  // Boutique, demande, soute et ventes se lisent sur l'état entier
+  const game = useGameStore((s) => s.game)
+  const { t, credits } = useI18n()
+  const conditions = useConditions(productId)
+  const district = game.districtId
+  const stock = game.markets[district].stock[productId]
+  const status = productStatus(game, district, productId)
+  const origin =
+    stock === undefined
+      ? null
+      : status === 'production'
+        ? 'production'
+        : PRODUCTS[productId].tier === 0
+          ? 'official'
+          : status === 'strong'
+            ? 'exceptional'
+            : 'arrival'
+  const owned = ownedQty(game.cargo, productId)
+  const cost = averageCost(game.cargo, productId)
+  const saleAll = owned > 0 ? saleQuote(game, productId, owned) : null
+  const lines = [
+    ...(origin ? [t.market.origin[origin]] : []),
+    t.market.demandHint,
+    ...(cost !== null ? [t.sheet.boughtAt(owned, credits(cost))] : []),
+    ...conditions.map((condition) => t.sheet.condition(condition)),
+  ]
+  return (
+    <Section title={t.sheet.hereTitle(t.district[district].name)}>
+      <Lines lines={lines} />
+      {saleAll && owned > 1 && (
+        <p className="mt-1 flex items-center gap-1.5 text-xs text-ink-soft">
+          {t.market.marginAll(owned)}
+          <Margin revenue={saleAll.total} cost={saleAll.cost} />
+        </p>
+      )}
+    </Section>
   )
 }
 

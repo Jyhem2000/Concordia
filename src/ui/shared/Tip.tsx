@@ -31,13 +31,15 @@ type TipProps = {
   className?: string
   /** Bulle large : détail d'un calcul, liste d'effets */
   wide?: boolean
+  /** Action du déclencheur au clic (une case de soute qui sort sa caisse du double fond) ; la bulle s'ouvre toujours au survol */
+  onClick?: () => void
 }
 
 /**
  * Infobulle (chap. 7) : s'ouvre au survol de la souris, au toucher sur mobile et au focus clavier ;
  * se ferme en quittant, en touchant ailleurs ou avec Échap. Rendue hors du panneau pour ne jamais être coupée.
  */
-export default function Tip({ content, children, label, className = '', wide = false }: TipProps) {
+export default function Tip({ content, children, label, className = '', wide = false, onClick }: TipProps) {
   // Bulle ouverte : état d'interface éphémère
   const [open, setOpen] = useState(false)
   // Éléments passés par état plutôt que par `refs` : le React Compiler interdit de lire un ref pendant le rendu
@@ -68,7 +70,7 @@ export default function Tip({ content, children, label, className = '', wide = f
         ref={setReference}
         aria-label={children ? undefined : label}
         className={`inline-flex cursor-help items-center rounded ${children ? '' : 'align-middle text-ink-faint hover:text-ink-soft'} ${FOCUS_RING} ${className}`}
-        {...getReferenceProps()}
+        {...getReferenceProps({ onClick })}
       >
         {children ?? <Info size={13} aria-hidden="true" />}
       </button>

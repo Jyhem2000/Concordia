@@ -1,7 +1,7 @@
 import { DISTRICT_IDS } from '../../data/districts.ts'
 import { AFTERSHOCK } from '../../data/events.ts'
 import { KARMA } from '../../data/locations.ts'
-import { aftershockEvents, rumorReliability } from '../../engine/events.ts'
+import { aftershockEvents, globalsInForce, rumorReliability } from '../../engine/events.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import type { ReactNode } from 'react'
@@ -23,6 +23,7 @@ export default function EventsList() {
   const phase = useGameStore((s) => s.game.phase)
   const { t, percent, change } = useI18n()
   const ctx = { day, phase, events }
+  const globals = globalsInForce(ctx)
 
   const locals = DISTRICT_IDS.flatMap((id) => {
     const event = events.local[id]
@@ -38,16 +39,24 @@ export default function EventsList() {
   const demotion = lottery?.demoted && lottery.viceDistrict && day <= lottery.viceUntil ? { from: lottery.demoted, to: lottery.viceDistrict } : null
   const name = (index: number) => t.events.names[index % t.events.names.length]
 
-  if (!events.global && locals.length === 0 && aftershocks.length === 0 && !drawToday && !demotion && !events.rumor && !influence)
+  if (globals.length === 0 && locals.length === 0 && aftershocks.length === 0 && !drawToday && !demotion && !events.rumor && !influence)
     return <Hint>{t.fil.noNews}</Hint>
 
   return (
     <dl className="flex flex-col gap-3 text-xs text-ink-soft">
-      {events.global && (
+      {globals.length > 0 && (
         <NewsGroup title={t.fil.newsGlobal}>
-          <span className="font-bold text-ink">
-            <EventDetails event={events.global} />
-          </span>
+          <ul className="flex flex-col gap-0.5">
+            {globals.map((event) => (
+              <li key={event} className="font-bold text-ink">
+                <EventDetails event={event} />
+                {/* Événement qui dure (canicule) : son dernier jour */}
+                {events.lasting?.event === event && events.lasting.until > day && (
+                  <span className="ml-1.5 font-normal text-ink-muted">{t.fil.lastsUntil(events.lasting.until)}</span>
+                )}
+              </li>
+            ))}
+          </ul>
         </NewsGroup>
       )}
       {locals.length > 0 && (

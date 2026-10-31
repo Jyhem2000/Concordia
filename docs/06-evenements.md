@@ -4,9 +4,9 @@
 
 | Type | Déclenchement | Durée | Cooldown |
 | :--- | :--- | :--- | :--- |
-| **Global** (Flash Info TV) | Tiré **la veille** : chaque matin, une chance qu'un événement frappe tous les districts **le lendemain**. Une **rumeur** l'annonce parfois (voir plus bas). | la journée | — |
+| **Global** (Flash Info TV) | Tiré **la veille** : chaque matin, une chance qu'un événement frappe tous les districts **le lendemain**. Une **rumeur** l'annonce parfois (voir plus bas). | la journée ; plusieurs jours pour un événement qui dure (`days`, la canicule), en vigueur à côté de l'événement global de chaque jour | — |
 | **Local** | Routine matinale : une chance par district qu'un de ses 3 événements se déclenche, parmi ceux hors cooldown. **Visibles dès 06h00** sur la carte et le téléscripteur. | la journée, dans ce district | par événement |
-| **Contrecoup** | Le lendemain d'un événement qui a touché des cours, si le même événement ne se répète pas. | la journée | — |
+| **Contrecoup** | Le lendemain d'un événement qui a touché des cours (le lendemain de son dernier jour pour un événement qui dure), si le même événement ne se répète pas. | la journée | — |
 | **Loterie** | Jours fixes de tirage, à 06h00. | voir plus bas | — |
 | **Routier** | Trajet **de jour sans interception** (ni barrage ni racket) : une chance d'aléa. 2 choix, résolus en 1 clic. La nuit, dans les galeries de service, personne à croiser : jamais d'aléa. | instantané | par aléa |
 
@@ -60,7 +60,7 @@
 
 | ID | Événement | Marché (tous districts sauf mention) | Autres effets |
 | :--- | :--- | :--- | :--- |
-| `[EVT-G01]` | **Alerte Canicule & Délestage Thermique** — 48 °C ; Aeterna coupe la climatisation publique pour refroidir ses processeurs. | ↑ `[T0-02]`, `[T1-01]`, `[T2-05]` | À 06h00, sans `[MOD-01]` : tout `[T1-03]` en soute **fond** (détruit) ; les autres `[TAG-PERISHABLE]` **vieillissent de 2 jours** (une caisse qui atteint Pourri est détruite aussitôt). Trajets de jour : perte de châssis (annulable par `[MOD-01]` ou, comme la nuit, par le refroidissement de `[T0-02]`) et de Santé (coup de chaleur, plancher à 1 PV). |
+| `[EVT-G01]` | **Alerte Canicule & Délestage Thermique** — 48 °C ; Aeterna coupe la climatisation publique pour refroidir ses processeurs. | ↑ `[T0-02]`, `[T1-01]`, `[T2-05]` | **Dure plusieurs jours**, à côté des autres événements globaux. Chaque matin de canicule, à 06h00, sans `[MOD-01]` : tout `[T1-03]` en soute **fond** (détruit) ; les autres `[TAG-PERISHABLE]` **vieillissent** d'un jour de plus (une caisse qui atteint Pourri est détruite aussitôt). Trajets de jour : perte de châssis (annulable par `[MOD-01]` ou, comme la nuit, par le refroidissement de `[T0-02]`) et de Santé (coup de chaleur, plancher à 1 PV). |
 | `[EVT-G02]` | **Alerte Sanitaire « Variant-X »** — virus saisonnier hautement suspect. | ↑↑ `[T3-04]`, ↑ `[T2-07]`, `[T1-04]`, `[T0-03]` | Risque accru partout, hors zone hors-réseau (sauf `[D3]` avec le laissez-passer de `[LOC-D3-1]`, chap. 3). |
 | `[EVT-G03]` | **Blackout du Cloud & sevrage du Fil Rose** — la population cherche frénétiquement des sensations hors-ligne. | ↑ `[T1-02]`, `[T1-05]`, `[T2-03]`, `[T2-04]`, `[T2-06]`, `[T3-06]` | Scanners électromagnétiques de `[D5]` hors service : détection `[TAG-TECH]` annulée en `[D5]`. |
 | `[EVT-G04]` | **Éco-Panique** — documentaire en boucle sur le méthane et le cholestérol. | ↑ `[T0-01]`, `[T3-05]` ; ↓ `[T2-02]`, `[T3-01]`, `[T4-01]` **jour seulement** (la nuit, la ville basse s'en gave en cachette) | Malus `[TAG-ODOROUS]` doublés partout. |

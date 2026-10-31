@@ -66,13 +66,12 @@ export function checkMove(state: GameState, move: InterceptionMove, offer: Offer
     case 'search':
       return racket ? 'move-unavailable' : null
     case 'bluff':
-      if (racket || interception.bluffFailed) return 'move-unavailable'
-      return checkBluffAids(state, tactics.bluffAids ?? [])
+      return racket || interception.bluffFailed ? 'move-unavailable' : null
     case 'bribe':
       if (racket) return 'move-unavailable'
       if (!Number.isInteger(offer.cash) || offer.cash < 0) return 'invalid-amount'
-      // Les caisses scellées du DSC ne se donnent pas
-      if (offer.crates.some(({ productId }) => PRODUCTS[productId].sealed)) return 'not-eligible'
+      // Seul le Luxe s'offre à un agent (chap. 5)
+      if (offer.crates.some(({ productId }) => !isBribeGift(productId))) return 'not-eligible'
       if (offer.cash > state.cash) return 'not-enough-cash'
       if (!ownsCrates(state.cargo, offer.crates)) return 'not-enough-cargo'
       return offerValue(state, offer) < minimumOffer(state) ? 'offer-too-low' : null
@@ -93,15 +92,17 @@ export function checkMove(state: GameState, move: InterceptionMove, offer: Offer
   }
 }
 
-/** Aides au bluff : produits qui en ont une, en quantité suffisante, chacun une fois */
-function checkBluffAids(state: GameState, aids: readonly ProductId[]): ActionError | null {
-  if (new Set(aids).size !== aids.length) return 'move-unavailable'
-  for (const id of aids) {
+/** Produit qu'un agent accepte en nature : un tag de cadeau (Luxe, chap. 5) */
+export function isBribeGift(productId: ProductId): boolean {
+  return PRODUCTS[productId].tags.some((tag) => TAGS[tag].bribeGift)
+}
+
+/** Aides au bluff en vigueur : produits qui en ont une, assez de caisses en soute, sans rien donner (chap. 5) */
+export function bluffAids(state: GameState): ProductId[] {
+  return [...new Set(state.cargo.map((lot) => lot.productId))].filter((id) => {
     const aid = PRODUCTS[id].bluffAid
-    if (!aid) return 'move-unavailable'
-    if (ownedQty(state.cargo, id) < aid.crates) return 'not-enough-cargo'
-  }
-  return null
+    return aid !== undefined && ownedQty(state.cargo, id) >= aid.crates
+  })
 }
 
 /** Largage offensif (une caisse d'un produit qui le permet) et dopage (une fois par jour) */
@@ -119,13 +120,6 @@ export function dropBonus(productId: ProductId): number {
   return Math.max(0, ...PRODUCTS[productId].tags.map((tag) => TAGS[tag].fleeDropBonus ?? 0))
 }
 
-/** Caisses données ou sacrifiées par les aides au bluff */
-const aidCrates = (aids: readonly ProductId[]): CrateCount[] =>
-  aids.flatMap((productId) => {
-    const aid = PRODUCTS[productId].bluffAid
-    return aid ? [{ productId, qty: aid.crates }] : []
-  })
-
 // ─── Chances (détaillables, chap. 7) ───
 
 const stars = (state: GameState) => DISTRICTS[state.districtId].security
@@ -133,15 +127,16 @@ const stars = (state: GameState) => DISTRICTS[state.districtId].security
 /** Malus de suivi après un bluff raté, sur la corruption et la fuite */
 const followUp = (interception: Interception | null) => (interception?.bluffFailed ? -BLUFF.followUpPenalty : 0)
 
-/** Chance de bluff, sur la soute telle qu'elle reste une fois les aides données */
-export function bluffChance(state: GameState, { bluffAids = [] }: Tactics = NO_TACTICS): Breakdown {
-  const cargo = giveCrates(state.cargo, aidCrates(bluffAids))
+/** Chance de bluff, aides en soute comprises */
+export function bluffChance(state: GameState): Breakdown {
+  const cargo = state.cargo
+  const aids = bluffAids(state)
   const masked = keysOf(TAGS).reduce((total, tag) => total + maskedQty(cargo, tag), 0)
   const chance = breakdown('rule.bluff-base', BLUFF.base)
     .add('rule.tier0-share', BLUFF.tier0ShareBonus * tierShare(cargo, 0))
     .add('rule.masked-crates', Math.min(BLUFF.maskedCap, BLUFF.perMaskedCrate * masked), { count: masked })
     .add('rule.security-stars', -BLUFF.perExtraStar * (stars(state) - 1))
-  const cancelsSmell = bluffAids.some((id) => PRODUCTS[id].bluffAid?.cancelsSmell)
+  const cancelsSmell = aids.some((id) => PRODUCTS[id].bluffAid?.cancelsSmell)
   for (const tag of keysOf(TAGS)) {
     const { bluffMalus, smell } = TAGS[tag]
     if (!bluffMalus) continue
@@ -150,7 +145,7 @@ export function bluffChance(state: GameState, { bluffAids = [] }: Tactics = NO_T
     // Une aide qui neutralise les chiens-robots annule le malus d'odeur
     chance.add(tag, smell && cancelsSmell ? 0 : -malus)
   }
-  for (const id of bluffAids) chance.add(id, PRODUCTS[id].bluffAid?.bonus ?? 0)
+  for (const id of aids) chance.add(id, PRODUCTS[id].bluffAid?.bonus ?? 0)
   const terminal = mountedWith(state, 'fakeTerminal')
   if (terminal) chance.add(terminal, MODULES[terminal].fakeTerminal?.bluffBonus ?? 0)
   chance.add('rule.sedation', sedation(state))
@@ -179,10 +174,9 @@ export function offerValue(state: GameState, offer: Offer): number {
   return offer.cash + paymentValue(state, offer.crates)
 }
 
-/** L'offre contient un produit apprécié des agents de ce district */
-export function hasConnivance(state: GameState, offer: Offer): boolean {
-  const favorites = DISTRICTS[state.districtId].bribeFavorites
-  return offer.crates.some(({ productId, qty }) => qty > 0 && favorites.includes(productId))
+/** L'offre contient une caisse de Luxe : l'agent ferme les yeux plus volontiers */
+export function hasConnivance(offer: Offer): boolean {
+  return offer.crates.some(({ productId, qty }) => qty > 0 && isBribeGift(productId))
 }
 
 export function bribeChance(state: GameState, offer: Offer): Breakdown {
@@ -190,7 +184,7 @@ export function bribeChance(state: GameState, offer: Offer): Breakdown {
   const offerBonus = BRIBE.offerBonuses.reduce((bonus, step) => (ratio >= step.ratio ? step.bonus : bonus), 0)
   const chance = breakdown('rule.bribe-base', BRIBE.base)
     .add('rule.offer', offerBonus)
-    .add('rule.connivance', hasConnivance(state, offer) ? BRIBE.connivance : 0)
+    .add('rule.connivance', hasConnivance(offer) ? BRIBE.connivance : 0)
     .add('rule.security-stars', -BRIBE.perExtraStar * (stars(state) - 1))
     .add('rule.bluff-failed', followUp(state.interception))
     .add(workingCrew(state) ?? 'rule.sedation', crewEffect(state, 'bribeBonus') ?? 0)
@@ -396,11 +390,9 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
       )
 
     case 'bluff': {
-      const chance = bluffChance(state, tactics)
-      // Les caisses d'aide sont données (ou sacrifiées) avant le verdict
-      const aided = sacrifice(state, ledger, aidCrates(tactics.bluffAids ?? []))
-      if (roll(chance)) return report(gainIcc(aided, ledger, BLUFF.successIccGain), chance, true, true, false)
-      const caught = loseIcc(aided, ledger, BLUFF.failIccLoss)
+      const chance = bluffChance(state)
+      if (roll(chance)) return report(gainIcc(state, ledger, BLUFF.successIccGain), chance, true, true, false)
+      const caught = loseIcc(state, ledger, BLUFF.failIccLoss)
       // Soute légale : la fausse déclaration ne coûte que l'ICC
       if (legalOnly(caught)) return report(caught, chance, false, true, true)
       return report(

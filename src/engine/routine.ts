@@ -25,7 +25,7 @@ import { drawEvents, hasEffect, heatWave } from './events.ts'
 import { drawMarkets } from './market.ts'
 import { drawPatrol } from './risk.ts'
 import { createRng } from './rng.ts'
-import { remember } from './state.ts'
+import { publishBulletin, remember } from './state.ts'
 import { loseHalfDay } from './time.ts'
 import type { Ending, EndingId, GameState, MorningBriefing, ProductId } from './types.ts'
 
@@ -230,7 +230,7 @@ function morningRoutine(state: GameState, night: Night): GameState {
   s = { ...s, lucidity: Math.max(0, s.lucidity - 1) }
   if (night !== 'cell') s = refreshLucidity(s)
 
-  return remember({ ...s, briefing }, s.districtId)
+  return remember(publishBulletin({ ...s, briefing }), s.districtId)
 }
 
 /** Canicule à 06h00 : un produit fond, les autres périssables vieillissent ; ceux qui atteignent Pourri sont détruits */

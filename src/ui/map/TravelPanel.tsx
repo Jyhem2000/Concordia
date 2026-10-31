@@ -1,14 +1,13 @@
-import { MapPin, Package } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import { motion } from 'motion/react'
 import { ENDINGS, WANTED } from '../../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
-import { VEHICLES } from '../../data/vehicles.ts'
 import { planTravel } from '../../engine/actions.ts'
-import { averageCost, cargoUsed, ownedQty } from '../../engine/cargo.ts'
+import { averageCost } from '../../engine/cargo.ts'
 import { crewEffect, isMemoryBlurred } from '../../engine/crew.ts'
 import { blurredQuote, estimatedUnitSale, fuelPriceBreakdown, lastSeen, productStatus } from '../../engine/market.ts'
-import { flyingCheckShare, hiddenCargo } from '../../engine/interception.ts'
+import { flyingCheckShare } from '../../engine/interception.ts'
 import { riskBreakdown } from '../../engine/risk.ts'
 import type { DistrictId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
@@ -26,67 +25,46 @@ import Tip from '../shared/Tip.tsx'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
 import Margin from '../shared/Margin.tsx'
+import TrendBadge from '../shared/TrendBadge.tsx'
 
 type DistrictDetailsProps = {
   districtId: DistrictId
-  /** Fiche mise en avant sous la carte ; sinon, ligne de la liste des destinations */
+  /** Fiche mise en avant (district désigné) ; sinon, ligne de la liste des destinations */
   featured?: boolean
 }
 
-type DestinationFactsProps = {
+type DistrictIdProps = {
   districtId: DistrictId
-}
-
-type TravelButtonProps = {
-  to: DistrictId
 }
 
 /** Ordre d'affichage : de la périphérie au sommet de la pyramide (carte du chap. 3) */
 const order = [...DISTRICT_IDS].sort((a, b) => DISTRICTS[a].echelon - DISTRICTS[b].echelon)
 
-/** District de la fiche sous la carte : survolé, sinon touché, sinon le district actuel */
-function useFeatured(): DistrictId {
-  const here = useGameStore((s) => s.game.districtId)
-  return useMapFocus((s) => s.hovered ?? s.selected ?? here)
-}
-
-/** Carte tactique (chap. 7) : la carte des districts, puis la fiche complète du district désigné */
+/** Carte tactique (chap. 7) : la carte des districts, le mode d'emploi derrière le « i » du titre */
 export default function MapPanel() {
   const { t } = useI18n()
   const selected = useMapFocus((s) => s.selected)
   const select = useMapFocus((s) => s.select)
   const hover = useMapFocus((s) => s.hover)
-  const featured = useFeatured()
   return (
     <Panel title={t.travel.title} info={t.travel.mapHint} collapseId="travel">
       <DistrictMap selected={selected} onSelect={select} onHover={hover} />
-      <DistrictDetails key={featured} districtId={featured} featured />
     </Panel>
   )
 }
 
-/** Soute à bord (chap. 7) : réserve de Synthanol, produits et part du double fond, ce qu'une saisie coûterait */
-export function CargoRecap() {
-  // Le double fond dépend du véhicule et de la soute : état entier
-  const game = useGameStore((s) => s.game)
-  const { t } = useI18n()
-  const { hidden } = hiddenCargo(game)
-  const products = [...new Set(game.cargo.map((lot) => lot.productId))]
-  const lines = products.map((id) => t.travel.cargoLine(ownedQty(game.cargo, id), t.product[id].name, ownedQty(hidden, id)))
-  return (
-    <Panel icon={Package} title={t.travel.cargoTitle(cargoUsed(game.cargo), VEHICLES[game.vehicleId].cargo)} collapseId="cargo-recap">
-      <p className="text-xs text-ink-soft">{lines.length > 0 ? lines.join(' · ') : t.travel.cargoEmpty}</p>
-      <Hint className="mt-1">{t.travel.fuelReminder(game.fuel, VEHICLES[game.vehicleId].tank)}</Hint>
-      <Exposure className="mt-1" />
-    </Panel>
-  )
+/** Fiche du district désigné (chap. 7) : survolé, sinon touché, sinon le district actuel */
+export function FeaturedDistrict() {
+  const here = useGameStore((s) => s.game.districtId)
+  const featured = useMapFocus((s) => s.hovered ?? s.selected ?? here)
+  return <DistrictDetails key={featured} districtId={featured} featured />
 }
 
-/** Les autres destinations, de la périphérie au sommet : tout ce que dit la fiche, sauf le district déjà sous la carte */
+/** Les autres destinations, sous la carte, de la périphérie au sommet ; le district de la fiche n'y figure pas */
 export function DestinationsPanel() {
   const tripDone = useGameStore((s) => (s.game.phase === 'day' ? s.game.dayTripDone : s.game.nightTripDone))
   const here = useGameStore((s) => s.game.districtId)
-  // Le district sous la carte quitte la liste ; le simple survol ne la fait pas bouger
+  // Le district de la fiche (touché, sinon actuel) quitte la liste ; le simple survol ne la fait pas bouger
   const pinned = useMapFocus((s) => s.selected ?? here)
   const { t } = useI18n()
   return (
@@ -94,6 +72,7 @@ export function DestinationsPanel() {
       {/* Raison commune à toutes les destinations : dite une fois plutôt que sous chaque bouton */}
       {tripDone && <Hint className="px-3 pt-2">{t.error['trip-done']}</Hint>}
       <LastTrip />
+      <Exposure className="px-3 pt-2" />
       <ul className="mt-2 divide-y divide-line border-t border-line">
         {order
           .filter((id) => id !== pinned)
@@ -105,7 +84,7 @@ export function DestinationsPanel() {
   )
 }
 
-/** Ce que le dernier trajet a coûté hors barrage : usure ou refroidissement */
+/** Ce que le dernier trajet a coûté hors barrage : usure ou refroidissement, mission, écart, injection */
 function LastTrip() {
   const report = useGameStore((s) => s.game.tripReport)
   const coolant = PRODUCT_IDS.find((id) => PRODUCTS[id].cooling)
@@ -128,8 +107,9 @@ function LastTrip() {
 }
 
 /**
- * Un district, avec tout ce qu'il faut pour choisir où aller : étoiles, indices, événement, Synthanol et lieux,
- * mémoire de marché et produits en soute, puis itinéraire, risque et départ. Mis en avant sous la carte, ou ligne de liste.
+ * Un district, avec tout ce qu'il faut pour choisir où aller : en-tête (nom, étoiles, indices), description sur toute la
+ * largeur, faits (événement, Synthanol, lieux, mémoire), produits en soute (statut, tendance, cours vu), puis une barre
+ * de départ pleine largeur : itinéraire, rations et risque à gauche, « Aller » à droite.
  */
 function DistrictDetails({ districtId, featured = false }: DistrictDetailsProps) {
   const here = useGameStore((s) => s.game.districtId === districtId)
@@ -147,37 +127,27 @@ function DistrictDetails({ districtId, featured = false }: DistrictDetailsProps)
   const owned = [...new Set(cargo.map((lot) => lot.productId))].filter((id) => !PRODUCTS[id].sealed)
   // Position actuelle en bleu, district choisi en ambre : deux surbrillances distinctes
   const frame = featured
-    ? `mt-3 rounded-lg border p-3 ${here ? 'border-info/40 bg-info/5' : 'border-accent/40 bg-accent/5'}`
+    ? `rounded-lg border p-3 ${here ? 'border-info/40 bg-info/5' : 'border-accent/40 bg-accent/5'}`
     : `px-3 py-2 ${here ? 'bg-info/5' : ''}`
-  const Wrapper = featured ? motion.div : motion.li
+  const Wrapper = featured ? motion.section : motion.li
 
   return (
     <Wrapper {...(featured ? APPEAR : {})} className={`text-sm ${frame}`}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className={`font-bold ${featured ? (here ? 'text-info' : 'text-accent') : ''}`}>
-            {t.district[districtId].name}
-            <span className="ml-2 font-normal text-accent" aria-hidden="true">
-              {'★'.repeat(security)}
-            </span>
-            <span className="sr-only">{t.travel.security(security)}</span>
-            {!featured && (
-              <span className="ml-2">
-                <DistrictSigns districtId={districtId} />
-              </span>
-            )}
-          </p>
-          <p className="text-xs text-ink-muted">{t.district[districtId].subtitle}</p>
-        </div>
-        {here ? (
-          <span className="flex shrink-0 items-center gap-1 text-xs text-info">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+        <p className={`font-bold ${featured ? (here ? 'text-info' : 'text-accent') : ''}`}>{t.district[districtId].name}</p>
+        <span className="text-accent" aria-hidden="true">
+          {'★'.repeat(security)}
+        </span>
+        <span className="sr-only">{t.travel.security(security)}</span>
+        {!featured && <DistrictSigns districtId={districtId} />}
+        {here && (
+          <span className="ml-auto flex items-center gap-1 text-xs text-info">
             <MapPin size={12} aria-hidden="true" />
             {t.travel.here}
           </span>
-        ) : (
-          !featured && <TravelButton to={districtId} />
         )}
       </div>
+      <p className="text-xs text-ink-muted">{t.district[districtId].subtitle}</p>
 
       <div className="mt-1 flex flex-col gap-0.5 text-xs text-ink-muted">
         {featured && <DistrictSigns districtId={districtId} labelled />}
@@ -190,46 +160,45 @@ function DistrictDetails({ districtId, featured = false }: DistrictDetailsProps)
             {owned.length > 0 && <Tip label={memoryLabel} content={t.travel.estimateHint} />}
           </span>
         )}
-        {/* Produits en soute : statut public du district (chap. 2) et cours mémorisé, pour décider où vendre */}
-        {!here && owned.length > 0 && (
-          <ul className="mt-0.5 text-ink-soft">
-            {owned.map((id) => {
-              const status = productStatus({ day, phase, events }, districtId, id)
-              return (
-                <li key={id} className="flex justify-between gap-2">
-                  <span className="truncate">
-                    {t.product[id].name}
-                    {status !== 'neutral' && (
-                      <span className={`ml-1.5 ${status === 'strong' ? 'text-warning' : 'text-success'}`}>{t.market.status[status]}</span>
-                    )}
-                  </span>
+      </div>
+
+      {/* Produits en soute : statut public du district (chap. 2), tendance publique et cours vu, pour décider où vendre */}
+      {!here && owned.length > 0 && (
+        <ul className="mt-1 grid gap-x-4 gap-y-0.5 text-xs text-ink-soft sm:grid-cols-2">
+          {owned.map((id) => {
+            const status = productStatus({ day, phase, events }, districtId, id)
+            return (
+              <li key={id} className="flex items-center justify-between gap-2">
+                <span className="min-w-0 truncate">
+                  {t.product[id].name}
+                  {status === 'strong' && <span className="ml-1.5 text-warning">{t.market.status.strong}</span>}
+                </span>
+                <span className="flex shrink-0 items-center gap-1.5">
+                  <TrendBadge districtId={districtId} productId={id} />
                   {memory && blurred ? (
-                    <span>{t.travel.blurred(credits(blurredQuote(memory.quotes[id]).low), credits(blurredQuote(memory.quotes[id]).high))}</span>
+                    t.travel.blurred(credits(blurredQuote(memory.quotes[id]).low), credits(blurredQuote(memory.quotes[id]).high))
                   ) : memory ? (
-                    <span className="flex items-center gap-1.5">
+                    <>
                       <Margin revenue={estimatedUnitSale(memory.quotes[id])} cost={averageCost(cargo, id) ?? 0} showAmount={false} />
                       {credits(memory.quotes[id])}
-                    </span>
+                    </>
                   ) : (
                     <span className="text-ink-faint">{t.travel.neverSeen}</span>
                   )}
-                </li>
-              )
-            })}
-          </ul>
-        )}
-      </div>
-      {featured && !here && (
-        <div className="mt-2 flex justify-end border-t border-line pt-2">
-          <TravelButton to={districtId} />
-        </div>
+                </span>
+              </li>
+            )
+          })}
+        </ul>
       )}
+
+      {!here && <TravelBar districtId={districtId} />}
     </Wrapper>
   )
 }
 
 /** Prix du Synthanol à l'arrivée et lieux spéciaux du district (panneau de prévision, chap. 7) */
-function DestinationFacts({ districtId }: DestinationFactsProps) {
+function DestinationFacts({ districtId }: DistrictIdProps) {
   // Le prix du Synthanol dépend du moment et du district : état entier, placé à destination
   const game = useGameStore((s) => s.game)
   const { t, credits } = useI18n()
@@ -242,36 +211,43 @@ function DestinationFacts({ districtId }: DestinationFactsProps) {
   )
 }
 
-function TravelButton({ to }: TravelButtonProps) {
+/** Barre de départ, sur toute la largeur : itinéraire, rations, risque détaillable et part de contrôles volants, puis « Aller » */
+function TravelBar({ districtId }: DistrictIdProps) {
   // planTravel lit plusieurs champs de la partie (phase, carburant, trajets faits…) : on passe l'état entier
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
   const { t, percent } = useI18n()
-  const plan = planTravel(game, to)
+  const plan = planTravel(game, districtId)
   // Ronde renforcée cachée : la part affichée est celle du district
   const revealed = Boolean(crewEffect(game, 'revealsPatrol'))
-  const flying = flyingCheckShare(game, to, revealed)
+  const flying = flyingCheckShare(game, districtId, revealed)
   const route = plan.crossed.length === 0 ? t.travel.direct : t.travel.via(plan.crossed.map((id) => t.district[id].name).join(', '))
 
   return (
-    <div className="shrink-0 text-right">
+    <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 border-t border-line pt-2 text-xs">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-ink-muted">
+        <span>{route}</span>
+        <span>· {t.travel.fuel(plan.fuelCost)}</span>
+        <span className="flex items-center gap-1">
+          · {t.travel.risk}
+          <Tip label={t.travel.risk} content={revealed ? t.travel.riskHintRevealed : t.travel.riskHint} />
+          <Detailed
+            breakdown={riskBreakdown(game, districtId, { includePatrol: revealed })}
+            format={(risk) => percent(risk, 0)}
+            percent
+            className="font-bold text-ink"
+          />
+        </span>
+        {flying > 0 && <span>· {t.travel.flyingShare(percent(flying, 0))}</span>}
+      </div>
       <Button
         variant="primary"
         disabled={plan.error !== null}
         reason={plan.error ? t.error[plan.error] : null}
-        onClick={() => dispatch({ type: 'travel', to })}
+        onClick={() => dispatch({ type: 'travel', to: districtId })}
       >
         {t.travel.go}
       </Button>
-      <div className="mt-0.5 text-xs text-ink-muted">
-        {route} · {t.travel.fuel(plan.fuelCost)}
-      </div>
-      <div className="flex items-center justify-end gap-1.5 text-xs">
-        <span className="text-ink-muted">{t.travel.risk}</span>
-        <Tip label={t.travel.risk} content={revealed ? t.travel.riskHintRevealed : t.travel.riskHint} />
-        <Detailed breakdown={riskBreakdown(game, to, { includePatrol: revealed })} format={(risk) => percent(risk, 0)} />
-      </div>
-      {flying > 0 && <div className="text-xs text-ink-muted">{t.travel.flyingShare(percent(flying, 0))}</div>}
     </div>
   )
 }

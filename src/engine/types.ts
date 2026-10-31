@@ -36,6 +36,7 @@ export type TagId =
   | 'TAG-FLAMMABLE'
   | 'TAG-FESTIVE'
   | 'TAG-DIURNAL'
+  | 'TAG-LUXURY'
 
 /** Districts (chap. 3) */
 export type DistrictId = `D${1 | 2 | 3 | 4 | 5 | 6}`
@@ -85,7 +86,11 @@ export type EventEffect = { districts?: readonly DistrictId[] } & (
   | { kind: 'repair'; factor: number }
 )
 
-export type GameEvent = { effects: readonly EventEffect[] }
+export type GameEvent = {
+  effects: readonly EventEffect[]
+  /** Événement global qui dure plusieurs jours (canicule) : il reste en vigueur à côté des événements du jour */
+  days?: number
+}
 
 /** Coût d'une option d'aléa routier ; tous les éléments sont dus */
 export type RoadCost = {
@@ -138,6 +143,8 @@ export type Tag = {
   explosion?: { chance: number; chassisLoss: number }
   /** Largage offensif en fuite : chance ajoutée en sacrifiant une caisse (chap. 2 et 5) */
   fleeDropBonus?: number
+  /** Cadeau d'agent : seuls ces produits s'offrent à la corruption, avec la connivence (chap. 5) */
+  bribeGift?: boolean
   /** Coefficient de vente pendant le couvre-feu (chap. 2) ; pour le tag de l'after, la fête le remplace (chap. 1) */
   nightSale?: number
 }
@@ -215,8 +222,6 @@ export type District = {
   flyingCheckShare: number
   /** Modes d'éjection autorisés : décharge manuelle, trappe de MOD-07 (le broyeur de VEH-04 passe partout) */
   ejection: { manual: boolean; trapdoor: boolean }
-  /** Produits qui valent la connivence des agents dans une offre de corruption (chap. 5) */
-  bribeFavorites: readonly ProductId[]
   /** Produits que les milices prennent en premier au péage en nature, dans l'ordre (chap. 3) */
   tollFavorites: readonly ProductId[]
   /** Coefficient de marché des produits de la liste Production */
@@ -451,7 +456,6 @@ export type InterceptionReport = {
 /** Tactiques d'une option de barrage : aides au bluff, sacrifices et dopage en fuite (chap. 2 et 5) */
 export type Tactics = {
   /** Produits dont les caisses sont données ou sacrifiées à l'agent pendant le bluff */
-  bluffAids?: readonly ProductId[]
   /** Produit dont une caisse est larguée pendant la fuite (largage offensif) */
   drop?: ProductId
   /** Produit bu pour le dopage pilote pendant la fuite */
@@ -533,6 +537,8 @@ export type EventsState = {
   prophecy: { day: number; event: GlobalEventId } | null
   /** Faux dossier accepté pour le tirage de ce jour-là */
   forgery: { day: number; card: ForgeryCard } | null
+  /** Événement global qui dure (canicule), en vigueur jusqu'au jour `until` inclus */
+  lasting: { event: GlobalEventId; until: number } | null
 }
 
 /** Dernier tirage de la Loterie : promu, déclassé et vice emporté */
@@ -680,6 +686,11 @@ export type GameState = {
   markets: Record<DistrictId, DistrictMarket>
   /** Cours observés par district, un relevé par jour, du plus ancien au plus récent */
   memory: Partial<Record<DistrictId, readonly MarketMemory[]>>
+  /**
+   * Bulletin du Fil (chap. 2) : cours du matin de chaque district, relevés chaque jour. Le joueur n'en voit que la tendance
+   * de la veille et d'avant (sens et forme), jamais les prix
+   */
+  bulletin: Partial<Record<DistrictId, readonly MarketMemory[]>>
   events: EventsState
   /** Aléa routier en attente du choix du joueur : le trajet est suspendu */
   roadEvent: RoadEventId | null

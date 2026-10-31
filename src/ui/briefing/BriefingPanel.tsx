@@ -1,6 +1,6 @@
 import { Sunrise } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
-import { ICC_MAX } from '../../data/balance.ts'
+import { ICC_MAX, WANTED } from '../../data/balance.ts'
 import type { MorningBriefing } from '../../engine/types.ts'
 import { heatWave } from '../../engine/events.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
@@ -60,10 +60,13 @@ function CrewLine({ crew }: { crew: NonNullable<MorningBriefing['crew']> }) {
 
 /** Une ligne par effet de la routine, dans son ordre d'application (chap. 1) */
 function BriefingLines({ briefing }: BriefingLinesProps) {
-  const { t, credits, signedPercent } = useI18n()
+  const { t, credits, signedPercent, percent } = useI18n()
   const districtId = useGameStore((s) => s.game.districtId)
   // Effet de canicule du jour, pour nommer le produit qui fond
   const heat = useGameStore((s) => (briefing.heat ? heatWave(s.game) : null))
+  // Fiche S montée la veille (fuite, écart de nuit filmé) : rappelée au réveil avec ce qu'elle coûte
+  const wanted = useGameStore((s) => s.game.wanted)
+  const raised = useGameStore((s) => (s.game.journal.at(-2)?.highlights ?? []).some((highlight) => highlight.kind === 'wanted'))
   const { sleep, custodyHealth, debtInterest, debtLate, protection, offshoreInterest, ventureRaid, ventureInterest } = briefing
   const wokeIn = t.district[briefing.districtId].name
   const places = allPlacesHere(briefing.districtId).map((id) => t.location[id].name)
@@ -81,6 +84,11 @@ function BriefingLines({ briefing }: BriefingLinesProps) {
       {heat && (
         <li className="text-danger">
           {t.briefing.heat(t.product[heat.melts].name, briefing.heat?.melted ?? 0, briefing.heat?.aged ?? 0, briefing.heat?.rotten ?? 0)}
+        </li>
+      )}
+      {raised && wanted > 0 && (
+        <li className="text-danger">
+          {t.briefing.wanted(wanted, WANTED.maxLevel, percent(WANTED.riskPerLevel * wanted, 0), percent(WANTED.fleePenaltyPerLevel * wanted, 0))}
         </li>
       )}
       {briefing.lockedIn && <li className="text-danger">{t.briefing.lockedIn(t.district[districtId].name)}</li>}

@@ -36,6 +36,7 @@ import {
   fineAmount,
   fleeConsequences,
   hiddenCargo,
+  isBribeGift,
   isLethalSearch,
   minimumOffer,
   searchSanction,
@@ -1042,8 +1043,10 @@ function barrage(view: GameState, plan: Plan, temperament: Temperament): Action 
   const trapdoor = ejectMode(view) === 'trapdoor' ? (mountedEffect(view, 'trapdoor')?.maxRecovery ?? 0) / 2 : 0
   consider('eject', ejectChance(view).total, (illegal - hidden) * (1 - trapdoor), searchLoss * 1.3, false)
 
-  // Corruption : une caisse appréciée des agents (connivence) remplace une part du cash
-  const favorite = DISTRICTS[view.districtId].bribeFavorites.find((id) => ownedQty(view.cargo, id) > 0)
+  // Corruption : une caisse de Luxe, la moins chère, apporte la connivence et remplace une part du cash
+  const favorite = [...new Set(view.cargo.map((lot) => lot.productId))]
+    .filter(isBribeGift)
+    .sort((a, b) => PRODUCTS[a].basePrice - PRODUCTS[b].basePrice)[0]
   const crates = favorite ? [{ productId: favorite, qty: 1 }] : []
   const cash = Math.max(0, Math.max(minimumOffer(view), bribeRate(view).total) - paymentValue(view, crates))
   if (cash <= view.cash) {

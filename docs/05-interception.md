@@ -43,7 +43,7 @@ Une interception de la BRC prend l'une de deux formes, tirée au moment où elle
 * **Barrage fixe** — un checkpoint au sas du district, **visible à 300 m** : toutes les options sont ouvertes, éjection et fuite comprises.
 * **Contrôle volant** — un drone a repéré le véhicule et une unité de la BRC le coince (contre le trottoir de jour, dans la galerie de nuit, au quai de service de `[D5]` et `[D6]`) ; l'agent a déjà la main sur la portière. **Ni éjection ni fuite** : trop tard pour vider la soute ou démarrer. Restent la fouille, le bluff et la corruption.
 * **Part des contrôles volants :** propre à chaque district (`flyingCheckShare` dans [`districts.ts`](../src/data/districts.ts) : rare dans les ruches où la BRC manque de drones, fréquente au sommet), majorée dans le district de la ronde renforcée, faite d'unités mobiles (`FLYING_CHECK` dans [`balance.ts`](../src/data/balance.ts)). En zone hors-réseau, les milices tiennent toujours une barricade visible (chap. 3).
-* *Intention :* sans contrôle volant, la fuite (avec largage et dopage) devient le repli universel dès que la cargaison vaut cher. Le contrôle volant oblige à préparer aussi le bluff (masquage, Tier 0, aides) ou la corruption (cash de réserve, caisses appréciées des agents) : chaque build garde ses failles.
+* *Intention :* sans contrôle volant, la fuite (avec largage et dopage) devient le repli universel dès que la cargaison vaut cher. Le contrôle volant oblige à préparer aussi le bluff (masquage, Tier 0, aides) ou la corruption (cash de réserve, caisses de Luxe) : chaque build garde ses failles.
 * **Brouilleur de drones** (`[MOD-09]`, chap. 4) : une fois par jour, un contrôle volant devient un barrage fixe.
 * **Cage de Faraday** (`[MOD-03]`, chap. 4) : la part de contrôles volants est réduite (multiplicateur), dans tous les districts.
 * **Lieu du barrage :** le texte suit la couche du réseau (chap. 3) : entrée du district de jour, galerie de service de nuit, sas du quai de service en `[D5]` et `[D6]`.
@@ -66,6 +66,7 @@ Le joueur accepte la fouille (**0**) ou tente une action : **1** Bluff, **2** Co
 **Chauffeur à bout** (chap. 1) : sous un seuil de Santé, malus au bluff et à la fuite (`WORN` dans [`balance.ts`](../src/data/balance.ts)).
 
 ### 0. Accepter la fouille (sanction de base)
+*Quand l'accepter :* soute légale (simple formalité, gain d'ICC) ; illégal tenu au double fond ; ou quand l'échec des autres options coûterait plus (amende relevée après un bluff raté, garde à vue, dégâts de la fuite). L'écran le rappelle en infobulle.
 Montants et taux : `SEARCH` dans [`balance.ts`](../src/data/balance.ts) ; le haut tier commence à `HIGH_TIER`.
 
 | Soute | Sanction |
@@ -81,11 +82,12 @@ Chance = min( plafond,  base
                    + bonus × part de Tier 0 dans la cargaison
                    + min(plafond, bonus × caisses masquées)
                    − malus × (étoiles du district − 1)
-                   − malus d'odeur ([TAG-ODOROUS])
+                   − malus d'odeur ([TAG-ODOROUS], annulé par [T2-01] en soute)
                    − Sédation − chauffeur à bout
-                   + bonus ([MOD-08], [T0-04]) )
+                   + bonus ([MOD-08], [T0-04] en soute) )
 ```
 * La chance n'a pas de plancher : une soute très odorante dans un district bien gardé peut la ramener à 0 %.
+* **Aides au bluff, passives :** les produits qui en ont une (`bluffAid` dans [`products.ts`](../src/data/products.ts)) jouent d'eux-mêmes dès qu'il y en a assez en soute : on ne donne rien à l'agent. L'écran les annonce.
 * **Succès :** passage avec toute la cargaison, **gain d'ICC** (gain de route plafonné, chap. 1).
 * **Échec :** **perte d'ICC** (fausse déclaration). Si la soute est uniquement légale, c'est tout. Sinon :
   1. bluff et éjection ne sont plus disponibles ;
@@ -99,10 +101,10 @@ Valeurs : `BRIBE` dans [`balance.ts`](../src/data/balance.ts).
 Chance = min( plafond,  base + Offre + Connivence − malus × (étoiles du district − 1) − Sédation + bonus ([CREW-01]) )
 ```
 * **Tarif standard :** le plus élevé entre **une part fixe par étoile du district** et **une part de la valeur des caisses illégales en soute** (au prix de base). L'agent évalue ce qu'il laisse passer. Réduit par `[MOD-08]`.
-* **Offre** — Cash-Puce et caisses de la soute, au choix et cumulables ; les caisses comptent à leur valeur en paiement (paiement en nature, chap. 2). Sa valeur totale est comparée au tarif standard. Elle est perdue même en cas d'échec (les caisses offertes ne sont pas confisquées une seconde fois, elles sont déjà parties). **En dessous d'une fraction du tarif, l'agent refuse** : le curseur d'offre démarre à ce minimum.
+* **Offre** — Cash-Puce et caisses de **Luxe** (`[TAG-LUXURY]`, chap. 2), au choix et cumulables : un agent ne prend en nature que ce qu'il peut garder pour lui (cigares, whisky…), jamais le reste de la soute. Les caisses comptent à leur valeur en paiement (paiement en nature, chap. 2). Sa valeur totale est comparée au tarif standard. Elle est perdue même en cas d'échec (les caisses offertes ne sont pas confisquées une seconde fois, elles sont déjà parties). **En dessous d'une fraction du tarif, l'agent refuse.** Le Cash-Puce proposé démarre au tarif standard, sans jamais dépasser ce que le joueur a.
 * **Bonus d'offre par paliers :** plus l'offre dépasse le tarif standard, plus la chance monte, jusqu'à un plafond (`offerBonuses`).
 
-* **Connivence** (bonus `BRIBE.connivance` dans [`balance.ts`](../src/data/balance.ts)) si l'offre contient au moins une caisse d'un produit apprécié des agents du district (`bribeFavorites` dans [`districts.ts`](../src/data/districts.ts)) : les agents humains de `[D1]` à `[D3]` et les douaniers d'élite de `[D5]` et `[D6]` n'apprécient pas les mêmes produits. L'app signale les caisses qui la déclenchent.
+* **Connivence** (bonus `BRIBE.connivance` dans [`balance.ts`](../src/data/balance.ts)) si l'offre contient au moins une caisse de Luxe : un cadeau qui se garde dispose l'agent mieux que des crédits traçables.
 * **Drones-Juges** (districts équipés, [`districts.ts`](../src/data/districts.ts)) : un échec critique incompressible (`droneCriticalFailure`), tiré avant le jet (ils sont incorruptibles : il faut tomber sur un douanier).
 * **Succès :** l'agent coupe sa caméra-piéton ; passage garanti, ICC inchangé.
 * **Échec :** confiscation + lourde amende + perte d'ICC + garde à vue, quel que soit le tier.
@@ -111,11 +113,11 @@ Chance = min( plafond,  base + Offre + Connivence − malus × (étoiles du dist
 * **Barrage fixe uniquement** (impossible en contrôle volant).
 * **Chance de base** et **plafond** dégressif selon les étoiles du district : `FLEE` dans [`balance.ts`](../src/data/balance.ts).
 * **Bonus :** `[MOD-06]`, `[CREW-02]`, `[VEH-03]` (en `[D3]` et `[D5]`). **Malus :** Fiche S, Sédation, chauffeur à bout.
-* **Sacrifices :** 1 largage offensif max (une caisse `[TAG-FLAMMABLE]` **ou** `[TAG-CHEMICAL]` ; si le produit porte les deux tags, le meilleur bonus compte) + dopage `[T2-05]` (cumulable). Les caisses sacrifiées ou bues sont perdues quel que soit le résultat. Le joueur choisit le produit à sacrifier ; l'app montre le bonus de chacun.
+* **Sacrifices :** 1 largage offensif max (une caisse `[TAG-FLAMMABLE]`, huile ou alcool fort) + dopage `[T2-05]` (cumulable). Les caisses sacrifiées ou bues sont perdues quel que soit le résultat. Le joueur choisit le produit à sacrifier ; l'app montre le bonus de chacun.
 * **Succès :** cargaison sauvée, **+1 niveau de Fiche S**, mais perte de châssis (tirage uniforme entier dans une fourchette ; `[MOD-06]`, `[VEH-03]`), casse `[TAG-FRAGILE]`, et perte d'ICC (caméras de trafic ; `[VEH-03]`, `[MOD-05]`).
 * **Échec :** explosions `[TAG-FLAMMABLE]` d'abord, puis confiscation + amende sur la valeur saisie + perte d'ICC ; perte de châssis et de Santé (`[MOD-06]`), mortelle si la Santé tombe à 0 ; garde à vue.
 * Avant validation, l'app affiche la chance et les conséquences du succès et de l'échec.
-* *Le largage n'est pas une éjection :* on ne cache rien, on jette une caisse derrière soi pendant la fuite (nuage chimique, nappe enflammée) pour aveugler les poursuivants. Se débarrasser de l'illégal, c'est l'éjection, avant le barrage.
+* *Le largage n'est pas une éjection :* on ne cache rien, on déverse et on enflamme une caisse derrière soi pendant la fuite (route glissante en feu) pour semer les poursuivants. Se débarrasser de l'illégal, c'est l'éjection, avant le barrage.
 
 ### 4. Éjection / broyage d'urgence — *« Se débarrasser de la cargaison avant le barrage »*
 * **Activation :** uniquement au tout début de l'interception, à 300 m d'un barrage fixe (impossible en contrôle volant).

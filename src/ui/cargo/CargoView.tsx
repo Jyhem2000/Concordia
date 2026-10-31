@@ -3,11 +3,11 @@ import { motion } from 'motion/react'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
 import { VEHICLES } from '../../data/vehicles.ts'
-import { canHide, cargoUsed, maskedQty, ownedQty, tagShare } from '../../engine/cargo.ts'
+import { cargoUsed, maskedQty, ownedQty, tagShare } from '../../engine/cargo.ts'
 import { checkCompartment } from '../../engine/compartment.ts'
 import { hiddenCargo } from '../../engine/interception.ts'
 import { keysOf } from '../../engine/records.ts'
-import type { ProductId, Tier } from '../../engine/types.ts'
+import type { ProductId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
@@ -19,14 +19,15 @@ import { TIER_STYLES } from '../shared/styles.ts'
 import { garageDistrict } from '../places/placesHere.ts'
 import CompartmentNotice from './CompartmentNotice.tsx'
 import Thumb from '../shared/Thumb.tsx'
+import Tip from '../shared/Tip.tsx'
 import { useConditions } from '../shared/useConditions.ts'
 
 type HoldRowProps = {
   productId: ProductId
 }
 
-/** Emplacement de soute : caisse d'un tier, cachée ou non ; `null` pour une place libre */
-type Slot = { tier: Tier; hidden: boolean } | null
+/** Emplacement de soute : caisse d'un produit, cachée ou non ; `null` pour une place libre */
+type Slot = { productId: ProductId; hidden: boolean } | null
 
 type SlotRowProps = {
   label: string
@@ -108,20 +109,20 @@ function HoldPanel() {
   const products = [...new Set(game.cargo.map((lot) => lot.productId))].sort((a, b) => PRODUCTS[b].tier - PRODUCTS[a].tier || a.localeCompare(b))
   // Places hors double fond, remplies par les caisses visibles ; le surplus visible occupe les places du double fond
   const open = vehicle.cargo - vehicle.hiddenCompartment
-  const visibleTiers = visible.flatMap((lot) => Array.from({ length: lot.qty }, () => PRODUCTS[lot.productId].tier))
-  const hiddenTiers = hidden.flatMap((lot) => Array.from({ length: lot.qty }, () => PRODUCTS[lot.productId].tier))
-  const cargoSlots = Array.from({ length: open }, (_, i): Slot => (i < visibleTiers.length ? { tier: visibleTiers[i], hidden: false } : null))
+  const visibleCrates = visible.flatMap((lot) => Array.from({ length: lot.qty }, () => lot.productId))
+  const hiddenCrates = hidden.flatMap((lot) => Array.from({ length: lot.qty }, () => lot.productId))
+  const cargoSlots = Array.from({ length: open }, (_, i): Slot => (i < visibleCrates.length ? { productId: visibleCrates[i], hidden: false } : null))
   const compartmentSlots: Slot[] = [
-    ...hiddenTiers.map((tier): Slot => ({ tier, hidden: true })),
-    ...visibleTiers.slice(open).map((tier): Slot => ({ tier, hidden: false })),
+    ...hiddenCrates.map((productId): Slot => ({ productId, hidden: true })),
+    ...visibleCrates.slice(open).map((productId): Slot => ({ productId, hidden: false })),
   ]
   const compartmentFree = Math.max(0, vehicle.hiddenCompartment - compartmentSlots.length)
 
   return (
     <Panel icon={Package} title={t.hold.title(used, vehicle.cargo)} collapseId="hold">
-      <SlotRow label={t.hold.cargoSlots(Math.min(visibleTiers.length, open), open)} slots={cargoSlots} />
+      <SlotRow label={t.hold.cargoSlots(Math.min(visibleCrates.length, open), open)} slots={cargoSlots} />
       <SlotRow
-        label={t.hold.compartment(hiddenTiers.length, vehicle.hiddenCompartment)}
+        label={t.hold.compartment(hiddenCrates.length, vehicle.hiddenCompartment)}
         slots={[...compartmentSlots, ...Array.from({ length: compartmentFree }, (): Slot => null)]}
         compartment
       />
@@ -140,33 +141,44 @@ function HoldPanel() {
   )
 }
 
-/** Une rangée d'emplacements : caisse visible (pleine), cachée (pointillés) ou place libre */
+/**
+ * Une rangée d'emplacements : caisse visible (pleine), cachée (pointillés) ou place libre. Chaque caisse dit son produit
+ * en infobulle ; un clic sur une caisse cachée la sort du double fond, une à la fois (chap. 4).
+ */
 function SlotRow({ label, slots, compartment = false }: SlotRowProps) {
+  const dispatch = useGameStore((s) => s.dispatch)
+  const { t } = useI18n()
   return (
     <div className="mt-2 first:mt-0">
       <p className={`flex items-center gap-1 text-xs ${compartment ? 'text-night' : 'text-ink-muted'}`}>
         {compartment && <EyeOff size={12} aria-hidden="true" />}
         {label}
       </p>
-      <ul
-        aria-hidden="true"
-        className={`mt-1 flex w-fit flex-wrap gap-1 ${compartment ? 'rounded-md border border-dashed border-night/40 p-1' : ''}`}
-      >
+      <ul className={`mt-1 flex w-fit flex-wrap gap-1 ${compartment ? 'rounded-md border border-dashed border-night/40 p-1' : ''}`}>
         {/* Cases sans identité propre : la position et le contenu font la clé, une case qui change de contenu rejoue son apparition */}
         {slots.map((slot, position) => (
           <motion.li
-            key={`${position}-${slot === null ? 'free' : `${slot.tier}-${slot.hidden}`}`}
+            key={`${position}-${slot === null ? 'free' : `${slot.productId}-${slot.hidden}`}`}
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`h-4 w-4 rounded-sm ${
-              slot === null
-                ? 'border border-line-strong'
-                : slot.hidden
-                  ? `border border-dashed ${TIER_STYLES[slot.tier].hiddenSlot}`
-                  : TIER_STYLES[slot.tier].slot
-            }`}
-          />
+            className="flex"
+          >
+            {slot === null ? (
+              <span className="h-4 w-4 rounded-sm border border-line-strong" />
+            ) : (
+              <Tip
+                content={slot.hidden ? t.hold.hiddenSlot(t.product[slot.productId].name) : t.product[slot.productId].name}
+                label={slot.hidden ? t.hold.hiddenSlot(t.product[slot.productId].name) : t.product[slot.productId].name}
+                onClick={slot.hidden ? () => dispatch({ type: 'compartment', productId: slot.productId, hide: false }) : undefined}
+                className={`h-4 w-4 rounded-sm ${
+                  slot.hidden
+                    ? `cursor-pointer border border-dashed ${TIER_STYLES[PRODUCTS[slot.productId].tier].hiddenSlot}`
+                    : TIER_STYLES[PRODUCTS[slot.productId].tier].slot
+                }`}
+              />
+            )}
+          </motion.li>
         ))}
       </ul>
     </div>
@@ -205,26 +217,19 @@ function HoldRow({ productId }: HoldRowProps) {
           ))}
         </div>
         {conditions.length > 0 && <Hint className="mt-1">{conditions.join(' · ')}</Hint>}
-        {canHide(productId) && (
+        {/* Double fond : ce qui y est caché, et « Cacher » seulement quand une place libre peut recevoir une caisse visible */}
+        {(hiddenQty > 0 || hideError === null) && (
           <div className="mt-2 flex flex-wrap items-center gap-2">
             {hiddenQty > 0 && (
-              <>
-                <Chip tone="night" icon={EyeOff}>
-                  {t.hold.hidden(hiddenQty)}
-                </Chip>
-                <Button size="sm" onClick={() => dispatch({ type: 'compartment', productId, hide: false })}>
-                  {t.hold.unhide}
-                </Button>
-              </>
+              <Chip tone="night" icon={EyeOff}>
+                {t.hold.hidden(hiddenQty)}
+              </Chip>
             )}
-            {hiddenQty < qty && (
-              <>
-                <Button size="sm" disabled={hideError !== null} onClick={() => dispatch({ type: 'compartment', productId, hide: true })}>
-                  <EyeOff size={12} aria-hidden="true" />
-                  {t.hold.hide}
-                </Button>
-                {hideError && <Hint>{t.error[hideError]}</Hint>}
-              </>
+            {hideError === null && (
+              <Button size="sm" onClick={() => dispatch({ type: 'compartment', productId, hide: true })}>
+                <EyeOff size={12} aria-hidden="true" />
+                {t.hold.hide}
+              </Button>
             )}
           </div>
         )}

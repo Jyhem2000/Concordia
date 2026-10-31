@@ -55,7 +55,7 @@ function ReportLines({ report }: ReportLinesProps) {
         {report.success !== null && (
           <span className={report.success ? 'text-success' : 'text-danger'}>{report.success ? t.report.success : t.report.failure}</span>
         )}
-        {report.chance && <Detailed breakdown={report.chance} format={(chance) => percent(chance, 0)} />}
+        {report.chance && <Detailed breakdown={report.chance} format={(chance) => percent(chance, 0)} percent />}
       </li>
       <Deltas deltas={deltas} />
       {report.custodyDays > 0 && <li className="text-danger">{t.report.custody(report.custodyDays)}</li>}

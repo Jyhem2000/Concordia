@@ -1,18 +1,14 @@
 import { ShieldAlert, Skull } from 'lucide-react'
-import { useState } from 'react'
 import { BLUFF, BRIBE, DAMAGED_FACTOR, EJECT, FINE, FLEE, ICC_MAX, RACKET, SEARCH, WANTED } from '../../data/balance.ts'
-import { DISTRICTS } from '../../data/districts.ts'
 import { TAGS } from '../../data/tags.ts'
 import { keysOf } from '../../engine/records.ts'
 import { ejectMode } from '../../engine/equipment.ts'
 import { MODULES } from '../../data/vehicles.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
-import { averageCost, ownedQty } from '../../engine/cargo.ts'
+import { ownedQty } from '../../engine/cargo.ts'
 import { paymentValue } from '../../engine/condition.ts'
 import {
-  bribeChance,
   checkpointPlace,
-  bribeRate,
   checkMove,
   compartmentDetection,
   ejectChance,
@@ -20,33 +16,18 @@ import {
   fleeConsequences,
   hiddenCargo,
   isLethalSearch,
-  minimumOffer,
-  offerValue,
   searchSanction,
   toll,
   tollInKind,
 } from '../../engine/interception.ts'
-import type { InterceptionMove, Offer, ProductId } from '../../engine/types.ts'
+import type { InterceptionMove } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
-import Button from '../shared/Button.tsx'
 import Detailed from '../shared/Detailed.tsx'
 import InterceptionReportPanel from './InterceptionReportPanel.tsx'
 import MoveCard from './MoveCard.tsx'
-import { BluffMove, FleeMove } from './TacticsMoves.tsx'
-import { FIELD } from '../shared/styles.ts'
-import Hint from '../shared/Hint.tsx'
+import { BluffMove, BribeMove, FleeMove } from './TacticsMoves.tsx'
 import Scene from '../shared/Scene.tsx'
-
-type BribeFormProps = {
-  label: string
-}
-
-type CrateOfferRowProps = {
-  productId: ProductId
-  qty: number
-  onChange: (qty: number) => void
-}
 
 /** Écran d'interception (chap. 5 et 7) : chaque option affiche sa chance détaillable et ses conséquences */
 export default function InterceptionScreen() {
@@ -108,9 +89,8 @@ export default function InterceptionScreen() {
           </p>
           {interception.jammed && <p className="text-info">{t.interception.jammed}</p>}
           {!racket && hidden.length > 0 && (
-            <p className="flex flex-wrap gap-1.5 text-info">
-              {t.interception.compartment(hidden.join(', '))}
-              <Detailed breakdown={compartmentDetection(game)} format={pct} />
+            <p className="text-info">
+              {t.interception.compartment(hidden.join(', '))} <Detailed breakdown={compartmentDetection(game)} format={pct} percent />
             </p>
           )}
           {covered.length > 0 && <p className="text-accent">{t.interception.sponsorCovered(covered.join(', '))}</p>}
@@ -126,10 +106,13 @@ export default function InterceptionScreen() {
       <InterceptionReportPanel />
 
       <ul className="flex flex-col gap-3">
-        {available('search') && <MoveCard move="search" label={t.interception.moves.search} chance={null} outcomes={searchOutcome} />}
+        {available('search') && (
+          <MoveCard move="search" label={t.interception.moves.search} chance={null} outcomes={searchOutcome} info={t.interception.searchInfo} />
+        )}
         {available('bluff') && (
           <BluffMove
             label={t.interception.moves.bluff}
+            info={t.interception.bluffInfo}
             outcomes={[
               t.interception.bluffSuccess(icc(BLUFF.successIccGain)),
               t.interception.bluffFailure(icc(-BLUFF.failIccLoss), fine(failedFine), signedPercent(-BLUFF.followUpPenalty, 0), available('flee')),
@@ -137,19 +120,16 @@ export default function InterceptionScreen() {
           />
         )}
         {available('bribe') && (
-          <MoveCard
-            move="bribe"
+          <BribeMove
             label={t.interception.moves.bribe}
-            chance={null}
-            customAction
+            info={t.interception.bribeInfo}
             outcomes={[
+              t.interception.bribeSuccess,
               t.interception.bribeFailure(fine(BRIBE.fail.fineRate), icc(-BRIBE.fail.iccLoss)),
               ...custody(BRIBE.fail.custodyDays),
               ...unpaid(BRIBE.fail.fineRate),
             ]}
-          >
-            <BribeForm label={t.interception.bribe} />
-          </MoveCard>
+          />
         )}
         {available('payToll') && (
           <MoveCard move="payToll" label={t.interception.moves.payToll} chance={null} outcomes={[t.interception.toll(credits(toll(game)))]} />
@@ -172,6 +152,7 @@ export default function InterceptionScreen() {
         {available('flee') && (
           <FleeMove
             label={racket ? t.interception.forceThrough : t.interception.moves.flee}
+            info={racket ? undefined : t.interception.fleeInfo}
             outcomes={[
               ...(racket
                 ? [t.interception.fleeSuccessRacket(`${pv(fled.chassis.min)} / ${pv(fled.chassis.max)}`), t.interception.fleeFailureRacket]
@@ -214,111 +195,5 @@ export default function InterceptionScreen() {
         )}
       </ul>
     </Scene>
-  )
-}
-
-/** Offre de corruption : Cash-Puce et caisses, chance mise à jour en temps réel (chap. 5 et 7) */
-function BribeForm({ label }: BribeFormProps) {
-  const game = useGameStore((s) => s.game)
-  const dispatch = useGameStore((s) => s.dispatch)
-  const { t, credits, percent } = useI18n()
-  const rate = bribeRate(game)
-  const minimum = minimumOffer(game)
-  // Offre en cours de composition : état d'interface éphémère
-  const [cashValue, setCashValue] = useState(String(minimum))
-  const [crates, setCrates] = useState<Partial<Record<ProductId, number>>>({})
-
-  const offeredCrates = PRODUCT_IDS.flatMap((productId) => {
-    const qty = crates[productId] ?? 0
-    return qty > 0 ? [{ productId, qty }] : []
-  })
-  const cash = Math.floor(Number(cashValue))
-  const offer: Offer = { cash: Number.isFinite(cash) ? cash : -1, crates: offeredCrates }
-  const error = checkMove(game, 'bribe', offer)
-  const cratesValue = paymentValue(game, offeredCrates)
-  const presets = [BRIBE.minOfferRatio, ...BRIBE.offerBonuses.map(({ ratio }) => ratio)]
-  const owned = [...new Set(game.cargo.map((lot) => lot.productId))].filter((id) => !PRODUCTS[id].sealed)
-  const setQty = (productId: ProductId, qty: number) => setCrates((current) => ({ ...current, [productId]: qty }))
-
-  return (
-    <div className="mt-2 flex flex-col gap-2">
-      <p className="flex flex-wrap gap-1.5 text-xs">
-        <span className="text-ink-muted">{t.interception.bribeRate}</span>
-        <Detailed breakdown={rate} format={credits} />
-      </p>
-
-      {owned.length > 0 && (
-        <div>
-          <Hint>{t.interception.offerCrates}</Hint>
-          <ul className="mt-1 space-y-1">
-            {owned.map((productId) => (
-              <CrateOfferRow key={productId} productId={productId} qty={crates[productId] ?? 0} onChange={(qty) => setQty(productId, qty)} />
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-xs text-ink-muted">{t.interception.offerCash}</span>
-        {presets.map((ratio) => (
-          <Button key={ratio} onClick={() => setCashValue(String(Math.max(0, Math.round(rate.total * ratio) - cratesValue)))}>
-            {percent(ratio, 0)}
-          </Button>
-        ))}
-        <input
-          type="number"
-          inputMode="numeric"
-          min={0}
-          step={1}
-          value={cashValue}
-          aria-label={t.interception.offerCash}
-          onChange={(event) => setCashValue(event.target.value)}
-          className={`w-28 ${FIELD}`}
-        />
-      </div>
-
-      <Hint tone="neutral">{t.interception.offerTotal(credits(offerValue(game, offer)))}</Hint>
-      {error ? (
-        <Hint tone="danger">{t.error[error]}</Hint>
-      ) : (
-        <p className="flex flex-wrap gap-1.5 text-xs">
-          <span className="text-ink-muted">{t.interception.chance}</span>
-          <Detailed breakdown={bribeChance(game, offer)} format={(chance) => percent(chance, 0)} />
-        </p>
-      )}
-      <div>
-        <Button variant="primary" disabled={error !== null} onClick={() => dispatch({ type: 'intercept', move: 'bribe', offer })}>
-          {label}
-        </Button>
-      </div>
-    </div>
-  )
-}
-
-/** Une ligne de caisses à offrir : valeur en paiement, prix d'achat, gain ou perte face au cash (chap. 2) */
-function CrateOfferRow({ productId, qty, onChange }: CrateOfferRowProps) {
-  const owned = useGameStore((s) => ownedQty(s.game.cargo, productId))
-  const cost = useGameStore((s) => averageCost(s.game.cargo, productId) ?? 0)
-  const favorite = useGameStore((s) => DISTRICTS[s.game.districtId].bribeFavorites.includes(productId))
-  const { t, credits, signedCredits } = useI18n()
-  const value = PRODUCTS[productId].basePrice
-  const gain = value - cost
-
-  return (
-    <li className="flex flex-wrap items-center gap-1.5 text-xs">
-      <Button aria-label={t.interception.removeCrate(t.product[productId].name)} disabled={qty <= 0} onClick={() => onChange(qty - 1)}>
-        −
-      </Button>
-      <span className="w-10 text-center">
-        {qty}/{owned}
-      </span>
-      <Button aria-label={t.interception.addCrate(t.product[productId].name)} disabled={qty >= owned} onClick={() => onChange(qty + 1)}>
-        +
-      </Button>
-      <span className="font-bold">{t.product[productId].name}</span>
-      <span className="text-ink-muted">{t.interception.crateValue(credits(value), credits(Math.round(cost)))}</span>
-      <span className={gain >= 0 ? 'text-success' : 'text-danger'}>{t.interception.crateGain(signedCredits(Math.round(gain)))}</span>
-      {favorite && <span className="text-accent">{t.interception.favorite}</span>}
-    </li>
   )
 }

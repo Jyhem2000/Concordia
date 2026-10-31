@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { GAME_LENGTH_DAYS } from '../data/balance.ts'
-import { TICKER_PER_SLOT, TICKER_STRIDE, tickerSlots } from '../ui/hud/tickerSlot.ts'
+import { TICKER_PER_DAY, TICKER_STRIDE, tickerSlots } from '../ui/hud/tickerSlot.ts'
 import { getI18n } from './index.ts'
 import { fr } from './fr.ts'
 import frSource from './fr.ts?raw'
@@ -49,9 +49,9 @@ describe('i18n (fr)', () => {
     const count = fr.ticker.messages.length
     const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b))
     expect(gcd(TICKER_STRIDE, count)).toBe(1)
-    const slots = Math.ceil(count / TICKER_PER_SLOT)
-    expect(slots).toBeLessThanOrEqual(GAME_LENGTH_DAYS * 2)
-    const shown = Array.from({ length: slots }, (_, slot) => tickerSlots(Math.floor(slot / 2) + 1, slot % 2 ? 'night' : 'day', count)).flat()
+    const days = Math.ceil(count / TICKER_PER_DAY)
+    expect(days).toBeLessThanOrEqual(GAME_LENGTH_DAYS)
+    const shown = Array.from({ length: days }, (_, index) => tickerSlots(index + 1, count)).flat()
     expect(new Set(shown.slice(0, count)).size).toBe(count)
   })
 

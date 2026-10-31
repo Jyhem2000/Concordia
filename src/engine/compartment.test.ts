@@ -40,6 +40,16 @@ describe('double fond (chap. 4)', () => {
     expect(hiddenQty(hidden, 'T1-01')).toBe(capacity)
   })
 
+  it('sort les caisses cachées une à une, pour panacher le double fond', () => {
+    const full = fillCompartment(gameAt(3, { cargo: [lot('T3-01', capacity), lot('T2-03', capacity)] }))
+    expect(hiddenQty(full, 'T3-01')).toBe(capacity)
+    const one = run(full, { type: 'compartment', productId: 'T3-01', hide: false })
+    expect(hiddenQty(one, 'T3-01')).toBe(capacity - 1)
+    const mixed = run(one, { type: 'compartment', productId: 'T2-03', hide: true })
+    expect(hiddenQty(mixed, 'T2-03')).toBe(1)
+    expect(errorOf(mixed, { type: 'compartment', productId: 'T2-03', hide: true })).toBe('compartment-full')
+  })
+
   it('refuse le légal, l’encombrant et ce qui n’est pas en soute', () => {
     const state = gameAt(3, { cargo: [lot('T0-01', 1), lot('T4-06', 1)] })
     expect(errorOf(state, { type: 'compartment', productId: 'T0-01', hide: true })).toBe('cannot-hide')

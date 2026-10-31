@@ -14,18 +14,20 @@ export function compartmentRoom(state: GameState): number {
   return Math.max(0, VEHICLES[state.vehicleId].hiddenCompartment - hiddenTotal(state.compartment))
 }
 
-/** Raison pour laquelle le joueur ne peut pas cacher ce produit (`hide`) ou le retirer du double fond (chap. 4) */
+/** Raison pour laquelle le joueur ne peut pas cacher ce produit (`hide`) ou en sortir une caisse du double fond (chap. 4) */
 export function checkCompartment(state: GameState, productId: ProductId, hide: boolean): ActionError | null {
-  if (ownedQty(state.cargo, productId) < 1) return 'not-enough-cargo'
+  const hidden = state.compartment[productId] ?? 0
   if (!canHide(productId)) return 'cannot-hide'
+  if (hide && ownedQty(state.cargo, productId) <= hidden) return 'not-enough-cargo'
+  if (!hide && hidden === 0) return 'not-enough-cargo'
   if (hide && compartmentRoom(state) === 0) return 'compartment-full'
   return null
 }
 
-/** Cache autant de caisses du produit que le double fond a de places libres (`hide`), ou les en retire toutes */
+/** Cache autant de caisses visibles du produit que le double fond a de places libres (`hide`), ou en sort une caisse */
 export function setCompartment(state: GameState, productId: ProductId, hide: boolean): GameState {
   const hidden = state.compartment[productId] ?? 0
-  const qty = hide ? hidden + Math.min(ownedQty(state.cargo, productId) - hidden, compartmentRoom(state)) : 0
+  const qty = hide ? hidden + Math.min(ownedQty(state.cargo, productId) - hidden, compartmentRoom(state)) : Math.max(0, hidden - 1)
   return { ...state, compartment: withQty(state.compartment, productId, qty) }
 }
 

@@ -297,3 +297,34 @@ export function fuelPriceBreakdown(state: GameState): Breakdown {
   if (atCantine(state)) return breakdown('LOC-D1-2', CANTINE.fuelPrice).build()
   return breakdown(state.districtId, DISTRICTS[state.districtId].fuelPrice).build()
 }
+
+/** Sens d'une tendance publique (chap. 2) */
+export type TrendDirection = 'up' | 'down' | 'flat'
+
+/** En dessous de cet écart relatif d'un jour à l'autre, le Fil annonce un cours stable */
+export const TREND_FLAT = 0.01
+
+/**
+ * Tendance publique d'un produit dans un district (chap. 2) : le sens de son dernier mouvement publié par le Fil (de
+ * l'avant-veille à la veille) et depuis combien de jours il dure ; null sans deux relevés publiés
+ */
+export function publicTrend(state: GameState, districtId: DistrictId, productId: ProductId): { direction: TrendDirection; days: number } | null {
+  const published = (state.bulletin[districtId] ?? []).filter((entry) => entry.day < state.day)
+  const directionAt = (index: number): TrendDirection => {
+    const change = published[index].quotes[productId] / published[index - 1].quotes[productId] - 1
+    return change > TREND_FLAT ? 'up' : change < -TREND_FLAT ? 'down' : 'flat'
+  }
+  const last = published.length - 1
+  if (last < 1) return null
+  const direction = directionAt(last)
+  let days = 1
+  while (last - days >= 1 && directionAt(last - days) === direction) days++
+  return { direction, days }
+}
+
+/** Bulletin publié d'un produit dans un district : les cours des jours passés, pour la forme de la courbe (chap. 7) */
+export function publishedQuotes(state: GameState, districtId: DistrictId, productId: ProductId): { day: number; quote: number }[] {
+  return (state.bulletin[districtId] ?? [])
+    .filter((entry) => entry.day < state.day)
+    .map((entry) => ({ day: entry.day, quote: entry.quotes[productId] }))
+}

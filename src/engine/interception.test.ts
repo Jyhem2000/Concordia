@@ -210,8 +210,11 @@ describe('corruption', () => {
     expect(ownedQty(passed.cargo, 'T2-01')).toBe(3)
   })
 
-  it('accepte des caisses à leur prix de base, et récompense un produit apprécié par la connivence', () => {
-    const favorite = DISTRICTS.D2.bribeFavorites[0]
+  it('accepte le Luxe à son prix de base, avec la connivence, et refuse les autres caisses', () => {
+    const favorite = 'T3-03'
+    expect(
+      errorOf(stopped([lot('T2-01', 3)]), { type: 'intercept', move: 'bribe', offer: { cash: 0, crates: [{ productId: 'T2-01', qty: 3 }] } }),
+    ).toBe('not-eligible')
     const state = stopped([lot('T2-01', 3), lot(favorite, 2)])
     const inKind: Offer = { cash: 0, crates: [{ productId: favorite, qty: 2 }] }
     expect(offerValue(state, inKind)).toBe(2 * PRODUCTS[favorite].basePrice)
@@ -220,7 +223,7 @@ describe('corruption', () => {
   })
 
   it('retire les caisses offertes de la soute, même en cas d’échec', () => {
-    const favorite = DISTRICTS.D2.bribeFavorites[0]
+    const favorite = 'T3-03'
     const state = stopped([lot(favorite, 30)], { rng: HIGH_ROLL_RNG })
     const offer: Offer = { cash: 0, crates: [{ productId: favorite, qty: 25 }] }
     expect(errorOf(state, { type: 'intercept', move: 'bribe', offer: { cash: 0, crates: [{ productId: favorite, qty: 31 }] } })).toBe(
@@ -321,17 +324,17 @@ describe('suites du barrage', () => {
 })
 
 describe('tactiques de barrage (chap. 2)', () => {
-  it('donne les manuels à l’agent pour un bonus de bluff, et sacrifie une épice contre le malus d’odeur', () => {
+  it('compte d’elles-mêmes les aides au bluff en soute, sans rien donner', () => {
     const manuals = defined(PRODUCTS['T0-04'].bluffAid)
-    const state = stopped([lot('T0-04', 6), lot('T1-02', 2)])
-    const aided = bluffChance(state, { bluffAids: ['T0-04'] })
-    expect(aided.lines.find((line) => line.source === 'T0-04')?.value).toBe(manuals.bonus)
-    expect(errorOf(stopped([lot('T0-04', 2)]), { type: 'intercept', move: 'bluff', tactics: { bluffAids: ['T0-04'] } })).toBe('not-enough-cargo')
-
-    const smelly = stopped([lot('T2-01', 3)])
-    expect(bluffChance(smelly, { bluffAids: ['T2-01'] }).total).toBeGreaterThan(bluffChance(smelly).total)
-    const bluffed = run({ ...state, rng: HIGH_ROLL_RNG }, { type: 'intercept', move: 'bluff', tactics: { bluffAids: ['T0-04'] } })
-    expect(ownedQty(bluffed.cargo, 'T0-04')).toBe(6 - manuals.crates)
+    const state = stopped([lot('T0-04', manuals.crates), lot('T1-02', 2)])
+    expect(bluffChance(state).lines.find((line) => line.source === 'T0-04')?.value).toBe(manuals.bonus)
+    // Pas assez de caisses : pas d'aide
+    expect(bluffChance(stopped([lot('T0-04', manuals.crates - 1)])).lines.some((line) => line.source === 'T0-04')).toBe(false)
+    // Le curry couvre l'odeur de toute la soute
+    const smelly = bluffChance(stopped([lot('T1-02', 3)])).total
+    expect(bluffChance(stopped([lot('T1-02', 3), lot('T2-01', 1)])).total).toBeGreaterThan(smelly)
+    const bluffed = run({ ...state, rng: HIGH_ROLL_RNG }, { type: 'intercept', move: 'bluff' })
+    expect(ownedQty(bluffed.cargo, 'T0-04')).toBe(manuals.crates)
   })
 
   it('largue une caisse et dope le pilote pour fuir, une fois par jour', () => {

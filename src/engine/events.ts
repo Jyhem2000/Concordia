@@ -47,6 +47,7 @@ export const NO_EVENTS: EventsState = {
   roadDays: {},
   prophecy: null,
   forgery: null,
+  lasting: null,
 }
 
 /** Événements locaux propres à un district */
@@ -68,12 +69,18 @@ function isGlobal(event: GlobalEventId | LocalEventId): event is GlobalEventId {
   return event.startsWith('EVT-G')
 }
 
-/** Effets en vigueur aujourd'hui dans un district : événement global, puis événement local */
+/** Événements globaux en vigueur aujourd'hui : celui du jour, et celui qui dure (canicule) s'il est différent */
+export function globalsInForce(ctx: EventContext): GlobalEventId[] {
+  const { global, lasting } = ctx.events
+  const lasts = lasting && lasting.until >= ctx.day && lasting.event !== global ? [lasting.event] : []
+  return [...(global ? [global] : []), ...lasts]
+}
+
+/** Effets en vigueur aujourd'hui dans un district : événements globaux, puis événement local */
 export function activeEffects(ctx: EventContext, districtId: DistrictId): ActiveEffect[] {
-  const { global, local } = ctx.events
-  const here = local[districtId]
+  const here = ctx.events.local[districtId]
   return [
-    ...(global ? effectsIn(global, districtId).map((effect) => ({ source: global, local: false, effect })) : []),
+    ...globalsInForce(ctx).flatMap((event) => effectsIn(event, districtId).map((effect) => ({ source: event, local: false, effect }))),
     ...(here ? effectsIn(here, districtId).map((effect) => ({ source: here, local: true, effect })) : []),
   ]
 }
@@ -125,10 +132,14 @@ export function eventFactor(ctx: EventContext, districtId: DistrictId, productId
 
 /** Événements d'hier qui ont touché des cours dans ce district et ne se répètent pas aujourd'hui */
 export function aftershockEvents(ctx: EventContext, districtId: DistrictId): (GlobalEventId | LocalEventId)[] {
-  const { yesterday, global, local } = ctx.events
+  const { yesterday, local } = ctx.events
   const yesterdayLocal = yesterday.local[districtId]
+  const globals = globalsInForce(ctx)
+  // L'événement qui dure a son contrecoup le lendemain de son terme
+  const lasting = ctx.events.lasting
+  const ended = lasting && lasting.until === ctx.day - 1 && !globals.includes(lasting.event) ? [lasting.event] : []
   return [
-    ...(yesterday.global && yesterday.global !== global ? [yesterday.global] : []),
+    ...new Set([...(yesterday.global && !globals.includes(yesterday.global) ? [yesterday.global] : []), ...ended]),
     ...(yesterdayLocal && yesterdayLocal !== local[districtId] ? [yesterdayLocal] : []),
   ].filter((event) => effectsIn(event, districtId).some((effect) => effect.kind === 'price' || effect.kind === 'appear'))
 }
@@ -178,11 +189,9 @@ export function hasEffect(ctx: EventContext, districtId: DistrictId, kind: Event
   return activeEffects(ctx, districtId).some(({ effect }) => effect.kind === kind)
 }
 
-/** Canicule en vigueur (événement global) */
+/** Canicule en vigueur (événement global, qui dure plusieurs jours) */
 export function heatWave(ctx: EventContext): Extract<EventEffect, { kind: 'heat' }> | null {
-  const global = ctx.events.global
-  if (!global) return null
-  for (const effect of GLOBAL_EVENTS[global].effects) if (effect.kind === 'heat') return effect
+  for (const event of globalsInForce(ctx)) for (const effect of GLOBAL_EVENTS[event].effects) if (effect.kind === 'heat') return effect
   return null
 }
 
@@ -279,6 +288,12 @@ export function drawEvents(previous: EventsState, day: number, rng: Rng, firstDa
   // Une rumeur fuite parfois sur l'événement de demain ; sans événement, une fausse rumeur circule parfois
   const rumor = prophecy ?? (tomorrow ? (rng.chance(RUMOR.leak) ? tomorrow : null) : rng.chance(RUMOR.falseAlarm) ? rng.pick(GLOBAL_EVENT_IDS) : null)
 
+  // Un événement qui dure (canicule) démarre, ou se prolonge s'il revient ; sinon le précédent court jusqu'à son terme
+  const days = global ? GLOBAL_EVENTS[global].days : undefined
+  // Gardé un jour de plus après son terme : le contrecoup du lendemain le lit
+  const lasting =
+    global && days ? { event: global, until: day + days - 1 } : previous.lasting && previous.lasting.until >= day - 1 ? previous.lasting : null
+
   return {
     global,
     local,
@@ -290,6 +305,7 @@ export function drawEvents(previous: EventsState, day: number, rng: Rng, firstDa
     roadDays: previous.roadDays,
     prophecy: previous.prophecy && previous.prophecy.day >= day ? previous.prophecy : null,
     forgery: previous.forgery && previous.forgery.day > day ? previous.forgery : null,
+    lasting,
   }
 }
 

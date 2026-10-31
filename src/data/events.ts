@@ -44,8 +44,9 @@ export const GLOBAL_EVENTS: Readonly<Record<GlobalEventId, GameEvent>> = {
   'EVT-G01': {
     effects: [
       { kind: 'price', products: ['T0-02', 'T1-01', 'T2-05'], factor: 2.5 },
-      { kind: 'heat', melts: 'T1-03', ageDays: 2, dayTripChassis: 10, dayTripHealth: 5 },
+      { kind: 'heat', melts: 'T1-03', ageDays: 1, dayTripChassis: 5, dayTripHealth: 2 },
     ],
+    days: 3,
   },
   'EVT-G02': {
     effects: [

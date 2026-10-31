@@ -9,7 +9,7 @@ import AeternaTicker from './hud/AeternaTicker.tsx'
 import InterceptionReportPanel from './interception/InterceptionReportPanel.tsx'
 import InterceptionScreen from './interception/InterceptionScreen.tsx'
 import StatusBar from './hud/StatusBar.tsx'
-import MapPanel, { CargoRecap, DestinationsPanel } from './map/TravelPanel.tsx'
+import MapPanel, { DestinationsPanel, FeaturedDistrict } from './map/TravelPanel.tsx'
 import MarketPanel from './market/MarketPanel.tsx'
 import PlacesPanel from './places/PlacesPanel.tsx'
 import RoadEventScreen from './road/RoadEventScreen.tsx'
@@ -110,20 +110,24 @@ export default function GameScreen() {
               <PlacesPanel garage />
             </div>
             {/*
-              Carte & lieux : la carte, la plus haute, à gauche ; à droite le panneau du soir, la soute, les autres destinations
-              et les lieux. Sur téléphone, la colonne de droite s'efface (contents) : le soir passe avant la carte, la soute et
-              les destinations après, les lieux dans leur onglet.
+              Carte & lieux. Grand écran : à gauche la carte puis la liste des destinations ; à droite la fiche du district
+              désigné, le panneau du soir, la pompe et les lieux. Téléphone : les colonnes s'effacent (contents), l'onglet
+              Carte montre le soir, la carte, la fiche puis les destinations ; les lieux ont leur onglet.
             */}
-            <div className={`order-2 min-w-0 flex-col gap-4 md:order-none md:col-span-3 ${shown('map')}`}>
-              <MapPanel />
+            <div className={`contents md:col-span-3 md:flex-col md:gap-4 ${TAB_GROUP[tab] === 'road' ? 'md:flex' : 'md:hidden'}`}>
+              <div className={`order-2 min-w-0 flex-col gap-4 md:order-none ${phoneOnly('map')}`}>
+                <MapPanel />
+              </div>
+              <div className={`order-4 min-w-0 flex-col gap-4 md:order-none ${phoneOnly('map')}`}>
+                <DestinationsPanel />
+              </div>
             </div>
             <div className={`contents md:col-span-2 md:flex-col md:gap-4 ${TAB_GROUP[tab] === 'road' ? 'md:flex' : 'md:hidden'}`}>
+              <div className={`order-3 min-w-0 flex-col gap-4 md:order-none ${phoneOnly('map')}`}>
+                <FeaturedDistrict />
+              </div>
               <div className={`order-1 min-w-0 flex-col gap-4 md:order-none ${phoneOnly('map')}`}>
                 <EveningPanel />
-              </div>
-              <div className={`order-3 min-w-0 flex-col gap-4 md:order-none ${phoneOnly('map')}`}>
-                <CargoRecap />
-                <DestinationsPanel />
               </div>
               <div className={`min-w-0 flex-col gap-4 ${phoneOnly('places')}`}>
                 <PlacesPanel />

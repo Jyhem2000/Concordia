@@ -13,9 +13,11 @@ export const TAGS: Readonly<Record<TagId, Tag>> = {
   'TAG-ODOROUS': { tripRisk: 0.25, bluffMalus: 0.2, smell: true },
   'TAG-CULTURE': { detectedRisk: 0.25 },
   'TAG-TECH': { detectedRisk: 0.5 },
-  'TAG-CHEMICAL': { detectedRisk: 0.25, fleeDropBonus: 0.15 },
+  'TAG-CHEMICAL': { detectedRisk: 0.25 },
   'TAG-FLAMMABLE': { explosion: { chance: 0.25, chassisLoss: 15 }, fleeDropBonus: 0.2 },
   // Vente pendant le couvre-feu (chap. 2) : la vie nocturne réclame ses vices ; les excitants de bureau, eux, attendent le matin
   'TAG-FESTIVE': { nightSale: 2 },
   'TAG-DIURNAL': { nightSale: 0.8 },
+  // Luxe : ce qu'un agent corrompu accepte en nature, et qui lui fait fermer les yeux (chap. 5)
+  'TAG-LUXURY': { bribeGift: true },
 }

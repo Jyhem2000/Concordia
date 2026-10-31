@@ -1,4 +1,5 @@
-import { normalQuote } from '../../engine/market.ts'
+import { isMemoryBlurred } from '../../engine/crew.ts'
+import { normalQuote, publishedQuotes, TREND_FLAT, type TrendDirection } from '../../engine/market.ts'
 import type { DistrictId, ProductId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -10,31 +11,50 @@ type QuoteChartProps = {
 }
 
 /**
- * Cours observés d'un produit dans un district, du Jour 1 à aujourd'hui, avec le cours normal en repère (chap. 2 et 7).
- * Seuls les jours où le joueur a vu ce marché ont un point ; la courbe s'interrompt entre deux visites espacées.
+ * Tendance publique d'un produit dans un district (chap. 2 et 7) : la forme de la courbe publiée par le Fil, jour par jour
+ * jusqu'à la veille, sans prix ; dessous, les cours exacts vus sur place. Sous Sédation, la tendance est brouillée.
  */
 export default function QuoteChart({ productId, districtId }: QuoteChartProps) {
-  // Mémoire de marché et cours normal du district : état entier
+  // Bulletin, mémoire de marché et cours normal du district : état entier
   const game = useGameStore((s) => s.game)
   const { t, credits } = useI18n()
-  const points = (game.memory[districtId] ?? []).flatMap((seen): ChartPoint[] => {
-    const quote = seen.quotes[productId]
-    return quote === undefined ? [] : [{ x: seen.day, y: quote, label: t.chart.dayTick(seen.day) }]
+  const published = publishedQuotes(game, districtId, productId)
+  const seen = (game.memory[districtId] ?? []).flatMap((entry) => {
+    const quote = entry.quotes[productId]
+    return quote === undefined ? [] : [t.sheet.seenOn(entry.day, credits(quote))]
   })
-  if (points.length === 0) return <p className="text-xs text-ink-faint">{t.sheet.historyEmpty}</p>
-  const normal = normalQuote(game, districtId, productId)
+  const directionOf = (index: number): TrendDirection => {
+    if (index === 0) return 'flat'
+    const change = published[index].quote / published[index - 1].quote - 1
+    return change > TREND_FLAT ? 'up' : change < -TREND_FLAT ? 'down' : 'flat'
+  }
+  const points = published.map(({ day, quote }, index): ChartPoint => ({
+    x: day,
+    y: quote,
+    label: t.chart.dayTick(day),
+    note: t.trend[directionOf(index)],
+  }))
 
   return (
-    <LineChart
-      points={points}
-      from={1}
-      to={Math.max(2, game.day)}
-      tick={t.chart.dayTick}
-      format={credits}
-      reference={normal}
-      readout={(point) => t.sheet.historyReadout(t.district[districtId].name, point.x, credits(point.y), credits(normal))}
-      label={t.sheet.historyLabel(t.district[districtId].name)}
-      gaps
-    />
+    <>
+      {isMemoryBlurred(game, districtId) ? (
+        <p className="text-xs text-ink-faint">{t.sheet.trendBlurred}</p>
+      ) : points.length < 2 ? (
+        <p className="text-xs text-ink-faint">{t.sheet.trendSoon}</p>
+      ) : (
+        <LineChart
+          points={points}
+          from={1}
+          to={Math.max(2, game.day - 1)}
+          tick={t.chart.dayTick}
+          format={credits}
+          reference={normalQuote(game, districtId, productId)}
+          readout={(point) => t.sheet.trendReadout(t.district[districtId].name, point.x, point.note ?? '')}
+          label={t.sheet.historyLabel(t.district[districtId].name)}
+          shapeOnly
+        />
+      )}
+      <p className="mt-1 text-xs text-ink-soft">{seen.length > 0 ? t.sheet.seen(seen.join(' · ')) : t.sheet.historyEmpty}</p>
+    </>
   )
 }

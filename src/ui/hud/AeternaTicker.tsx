@@ -15,14 +15,13 @@ const STILL_ROTATION_MS = 8000
 
 /**
  * Téléscripteur d'Aeterna (chap. 7) : bandeau sous les onglets, dans la couleur de la diffusion d'Aeterna. Trois messages
- * par demi-journée défilent à la suite ; si le système réduit les animations, ils se relaient en fondu, sans défiler.
+ * par jour défilent à la suite ; si le système réduit les animations, ils se relaient en fondu, sans défiler.
  */
 export default function AeternaTicker({ className = '' }: AeternaTickerProps) {
   const day = useGameStore((s) => s.game.day)
-  const phase = useGameStore((s) => s.game.phase)
   const { t } = useI18n()
   const still = useReducedMotion()
-  const messages = tickerSlots(day, phase, t.ticker.messages.length).map((index) => t.ticker.messages[index])
+  const messages = tickerSlots(day, t.ticker.messages.length).map((index) => t.ticker.messages[index])
   // Message affiché sans défilement : état d'interface éphémère
   const [shown, setShown] = useState(0)
   useEffect(() => {

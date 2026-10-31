@@ -5,6 +5,8 @@ export type ChartPoint = {
   y: number
   /** Libellé du point dans le tableau des lecteurs d'écran (« J4 ») */
   label: string
+  /** Valeur dite dans le tableau des lecteurs d'écran à la place du nombre (courbe sans valeurs) */
+  note?: string
 }
 
 type LineChartProps = {
@@ -23,6 +25,8 @@ type LineChartProps = {
   label: string
   /** Vrai : la courbe s'interrompt entre deux points non consécutifs (jours sans relevé) */
   gaps?: boolean
+  /** Vrai : la forme seule, sans valeurs sur l'axe vertical (tendance publique) */
+  shapeOnly?: boolean
 }
 
 /** Géométrie du tracé (viewBox SVG), marges comprises pour les libellés d'axes */
@@ -34,7 +38,7 @@ const MARGIN = { top: 10, right: 12, bottom: 20, left: 56 }
  * Courbe d'une série dans le temps (chap. 7) : un point désigné au survol ou au toucher et lu au-dessus,
  * une ligne de repère, et le tableau des valeurs pour les lecteurs d'écran
  */
-export default function LineChart({ points, from, to, tick, format, reference, readout, label, gaps = false }: LineChartProps) {
+export default function LineChart({ points, from, to, tick, format, reference, readout, label, gaps = false, shapeOnly = false }: LineChartProps) {
   // Point désigné : état d'interface éphémère
   const [pointed, setPointed] = useState<number | null>(null)
   if (points.length === 0) return null
@@ -70,7 +74,7 @@ export default function LineChart({ points, from, to, tick, format, reference, r
             strokeDasharray="3 3"
           />
         )}
-        {[low, high].map((value) => (
+        {(shapeOnly ? [] : [low, high]).map((value) => (
           <text key={value} x={MARGIN.left - 4} y={y(value) + 3} textAnchor="end" fontSize={9} className="fill-ink-faint">
             {format(value)}
           </text>
@@ -122,7 +126,7 @@ export default function LineChart({ points, from, to, tick, format, reference, r
           {points.map((point) => (
             <tr key={point.x}>
               <th scope="row">{point.label}</th>
-              <td>{format(point.y)}</td>
+              <td>{point.note ?? format(point.y)}</td>
             </tr>
           ))}
         </tbody>

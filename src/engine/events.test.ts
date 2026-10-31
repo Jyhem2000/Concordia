@@ -5,9 +5,11 @@ import { AFTERSHOCK, EVENT_COOLDOWNS, EVENT_MULT_CAP, GLOBAL_EVENTS, LOCAL_EVENT
 import { PRODUCT_IDS } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import {
+  aftershockEvents,
   drawEvents,
   eventFactor,
   eventMultipliers,
+  heatWave,
   localEventsOf,
   NO_EVENTS,
   rumorReliability,
@@ -229,21 +231,37 @@ describe('risque', () => {
 
 describe('canicule et sas', () => {
   it('fait fondre le beurre et vieillir les périssables à 06h00', () => {
-    const state = gameAt(3, { events: { ...NO_EVENTS, tomorrow: 'EVT-G01' }, cargo: [lot('T1-03', 2), lot('T2-02', 3, 3), lot('T3-01', 1, 2)] })
+    const state = gameAt(3, { events: { ...NO_EVENTS, tomorrow: 'EVT-G01' }, cargo: [lot('T1-03', 2), lot('T2-02', 3, 3), lot('T3-01', 1, 1)] })
     const morning = sleep(state)
     const heat = defined(morning.briefing?.heat)
     expect(heat.melted).toBe(2)
-    // T3-01 acheté le jour 2, vieilli de 2 jours au jour 4 : âge 4, pourri
+    // T3-01 acheté le jour 1, vieilli d'un jour au jour 4 : âge 4, pourri
     expect(heat.rotten).toBe(1)
-    expect(morning.cargo.find((entry) => entry.productId === 'T2-02')?.boughtDay).toBe(1)
+    expect(morning.cargo.find((entry) => entry.productId === 'T2-02')?.boughtDay).toBe(2)
     expect(FRESHNESS.rottenFromAge).toBe(4)
+  })
+
+  it('dure plusieurs jours, à côté des événements du jour, puis a son contrecoup', () => {
+    const days = defined(GLOBAL_EVENTS['EVT-G01'].days)
+    // Pas d'autre événement global tiré pour le lendemain : seule la canicule court
+    const calm = (s: GameState): GameState => ({ ...s, phase: 'night', events: { ...s.events, tomorrow: null } })
+    let state = sleep(gameAt(3, { phase: 'night', events: { ...NO_EVENTS, tomorrow: 'EVT-G01' } }))
+    expect(heatWave(state)).not.toBeNull()
+    for (let morning = 1; morning < days; morning++) {
+      state = sleep(calm(state))
+      expect(heatWave(state)).not.toBeNull()
+    }
+    state = sleep(calm(state))
+    expect(heatWave(state)).toBeNull()
+    expect(aftershockEvents(state, 'D1')).toContain('EVT-G01')
   })
 
   it('coûte châssis et Santé aux trajets de jour', () => {
     const state = withEvents({ global: 'EVT-G01' }, { rng: HIGH_ROLL_RNG, autoCooling: false })
     const moved = run(state, { type: 'travel', to: 'D2' })
-    expect(moved.tripReport?.heatHealth).toBe(5)
-    expect(moved.tripReport?.chassisWear).toBe(10)
+    const heat = defined(GLOBAL_EVENTS['EVT-G01'].effects.find((effect) => effect.kind === 'heat'))
+    expect(moved.tripReport?.heatHealth).toBe(heat.kind === 'heat' ? heat.dayTripHealth : 0)
+    expect(moved.tripReport?.chassisWear).toBe(heat.kind === 'heat' ? heat.dayTripChassis : 0)
   })
 
   it('fait perdre une demi-journée à qui entre dans un district bouclé, ou s’y réveille', () => {

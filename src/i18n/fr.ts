@@ -188,7 +188,8 @@ export const fr = {
   /** Onglet En bref : tout ce qui compte aujourd'hui, avant d'aller au marché puis sur la carte (chap. 7) */
   fil: {
     news: 'Actualités',
-    newsGlobal: 'Événement du jour, dans toute la ville',
+    newsGlobal: 'Dans toute la ville',
+    lastsUntil: (day: number) => `jusqu'au J${day}`,
     newsLocal: 'Événements locaux, district par district',
     newsAftershock: "Contrecoups d'hier",
     newsAftershockInfo:
@@ -341,11 +342,11 @@ export const fr = {
     cargoSlots: (used: number, capacity: number) => `Soute ${used}/${capacity}`,
     compartment: (used: number, capacity: number) => `Double fond ${used}/${capacity}`,
     compartmentRule:
-      "Les caisses illégales qui arrivent s'y rangent d'elles-mêmes, et prennent la place des moins chères. Le double fond fait partie de la soute : quand il n'y a rien à cacher, ses places reçoivent des caisses visibles.",
+      "Les caisses illégales qui arrivent s'y rangent d'elles-mêmes, et prennent la place des moins chères. Cliquer sur une caisse cachée l'en sort ; « Cacher » remplit les places libres. Le double fond fait partie de la soute : quand il n'y a rien à cacher, ses places reçoivent des caisses visibles.",
     hidden: (qty: number) => `${qty} au double fond`,
     beacon: 'Balise',
     hide: 'Cacher au double fond',
-    unhide: 'Retirer du double fond',
+    hiddenSlot: (product: string) => `${product}, caché au double fond : cliquer pour le sortir (une caisse)`,
     notice: (product: string, crates: string) => `Double fond : ${product} prend la place de ${crates}.`,
     profile: 'Profil de la cargaison',
     profileRule: 'Ces parts pilotent le risque de contrôle ; une caisse masquée par un Tier 0 compte moins.',
@@ -512,6 +513,8 @@ export const fr = {
   },
 
   briefing: {
+    wanted: (level: number, max: number, risk: string, flee: string) =>
+      `Fiche S montée hier (fuite ou écart de nuit filmé) : ${level}/${max}. Risque de contrôle +${risk} partout, fuite −${flee} ; une nuit au relais l'efface d'un niveau.`,
     title: (day: number) => `Briefing de 06h00 — Jour ${day}`,
     ventureRaid: (loss: string) => `Coup de filet de la BRC sur une filière du Cartel : le placement perd ${loss}.`,
     ventureInterest: 'Intérêts du placement',
@@ -862,12 +865,13 @@ export const fr = {
     filters: 'Filtrer les produits',
     filterTierLabel: 'Filtrer par tier',
     filterTagLabel: 'Filtrer par tag',
-    allTiers: 'Tous les tiers',
-    allTags: 'Tous les tags',
+    allTiers: 'Tiers',
+    allTags: 'Tags',
     filterTier: (tier: number) => `Tier ${tier}`,
     resetFilters: 'Effacer',
+    rowHint: (product: string) => `${product} : ouvrir la fiche`,
     sortLabel: 'Trier les produits',
-    sort: { tier: 'Tier', priceAsc: 'Prix croissant', priceDesc: 'Prix décroissant' },
+    sort: { tier: 'Par tier', priceAsc: 'Prix ↑', priceDesc: 'Prix ↓' },
     noMatch: 'Aucun produit de ce filtre ici.',
     streetOnly: 'Passé 20h00 : seul le marché de rue est ouvert.',
     sellAll: (amount: string) => `Vendre tout (${amount})`,
@@ -903,21 +907,30 @@ export const fr = {
     sell: 'Vendre',
     max: 'MAX',
     status: {
-      production: 'Production locale · se revend mal ici',
+      production: 'Arrivage régulier',
       strong: 'Forte demande',
       neutral: '',
     },
     origin: {
+      production: "Arrivage régulier : le produit arrive ici chaque jour, d'où un cours bas ; il se revend mieux ailleurs.",
       official: 'Socle officiel : le Tier 0 est en boutique partout, chaque jour.',
       arrival: 'Arrivage du jour : un complément tiré au hasard ce matin.',
       exceptional: "Arrivage d'événement : en boutique grâce à l'événement du jour.",
     },
   },
 
+  /** Sens d'une tendance publique (chap. 2) */
+  trend: { up: 'en hausse', down: 'en baisse', flat: 'stable' },
+  trendSince: (trend: string, days: number) => `${trend} depuis ${days} jour${days > 1 ? 's' : ''}`,
+
   sheet: {
     title: 'Fiche',
-    open: (product: string) => `${product} : ouvrir la fiche`,
-    quotesTitle: 'Cours observés, district par district',
+    quotesTitle: 'Tendance publique, district par district',
+    seenOn: (day: number, quote: string) => `J${day} ${quote}`,
+    seen: (visits: string) => `Vu sur place : ${visits}`,
+    trendBlurred: 'Sous Sédation, la tendance publiée se brouille : impossible de la lire.',
+    trendSoon: 'Le Fil publiera la tendance dès demain.',
+    trendReadout: (district: string, day: number, trend: string) => `${district}, J${day} : ${trend}`,
     historyDistrict: 'District de la courbe',
     trendRule:
       "Chaque district a sa propre économie : un produit n'a ni le même cours ni la même tendance d'un district à l'autre. Les cours dérivent d'un jour à l'autre ; une baisse dure souvent quelques jours, puis le cours revient vers la normale. Les événements s'y ajoutent. À vous de repérer les bons moments.",
@@ -935,9 +948,10 @@ export const fr = {
     breakage: (flee: string, shock: string, threshold: number, factor: string) =>
       `chaque caisse peut casser (${flee} en fuite réussie, ${shock} à chaque choc de ${threshold} PV de châssis ou plus) ; abîmée, elle vaut ${factor}`,
     explosion: (chance: string, chassis: number) => `si une fuite échoue, chaque caisse non masquée peut exploser (${chance}, châssis −${chassis})`,
-    drop: (bonus: string) => `largage offensif en fuite : ${bonus} de chance de fuite pour 1 caisse`,
+    drop: (bonus: string) => `largage offensif en fuite (route en feu) : ${bonus} de chance de fuite pour 1 caisse`,
+    bribeGift: "s'offre à un agent corrompu, avec la connivence",
     masks: (tag: string) => `Chaque caisse masque 1 caisse ${tag} (moins de risque, bonus au bluff)`,
-    bluffAid: (crates: number, effect: string) => `Au bluff : donner ${crates} caisse${crates > 1 ? 's' : ''} à l'agent (${effect})`,
+    bluffAid: (crates: number, effect: string) => `Au bluff, dès ${crates} caisse${crates > 1 ? 's' : ''} en soute : ${effect}, sans rien donner`,
     doping: (bonus: string, chassis: number, icc: number) =>
       `En fuite : dopage du pilote, ${bonus} de chance (châssis −${chassis}, ICC −${icc} %), une fois par jour`,
     sleepless: (health: number) => `Le soir : une nuit blanche de plus malgré l'épuisement (Santé −${health})`,
@@ -948,17 +962,18 @@ export const fr = {
     legal: 'Fouille : rien à craindre, simple formalité',
     seizure: (fine: string, icc: number, custodyDays: number, high: boolean) =>
       `Saisie : confiscation, amende de ${fine} de leur valeur (prix de base), ICC −${icc}${high ? `, garde à vue ${custodyDays} jour${custodyDays > 1 ? 's' : ''} (haut tier)` : ''}`,
-    bribeFavorite: (districts: string) => `Apprécié des agents de ${districts} : connivence à la corruption`,
     tollFavorite: (districts: string) => `Pris en premier par les milices de ${districts}`,
     strong: (districts: string) => `Forte demande : ${districts} (jamais en boutique là-bas, sauf événement)`,
     nowhere: 'nulle part',
-    produced: (districts: string) => `Production : ${districts} (en boutique chaque jour, moins cher)`,
+    produced: (districts: string) => `Arrivage régulier : ${districts} (en boutique chaque jour, moins cher)`,
+    hereTitle: (district: string) => `À ${district}, aujourd'hui`,
+    boughtAt: (qty: number, cost: string) => `${qty} en soute, acheté${qty > 1 ? 's' : ''} ${cost}/u en moyenne`,
+    condition: (condition: string) => `État : ${condition}`,
     best: (quote: string, district: string, age: number) =>
       `Meilleur cours vu ailleurs : ${quote} à ${district} (${age === 0 ? "aujourd'hui" : `il y a ${age} jour${age > 1 ? 's' : ''}`})`,
     noMemory: 'Aucun cours vu ailleurs pour ce produit',
-    historyEmpty: 'Jamais observé dans ce district.',
-    historyLabel: (district: string) => `Cours observés à ${district}, jour par jour, avec le cours normal en pointillé`,
-    historyReadout: (district: string, day: number, quote: string, normal: string) => `${district}, J${day} : ${quote} (cours normal ${normal})`,
+    historyEmpty: 'Jamais vu sur place : le cours exact se découvre en y passant.',
+    historyLabel: (district: string) => `Tendance publique à ${district}, jour par jour, sans prix, avec le cours normal en pointillé`,
   },
 
   margin: {
@@ -984,7 +999,7 @@ export const fr = {
         `Un drone vous a repéré ${place} : une unité de la BRC vous coince et l'agent a déjà la main sur la portière. Trop tard pour fuir ou vider la soute.`,
       racket: (place: string) => `Une barricade des milices barre le passage, ${place}. Les miliciens réclament leur dû.`,
     },
-    compartment: (crates: string) => `Double fond : ${crates}. À la fouille, chance que les agents le trouvent :`,
+    compartment: (crates: string) => `Double fond : ${crates} ; à la fouille, chance que les agents le trouvent :`,
     sponsorCovered: (crates: string) => `Commande du Velvet-Silo : ${crates}, sous la protection de ton parrain. Les agents ne les verront pas.`,
     jammed:
       'Votre brouilleur a fait décrocher le drone : la BRC a dû dresser ce barrage plus loin. Attention : découvert à la fouille, il vaut une garde à vue.',
@@ -1013,16 +1028,27 @@ export const fr = {
     bribeRate: 'Tarif standard',
     offer: 'Offre',
     offerCash: 'Cash-Puce offert',
-    offerCrates: 'Caisses offertes (valeur en paiement : prix de base)',
+    offerCrates: 'Caisses de Luxe offertes (valeur en paiement : prix de base ; une seule suffit pour la connivence)',
+    noGift: "Aucune caisse de Luxe en soute : l'agent ne prend que du cash. Le Luxe (cigares, whisky…) s'offre aussi, et le dispose mieux.",
+    bribeRateInfo: (minimum: string) =>
+      `L'agent évalue ce qu'il laisse passer : le plus élevé entre une part fixe par étoile du district et une part de la valeur de vos caisses illégales. En dessous de ${minimum}, il refuse ; au-delà du tarif, la chance monte par paliers.`,
     offerTotal: (amount: string) => `Valeur totale de l'offre : ${amount}`,
     crateValue: (value: string, cost: string) => `${value}/u en paiement, acheté ${cost}/u`,
     crateGain: (gain: string) => `${gain}/u face au cash`,
-    favorite: 'appréciée des agents : connivence',
     addCrate: (product: string) => `Offrir une caisse de plus : ${product}`,
     removeCrate: (product: string) => `Offrir une caisse de moins : ${product}`,
     cancelsSmell: "annule le malus d'odeur",
-    bluffAid: (crates: number, product: string, effect: string) => `Donner ${crates} × ${product} à l'agent (${effect})`,
-    drop: 'Largage offensif (une caisse jetée derrière vous aveugle les poursuivants)',
+    bluffAid: (product: string, effect: string) => `${product} (${effect})`,
+    bluffAids: (aids: string) => `Aides en soute, déjà comptées : ${aids}`,
+    drop: 'Largage offensif (une caisse inflammable jetée derrière vous : route en feu, poursuivants semés)',
+    searchInfo:
+      "Utile quand la soute est légale (simple formalité, gain d'ICC), quand l'illégal tient au double fond, ou quand un échec des autres options coûterait plus cher (amende relevée, garde à vue, châssis).",
+    bluffInfo:
+      "Une fausse déclaration : elle passe mieux avec une soute couverte de Tier 0, sans odeur, dans un district peu gardé. Les aides en soute comptent d'elles-mêmes.",
+    bribeInfo:
+      "Une offre en Cash-Puce et en caisses de Luxe. Elle est perdue même en cas d'échec ; plus elle dépasse le tarif standard, plus la chance monte.",
+    fleeInfo: 'Pied au plancher : la cargaison est sauvée si ça passe, mais la Fiche S monte et le châssis souffre.',
+    bribeSuccess: "Succès : l'agent coupe sa caméra-piéton, tout passe, ICC inchangé.",
     breakageRisk: (tag: string, chance: string, factor: string) =>
       `En cas de succès, chaque caisse ${tag} peut casser (${chance}) : elle se vendra et paiera ${factor}.`,
     explosionRisk: (tag: string, chance: string, chassis: string) =>
@@ -1082,7 +1108,6 @@ export const fr = {
     title: 'Carte',
     fuelPrice: (price: string) => `Synthanol ${price} la ration`,
     places: (names: string) => `Lieux : ${names}`,
-    fuelReminder: (fuel: number, tank: number) => `Synthanol ${fuel}/${tank} : le plein se fait à la pompe, onglet Lieux.`,
     mapHint:
       "Survolez ou touchez un district : sa fiche complète et son itinéraire s'affichent sous la carte. En bleu, vous êtes ici ; en ambre, le district choisi. Les autres destinations sont listées à part.",
     destinations: 'Autres destinations',
@@ -1119,9 +1144,6 @@ export const fr = {
     after: 'After du couvre-feu ce soir',
     trust: (deliveries: number, factor: string) =>
       `Confiance du DSC : ${deliveries} commande${deliveries > 1 ? 's' : ''} livrée${deliveries > 1 ? 's' : ''}, prime ${factor}.`,
-    cargoTitle: (used: number, capacity: number) => `Soute ${used}/${capacity}`,
-    cargoEmpty: 'vide',
-    cargoLine: (qty: number, name: string, hidden: number) => `${qty} × ${name}${hidden > 0 ? ` (dont ${hidden} au double fond)` : ''}`,
     deliveryTitle: 'Livraison officielle du jour',
     deliveryOffer: (district: string, crates: number, fee: string) =>
       `La plateforme du DSC propose ${crates} caisses scellées à livrer à ${district} par le trajet de jour, prime ${fee}. Légales, elles couvrent la soute ; non livrées, elles sont reprises à 06h00 (ICC en baisse).`,
@@ -1308,6 +1330,7 @@ export const fr = {
     'TAG-TECH': { name: 'Tech' },
     'TAG-CHEMICAL': { name: 'Chimique' },
     'TAG-FLAMMABLE': { name: 'Inflammable' },
+    'TAG-LUXURY': { name: 'Luxe' },
     'TAG-FESTIVE': { name: 'Festif' },
     'TAG-DIURNAL': { name: 'Diurne' },
   } satisfies Record<TagId, Named>,

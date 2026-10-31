@@ -609,3 +609,21 @@ Les deux services restaient négatifs aux retraits. Le bot les jouait mal : pani
 - **Plans :** Haut tier en Casse-cou 129 800 → 149 800 ₡ (la cloison protège le haut tier caché), en Équilibré 58 100 → 53 600 ₡ et en Prudent 24 100 → 22 700 ₡ (la cloison et la trappe perdue au changement de châssis coûtent sans assez servir), dans le bruit ; Saboteur inchangé ; les autres plans à châssis (Chaîne du froid, Couverture légale) inchangés.
 - **Hasard :** écart entre bots 50 700 ₡ (43 700 avant, tiré par le Haut tier Casse-cou), entre graines 126 000 ₡ : le hasard pèse toujours plus que le plan.
 - **Contrôle et fins :** inchangés.
+
+## Tags de comportement, contrôle repensé, canicule qui dure, tendance publique
+**Changements de règle :**
+- Corruption payée en Cash-Puce et en caisses de Luxe seulement (nouveau tag : café, cigares, whisky, roquefort, wagyu, œuvres d'art), connivence apportée par le Luxe ; plus de listes de produits par district.
+- Largage de fuite réservé à l'Inflammable, recentré sur l'huile et le whisky (les cigares n'explosent plus). Chimique ramené aux vraies substances (sans le curry ni le miel), détection seulement.
+- Aides au bluff passives : manuels et curry jouent dès qu'ils sont en soute, sans rien donner.
+- Canicule de trois jours, à côté des autres événements globaux, contrecoup le lendemain de son terme ; chaque matin les périssables vieillissent d'un jour, et la peine des trajets de jour est adoucie.
+- Tendance publique des cours, sans prix, dans la fiche et la carte.
+- Double fond vidé une caisse à la fois.
+
+**Canicule :** à peine égale, la faire durer trois jours coûtait 6 points de survie à Électronique (Équilibré, 300 parties : 82 % → 77 %) ; ni le vieillissement ni la fin du largage chimique n'y étaient pour rien, c'étaient les trajets de jour sous la chaleur. Avec la peine par trajet adoucie, la canicule reste plus dure qu'avant sur trois jours, sans écraser les plans.
+
+**Campagnes** (mêmes effectifs) :
+- **Contrôle :** Novice 80 % de survie, inchangé.
+- **Plans :** dans le bruit pour la plupart. Couverture légale monte en Équilibré et Casse-cou (83 → 94k, 196 → 219k : le curry couvre l'odeur sans rien coûter, et le plan porte de l'odorant). Corruption et Citoyen modèle tiennent malgré la fin des préférences par district (le Luxe remplace). Chaîne du froid en Casse-cou baisse (166 → 139k : la canicule dure pour les périssables), Électronique et Saboteur en Équilibré perdent 4 points de survie, dans la marge à 200 parties.
+- **Retraits :** Karma-Cham, chirurgie et Cloison fantôme inchangés ; `[MOD-08]` et Vance restent positifs au score.
+- **Fins :** dans le bruit, le Fantôme par la fuite perd 5 points (73 %).
+- **Hasard :** le hasard des graines pèse toujours plus que le choix du plan.
