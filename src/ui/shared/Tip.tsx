@@ -15,7 +15,7 @@ import {
 } from '@floating-ui/react'
 import { Info } from 'lucide-react'
 import { motion } from 'motion/react'
-import { useState, type ReactNode } from 'react'
+import { useState, type MouseEventHandler, type ReactNode } from 'react'
 import { FOCUS_RING } from './focus.ts'
 import { POP } from './motion.ts'
 import { BUBBLE } from './styles.ts'
@@ -32,7 +32,7 @@ type TipProps = {
   /** Bulle large : détail d'un calcul, liste d'effets */
   wide?: boolean
   /** Action du déclencheur au clic (une case de soute qui sort sa caisse du double fond) ; la bulle s'ouvre toujours au survol */
-  onClick?: () => void
+  onClick?: MouseEventHandler<HTMLButtonElement>
 }
 
 /**

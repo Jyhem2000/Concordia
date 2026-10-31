@@ -48,7 +48,7 @@
 | **Le promu** | « Félicitations, il monte d'un étage ! » | Vrai promu, ou opposant « suicidé », dont un Deepfake radieux appelle la famille depuis la Résidence d'Acclimatation. | **Purge préventive :** risque d'interception accru dans son district pour la journée (« célébration civique »). Une chance que ce soit ton **équipier actif** : il disparaît définitivement, son salaire s'arrête, le prochain recrutement est gratuit (avec l'équipage, chap. 4). |
 | **Le déclassé** (une fois sur deux) | « Un citoyen a choisi la sobriété heureuse. » | Un vrai cadre tombé en disgrâce, renvoyé un échelon plus bas avec son foyer et ses vices, au vu de tout le quartier. | **Il emporte ses vices :** pendant quelques jours (tirage compris), un produit de la Forte demande de son ancien district passe en Forte demande dans le district inférieur (`[D5]` → `[D3]` → `[D2]` → `[D1]`). Le produit est tiré parmi ceux qui n'y sont ni produits ni déjà en Forte demande. Il sort de la boutique de ce district (exclusion), comme toute Forte demande. |
 
-* Les noms du promu et du déclassé sont tirés au hasard (lore seulement).
+* Les noms du promu et du déclassé sont tirés au hasard parmi des inconnus (lore) ; quand le promu est ton équipier, c'est son nom qui s'affiche.
 * Un faux dossier « cadre » de `[LOC-D5-1]` garantit le déclassement de ce tirage (chap. 3).
 * *Ex. de bandeau :* « 🎉 Félicitations à Mama Rosa, promue Citoyenne d'Honneur ! Elle ne pourra pas vous répondre : elle est très occupée à être heureuse. » · « 🌱 M. K. Okafor, ex-Glass Spire, rejoint avec enthousiasme les Ruches Grises. Son goût pour les cigares l'y suit. »
 

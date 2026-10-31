@@ -10,7 +10,7 @@ import { crossedDistricts, shortestRoute } from './map.ts'
 import { dismiss, hire } from './crew.ts'
 import { acceptDelivery, checkDelivery } from './delivery.ts'
 import { noteSale } from './progress.ts'
-import { acceptMission, checkMission, isOnMission, recordDeviation } from './night.ts'
+import { acceptMission, checkMission, isOnMission, missionOffer, recordDeviation } from './night.ts'
 import {
   auction,
   blackmail,
@@ -68,6 +68,7 @@ export type Action =
   | { type: 'acceptDelivery' }
   /** Tournée de nuit ; `drink` : boisson pour une nuit blanche malgré l'épuisement ; `mission` : accepter la mission du soir */
   | { type: 'forceCurfew'; drink?: ProductId; mission?: boolean }
+  | { type: 'nightTrip'; to: DistrictId; drink?: ProductId }
   | { type: 'useProduct'; productId: ProductId }
   | { type: 'setAutoCooling'; enabled: boolean }
   | { type: 'sleep' }
@@ -508,6 +509,34 @@ function forceCurfew(state: GameState, drink?: ProductId, mission = false): Acti
   return { ok: true, state: changeHealth(drunk, -sleepless.healthLoss).state }
 }
 
+/**
+ * Tournée de nuit en un geste (chap. 1) : le passage à la nuit et le trajet ne vont pas l'un sans l'autre. Vers le
+ * district de la mission proposée, c'est la livraison autorisée (caisses scellées chargées) ; ailleurs, la tournée
+ * clandestine. Si le trajet ne peut pas partir, rien ne change : ni nuit, ni épuisement.
+ */
+export function startNightTrip(state: GameState, to: DistrictId, drink?: ProductId): ActionResult {
+  const night = beginNight(state, to, drink)
+  if (!night.ok) return night
+  return travel(night.state, to)
+}
+
+/** Passage à la nuit pour une tournée vers ce district (mission s'il s'agit de la sienne), avant le trajet : sert aussi à l'aperçu */
+export function beginNight(state: GameState, to: DistrictId, drink?: ProductId): ActionResult {
+  return forceCurfew(state, drink, missionOffer(state) === to)
+}
+
+/** Boisson qui permet une nuit blanche malgré l'épuisement, s'il y en a une en soute (chap. 1 et 2) */
+export function sleeplessDrink(state: GameState): ProductId | undefined {
+  if (checkForceCurfew(state) !== 'exhausted') return undefined
+  return PRODUCT_IDS.find((id) => ownedQty(state.cargo, id) > 0 && !checkForceCurfew(state, id))
+}
+
+/** Raison pour laquelle la tournée de nuit vers ce district ne peut pas partir, ou null */
+export function checkNightTrip(state: GameState, to: DistrictId, drink?: ProductId): ActionError | null {
+  const result = startNightTrip(state, to, drink)
+  return result.ok ? null : result.error
+}
+
 // ─── Garage (chap. 3 et 4) ───
 
 /** Les services du garage s'obtiennent de jour, à Rust Valley */
@@ -592,6 +621,8 @@ function resolveAction(state: GameState, action: Action): ActionResult {
       return isQuantity(action.qty) ? refuel(state, action.qty) : fail('invalid-quantity')
     case 'travel':
       return travel(state, action.to)
+    case 'nightTrip':
+      return startNightTrip(state, action.to, action.drink)
     case 'acceptDelivery': {
       const error = checkDelivery(state)
       return error ? fail(error) : { ok: true, state: acceptDelivery(state) }

@@ -240,6 +240,8 @@ function DealsPanel() {
       const revenue = best ? estimatedUnitSale(best.quote) : null
       return { productId, best, revenue, cost: averageCost(game.cargo, productId) }
     })
+    // Une revente à perte n'est pas une bonne affaire : seulement les marges positives, ou les produits jamais vus ailleurs
+    .filter(({ revenue, cost }) => revenue === null || cost === null || revenue > cost)
     .sort(byMargin)
   // Boutique d'ici : ce que le stock, la place et le cash permettent d'acheter, rangé par gain total possible
   const shop = shopProducts(market)

@@ -894,12 +894,11 @@ export const fr = {
     marginAll: (qty: number) => `En vendant tout (${qty}) :`,
     buy: 'Acheter',
     sell: 'Vendre',
-    fullRateShort: 'Plein cours',
-    buyCost: (cost: string) => `−${cost}`,
-    saleTotal: (total: string) => `+${total}`,
-    less: (action: string) => `${action} : une caisse de moins`,
-    more: (action: string) => `${action} : une caisse de plus`,
-    quantity: (action: string, product: string) => `${action} : nombre de caisses de ${product}`,
+    buyCost: (cost: string) => `Coût : −${cost}`,
+    fullRate: (qty: number) => `Plein cours (${qty})`,
+    all: (qty: number) => `Tout (${qty})`,
+    maxOf: (qty: number) => `Max (${qty})`,
+    saleTotal: (total: string) => `Vente : +${total}`,
     max: 'MAX',
     status: {
       production: 'Arrivage régulier',
@@ -1111,6 +1110,9 @@ export const fr = {
     via: (names: string) => `Via ${names}`,
     fuel: (rations: number) => `${rations} ration${rations > 1 ? 's' : ''}`,
     go: 'Aller',
+    goNight: 'Aller de nuit',
+    goMission: (fee: string) => `Livrer de nuit (prime ${fee})`,
+    goNightDrink: (product: string, health: number) => `Aller de nuit — nuit blanche : 1 × ${product} (Santé −${health})`,
     deliveryTarget: 'Livraison officielle du jour (marché)',
     memoryNever: 'Cours jamais observés',
     memoryToday: "Cours vus aujourd'hui",
@@ -1162,23 +1164,19 @@ export const fr = {
     contractTonight: (district: string) => `Contrat de Viktor en cours : il se livre à ${district} par n'importe quel trajet, de nuit aussi.`,
     nightRule:
       'Ce soir : dormir, ou un second trajet dans les galeries de service, où tout est filmé. Une tournée interdit la suivante le lendemain, sauf nuit blanche forcée.',
-    missionTour: (district: string, fee: string) => `Livraison de nuit autorisée vers ${district} (prime ${fee})`,
     missionTourHint: (crates: number) =>
       `La plateforme charge ${crates} caisses scellées (place libre requise) : le trajet vers ce district est couvert, et votre marchandise peut voyager avec.`,
     lethalConfirm: 'Tournée clandestine avec le serveur ?',
     lethalWarning: (product: string) =>
       `${product} est à bord : si les agents fouillent la soute, c'est l'exécution sommaire et la fin de la partie.`,
     lethalAction: 'Partir quand même',
-    clandestineTour: 'Tournée clandestine',
-    clandestineShort: 'Hors mission : risque accru, Fiche S.',
-    missionTourShort: 'Trajet couvert, prime.',
+    nightFromMap: 'Pour partir cette nuit, choisissez la destination sur la carte : « Aller de nuit », ou « Livrer de nuit » vers la mission.',
     sleepShort: "Repos jusqu'à 06h00.",
     sleepRelayHint: "Nuit au relais routier du DSC : gain d'ICC et de Santé, épuisement effacé.",
     bivouacHint: 'Bivouac, faute de relais ici : épuisement effacé, mais ni ICC, ni Santé.',
     clandestineHint: (wanted: string) => `Hors mission, vers le district de votre choix : risque accru, et ${wanted} si le trajet passe.`,
     injectionHint: (next: number, needed: number) =>
       `Serveur Aeterna en soute et Glitch au travail : si tu arrives sans garde à vue, elle injecte un morceau de ton dossier (${next}/${needed}).`,
-    withDrink: (product: string, health: number) => ` — nuit blanche : boire 1 × ${product} (Santé −${health})`,
     missionLocked: (done: number, needed: number) =>
       `La plateforme ne vous confie pas encore la nuit : ${done}/${needed} commandes livrées (livraisons officielles du jour). Seule la tournée clandestine reste possible.`,
     missionOffer: (district: string, crates: number, fee: string) =>

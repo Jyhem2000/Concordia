@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes } from 'react'
+import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { FOCUS_RING } from './focus.ts'
 import Tip from './Tip.tsx'
 
@@ -11,6 +11,8 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   size?: 'sm' | 'md'
   /** Bouton grisé : la raison s'affiche au survol, au toucher ou au focus, plutôt que sous le bouton */
   reason?: string | null
+  /** Bouton actif : ce que fera le clic, en aperçu au survol ou au focus (résultat d'une vente, coût d'un achat) */
+  preview?: ReactNode
 }
 
 const variants: Record<ButtonVariant, string> = {
@@ -27,11 +29,18 @@ const sizes = {
 const BASE = 'inline-flex items-center justify-center gap-1.5 rounded-md border uppercase transition-colors'
 
 /** Bouton de l'interface : `type="button"` par défaut pour ne jamais soumettre un formulaire par accident */
-export default function Button({ variant = 'default', size = 'md', className = '', reason, ...props }: ButtonProps) {
+export default function Button({ variant = 'default', size = 'md', className = '', reason, preview, ...props }: ButtonProps) {
   // Grisé avec une raison : un déclencheur d'infobulle à l'allure du bouton grisé (un bouton désactivé ne reçoit ni survol ni toucher)
   if (props.disabled && reason)
     return (
       <Tip content={reason} className={`${BASE} opacity-35 ${variants[variant]} ${sizes[size]} ${className}`}>
+        {props.children}
+      </Tip>
+    )
+  // Actif avec un aperçu : le déclencheur d'infobulle agit au clic, l'aperçu s'ouvre au survol
+  if (!props.disabled && preview && props.onClick)
+    return (
+      <Tip content={preview} onClick={props.onClick} className={`${BASE} ${variants[variant]} ${sizes[size]} ${className}`}>
         {props.children}
       </Tip>
     )

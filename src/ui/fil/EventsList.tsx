@@ -38,6 +38,8 @@ export default function EventsList() {
   // Déclassement du dernier tirage (s'il y en a eu un) et durée de ses vices
   const demotion = lottery?.demoted && lottery.viceDistrict && day <= lottery.viceUntil ? { from: lottery.demoted, to: lottery.viceDistrict } : null
   const name = (index: number) => t.events.names[index % t.events.names.length]
+  // Équipier « promu » ce matin (disparu) : c'est son nom que la Loterie affiche (chap. 6)
+  const crewLost = useGameStore((s) => (s.game.briefing?.day === s.game.day ? s.game.briefing.crewLost : null))
 
   if (globals.length === 0 && locals.length === 0 && aftershocks.length === 0 && !drawToday && !demotion && !events.rumor && !influence)
     return <Hint>{t.fil.noNews}</Hint>
@@ -82,7 +84,9 @@ export default function EventsList() {
       )}
       {lottery && (drawToday || demotion) && (
         <NewsGroup title={t.fil.newsLottery}>
-          {drawToday && <p>{t.events.promoted(name(lottery.names.promoted), t.district[lottery.promoted].name)}</p>}
+          {drawToday && (
+            <p>{t.events.promoted(crewLost ? t.crew[crewLost].name : name(lottery.names.promoted), t.district[lottery.promoted].name)}</p>
+          )}
           {demotion && (
             <p>
               {t.events.demoted(name(lottery.names.demoted), t.district[demotion.from].name, t.district[demotion.to].name)}

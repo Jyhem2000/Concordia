@@ -3,16 +3,17 @@ import { motion } from 'motion/react'
 import { ENDINGS, WANTED } from '../../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
-import { planTravel } from '../../engine/actions.ts'
-import { averageCost } from '../../engine/cargo.ts'
+import { beginNight, planTravel, sleeplessDrink } from '../../engine/actions.ts'
+import { averageCost, ownedQty } from '../../engine/cargo.ts'
 import { crewEffect } from '../../engine/crew.ts'
 import { estimatedUnitSale, fuelPriceBreakdown, lastSeen, productStatus } from '../../engine/market.ts'
 import { flyingCheckShare } from '../../engine/interception.ts'
 import { riskBreakdown } from '../../engine/risk.ts'
+import { missionFee, missionOffer } from '../../engine/night.ts'
 import type { DistrictId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
-import Button from '../shared/Button.tsx'
+import ConfirmButton from '../shared/ConfirmButton.tsx'
 import EventDetails from '../events/EventDetails.tsx'
 import DistrictMap from './DistrictMap.tsx'
 import Exposure from './Exposure.tsx'
@@ -62,7 +63,8 @@ export function FeaturedDistrict() {
 
 /** Les autres destinations, sous la carte, de la périphérie au sommet ; le district de la fiche n'y figure pas */
 export function DestinationsPanel() {
-  const tripDone = useGameStore((s) => (s.game.phase === 'day' ? s.game.dayTripDone : s.game.nightTripDone))
+  // Le trajet du jour fait, c'est le soir : on peut encore partir de nuit ; seule la nuit, une fois sa tournée faite, ferme la carte
+  const tripDone = useGameStore((s) => s.game.phase === 'night' && s.game.nightTripDone)
   const here = useGameStore((s) => s.game.districtId)
   // Le district de la fiche (touché, sinon actuel) quitte la liste ; le simple survol ne la fait pas bouger
   const pinned = useMapFocus((s) => s.selected ?? here)
@@ -213,12 +215,29 @@ function TravelBar({ districtId }: DistrictIdProps) {
   // planTravel lit plusieurs champs de la partie (phase, carburant, trajets faits…) : on passe l'état entier
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
-  const { t, percent } = useI18n()
-  const plan = planTravel(game, districtId)
+  const { t, percent, credits } = useI18n()
+  // Le soir venu, le départ est une tournée de nuit : aperçu sur l'état une fois la nuit tombée (mission comprise)
+  const evening = game.phase === 'day' && game.dayTripDone
+  const drink = evening ? sleeplessDrink(game) : undefined
+  const night = evening ? beginNight(game, districtId, drink) : null
+  const from = night?.ok ? night.state : game
+  const plan = planTravel(from, districtId)
+  const error = night && !night.ok ? night.error : plan.error
+  const mission = evening && missionOffer(game) === districtId
   // Ronde renforcée cachée : la part affichée est celle du district
   const revealed = Boolean(crewEffect(game, 'revealsPatrol'))
-  const flying = flyingCheckShare(game, districtId, revealed)
+  const flying = flyingCheckShare(from, districtId, revealed)
   const route = plan.crossed.length === 0 ? t.travel.direct : t.travel.via(plan.crossed.map((id) => t.district[id].name).join(', '))
+  // Produit qui mène à l'exécution sommaire si la soute est fouillée : la tournée de nuit demande confirmation
+  const lethal = PRODUCT_IDS.find((id) => PRODUCTS[id].lethalOnSearch && ownedQty(game.cargo, id) > 0)
+  const sleepless = drink ? PRODUCTS[drink].sleeplessNight : undefined
+  const label = !evening
+    ? t.travel.go
+    : mission
+      ? t.travel.goMission(credits(missionFee(game)))
+      : drink && sleepless
+        ? t.travel.goNightDrink(t.product[drink].name, sleepless.healthLoss)
+        : t.travel.goNight
 
   return (
     <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 border-t border-line pt-2 text-xs">
@@ -229,7 +248,7 @@ function TravelBar({ districtId }: DistrictIdProps) {
           · {t.travel.risk}
           <Tip label={t.travel.risk} content={revealed ? t.travel.riskHintRevealed : t.travel.riskHint} />
           <Detailed
-            breakdown={riskBreakdown(game, districtId, { includePatrol: revealed })}
+            breakdown={riskBreakdown(from, districtId, { includePatrol: revealed })}
             format={(risk) => percent(risk, 0)}
             percent
             className="font-bold text-ink"
@@ -237,14 +256,19 @@ function TravelBar({ districtId }: DistrictIdProps) {
         </span>
         {flying > 0 && <span>· {t.travel.flyingShare(percent(flying, 0))}</span>}
       </div>
-      <Button
-        variant="primary"
-        disabled={plan.error !== null}
-        reason={plan.error ? t.error[plan.error] : null}
-        onClick={() => dispatch({ type: 'travel', to: districtId })}
+      <ConfirmButton
+        variant={evening && !mission ? 'danger' : 'primary'}
+        disabled={error !== null}
+        reason={error ? t.error[error] : null}
+        onClick={() => dispatch(evening ? { type: 'nightTrip', to: districtId, drink } : { type: 'travel', to: districtId })}
+        confirm={
+          evening && lethal
+            ? { title: t.evening.lethalConfirm, message: t.evening.lethalWarning(t.product[lethal].name), action: t.evening.lethalAction }
+            : undefined
+        }
       >
-        {t.travel.go}
-      </Button>
+        {label}
+      </ConfirmButton>
     </div>
   )
 }

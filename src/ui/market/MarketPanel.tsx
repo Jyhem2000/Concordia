@@ -307,68 +307,47 @@ function Field({ label, children }: FieldProps) {
 }
 
 /**
- * Achat ou vente d'un produit (chap. 7) : une quantité (−/+, raccourcis 1, 5, MAX et plein cours qui la remplissent),
- * puis un seul bouton qui annonce le résultat exact de cette quantité : coût de l'achat, ou produit et marge de la vente
+ * Achat ou vente d'un produit (chap. 7) : des boutons qui agissent d'un clic (1, 5, MAX, et pour la vente le plein
+ * cours), chacun avec, au survol ou au focus, le résultat exact : coût de l'achat, ou produit et marge de la vente
  */
 function TradeControl({ productId, kind, max, fullRate }: TradeControlProps) {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
   const { t, credits } = useI18n()
-  // Quantité choisie : état d'interface éphémère, ramenée au maximum du moment
-  const [picked, setPicked] = useState(1)
-  const qty = Math.max(0, Math.min(picked, max))
   const variant = kind === 'buy' ? 'primary' : 'danger'
-  const presets = [
+  const choices = [
     { label: '1', qty: 1 },
     { label: '5', qty: 5 },
-    { label: t.market.max, qty: max },
-    ...(kind === 'sell' && fullRate !== undefined && fullRate > 0 && fullRate < max ? [{ label: t.market.fullRateShort, qty: fullRate }] : []),
+    ...(kind === 'sell' && fullRate !== undefined && fullRate > 0 && fullRate < max ? [{ label: t.market.fullRate(fullRate), qty: fullRate }] : []),
+    { label: kind === 'sell' ? t.market.all(max) : t.market.maxOf(max), qty: max },
   ]
-  const sale = kind === 'sell' && qty > 0 ? saleQuote(game, productId, qty) : null
-  const label = kind === 'buy' ? t.market.buy : t.market.sell
+  // Résultat exact d'une quantité : ce que coûte l'achat, ou ce que rapporte la vente et sa marge
+  const preview = (qty: number) => {
+    if (kind === 'buy') return t.market.buyCost(credits(quote(game, game.districtId, productId) * qty))
+    const sale = saleQuote(game, productId, qty)
+    return (
+      <span className="flex items-center gap-1.5">
+        {t.market.saleTotal(credits(sale.total))}
+        <Margin revenue={sale.total} cost={sale.cost} />
+      </span>
+    )
+  }
 
   return (
     <div className="flex flex-wrap items-center gap-1">
-      <Button size="sm" aria-label={t.market.less(label)} disabled={qty <= 1} onClick={() => setPicked(qty - 1)}>
-        −
-      </Button>
-      <input
-        type="number"
-        inputMode="numeric"
-        min={1}
-        max={max}
-        value={qty}
-        aria-label={t.market.quantity(label, t.product[productId].name)}
-        onChange={(event) => setPicked(Math.floor(Number(event.target.value)) || 0)}
-        className={`w-12 text-center ${FIELD}`}
-      />
-      <Button size="sm" aria-label={t.market.more(label)} disabled={qty >= max} onClick={() => setPicked(qty + 1)}>
-        +
-      </Button>
-      {presets.map((preset) => (
-        <Button key={preset.label} size="sm" disabled={preset.qty < 1 || preset.qty > max} onClick={() => setPicked(preset.qty)}>
-          {preset.label === t.market.max || preset.label === t.market.fullRateShort ? `${preset.label} (${preset.qty})` : preset.label}
+      <span className="text-xs font-bold text-ink uppercase">{kind === 'buy' ? t.market.buy : t.market.sell}</span>
+      {choices.map(({ label, qty }) => (
+        <Button
+          key={label}
+          variant={variant}
+          size="sm"
+          disabled={qty < 1 || qty > max}
+          preview={qty >= 1 && qty <= max ? preview(qty) : undefined}
+          onClick={() => dispatch(kind === 'buy' ? { type: 'buy', productId, qty } : { type: 'sell', productId, qty })}
+        >
+          {label}
         </Button>
       ))}
-      <Button
-        variant={variant}
-        size="sm"
-        disabled={qty < 1}
-        onClick={() => dispatch(kind === 'buy' ? { type: 'buy', productId, qty } : { type: 'sell', productId, qty })}
-      >
-        {label}
-      </Button>
-      {/* Résultat exact de la quantité choisie, hors du bouton : coût de l'achat, ou produit et marge de la vente */}
-      {kind === 'buy' ? (
-        <span className="text-xs text-ink-soft tabular-nums">{t.market.buyCost(credits(quote(game, game.districtId, productId) * qty))}</span>
-      ) : (
-        sale && (
-          <span className="flex items-center gap-1 text-xs text-ink-soft tabular-nums">
-            {t.market.saleTotal(credits(sale.total))}
-            <Margin revenue={sale.total} cost={sale.cost} />
-          </span>
-        )
-      )}
     </div>
   )
 }

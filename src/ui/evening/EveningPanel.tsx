@@ -3,45 +3,34 @@ import { AFTER, ENDINGS, WANTED } from '../../data/balance.ts'
 import { TAGS } from '../../data/tags.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { ownedQty } from '../../engine/cargo.ts'
-import { checkForceCurfew } from '../../engine/actions.ts'
-import { canInject, checkMission, missionFee, missionOffer, sealedCount } from '../../engine/night.ts'
+import { checkForceCurfew, sleeplessDrink } from '../../engine/actions.ts'
+import { canInject, missionFee, missionOffer, sealedCount } from '../../engine/night.ts'
 import { nightUnlock } from '../../engine/progress.ts'
 import { sleepsAtRelay } from '../../engine/routine.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
-import ConfirmButton from '../shared/ConfirmButton.tsx'
 import { FOCUS_RING } from '../shared/focus.ts'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
 import Tip from '../shared/Tip.tsx'
 
-/** Un choix du soir : côte à côte sur grand écran, l'un sous l'autre quand la place manque */
-const CHOICE = 'flex min-w-0 flex-1 basis-48 flex-col gap-1'
-
 /**
- * Dilemme de 20h00 (chap. 1) : de jour, attendre le soir sur place ; le soir venu, mission de nuit, tournée clandestine ou
- * sommeil ; le plein se fait à la pompe (onglet Lieux)
+ * Dilemme de 20h00 (chap. 1) : de jour, attendre le soir sur place ; le soir venu, dormir ici, ou partir de nuit depuis la
+ * carte (« Aller de nuit », « Livrer de nuit » vers la mission) ; le plein se fait à la pompe (onglet Lieux)
  */
 export default function EveningPanel() {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
   const { t, credits, change, percent } = useI18n()
 
-  // Trois choix le soir (chap. 1) : dormir, livraison de nuit autorisée (mission), ou tournée clandestine
+  // Mission proposée ce soir : elle part de la carte, vers son district
   const offer = missionOffer(game)
   // Mission de nuit : seulement après quelques commandes livrées (confiance du DSC)
   const night = nightUnlock(game)
-  // Épuisé : une boisson pour une nuit blanche malgré tout, si le joueur en a (chap. 2)
-  const exhausted = checkForceCurfew(game) === 'exhausted'
-  const drink = exhausted ? PRODUCT_IDS.find((id) => ownedQty(game.cargo, id) > 0 && !checkForceCurfew(game, id)) : undefined
-  const sleepless = drink ? PRODUCTS[drink].sleeplessNight : undefined
-  const drinkLabel = drink && sleepless ? t.evening.withDrink(t.product[drink].name, sleepless.healthLoss) : ''
-  const curfewError = checkForceCurfew(game, drink)
-  const missionError = curfewError ?? (offer ? checkMission(game) : 'no-mission')
+  // Épuisé : une boisson pour une nuit blanche malgré tout, si le joueur en a (chap. 2) ; sinon, la raison de ne pas partir
+  const curfewError = checkForceCurfew(game, sleeplessDrink(game))
   const sleepLabel = sleepsAtRelay(game) ? t.evening.sleepRelay : t.evening.bivouac
-  // Produit qui mène à l'exécution sommaire si la soute est fouillée (chap. 5)
-  const lethal = PRODUCT_IDS.find((id) => PRODUCTS[id].lethalOnSearch && ownedQty(game.cargo, id) > 0)
   // Eau qui refroidit le moteur la nuit (chap. 2)
   const coolants = PRODUCT_IDS.filter((id) => PRODUCTS[id].cooling && ownedQty(game.cargo, id) > 0)
   // After du couvre-feu de ce soir, annoncée dès 06h00 (chap. 1)
@@ -97,56 +86,30 @@ export default function EveningPanel() {
                 <Tip label={t.evening.wait} content={t.evening.waitHint} />
               </div>
             ) : (
-              /* Le soir : les choix côte à côte */
-              <ul className="mt-2 flex flex-wrap items-start gap-2">
-                {offer && (
-                  <li className={CHOICE}>
-                    <Button
-                      className="w-full"
-                      disabled={missionError !== null}
-                      reason={missionError ? t.error[missionError] : null}
-                      onClick={() => dispatch({ type: 'forceCurfew', mission: true, drink })}
-                    >
-                      {t.evening.missionTour(t.district[offer].name, credits(missionFee(game)))}
-                      {drinkLabel}
-                    </Button>
-                    <Hint>
-                      {t.evening.missionTourShort} <Tip label={t.evening.missionTourShort} content={t.evening.missionTourHint(sealedCount(game))} />
-                    </Hint>
-                  </li>
-                )}
-                <li className={CHOICE}>
-                  <ConfirmButton
-                    variant="danger"
-                    className="w-full"
-                    disabled={curfewError !== null}
-                    reason={curfewError ? t.error[curfewError] : null}
-                    onClick={() => dispatch({ type: 'forceCurfew', drink })}
-                    confirm={
-                      lethal
-                        ? { title: t.evening.lethalConfirm, message: t.evening.lethalWarning(t.product[lethal].name), action: t.evening.lethalAction }
-                        : undefined
+              /* Le soir : partir se fait depuis la carte (« Aller de nuit »), ici on dort ou l'on s'informe */
+              <div className="mt-2 flex flex-col gap-1.5">
+                <Hint tone="night">
+                  {t.evening.nightFromMap}{' '}
+                  <Tip
+                    label={t.evening.nightFromMap}
+                    content={
+                      <>
+                        <p>{t.evening.clandestineHint(t.hud.wantedGain(WANTED.perOffense))}</p>
+                        {offer && <p className="mt-1">{t.evening.missionTourHint(sealedCount(game))}</p>}
+                      </>
                     }
-                  >
-                    {t.evening.clandestineTour}
-                    {drinkLabel}
-                  </ConfirmButton>
-                  <Hint>
-                    {t.evening.clandestineShort}{' '}
-                    <Tip label={t.evening.clandestineShort} content={t.evening.clandestineHint(t.hud.wantedGain(WANTED.perOffense))} />
-                  </Hint>
-                  {canInject(game) && <Hint tone="accent">{t.evening.injectionHint(game.progress.injections + 1, ENDINGS.resident.injections)}</Hint>}
-                </li>
-                <li className={CHOICE}>
-                  <Button variant="primary" className="w-full" onClick={() => dispatch({ type: 'sleep' })}>
+                  />
+                </Hint>
+                {curfewError && <Hint tone="warning">{t.error[curfewError]}</Hint>}
+                {canInject(game) && <Hint tone="accent">{t.evening.injectionHint(game.progress.injections + 1, ENDINGS.resident.injections)}</Hint>}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <Button variant="primary" onClick={() => dispatch({ type: 'sleep' })}>
                     <BedDouble size={14} aria-hidden="true" />
                     {sleepLabel}
                   </Button>
-                  <Hint>
-                    {t.evening.sleepShort} <Tip label={sleepLabel} content={sleepsAtRelay(game) ? t.evening.sleepRelayHint : t.evening.bivouacHint} />
-                  </Hint>
-                </li>
-              </ul>
+                  <Tip label={sleepLabel} content={sleepsAtRelay(game) ? t.evening.sleepRelayHint : t.evening.bivouacHint} />
+                </div>
+              </div>
             )}
             {coolants.map((id) => (
               <label key={id} className="mt-2 flex items-center gap-1.5 text-xs text-ink-soft">

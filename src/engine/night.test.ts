@@ -107,6 +107,23 @@ describe('mission de nuit', () => {
   })
 })
 
+describe('tournée de nuit en un geste', () => {
+  it('passe à la nuit et part d’un même coup, en mission vers son district', () => {
+    const delivered = run(evening(), { type: 'nightTrip', to: 'D2' })
+    expect(delivered.districtId).toBe('D2')
+    expect(delivered.phase).toBe('night')
+    expect(delivered.lastCurfewDay).toBe(3)
+    expect(delivered.tripReport?.mission).toBe('delivered')
+  })
+
+  it('ne change rien si le trajet ne peut pas partir : ni nuit, ni épuisement', () => {
+    const dry = evening({ fuel: 0 })
+    expect(errorOf(dry, { type: 'nightTrip', to: 'D3' })).not.toBeNull()
+    const start = evening()
+    expect(errorOf({ ...start, lastCurfewDay: 2 }, { type: 'nightTrip', to: 'D3' })).toBe('exhausted')
+  })
+})
+
 describe('réseau logistique', () => {
   it('ne tire jamais d’aléa routier la nuit', () => {
     expect(drawRoadEvent(gameAt(3, { phase: 'night' }), createRng(LOW_ROLL_RNG))).toBeNull()
