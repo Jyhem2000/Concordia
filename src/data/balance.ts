@@ -16,9 +16,6 @@ export const START_DISTRICT: DistrictId = 'D1'
 /** Cash-Puce de départ (chap. 1) */
 export const START_CASH = 2_000
 
-/** Lucidité (chap. 1) : jours avant la Sédation, malus de Sédation, fourchette de la mémoire brouillée */
-export const SEDATION = { lucidityDays: 4, penalty: 0.1, memoryBlur: 0.2 }
-
 /** Chauffeur à bout (chap. 1) : sous ce seuil de Santé, malus au bluff et à la fuite */
 export const WORN = { healthBelow: 30, penalty: 0.15 }
 

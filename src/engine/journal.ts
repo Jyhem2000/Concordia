@@ -65,7 +65,7 @@ export function recordJournal(before: GameState, after: GameState, action: Actio
 
   // Flux de marchandise : seules les actions d'achat et de vente au marché comptent
   const spent = action.type === 'buy' ? before.cash - after.cash : 0
-  const earned = action.type === 'sell' || action.type === 'sellAll' ? after.cash - before.cash : 0
+  const earned = action.type === 'sell' ? after.cash - before.cash : 0
 
   if (highlights.length === 0 && spent === 0 && earned === 0 && after.day === before.day) return after
   const past = after.journal.slice(0, -1)

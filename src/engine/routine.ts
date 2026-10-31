@@ -20,7 +20,7 @@ import { drawDayOffer } from './delivery.ts'
 import { drawAfter, drawNightOffer, reclaimSealed } from './night.ts'
 import { mountedEffect, recoverDumped } from './equipment.ts'
 import { changeHealth, gainRouteIcc, iccTier } from './gauges.ts'
-import { crewEffect, payCrew, refreshLucidity } from './crew.ts'
+import { crewEffect, payCrew } from './crew.ts'
 import { drawEvents, hasEffect, heatWave } from './events.ts'
 import { drawMarkets } from './market.ts'
 import { drawPatrol } from './risk.ts'
@@ -225,10 +225,6 @@ function morningRoutine(state: GameState, night: Night): GameState {
     s = loseHalfDay(s)
     briefing.lockedIn = true
   }
-
-  // Lucidité : un jour de moins, rendue au maximum en D1 de jour
-  s = { ...s, lucidity: Math.max(0, s.lucidity - 1) }
-  if (night !== 'cell') s = refreshLucidity(s)
 
   return remember(publishBulletin({ ...s, briefing }), s.districtId)
 }

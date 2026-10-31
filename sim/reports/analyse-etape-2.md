@@ -627,3 +627,8 @@ Les deux services restaient négatifs aux retraits. Le bot les jouait mal : pani
 - **Retraits :** Karma-Cham, chirurgie et Cloison fantôme inchangés ; `[MOD-08]` et Vance restent positifs au score.
 - **Fins :** dans le bruit, le Fantôme par la fuite perd 5 points (73 %).
 - **Hasard :** le hasard des graines pèse toujours plus que le choix du plan.
+
+## Lucidité retirée, vente au plein cours, contrat de la Pègre
+**Changements de règle :** la Lucidité et la Sédation quittent les mécaniques (l'eau sans sédatifs de la Cantine reste du lore) ; la Fiche S prend sa place dans le bandeau. La vente se fait par article, une quantité choisie (raccourcis 1, 5, MAX, plein cours jusqu'au rachat restant) et un seul bouton qui annonce le résultat ; plus de vente groupée. Un contrat de la Pègre ne se livre qu'avec des caisses qui ont voyagé.
+
+**Campagnes** (mêmes effectifs) : tout dans le bruit. Novice 79 % de survie (80 % avant). Sans la Sédation, les Casse-cou gagnent un peu (Sans build 143 → 151k, Fuite au sommet 134 → 151k), les autres plans ne bougent pas. Les bots ne dépendaient pas de la Lucidité pour leurs trajets ; Hives reste fréquenté pour Viktor, la Cantine et le Quai 9.

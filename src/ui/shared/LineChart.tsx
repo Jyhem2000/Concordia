@@ -119,18 +119,20 @@ export default function LineChart({ points, from, to, tick, format, reference, r
           />
         ))}
       </svg>
-      {/* Vue tableau pour les lecteurs d'écran */}
-      <table className="sr-only">
-        <caption>{label}</caption>
-        <tbody>
-          {points.map((point) => (
-            <tr key={point.x}>
-              <th scope="row">{point.label}</th>
-              <td>{point.note ?? format(point.y)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {/* Vue tableau pour les lecteurs d'écran ; dans un bloc masqué, car un tableau ignore la largeur nulle de sr-only */}
+      <div className="sr-only">
+        <table>
+          <caption>{label}</caption>
+          <tbody>
+            {points.map((point) => (
+              <tr key={point.x}>
+                <th scope="row">{point.label}</th>
+                <td>{point.note ?? format(point.y)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </figure>
   )
 }

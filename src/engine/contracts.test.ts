@@ -42,6 +42,13 @@ describe('contrats de la Pègre (chap. 3)', () => {
     expect(errorOf(stateWith({ districtId: 'D2', contract, cargo: [lot(2)] }), { type: 'deliverContract' })).toBe('not-enough-cargo')
   })
 
+  it('ne compte que les caisses apportées d’ailleurs, pas celles achetées sur place', () => {
+    const bought = { ...lot(5), travelled: false }
+    expect(errorOf(stateWith({ districtId: 'D2', contract, cargo: [bought] }), { type: 'deliverContract' })).toBe('contract-untravelled')
+    const mixed = run(stateWith({ districtId: 'D2', contract, cargo: [lot(contract.qty), bought] }), { type: 'deliverContract' })
+    expect(mixed.cargo).toEqual([bought])
+  })
+
   it('ajoute une pénalité à la dette quand le délai est passé', () => {
     const late = run(gameAt(contract.deadline, { contract }), { type: 'waitEvening' }, { type: 'sleep' })
     const penalty = Math.round(contract.reward * CONTRACT.failDebtShare)

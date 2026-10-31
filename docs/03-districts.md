@@ -48,10 +48,10 @@ Boucherie clandestine de Viktor Varga et de ses « Bouchers ».
   * **Livraison :** dans le district de destination, de jour comme de nuit, jusqu'au dernier jour du délai inclus, avec assez de caisses du produit en soute. Les caisses partent (les plus anciennes d'abord), la prime arrive en Cash-Puce, sans commission ni saturation.
   * **Échec :** le délai passé, à la routine matinale, Viktor ajoute une pénalité à la dette, une part de la prime. Pas de pardon.
   * *Intention :* un objectif à quelques jours, accessible à tous dès le début, qui fait planifier un achat et un trajet ; la prime ne bouge pas avec le marché, mais il faut traverser la ville avec la marchandise.
+* **Caisses apportées d'ailleurs :** seules les caisses qui ont voyagé depuis leur achat se livrent ; celles achetées dans le district de destination ne comptent pas (Viktor paie un transport, pas un achat sur place).
 
 ### `[LOC-D1-2]` La Cantine des Chauffeurs (« Chez Borg »)
-Bar enfumé réservé aux routiers, où l'on sert l'eau qui garde la Lucidité.
-* **Lucidité :** se trouver en `[D1]` de jour (au réveil ou à l'arrivée) suffit : les routiers passent tous à la Cantine. La Lucidité revient au maximum (chap. 1).
+Bar enfumé réservé aux routiers, où l'on sert l'eau sans sédatifs (lore : le privilège syndical qui garde aux chauffeurs l'esprit clair).
 * **Synthanol au tarif syndical :** en `[D1]`, de jour, le plein se fait à la Cantine, au tarif syndical, moins cher que les pompes (`CANTINE` dans [`locations.ts`](../src/data/locations.ts)) ; la pompe officielle du district ne sert que la nuit, une fois la Cantine fermée.
 
 ### `[LOC-D1-3]` Le Quai 9 (bar clandestin)
@@ -102,7 +102,7 @@ Coûts, durées et effets chiffrés : `MORGUE` dans [`locations.ts`](../src/data
   * valent 0 : suspicion d'ICC, malus de tags, couverture légale et camouflage de `[VEH-02]`, ronde renforcée, Fiche S, pic suspect, malus d'événements visant la BRC.
 * **Menace — Racket des milices** (remplace l'interception de la BRC : ni bluff, ni corruption, ni éjection, ni garde à vue). Le joueur choisit :
   * **Payer le péage :** **une part de la valeur de la soute** (au prix de base ; `RACKET` dans [`balance.ts`](../src/data/balance.ts)), en ₡ **ou** en caisses choisies par les miliciens : d'abord leurs produits favoris, dans l'ordre (`tollFavorites` dans [`districts.ts`](../src/data/districts.ts)), puis les caisses les plus chères, jusqu'à couvrir le péage à la valeur en paiement (chap. 2). La dernière caisse prise peut dépasser le péage : les milices ne rendent pas la monnaie. L'app montre à l'avance les caisses qui seraient prises.
-  * **Forcer :** jet de fuite (chap. 5, mêmes bonus, sacrifices et Sédation). La Fiche S est ignorée : ni malus au jet, ni niveau gagné. Aucune perte d'ICC, dopage `[T2-05]` compris. Succès : passage avec dégâts de châssis et casse comme une fuite. Échec : sanction du refus.
+  * **Forcer :** jet de fuite (chap. 5, mêmes bonus et sacrifices). La Fiche S est ignorée : ni malus au jet, ni niveau gagné. Aucune perte d'ICC, dopage `[T2-05]` compris. Succès : passage avec dégâts de châssis et casse comme une fuite. Échec : sanction du refus.
   * **Refuser :** les miliciens pillent **une part de la soute (arrondie à la caisse supérieure) en commençant par les caisses les plus chères** (`[T4-06]` compris : il finira chez la rébellion), tabassent le joueur (perte de Santé) et cabossent le camion (perte de châssis).
   * **Modificateur :** `[VEH-04]`.
 * **Nuit :** dormir ici = bivouac (chap. 1).

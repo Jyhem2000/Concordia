@@ -5,8 +5,8 @@ import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { planTravel } from '../../engine/actions.ts'
 import { averageCost } from '../../engine/cargo.ts'
-import { crewEffect, isMemoryBlurred } from '../../engine/crew.ts'
-import { blurredQuote, estimatedUnitSale, fuelPriceBreakdown, lastSeen, productStatus } from '../../engine/market.ts'
+import { crewEffect } from '../../engine/crew.ts'
+import { estimatedUnitSale, fuelPriceBreakdown, lastSeen, productStatus } from '../../engine/market.ts'
 import { flyingCheckShare } from '../../engine/interception.ts'
 import { riskBreakdown } from '../../engine/risk.ts'
 import type { DistrictId } from '../../engine/types.ts'
@@ -116,7 +116,6 @@ function DistrictDetails({ districtId, featured = false }: DistrictDetailsProps)
   const day = useGameStore((s) => s.game.day)
   const cargo = useGameStore((s) => s.game.cargo)
   const memory = useGameStore((s) => lastSeen(s.game, districtId))
-  const blurred = useGameStore((s) => isMemoryBlurred(s.game, districtId))
   const events = useGameStore((s) => s.game.events)
   const phase = useGameStore((s) => s.game.phase)
   const { t, credits } = useI18n()
@@ -175,9 +174,7 @@ function DistrictDetails({ districtId, featured = false }: DistrictDetailsProps)
                 </span>
                 <span className="flex shrink-0 items-center gap-1.5">
                   <TrendBadge districtId={districtId} productId={id} />
-                  {memory && blurred ? (
-                    t.travel.blurred(credits(blurredQuote(memory.quotes[id]).low), credits(blurredQuote(memory.quotes[id]).high))
-                  ) : memory ? (
+                  {memory ? (
                     <>
                       <Margin revenue={estimatedUnitSale(memory.quotes[id])} cost={averageCost(cargo, id) ?? 0} showAmount={false} />
                       {credits(memory.quotes[id])}

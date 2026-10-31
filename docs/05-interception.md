@@ -62,7 +62,6 @@ Le joueur accepte la fouille (**0**) ou tente une action : **1** Bluff, **2** Co
 **Double fond** (chap. 4) : à chaque fouille effective qui confisque, un second jet décide si les agents le trouvent (chance selon les étoiles du district, réduite par `[MOD-10]`). Non trouvé, ses caisses sont gardées et la sanction se juge sur la soute visible ; trouvé, tout est confisqué, avec une perte d'ICC en plus. L'écran annonce les caisses cachées et la chance qu'il soit trouvé ici.
 
 **Protection du parrain** (chap. 3) : dans le district du Velvet-Silo, les caisses d'une commande VIP en cours (au plus le nombre commandé, échéance non passée) sont hors de vue des agents. Elles ne comptent pas dans le risque du trajet, et au barrage elles sont mises de côté : ni fouille, ni saisie, ni amende, ni éjection ; elles reviennent à bord à la fin du contrôle. L'écran les annonce.
-**Sédation** (chap. 1) : malus au bluff, à la corruption et à la fuite (`SEDATION` dans [`balance.ts`](../src/data/balance.ts)).
 **Chauffeur à bout** (chap. 1) : sous un seuil de Santé, malus au bluff et à la fuite (`WORN` dans [`balance.ts`](../src/data/balance.ts)).
 
 ### 0. Accepter la fouille (sanction de base)
@@ -83,7 +82,7 @@ Chance = min( plafond,  base
                    + min(plafond, bonus × caisses masquées)
                    − malus × (étoiles du district − 1)
                    − malus d'odeur ([TAG-ODOROUS], annulé par [T2-01] en soute)
-                   − Sédation − chauffeur à bout
+                   − chauffeur à bout
                    + bonus ([MOD-08], [T0-04] en soute) )
 ```
 * La chance n'a pas de plancher : une soute très odorante dans un district bien gardé peut la ramener à 0 %.
@@ -98,7 +97,7 @@ Chance = min( plafond,  base
 Jamais automatique : un jet, amélioré par la valeur de l'offre et par le build.
 Valeurs : `BRIBE` dans [`balance.ts`](../src/data/balance.ts).
 ```
-Chance = min( plafond,  base + Offre + Connivence − malus × (étoiles du district − 1) − Sédation + bonus ([CREW-01]) )
+Chance = min( plafond,  base + Offre + Connivence − malus × (étoiles du district − 1) + bonus ([CREW-01]) )
 ```
 * **Tarif standard :** le plus élevé entre **une part fixe par étoile du district** et **une part de la valeur des caisses illégales en soute** (au prix de base). L'agent évalue ce qu'il laisse passer. Réduit par `[MOD-08]`.
 * **Offre** — Cash-Puce et caisses de **Luxe** (`[TAG-LUXURY]`, chap. 2), au choix et cumulables : un agent ne prend en nature que ce qu'il peut garder pour lui (cigares, whisky…), jamais le reste de la soute. Les caisses comptent à leur valeur en paiement (paiement en nature, chap. 2). Sa valeur totale est comparée au tarif standard. Elle est perdue même en cas d'échec (les caisses offertes ne sont pas confisquées une seconde fois, elles sont déjà parties). **En dessous d'une fraction du tarif, l'agent refuse.** Le Cash-Puce proposé démarre au tarif standard, sans jamais dépasser ce que le joueur a.
@@ -112,7 +111,7 @@ Chance = min( plafond,  base + Offre + Connivence − malus × (étoiles du dist
 ### 3. Fuite — *« Pied au plancher ! »*
 * **Barrage fixe uniquement** (impossible en contrôle volant).
 * **Chance de base** et **plafond** dégressif selon les étoiles du district : `FLEE` dans [`balance.ts`](../src/data/balance.ts).
-* **Bonus :** `[MOD-06]`, `[CREW-02]`, `[VEH-03]` (en `[D3]` et `[D5]`). **Malus :** Fiche S, Sédation, chauffeur à bout.
+* **Bonus :** `[MOD-06]`, `[CREW-02]`, `[VEH-03]` (en `[D3]` et `[D5]`). **Malus :** Fiche S, chauffeur à bout.
 * **Sacrifices :** 1 largage offensif max (une caisse `[TAG-FLAMMABLE]`, huile ou alcool fort) + dopage `[T2-05]` (cumulable). Les caisses sacrifiées ou bues sont perdues quel que soit le résultat. Le joueur choisit le produit à sacrifier ; l'app montre le bonus de chacun.
 * **Succès :** cargaison sauvée, **+1 niveau de Fiche S**, mais perte de châssis (tirage uniforme entier dans une fourchette ; `[MOD-06]`, `[VEH-03]`), casse `[TAG-FRAGILE]`, et perte d'ICC (caméras de trafic ; `[VEH-03]`, `[MOD-05]`).
 * **Échec :** explosions `[TAG-FLAMMABLE]` d'abord, puis confiscation + amende sur la valeur saisie + perte d'ICC ; perte de châssis et de Santé (`[MOD-06]`), mortelle si la Santé tombe à 0 ; garde à vue.

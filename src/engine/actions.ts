@@ -38,7 +38,6 @@ import { sleep } from './routine.ts'
 import { remember } from './state.ts'
 import type {
   CargoLot,
-  CrateCount,
   CrewId,
   DistrictId,
   ForgeryCard,
@@ -63,7 +62,6 @@ export type Action =
   | { type: 'buy'; productId: ProductId; qty: number }
   | { type: 'sell'; productId: ProductId; qty: number }
   /** Vente groupée : tout ce qui se vend, ou seulement les produits vendus avec une marge (`profitableOnly`) */
-  | { type: 'sellAll'; profitableOnly: boolean }
   | { type: 'refuel'; qty: number }
   | { type: 'travel'; to: DistrictId }
   /** Livraison officielle du jour, à accepter avant le trajet de jour */
@@ -136,6 +134,7 @@ export type ActionError =
   | 'not-enough-offshore'
   | 'not-enough-venture'
   | 'not-contract-district'
+  | 'contract-untravelled'
   | 'intercepted'
   | 'not-intercepted'
   | 'move-unavailable'
@@ -206,24 +205,11 @@ function buy(state: GameState, productId: ProductId, qty: number): ActionResult 
   }
 }
 
-/**
- * Ventes groupées (chap. 7) : chaque produit en soute vendu en entier, caisses scellées exclues ; avec `profitableOnly`,
- * seulement ceux dont la vente entière rapporte plus que leur prix d'achat (saturation comprise)
- */
-export function bulkSales(state: GameState, profitableOnly: boolean): CrateCount[] {
-  const owned = [...new Set(state.cargo.map((lot) => lot.productId))].filter((id) => !PRODUCTS[id].sealed)
-  return owned.flatMap((productId) => {
-    const qty = ownedQty(state.cargo, productId)
-    if (!profitableOnly) return [{ productId, qty }]
-    const sale = saleQuote(state, productId, qty)
-    return sale.total > sale.cost ? [{ productId, qty }] : []
-  })
-}
-
-function sellAll(state: GameState, profitableOnly: boolean): ActionResult {
-  const sales = bulkSales(state, profitableOnly)
-  if (sales.length === 0) return fail('nothing-to-sell')
-  return sales.reduce<ActionResult>((result, { productId, qty }) => (result.ok ? sell(result.state, productId, qty) : result), { ok: true, state })
+/** Caisses d'un produit qui se vendent ici au plein cours : la soute, dans la limite du rachat restant (chap. 2) */
+export function fullRateQty(state: GameState, productId: ProductId): number {
+  const owned = ownedQty(state.cargo, productId)
+  const demandLeft = state.markets[state.districtId].demand[productId]
+  return demandLeft === undefined ? owned : Math.min(owned, demandLeft)
 }
 
 function sell(state: GameState, productId: ProductId, qty: number): ActionResult {
@@ -602,8 +588,6 @@ function resolveAction(state: GameState, action: Action): ActionResult {
       return isQuantity(action.qty) ? buy(state, action.productId, action.qty) : fail('invalid-quantity')
     case 'sell':
       return isQuantity(action.qty) ? sell(state, action.productId, action.qty) : fail('invalid-quantity')
-    case 'sellAll':
-      return sellAll(state, action.profitableOnly)
     case 'refuel':
       return isQuantity(action.qty) ? refuel(state, action.qty) : fail('invalid-quantity')
     case 'travel':

@@ -8,10 +8,11 @@ import { compartmentRoom } from '../../engine/compartment.ts'
 import { daysBeforeRot } from '../../engine/condition.ts'
 import { maxBuy, planTravel } from '../../engine/actions.ts'
 import { exposure } from '../../engine/interception.ts'
-import { crewEffect, isMemoryBlurred, workingCrew } from '../../engine/crew.ts'
+import { crewEffect, workingCrew } from '../../engine/crew.ts'
+import { nextProtectionDay, protectionBreakdown } from '../../engine/finance.ts'
 import { isWorn } from '../../engine/gauges.ts'
 import { deliveryCrates, deliveryFee, deliveryOffer } from '../../engine/delivery.ts'
-import { bestRemembered, blurredQuote, estimatedUnitSale, productStatus, quote, shopProducts } from '../../engine/market.ts'
+import { bestRemembered, estimatedUnitSale, productStatus, quote, shopProducts } from '../../engine/market.ts'
 import { missionFee, missionOffer, sealedCount } from '../../engine/night.ts'
 import type { ProductId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
@@ -23,7 +24,7 @@ import Hint from '../shared/Hint.tsx'
 import Margin from '../shared/Margin.tsx'
 import Panel from '../shared/Panel.tsx'
 import Tip from '../shared/Tip.tsx'
-import { TONE_TEXT, type Tone } from '../shared/styles.ts'
+import { TIER_STYLES, TONE_TEXT, type Tone } from '../shared/styles.ts'
 import EventsList from './EventsList.tsx'
 import CalendarPanel from './CalendarPanel.tsx'
 import JournalPanel from './JournalPanel.tsx'
@@ -145,7 +146,8 @@ function TodayPanel() {
 function AlertsPanel() {
   // Fraîcheur, saisie, double fond et trajets se calculent sur l'état entier
   const game = useGameStore((s) => s.game)
-  const { t, percent } = useI18n()
+  const { t, percent, credits } = useI18n()
+  const protectionDay = nextProtectionDay(game)
   const products = [...new Set(game.cargo.map((lot) => lot.productId))]
   const rotting = products.flatMap((id) => {
     const qty = game.cargo.reduce((total, lot) => (lot.productId === id && (daysBeforeRot(game, lot) ?? Infinity) <= 1 ? total + lot.qty : total), 0)
@@ -195,6 +197,9 @@ function AlertsPanel() {
         ]
       : []),
     ...fuelLine,
+    // Collecte de Viktor demain matin : arriver léger, ou blanchir avant (chap. 1)
+    ...(protectionDay === game.day + 1 ? [line('protection', t.fil.protectionTomorrow(credits(protectionBreakdown(game).total)), 'warning')] : []),
+    ...(game.crew.active && game.crew.paidDay !== game.day ? [line('crew', t.fil.crewUnpaid(t.crew[game.crew.active].name), 'danger')] : []),
     ...beacons,
     ...rotting.map((text): Line => ({ key: text, text, tone: 'danger' })),
     ...damaged.map((text): Line => ({ key: text, text, tone: 'warning' })),
@@ -231,8 +236,7 @@ function DealsPanel() {
     .filter((id) => !PRODUCTS[id].sealed)
     .map((productId): Deal => {
       const best = bestRemembered(game, productId)
-      // Sédation : cours brouillé, pas de marge à annoncer
-      const revenue = best && !isMemoryBlurred(game, best.districtId) ? estimatedUnitSale(best.quote) : null
+      const revenue = best ? estimatedUnitSale(best.quote) : null
       return { productId, best, revenue, cost: averageCost(game.cargo, productId) }
     })
     .sort(byMargin)
@@ -241,7 +245,7 @@ function DealsPanel() {
     .flatMap((productId): ShopDeal[] => {
       const best = bestRemembered(game, productId)
       const qty = maxBuy(game, productId)
-      if (!best || qty === 0 || isMemoryBlurred(game, best.districtId)) return []
+      if (!best || qty === 0) return []
       const revenue = estimatedUnitSale(best.quote)
       const cost = quote(game, game.districtId, productId)
       return revenue > cost ? [{ productId, best, revenue, cost, qty }] : []
@@ -287,25 +291,29 @@ function DealRow({ deal: { productId, best, revenue, cost }, qty, here = false }
   // Profil public des districts (Forte demande) : état entier
   const game = useGameStore((s) => s.game)
   const { t, credits } = useI18n()
-  const sale = best
-    ? t.fil.best(
-        revenue === null ? t.travel.blurred(credits(blurredQuote(best.quote).low), credits(blurredQuote(best.quote).high)) : credits(best.quote),
-        t.district[best.districtId].name,
-        best.age,
-      )
-    : null
   // Jamais vu ailleurs : la Forte demande, publique, dit au moins où chercher
   const strong = DISTRICT_IDS.filter((id) => productStatus(game, id, productId) === 'strong').map((id) => t.district[id].name)
-  const where = sale ?? (strong.length > 0 ? t.fil.strongAt(strong.join(', ')) : t.fil.neverSeen)
+  const tier = PRODUCTS[productId].tier
 
   return (
     <li className="flex items-center justify-between gap-2 text-xs">
       <div className="min-w-0">
         <p className="font-bold text-ink">
+          <span className={`mr-1.5 ${TIER_STYLES[tier].text}`}>T{tier}</span>
           {t.product[productId].name}
-          {qty !== undefined && <span className="ml-1 font-normal text-ink-muted">{here ? t.fil.canBuy(qty) : t.fil.held(qty)}</span>}
         </p>
-        <p className="text-ink-muted">{where}</p>
+        {qty !== undefined && <p className="text-ink-muted">{here ? t.fil.canBuy(qty) : t.fil.held(qty)}</p>}
+        <p className="text-ink-muted">
+          {best ? (
+            <>
+              <span className="font-bold text-ink-soft">{t.district[best.districtId].name}</span> {t.fil.bestQuote(credits(best.quote), best.age)}
+            </>
+          ) : strong.length > 0 ? (
+            t.fil.strongAt(strong.join(', '))
+          ) : (
+            t.fil.neverSeen
+          )}
+        </p>
       </div>
       {revenue !== null && cost !== null && <Margin revenue={revenue} cost={cost} unit={t.market.marginUnit} className="shrink-0" />}
     </li>

@@ -26,7 +26,6 @@ export function violations(state: GameState): string[] {
     [state.modules.mounted.every((id) => state.modules.owned.includes(id)), 'module monté non possédé'],
     [!(state.interception && state.roadEvent), 'barrage et aléa routier en même temps'],
     [state.day >= 1 && state.day <= 30, `jour hors bornes : ${state.day}`],
-    [state.lucidity >= 0, 'Lucidité négative'],
   ]
   return checks.flatMap(([ok, message]) => (ok ? [] : [message]))
 }

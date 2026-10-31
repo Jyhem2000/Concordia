@@ -47,8 +47,6 @@ function candidates(state: GameState): Action[] {
     { type: 'refuel', qty: 1 },
     { type: 'sleep' },
     { type: 'acceptDelivery' },
-    { type: 'sellAll', profitableOnly: true },
-    { type: 'sellAll', profitableOnly: false },
     { type: 'forceCurfew' },
     { type: 'forceCurfew', mission: true },
     ...owned.map((drink): Action => ({ type: 'forceCurfew', drink })),

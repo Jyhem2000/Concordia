@@ -10,8 +10,6 @@ export type AgendaItem =
   | { kind: 'debt'; day: number }
   | { kind: 'debtLate'; day: number }
   | { kind: 'protection'; day: number }
-  | { kind: 'sedation'; day: number }
-  | { kind: 'sedated'; day: number }
   | { kind: 'lottery'; day: number }
   | { kind: 'vice'; day: number; productId: ProductId; districtId: DistrictId }
   | { kind: 'prophecy'; day: number; event: GlobalEventId }
@@ -35,7 +33,6 @@ export function agenda(state: GameState): AgendaItem[] {
   if (debt !== null) items.push({ kind: 'debt', day: debt })
   if (state.debtLate) items.push({ kind: 'debtLate', day })
   if (state.initialDebtPaid) for (const d of PROTECTION.days) if (d > day) items.push({ kind: 'protection', day: d })
-  items.push(state.lucidity === 0 ? { kind: 'sedated', day } : { kind: 'sedation', day: day + state.lucidity })
   for (const d of LOTTERY.days) if (d > day) items.push({ kind: 'lottery', day: d })
   if (vice?.vice && vice.viceDistrict && day <= vice.viceUntil)
     items.push({ kind: 'vice', day: vice.viceUntil, productId: vice.vice, districtId: vice.viceDistrict })

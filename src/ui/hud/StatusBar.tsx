@@ -1,21 +1,12 @@
-import { Crosshair, Droplet, HandCoins, Hourglass, Info, Moon, Sun, UserRound, type LucideIcon } from 'lucide-react'
+import { Crosshair, Hourglass, Info, Moon, Sun } from 'lucide-react'
 import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
-import {
-  AUDIT_COUNTDOWN_DAY,
-  DEBT_LATE,
-  GAME_LENGTH_DAYS,
-  HEALTH_MAX,
-  ICC_DAILY_ROUTE_GAIN_CAP,
-  ICC_MAX,
-  SEDATION,
-  WANTED,
-  WORN,
-} from '../../data/balance.ts'
-import { cantineDistrict, crewEffect } from '../../engine/crew.ts'
-import { effectiveOffshoreRate, nextDebtDeadline, nextProtectionDay, offshoreBalance, protectionBreakdown } from '../../engine/finance.ts'
+import { AUDIT_COUNTDOWN_DAY, DEBT_LATE, GAME_LENGTH_DAYS, HEALTH_MAX, ICC_DAILY_ROUTE_GAIN_CAP, ICC_MAX, WANTED, WORN } from '../../data/balance.ts'
+import { crewEffect } from '../../engine/crew.ts'
+import { effectiveOffshoreRate, nextDebtDeadline, offshoreBalance } from '../../engine/finance.ts'
 import { checkForceCurfew } from '../../engine/actions.ts'
 import { iccRouteGainLeft, iccTier, isWorn } from '../../engine/gauges.ts'
+import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import { APPEAR } from '../shared/motion.ts'
@@ -43,21 +34,10 @@ type CellInfoProps = {
   text: string
 }
 
-type StatProps = {
-  icon: LucideIcon
-  label: string
-  value?: string
-  /** Précision entre parenthèses (taux, alerte…) */
-  note?: string
-  tone?: Tone
-  /** Explication de la règle, en infobulle */
-  info?: string
-}
-
 /** Santé en orange sous cette part du maximum (repère visuel seulement) ; en rouge, chauffeur à bout (règle du chap. 1) */
 const MEDIUM_HEALTH = 0.5
 
-/** Bandeau supérieur permanent : huit cases (jour, lieu, Lucidité, ICC, argent, dette, Santé), puis Fiche S, équipier, collecte (chap. 7) */
+/** Bandeau supérieur permanent : huit cases (jour, lieu, Fiche S, ICC, argent, dette, Santé) (chap. 7) */
 export default function StatusBar() {
   // Les échéances et la collecte se calculent sur l'état entier de la partie
   const game = useGameStore((s) => s.game)
@@ -68,7 +48,6 @@ export default function StatusBar() {
   const offshoreRate = effectiveOffshoreRate(crewEffect(game, 'offshoreBonus') ?? 0)
   const tier = iccTier(game.icc)
   const deadline = nextDebtDeadline(game)
-  const protectionDay = nextProtectionDay(game)
   // Moment de la journée : Journée, 20h00 (journée finie avant l'heure), Nuit (chap. 1)
   const moment = game.phase === 'night' ? 'night' : game.dayOver ? 'curfew' : 'day'
   const tripDone = game.phase === 'day' ? game.dayTripDone : game.nightTripDone
@@ -78,8 +57,11 @@ export default function StatusBar() {
   const exhausted = checkForceCurfew(game) === 'exhausted'
   const worn = isWorn(game)
   const debtStatus = game.debtLate ? t.hud.debtLate : deadline === null ? undefined : t.hud.debtDue(t.hud.daysLeft(deadline - game.day))
-  const sedation = game.lucidity === 0 ? t.hud.sedated : game.lucidity === 1 ? t.hud.sedationTomorrow : undefined
   const PhaseIcon = game.phase === 'day' ? Sun : Moon
+  // Districts sans relais routier : on y bivouaque, et la Fiche S ne baisse pas
+  const bivouacDistricts = DISTRICT_IDS.filter((id) => !DISTRICTS[id].relay)
+    .map((id) => t.district[id].name)
+    .join(', ')
 
   return (
     <header className="z-20 border-b border-line bg-base/95 backdrop-blur md:sticky md:top-0">
@@ -110,22 +92,26 @@ export default function StatusBar() {
           >
             {t.district[game.districtId].name}
           </Cell>
-          {/* Lucidité : jours avant la Sédation (chap. 1) */}
+          {/* Fiche S : le niveau de recherche d'Aeterna (chap. 5), en violet dès qu'il existe */}
           <Cell
-            label={t.hud.lucidity}
-            tone={game.lucidity <= 1 ? 'danger' : 'info'}
-            valueKey={game.lucidity}
-            alert={sedation ? 'danger' : undefined}
+            label={t.hud.wantedLabel}
+            tone="wanted"
+            valueKey={game.wanted}
+            alert={game.wanted > 0 ? 'wanted' : undefined}
             info={
               <CellInfo
-                status={sedation ? [sedation] : undefined}
-                statusTone="danger"
-                text={t.hud.lucidityInfo(SEDATION.lucidityDays, t.district[cantineDistrict()].name, percent(SEDATION.penalty, 0))}
+                status={
+                  game.wanted > 0
+                    ? [t.hud.wantedNow(percent(WANTED.riskPerLevel * game.wanted, 0), percent(WANTED.fleePenaltyPerLevel * game.wanted, 0))]
+                    : undefined
+                }
+                statusTone="wanted"
+                text={t.hud.wantedInfo(percent(WANTED.riskPerLevel, 0), percent(WANTED.fleePenaltyPerLevel, 0), bivouacDistricts)}
               />
             }
           >
-            <Droplet size={14} aria-hidden="true" />
-            {t.hud.lucidityDays(game.lucidity)}
+            <Crosshair size={14} aria-hidden="true" />
+            {t.hud.wantedValue(game.wanted, WANTED.maxLevel)}
           </Cell>
           <Cell
             label={t.gauge.icc}
@@ -196,28 +182,6 @@ export default function StatusBar() {
             {t.hud.healthValue(number(game.health, 0))}
           </Cell>
         </div>
-
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs empty:hidden">
-          {game.wanted > 0 && (
-            <Stat
-              icon={Crosshair}
-              label={t.hud.wanted(game.wanted, WANTED.maxLevel)}
-              tone="danger"
-              info={t.hud.wantedInfo(percent(WANTED.riskPerLevel, 0), percent(WANTED.fleePenaltyPerLevel, 0))}
-            />
-          )}
-          {game.crew.active && (
-            <Stat
-              icon={UserRound}
-              label={t.hud.crew(t.crew[game.crew.active].name)}
-              note={game.crew.paidDay === game.day ? undefined : t.hud.crewUnpaid}
-              tone={game.crew.paidDay === game.day ? 'neutral' : 'danger'}
-            />
-          )}
-          {protectionDay !== null && (
-            <Stat icon={HandCoins} label={t.hud.nextProtection(protectionDay, credits(protectionBreakdown(game).total))} tone="warning" />
-          )}
-        </div>
       </div>
       {game.day >= AUDIT_COUNTDOWN_DAY && (
         <p className="flex items-center justify-center gap-1.5 border-t border-accent/40 bg-accent/10 px-4 py-1 text-center text-xs text-accent">
@@ -274,17 +238,5 @@ function CellInfo({ status, statusTone = 'neutral', text }: CellInfoProps) {
       ))}
       <p className={status && status.length > 0 ? 'mt-1' : ''}>{text}</p>
     </div>
-  )
-}
-
-function Stat({ icon: Icon, label, value, note, tone = 'neutral', info }: StatProps) {
-  return (
-    <span className={`flex items-center gap-1 ${TONE_TEXT[tone]}`}>
-      <Icon size={12} aria-hidden="true" />
-      <span className="text-ink-muted">{label}</span>
-      {value && <span className="font-bold">{value}</span>}
-      {note && <span className="opacity-75">({note})</span>}
-      {info && <Tip label={label} content={info} />}
-    </span>
   )
 }

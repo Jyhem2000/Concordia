@@ -15,7 +15,7 @@ import Chip from '../shared/Chip.tsx'
 import Gauge from '../shared/Gauge.tsx'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
-import { TIER_STYLES } from '../shared/styles.ts'
+import { SEALED_STYLE, TIER_STYLES } from '../shared/styles.ts'
 import { garageDistrict } from '../places/placesHere.ts'
 import CompartmentNotice from './CompartmentNotice.tsx'
 import Thumb from '../shared/Thumb.tsx'
@@ -35,6 +35,12 @@ type SlotRowProps = {
   /** Rangée du double fond : encadrée en pointillés */
   compartment?: boolean
 }
+
+/** Taille d'un emplacement : assez gros pour le pouce sur téléphone, discret sur grand écran */
+const SLOT_SIZE = 'h-7 w-7 md:h-4 md:w-4'
+
+/** Couleurs d'une caisse : celles de son tier, ou le gris des caisses scellées du DSC */
+const crateStyle = (productId: ProductId) => (PRODUCTS[productId].sealed ? SEALED_STYLE : TIER_STYLES[PRODUCTS[productId].tier])
 
 /** Tags qui pèsent sur le risque de contrôle : ceux du profil de la cargaison (chap. 5) */
 const RISK_TAGS = keysOf(TAGS).filter(
@@ -165,18 +171,19 @@ function SlotRow({ label, slots, compartment = false }: SlotRowProps) {
             className="flex"
           >
             {slot === null ? (
-              <span className="h-4 w-4 rounded-sm border border-line-strong" />
+              <span className={`${SLOT_SIZE} rounded-sm border border-line-strong`} />
             ) : (
               <Tip
                 content={slot.hidden ? t.hold.hiddenSlot(t.product[slot.productId].name) : t.product[slot.productId].name}
                 label={slot.hidden ? t.hold.hiddenSlot(t.product[slot.productId].name) : t.product[slot.productId].name}
                 onClick={slot.hidden ? () => dispatch({ type: 'compartment', productId: slot.productId, hide: false }) : undefined}
-                className={`h-4 w-4 rounded-sm ${
-                  slot.hidden
-                    ? `cursor-pointer border border-dashed ${TIER_STYLES[PRODUCTS[slot.productId].tier].hiddenSlot}`
-                    : TIER_STYLES[PRODUCTS[slot.productId].tier].slot
+                className={`${SLOT_SIZE} rounded-sm ${
+                  slot.hidden ? `cursor-pointer border border-dashed ${crateStyle(slot.productId).hiddenSlot}` : crateStyle(slot.productId).slot
                 }`}
-              />
+              >
+                {/* Le déclencheur est la case elle-même : pas d'icône « i » */}
+                <span aria-hidden="true" />
+              </Tip>
             )}
           </motion.li>
         ))}
@@ -198,11 +205,11 @@ function HoldRow({ productId }: HoldRowProps) {
   const hideError = checkCompartment(game, productId, true)
 
   return (
-    <li className={`flex items-start gap-2 rounded-md border border-l-4 border-line bg-raised/60 px-3 py-2 ${TIER_STYLES[product.tier].stripe}`}>
-      <Thumb id={productId} tier={product.tier} />
+    <li className={`flex items-start gap-2 rounded-md border border-l-4 border-line bg-raised/60 px-3 py-2 ${crateStyle(productId).stripe}`}>
+      <Thumb id={productId} tier={product.sealed ? undefined : product.tier} />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className={`text-xs font-bold ${TIER_STYLES[product.tier].text}`}>T{product.tier}</span>
+          <span className={`text-xs font-bold ${crateStyle(productId).text}`}>T{product.tier}</span>
           <span className="font-bold">{t.product[productId].name}</span>
           <span className="ml-auto font-bold">×{qty}</span>
         </div>

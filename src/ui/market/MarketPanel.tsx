@@ -3,7 +3,7 @@ import { ArrowUpDown, Filter, RotateCcw } from 'lucide-react'
 import { useState, type MouseEvent, type ReactNode } from 'react'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
-import { bulkSales, checkUseProduct, maxBuy } from '../../engine/actions.ts'
+import { checkUseProduct, fullRateQty, maxBuy } from '../../engine/actions.ts'
 import { ownedQty } from '../../engine/cargo.ts'
 import { demandQuota, demandRefill, productStatus, quote, quoteBreakdown, saleQuote, shopProducts } from '../../engine/market.ts'
 import { keysOf } from '../../engine/records.ts'
@@ -13,7 +13,6 @@ import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import Detailed from '../shared/Detailed.tsx'
 import Chip from '../shared/Chip.tsx'
-import ConfirmButton from '../shared/ConfirmButton.tsx'
 import Hint from '../shared/Hint.tsx'
 import Margin from '../shared/Margin.tsx'
 import Panel from '../shared/Panel.tsx'
@@ -45,12 +44,13 @@ type FieldProps = {
   children: ReactNode
 }
 
-type QuantityButtonsProps = {
-  label: string
+type TradeControlProps = {
+  productId: ProductId
+  kind: 'buy' | 'sell'
+  /** Caisses au plus : achetables (stock, place, cash) ou en soute */
   max: number
-  maxLabel: string
-  onPick: (qty: number) => void
-  variant: 'primary' | 'danger'
+  /** Raccourci de plus après MAX : la vente au plein cours */
+  fullRate?: number
 }
 
 /** Tableau des cours : la boutique du jour, plus tous les produits en soute (chap. 7) */
@@ -108,7 +108,6 @@ export default function MarketPanel() {
           <ContractCard kind="active" />
         </div>
       )}
-      <BulkSales />
       <FilterBar tiers={tiers} tags={tags} current={filter} onPick={setPicked} sort={sort} onSort={setSort} />
       {shown.length === 0 && <Hint className="px-3 pt-2">{t.market.noMatch}</Hint>}
       <ul className="space-y-2 p-2">
@@ -178,42 +177,6 @@ function FilterBar({ tiers, tags, current, onPick, sort, onSort }: FilterBarProp
   )
 }
 
-/** Ventes groupées : tout vendre, ou seulement ce qui marge, avec le produit annoncé (chap. 7) */
-function BulkSales() {
-  // Les ventes se calculent sur l'état entier de la partie (lots, demande, fraîcheur)
-  const game = useGameStore((s) => s.game)
-  const dispatch = useGameStore((s) => s.dispatch)
-  const { t, credits, signedCredits } = useI18n()
-  const revenue = (profitableOnly: boolean) =>
-    bulkSales(game, profitableOnly).reduce((total, { productId, qty }) => total + saleQuote(game, productId, qty).total, 0)
-  const all = bulkSales(game, false)
-  if (all.length === 0) return null
-  const profitable = bulkSales(game, true)
-  // Produits que « Vendre tout » céderait à perte, saturation et état des caisses compris
-  const losses = all.flatMap(({ productId, qty }) => {
-    const sale = saleQuote(game, productId, qty)
-    return sale.total < sale.cost ? [t.market.sellAllLoss(t.product[productId].name, signedCredits(sale.total - sale.cost))] : []
-  })
-  return (
-    <div className="flex flex-wrap gap-2 px-3 pt-3">
-      <Button variant="primary" disabled={profitable.length === 0} onClick={() => dispatch({ type: 'sellAll', profitableOnly: true })}>
-        {t.market.sellProfitable(credits(revenue(true)))}
-      </Button>
-      <ConfirmButton
-        variant="danger"
-        onClick={() => dispatch({ type: 'sellAll', profitableOnly: false })}
-        confirm={
-          losses.length > 0
-            ? { title: t.market.sellAllConfirm, message: t.market.sellAllLosses(losses.join(', ')), action: t.market.sellAllAction }
-            : undefined
-        }
-      >
-        {t.market.sellAll(credits(revenue(false)))}
-      </ConfirmButton>
-    </div>
-  )
-}
-
 /**
  * Ligne d'un produit : tout le cartouche ouvre sa fiche (sauf ses boutons). En haut, image, tier, nom, Forte demande et
  * tags ; dessous, cours (et tendance), stock, rachat et, en soute, quantité, vente et marge ; en bas, une barre fixe :
@@ -239,6 +202,7 @@ function MarketRow({ productId }: MarketRowProps) {
   const trend = yesterday ? today / yesterday - 1 : null
   const demandLeft = game.markets[district].demand[productId]
   const buyMax = maxBuy(game, productId)
+  const fullRate = fullRateQty(game, productId)
   const sale = owned > 0 ? saleQuote(game, productId, 1) : null
   const saleAll = owned > 0 ? saleQuote(game, productId, owned) : null
 
@@ -247,8 +211,6 @@ function MarketRow({ productId }: MarketRowProps) {
   const iccRestore = PRODUCTS[productId].iccRestore
   const useError = useGameStore((s) => checkUseProduct(s.game, productId))
 
-  const buy = (qty: number) => dispatch({ type: 'buy', productId, qty })
-  const sell = (qty: number) => dispatch({ type: 'sell', productId, qty })
   // Un clic sur le cartouche ouvre la fiche, sauf sur ses commandes (boutons, infobulles) et dans la fiche elle-même
   const openSheet = (event: MouseEvent<HTMLLIElement>) => {
     if (event.target instanceof Element && event.target.closest('button, select, input, dialog')) return
@@ -315,9 +277,7 @@ function MarketRow({ productId }: MarketRowProps) {
 
       {/* Barre d'achat et de vente, toujours à la même place : acheter à gauche, vendre à droite */}
       <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-1.5">
-        <div>
-          {stock !== undefined && <QuantityButtons label={t.market.buy} max={buyMax} onPick={buy} maxLabel={t.market.max} variant="primary" />}
-        </div>
+        <div>{stock !== undefined && <TradeControl productId={productId} kind="buy" max={buyMax} />}</div>
         <div className="flex flex-wrap items-center gap-1.5">
           {owned > 0 && iccRestore !== undefined && (
             <Button
@@ -329,7 +289,7 @@ function MarketRow({ productId }: MarketRowProps) {
               {t.market.use}
             </Button>
           )}
-          {owned > 0 && <QuantityButtons label={t.market.sell} max={owned} onPick={sell} maxLabel={t.market.max} variant="danger" />}
+          {owned > 0 && <TradeControl productId={productId} kind="sell" max={owned} fullRate={fullRate} />}
         </div>
       </div>
       <ProductSheet productId={productId} open={open} onClose={() => setOpen(false)} />
@@ -346,20 +306,64 @@ function Field({ label, children }: FieldProps) {
   )
 }
 
-/** Curseurs d'achat / vente : +1, +5, MAX (chap. 7) */
-function QuantityButtons({ label, max, maxLabel, onPick, variant }: QuantityButtonsProps) {
+/**
+ * Achat ou vente d'un produit (chap. 7) : une quantité (−/+, raccourcis 1, 5, MAX et plein cours qui la remplissent),
+ * puis un seul bouton qui annonce le résultat exact de cette quantité : coût de l'achat, ou produit et marge de la vente
+ */
+function TradeControl({ productId, kind, max, fullRate }: TradeControlProps) {
+  const game = useGameStore((s) => s.game)
+  const dispatch = useGameStore((s) => s.dispatch)
+  const { t, credits, signedCredits } = useI18n()
+  // Quantité choisie : état d'interface éphémère, ramenée au maximum du moment
+  const [picked, setPicked] = useState(1)
+  const qty = Math.max(0, Math.min(picked, max))
+  const variant = kind === 'buy' ? 'primary' : 'danger'
+  const presets = [
+    { label: '1', qty: 1 },
+    { label: '5', qty: 5 },
+    { label: t.market.max, qty: max },
+    ...(kind === 'sell' && fullRate !== undefined && fullRate > 0 && fullRate < max ? [{ label: t.market.fullRateShort, qty: fullRate }] : []),
+  ]
+  const sale = kind === 'sell' && qty > 0 ? saleQuote(game, productId, qty) : null
+  const result =
+    kind === 'buy'
+      ? t.market.buyFor(qty, credits(quote(game, game.districtId, productId) * qty))
+      : sale
+        ? t.market.sellFor(qty, credits(sale.total), signedCredits(sale.total - sale.cost))
+        : t.market.sellFor(0, credits(0), signedCredits(0))
+  const label = kind === 'buy' ? t.market.buy : t.market.sell
+
   return (
-    <span className="flex items-center gap-1">
-      <span className="text-xs font-bold text-ink uppercase">{label}</span>
-      <Button variant={variant} size="sm" disabled={max < 1} aria-label={`${label} 1`} onClick={() => onPick(1)}>
-        1
+    <div className="flex flex-wrap items-center gap-1">
+      <Button size="sm" aria-label={t.market.less(label)} disabled={qty <= 1} onClick={() => setPicked(qty - 1)}>
+        −
       </Button>
-      <Button variant={variant} size="sm" disabled={max < 5} aria-label={`${label} 5`} onClick={() => onPick(5)}>
-        5
+      <input
+        type="number"
+        inputMode="numeric"
+        min={1}
+        max={max}
+        value={qty}
+        aria-label={t.market.quantity(label, t.product[productId].name)}
+        onChange={(event) => setPicked(Math.floor(Number(event.target.value)) || 0)}
+        className={`w-12 text-center ${FIELD}`}
+      />
+      <Button size="sm" aria-label={t.market.more(label)} disabled={qty >= max} onClick={() => setPicked(qty + 1)}>
+        +
       </Button>
-      <Button variant={variant} size="sm" disabled={max < 1} onClick={() => onPick(max)}>
-        {maxLabel} ({max})
+      {presets.map((preset) => (
+        <Button key={preset.label} size="sm" disabled={preset.qty < 1 || preset.qty > max} onClick={() => setPicked(preset.qty)}>
+          {preset.label === t.market.max || preset.label === t.market.fullRateShort ? `${preset.label} (${preset.qty})` : preset.label}
+        </Button>
+      ))}
+      <Button
+        variant={variant}
+        size="sm"
+        disabled={qty < 1}
+        onClick={() => dispatch(kind === 'buy' ? { type: 'buy', productId, qty } : { type: 'sell', productId, qty })}
+      >
+        {result}
       </Button>
-    </span>
+    </div>
   )
 }

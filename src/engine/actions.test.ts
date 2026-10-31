@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { GAME_LENGTH_DAYS, OFFSHORE_WITHDRAW_FACTOR, SIPHON, SURVIVAL_ADVANCE } from '../data/balance.ts'
 import { PRODUCTS } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
-import { canSiphon, checkService, fuelPrice, maxBuy, maxRepay, planTravel, type Action } from './actions.ts'
+import { canSiphon, checkService, fuelPrice, fullRateQty, maxBuy, maxRepay, planTravel, type Action } from './actions.ts'
 import { cargoUsed, ownedQty } from './cargo.ts'
 import { offshoreBalance } from './finance.ts'
 import { quote, shopProducts } from './market.ts'
@@ -60,17 +60,16 @@ describe('achat et vente', () => {
   })
 })
 
-describe('ventes groupées', () => {
+describe('vente au plein cours', () => {
   const lotAt = (productId: ProductId, qty: number, unitCost: number) => ({ productId, qty, unitCost, travelled: true, boughtDay: 2, damaged: false })
 
-  it('vendent tout, ou seulement ce qui marge, jamais les caisses scellées', () => {
-    const cargo = [lotAt('T1-01', 2, 1), lotAt('T1-04', 2, 1_000_000), lotAt('T0-05', 3, 0)]
-    const profitable = run(gameAt(3, { cargo }), { type: 'sellAll', profitableOnly: true })
-    expect(ownedQty(profitable.cargo, 'T1-01')).toBe(0)
-    expect(ownedQty(profitable.cargo, 'T1-04')).toBe(2)
-    const all = run(gameAt(3, { cargo }), { type: 'sellAll', profitableOnly: false })
-    expect(all.cargo.map((lot) => lot.productId)).toEqual(['T0-05'])
-    expect(errorOf(gameAt(3, { cargo: [lotAt('T1-04', 2, 1_000_000)] }), { type: 'sellAll', profitableOnly: true })).toBe('nothing-to-sell')
+  it('au plein cours, ne vendent que jusqu’au rachat restant : le surplus reste pour ailleurs', () => {
+    const state = gameAt(3, { cargo: [lotAt('T1-01', 40, 1)] })
+    const left = defined(state.markets[state.districtId].demand['T1-01'])
+    expect(fullRateQty(state, 'T1-01')).toBe(Math.min(40, left))
+    const sold = run(state, { type: 'sell', productId: 'T1-01', qty: fullRateQty(state, 'T1-01') })
+    expect(ownedQty(sold.cargo, 'T1-01')).toBe(40 - Math.min(40, left))
+    expect(sold.oversold).toEqual(state.oversold)
   })
 })
 

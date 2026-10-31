@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { FRESHNESS, PUMP_NIGHT_MIN_ICC, SEDATION, WORN } from '../data/balance.ts'
+import { FRESHNESS, PUMP_NIGHT_MIN_ICC, WORN } from '../data/balance.ts'
 import { CANTINE } from '../data/locations.ts'
 import { CREW, CREW_HIRE_FEE } from '../data/vehicles.ts'
 import { fuelPrice } from './actions.ts'
-import { hireFee, isMemoryBlurred, isSedated, salary } from './crew.ts'
+import { hireFee, salary } from './crew.ts'
 import { NO_EVENTS } from './events.ts'
 import { offshoreInterestBreakdown } from './finance.ts'
 import { bluffChance, bribeChance, fleeChance, NO_OFFER } from './interception.ts'
@@ -87,24 +87,6 @@ describe('bonus des équipiers', () => {
     expect(line.lines.find((entry) => entry.source === 'rule.refining')?.value).toBe(FRESHNESS.extra)
     expect(saleQuote(rosa, 'T1-03', 1).total).toBeGreaterThan(saleQuote(alone, 'T1-03', 1).total)
     expect(demandQuota(rosa, 'D2', 'T1-03')).toBeGreaterThan(defined(demandQuota({ day: 3, phase: 'day', events: NO_EVENTS }, 'D2', 'T1-03')))
-  })
-})
-
-describe('Lucidité et Sédation', () => {
-  it('perd un jour de protection par matin hors de D1, et revient au maximum en D1', () => {
-    const away = sleep(gameAt(3, { districtId: 'D2', lucidity: 1 }))
-    expect(away.lucidity).toBe(0)
-    expect(isSedated(away)).toBe(true)
-    expect(sleep(gameAt(3, { lucidity: 1 })).lucidity).toBe(SEDATION.lucidityDays)
-  })
-
-  it('réduit le bluff et brouille la mémoire, sauf avec le flux de Glitch', () => {
-    const sedated = gameAt(3, { districtId: 'D2', lucidity: 0, interception: brc, cargo: [lot('T2-03', 2)] })
-    const clear = { ...sedated, lucidity: 2 }
-    expect(bluffChance(sedated).total).toBeCloseTo(bluffChance(clear).total - SEDATION.penalty)
-    expect(isMemoryBlurred(sedated, 'D5')).toBe(true)
-    expect(isMemoryBlurred(sedated, 'D2')).toBe(false)
-    expect(isMemoryBlurred({ ...sedated, crew: { ...sedated.crew, active: 'CREW-02', paidDay: 3 } }, 'D5')).toBe(false)
   })
 })
 

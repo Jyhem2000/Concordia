@@ -61,10 +61,11 @@ export default function EventsList() {
       )}
       {locals.length > 0 && (
         <NewsGroup title={t.fil.newsLocal}>
-          <ul className="flex flex-col gap-0.5">
+          <ul className="flex flex-col gap-1">
             {locals.map(({ district, event }) => (
-              <li key={district}>
-                <EventDetails event={event} label={t.events.local(t.district[district].name, t.event[event].name)} />
+              <li key={district} className="flex flex-wrap items-baseline gap-x-1.5">
+                <span className="font-bold text-ink">{t.district[district].name}</span>
+                <EventDetails event={event} />
               </li>
             ))}
           </ul>

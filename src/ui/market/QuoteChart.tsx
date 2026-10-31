@@ -1,4 +1,3 @@
-import { isMemoryBlurred } from '../../engine/crew.ts'
 import { normalQuote, publishedQuotes, TREND_FLAT, type TrendDirection } from '../../engine/market.ts'
 import type { DistrictId, ProductId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
@@ -12,17 +11,20 @@ type QuoteChartProps = {
 
 /**
  * Tendance publique d'un produit dans un district (chap. 2 et 7) : la forme de la courbe publiée par le Fil, jour par jour
- * jusqu'à la veille, sans prix ; dessous, les cours exacts vus sur place. Sous Sédation, la tendance est brouillée.
+ * jusqu'à la veille, sans prix ; dessous, les cours exacts vus sur place.
  */
 export default function QuoteChart({ productId, districtId }: QuoteChartProps) {
   // Bulletin, mémoire de marché et cours normal du district : état entier
   const game = useGameStore((s) => s.game)
   const { t, credits } = useI18n()
   const published = publishedQuotes(game, districtId, productId)
-  const seen = (game.memory[districtId] ?? []).flatMap((entry) => {
-    const quote = entry.quotes[productId]
-    return quote === undefined ? [] : [t.sheet.seenOn(entry.day, credits(quote))]
-  })
+  // Cours exacts vus sur place, du plus récent au plus ancien
+  const seen = (game.memory[districtId] ?? [])
+    .flatMap((entry) => {
+      const quote = entry.quotes[productId]
+      return quote === undefined ? [] : [{ day: entry.day, quote }]
+    })
+    .reverse()
   const directionOf = (index: number): TrendDirection => {
     if (index === 0) return 'flat'
     const change = published[index].quote / published[index - 1].quote - 1
@@ -37,9 +39,7 @@ export default function QuoteChart({ productId, districtId }: QuoteChartProps) {
 
   return (
     <>
-      {isMemoryBlurred(game, districtId) ? (
-        <p className="text-xs text-ink-faint">{t.sheet.trendBlurred}</p>
-      ) : points.length < 2 ? (
+      {points.length < 2 ? (
         <p className="text-xs text-ink-faint">{t.sheet.trendSoon}</p>
       ) : (
         <LineChart
@@ -54,7 +54,31 @@ export default function QuoteChart({ productId, districtId }: QuoteChartProps) {
           shapeOnly
         />
       )}
-      <p className="mt-1 text-xs text-ink-soft">{seen.length > 0 ? t.sheet.seen(seen.join(' · ')) : t.sheet.historyEmpty}</p>
+      {seen.length > 0 ? (
+        <table className="mt-2 w-full text-xs tabular-nums">
+          <caption className="mb-1 text-left text-ink-muted">{t.sheet.seenTitle}</caption>
+          <thead>
+            <tr className="border-b border-line text-ink-faint">
+              <th scope="col" className="py-0.5 text-left font-normal">
+                {t.sheet.seenDay}
+              </th>
+              <th scope="col" className="py-0.5 text-right font-normal">
+                {t.sheet.seenQuote}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {seen.map(({ day, quote }) => (
+              <tr key={day} className="border-b border-line/50 text-ink-soft">
+                <td className="py-0.5">{t.chart.dayTick(day)}</td>
+                <td className="py-0.5 text-right">{credits(quote)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p className="mt-1 text-xs text-ink-soft">{t.sheet.historyEmpty}</p>
+      )}
     </>
   )
 }

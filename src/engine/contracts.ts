@@ -48,15 +48,22 @@ export function checkDeliverContract(state: GameState): ActionError | null {
   if (!state.contract) return 'no-contract'
   if (state.districtId !== state.contract.to) return 'not-contract-district'
   if (ownedQty(state.cargo, state.contract.productId) < state.contract.qty) return 'not-enough-cargo'
+  // Viktor veut des caisses apportées d'ailleurs : celles achetées sur place ne comptent pas (chap. 3)
+  if (ownedQty(travelledLots(state), state.contract.productId) < state.contract.qty) return 'contract-untravelled'
   return null
 }
 
-/** Livraison : les caisses partent (les plus anciennes d'abord), la prime arrive en Cash-Puce */
+/** Caisses qui ont voyagé depuis leur achat */
+const travelledLots = (state: GameState) => state.cargo.filter((lot) => lot.travelled)
+
+/** Livraison : les caisses qui ont voyagé partent (les plus anciennes d'abord), la prime arrive en Cash-Puce */
 export function deliverContract(state: GameState): GameState {
   const { contract } = state
   if (!contract) return state
-  const { remaining } = takeLots(state.cargo, contract.productId, contract.qty)
-  return { ...state, cargo: remaining, cash: state.cash + contract.reward, contract: null }
+  const { remaining } = takeLots(travelledLots(state), contract.productId, contract.qty)
+  // Les caisses achetées ici restent en soute
+  const cargo = [...remaining, ...state.cargo.filter((lot) => !lot.travelled)]
+  return { ...state, cargo, cash: state.cash + contract.reward, contract: null }
 }
 
 /** Délai dépassé à la routine matinale : la pénalité s'ajoute à la dette et le contrat tombe */

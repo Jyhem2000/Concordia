@@ -10,7 +10,6 @@ import {
   HIGH_TIER,
   RACKET,
   SEARCH,
-  SEDATION,
   WANTED,
   WORN,
 } from '../data/balance.ts'
@@ -22,7 +21,7 @@ import type { ActionError } from './actions.ts'
 import { breakdown, type Breakdown } from './breakdown.ts'
 import { baseValue, cargoUsed, giveCrates, isIllegal, maskedQty, ownedQty, ownsCrates, splitHidden, tagShare, tierShare } from './cargo.ts'
 import { breakOnFlee, breakOnShock, crateValue, explodeFlammable, paymentValue } from './condition.ts'
-import { crewEffect, isSedated, workingCrew } from './crew.ts'
+import { crewEffect, workingCrew } from './crew.ts'
 import { isWorn } from './gauges.ts'
 import { ejectMode, moduleTagFactor, mountedEffect, mountedWith } from './equipment.ts'
 import { arrive, tagFactor } from './events.ts'
@@ -148,7 +147,6 @@ export function bluffChance(state: GameState): Breakdown {
   for (const id of aids) chance.add(id, PRODUCTS[id].bluffAid?.bonus ?? 0)
   const terminal = mountedWith(state, 'fakeTerminal')
   if (terminal) chance.add(terminal, MODULES[terminal].fakeTerminal?.bluffBonus ?? 0)
-  chance.add('rule.sedation', sedation(state))
   chance.add('rule.worn', worn(state))
   return chance.clamp(0, BLUFF.cap).build()
 }
@@ -187,9 +185,9 @@ export function bribeChance(state: GameState, offer: Offer): Breakdown {
     .add('rule.connivance', hasConnivance(offer) ? BRIBE.connivance : 0)
     .add('rule.security-stars', -BRIBE.perExtraStar * (stars(state) - 1))
     .add('rule.bluff-failed', followUp(state.interception))
-    .add(workingCrew(state) ?? 'rule.sedation', crewEffect(state, 'bribeBonus') ?? 0)
-    .add('rule.sedation', sedation(state))
-    .clamp(0, BRIBE.cap)
+  const bribeCrew = workingCrew(state)
+  if (bribeCrew) chance.add(bribeCrew, crewEffect(state, 'bribeBonus') ?? 0)
+  chance.clamp(0, BRIBE.cap)
   // Les Drones-Juges sont incorruptibles : il faut d'abord tomber sur un douanier
   if (DISTRICTS[state.districtId].droneJudges) chance.mul('rule.drone-judges', 1 - BRIBE.droneCriticalFailure)
   return chance.build()
@@ -208,8 +206,8 @@ export function fleeChance(state: GameState, { drop, dope }: Tactics = NO_TACTIC
   if (ram) chance.add(ram, MODULES[ram].ram?.fleeBonus ?? 0)
   const transponder = activeTransponder(state)
   if (transponder) chance.add(state.vehicleId, transponder.fleeBonus)
-  chance.add(workingCrew(state) ?? 'rule.sedation', crewEffect(state, 'fleeBonus') ?? 0)
-  chance.add('rule.sedation', sedation(state))
+  const fleeCrew = workingCrew(state)
+  if (fleeCrew) chance.add(fleeCrew, crewEffect(state, 'fleeBonus') ?? 0)
   chance.add('rule.worn', worn(state))
   return chance.clamp(0, cap, 'rule.flee-cap').build()
 }
@@ -238,9 +236,6 @@ export function checkpointPlace(state: GameState): 'street' | 'gallery' | 'docks
   if (state.phase === 'night') return 'gallery'
   return DISTRICTS[state.districtId].access === 'docks' ? 'docks' : 'street'
 }
-
-/** Malus de Sédation (chap. 1), 0 sous protection */
-const sedation = (state: GameState) => (isSedated(state) ? -SEDATION.penalty : 0)
 
 /** Malus du chauffeur à bout (chap. 1), 0 au-dessus du seuil de Santé */
 const worn = (state: GameState) => (isWorn(state) ? -WORN.penalty : 0)

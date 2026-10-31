@@ -1,4 +1,4 @@
-import { SEDATION, START_CASH, START_DEBT, START_DISTRICT, START_HEALTH, START_ICC } from '../data/balance.ts'
+import { START_CASH, START_DEBT, START_DISTRICT, START_HEALTH, START_ICC } from '../data/balance.ts'
 import { START_VEHICLE, VEHICLES } from '../data/vehicles.ts'
 import { DISTRICT_IDS } from '../data/districts.ts'
 import { crewEffect } from './crew.ts'
@@ -45,7 +45,6 @@ export function createInitialState(seed: number): GameState {
     dumped: [],
     plateDay: null,
     crew: { active: null, paidDay: null, hires: 0, lost: [], freeHire: false, payInKind: true },
-    lucidity: SEDATION.lucidityDays,
     services: { uses: {}, lastDay: {} },
     morguePass: null,
     influence: null,

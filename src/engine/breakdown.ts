@@ -75,7 +75,6 @@ export type RuleId =
   | 'event-cap'
   | 'repair'
   | 'refining'
-  | 'sedation'
   | 'worn'
   | 'cantine'
 

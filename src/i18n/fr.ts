@@ -136,7 +136,6 @@ export const fr = {
     'rule.event-cap': 'Plafond des événements',
     'rule.repair': 'Réparation (par PV)',
     'rule.refining': 'Affinage de Mama Rosa (Standard vendu Extra-Frais)',
-    'rule.sedation': 'Sédation',
     'rule.worn': 'Chauffeur à bout',
     'rule.cantine': 'Tarif syndical',
   } satisfies Record<RuleSource, string>,
@@ -218,8 +217,6 @@ export const fr = {
     debtLate: 'Dette en retard : la prochaine échéance est un audit',
     protection: (amount: string) => `Collecte de Viktor (≈ ${amount})`,
     audit: (day: number) => `Audit du Jour ${day}, à minuit`,
-    sedation: 'Fin de la Lucidité : Sédation',
-    sedated: 'Sédation en cours : passez à la Cantine de jour',
     lottery: 'Tirage de la Loterie',
     viceEnd: (product: string, district: string) => `Fin du vice : ${product} en Forte demande à ${district}`,
     serviceReady: (service: string) => `${service} : de nouveau disponible`,
@@ -244,12 +241,11 @@ export const fr = {
     dealsEmpty: 'Aucun cours vu ailleurs : les marchés des autres districts se découvrent en y passant.',
     dealsOwned: 'Où revendre la soute',
     dealsShop: 'À acheter ici',
-    canBuy: (qty: number) => `jusqu'à ${qty} caisse${qty > 1 ? 's' : ''}`,
+    canBuy: (qty: number) => `jusqu'à ${qty} caisse${qty > 1 ? 's' : ''} achetable${qty > 1 ? 's' : ''}`,
     held: (qty: number) => `${qty} en soute`,
     dealsSeen:
       'Cours relevés lors de votre dernier passage dans chaque district : ils ont pu bouger depuis. Les marchés des autres districts se découvrent en y passant.',
-    best: (quote: string, district: string, age: number) =>
-      `${district} : ${quote} (${age === 0 ? "vu aujourd'hui" : `vu il y a ${age} jour${age > 1 ? 's' : ''}`})`,
+    bestQuote: (quote: string, age: number) => `${quote} (${age === 0 ? "vu aujourd'hui" : `vu il y a ${age} jour${age > 1 ? 's' : ''}`})`,
     neverSeen: 'jamais vu ailleurs',
     strongAt: (districts: string) => `Forte demande : ${districts}`,
     alerts: 'Alertes',
@@ -265,6 +261,9 @@ export const fr = {
     beaconJammed: (product: string) => `${product} à bord : sa balise est brouillée par votre équipière`,
     wanted: (level: number, max: number, risk: string, flee: string) =>
       `Fiche S ${level}/${max} : Aeterna vous recherche. Risque de contrôle +${risk} partout, fuite −${flee}. Chaque nuit au relais routier l'efface d'un niveau.`,
+    protectionTomorrow: (amount: string) =>
+      `Collecte de Viktor demain matin : ≈ ${amount} (une part du Cash-Puce et de la soute ; l'offshore lui échappe).`,
+    crewUnpaid: (name: string) => `${name} n'a pas été payé ce matin : pas de travail aujourd'hui.`,
     compartmentRoom: (room: number) => `${room} place${room > 1 ? 's' : ''} libre${room > 1 ? 's' : ''} au double fond`,
     journal: 'Bilan & carnet de route',
     yesterday: (day: number) => `Bilan du J${day}`,
@@ -382,23 +381,17 @@ export const fr = {
     newGameAction: 'Abandonner et recommencer',
     offshoreRate: (rate: string) => `Intérêts : ${rate} par jour`,
     wanted: (level: number, max: number) => `Fiche S ${level}/${max}`,
-    wantedInfo: (risk: string, flee: string) =>
-      `Fiche S : votre niveau de recherche dans les fichiers d'Aeterna. Il monte d'un niveau à chaque fuite réussie devant la BRC et à chaque tournée de nuit hors mission passée sans contrôle (l'écart est filmé). Par niveau : risque de contrôle +${risk} partout, fuite −${flee}. Chaque nuit au relais routier l'efface d'un niveau (pas le bivouac, ni la nuit d'une tournée).`,
+    wantedLabel: 'Fiche S',
+    wantedValue: (level: number, max: number) => `${level}/${max}`,
+    wantedNow: (risk: string, flee: string) => `Recherché : risque de contrôle +${risk} partout, fuite −${flee}`,
+    wantedInfo: (risk: string, flee: string, bivouac: string) =>
+      `Fiche S : votre niveau de recherche dans les fichiers d'Aeterna. Il monte d'un niveau à chaque fuite réussie devant la BRC et à chaque tournée de nuit hors mission passée sans contrôle (l'écart est filmé). Par niveau : risque de contrôle +${risk} partout, fuite −${flee}. Chaque nuit au relais routier l'efface d'un niveau : il y en a un dans chaque district, sauf à ${bivouac} (bivouac). La nuit qui suit une tournée ne compte pas.`,
     wantedGain: (levels: number) => `+${levels} niveau${levels > 1 ? 'x' : ''} de Fiche S`,
     debtLate: 'Dette initiale en retard',
     debtDue: (when: string) => `Dette initiale à solder ${when}`,
-    nextProtection: (day: number, amount: string) => `Collecte de Viktor J${day} : ≈ ${amount}`,
     place: 'Lieu',
     placeInfo: 'District où se trouve le camion. Chaque district a sa propre économie : ses cours ne valent que chez lui.',
-    lucidity: 'Lucidité',
-    lucidityDays: (days: number) => `${days} j`,
-    sedated: 'Sédation en cours',
-    sedationTomorrow: 'Sédation demain matin',
-    lucidityInfo: (days: number, district: string, penalty: string) =>
-      `Lucidité : l'eau sans sédatifs servie aux seuls routiers leur garde l'esprit clair. Elle perd un jour chaque matin et revient à ${days} jours en passant à ${district} de jour. À zéro, c'est la Sédation : bluff, corruption et fuite à −${penalty}, et les cours mémorisés des autres districts brouillés en fourchette.`,
     offshore: 'Offshore',
-    crew: (name: string) => name,
-    crewUnpaid: 'non payé, ne travaille pas',
     patrol: (district: string) => `Ronde renforcée : ${district}`,
     countdown: (day: number) => `Audit le Jour ${day} à minuit : dernier remboursement et dernier dépôt offshore possibles le J${day} avant 20h00.`,
   },
@@ -815,7 +808,8 @@ export const fr = {
   },
 
   place: {
-    cantineLucidity: (days: number) => `L'eau sans sédatifs des routiers : Lucidité remise à ${days} jours, ici, de jour.`,
+    cantineLore:
+      "Ici, l'eau est servie sans sédatifs : un privilège syndical des routiers. Partout ailleurs, l'eau courante d'Aeterna apaise les citoyens.",
     cantineFuel: 'Synthanol au tarif syndical · réserve',
     ventureTitle: 'Placement du Cartel',
     ventureRule: (rate: string, chance: string, loss: string) =>
@@ -874,13 +868,6 @@ export const fr = {
     sort: { tier: 'Par tier', priceAsc: 'Prix ↑', priceDesc: 'Prix ↓' },
     noMatch: 'Aucun produit de ce filtre ici.',
     streetOnly: 'Passé 20h00 : seul le marché de rue est ouvert.',
-    sellAll: (amount: string) => `Vendre tout (${amount})`,
-    sellAllConfirm: 'Vendre aussi à perte ?',
-    sellAllLosses: (lines: string) =>
-      `Une partie de la soute se vendrait moins cher qu'elle n'a coûté : ${lines}. « Vendre tout ce qui marge » garde ces caisses.`,
-    sellAllLoss: (product: string, loss: string) => `${product} (${loss})`,
-    sellAllAction: 'Vendre tout quand même',
-    sellProfitable: (amount: string) => `Vendre tout ce qui marge (${amount})`,
     quote: 'Cours',
     stock: 'Stock',
     owned: 'En soute',
@@ -905,6 +892,12 @@ export const fr = {
     marginAll: (qty: number) => `En vendant tout (${qty}) :`,
     buy: 'Acheter',
     sell: 'Vendre',
+    fullRateShort: 'Plein cours',
+    buyFor: (qty: number, cost: string) => `Acheter ${qty} : −${cost}`,
+    sellFor: (qty: number, total: string, margin: string) => `Vendre ${qty} : +${total} (marge ${margin})`,
+    less: (action: string) => `${action} : une caisse de moins`,
+    more: (action: string) => `${action} : une caisse de plus`,
+    quantity: (action: string, product: string) => `${action} : nombre de caisses de ${product}`,
     max: 'MAX',
     status: {
       production: 'Arrivage régulier',
@@ -926,9 +919,9 @@ export const fr = {
   sheet: {
     title: 'Fiche',
     quotesTitle: 'Tendance publique, district par district',
-    seenOn: (day: number, quote: string) => `J${day} ${quote}`,
-    seen: (visits: string) => `Vu sur place : ${visits}`,
-    trendBlurred: 'Sous Sédation, la tendance publiée se brouille : impossible de la lire.',
+    seenTitle: 'Cours vus sur place',
+    seenDay: 'Jour',
+    seenQuote: 'Cours',
     trendSoon: 'Le Fil publiera la tendance dès demain.',
     trendReadout: (district: string, day: number, trend: string) => `${district}, J${day} : ${trend}`,
     historyDistrict: 'District de la courbe',
@@ -1132,7 +1125,6 @@ export const fr = {
     exposedSanction: (fine: string, custodyDays: number) =>
       `Une saisie les confisque, avec une amende de ${fine}${custodyDays > 0 ? ` et une garde à vue (haut tier à bord)` : ''}.`,
     neverSeen: 'jamais vu',
-    blurred: (low: string, high: string) => `${low} – ${high}`,
     patrol: 'Ronde renforcée (révélée par Vance)',
     wear: (pv: number) => `usure du châssis −${pv}`,
     cooled: (crates: number, product: string) => `moteur refroidi : ${crates} × ${product} consommées`,
@@ -1308,6 +1300,7 @@ export const fr = {
     'contract-active': 'Une commande est déjà en cours.',
     'no-contract': 'Aucune commande en cours.',
     'not-contract-district': 'Le contrat se livre dans son district de destination.',
+    'contract-untravelled': "Viktor veut des caisses apportées d'ailleurs : celles achetées ici ne comptent pas.",
   } satisfies Record<ActionError, string>,
 
   // ─── Données de jeu (chap. 2 à 6) ───

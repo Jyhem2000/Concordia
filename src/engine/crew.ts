@@ -1,4 +1,3 @@
-import { SEDATION } from '../data/balance.ts'
 import { LOCATIONS } from '../data/locations.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import { CREW, CREW_HIRE_FEE } from '../data/vehicles.ts'
@@ -96,25 +95,10 @@ export function payCrew(state: GameState, inCell: boolean): { state: GameState; 
 
 // ─── Lucidité et Sédation (chap. 1) ───
 
-/** Sédation : protection épuisée */
-export function isSedated(state: GameState): boolean {
-  return state.lucidity === 0
-}
-
 /** District de la Cantine des Chauffeurs, où la Lucidité se recharge */
 export const cantineDistrict = (): DistrictId => LOCATIONS['LOC-D1-2'].district
 
 /** De jour, au district de la Cantine : les routiers y passent tous (Lucidité, Synthanol au tarif syndical) */
 export function atCantine(state: GameState): boolean {
   return state.districtId === cantineDistrict() && state.phase === 'day' && !state.dayOver
-}
-
-/** Se trouver au district de la Cantine de jour remet la Lucidité au maximum */
-export function refreshLucidity(state: GameState): GameState {
-  return atCantine(state) ? { ...state, lucidity: SEDATION.lucidityDays } : state
-}
-
-/** Mémoire de marché brouillée : Sédation, sauf flux pirate de Glitch, jamais dans le district actuel */
-export function isMemoryBlurred(state: GameState, districtId: GameState['districtId']): boolean {
-  return districtId !== state.districtId && isSedated(state) && !crewEffect(state, 'liveQuotes')
 }

@@ -1,6 +1,6 @@
 import { Landmark, Lock } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { SEDATION, SURVIVAL_ADVANCE, VENTURE } from '../../data/balance.ts'
+import { SURVIVAL_ADVANCE, VENTURE } from '../../data/balance.ts'
 import { LOCATIONS } from '../../data/locations.ts'
 import { VEHICLES } from '../../data/vehicles.ts'
 import { maxRepay } from '../../engine/actions.ts'
@@ -114,7 +114,7 @@ function CantineDesk() {
 
   return (
     <>
-      <p className="text-info">{t.place.cantineLucidity(SEDATION.lucidityDays)}</p>
+      <p className="text-ink-muted italic">{t.place.cantineLore}</p>
       <p>
         <span className="text-ink-muted">{t.place.cantineFuel} </span>
         <span className="font-bold">{t.pump.reserve(game.fuel, VEHICLES[game.vehicleId].tank)}</span>

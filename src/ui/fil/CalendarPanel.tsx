@@ -20,8 +20,6 @@ const AGENDA_TONES: Record<AgendaItem['kind'], Tone> = {
   debt: 'danger',
   debtLate: 'danger',
   protection: 'warning',
-  sedation: 'info',
-  sedated: 'danger',
   lottery: 'neutral',
   vice: 'neutral',
   prophecy: 'accent',
@@ -54,10 +52,6 @@ export default function CalendarPanel() {
         return { text: t.fil.debtLate, tone }
       case 'protection':
         return { text: t.fil.protection(credits(protectionBreakdown(game).total)), tone }
-      case 'sedation':
-        return { text: t.fil.sedation, tone }
-      case 'sedated':
-        return { text: t.fil.sedated, tone }
       case 'lottery':
         return { text: t.fil.lottery, tone }
       case 'vice':

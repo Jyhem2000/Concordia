@@ -6,9 +6,8 @@ import { AFTER, DAMAGED_FACTOR, FRESHNESS } from '../../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
-import { isMemoryBlurred } from '../../engine/crew.ts'
 import { searchSanction } from '../../engine/interception.ts'
-import { bestRemembered, blurredQuote, productStatus, saleQuote } from '../../engine/market.ts'
+import { bestRemembered, productStatus, saleQuote } from '../../engine/market.ts'
 import type { District, DistrictId, ProductId, TagId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -97,7 +96,7 @@ function SheetBody({ productId }: SheetBodyProps) {
       ...(fleeDropBonus ? [t.sheet.drop(signedPercent(fleeDropBonus, 0))] : []),
       ...(bribeGift ? [t.sheet.bribeGift] : []),
       ...(nightSale ? [t.sheet.nightSale(change(nightSale), tag === AFTER.tag ? change(AFTER.festiveFactor) : null)] : []),
-    ].map((line) => `${t.tag[tag].name} : ${line}`)
+    ]
   }
 
   // Actions propres au produit (chap. 2)
@@ -140,15 +139,7 @@ function SheetBody({ productId }: SheetBodyProps) {
   const sale = [
     t.sheet.strong(strong.length > 0 ? names(strong) : t.sheet.nowhere),
     ...(produced.length > 0 ? [t.sheet.produced(names(produced))] : []),
-    best
-      ? t.sheet.best(
-          isMemoryBlurred(game, best.districtId)
-            ? t.travel.blurred(credits(blurredQuote(best.quote).low), credits(blurredQuote(best.quote).high))
-            : credits(best.quote),
-          t.district[best.districtId].name,
-          best.age,
-        )
-      : t.sheet.noMemory,
+    best ? t.sheet.best(credits(best.quote), t.district[best.districtId].name, best.age) : t.sheet.noMemory,
   ]
   const seizureLines = [seizure, ...(tolls.length > 0 ? [t.sheet.tollFavorite(names(tolls))] : [])]
 
@@ -175,7 +166,27 @@ function SheetBody({ productId }: SheetBodyProps) {
       </Section>
       {product.tags.length > 0 && (
         <Section title={t.sheet.tagsTitle}>
-          <Lines lines={product.tags.flatMap(tagLines)} />
+          <ul className="list-disc space-y-0.5 pl-4 text-xs text-ink-soft">
+            {/* Un tag par puce ; plusieurs effets d'un même tag en sous-liste */}
+            {product.tags.map((tag) => {
+              const effects = tagLines(tag)
+              if (effects.length === 0) return null
+              return (
+                <li key={tag}>
+                  <span className="font-bold text-ink">{t.tag[tag].name}</span>
+                  {effects.length === 1 ? (
+                    <> : {effects[0]}</>
+                  ) : (
+                    <ul className="mt-0.5 list-disc space-y-0.5 pl-4">
+                      {effects.map((effect) => (
+                        <li key={effect}>{effect}</li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
         </Section>
       )}
       {actions.length > 0 && (

@@ -33,7 +33,7 @@ Force de police unique. Dans les quartiers pauvres : agents humains fatigués, s
 ## Le rôle du joueur
 Tu incarnes un **Livreur de Catégorie C** de la plateforme logistique d'État, officiellement chargé de transporter des caisses légales à bord de ton utilitaire propulsé au **Synthanol** (biocarburant d'État rationné).
 
-* **Le Paradoxe du Chauffeur :** pour éviter que les camions de 3,5 tonnes ne provoquent des carambolages, la guilde des routiers garde sa **Lucidité** (eau filtrée sans sédatifs, servie à `[LOC-D1-2]` ; sans elle, la sédation te rattrape, chap. 1). Seuls prolétaires à avoir l'esprit clair et à traverser tous les districts chaque jour, les chauffeurs ont compris l'hypocrisie du système : officieusement, tu es devenu un **« Passeur du Monde d'Avant »**.
+* **Le Paradoxe du Chauffeur :** pour éviter que les camions de 3,5 tonnes ne provoquent des carambolages, la guilde des routiers boit une eau sans sédatifs, servie à `[LOC-D1-2]` : c'est du lore, pas une jauge. Seuls prolétaires à avoir l'esprit clair et à traverser tous les districts chaque jour, les chauffeurs ont compris l'hypocrisie du système : officieusement, tu es devenu un **« Passeur du Monde d'Avant »**.
 * Tu ne consommes pas tes cargaisons de luxe (scellées sous vide pour des clients VIP, et bien trop précieuses face à la mafia qui menace de te recycler en Bio-Briques), mais tu sais utiliser certains produits tactiques pour survivre à la route : `[T2-05]`, `[T2-01]`, `[T1-06]`, `[T4-03]`.
 
 ---
@@ -80,15 +80,6 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 * **Prix d'une ration :** fixé par district ([`districts.ts`](../src/data/districts.ts)).
 * **Siphonage / Corvée DSC (anti soft-lock) :** de jour, bloqué avec 0 ration, une soute vide et pas assez de Cash-Puce pour 1 ration locale → une ration gratuite contre une perte d'ICC (`SIPHON` dans [`balance.ts`](../src/data/balance.ts)) et une **demi-journée** perdue. En `[D4]`, ce sont les milices qui « prêtent » la ration, aux mêmes conditions.
 
-### Lucidité & Sédation
-Seuls les routiers boivent l'eau sans sédatifs de `[LOC-D1-2]` : c'est elle qui leur garde l'esprit clair.
-* **Jours de Lucidité :** se trouver en `[D1]` de jour (au réveil ou à l'arrivée d'un trajet de jour, Cantine `[LOC-D1-2]`) les remet au maximum. Elle baisse de 1 à chaque routine matinale. Départ au maximum. Chiffres : `SEDATION` dans [`balance.ts`](../src/data/balance.ts).
-* **Sédation** (Lucidité à 0, jusqu'au prochain passage en `[D1]` de jour) : malus au bluff, à la corruption et à la fuite (racket de `[D4]` compris), et la mémoire de marché des autres districts est **brouillée** : les cours mémorisés s'affichent en fourchette autour du vrai relevé (l'historique aussi). Le flux de `[CREW-02]` reste exact. Le district actuel n'est jamais brouillé.
-* L'app affiche les jours de Lucidité restants et prévient la veille de la Sédation (chap. 7).
-
----
-
-## L'argent : les trois portefeuilles
 ### Cash-Puce (portefeuille courant)
 * **Départ :** [`balance.ts`](../src/data/balance.ts). Utilisable partout, ne rapporte **aucun intérêt**.
 * **Vulnérable :** ponctionné par les sanctions d'interception, le racket de `[D4]` et la collecte de protection, et **effacé** à l'audit du Jour 30.
@@ -109,7 +100,7 @@ Seuls les routiers boivent l'eau sans sédatifs de `[LOC-D1-2]` : c'est elle qui
 * **Quand :** une fois la dette initiale soldée, à 06h00 des jours de collecte (`PROTECTION` dans [`balance.ts`](../src/data/balance.ts)).
 * **Montant :** **une part de ta richesse visible** = Cash-Puce + valeur de la soute (au prix de base). Le compte offshore est invisible pour Viktor.
 * **Paiement :** prélevé automatiquement sur le Cash-Puce ; le reliquat éventuel s'ajoute à la dette.
-* **Affichage :** date et estimation de la prochaine collecte en permanence (chap. 7). *Lecture stratégique :* arriver léger au matin de la collecte, ou blanchir avant.
+* **Affichage :** chaque collecte dans l'agenda, et une alerte la veille avec le montant estimé (chap. 7). *Lecture stratégique :* arriver léger au matin de la collecte, ou blanchir avant.
 
 ### Compte offshore
 * **Guichet :** `[LOC-D5-1]`, de jour uniquement.
@@ -149,7 +140,7 @@ Le Jour 1 commence sans routine : pas d'intérêts, boutiques et événements ti
 4. Récupération des caisses larguées la veille via `[MOD-07]` ; échéance d'une commande VIP de `[LOC-D6-1]` ou d'un contrat de la Pègre de `[LOC-D1-1]` dépassée (chap. 3).
 5. Dégradation de fraîcheur des caisses `[TAG-PERISHABLE]`, caisses récupérées comprises (chap. 2).
 6. Tirage de la livraison officielle du jour, de la mission de nuit proposée pour ce soir et du contrat de la Pègre proposé (s'il n'y en a pas en cours) ; tirage de la ronde renforcée ; entrée en vigueur de l'événement global tiré la veille, tirage des événements locaux, de la Loterie les jours de tirage, de l'événement global du lendemain et de sa rumeur ; contrecoups (chap. 6). Puis, parce que les événements les modifient : reconstitution des quotas de demande, cours et boutiques (chap. 2) ; enfin, tirage de l'after du couvre-feu de ce soir (voir *Tournée de nuit*).
-7. Effets du matin des événements : canicule sur les périssables, sas de `[EVT-D3-01]` si le joueur se trouve en `[D3]` (chap. 6). Enfin, Lucidité **−1 jour**.
+7. Effets du matin des événements : canicule sur les périssables, sas de `[EVT-D3-01]` si le joueur se trouve en `[D3]` (chap. 6).
 
 ### Service de jour (06h00 – 20h00)
 Acheter / vendre au marché, faire le plein, utiliser les lieux spéciaux du district, accepter la livraison officielle du jour, et effectuer **1 trajet de jour**, ou rester sur place et attendre le soir. Une fois arrivé, on peut à nouveau commercer avant 20h00.

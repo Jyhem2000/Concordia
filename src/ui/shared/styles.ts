@@ -2,7 +2,7 @@ import { FOCUS_RING } from './focus.ts'
 import type { IccTier, Tier } from '../../engine/types.ts'
 
 /** Rôles de couleur de la charte (chap. 7) ; chaque rôle est une variable du thème dans `src/index.css` */
-export type Tone = 'neutral' | 'muted' | 'accent' | 'danger' | 'success' | 'warning' | 'info' | 'night' | 'event' | 'cash' | 'offshore'
+export type Tone = 'neutral' | 'muted' | 'accent' | 'danger' | 'success' | 'warning' | 'info' | 'night' | 'event' | 'cash' | 'offshore' | 'wanted'
 
 /** Texte dans la couleur d'un rôle */
 export const TONE_TEXT: Record<Tone, string> = {
@@ -17,6 +17,7 @@ export const TONE_TEXT: Record<Tone, string> = {
   event: 'text-event',
   cash: 'text-cash',
   offshore: 'text-offshore',
+  wanted: 'text-wanted',
 }
 
 /** Fond plein d'un rôle (barre de jauge) */
@@ -32,6 +33,7 @@ export const TONE_BG: Record<Tone, string> = {
   event: 'bg-event',
   cash: 'bg-cash',
   offshore: 'bg-offshore',
+  wanted: 'bg-wanted',
 }
 
 /** Pastille teintée d'un rôle : bord, fond et texte */
@@ -47,10 +49,14 @@ export const TONE_CHIP: Record<Tone, string> = {
   event: 'border-event/40 bg-event/10 text-event',
   cash: 'border-cash/40 bg-cash/10 text-cash',
   offshore: 'border-offshore/40 bg-offshore/10 text-offshore',
+  wanted: 'border-wanted/40 bg-wanted/10 text-wanted',
 }
 
 /** Couleur de chaque tier (chap. 7) : texte, liseré gauche des lignes de produit, case d'image, emplacement de soute (plein ou caché) */
-export const TIER_STYLES: Record<Tier, { text: string; stripe: string; tile: string; slot: string; hiddenSlot: string }> = {
+/** Couleurs d'une caisse : texte, liseré, case d'image, emplacement de soute (plein ou caché) */
+export type CrateStyle = { text: string; stripe: string; tile: string; slot: string; hiddenSlot: string }
+
+export const TIER_STYLES: Record<Tier, CrateStyle> = {
   0: {
     text: 'text-tier-0',
     stripe: 'border-l-tier-0',
@@ -101,3 +107,12 @@ export const BUBBLE = 'z-50 rounded-lg border border-line-strong bg-raised p-2 t
 
 /** Champ de saisie ou liste déroulante */
 export const FIELD = `rounded-md border border-line-strong bg-base px-2 py-1 text-sm disabled:opacity-35 ${FOCUS_RING}`
+
+/** Caisses scellées du DSC : hors commerce, en gris plutôt qu'au vert du Tier 0 (chap. 2) */
+export const SEALED_STYLE: CrateStyle = {
+  text: 'text-ink-muted',
+  stripe: 'border-l-ink-faint',
+  tile: 'border-line-strong bg-raised text-ink-muted',
+  slot: 'bg-ink-faint',
+  hiddenSlot: 'border-ink-faint bg-ink-faint/25',
+}

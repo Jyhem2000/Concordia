@@ -8,7 +8,6 @@ import {
   QUOTE_NOISE,
   SALE_COMMISSION,
   SATURATED_SALE_FACTOR,
-  SEDATION,
   SHOP_MIN_PRODUCTS,
 } from '../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../data/districts.ts'
@@ -279,11 +278,6 @@ export function saleQuote(state: GameState, productId: ProductId, qty: number): 
     }
   }
   return { total, cost, saturatedQty: Math.max(0, sold - demandLeft), first }
-}
-
-/** Fourchette affichée d'un cours mémorisé brouillé par la Sédation (chap. 1) */
-export function blurredQuote(quote: number): { low: number; high: number } {
-  return { low: quote * (1 - SEDATION.memoryBlur), high: quote * (1 + SEDATION.memoryBlur) }
 }
 
 /** Estimation du produit net d'une caisse à partir d'un cours mémorisé : commission seule, sans savoir-faire ni saturation */

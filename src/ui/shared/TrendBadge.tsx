@@ -1,5 +1,4 @@
 import { ArrowDownRight, ArrowRight, ArrowUpRight } from 'lucide-react'
-import { isMemoryBlurred } from '../../engine/crew.ts'
 import { publicTrend, type TrendDirection } from '../../engine/market.ts'
 import type { DistrictId, ProductId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
@@ -17,11 +16,11 @@ const STYLES: Record<TrendDirection, { icon: typeof ArrowRight; className: strin
   flat: { icon: ArrowRight, className: 'text-ink-muted' },
 }
 
-/** Tendance publique d'un produit dans un district (chap. 2) : flèche et durée, en clair dans l'infobulle ; rien sous Sédation */
+/** Tendance publique d'un produit dans un district (chap. 2) : flèche et durée, en clair dans l'infobulle */
 export default function TrendBadge({ districtId, productId }: TrendBadgeProps) {
-  // Bulletin et Sédation : état entier (un objet calculé ne peut pas sortir d'un sélecteur, il changerait à chaque lecture)
+  // Bulletin : état entier (un objet calculé ne peut pas sortir d'un sélecteur, il changerait à chaque lecture)
   const game = useGameStore((s) => s.game)
-  const trend = isMemoryBlurred(game, districtId) ? null : publicTrend(game, districtId, productId)
+  const trend = publicTrend(game, districtId, productId)
   const { t } = useI18n()
   if (!trend) return null
   const { icon: Icon, className } = STYLES[trend.direction]
