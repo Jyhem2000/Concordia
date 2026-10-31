@@ -1,5 +1,5 @@
-import { AlertTriangle, ArrowRight, Megaphone, TrendingUp } from 'lucide-react'
-import { AFTER, WORN } from '../../data/balance.ts'
+import { AlertTriangle, Megaphone, TrendingUp } from 'lucide-react'
+import { AFTER, WANTED, WORN } from '../../data/balance.ts'
 import { DISTRICT_IDS } from '../../data/districts.ts'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
@@ -7,6 +7,7 @@ import { averageCost, canHide, ownedQty } from '../../engine/cargo.ts'
 import { compartmentRoom } from '../../engine/compartment.ts'
 import { daysBeforeRot } from '../../engine/condition.ts'
 import { maxBuy, planTravel } from '../../engine/actions.ts'
+import { exposure } from '../../engine/interception.ts'
 import { crewEffect, isMemoryBlurred, workingCrew } from '../../engine/crew.ts'
 import { isWorn } from '../../engine/gauges.ts'
 import { deliveryCrates, deliveryFee, deliveryOffer } from '../../engine/delivery.ts'
@@ -15,38 +16,27 @@ import { missionFee, missionOffer, sealedCount } from '../../engine/night.ts'
 import type { ProductId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
-import type { Tab } from '../TabBar.tsx'
 import BriefingPanel from '../briefing/BriefingPanel.tsx'
 import Exposure from '../map/Exposure.tsx'
 import ObjectivesPanel from '../objectives/ObjectivesPanel.tsx'
-import Button from '../shared/Button.tsx'
 import Hint from '../shared/Hint.tsx'
 import Margin from '../shared/Margin.tsx'
 import Panel from '../shared/Panel.tsx'
+import Tip from '../shared/Tip.tsx'
 import { TONE_TEXT, type Tone } from '../shared/styles.ts'
 import EventsList from './EventsList.tsx'
-import FlashInfo from './FlashInfo.tsx'
 import CalendarPanel from './CalendarPanel.tsx'
 import JournalPanel from './JournalPanel.tsx'
-import RecordsPanel from './RecordsPanel.tsx'
+import NewGamePanel from './NewGamePanel.tsx'
 
 type Line = {
   key: string
   text: string
   tone: Tone
-  /** Onglet où agir sur cette information */
-  go?: Tab
 }
-
-type FilViewProps = {
-  /** Ouvre un onglet (téléphone) ou amène à son bloc (desktop) */
-  onGo: (tab: Tab) => void
-}
-
-type GoProps = FilViewProps
 
 /** Ligne colorée d'un panneau du Fil */
-const line = (key: string, text: string, tone: Tone, go?: Tab): Line => ({ key, text, tone, go })
+const line = (key: string, text: string, tone: Tone): Line => ({ key, text, tone })
 
 type Deal = {
   productId: ProductId
@@ -76,91 +66,83 @@ const SECTION = 'mb-1.5 text-xs font-bold text-ink-soft uppercase'
 const SEPARATED = 'mt-3 border-t border-line pt-2'
 
 /** Onglet En bref (chap. 7) : ce qui compte aujourd'hui, avant d'aller au marché puis sur la carte */
-export default function FilView({ onGo }: FilViewProps) {
+export default function FilView() {
   return (
     <>
       {/* Dans l'ordre de lecture : la journée, les décisions, le bilan ; sur grand écran, répartis en colonnes */}
       <BriefingPanel />
-      <TodayPanel onGo={onGo} />
-      <AlertsPanel onGo={onGo} />
+      <TodayPanel />
+      <AlertsPanel />
       <DealsPanel />
       <CalendarPanel />
       <ObjectivesPanel />
       <JournalPanel />
-      <RecordsPanel />
+      <NewGamePanel />
     </>
   )
 }
 
 /**
- * Aujourd'hui : le Message Aeterna, ce qui concerne le joueur (commandes du jour et du soir, contrat, after, ronde renforcée,
- * pics suspects), chacun avec son raccourci vers l'onglet où agir, puis les actualités de la ville
+ * Aujourd'hui : ce qui concerne le joueur (commandes du jour et du soir, contrat, after, ronde renforcée, pics suspects),
+ * puis les actualités de la ville
  */
-function TodayPanel({ onGo }: GoProps) {
+function TodayPanel() {
   // Offres et primes se calculent sur l'état entier de la partie
   const game = useGameStore((s) => s.game)
-  const { t, credits, multiplier, percent } = useI18n()
+  const { t, credits, change, percent } = useI18n()
   const delivery = game.phase === 'day' && !game.dayTripDone ? deliveryOffer(game) : null
   const mission = game.phase === 'day' ? missionOffer(game) : null
   const patrol = crewEffect(game, 'revealsPatrol') ? game.patrolDistrict : null
   const lines: Line[] = [
-    ...(game.delivery ? [line('delivery', t.fil.deliveryActive(t.district[game.delivery.to].name), 'info', 'map')] : []),
-    ...(delivery
-      ? [line('delivery', t.fil.deliveryOffer(t.district[delivery].name, deliveryCrates(game), credits(deliveryFee(game))), 'info', 'market')]
-      : []),
+    ...(game.delivery ? [line('delivery', t.fil.deliveryActive(t.district[game.delivery.to].name), 'info')] : []),
+    ...(delivery ? [line('delivery', t.fil.deliveryOffer(t.district[delivery].name, deliveryCrates(game), credits(deliveryFee(game))), 'info')] : []),
     ...(game.contract
       ? [
           line(
             'contract',
             t.contract.fil(game.contract.qty, t.product[game.contract.productId].name, t.district[game.contract.to].name, game.contract.deadline),
             'warning',
-            game.districtId === game.contract.to ? 'market' : 'map',
           ),
         ]
       : []),
     ...(game.contractOffer && game.phase === 'day'
-      ? [
-          line(
-            'contractOffer',
-            t.contract.offerFil(t.product[game.contractOffer.productId].name, credits(game.contractOffer.reward)),
-            'warning',
-            'places',
-          ),
-        ]
+      ? [line('contractOffer', t.contract.offerFil(t.product[game.contractOffer.productId].name, credits(game.contractOffer.reward)), 'warning')]
       : []),
-    ...(mission
-      ? [line('mission', t.fil.missionTonight(t.district[mission].name, sealedCount(game), credits(missionFee(game))), 'info', 'map')]
-      : []),
+    ...(mission ? [line('mission', t.fil.missionTonight(t.district[mission].name, sealedCount(game), credits(missionFee(game))), 'info')] : []),
     line(
       'after',
       t.evening.after(
         t.district[game.after].name,
-        multiplier(AFTER.festiveFactor),
-        multiplier(TAGS[AFTER.tag].nightSale ?? 1),
+        change(AFTER.festiveFactor),
+        change(TAGS[AFTER.tag].nightSale ?? 1),
         percent(1 - AFTER.nightRiskFactor, 0),
       ),
       'event',
-      'map',
     ),
-    ...(patrol ? [line('patrol', t.fil.patrol(t.district[patrol].name), 'info', 'map')] : []),
+    ...(patrol ? [line('patrol', t.fil.patrol(t.district[patrol].name), 'info')] : []),
     ...(game.suspiciousPeaks.length > 0
-      ? [line('peaks', t.fil.peaks(game.suspiciousPeaks.map((id) => t.district[id].name).join(', ')), 'danger', 'map')]
+      ? [line('peaks', t.fil.peaks(game.suspiciousPeaks.map((id) => t.district[id].name).join(', ')), 'danger')]
       : []),
   ]
 
   return (
     <Panel icon={Megaphone} title={t.fil.today} collapseId="fil-today">
-      <FlashInfo />
-      <h3 className={`${SECTION} ${SEPARATED}`}>{t.fil.forYou}</h3>
-      <Lines lines={lines} onGo={onGo} />
-      <h3 className={`${SECTION} ${SEPARATED}`}>{t.fil.news}</h3>
+      <h3 className={SECTION}>{t.fil.forYou}</h3>
+      <Lines lines={lines} />
+      <h3 className={`flex items-center gap-1 ${SECTION} ${SEPARATED}`}>
+        {t.fil.news}
+        <Tip label={t.fil.news} content={t.fil.newsInfo} />
+      </h3>
       <EventsList />
     </Panel>
   )
 }
 
-/** Synthanol bas, balise à bord, caisses qui pourrissent demain, caisses abîmées, ce qu'une saisie coûterait, places libres au double fond */
-function AlertsPanel({ onGo }: GoProps) {
+/**
+ * Chauffeur à bout, Fiche S, Synthanol bas, balise à bord, caisses qui pourrissent demain, caisses abîmées, places libres
+ * au double fond, ce qu'une saisie coûterait ; rien à signaler, pas d'encart
+ */
+function AlertsPanel() {
   // Fraîcheur, saisie, double fond et trajets se calculent sur l'état entier
   const game = useGameStore((s) => s.game)
   const { t, percent } = useI18n()
@@ -182,9 +164,9 @@ function AlertsPanel({ onGo }: GoProps) {
   const longest = Math.max(...costs)
   const fuelLine: Line[] =
     game.fuel < shortest
-      ? [line('fuel', t.fil.fuelOut(game.fuel, shortest), 'danger', 'places')]
+      ? [line('fuel', t.fil.fuelOut(game.fuel, shortest), 'danger')]
       : game.fuel < longest
-        ? [line('fuel', t.fil.fuelLow(game.fuel, longest), 'warning', 'places')]
+        ? [line('fuel', t.fil.fuelLow(game.fuel, longest), 'warning')]
         : []
   // Balise d'un produit à bord : risque ajouté partout, sauf si l'équipière la brouille
   const beacons = products.flatMap((id) => {
@@ -198,16 +180,33 @@ function AlertsPanel({ onGo }: GoProps) {
   })
   const lines: Line[] = [
     ...(isWorn(game) ? [line('worn', t.fil.worn(WORN.healthBelow, percent(WORN.penalty, 0)), 'danger')] : []),
+    ...(game.wanted > 0
+      ? [
+          line(
+            'wanted',
+            t.fil.wanted(
+              game.wanted,
+              WANTED.maxLevel,
+              percent(WANTED.riskPerLevel * game.wanted, 0),
+              percent(WANTED.fleePenaltyPerLevel * game.wanted, 0),
+            ),
+            'danger',
+          ),
+        ]
+      : []),
     ...fuelLine,
     ...beacons,
-    ...rotting.map((text): Line => ({ key: text, text, tone: 'danger', go: 'market' })),
-    ...damaged.map((text): Line => ({ key: text, text, tone: 'warning', go: 'market' })),
+    ...rotting.map((text): Line => ({ key: text, text, tone: 'danger' })),
+    ...damaged.map((text): Line => ({ key: text, text, tone: 'warning' })),
+    ...(room > 0 ? [line('room', t.fil.compartmentRoom(room), 'night')] : []),
   ]
+  // Ce qu'une saisie coûterait : seulement avec de l'illégal à bord
+  const exposed = exposure(game).crates > 0
+  if (lines.length === 0 && !exposed) return null
   return (
     <Panel icon={AlertTriangle} title={t.fil.alerts} collapseId="fil-alerts">
-      <Lines lines={[...lines, ...(room > 0 ? [line('room', t.fil.compartmentRoom(room), 'night', 'vehicle')] : [])]} onGo={onGo} />
-      <Exposure className="mt-1" />
-      {lines.length === 0 && room === 0 && <Hint>{t.fil.noAlert}</Hint>}
+      <Lines lines={lines} />
+      <Exposure className={lines.length > 0 ? 'mt-1' : ''} />
     </Panel>
   )
 }
@@ -254,7 +253,10 @@ function DealsPanel() {
     <Panel icon={TrendingUp} title={t.fil.deals} collapseId="fil-deals">
       {owned.length > 0 && (
         <>
-          <h3 className={SECTION}>{t.fil.dealsOwned}</h3>
+          <h3 className={`flex items-center gap-1 ${SECTION}`}>
+            {t.fil.dealsOwned}
+            <Tip label={t.fil.dealsOwned} content={t.fil.dealsSeen} />
+          </h3>
           <ul className="flex flex-col gap-1.5">
             {owned.map((deal) => (
               <DealRow key={deal.productId} deal={deal} qty={ownedQty(game.cargo, deal.productId)} />
@@ -264,7 +266,10 @@ function DealsPanel() {
       )}
       {shop.length > 0 && (
         <>
-          <h3 className={`${SECTION} ${owned.length > 0 ? SEPARATED : ''}`}>{t.fil.dealsShop}</h3>
+          <h3 className={`flex items-center gap-1 ${SECTION} ${owned.length > 0 ? SEPARATED : ''}`}>
+            {t.fil.dealsShop}
+            <Tip label={t.fil.dealsShop} content={t.fil.dealsSeen} />
+          </h3>
           <ul className="flex flex-col gap-1.5">
             {shop.map((deal) => (
               <DealRow key={deal.productId} deal={deal} qty={deal.qty} here />
@@ -277,7 +282,7 @@ function DealsPanel() {
   )
 }
 
-/** Une affaire : le produit, où le revendre (cours et ancienneté), et la marge estimée par caisse */
+/** Une affaire : le produit en entier, dessous où le revendre (district, cours vu et ancienneté), et la marge estimée par caisse */
 function DealRow({ deal: { productId, best, revenue, cost }, qty, here = false }: DealRowProps) {
   // Profil public des districts (Forte demande) : état entier
   const game = useGameStore((s) => s.game)
@@ -296,35 +301,28 @@ function DealRow({ deal: { productId, best, revenue, cost }, qty, here = false }
   return (
     <li className="flex items-center justify-between gap-2 text-xs">
       <div className="min-w-0">
-        <p className="truncate font-bold text-ink">
+        <p className="font-bold text-ink">
           {t.product[productId].name}
-          {qty !== undefined && <span className="ml-1 font-normal text-ink-muted">{here ? t.fil.canBuy(qty) : `×${qty}`}</span>}
+          {qty !== undefined && <span className="ml-1 font-normal text-ink-muted">{here ? t.fil.canBuy(qty) : t.fil.held(qty)}</span>}
         </p>
-        <p className="text-ink-muted">{here && cost !== null ? t.fil.buyHere(credits(cost), where) : where}</p>
+        <p className="text-ink-muted">{where}</p>
       </div>
       {revenue !== null && cost !== null && <Margin revenue={revenue} cost={cost} unit={t.market.marginUnit} className="shrink-0" />}
     </li>
   )
 }
 
-type LinesProps = GoProps & {
+type LinesProps = {
   lines: readonly Line[]
 }
 
-/** Lignes d'information, chacune avec son raccourci vers l'onglet où agir */
-function Lines({ lines, onGo }: LinesProps) {
-  const { t } = useI18n()
+/** Lignes d'information colorées */
+function Lines({ lines }: LinesProps) {
   return (
     <ul className="flex flex-col gap-1.5 text-xs">
-      {lines.map(({ key, text, tone, go }) => (
-        <li key={key} className="flex items-start justify-between gap-2">
-          <span className={TONE_TEXT[tone]}>{text}</span>
-          {go && (
-            <Button size="sm" className="shrink-0" aria-label={t.fil.goTo(t.tabs[go])} onClick={() => onGo(go)}>
-              {t.tabs[go]}
-              <ArrowRight size={12} aria-hidden="true" />
-            </Button>
-          )}
+      {lines.map(({ key, text, tone }) => (
+        <li key={key} className={TONE_TEXT[tone]}>
+          {text}
         </li>
       ))}
     </ul>

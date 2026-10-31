@@ -42,10 +42,8 @@ type MarketRowProps = {
 
 type FieldProps = {
   label: string
-  /** Explication en infobulle, derrière une icône « i » */
+  /** Explication ou précision en infobulle, derrière une icône « i » */
   hint?: string
-  /** Occupe deux colonnes de la grille */
-  wide?: boolean
   children: ReactNode
 }
 
@@ -218,6 +216,10 @@ function BulkSales() {
   )
 }
 
+/**
+ * Ligne d'un produit, sur deux lignes : nom (qui ouvre la fiche) et statut, puis cours, stock, rachat et, en soute,
+ * quantité, vente nette et marge ; les précisions (origine, prix d'achat, état, vente de tout) en infobulles
+ */
 function MarketRow({ productId }: MarketRowProps) {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
@@ -253,96 +255,99 @@ function MarketRow({ productId }: MarketRowProps) {
   const sell = (qty: number) => dispatch({ type: 'sell', productId, qty })
 
   return (
-    <li className={`rounded-md border border-l-4 border-line bg-raised/60 px-3 py-2 ${TIER_STYLES[product.tier].stripe}`}>
-      <div className="flex items-start gap-2">
-        <Thumb id={productId} tier={product.tier} />
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className={`text-xs font-bold ${TIER_STYLES[product.tier].text}`}>T{product.tier}</span>
-            <span className="mr-1 font-bold">{t.product[productId].name}</span>
-            {status !== 'neutral' && <Chip tone={status === 'strong' ? 'warning' : 'success'}>{t.market.status[status]}</Chip>}
-            {origin && <span className="text-xs text-ink-muted">{t.market.origin[origin]}</span>}
-            {hiddenQty > 0 && (
-              <Chip tone="night" icon={EyeOff}>
-                {t.hold.hidden(hiddenQty)}
-              </Chip>
-            )}
-          </div>
-          <div className="mt-1 flex flex-wrap gap-1">
-            {product.tags.map((tag) => (
-              <Chip key={tag}>{t.tag[tag].name}</Chip>
-            ))}
+    <li className={`rounded-md border border-l-4 border-line bg-raised/60 px-2 py-1.5 ${TIER_STYLES[product.tier].stripe}`}>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        <div className="flex min-w-0 flex-1 basis-72 items-center gap-2">
+          <Thumb id={productId} tier={product.tier} />
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className={`text-xs font-bold ${TIER_STYLES[product.tier].text}`}>T{product.tier}</span>
+              <ProductSheet productId={productId} />
+              {status !== 'neutral' && <Chip tone={status === 'strong' ? 'warning' : 'success'}>{t.market.status[status]}</Chip>}
+              {hiddenQty > 0 && (
+                <Chip tone="night" icon={EyeOff}>
+                  {t.hold.hidden(hiddenQty)}
+                </Chip>
+              )}
+            </div>
+            <dl className="flex flex-wrap gap-x-3 text-xs">
+              <Field label={t.market.quote}>
+                <Detailed breakdown={quoteBreakdown(game, district, productId)} format={credits} className="font-bold text-ink" />
+                {trend !== null && trend !== 0 && (
+                  <span className={`ml-1 ${trend > 0 ? 'text-success' : 'text-danger'}`}>{t.market.trend(signedPercent(trend, 0))}</span>
+                )}
+              </Field>
+              <Field label={t.market.stock} hint={origin ? t.market.origin[origin] : undefined}>
+                {stock === undefined ? <span className="text-ink-faint">{t.market.notInShop}</span> : stock}
+              </Field>
+              <Field label={t.market.demand} hint={t.market.demandHint}>
+                {quota === null || demandLeft === undefined
+                  ? t.market.unlimited
+                  : t.market.demandLeft(demandLeft, Math.min(quota - demandLeft, demandRefill(quota)))}
+              </Field>
+              {owned > 0 && (
+                <Field
+                  label={t.market.owned}
+                  hint={[...(cost !== null ? [t.market.averageCost(credits(cost))] : []), ...conditions].join(' · ') || undefined}
+                >
+                  <span className={conditions.length > 0 ? 'text-warning' : ''}>{owned}</span>
+                </Field>
+              )}
+              {sale?.first && saleAll && (
+                <Field label={t.market.sale}>
+                  <Detailed breakdown={sale.first} format={credits} />
+                  {saleAll.saturatedQty > 0 && <span className="ml-1 text-danger">{t.market.saturated(saleAll.saturatedQty)}</span>}
+                </Field>
+              )}
+              {sale && saleAll && (
+                <Field label={t.market.margin}>
+                  <Margin revenue={sale.total} cost={sale.cost} unit={t.market.marginUnit} />
+                  {owned > 1 && (
+                    <Tip
+                      label={t.market.marginAll(owned)}
+                      content={
+                        <span className="flex items-center gap-1">
+                          {t.market.marginAll(owned)}
+                          <Margin revenue={saleAll.total} cost={saleAll.cost} />
+                        </span>
+                      }
+                      className="ml-1"
+                    />
+                  )}
+                </Field>
+              )}
+            </dl>
           </div>
         </div>
-      </div>
 
-      <dl className="mt-1 grid grid-cols-2 gap-x-4 gap-y-0.5 text-sm sm:grid-cols-4">
-        <Field label={t.market.quote}>
-          <Detailed breakdown={quoteBreakdown(game, district, productId)} format={credits} />
-          {trend !== null && trend !== 0 && (
-            <span className={`ml-1 text-xs ${trend > 0 ? 'text-success' : 'text-danger'}`}>{t.market.trend(signedPercent(trend, 0))}</span>
-          )}
-        </Field>
-        <Field label={t.market.stock}>{stock === undefined ? <span className="text-ink-faint">{t.market.notInShop}</span> : stock}</Field>
-        <Field label={t.market.demand} hint={t.market.demandHint}>
-          {quota === null || demandLeft === undefined
-            ? t.market.unlimited
-            : t.market.demandLeft(demandLeft, Math.min(quota - demandLeft, demandRefill(quota)))}
-        </Field>
-        {owned > 0 && conditions.length > 0 && (
-          <Field label={t.market.condition} wide>
-            {conditions.join(' · ')}
-          </Field>
-        )}
-        <Field label={t.market.owned}>
-          {owned}
-          {cost !== null && <span className="ml-1 text-xs text-ink-muted">({t.market.averageCost(credits(cost))})</span>}
-        </Field>
-        {sale?.first && saleAll && (
-          <Field label={t.market.sale}>
-            <Detailed breakdown={sale.first} format={credits} className="inline-block" />
-            {saleAll.saturatedQty > 0 && <span className="ml-1 text-xs text-danger">{t.market.saturated(saleAll.saturatedQty)}</span>}
-          </Field>
-        )}
-        {sale && saleAll && (
-          <Field label={t.market.margin} wide>
-            <Margin revenue={sale.total} cost={sale.cost} unit={t.market.marginUnit} />
-            {owned > 1 && (
-              <>
-                <span className="ml-2 text-xs text-ink-muted">{t.market.marginAll(owned)}</span>
-                <Margin revenue={saleAll.total} cost={saleAll.cost} className="ml-1" />
-              </>
-            )}
-          </Field>
-        )}
-      </dl>
-
-      <ProductSheet productId={productId} />
-
-      <div className="mt-2 flex flex-wrap gap-1.5">
-        {stock !== undefined && <QuantityButtons label={t.market.buy} max={buyMax} onPick={buy} maxLabel={t.market.max} variant="primary" />}
-        {owned > 0 && <QuantityButtons label={t.market.sell} max={owned} onPick={sell} maxLabel={t.market.max} variant="danger" />}
-        {owned > 0 && iccRestore !== undefined && (
-          <span className="flex items-center gap-1.5">
-            <Button size="sm" disabled={useError !== null} onClick={() => dispatch({ type: 'useProduct', productId })}>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {stock !== undefined && <QuantityButtons label={t.market.buy} max={buyMax} onPick={buy} maxLabel={t.market.max} variant="primary" />}
+          {owned > 0 && <QuantityButtons label={t.market.sell} max={owned} onPick={sell} maxLabel={t.market.max} variant="danger" />}
+          {owned > 0 && iccRestore !== undefined && (
+            <Button
+              size="sm"
+              disabled={useError !== null}
+              reason={useError ? t.error[useError] : null}
+              onClick={() => dispatch({ type: 'useProduct', productId })}
+            >
               {t.market.use}
             </Button>
-            <span className="text-xs text-ink-muted">{useError ? t.error[useError] : t.market.iccRestore(iccRestore)}</span>
-          </span>
-        )}
+          )}
+          {owned > 0 && iccRestore !== undefined && !useError && <Tip label={t.market.use} content={t.market.iccRestore(iccRestore)} />}
+        </div>
       </div>
     </li>
   )
 }
 
-function Field({ label, hint, wide = false, children }: FieldProps) {
+function Field({ label, hint, children }: FieldProps) {
   return (
-    <div className={`flex gap-1.5 ${wide ? 'col-span-2' : ''}`}>
-      <dt className="flex items-center gap-1 text-ink-faint">
+    <div className="flex items-baseline gap-1">
+      <dt className="flex items-center gap-0.5 text-ink-faint">
         {label}
         {hint && <Tip label={label} content={hint} />}
       </dt>
-      <dd className="flex flex-wrap items-baseline">{children}</dd>
+      <dd className="flex flex-wrap items-baseline text-ink-soft">{children}</dd>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { BookOpen } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
-import { AFTER, DAMAGED_FACTOR, FRESHNESS, QUOTE_NOISE } from '../../data/balance.ts'
+import { AFTER, DAMAGED_FACTOR, FRESHNESS } from '../../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { PRODUCTS } from '../../data/products.ts'
 import { TAGS } from '../../data/tags.ts'
@@ -10,7 +10,7 @@ import { bestRemembered, blurredQuote, productStatus } from '../../engine/market
 import type { District, DistrictId, ProductId, TagId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
-import Button from '../shared/Button.tsx'
+import { FOCUS_RING } from '../shared/focus.ts'
 import Chip from '../shared/Chip.tsx'
 import Modal from '../shared/Modal.tsx'
 import { FIELD, TIER_STYLES } from '../shared/styles.ts'
@@ -30,7 +30,7 @@ type LinesProps = {
   lines: readonly string[]
 }
 
-/** Bouton « Fiche » d'une ligne du marché : ouvre la fiche produit en fenêtre (chap. 7) */
+/** Nom du produit sur sa ligne du marché : il ouvre la fiche produit en fenêtre (chap. 7) */
 export default function ProductSheet({ productId }: ProductSheetProps) {
   const { t } = useI18n()
   // Fenêtre ouverte : état d'interface éphémère
@@ -38,10 +38,16 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
   const product = PRODUCTS[productId]
   return (
     <>
-      <Button size="sm" onClick={() => setOpen(true)}>
-        <BookOpen size={12} aria-hidden="true" />
-        {t.sheet.title}
-      </Button>
+      <button
+        type="button"
+        aria-haspopup="dialog"
+        aria-label={t.sheet.open(t.product[productId].name)}
+        onClick={() => setOpen(true)}
+        className={`inline-flex items-center gap-1 rounded text-left font-bold text-ink hover:text-accent ${FOCUS_RING}`}
+      >
+        {t.product[productId].name}
+        <BookOpen size={12} aria-hidden="true" className="shrink-0 text-ink-faint" />
+      </button>
       <Modal
         open={open}
         onClose={() => setOpen(false)}
@@ -51,6 +57,7 @@ export default function ProductSheet({ productId }: ProductSheetProps) {
             <div className="min-w-0">
               <p className={`text-xs font-bold ${TIER_STYLES[product.tier].text}`}>T{product.tier}</p>
               <h2 className="font-bold">{t.product[productId].name}</h2>
+              <p className="text-xs text-ink-muted italic">{t.product[productId].lore}</p>
               <div className="mt-1 flex flex-wrap gap-1">
                 {product.tags.map((tag) => (
                   <Chip key={tag}>{t.tag[tag].name}</Chip>
@@ -71,7 +78,7 @@ function SheetBody({ productId }: ProductSheetProps) {
   // Profil public (vices de la Loterie compris) et mémoire de marché se lisent sur la partie entière
   const game = useGameStore((s) => s.game)
   const here = game.districtId
-  const { t, percent, signedPercent, credits, multiplier } = useI18n()
+  const { t, percent, signedPercent, credits, change } = useI18n()
   const product = PRODUCTS[productId]
 
   const where = (test: (district: District) => boolean) => DISTRICT_IDS.filter((id) => test(DISTRICTS[id]))
@@ -93,7 +100,7 @@ function SheetBody({ productId }: ProductSheetProps) {
         : []),
       ...(explosion ? [t.sheet.explosion(percent(explosion.chance, 0), explosion.chassisLoss)] : []),
       ...(fleeDropBonus ? [t.sheet.drop(signedPercent(fleeDropBonus, 0))] : []),
-      ...(nightSale ? [t.sheet.nightSale(multiplier(nightSale), tag === AFTER.tag ? multiplier(AFTER.festiveFactor) : null)] : []),
+      ...(nightSale ? [t.sheet.nightSale(change(nightSale), tag === AFTER.tag ? change(AFTER.festiveFactor) : null)] : []),
     ].map((line) => `${t.tag[tag].name} : ${line}`)
   }
 
@@ -174,9 +181,7 @@ function SheetBody({ productId }: ProductSheetProps) {
           </select>
         )}
         <QuoteChart productId={productId} districtId={chartDistrict} />
-        <p className="mt-2 text-xs text-ink-muted">
-          {t.sheet.trendRule(percent(QUOTE_NOISE.persistence, 0), percent(QUOTE_NOISE.shock, 0), percent(QUOTE_NOISE.max, 0))}
-        </p>
+        <p className="mt-2 text-xs text-ink-muted">{t.sheet.trendRule}</p>
       </Section>
       {product.tags.length > 0 && (
         <Section title={t.sheet.tagsTitle}>

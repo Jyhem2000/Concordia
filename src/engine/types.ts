@@ -45,7 +45,7 @@ export type LocationId = 'LOC-D1-1' | 'LOC-D1-2' | 'LOC-D1-3' | 'LOC-D2-1' | 'LO
 
 /** Véhicules, modules, équipiers (chap. 4) */
 export type VehicleId = `VEH-${Four}`
-export type ModuleId = `MOD-${Eight | '09'}`
+export type ModuleId = `MOD-${Eight | '09' | '10'}`
 export type CrewId = `CREW-${Three}`
 
 /** Événements (chap. 6) */
@@ -273,11 +273,18 @@ export type Vehicle = {
 
 export type ModuleCategory = 'conservation' | 'camouflage' | 'tactical'
 
+/**
+ * Montage d'un module au changement de châssis (chap. 4) : électronique qui se démonte et suit le joueur, mécanique que
+ * Mitch adapte contre une part de son prix, ou soudé au châssis et perdu avec lui
+ */
+export type ModuleFitting = 'portable' | 'adaptable' | 'welded'
+
 export type Module = {
   /** Conditions pour que Mitch le vende (catalogue en rayons, chap. 4) */
   requires?: readonly Requirement[]
   price: number
   category: ModuleCategory
+  fitting: ModuleFitting
   /** Jours de retard sur tout le cycle de fraîcheur */
   freshnessDelay?: number
   /** Immunité à la canicule : ni fonte, ni vieillissement, ni usure de châssis */
@@ -300,6 +307,8 @@ export type Module = {
   fakeTerminal?: { bluffBonus: number; bribeRateFactor: number }
   /** Brouilleur de drones : une fois par jour, un contrôle volant devient un barrage fixe ; saisi à la fouille */
   droneJammer?: boolean
+  /** Cloison fantôme : facteur sur la chance que les agents trouvent le double fond */
+  compartmentFactor?: number
 }
 
 /** Acte qui fait se présenter un équipier (chap. 4) : contrôles franchis sans garde à vue, caisses d'un tag vendues, première Fiche S */
@@ -316,6 +325,7 @@ export type Requirement =
   | { kind: 'wealth'; amount: number }
   | { kind: 'tagSales'; tag: TagId; count: number }
   | { kind: 'controls'; count: number }
+  | { kind: 'compartmentHeld'; count: number }
 
 export type Crew = {
   /** Conditions pour qu'il se présente à la Cantine */
@@ -736,6 +746,8 @@ export type GameState = {
     vipOrders: number
     /** Injections du serveur réussies par Glitch (Fantôme) */
     injections: number
+    /** Fouilles où les agents n'ont pas trouvé le double fond (catalogue de Mitch) */
+    compartmentHeld: number
   }
   /** Livraison officielle acceptée, jusqu'à sa livraison ou à 06h00 */
   delivery: { to: DistrictId } | null

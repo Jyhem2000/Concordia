@@ -70,6 +70,12 @@ export const ENDINGS: Readonly<EndingRules> = {
   mafia: { minScore: 150_000 },
 }
 
+/**
+ * Hauts faits de carrière (chap. 7), d'une partie à l'autre : fuites réussies, sécurité minimale du district d'un bluff
+ * réussi, contrats de la Pègre livrés, trajets de nuit, dernier jour pour solder la dette initiale
+ */
+export const FEATS = { escapes: 3, summitSecurity: 5, contracts: 3, nightTrips: 10, debtByDay: 8 }
+
 // ─── Trajets (chap. 1 et 3) ───
 
 /** Surcoût en rations par district traversé */

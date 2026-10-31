@@ -61,14 +61,16 @@ Stock par jour, quota de demande (chap. 2) et bonus de Forte demande de chaque t
 
 ---
 
+**Noms :** un nom de produit tient sur une ligne du marché, 30 caractères au plus ; le reste (origine, détail de lore) va dans la ligne de lore de la fiche produit (chap. 7).
+
 ## Tier 0
 
 | ID | Nom |
 | :--- | :--- |
-| `[T0-01]` | Bio-Briques « Nutri-Standard » (Soja & Insectes) |
+| `[T0-01]` | Bio-Briques « Nutri-Standard » |
 | `[T0-02]` | Eau Minérale Déminéralisée |
-| `[T0-03]` | Antidépresseurs Doux « Sourire+ » |
-| `[T0-04]` | Manuels d'Auto-Censure Citoyenne |
+| `[T0-03]` | Antidépresseurs « Sourire+ » |
+| `[T0-04]` | Manuels d'Auto-Censure |
 
 * **[T0-01]** — Briques de pâte nutritive grise (« Bug-Blocks »), base de la Camisole Métabolique. Leur odeur d'insecte fermenté couvre n'importe quel saucisson.
 * **[T0-02]** — Garantie 0 % d'électrolytes pour éviter l'excitation citoyenne. **Refroidissement moteur :** des caisses (`cooling` dans [`products.ts`](../src/data/products.ts)) sont consommées automatiquement pour annuler l'usure d'un trajet de nuit ou la surchauffe de `[EVT-G01]`, s'il en reste assez. Désactivable depuis le panneau du soir ; la carte indique ce que le dernier trajet a consommé ou usé.
@@ -80,12 +82,12 @@ Stock par jour, quota de demande (chap. 2) et bonus de Forte demande de chaque t
 
 | ID | Nom |
 | :--- | :--- |
-| `[T1-01]` | Sodas « Mega-Cola » (Vrai Sucre) |
+| `[T1-01]` | Sodas « Mega-Cola » |
 | `[T1-02]` | Grains d'Arabica Torréfiés |
 | `[T1-03]` | Beurre de Baratte Demi-Sel |
-| `[T1-04]` | Nouilles Instantanées « MSG-621 » |
-| `[T1-05]` | Cartons de Chewing-gums Nicotine |
-| `[T1-06]` | Bidons d'Huile de Friture Usagée |
+| `[T1-04]` | Nouilles « MSG-621 » |
+| `[T1-05]` | Chewing-gums à la Nicotine |
+| `[T1-06]` | Huile de Friture Usagée |
 
 * **[T1-01]** — Vrai saccharose non-édulcoré.
 * **[T1-02]** — Torréfié en cachette sur le campus de `[D2]`. L'odeur du vrai café attire les patrouilles, mais il ouvre bien des portes.
@@ -98,13 +100,13 @@ Stock par jour, quota de demande (chap. 2) et bonus de Forte demande de chaque t
 
 | ID | Nom |
 | :--- | :--- |
-| `[T2-01]` | Curry Vindaloo « Lava-Grade » (Inde) |
-| `[T2-02]` | Saucisson Sec Ibérique & Chorizo |
+| `[T2-01]` | Curry Vindaloo « Lava-Grade » |
+| `[T2-02]` | Saucisson Ibérique & Chorizo |
 | `[T2-03]` | Caisses de Vinyles Rock & Rap |
-| `[T2-04]` | Lots de « Dumbphones » (type 3310) |
-| `[T2-05]` | Canettes « Tcherno-Bull » (Taurine x10) |
-| `[T2-06]` | Valises de Clés USB « Monde Libre » |
-| `[T2-07]` | Pots de Miel Sauvage Non-Pasteurisé |
+| `[T2-04]` | Lots de « Dumbphones » |
+| `[T2-05]` | Canettes « Tcherno-Bull » |
+| `[T2-06]` | Clés USB « Monde Libre » |
+| `[T2-07]` | Miel Sauvage Non-Pasteurisé |
 
 * **[T2-01]** — Épices importées en fraude. **Action contrôle :** sacrifier une caisse (`bluffAid` dans [`products.ts`](../src/data/products.ts)) neutralise les chiens-robots et annule le malus d'odeur du bluff. La caisse est perdue quel que soit le verdict.
 * **[T2-02]** — Recherché dans les zones ouvrières et chez les bobos, surtout la nuit.
@@ -121,13 +123,13 @@ Stock par jour, quota de demande (chap. 2) et bonus de Forte demande de chaque t
 
 | ID | Nom |
 | :--- | :--- |
-| `[T3-01]` | Roquefort Français « Bio-Hazard » |
+| `[T3-01]` | Roquefort « Bio-Hazard » |
 | `[T3-02]` | Boîtes de Cigares Cubains |
-| `[T3-03]` | Caisses de Whisky Écossais (18 ans) |
-| `[T3-04]` | Antibiotiques & Ivermectine « Old-School » |
-| `[T3-05]` | Sacs de Graines de Tomates Fertiles |
-| `[T3-06]` | Cartes Graphiques Rétro (Sans Bride IA) |
-| `[T3-07]` | Clones Vocaux & Deepfakes sur Mesure |
+| `[T3-03]` | Whisky Écossais Vieilli |
+| `[T3-04]` | Antibiotiques « Old-School » |
+| `[T3-05]` | Graines de Tomates Fertiles |
+| `[T3-06]` | Cartes Graphiques Sans Bride |
+| `[T3-07]` | Clones Vocaux & Deepfakes |
 
 * **[T3-01]** — Moisissure vivante au lait cru, classée Arme Biologique par le DSC.
 * **[T3-02]** — Feuilles de tabac entières importées en fraude. Monnaie de corruption des douaniers d'élite et de `[LOC-D6-1]`.
@@ -141,11 +143,11 @@ Stock par jour, quota de demande (chap. 2) et bonus de Forte demande de chaque t
 
 | ID | Nom |
 | :--- | :--- |
-| `[T4-01]` | Bœuf Wagyu de Kobé & Côtes Argentines |
-| `[T4-02]` | Malles d'Œuvres d'Art du Monde d'Avant |
-| `[T4-03]` | Mallettes de Pass Biométriques « ICC-100% » |
-| `[T4-04]` | Glacières de « Placebo-Officiel » (Anti-Vaccin DSC) |
-| `[T4-05]` | Cuves de Cellules Souches « Jouvence » (Clonage) |
+| `[T4-01]` | Bœuf Wagyu de Kobé |
+| `[T4-02]` | Œuvres d'Art du Monde d'Avant |
+| `[T4-03]` | Pass Biométriques « ICC-100% » |
+| `[T4-04]` | « Placebo-Officiel » du DSC |
+| `[T4-05]` | Cellules Souches « Jouvence » |
 | `[T4-06]` | Vieux Serveur Aeterna |
 
 * **[T4-01]** — L'élevage bovin est puni de rééducation à vie pour « Écocide Méthanier » : cette vraie viande vaut une fortune chez l'élite.

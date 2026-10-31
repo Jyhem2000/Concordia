@@ -54,6 +54,7 @@ export const EARNED: GameState['progress'] = {
   deliveries: 3,
   vipOrders: 0,
   injections: 0,
+  compartmentHeld: 1,
 }
 
 /** Tirage haut : aucun barrage au prochain trajet, échec de la prochaine option tentée */

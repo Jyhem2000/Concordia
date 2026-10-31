@@ -290,7 +290,11 @@ export function exposure(state: GameState): { crates: number; hidden: number; co
 
 /** Chance que les agents trouvent le double fond à une fouille effective, selon la sécurité du district */
 export function compartmentDetection(state: GameState): Breakdown {
-  return breakdown('rule.security-stars', COMPARTMENT.detectionPerStar * stars(state)).build()
+  const chance = breakdown('rule.security-stars', COMPARTMENT.detectionPerStar * stars(state))
+  // Cloison fantôme (chap. 4) : le double fond se fond dans le châssis
+  const ghost = mountedWith(state, 'compartmentFactor')
+  if (ghost) chance.mul(ghost, MODULES[ghost].compartmentFactor ?? 1)
+  return chance.build()
 }
 
 /** Péage des milices : part de la valeur de la soute au prix de base, réduite pour un monstre blindé */
@@ -536,7 +540,9 @@ function keepHidden(state: GameState, ledger: Ledger, hidden: readonly CargoLot[
   if (hidden.length === 0) return state
   ledger.compartment = 'kept'
   ledger.hiddenCrates = cargoUsed(hidden)
-  return { ...state, cargo: [...state.cargo, ...hidden] }
+  // Le double fond a tenu : Mitch l'apprend, et sort sa cloison fantôme (chap. 4)
+  const progress = { ...state.progress, compartmentHeld: state.progress.compartmentHeld + 1 }
+  return { ...state, cargo: [...state.cargo, ...hidden], progress }
 }
 
 /** Refus du péage : pillage des caisses les plus chères, tabassage, châssis cabossé (chap. 3) */

@@ -50,7 +50,6 @@ export const fr = {
   format: {
     /** `amount` est déjà formaté selon la langue ; espace insécable avant le symbole */
     credits: (amount: string) => `${amount}${NBSP}₡`,
-    multiplier: (factor: string) => `×${factor}`,
     dayShort: (day: number, total: number) => `${day}/${total}`,
   },
 
@@ -190,15 +189,18 @@ export const fr = {
   fil: {
     news: 'Actualités',
     newsGlobal: 'Événement du jour, dans toute la ville',
-    newsLocal: 'Événements locaux',
-    newsAftershock: 'Contrecoups',
+    newsLocal: 'Événements locaux, district par district',
+    newsAftershock: "Contrecoups d'hier",
+    newsAftershockInfo:
+      "Le lendemain d'un événement qui a fait bouger des cours, le marché se corrige le temps d'une journée : ce qui a flambé retombe, ce qui a été bradé remonte.",
+    newsInfo:
+      "Le Fil d'Aeterna diffuse à toute la ville les événements de chaque district : ce qui se passe ailleurs se sait sans y aller. Chaque événement s'ouvre sur ses effets.",
     newsLottery: 'Loterie',
     newsInfluence: 'Karma-Cham',
     newsTomorrow: 'Demain',
     noNews: "Rien à signaler aujourd'hui.",
     today: "Aujourd'hui",
     forYou: 'Pour vous',
-    goTo: (tab: string) => `Aller à l'onglet ${tab}`,
     deliveryOffer: (district: string, crates: number, fee: string) =>
       `Livraison officielle : ${crates} caisses scellées pour ${district}, prime ${fee} (à accepter sur la carte)`,
     deliveryActive: (district: string) => `Livraison officielle en cours vers ${district}`,
@@ -241,16 +243,17 @@ export const fr = {
     dealsEmpty: 'Aucun cours vu ailleurs : les marchés des autres districts se découvrent en y passant.',
     dealsOwned: 'Où revendre la soute',
     dealsShop: 'À acheter ici',
-    buyHere: (price: string, sale: string) => `${price} ici → ${sale}`,
     canBuy: (qty: number) => `jusqu'à ${qty} caisse${qty > 1 ? 's' : ''}`,
+    held: (qty: number) => `${qty} en soute`,
+    dealsSeen:
+      'Cours relevés lors de votre dernier passage dans chaque district : ils ont pu bouger depuis. Les marchés des autres districts se découvrent en y passant.',
     best: (quote: string, district: string, age: number) =>
-      `${quote} à ${district} (${age === 0 ? "aujourd'hui" : `il y a ${age} jour${age > 1 ? 's' : ''}`})`,
+      `${district} : ${quote} (${age === 0 ? "vu aujourd'hui" : `vu il y a ${age} jour${age > 1 ? 's' : ''}`})`,
     neverSeen: 'jamais vu ailleurs',
     strongAt: (districts: string) => `Forte demande : ${districts}`,
     alerts: 'Alertes',
     worn: (below: number, penalty: string) =>
       `Chauffeur à bout (moins de ${below} PV) : bluff et fuite à −${penalty}. Le relais et la Morgue soignent.`,
-    noAlert: 'Rien à signaler.',
     rotsTomorrow: (qty: number, product: string) => `${qty} ${product} pourri${qty > 1 ? 'ssent' : 't'} demain matin`,
     damaged: (qty: number, product: string) => `${qty} ${product} abîmée${qty > 1 ? 's' : ''}`,
     fuelLow: (fuel: number, longest: number) =>
@@ -259,6 +262,8 @@ export const fr = {
       `Synthanol : ${fuel} ration${fuel > 1 ? 's' : ''}, pas assez pour quitter le district (${shortest} au minimum)`,
     beacon: (product: string, risk: string) => `${product} à bord : sa balise ajoute ${risk} de risque de contrôle partout`,
     beaconJammed: (product: string) => `${product} à bord : sa balise est brouillée par votre équipière`,
+    wanted: (level: number, max: number, risk: string, flee: string) =>
+      `Fiche S ${level}/${max} : Aeterna vous recherche. Risque de contrôle +${risk} partout, fuite −${flee}. Chaque nuit au relais routier l'efface d'un niveau.`,
     compartmentRoom: (room: number) => `${room} place${room > 1 ? 's' : ''} libre${room > 1 ? 's' : ''} au double fond`,
     journal: 'Bilan & carnet de route',
     yesterday: (day: number) => `Bilan du J${day}`,
@@ -273,10 +278,27 @@ export const fr = {
     hideAll: 'Masquer le carnet',
   },
 
-  /** Palmarès, d'une partie à l'autre (chap. 7) */
+  /** Carrière, d'une partie à l'autre (chap. 7) */
   records: {
-    title: 'Palmarès',
-    none: 'Aucune partie terminée pour l’instant : les fins atteintes s’inscriront ici.',
+    title: 'Carrière',
+    open: 'Carrière',
+    none: 'Aucune partie terminée pour l’instant : les fins atteintes et les hauts faits s’inscriront ici.',
+    endings: 'Fins atteintes',
+    feats: 'Hauts faits',
+    featsThisGame: 'Hauts faits de cette partie',
+    feat: {
+      escapes: { name: 'Pied au plancher', how: (count: number) => `${count} fuites réussies devant la BRC dans une même partie.` },
+      summitBluff: {
+        name: "Langue d'argent",
+        how: (stars: number) => `Un bluff réussi face à la BRC dans un district de ${stars} étoiles ou plus.`,
+      },
+      clean: { name: 'Casier vierge', how: () => 'Une partie gagnée sans un seul jour de garde à vue.' },
+      wantedMax: { name: 'Ennemi public', how: (level: number) => `Fiche S au niveau ${level}, et la partie gagnée quand même.` },
+      contracts: { name: 'Fidèle de Viktor', how: (count: number) => `${count} contrats de la Pègre livrés dans une même partie.` },
+      nightOwl: { name: 'Oiseau de nuit', how: (count: number) => `${count} trajets de nuit dans une même partie.` },
+      earlyDebt: { name: 'Ardoise effacée', how: (day: number) => `La dette initiale soldée au plus tard le J${day}.` },
+      gold: { name: 'Plaqué or', how: () => 'Atteindre le palier Citoyen Or.' },
+    },
     summary: (games: number, defeats: number) =>
       `${games} partie${games > 1 ? 's' : ''} terminée${games > 1 ? 's' : ''}, dont ${defeats} défaite${defeats > 1 ? 's' : ''}.`,
     best: (score: string) => `Meilleur score : ${score}`,
@@ -355,10 +377,12 @@ export const fr = {
       `Santé du chauffeur : à zéro, la partie est perdue. Sous ${below} PV, chauffeur à bout : bluff et fuite à −${penalty}. Fuite ratée, racket, aléas, canicule et cellule en coûtent ; le relais et la Morgue en rendent.`,
     worn: 'À bout : bluff et fuite diminués',
     newGame: 'Nouvelle partie',
-    newGameConfirm: 'Abandonner la partie en cours et recommencer au Jour 1 ? Elle ne comptera pas au palmarès.',
+    newGameConfirm: 'Abandonner la partie en cours et recommencer au Jour 1 ? Elle ne comptera pas à la carrière.',
     newGameAction: 'Abandonner et recommencer',
     offshoreRate: (rate: string) => `Intérêts : ${rate} par jour`,
     wanted: (level: number, max: number) => `Fiche S ${level}/${max}`,
+    wantedInfo: (risk: string, flee: string) =>
+      `Fiche S : votre niveau de recherche dans les fichiers d'Aeterna. Il monte d'un niveau à chaque fuite réussie devant la BRC et à chaque tournée de nuit hors mission passée sans contrôle (l'écart est filmé). Par niveau : risque de contrôle +${risk} partout, fuite −${flee}. Chaque nuit au relais routier l'efface d'un niveau (pas le bivouac, ni la nuit d'une tournée).`,
     wantedGain: (levels: number) => `+${levels} niveau${levels > 1 ? 'x' : ''} de Fiche S`,
     debtLate: 'Dette initiale en retard',
     debtDue: (when: string) => `Dette initiale à solder ${when}`,
@@ -392,6 +416,15 @@ export const fr = {
       'Une pensée négative détectée est une pensée déjà pardonnée par la garde à vue sensorielle.',
       'Le doute est un bug. Nos serveurs pensent pour vous, à 99,98 % sans erreur.',
       "L'ennui n'existe pas sur le Fil Rose. Scrollez, souriez, recommencez.",
+      'Vos rêves de cette nuit ont été jugés conformes. Aucune action requise de votre part.',
+      "Aeterna ne ment jamais : elle réécrit la vérité avant qu'elle ne vous blesse.",
+      'Le bonheur est obligatoire, mais il reste gratuit. Profitez-en tant que le Directoire le permet.',
+      'Penser par soi-même fatigue les neurones. Laissez-les se reposer sur nos serveurs.',
+      "Un Citoyen calme est un Citoyen qui n'a pas encore lu les nouvelles. Restez calme.",
+      'Le silence de vos voisins est une preuve de leur sérénité. Ou de leur prochain signalement.',
+      "L'eau du robinet contient désormais un apaisant citoyen. L'eau des routiers, elle, reste lucide : jalousez-les sans haine.",
+      'Les larmes non autorisées sont recyclées en eau de refroidissement. Pleurez utile.',
+      'Aeterna a calculé votre humeur de demain. Elle sera excellente. Ne la contrariez pas.',
 
       // ─── Camisole Métabolique & terrorisme gastronomique ───
       'Aeterna rappelle que la sobriété est la plus belle des libertés.',
@@ -403,6 +436,15 @@ export const fr = {
       "Mâcher lentement votre ration d'insectes augmente la sensation de satiété de 14 %. Faites un effort.",
       "La caféine fausse votre jugement ; la tisane d'État le remet d'aplomb.",
       "Le vrai sucre ronge vos dents et votre Indice de Conformité Civique. Préférez la douceur de l'obéissance.",
+      'Le fromage affiné est une arme biologique. Toute meule détectée sera confisquée et dégustée par un expert habilité.',
+      'Une odeur de friture dans votre quartier ? Ne paniquez pas, alertez le Comité de Pureté.',
+      'Le goût est une illusion bourgeoise. La texture, une simple suggestion.',
+      "Les épices d'avant-guerre provoquaient des passions. Les passions provoquaient des guerres. Mangez fade.",
+      'Le chocolat noir est classé substance agitatrice. Le chocolat blanc, simple erreur de goût.',
+      'Votre ration de grillons a été enrichie en gratitude. Mâchez avec reconnaissance.',
+      'Un dîner entre amis sans déclaration préalable est un banquet clandestin. Pensez au formulaire.',
+      'Les cantines du DSC servent un menu unique : celui qui vous convient, selon Aeterna.',
+      'Saliver devant une vitrine est un symptôme. Consultez votre terminal de santé civique.',
 
       // ─── Délation, surveillance & Loterie ───
       'Le Comité de Pureté remercie les citoyens qui signalent les citoyens déviants.',
@@ -414,6 +456,15 @@ export const fr = {
       "Parents : les Jeunesses d'Aeterna recrutent dès 6 ans. Un enfant vigile est un foyer tranquille.",
       "Si vous n'avez rien à cacher, pourquoi fermez-vous les portes de votre fourgon à clé ?",
       "Les Drones-Juges de la BRC n'ont ni préjugés, ni fatigue, ni pitié. Respectez les couloirs de livraison.",
+      'Un signalement par jour, et votre ICC vous dira merci.',
+      'La BRC ne fouille que les coupables. Si elle vous fouille, demandez-vous pourquoi.',
+      "Les caméras du réseau de service ne dorment jamais. C'est pour cela qu'elles vous aiment.",
+      'Votre fourgon a dévié de son trajet habituel ? Aeterna aussi se pose la question.',
+      "La Loterie de l'Ascenseur Civique récompense les méritants. Les autres méritent aussi, autre chose.",
+      "Les Citoyens d'Honneur ne paient pas l'eau. Ils paient en exemple.",
+      'Un Citoyen fiché est un Citoyen connu. Être connu, c’est déjà être aimé.',
+      'Les rumeurs sont des virus. Toute rumeur vérifiée devient une information, et toute information appartient au DSC.',
+      "La délation n'est pas une trahison : c'est un service après-vente de la société.",
 
       // ─── Éco-panique, infrastructure & Délestage Thermique ───
       "Votre consommation d'eau a été jugée exemplaire. Presque.",
@@ -424,6 +475,15 @@ export const fr = {
       "L'air chaud rejeté par les échangeurs thermiques est un chauffage gratuit anticipé pour cet hiver.",
       "Chaque goutte de Synthanol économisée est une victoire contre l'effondrement.",
       'Le gazon synthétique de Pastel-Heights ne jaunit jamais, tout comme notre foi dans le Directoire.',
+      "Les galeries de service sont réservées aux véhicules autorisés. Les autres y sont filmés avec beaucoup d'attention.",
+      "Le soleil est surfacturé cet été. Restez à l'ombre des serveurs.",
+      "Une panne d'ascenseur à Hives libère de l'énergie pour illuminer The Glass Spire. Montez les escaliers avec fierté.",
+      'Le recyclage de vos vieux souvenirs alimente le chauffage collectif. Oubliez généreusement.',
+      'Les pigeons de Rust Valley ne sont pas des drones. Ne leur parlez pas quand même.',
+      "Le délestage thermique de ce soir est une fête : éteignez tout, et célébrez l'obscurité réglementaire.",
+      'Chaque fourgon à l’arrêt réduit le smog. Chaque fourgon en mouvement réduit la dette. Choisissez la dette.',
+      'Les fumées violettes des Docks sont parfaitement inoffensives, selon les fumées elles-mêmes.',
+      'Le Synthanol pirate détruit les moteurs et les âmes. Le Synthanol officiel ne détruit que votre budget.',
 
       // ─── Monde Extérieur, économie & contrebande ───
       'Les prix montent pour votre sécurité. Merci de votre compréhension.',
@@ -433,6 +493,17 @@ export const fr = {
       'Les rumeurs de banquets de viande bovine à Olympus-Green sont des hallucinations collectives.',
       "L'Audit Mensuel approche toujours : un portefeuille remis à zéro est une âme purifiée.",
       'Votre rythme cardiaque au dernier portique a été archivé. Bonne route, Citoyen-Livreur.',
+      'La dette est un lien affectueux entre vous et votre créancier. Entretenez-le.',
+      "L'offshore n'existe pas. Ceux qui y placent leur argent non plus, bientôt.",
+      'Un marché libre est un marché qui obéit librement aux cours fixés par Aeterna.',
+      'La contrebande nuit gravement à la balance commerciale et aux rotules des contrebandiers.',
+      "Le Mur protège Concordia du dehors. Le dehors, lui, n'a jamais demandé à entrer. C'est suspect.",
+      'Le troc est interdit. Le paiement en nature aussi. Le paiement tout court, vivement encouragé.',
+      'Les cartels sont un mythe urbain entretenu par des citoyens au portefeuille trop rempli.',
+      'Acheter bas et revendre haut est une spéculation. Acheter haut et revendre bas est du civisme.',
+      "Les chalutiers de Rust Valley ne transportent que du poisson. Le poisson, lui, transporte ce qu'il veut.",
+      "Viktor Varga n'existe pas. Ses intérêts, si.",
+      'Un portefeuille vide est un portefeuille transparent. Le DSC vous remercie de votre transparence.',
     ],
   },
 
@@ -582,6 +653,8 @@ export const fr = {
     tagSales: (tag: string, done: number, needed: number) => `Après ${needed} caisses ${tag} vendues (${done}/${needed}).`,
     controls: (done: number, needed: number) =>
       `Après ${needed} contrôle${needed > 1 ? 's' : ''} de la BRC franchi${needed > 1 ? 's' : ''} sans garde à vue (${done}/${needed}).`,
+    compartmentHeld: (done: number, needed: number) =>
+      `Après ${needed > 1 ? `${needed} fouilles` : 'une fouille'} où la BRC n'a pas trouvé votre double fond (${done}/${needed}) : Mitch aime les clients dont le travail tient.`,
   },
 
   crewDesk: {
@@ -616,8 +689,11 @@ export const fr = {
     availableFrom: (day: number) => `Disponible à nouveau le J${day}.`,
     karma: {
       title: 'Panique Algorithmique sur Commande',
-      rule: (cost: string, factor: string, cooldown: number) =>
-        `${cost} : demain seulement, tous les produits du tag choisi valent ${factor} dans tous les districts (plafond compris). Recharge ${cooldown} jours, prix en hausse à chaque commande.`,
+      rule: (factor: string, cooldown: number) =>
+        `Demain seulement, tous les produits du tag choisi valent ${factor} dans tous les districts (plafond compris). Recharge ${cooldown} jours, prix en hausse à chaque commande.`,
+      pick: 'Tag de la panique',
+      held: (qty: number) => (qty > 0 ? `${qty} en soute` : 'rien en soute'),
+      order: (cost: string) => `Commander la panique (${cost})`,
       pending: (tag: string, day: number) => `Panique commandée : ${tag}, le J${day}.`,
       options: KARMA_OPTIONS,
     },
@@ -692,7 +768,16 @@ export const fr = {
     repair: 'Réparer (PV)',
     modulesTitle: (mounted: number, slots: number) => `Modules (${mounted}/${slots} slots montés)`,
     vehiclesTitle: 'Châssis',
-    vehicleRule: "Le nouveau châssis reprend la marchandise, le carburant et les modules ; l'ancien est perdu, sans reprise.",
+    vehicleRule:
+      "Le nouveau châssis reprend la marchandise et le carburant ; l'ancien est perdu, sans reprise. Les modules électroniques suivent, les mécaniques sont adaptés (compris dans le prix), les soudés restent sur l'ancien.",
+    withRefit: (refit: string) => `(dont ${refit} d'adaptation des modules)`,
+    weldedLost: (modules: string) => `Perdu avec l'ancien châssis (soudé) : ${modules}.`,
+    fitting: { portable: 'Démontable', adaptable: 'Adaptable', welded: 'Soudé' },
+    fittingInfo: {
+      portable: () => 'Électronique : il se démonte et suit le joueur sur un nouveau châssis, sans frais.',
+      adaptable: (refit: string) => `Mécanique : Mitch l'adapte à un nouveau châssis pour ${refit}.`,
+      welded: () => "Soudé au châssis : perdu si l'on change de véhicule.",
+    },
     vehicleStats: (cargo: number, hidden: number, slots: number, chassis: number, tank: number, day: number, night: number) =>
       `Soute ${cargo} (double fond ${hidden}) · ${slots} slot${slots > 1 ? 's' : ''} · châssis ${chassis} PV · réservoir ${tank} · ${day} ration${day > 1 ? 's' : ''} de jour, ${night} de nuit`,
     buy: 'Acheter',
@@ -722,6 +807,8 @@ export const fr = {
       `Éjection par les égouts (${chance}, sans dégât, sauf ${sealed}), recharge ${cooldown} jours ; le lendemain, 0 à ${recovery} des caisses rapportées.`,
     fakeTerminal: (bonus: string, factor: string) => `Bluff ${bonus} ; tarif standard de corruption ${factor}.`,
     droneJammer: 'Une fois par jour, un contrôle volant devient un barrage fixe. Découvert à la fouille : saisi, garde à vue.',
+    ghostWall: (factor: string) =>
+      `Isolation anti-odeur, anti-scanner, anti-chien : à la fouille, chance que les agents trouvent le double fond ${factor}. Ne cache pas l'odeur de la soute, ni le chauffeur.`,
   },
 
   place: {
@@ -793,10 +880,10 @@ export const fr = {
     quote: 'Cours',
     stock: 'Stock',
     owned: 'En soute',
-    demand: 'Rachat au cours',
+    demand: 'Rachat',
     demandHint:
       "Caisses que ce district rachète encore aujourd'hui au plein cours. Au-delà, le prix est saturé et Aeterna note un pic suspect. Le rachat remonte chaque matin.",
-    sale: 'Vente nette',
+    sale: 'Vente',
     notInShop: 'Hors boutique',
     unlimited: 'Illimitée',
     demandLeft: (left: number, refill: number) => (refill > 0 ? `${left} (+${refill} demain)` : `${left}`),
@@ -811,7 +898,7 @@ export const fr = {
     iccRestore: (icc: number) => `+${icc} % d'ICC, hors plafond, une seule fois par partie`,
     margin: 'Marge',
     marginUnit: '/u',
-    marginAll: (qty: number) => `tout (${qty}) :`,
+    marginAll: (qty: number) => `En vendant tout (${qty}) :`,
     buy: 'Acheter',
     sell: 'Vendre',
     max: 'MAX',
@@ -820,15 +907,20 @@ export const fr = {
       strong: 'Forte demande',
       neutral: '',
     },
-    origin: { official: 'Socle officiel', arrival: 'Arrivage du jour', exceptional: "Arrivage d'événement" },
+    origin: {
+      official: 'Socle officiel : le Tier 0 est en boutique partout, chaque jour.',
+      arrival: 'Arrivage du jour : un complément tiré au hasard ce matin.',
+      exceptional: "Arrivage d'événement : en boutique grâce à l'événement du jour.",
+    },
   },
 
   sheet: {
     title: 'Fiche',
+    open: (product: string) => `${product} : ouvrir la fiche`,
     quotesTitle: 'Cours observés, district par district',
     historyDistrict: 'District de la courbe',
-    trendRule: (persistence: string, shock: string, max: string) =>
-      `Chaque district a sa propre économie : un produit n'a pas le même cours d'un district à l'autre, ni la même tendance. Chaque matin, le cours de chaque district garde ${persistence} de son écart de la veille au cours normal, plus un choc tiré au hasard (jusqu'à ±${shock}), sans s'écarter de plus de ±${max} : une baisse dure souvent quelques jours, puis le cours revient vers la normale. Les événements s'y ajoutent.`,
+    trendRule:
+      "Chaque district a sa propre économie : un produit n'a ni le même cours ni la même tendance d'un district à l'autre. Les cours dérivent d'un jour à l'autre ; une baisse dure souvent quelques jours, puis le cours revient vers la normale. Les événements s'y ajoutent. À vous de repérer les bons moments.",
     tagsTitle: 'Tags',
     actionsTitle: 'Actions',
     seizureTitle: 'Contrôle',
@@ -991,7 +1083,9 @@ export const fr = {
     fuelPrice: (price: string) => `Synthanol ${price} la ration`,
     places: (names: string) => `Lieux : ${names}`,
     fuelReminder: (fuel: number, tank: number) => `Synthanol ${fuel}/${tank} : le plein se fait à la pompe, onglet Lieux.`,
-    mapHint: 'Survolez ou touchez un district : sa fiche et son itinéraire s’affichent ; toutes les destinations sont détaillées plus bas.',
+    mapHint:
+      "Survolez ou touchez un district : sa fiche complète et son itinéraire s'affichent sous la carte. En bleu, vous êtes ici ; en ambre, le district choisi. Les autres destinations sont listées à part.",
+    destinations: 'Autres destinations',
     here: 'Vous êtes ici',
     direct: 'Liaison directe',
     via: (names: string) => `Via ${names}`,
@@ -1044,6 +1138,8 @@ export const fr = {
     siphon: 'Corvée DSC',
     siphonHint: "Une ration contre de l'ICC et une demi-journée.",
     curfewTitle: '20h00 — couvre-feu sanitaire',
+    curfewInfo:
+      'À 20h00, Aeterna confine les citoyens chez eux, pour leur hygiène de sommeil : rues vides, marché de rue seulement, lieux fermés. La nuit appartient aux véhicules autorisés du DSC, dans les galeries de service filmées, et aux afters, ces fêtes clandestines où la foule brave le couvre-feu.',
     wait: 'Attendre le soir',
     waitHint: 'Rester sur place sans trajet de jour : la journée passe, marché de rue seulement, lieux fermés.',
     beforeEvening: 'Le soir venu (après le trajet du jour, ou en attendant le soir) : mission de nuit, tournée clandestine ou sommeil.',
@@ -1058,6 +1154,11 @@ export const fr = {
       `${product} est à bord : si les agents fouillent la soute, c'est l'exécution sommaire et la fin de la partie.`,
     lethalAction: 'Partir quand même',
     clandestineTour: 'Tournée clandestine',
+    clandestineShort: 'Hors mission : risque accru, Fiche S.',
+    missionTourShort: 'Trajet couvert, prime.',
+    sleepShort: "Repos jusqu'à 06h00.",
+    sleepRelayHint: "Nuit au relais routier du DSC : gain d'ICC et de Santé, épuisement effacé, Fiche S baissée d'un niveau.",
+    bivouacHint: 'Bivouac, faute de relais ici : épuisement effacé, mais ni ICC, ni Santé, et la Fiche S ne baisse pas.',
     clandestineHint: (wanted: string) => `Hors mission, vers le district de votre choix : risque accru, et ${wanted} si le trajet passe.`,
     injectionHint: (next: number, needed: number) =>
       `Serveur Aeterna en soute et Glitch au travail : si tu arrives sans garde à vue, elle injecte un morceau de ton dossier (${next}/${needed}).`,
@@ -1212,38 +1313,41 @@ export const fr = {
   } satisfies Record<TagId, Named>,
 
   product: {
-    'T0-01': { name: 'Bio-Briques « Nutri-Standard » (Soja & Insectes)' },
-    'T0-02': { name: 'Eau Minérale Déminéralisée' },
-    'T0-03': { name: 'Antidépresseurs Doux « Sourire+ »' },
-    'T0-04': { name: "Manuels d'Auto-Censure Citoyenne" },
-    'T0-05': { name: 'Caisses scellées du DSC' },
-    'T1-01': { name: 'Sodas « Mega-Cola » (Vrai Sucre)' },
-    'T1-02': { name: "Grains d'Arabica Torréfiés" },
-    'T1-03': { name: 'Beurre de Baratte Demi-Sel' },
-    'T1-04': { name: 'Nouilles Instantanées « MSG-621 »' },
-    'T1-05': { name: 'Cartons de Chewing-gums Nicotine' },
-    'T1-06': { name: "Bidons d'Huile de Friture Usagée" },
-    'T2-01': { name: 'Curry Vindaloo « Lava-Grade » (Inde)' },
-    'T2-02': { name: 'Saucisson Sec Ibérique & Chorizo' },
-    'T2-03': { name: 'Caisses de Vinyles Rock & Rap' },
-    'T2-04': { name: 'Lots de « Dumbphones » (type 3310)' },
-    'T2-05': { name: 'Canettes « Tcherno-Bull » (Taurine x10)' },
-    'T2-06': { name: 'Valises de Clés USB « Monde Libre »' },
-    'T2-07': { name: 'Pots de Miel Sauvage Non-Pasteurisé' },
-    'T3-01': { name: 'Roquefort Français « Bio-Hazard »' },
-    'T3-02': { name: 'Boîtes de Cigares Cubains' },
-    'T3-03': { name: 'Caisses de Whisky Écossais (18 ans)' },
-    'T3-04': { name: 'Antibiotiques & Ivermectine « Old-School »' },
-    'T3-05': { name: 'Sacs de Graines de Tomates Fertiles' },
-    'T3-06': { name: 'Cartes Graphiques Rétro (Sans Bride IA)' },
-    'T3-07': { name: 'Clones Vocaux & Deepfakes sur Mesure' },
-    'T4-01': { name: 'Bœuf Wagyu de Kobé & Côtes Argentines' },
-    'T4-02': { name: "Malles d'Œuvres d'Art du Monde d'Avant" },
-    'T4-03': { name: 'Mallettes de Pass Biométriques « ICC-100% »' },
-    'T4-04': { name: 'Glacières de « Placebo-Officiel » (Anti-Vaccin DSC)' },
-    'T4-05': { name: 'Cuves de Cellules Souches « Jouvence » (Clonage)' },
-    'T4-06': { name: 'Vieux Serveur Aeterna' },
-  } satisfies Record<ProductId, Named>,
+    'T0-01': { name: 'Bio-Briques « Nutri-Standard »', lore: 'Soja et insectes compressés, saveur neutre garantie par décret.' },
+    'T0-02': { name: 'Eau Minérale Déminéralisée', lore: "Rien dedans, et c'est bien là sa promesse." },
+    'T0-03': { name: 'Antidépresseurs « Sourire+ »', lore: "La bonne humeur d'État, en comprimés doux, sur ordonnance automatique." },
+    'T0-04': { name: "Manuels d'Auto-Censure", lore: "Le guide officiel du Citoyen qui se corrige avant qu'on le corrige." },
+    'T0-05': { name: 'Caisses scellées du DSC', lore: 'Contenu inconnu, plombs intacts : on livre, on ne regarde pas.' },
+    'T1-01': { name: 'Sodas « Mega-Cola »', lore: 'Au vrai sucre, celui que le Comité de Pureté traque dans les poubelles.' },
+    'T1-02': { name: "Grains d'Arabica Torréfiés", lore: 'Une odeur qui trahit à trois rues : le café réveille, et Aeterna déteste ça.' },
+    'T1-03': { name: 'Beurre de Baratte Demi-Sel', lore: 'Gras, salé, interdit : le cholestérol en motte.' },
+    'T1-04': { name: 'Nouilles « MSG-621 »', lore: 'Instantanées, hyper-salées, exhausteur de goût dopé : la consolation des dortoirs.' },
+    'T1-05': { name: 'Chewing-gums à la Nicotine', lore: 'Le vice qui se mâche en silence, par cartons entiers.' },
+    'T1-06': { name: 'Huile de Friture Usagée', lore: 'Bidons noirs de friteries clandestines, carburant des nuits grasses.' },
+    'T2-01': { name: 'Curry Vindaloo « Lava-Grade »', lore: "Importé d'Inde par des routes oubliées, il brûle la langue et les capteurs." },
+    'T2-02': { name: 'Saucisson Ibérique & Chorizo', lore: "Charcuterie sèche du Monde d'Avant, au parfum de rébellion." },
+    'T2-03': { name: 'Caisses de Vinyles Rock & Rap', lore: "Des sillons pleins de colère d'avant-guerre, sans aucune connexion." },
+    'T2-04': { name: 'Lots de « Dumbphones »', lore: 'Des téléphones à clapet sans Cloud : on appelle sans être écouté.' },
+    'T2-05': { name: 'Canettes « Tcherno-Bull »', lore: 'Taurine à dose déraisonnable : de quoi tenir une nuit, ou doubler un barrage.' },
+    'T2-06': { name: 'Clés USB « Monde Libre »', lore: "Des valises de mémoires interdites : livres, films, archives d'avant." },
+    'T2-07': { name: 'Miel Sauvage Non-Pasteurisé', lore: 'Des ruches hors registre, des abeilles sans badge.' },
+    'T3-01': { name: 'Roquefort « Bio-Hazard »', lore: 'Un fromage français classé arme biologique, et adoré pour ça.' },
+    'T3-02': { name: 'Boîtes de Cigares Cubains', lore: 'Roulés à la main, fumés en cachette au sommet de la pyramide.' },
+    'T3-03': { name: 'Whisky Écossais Vieilli', lore: 'Des fûts plus âgés que le Directoire, et bien plus respectés.' },
+    'T3-04': {
+      name: 'Antibiotiques « Old-School »',
+      lore: "Antibiotiques et ivermectine d'avant les protocoles : ils soignent sans demander l'avis d'Aeterna.",
+    },
+    'T3-05': { name: 'Graines de Tomates Fertiles', lore: 'Des semences qui repoussent : un crime contre le monopole agricole.' },
+    'T3-06': { name: 'Cartes Graphiques Sans Bride', lore: 'Du matériel rétro sans bride IA, assez puissant pour penser tout seul.' },
+    'T3-07': { name: 'Clones Vocaux & Deepfakes', lore: 'Des voix et des visages sur mesure, pour mentir aux portiques.' },
+    'T4-01': { name: 'Bœuf Wagyu de Kobé', lore: 'Wagyu et côtes argentines : la viande rouge, luxe suprême des élites.' },
+    'T4-02': { name: "Œuvres d'Art du Monde d'Avant", lore: 'Des toiles sauvées des purges, roulées dans des malles.' },
+    'T4-03': { name: 'Pass Biométriques « ICC-100% »', lore: 'Une identité de Citoyen modèle, le temps de passer un contrôle.' },
+    'T4-04': { name: '« Placebo-Officiel » du DSC', lore: 'Le vaccin officiel est un placebo ; celui-ci, en glacière, soigne vraiment.' },
+    'T4-05': { name: 'Cellules Souches « Jouvence »', lore: 'Des cuves de clonage pour élites qui refusent de vieillir.' },
+    'T4-06': { name: 'Vieux Serveur Aeterna', lore: "Une baie d'avant la mise à jour : la mémoire qu'Aeterna voudrait effacer." },
+  } satisfies Record<ProductId, Named & { lore: string }>,
 
   district: {
     D1: { name: 'Hives', subtitle: 'Les Ruches Grises' },
@@ -1292,6 +1396,7 @@ export const fr = {
     'MOD-07': { name: 'Trappe de Largage « Égouts »' },
     'MOD-08': { name: 'Faux Terminal « Citoyen Or »' },
     'MOD-09': { name: 'Brouilleur de Drones « Grésil »' },
+    'MOD-10': { name: 'Cloison Fantôme' },
   } satisfies Record<ModuleId, Named>,
 
   crew: {

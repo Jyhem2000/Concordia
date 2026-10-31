@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes } from 'react'
 import { FOCUS_RING } from './focus.ts'
+import Tip from './Tip.tsx'
 
 /** `primary` : action principale ; `danger` : action risquée ou destructrice ; `default` : le reste */
 export type ButtonVariant = 'default' | 'primary' | 'danger'
@@ -8,6 +9,8 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant
   /** `sm` pour les boutons serrés d'une ligne de tableau */
   size?: 'sm' | 'md'
+  /** Bouton grisé : la raison s'affiche au survol, au toucher ou au focus, plutôt que sous le bouton */
+  reason?: string | null
 }
 
 const variants: Record<ButtonVariant, string> = {
@@ -21,12 +24,21 @@ const sizes = {
   md: 'px-3 py-1.5 text-sm',
 }
 
+const BASE = 'inline-flex items-center justify-center gap-1.5 rounded-md border uppercase transition-colors'
+
 /** Bouton de l'interface : `type="button"` par défaut pour ne jamais soumettre un formulaire par accident */
-export default function Button({ variant = 'default', size = 'md', className = '', ...props }: ButtonProps) {
+export default function Button({ variant = 'default', size = 'md', className = '', reason, ...props }: ButtonProps) {
+  // Grisé avec une raison : un déclencheur d'infobulle à l'allure du bouton grisé (un bouton désactivé ne reçoit ni survol ni toucher)
+  if (props.disabled && reason)
+    return (
+      <Tip content={reason} className={`${BASE} opacity-35 ${variants[variant]} ${sizes[size]} ${className}`}>
+        {props.children}
+      </Tip>
+    )
   return (
     <button
       type="button"
-      className={`inline-flex items-center justify-center gap-1.5 rounded-md border uppercase transition-colors disabled:cursor-not-allowed disabled:opacity-35 ${FOCUS_RING} ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`${BASE} disabled:cursor-not-allowed disabled:opacity-35 ${FOCUS_RING} ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     />
   )

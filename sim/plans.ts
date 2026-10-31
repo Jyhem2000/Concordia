@@ -16,7 +16,7 @@ export const PLANS: readonly Plan[] = [
   { name: 'Nuit festive', modules: ['MOD-04', 'MOD-06'], nightOwl: true, runner: true },
   { name: 'Corruption', modules: ['MOD-08'], crew: 'CREW-01', favorTags: ['TAG-ADDICTIVE'] },
   { name: 'Rentier', modules: [], crew: 'CREW-02', offshoreFromDay: 6 },
-  { name: 'Haut tier', vehicle: 'VEH-04', modules: ['MOD-07'], favorTags: ['TAG-FLAMMABLE'] },
+  { name: 'Haut tier', vehicle: 'VEH-04', modules: ['MOD-07', 'MOD-10'], favorTags: ['TAG-FLAMMABLE'] },
   // Étape 2 : plans à logique propre
   { name: 'Fuite au sommet', modules: ['MOD-06', 'MOD-09'], crew: 'CREW-02', runner: true, favorTags: ['TAG-CULTURE'] },
   {

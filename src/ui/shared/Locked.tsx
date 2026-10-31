@@ -30,6 +30,8 @@ export default function Locked({ requires = [] }: LockedProps) {
         return r.tagSales(t.tag[requirement.tag].name, done, needed)
       case 'controls':
         return r.controls(done, needed)
+      case 'compartmentHeld':
+        return r.compartmentHeld(done, needed)
     }
   }
   const missing = requires.flatMap((requirement) => {

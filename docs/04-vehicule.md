@@ -4,8 +4,8 @@
 
 ## Véhicules
 * **Achat** uniquement à `[LOC-D4-1]`, de jour.
-* **Changement de châssis :** le nouveau véhicule reprend la marchandise, le carburant (dans la limite de son réservoir) et les modules possédés ; l'ancien est **perdu** (aucune reprise). Le nouveau châssis arrive en parfait état.
-  * Achat refusé si la soute actuelle dépasse la capacité du nouveau véhicule.
+* **Changement de châssis :** le nouveau véhicule reprend la marchandise et le carburant (dans la limite de son réservoir) ; l'ancien est **perdu** (aucune reprise). Le nouveau châssis arrive en parfait état. Les modules possédés le suivent selon leur **montage** (voir *Modules*) : les démontables sans frais, les adaptables contre le prix de leur adaptation, compris dans le prix du châssis ; les soudés restent sur l'ancien et sont perdus.
+  * Achat refusé si la soute actuelle dépasse la capacité du nouveau véhicule, ou si le Cash-Puce ne couvre pas le châssis et les adaptations.
   * Si le nouveau véhicule a moins de slots, les derniers modules montés sont démontés (ils restent possédés).
 * *Lore :* tous les châssis sont des utilitaires officiellement enregistrés auprès du DSC (modifiés en secret par Mécano-Mitch), d'où leur accès à tous les quais de service.
 * *Conso :* par trajet, selon la phase, plus le surcoût des districts traversés (chap. 3).
@@ -26,7 +26,7 @@ Chaque châssis a un **double fond** d'origine, soudé par Mécano-Mitch : quelq
 * **À la main, depuis la soute (chap. 7) :** **retirer** un produit du double fond libère ses places ; **cacher** un produit ne se fait que dans une place libre. Utile quand un événement fait exploser le cours d'un produit moins cher ailleurs.
 * **Sortie de caisses :** une vente, une consommation ou une perte prend d'abord les caisses visibles du produit ; le double fond ne compte jamais plus de caisses que la soute n'en a.
 * **Trop encombrant :** `[T4-06]` n'y entre pas (une baie de serveur, chap. 2). La règle d'exécution sommaire et la fin « Saboteur » ne changent donc pas.
-* **À la fouille effective de la BRC** (chap. 5) : un second jet décide si les agents trouvent le double fond. Chance de le trouver : par étoile de sécurité du district (`COMPARTMENT` dans [`balance.ts`](../src/data/balance.ts)), du simple coup d'œil des ruches aux scanners du sommet.
+* **À la fouille effective de la BRC** (chap. 5) : un second jet décide si les agents trouvent le double fond. Chance de le trouver : par étoile de sécurité du district (`COMPARTMENT` dans [`balance.ts`](../src/data/balance.ts)), du simple coup d'œil des ruches aux scanners du sommet ; réduite par la cloison fantôme `[MOD-10]`.
   * **Non trouvé :** ses caisses sont gardées. La sanction est jugée sur la soute visible seulement (formalité si elle est légale, sanction de bas tier si le haut tier était caché).
   * **Trouvé :** tout est confisqué comme sans double fond, la sanction est jugée sur toute la soute, plus une perte d'ICC pour dissimulation.
 * **Ne cache pas l'odeur :** le risque d'interception, le bluff et le tarif de corruption se calculent sur toute la soute. Le double fond protège la marchandise, pas le chauffeur.
@@ -37,12 +37,18 @@ Chaque châssis a un **double fond** d'origine, soudé par Mécano-Mitch : quelq
 
 ## Modules
 * Chaque châssis a un nombre strict de slots. Les modules s'achètent **définitivement** à `[LOC-D4-1]` ; un module acheté est monté aussitôt s'il reste un slot libre. C'est **uniquement là** qu'on monte ou démonte (gratuitement) ses modules. Le montage est donc un choix de build pour plusieurs jours, pas un réglage par trajet.
-* Seuls les modules **montés** agissent. Prix, catégorie et chiffres : `MODULES` dans [`vehicles.ts`](../src/data/vehicles.ts).
+* Seuls les modules **montés** agissent. Prix, catégorie, montage et chiffres : `MODULES` dans [`vehicles.ts`](../src/data/vehicles.ts).
+* **Montage,** affiché à l'achat (ce que devient le module au changement de châssis) :
+  * **Démontable** (électronique) : il se démonte et suit le joueur, sans frais : `[MOD-05]`, `[MOD-08]`, `[MOD-09]`.
+  * **Adaptable** (mécanique) : Mitch l'adapte au nouveau châssis contre une part de son prix (`GARAGE.refitShare` dans [`locations.ts`](../src/data/locations.ts)) : `[MOD-01]`, `[MOD-02]`, `[MOD-04]`, `[MOD-06]`.
+  * **Soudé** au châssis : perdu avec lui : `[MOD-03]` (doublure de toute la soute), `[MOD-07]` (trappe découpée dans le plancher), `[MOD-10]` (cloison du double fond).
+  * *Intention :* changer de véhicule devient un choix de build. Un module soudé s'achète pour le châssis qu'on garde.
 * **Le catalogue en rayons :** Mitch ne sort pas tout à n'importe qui (`requires` de chaque module et véhicule). Le garage affiche tout, avec la condition de ce qui est réservé et la progression vers elle.
   * **Rayon libre** dès le Jour 1 : `[MOD-02]`, `[MOD-04]`, réparations.
   * **Matériel de contrebande**, une fois la dette initiale soldée (client solvable) : `[MOD-01]`, `[MOD-03]`, `[MOD-06]`, `[MOD-07]`, et les châssis `[VEH-03]` et `[VEH-04]`.
   * **Voie pègre**, pour les fichés (première Fiche S) : `[MOD-05]`, `[MOD-09]`, de quoi tromper les caméras et les drones.
   * **Voie officielle**, après quelques commandes du DSC livrées : `[VEH-02]` aux couleurs du DSC et `[MOD-08]`, le faux terminal « Citoyen Or ».
+  * **Pièce de maître**, une fois que le double fond a tenu à une fouille de la BRC (Mitch aime les clients dont le travail tient) : `[MOD-10]`, la cloison fantôme.
 
 | ID | Nom | Effet |
 | :--- | :--- | :--- |
@@ -55,6 +61,7 @@ Chaque châssis a un **double fond** d'origine, soudé par Mécano-Mitch : quelq
 | `[MOD-07]` | Trappe de Largage « Égouts » | Mode d'éjection par les égouts : partout sauf en `[D6]` (dalle bio-scellée), y compris en `[D5]` où l'éjection manuelle est interdite. Cooldown en jours à compter de l'usage, réussi ou non. Réussite plus probable que le mode manuel, sans dégât. **Récupération :** le lendemain à 06h00, des complices rapportent une part tirée au hasard (uniformément, arrondie à la caisse inférieure) des caisses larguées, dans la limite de la place en soute ; le reste est perdu. Les caisses rapportées gardent leur état. |
 | `[MOD-08]` | Faux Terminal « Citoyen Or » | Bonus au bluff ; tarif standard de corruption réduit. |
 | `[MOD-09]` | Brouilleur de Drones « Grésil » | **Une fois par jour**, quand un drone repère le camion, il le fait décrocher : le **contrôle volant devient un barrage fixe** un peu plus loin (fuite et éjection redeviennent possibles ; l'interception a toujours lieu). **Sabotage d'infrastructure :** découvert lors d'une fouille effective (chap. 5), il est saisi (perdu) et la sanction comprend une garde à vue, même avec une soute de bas tier ou légale. |
+| `[MOD-10]` | Cloison Fantôme | Doublure isolante du double fond (anti-odeur, anti-scanner, anti-chien) : à la fouille, la chance que les agents trouvent le double fond est réduite (multiplicateur, chap. 5). Ne cache ni l'odeur de la soute (le risque, le bluff et la corruption se calculent toujours sur toute la soute) ni le chauffeur. Module de haut de gamme : cher, soudé, réservé. |
 
 ---
 

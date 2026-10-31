@@ -26,14 +26,14 @@ export default function BreakdownView({ breakdown, formatTotal }: BreakdownViewP
 }
 
 function Lines({ lines }: LinesProps) {
-  const { label, number, multiplier } = useI18n()
+  const { label, number, change } = useI18n()
 
   const operand = (line: BreakdownLine) => {
     switch (line.op) {
       case 'add':
         return `${line.value >= 0 ? '+' : '−'}${number(Math.abs(line.value))}`
       case 'mul':
-        return multiplier(line.value)
+        return change(line.value)
       case 'base':
         return number(line.value)
       default:

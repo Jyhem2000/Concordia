@@ -15,7 +15,7 @@ export type Unlock = { unlocked: boolean; done: number; needed: number }
 
 /** Progression vers une condition (chap. 1, 3 et 4) */
 export function requirementProgress(state: GameState, requirement: Requirement): Unlock {
-  const { controlsPassed, tagSales, flagged, deliveries } = state.progress
+  const { controlsPassed, tagSales, flagged, deliveries, compartmentHeld } = state.progress
   const count = (done: number, needed: number): Unlock => ({ unlocked: done >= needed, done: Math.min(done, needed), needed })
   switch (requirement.kind) {
     case 'debtPaid':
@@ -36,6 +36,8 @@ export function requirementProgress(state: GameState, requirement: Requirement):
       return count(tagSales[requirement.tag] ?? 0, requirement.count)
     case 'controls':
       return count(controlsPassed, requirement.count)
+    case 'compartmentHeld':
+      return count(compartmentHeld, requirement.count)
   }
 }
 

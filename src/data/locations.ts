@@ -8,8 +8,8 @@ import type { DistrictId, GlobalEventId, Location, LocationId, ProductId, Requir
 /** Cantine des Chauffeurs : Synthanol au tarif syndical (la Lucidité se recharge dans son district, de jour) */
 export const CANTINE = { fuelPrice: 60 }
 
-/** Garage de Mécano-Mitch : prix d'un PV de châssis réparé */
-export const GARAGE = { repairPerPv: 60 }
+/** Garage de Mitch : prix d'un PV de châssis réparé ; adaptation d'un module mécanique à un nouveau châssis, en part de son prix */
+export const GARAGE = { repairPerPv: 60, refitShare: 0.25 }
 
 /** Karma-Cham : panique algorithmique (hausse par usage), bonus d'influence le lendemain */
 export const KARMA = {

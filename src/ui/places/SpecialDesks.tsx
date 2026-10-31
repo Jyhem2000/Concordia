@@ -29,13 +29,15 @@ import {
   type MorgueService,
 } from '../../engine/services.ts'
 import type { ActionError } from '../../engine/actions.ts'
-import type { DistrictId, ForgeryCard, ProductId, Requirement } from '../../engine/types.ts'
+import type { DistrictId, ForgeryCard, ProductId, Requirement, TagId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import Locked from '../shared/Locked.tsx'
 import { FIELD } from '../shared/styles.ts'
 import Hint from '../shared/Hint.tsx'
+import Tip from '../shared/Tip.tsx'
+import { FOCUS_RING } from '../shared/focus.ts'
 
 type DeskRowProps = {
   label: string
@@ -68,32 +70,59 @@ function DeskRow({ label, detail, error, onClick, requires }: DeskRowProps) {
   )
 }
 
-/** Karma-Cham : panique algorithmique sur un tag, effet le lendemain (chap. 3) */
+/**
+ * Karma-Cham : panique algorithmique sur un tag, effet le lendemain (chap. 3). On choisit le tag parmi des pastilles
+ * (avec les caisses du tag déjà en soute), puis un seul bouton commande la panique, prix affiché.
+ */
 export function KarmaDesk() {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
-  const { t, credits, multiplier } = useI18n()
+  const { t, credits, change } = useI18n()
   const d = t.desks.karma
   const from = availableFrom(game, 'influence', KARMA.cooldownDays)
+  // Tag choisi : état d'interface éphémère
+  const [picked, setPicked] = useState<TagId>(KARMA.tags[0])
+  const error = checkInfluence(game, picked)
+  // Caisses du tag en soute : ce que la panique ferait monter demain
+  const held = (tag: TagId) => game.cargo.reduce((total, lot) => (PRODUCTS[lot.productId].tags.includes(tag) ? total + lot.qty : total), 0)
 
   return (
     <div className="border-t border-line pt-2">
-      <p className="font-bold">{d.title}</p>
-      <Hint>{d.rule(credits(karmaCost(game)), multiplier(KARMA.factor), KARMA.cooldownDays)}</Hint>
+      <p className="flex items-center gap-1 font-bold">
+        {d.title}
+        <Tip label={d.title} content={d.rule(change(KARMA.factor), KARMA.cooldownDays)} />
+      </p>
       <Locked requires={SERVICE_REQUIREMENTS.influence} />
       {game.influence && game.influence.day >= game.day && <Hint tone="accent">{d.pending(t.tag[game.influence.tag].name, game.influence.day)}</Hint>}
       {from !== null && <Hint>{t.desks.availableFrom(from)}</Hint>}
-      <ul className="mt-1 space-y-1">
+      <div role="radiogroup" aria-label={d.pick} className="mt-1.5 flex flex-wrap gap-1.5">
         {KARMA.tags.map((tag) => (
-          <DeskRow
+          <button
             key={tag}
-            label={d.options[tag] ?? t.tag[tag].name}
-            detail={t.tag[tag].name}
-            error={checkInfluence(game, tag)}
-            onClick={() => dispatch({ type: 'influence', tag })}
-          />
+            type="button"
+            role="radio"
+            aria-checked={tag === picked}
+            onClick={() => setPicked(tag)}
+            className={`flex flex-col rounded-md border px-2 py-1 text-left text-xs ${FOCUS_RING} ${
+              tag === picked ? 'border-accent bg-accent/10 text-ink' : 'border-line-strong bg-raised text-ink-soft hover:bg-line-strong'
+            }`}
+          >
+            <span className="font-bold">{t.tag[tag].name}</span>
+            <span className="text-ink-muted">{d.held(held(tag))}</span>
+          </button>
         ))}
-      </ul>
+      </div>
+      <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
+        <Button
+          variant="primary"
+          disabled={error !== null}
+          reason={error && error !== 'locked' ? t.error[error] : null}
+          onClick={() => dispatch({ type: 'influence', tag: picked })}
+        >
+          {d.order(credits(karmaCost(game)))}
+        </Button>
+        <span className="text-ink-muted italic">{d.options[picked] ?? t.tag[picked].name}</span>
+      </div>
     </div>
   )
 }
@@ -250,7 +279,7 @@ export function ForgeryDesk() {
 export function VelvetDesk() {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
-  const { t, credits, multiplier } = useI18n()
+  const { t, credits, change } = useI18n()
   const d = t.desks.velvet
   if (velvetLocked(game) && game.velvetLock !== null)
     return <p className="border-t border-line pt-2 text-xs text-danger">{d.locked(game.velvetLock)}</p>
@@ -265,7 +294,7 @@ export function VelvetDesk() {
       <div className="border-t border-line pt-2">
         <Locked requires={SERVICE_REQUIREMENTS.auction} />
         <p className="font-bold">{d.auctionTitle}</p>
-        <Hint>{d.auctionRule(VELVET.auction.minTier, multiplier(VELVET.auction.factor), VELVET.auction.cooldownDays)}</Hint>
+        <Hint>{d.auctionRule(VELVET.auction.minTier, change(VELVET.auction.factor), VELVET.auction.cooldownDays)}</Hint>
         {lots.length === 0 && <Hint>{d.nothingToAuction(VELVET.auction.minTier)}</Hint>}
         <ul className="mt-1 space-y-1">
           {lots.map((id) => (
@@ -301,7 +330,7 @@ export function VelvetDesk() {
 
       <div className="border-t border-line pt-2">
         <p className="font-bold">{d.vipTitle}</p>
-        <Hint>{d.vipRule(VELVET.vip.crates, multiplier(VELVET.vip.factor), VELVET.vip.failIccLoss, VELVET.vip.lockDays)}</Hint>
+        <Hint>{d.vipRule(VELVET.vip.crates, change(VELVET.vip.factor), VELVET.vip.failIccLoss, VELVET.vip.lockDays)}</Hint>
         <Hint tone="accent">{d.sponsor(Math.min(game.progress.vipOrders, ENDINGS.elite.sponsorOrders), ENDINGS.elite.sponsorOrders)}</Hint>
         <ul className="mt-1 space-y-1">
           {vip ? (

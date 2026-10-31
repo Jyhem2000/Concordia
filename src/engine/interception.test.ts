@@ -19,7 +19,7 @@ import {
 import { DISTRICTS } from '../data/districts.ts'
 import { VELVET } from '../data/locations.ts'
 import { PRODUCTS } from '../data/products.ts'
-import { VEHICLES } from '../data/vehicles.ts'
+import { MODULES, VEHICLES } from '../data/vehicles.ts'
 import { cargoUsed, ownedQty } from './cargo.ts'
 import { paymentValue } from './condition.ts'
 import {
@@ -130,6 +130,8 @@ describe('double fond (chap. 4)', () => {
     const kept = run(stopped([lot('T0-01', 4), lot('T1-01', 3), lot('T2-03', 1)], { rng: HIGH_ROLL_RNG }), { type: 'intercept', move: 'search' })
     expect(kept.cargo).toEqual([lot('T0-01', 4), lot('T1-01', hidden - 1), lot('T2-03', 1)])
     expect(defined(kept.interceptionReport)).toMatchObject({ compartment: 'kept', hiddenCrates: hidden, crates: -(4 - hidden) })
+    // Le double fond a tenu : la cloison fantôme de Mitch se débloque
+    expect(kept.progress.compartmentHeld).toBe(1)
   })
 
   it('non trouvé, juge la sanction sur la soute visible', () => {
@@ -146,6 +148,13 @@ describe('double fond (chap. 4)', () => {
   it('est plus souvent trouvé dans les districts les mieux gardés', () => {
     expect(compartmentDetection(stopped([], { districtId: 'D1' })).total).toBeCloseTo(COMPARTMENT.detectionPerStar)
     expect(compartmentDetection(stopped([], { districtId: 'D6' })).total).toBeCloseTo(COMPARTMENT.detectionPerStar * DISTRICTS.D6.security)
+  })
+
+  it('se trouve moins souvent derrière la cloison fantôme', () => {
+    const ghost = stopped([], { districtId: 'D6', modules: { owned: ['MOD-10'], mounted: ['MOD-10'] } })
+    expect(compartmentDetection(ghost).total).toBeCloseTo(
+      COMPARTMENT.detectionPerStar * DISTRICTS.D6.security * (MODULES['MOD-10'].compartmentFactor ?? 1),
+    )
   })
 })
 

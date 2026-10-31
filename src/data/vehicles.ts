@@ -56,26 +56,47 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
 }
 
 export const MODULES: Readonly<Record<ModuleId, Module>> = {
-  'MOD-01': { requires: [{ kind: 'debtPaid' }], price: 2_000, category: 'conservation', freshnessDelay: 2, heatProof: true },
-  'MOD-02': { price: 3_500, category: 'camouflage', tagFactor: { tag: 'TAG-ODOROUS', factor: 0.1 } },
+  'MOD-01': { requires: [{ kind: 'debtPaid' }], price: 2_000, category: 'conservation', fitting: 'adaptable', freshnessDelay: 2, heatProof: true },
+  'MOD-02': { price: 3_500, category: 'camouflage', fitting: 'adaptable', tagFactor: { tag: 'TAG-ODOROUS', factor: 0.1 } },
   'MOD-03': {
     requires: [{ kind: 'debtPaid' }],
     price: 4_000,
     category: 'camouflage',
+    fitting: 'welded',
     tagFactor: { tag: 'TAG-TECH', factor: 0 },
     flyingCheckFactor: 0.5,
   },
-  'MOD-04': { price: 2_000, category: 'conservation', smoothRide: true, nightRiskFactor: 0.5 },
-  'MOD-05': { requires: [{ kind: 'wanted' }], price: 4_000, category: 'tactical', rotatingPlate: true },
-  'MOD-06': { requires: [{ kind: 'debtPaid' }], price: 4_000, category: 'tactical', ram: { fleeBonus: 0.4, damageFactor: 0.5 } },
-  'MOD-07': { requires: [{ kind: 'debtPaid' }], price: 4_000, category: 'tactical', trapdoor: { chance: 0.75, cooldownDays: 3, maxRecovery: 1 } },
+  'MOD-04': { price: 2_000, category: 'conservation', fitting: 'adaptable', smoothRide: true, nightRiskFactor: 0.5 },
+  'MOD-05': { requires: [{ kind: 'wanted' }], price: 4_000, category: 'tactical', fitting: 'portable', rotatingPlate: true },
+  'MOD-06': {
+    requires: [{ kind: 'debtPaid' }],
+    price: 4_000,
+    category: 'tactical',
+    fitting: 'adaptable',
+    ram: { fleeBonus: 0.4, damageFactor: 0.5 },
+  },
+  'MOD-07': {
+    requires: [{ kind: 'debtPaid' }],
+    price: 4_000,
+    category: 'tactical',
+    fitting: 'welded',
+    trapdoor: { chance: 0.75, cooldownDays: 3, maxRecovery: 1 },
+  },
   'MOD-08': {
     requires: [{ kind: 'deliveries', count: 3 }],
     price: 12_000,
     category: 'tactical',
+    fitting: 'portable',
     fakeTerminal: { bluffBonus: 0.35, bribeRateFactor: 0.5 },
   },
-  'MOD-09': { requires: [{ kind: 'wanted' }], price: 5_000, category: 'tactical', droneJammer: true },
+  'MOD-09': { requires: [{ kind: 'wanted' }], price: 5_000, category: 'tactical', fitting: 'portable', droneJammer: true },
+  'MOD-10': {
+    requires: [{ kind: 'compartmentHeld', count: 1 }],
+    price: 15_000,
+    category: 'camouflage',
+    fitting: 'welded',
+    compartmentFactor: 0.5,
+  },
 }
 
 /** Frais de recrutement à la Cantine (le premier recrutement est gratuit) */

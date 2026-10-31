@@ -22,7 +22,7 @@ import { canSiphon, checkForceCurfew, checkService, fuelPrice, maxBuy, planTrave
 import { baseValue, cargoUsed, isIllegal, ownedQty } from '../../src/engine/cargo.ts'
 import { daysBeforeRot, paymentValue } from '../../src/engine/condition.ts'
 import { checkHire, crewEffect, hireFee, salary } from '../../src/engine/crew.ts'
-import { checkBuyModule, checkBuyVehicle, ejectMode, missingChassis, mountedEffect, repairPrice } from '../../src/engine/equipment.ts'
+import { checkBuyModule, checkBuyVehicle, ejectMode, missingChassis, mountedEffect, repairPrice, vehicleTotal } from '../../src/engine/equipment.ts'
 import { eventFactor } from '../../src/engine/events.ts'
 import { loanRoom, offshoreBalance, scoreOf } from '../../src/engine/finance.ts'
 import {
@@ -730,13 +730,20 @@ function specialPlaces(view: GameState, uses: (place: PlaceUse) => boolean, rese
   return null
 }
 
+/** Part du prix du châssis du plan déjà disponible au-delà de laquelle un module soudé attend le nouveau châssis */
+const CHASSIS_SOON = 0.5
+
 function equip(view: GameState, plan: Plan, reserve: number): Action | null {
   const spare = view.cash - reserve - CAPITAL
   if (!checkService(view, 'garage')) {
-    if (plan.vehicle && view.vehicleId !== plan.vehicle && VEHICLES[plan.vehicle].price <= spare && !checkBuyVehicle(view, plan.vehicle)) {
+    const chassisPending = plan.vehicle !== undefined && view.vehicleId !== plan.vehicle
+    if (plan.vehicle && chassisPending && vehicleTotal(view, plan.vehicle) <= spare && !checkBuyVehicle(view, plan.vehicle)) {
       return { type: 'buyVehicle', vehicleId: plan.vehicle }
     }
-    const next = plan.modules.find((id) => !view.modules.owned.includes(id))
+    // Un module soudé attend le châssis du plan quand celui-ci est presque à portée : il serait perdu avec l'ancien (chap. 4) ;
+    // châssis encore loin, il sert dès maintenant
+    const chassisSoon = plan.vehicle !== undefined && chassisPending && spare >= vehicleTotal(view, plan.vehicle) * CHASSIS_SOON
+    const next = plan.modules.find((id) => !view.modules.owned.includes(id) && !(chassisSoon && MODULES[id].fitting === 'welded'))
     if (next && MODULES[next].price <= spare && !checkBuyModule(view, next)) return { type: 'buyModule', moduleId: next }
     const unmounted = plan.modules.find((id) => view.modules.owned.includes(id) && !view.modules.mounted.includes(id))
     if (unmounted && view.modules.mounted.length < VEHICLES[view.vehicleId].moduleSlots)
@@ -759,7 +766,7 @@ function pendingEquipment(view: GameState, plan: Plan): boolean {
   if (plan.novice || view.debt > 0) return false
   const price =
     plan.vehicle && view.vehicleId !== plan.vehicle
-      ? VEHICLES[plan.vehicle].price
+      ? vehicleTotal(view, plan.vehicle)
       : plan.modules.filter((id) => !view.modules.owned.includes(id)).map((id) => MODULES[id].price)[0]
   return price !== undefined && view.cash > price * 1.3
 }

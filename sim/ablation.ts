@@ -75,6 +75,7 @@ export const ABLATIONS: readonly Ablation[] = [
   pair('MOD-07', plan('Haut tier'), 'Équilibré', withoutModule(plan('Haut tier'), 'MOD-07'), bought('MOD-07')),
   pair('MOD-08', plan('Corruption'), 'Équilibré', withoutModule(plan('Corruption'), 'MOD-08'), bought('MOD-08')),
   pair('MOD-09', FLIGHT, 'Casse-cou', withoutModule(FLIGHT, 'MOD-09'), bought('MOD-09')),
+  pair('MOD-10', plan('Haut tier'), 'Casse-cou', withoutModule(plan('Haut tier'), 'MOD-10'), bought('MOD-10')),
   // Équipiers
   pair('CREW-01', plan('Corruption'), 'Équilibré', { ...plan('Corruption'), crew: undefined }, bought('CREW-01')),
   pair('CREW-02', plan('Rentier'), 'Équilibré', { ...plan('Rentier'), crew: undefined }, bought('CREW-02')),

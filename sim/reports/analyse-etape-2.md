@@ -598,3 +598,14 @@ Les deux services restaient négatifs aux retraits. Le bot les jouait mal : pani
 - **Retraits :** Karma-Cham (Sans build, Équilibré) utilisée dans 54 % des parties, −600 ₡ ± 6 300 (−3 500 ₡ ± 5 400 à ×1,5) : à l'équilibre, sans dominer.
 - **Plans :** l'Opportuniste gagne un peu en Prudent (moyenne 25 800 → 27 600 ₡) et en Équilibré (médiane 26 900 → 31 300 ₡), inchangé en Casse-cou ; il rejoint le Sans build (26 / 54 / 143k) sauf en Casse-cou (126k).
 - **Contrôle, fins, hasard :** inchangés (ces bots ne commandent pas de panique).
+
+## Modules au changement de châssis, Cloison fantôme
+**Changements de règle :** au changement de châssis, chaque module suit selon son montage : démontable (électronique) sans frais, adaptable (mécanique) contre une part de son prix, soudé (doublure plomb, trappe, cloison) perdu avec l'ancien. Nouveau module `[MOD-10]` « Cloison fantôme », soudé, cher, débloqué après une fouille où le double fond a tenu : chance que la BRC trouve le double fond divisée par deux.
+
+**Bot :** un module soudé attend le châssis du plan quand celui-ci est presque à portée, et sert tout de suite sinon. Une première version le faisait toujours attendre : le Prudent, qui n'achète jamais le Bunker-Lourd, n'achetait plus ni la trappe ni la doublure, et la trappe passait de 64 à 26 % des parties en Équilibré. Le Haut tier vise la cloison une fois débloquée.
+
+**Campagnes** (mêmes effectifs) :
+- **Retraits :** Cloison fantôme (Haut tier, Casse-cou) achetée dans 39 % des parties, +17 200 ₡ ± 23 200 et +2 points de survie ± 2 : un module qu'on a envie d'avoir, sans rendre un convoi sûr. `[MOD-01]`, `[MOD-02]`, `[MOD-07]` et les châssis restent dans le bruit malgré l'adaptation payante et les modules soudés perdus.
+- **Plans :** Haut tier en Casse-cou 129 800 → 149 800 ₡ (la cloison protège le haut tier caché), en Équilibré 58 100 → 53 600 ₡ et en Prudent 24 100 → 22 700 ₡ (la cloison et la trappe perdue au changement de châssis coûtent sans assez servir), dans le bruit ; Saboteur inchangé ; les autres plans à châssis (Chaîne du froid, Couverture légale) inchangés.
+- **Hasard :** écart entre bots 50 700 ₡ (43 700 avant, tiré par le Haut tier Casse-cou), entre graines 126 000 ₡ : le hasard pèse toujours plus que le plan.
+- **Contrôle et fins :** inchangés.

@@ -7,9 +7,12 @@ import { useGameStore } from '../../stores/gameStore.ts'
 import type { ReactNode } from 'react'
 import EventDetails from '../events/EventDetails.tsx'
 import Hint from '../shared/Hint.tsx'
+import Tip from '../shared/Tip.tsx'
 
 type NewsGroupProps = {
   title: string
+  /** Explication de la rubrique, en infobulle */
+  info?: string
   children: ReactNode
 }
 
@@ -18,7 +21,7 @@ export default function EventsList() {
   const events = useGameStore((s) => s.game.events)
   const day = useGameStore((s) => s.game.day)
   const phase = useGameStore((s) => s.game.phase)
-  const { t, percent, multiplier } = useI18n()
+  const { t, percent, change } = useI18n()
   const ctx = { day, phase, events }
 
   const locals = DISTRICT_IDS.flatMap((id) => {
@@ -39,10 +42,10 @@ export default function EventsList() {
     return <Hint>{t.fil.noNews}</Hint>
 
   return (
-    <dl className="flex flex-col gap-2 text-xs text-ink-soft">
+    <dl className="flex flex-col gap-3 text-xs text-ink-soft">
       {events.global && (
         <NewsGroup title={t.fil.newsGlobal}>
-          <span className="font-bold text-accent">
+          <span className="font-bold text-ink">
             <EventDetails event={events.global} />
           </span>
         </NewsGroup>
@@ -59,10 +62,10 @@ export default function EventsList() {
         </NewsGroup>
       )}
       {aftershocks.length > 0 && (
-        <NewsGroup title={t.fil.newsAftershock}>
+        <NewsGroup title={t.fil.newsAftershock} info={t.fil.newsAftershockInfo}>
           <ul className="flex flex-col gap-0.5 text-ink-muted">
             {aftershocks.map((event) => (
-              <li key={event}>{t.events.aftershock(t.event[event].name, multiplier(AFTERSHOCK.afterRush), multiplier(AFTERSHOCK.afterSale))}</li>
+              <li key={event}>{t.events.aftershock(t.event[event].name, change(AFTERSHOCK.afterRush), change(AFTERSHOCK.afterSale))}</li>
             ))}
           </ul>
         </NewsGroup>
@@ -80,7 +83,7 @@ export default function EventsList() {
       )}
       {influence && (
         <NewsGroup title={t.fil.newsInfluence}>
-          <p className="text-accent">{t.events.influence(t.tag[influence.tag].name, multiplier(KARMA.factor))}</p>
+          <p className="text-accent">{t.events.influence(t.tag[influence.tag].name, change(KARMA.factor))}</p>
         </NewsGroup>
       )}
       {events.rumor && (
@@ -95,11 +98,14 @@ export default function EventsList() {
 }
 
 /** Une rubrique des actualités : son intitulé, puis son contenu */
-function NewsGroup({ title, children }: NewsGroupProps) {
+function NewsGroup({ title, info, children }: NewsGroupProps) {
   return (
     <div>
-      <dt className="text-ink-muted uppercase">{title}</dt>
-      <dd className="mt-0.5">{children}</dd>
+      <dt className="flex items-center gap-1 font-bold text-ink-muted uppercase">
+        {title}
+        {info && <Tip label={title} content={info} />}
+      </dt>
+      <dd className="mt-1">{children}</dd>
     </div>
   )
 }

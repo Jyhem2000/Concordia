@@ -3,7 +3,8 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import { useHighlightText } from '../fil/useHighlightText.ts'
-import RecordsPanel from '../fil/RecordsPanel.tsx'
+import CareerView, { FeatChips } from '../fil/CareerView.tsx'
+import { featsOf } from '../../engine/feats.ts'
 import WealthChart from '../fil/WealthChart.tsx'
 
 /** Écran de fin : la fin débloquée à l'audit du Jour 30, ou la défaite (chap. 1) */
@@ -11,6 +12,8 @@ export default function EndScreen() {
   const ending = useGameStore((s) => s.game.ending)
   const newGame = useGameStore((s) => s.newGame)
   const journal = useGameStore((s) => s.game.journal)
+  // Hauts faits de cette partie, lus dans son carnet
+  const feats = useGameStore((s) => featsOf(s.game))
   const { t, credits } = useI18n()
   const text = useHighlightText()
   // Cartouche de la partie : les faits marquants de chaque journée, sans les simples trajets
@@ -50,9 +53,16 @@ export default function EndScreen() {
           </ul>
         )}
       </section>
-      <div className="w-full text-left">
-        <RecordsPanel />
-      </div>
+      {feats.length > 0 && (
+        <section className="w-full rounded-lg border border-line bg-panel p-3 text-left">
+          <h2 className="mb-1.5 text-xs font-bold tracking-wide text-accent uppercase">{t.records.featsThisGame}</h2>
+          <FeatChips feats={feats} />
+        </section>
+      )}
+      <section className="w-full rounded-lg border border-line bg-panel p-3 text-left">
+        <h2 className="text-xs font-bold tracking-wide text-accent uppercase">{t.records.title}</h2>
+        <CareerView />
+      </section>
       <Button variant="primary" onClick={newGame}>
         {t.hud.newGame}
       </Button>

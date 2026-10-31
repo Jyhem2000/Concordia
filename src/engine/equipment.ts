@@ -93,30 +93,55 @@ export function repair(state: GameState, pv: number): EquipmentResult {
   return { ok: true, state: { ...state, cash: state.cash - repairPrice(state).total * pv, chassis: state.chassis + pv } }
 }
 
+/** Prix d'adaptation d'un module mécanique à un nouveau châssis (chap. 4) ; 0 pour les autres */
+export function refitPrice(moduleId: ModuleId): number {
+  const { fitting, price } = MODULES[moduleId]
+  return fitting === 'adaptable' ? Math.round(price * GARAGE.refitShare) : 0
+}
+
+/** Au changement de châssis : modules qui suivent (électronique, mécanique adaptée), soudés perdus, prix des adaptations */
+export function vehicleSwap(state: GameState): { kept: ModuleId[]; lost: ModuleId[]; refit: number } {
+  const { owned } = state.modules
+  return {
+    kept: owned.filter((id) => MODULES[id].fitting !== 'welded'),
+    lost: owned.filter((id) => MODULES[id].fitting === 'welded'),
+    refit: owned.reduce((total, id) => total + refitPrice(id), 0),
+  }
+}
+
+/** Prix total d'un nouveau châssis : le véhicule, plus l'adaptation des modules mécaniques possédés */
+export function vehicleTotal(state: GameState, vehicleId: VehicleId): number {
+  return VEHICLES[vehicleId].price + vehicleSwap(state).refit
+}
+
 export function checkBuyVehicle(state: GameState, vehicleId: VehicleId): ActionError | null {
   const vehicle = VEHICLES[vehicleId]
   if (vehicleId === state.vehicleId) return 'already-owned'
   if (!meets(state, vehicle.requires)) return 'locked'
-  if (vehicle.price > state.cash) return 'not-enough-cash'
+  if (vehicleTotal(state, vehicleId) > state.cash) return 'not-enough-cash'
   if (cargoUsed(state.cargo) > vehicle.cargo) return 'cargo-full'
   return null
 }
 
-/** Nouveau châssis : marchandise, carburant (dans la limite du réservoir) et modules repris ; l'ancien est perdu */
+/**
+ * Nouveau châssis : marchandise, carburant (dans la limite du réservoir) et modules repris, sauf les modules soudés,
+ * perdus avec l'ancien ; les modules mécaniques sont adaptés (payants). L'ancien châssis est perdu.
+ */
 export function buyVehicle(state: GameState, vehicleId: VehicleId): EquipmentResult {
   const error = checkBuyVehicle(state, vehicleId)
   if (error) return fail(error)
   const vehicle = VEHICLES[vehicleId]
+  const { kept } = vehicleSwap(state)
   return {
     ok: true,
     state: {
       ...state,
       vehicleId,
-      cash: state.cash - vehicle.price,
+      cash: state.cash - vehicleTotal(state, vehicleId),
       chassis: vehicle.maxChassis,
       fuel: Math.min(vehicle.tank, state.fuel),
       // Moins de slots : les derniers modules montés sont démontés
-      modules: { ...state.modules, mounted: state.modules.mounted.slice(0, vehicle.moduleSlots) },
+      modules: { owned: kept, mounted: state.modules.mounted.filter((id) => kept.includes(id)).slice(0, vehicle.moduleSlots) },
     },
   }
 }

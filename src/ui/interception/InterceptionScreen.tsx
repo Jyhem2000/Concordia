@@ -52,7 +52,7 @@ type CrateOfferRowProps = {
 export default function InterceptionScreen() {
   // Les chances et les sanctions se calculent sur l'état entier de la partie
   const game = useGameStore((s) => s.game)
-  const { t, percent, signedPercent, credits, number, multiplier } = useI18n()
+  const { t, percent, signedPercent, credits, number, change } = useI18n()
   const interception = game.interception
   if (!interception) return null
 
@@ -91,7 +91,7 @@ export default function InterceptionScreen() {
     const { breakage, explosion } = TAGS[tag]
     if (!game.cargo.some((lot) => PRODUCTS[lot.productId].tags.includes(tag))) return []
     return [
-      ...(breakage ? [t.interception.breakageRisk(t.tag[tag].name, pct(breakage.fleeChance), multiplier(DAMAGED_FACTOR))] : []),
+      ...(breakage ? [t.interception.breakageRisk(t.tag[tag].name, pct(breakage.fleeChance), change(DAMAGED_FACTOR))] : []),
       ...(explosion ? [t.interception.explosionRisk(t.tag[tag].name, pct(explosion.chance), pv(explosion.chassisLoss))] : []),
     ]
   })
@@ -221,7 +221,7 @@ export default function InterceptionScreen() {
 function BribeForm({ label }: BribeFormProps) {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
-  const { t, credits, percent, multiplier } = useI18n()
+  const { t, credits, percent } = useI18n()
   const rate = bribeRate(game)
   const minimum = minimumOffer(game)
   // Offre en cours de composition : état d'interface éphémère
@@ -262,7 +262,7 @@ function BribeForm({ label }: BribeFormProps) {
         <span className="text-xs text-ink-muted">{t.interception.offerCash}</span>
         {presets.map((ratio) => (
           <Button key={ratio} onClick={() => setCashValue(String(Math.max(0, Math.round(rate.total * ratio) - cratesValue)))}>
-            {multiplier(ratio)}
+            {percent(ratio, 0)}
           </Button>
         ))}
         <input

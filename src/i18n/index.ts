@@ -21,8 +21,8 @@ export type I18n = {
   percent(fraction: number, maxDigits?: number): string
   /** Pourcentage signé : 0.25 → « +25 % » */
   signedPercent(fraction: number, maxDigits?: number): string
-  /** 0.85 → « ×0,85 » */
-  multiplier(factor: number): string
+  /** Facteur en variation, lisible par tous : 0.85 → « −15 % », 1.5 → « +50 % » */
+  change(factor: number): string
   number(value: number, maxDigits?: number): string
   /** Libellé d'une source de Breakdown : nom de la donnée de jeu ou de la règle */
   label(source: BreakdownSource): string
@@ -63,7 +63,7 @@ function createI18n(locale: Locale): I18n {
     signedCredits: (amount) => t.format.credits(format(amount, { maximumFractionDigits: 0, signDisplay: 'exceptZero' })),
     percent: (fraction, maxDigits = 1) => format(fraction, { style: 'percent', maximumFractionDigits: maxDigits }),
     signedPercent: (fraction, maxDigits = 1) => format(fraction, { style: 'percent', maximumFractionDigits: maxDigits, signDisplay: 'exceptZero' }),
-    multiplier: (factor) => t.format.multiplier(number(factor)),
+    change: (factor) => format(factor - 1, { style: 'percent', maximumFractionDigits: 0, signDisplay: 'exceptZero' }),
     number,
     label: (source) => labelOf(t, source),
   }

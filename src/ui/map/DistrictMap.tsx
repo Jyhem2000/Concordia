@@ -101,19 +101,19 @@ export default function DistrictMap({ selected, onSelect, onHover }: DistrictMap
                   {isHere && (
                     <motion.span
                       aria-hidden="true"
-                      className="absolute inset-0 rounded-full border-2 border-accent"
+                      className="absolute inset-0 rounded-full border-2 border-info"
                       animate={{ scale: [1, 1.9], opacity: [0.7, 0] }}
                       transition={{ duration: 1.6, repeat: Infinity, ease: 'easeOut' }}
                     />
                   )}
                   <span
                     className={`h-4 w-4 rounded-full border-2 transition-transform group-hover:scale-125 ${
-                      isHere ? 'border-accent bg-accent' : isSelected ? 'border-accent bg-accent/30' : 'border-ink-muted bg-panel'
+                      isHere ? 'border-info bg-info' : isSelected ? 'border-accent bg-accent/30' : 'border-ink-muted bg-panel'
                     }`}
                   />
                 </span>
                 <span
-                  className={`mt-0.5 rounded bg-base/80 px-1 font-bold whitespace-nowrap ${isHere || isSelected ? 'text-accent' : 'text-ink group-hover:text-accent'}`}
+                  className={`mt-0.5 rounded bg-base/80 px-1 font-bold whitespace-nowrap ${isHere ? 'text-info' : isSelected ? 'text-accent' : 'text-ink group-hover:text-accent'}`}
                 >
                   {t.district[id].name}
                 </span>

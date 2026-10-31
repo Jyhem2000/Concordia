@@ -5,10 +5,11 @@ import CargoView from './cargo/CargoView.tsx'
 import EndScreen from './modals/EndScreen.tsx'
 import EveningPanel from './evening/EveningPanel.tsx'
 import FilView from './fil/FilView.tsx'
+import AeternaTicker from './hud/AeternaTicker.tsx'
 import InterceptionReportPanel from './interception/InterceptionReportPanel.tsx'
 import InterceptionScreen from './interception/InterceptionScreen.tsx'
 import StatusBar from './hud/StatusBar.tsx'
-import TravelPanel from './map/TravelPanel.tsx'
+import MapPanel, { CargoRecap, DestinationsPanel } from './map/TravelPanel.tsx'
 import MarketPanel from './market/MarketPanel.tsx'
 import PlacesPanel from './places/PlacesPanel.tsx'
 import RoadEventScreen from './road/RoadEventScreen.tsx'
@@ -53,11 +54,6 @@ export default function GameScreen() {
   // Nouvelle scène : un nouveau matin ouvre En bref, le couvre-feu sur place la carte (la tournée de nuit), un trajet le marché
   const tab = picked.scene === scene ? picked.tab : picked.day !== day ? 'fil' : picked.districtId === districtId ? 'map' : 'market'
   const choose = (next: Tab) => setPicked({ tab: next, scene, day, districtId, byPlayer: true })
-  // Raccourci d'En bref : ouvre l'onglet sur téléphone, amène à son bloc sur desktop
-  const go = (next: Tab) => {
-    choose(next)
-    requestAnimationFrame(() => document.getElementById(`tab-${next}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
-  }
   const pick = (next: Tab) => {
     choose(next)
     window.scrollTo({ top: 0 })
@@ -71,6 +67,8 @@ export default function GameScreen() {
   // Téléphone : seul l'onglet ouvert s'affiche ; grand écran : tout son groupe, côte à côte
   const shown = (of: Tab) =>
     `${tab === of ? 'flex' : 'hidden'} ${TAB_GROUP[tab] === TAB_GROUP[of] ? 'md:flex' : 'md:hidden'} motion-safe:animate-fade-in`
+  // Bloc d'une colonne déjà montrée ou cachée par son groupe sur grand écran : seul l'onglet du téléphone compte
+  const phoneOnly = (of: Tab) => `${tab === of ? 'flex' : 'hidden'} md:flex motion-safe:animate-fade-in`
 
   return (
     <div className="flex min-h-full flex-col">
@@ -85,6 +83,8 @@ export default function GameScreen() {
         <>
           <main className="mx-auto flex w-full max-w-8xl flex-1 flex-col gap-4 p-4 pb-24 md:grid md:grid-cols-5 md:content-start md:items-start md:pb-4">
             <DesktopTabs current={tab} onPick={pick} />
+            {/* Message Aeterna : téléscripteur sous les onglets, sur toute la largeur */}
+            <AeternaTicker className="md:col-span-5" />
             {/* Comptes rendus : au-dessus de tout, sur toute la largeur */}
             {reportsShown && (
               <div className="flex flex-col gap-4 empty:hidden md:col-span-5">
@@ -99,22 +99,35 @@ export default function GameScreen() {
             <div
               className={`min-w-0 flex-col gap-4 motion-safe:animate-fade-in md:col-span-5 md:columns-xs md:*:mb-4 md:*:break-inside-avoid ${tab === 'fil' ? 'flex' : 'hidden'} ${TAB_GROUP[tab] === 'brief' ? 'md:block' : 'md:hidden'}`}
             >
-              <FilView onGo={go} />
+              <FilView />
             </div>
             {/* Marché & véhicule, puis Carte & lieux : le bloc principal à gauche, l'autre à droite */}
-            <div id="tab-market" className={`min-w-0 scroll-mt-4 flex-col md:col-span-3 md:scroll-mt-48 ${shown('market')}`}>
+            <div className={`min-w-0 flex-col md:col-span-3 ${shown('market')}`}>
               <MarketPanel />
             </div>
-            <div id="tab-vehicle" className={`min-w-0 scroll-mt-4 flex-col gap-4 md:col-span-2 md:scroll-mt-48 ${shown('vehicle')}`}>
+            <div className={`min-w-0 flex-col gap-4 md:col-span-2 ${shown('vehicle')}`}>
               <CargoView />
               <PlacesPanel garage />
             </div>
-            <div id="tab-map" className={`min-w-0 scroll-mt-4 flex-col gap-4 md:col-span-3 md:scroll-mt-48 ${shown('map')}`}>
-              <EveningPanel />
-              <TravelPanel />
+            {/*
+              Carte & lieux : la carte, la plus haute, à gauche ; à droite le panneau du soir, la soute, les autres destinations
+              et les lieux. Sur téléphone, la colonne de droite s'efface (contents) : le soir passe avant la carte, la soute et
+              les destinations après, les lieux dans leur onglet.
+            */}
+            <div className={`order-2 min-w-0 flex-col gap-4 md:order-none md:col-span-3 ${shown('map')}`}>
+              <MapPanel />
             </div>
-            <div id="tab-places" className={`min-w-0 scroll-mt-4 flex-col gap-4 md:col-span-2 md:scroll-mt-48 ${shown('places')}`}>
-              <PlacesPanel />
+            <div className={`contents md:col-span-2 md:flex-col md:gap-4 ${TAB_GROUP[tab] === 'road' ? 'md:flex' : 'md:hidden'}`}>
+              <div className={`order-1 min-w-0 flex-col gap-4 md:order-none ${phoneOnly('map')}`}>
+                <EveningPanel />
+              </div>
+              <div className={`order-3 min-w-0 flex-col gap-4 md:order-none ${phoneOnly('map')}`}>
+                <CargoRecap />
+                <DestinationsPanel />
+              </div>
+              <div className={`min-w-0 flex-col gap-4 ${phoneOnly('places')}`}>
+                <PlacesPanel />
+              </div>
             </div>
           </main>
           <TabBar current={tab} tabs={tabs} onPick={pick} />

@@ -1,4 +1,4 @@
-import { Crosshair, Droplet, HandCoins, Hourglass, Info, Moon, RotateCcw, Sun, UserRound, type LucideIcon } from 'lucide-react'
+import { Crosshair, Droplet, HandCoins, Hourglass, Info, Moon, Sun, UserRound, type LucideIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
 import {
@@ -18,7 +18,6 @@ import { checkForceCurfew } from '../../engine/actions.ts'
 import { iccRouteGainLeft, iccTier, isWorn } from '../../engine/gauges.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
-import ConfirmButton from '../shared/ConfirmButton.tsx'
 import { APPEAR } from '../shared/motion.ts'
 import Tip from '../shared/Tip.tsx'
 import { ICC_TONE, TONE_TEXT, type Tone } from '../shared/styles.ts'
@@ -63,7 +62,6 @@ export default function StatusBar() {
   // Les échéances et la collecte se calculent sur l'état entier de la partie
   const game = useGameStore((s) => s.game)
   const lastError = useGameStore((s) => s.lastError)
-  const newGame = useGameStore((s) => s.newGame)
   const { t, credits, signedCredits, number, percent } = useI18n()
   const offshore = offshoreBalance(game.offshore)
   const venture = offshoreBalance(game.venture)
@@ -199,8 +197,15 @@ export default function StatusBar() {
           </Cell>
         </div>
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
-          {game.wanted > 0 && <Stat icon={Crosshair} label={t.hud.wanted(game.wanted, WANTED.maxLevel)} tone="danger" />}
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs empty:hidden">
+          {game.wanted > 0 && (
+            <Stat
+              icon={Crosshair}
+              label={t.hud.wanted(game.wanted, WANTED.maxLevel)}
+              tone="danger"
+              info={t.hud.wantedInfo(percent(WANTED.riskPerLevel, 0), percent(WANTED.fleePenaltyPerLevel, 0))}
+            />
+          )}
           {game.crew.active && (
             <Stat
               icon={UserRound}
@@ -212,19 +217,6 @@ export default function StatusBar() {
           {protectionDay !== null && (
             <Stat icon={HandCoins} label={t.hud.nextProtection(protectionDay, credits(protectionBreakdown(game).total))} tone="warning" />
           )}
-          <ConfirmButton
-            className="ml-auto"
-            size="sm"
-            onClick={newGame}
-            aria-label={t.hud.newGame}
-            confirm={{ title: t.hud.newGame, message: t.hud.newGameConfirm, action: t.hud.newGameAction }}
-          >
-            <RotateCcw size={14} aria-hidden="true" />
-            {/* Libellé visible là où il y a la place ; le nom accessible vient de aria-label */}
-            <span aria-hidden="true" className="hidden md:inline">
-              {t.hud.newGame}
-            </span>
-          </ConfirmButton>
         </div>
       </div>
       {game.day >= AUDIT_COUNTDOWN_DAY && (

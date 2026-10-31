@@ -4,7 +4,7 @@ import { EJECT, FLEE, NIGHT_TRIP_RISK } from '../data/balance.ts'
 import { GARAGE } from '../data/locations.ts'
 import { MODULES, VEHICLES } from '../data/vehicles.ts'
 import { freshnessOf } from './condition.ts'
-import { ejectMode, repairPrice } from './equipment.ts'
+import { ejectMode, repairPrice, vehicleSwap } from './equipment.ts'
 import { NO_EVENTS } from './events.ts'
 import { bluffChance, bribeRate, fleeChance, flyingCheckShare } from './interception.ts'
 import { riskBreakdown } from './risk.ts'
@@ -30,10 +30,25 @@ describe('garage', () => {
   it('vend un châssis qui reprend soute, carburant et modules, et refuse une soute trop pleine', () => {
     const state = atGarage({ cargo: [lot('T1-04', 8)], fuel: 6, modules: { owned: ['MOD-04'], mounted: ['MOD-04'] } })
     const bought = run(state, { type: 'buyVehicle', vehicleId: 'VEH-02' })
-    expect(bought).toMatchObject({ vehicleId: 'VEH-02', chassis: VEHICLES['VEH-02'].maxChassis, fuel: 6, cash: 500_000 - VEHICLES['VEH-02'].price })
+    // Les suspensions, mécaniques, sont adaptées au nouveau châssis : une part de leur prix en plus
+    const refit = Math.round(MODULES['MOD-04'].price * GARAGE.refitShare)
+    expect(bought).toMatchObject({
+      vehicleId: 'VEH-02',
+      chassis: VEHICLES['VEH-02'].maxChassis,
+      fuel: 6,
+      cash: 500_000 - VEHICLES['VEH-02'].price - refit,
+    })
     expect(bought.modules.mounted).toEqual(['MOD-04'])
     expect(errorOf({ ...bought, cargo: [lot('T1-04', 15)] }, { type: 'buyVehicle', vehicleId: 'VEH-01' })).toBe('cargo-full')
     expect(errorOf(gameAt(3, { cash: 500_000 }), { type: 'buyVehicle', vehicleId: 'VEH-02' })).toBe('not-at-location')
+  })
+
+  it('au changement de châssis, garde l’électronique sans frais et perd les modules soudés', () => {
+    const state = atGarage({ modules: { owned: ['MOD-07', 'MOD-08'], mounted: ['MOD-07'] } })
+    expect(vehicleSwap(state)).toEqual({ kept: ['MOD-08'], lost: ['MOD-07'], refit: 0 })
+    const bought = run(state, { type: 'buyVehicle', vehicleId: 'VEH-02' })
+    expect(bought.modules).toEqual({ owned: ['MOD-08'], mounted: [] })
+    expect(bought.cash).toBe(500_000 - VEHICLES['VEH-02'].price)
   })
 
   it('monte un module acheté s’il reste un slot, et démonte au besoin', () => {

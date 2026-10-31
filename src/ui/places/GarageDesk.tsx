@@ -1,6 +1,17 @@
 import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { MODULES, VEHICLES } from '../../data/vehicles.ts'
-import { checkBuyModule, checkBuyVehicle, checkMount, MODULE_IDS, missingChassis, repairPrice, VEHICLE_IDS } from '../../engine/equipment.ts'
+import {
+  checkBuyModule,
+  checkBuyVehicle,
+  checkMount,
+  MODULE_IDS,
+  missingChassis,
+  refitPrice,
+  repairPrice,
+  VEHICLE_IDS,
+  vehicleSwap,
+  vehicleTotal,
+} from '../../engine/equipment.ts'
 import type { ModuleId, VehicleId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -11,6 +22,8 @@ import Detailed from '../shared/Detailed.tsx'
 import Locked from '../shared/Locked.tsx'
 import { useCollapsed } from '../shared/useCollapsed.ts'
 import Hint from '../shared/Hint.tsx'
+import Thumb from '../shared/Thumb.tsx'
+import Tip from '../shared/Tip.tsx'
 
 type VehicleOfferProps = {
   vehicleId: VehicleId
@@ -46,7 +59,7 @@ export default function GarageDesk() {
       <div className="border-t border-line pt-2">
         <CollapseToggle id="garage:modules">{t.garage.modulesTitle(game.modules.mounted.length, vehicle.moduleSlots)}</CollapseToggle>
         {!modulesCollapsed && (
-          <ul className="mt-1 space-y-2">
+          <ul className="mt-1.5 flex flex-col gap-2">
             {MODULE_IDS.map((id) => (
               <ModuleRow key={id} moduleId={id} />
             ))}
@@ -59,7 +72,7 @@ export default function GarageDesk() {
         {!vehiclesCollapsed && (
           <>
             <Hint>{t.garage.vehicleRule}</Hint>
-            <ul className="mt-1 space-y-2">
+            <ul className="mt-1.5 flex flex-col gap-2">
               {VEHICLE_IDS.filter((id) => id !== game.vehicleId).map((id) => (
                 <VehicleOffer key={id} vehicleId={id} />
               ))}
@@ -72,35 +85,48 @@ export default function GarageDesk() {
 }
 
 function VehicleOffer({ vehicleId }: VehicleOfferProps) {
-  const error = useGameStore((s) => checkBuyVehicle(s.game, vehicleId))
+  // Modules repris, adaptés ou perdus : selon ceux que possède le joueur
+  const game = useGameStore((s) => s.game)
+  const error = checkBuyVehicle(game, vehicleId)
   const dispatch = useGameStore((s) => s.dispatch)
   const { t, credits } = useI18n()
   const vehicle = VEHICLES[vehicleId]
   const describe = useEquipmentTexts()
+  const { lost, refit } = vehicleSwap(game)
 
   return (
-    <li className="text-xs">
-      <p className="font-bold text-ink">
-        {t.vehicle[vehicleId].name} — {credits(vehicle.price)}
-      </p>
-      <p className="text-ink-muted">
-        {t.garage.vehicleStats(
-          vehicle.cargo,
-          vehicle.hiddenCompartment,
-          vehicle.moduleSlots,
-          vehicle.maxChassis,
-          vehicle.tank,
-          vehicle.fuelPerTrip.day,
-          vehicle.fuelPerTrip.night,
-        )}
-      </p>
-      <p className="text-ink-soft">{describe.vehicle(vehicleId)}</p>
-      <Locked requires={vehicle.requires} />
-      <div className="mt-1 flex items-center gap-2">
-        <Button variant="primary" disabled={error !== null} onClick={() => dispatch({ type: 'buyVehicle', vehicleId })}>
-          {t.garage.buy}
-        </Button>
-        {error && error !== 'locked' && <span className="text-danger">{t.error[error]}</span>}
+    <li className="flex items-start gap-2 rounded-md border border-line bg-raised/60 p-2 text-xs">
+      <Thumb id={vehicleId} />
+      <div className="min-w-0 flex-1">
+        <p className="font-bold text-ink">
+          {t.vehicle[vehicleId].name} — {credits(vehicleTotal(game, vehicleId))}
+          {refit > 0 && <span className="ml-1 font-normal text-ink-muted">{t.garage.withRefit(credits(refit))}</span>}
+        </p>
+        <p className="text-ink-muted">
+          {t.garage.vehicleStats(
+            vehicle.cargo,
+            vehicle.hiddenCompartment,
+            vehicle.moduleSlots,
+            vehicle.maxChassis,
+            vehicle.tank,
+            vehicle.fuelPerTrip.day,
+            vehicle.fuelPerTrip.night,
+          )}
+        </p>
+        <p className="text-ink-soft">{describe.vehicle(vehicleId)}</p>
+        {lost.length > 0 && <p className="text-warning">{t.garage.weldedLost(lost.map((id) => t.module[id].name).join(', '))}</p>}
+        <Locked requires={vehicle.requires} />
+        <div className="mt-1">
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={error !== null}
+            reason={error && error !== 'locked' ? t.error[error] : null}
+            onClick={() => dispatch({ type: 'buyVehicle', vehicleId })}
+          >
+            {t.garage.buy}
+          </Button>
+        </div>
       </div>
     </li>
   )
@@ -116,28 +142,48 @@ function ModuleRow({ moduleId }: ModuleRowProps) {
   const buyError = checkBuyModule(game, moduleId)
   const mountError = checkMount(game, moduleId, !mounted)
 
+  const fitting = MODULES[moduleId].fitting
+
   return (
-    <li className="text-xs">
-      <p className="font-bold text-ink">
-        {t.module[moduleId].name}
-        <span className="ml-1.5 font-normal text-ink-muted">
-          {owned ? (mounted ? t.garage.mounted : t.garage.stored) : credits(MODULES[moduleId].price)}
-        </span>
-      </p>
-      <p className="text-ink-soft">{describe.module(moduleId)}</p>
-      {!owned && <Locked requires={MODULES[moduleId].requires} />}
-      <div className="mt-1 flex items-center gap-2">
-        {owned ? (
-          <Button disabled={mountError !== null} onClick={() => dispatch({ type: 'mountModule', moduleId, mount: !mounted })}>
-            {mounted ? t.garage.unmount : t.garage.mount}
-          </Button>
-        ) : (
-          <Button variant="primary" disabled={buyError !== null} onClick={() => dispatch({ type: 'buyModule', moduleId })}>
-            {t.garage.buy}
-          </Button>
-        )}
-        {owned && mountError && !mounted && <span className="text-ink-muted">{t.error[mountError]}</span>}
-        {!owned && buyError && buyError !== 'locked' && <span className="text-danger">{t.error[buyError]}</span>}
+    <li className={`flex items-start gap-2 rounded-md border p-2 text-xs ${mounted ? 'border-accent/40 bg-accent/5' : 'border-line bg-raised/60'}`}>
+      <Thumb id={moduleId} />
+      <div className="min-w-0 flex-1">
+        <p className="flex flex-wrap items-center gap-x-1.5 font-bold text-ink">
+          {t.module[moduleId].name}
+          <span className="font-normal text-ink-muted">
+            {owned ? (mounted ? t.garage.mounted : t.garage.stored) : credits(MODULES[moduleId].price)}
+          </span>
+          <Tip
+            content={t.garage.fittingInfo[fitting](credits(refitPrice(moduleId)))}
+            className="font-normal text-ink-muted underline decoration-ink-faint decoration-dotted underline-offset-4"
+          >
+            {t.garage.fitting[fitting]}
+          </Tip>
+        </p>
+        <p className="text-ink-soft">{describe.module(moduleId)}</p>
+        {!owned && <Locked requires={MODULES[moduleId].requires} />}
+        <div className="mt-1">
+          {owned ? (
+            <Button
+              size="sm"
+              disabled={mountError !== null}
+              reason={mountError && !mounted ? t.error[mountError] : null}
+              onClick={() => dispatch({ type: 'mountModule', moduleId, mount: !mounted })}
+            >
+              {mounted ? t.garage.unmount : t.garage.mount}
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              size="sm"
+              disabled={buyError !== null}
+              reason={buyError && buyError !== 'locked' ? t.error[buyError] : null}
+              onClick={() => dispatch({ type: 'buyModule', moduleId })}
+            >
+              {t.garage.buy}
+            </Button>
+          )}
+        </div>
       </div>
     </li>
   )
@@ -145,26 +191,26 @@ function ModuleRow({ moduleId }: ModuleRowProps) {
 
 /** Passifs des véhicules et effets des modules, chiffres lus dans les données (chap. 4) */
 function useEquipmentTexts() {
-  const { t, multiplier, signedPercent, percent } = useI18n()
+  const { t, change, signedPercent, percent } = useI18n()
   const g = t.garage
 
   const vehicle = (id: VehicleId): string => {
     const { riskFactor, legalCamouflage, coldChain, transponder, heavy, fuelPerTrip } = VEHICLES[id]
     return [
-      ...(riskFactor !== undefined ? [g.lowProfile(multiplier(riskFactor))] : []),
+      ...(riskFactor !== undefined ? [g.lowProfile(change(riskFactor))] : []),
       ...(fuelPerTrip.day === fuelPerTrip.night ? [g.ecoEngine] : []),
-      ...(legalCamouflage ? [g.camouflage(multiplier(legalCamouflage.factor), percent(legalCamouflage.minShare, 0))] : []),
+      ...(legalCamouflage ? [g.camouflage(change(legalCamouflage.factor), percent(legalCamouflage.minShare, 0))] : []),
       ...(coldChain ? [g.coldChain] : []),
       ...(transponder
         ? [
             g.transponder(
               transponder.districts.map((d) => t.district[d].name).join(', '),
               signedPercent(transponder.fleeBonus, 0),
-              multiplier(transponder.iccLossFactor),
+              change(transponder.iccLossFactor),
             ),
           ]
         : []),
-      ...(heavy ? [g.heavy(multiplier(heavy.tollFactor), percent(heavy.crusherChance, 0), signedPercent(heavy.riskAdd, 0))] : []),
+      ...(heavy ? [g.heavy(change(heavy.tollFactor), percent(heavy.crusherChance, 0), signedPercent(heavy.riskAdd, 0))] : []),
     ].join(' ')
   }
 
@@ -181,18 +227,19 @@ function useEquipmentTexts() {
       trapdoor,
       fakeTerminal,
       droneJammer,
+      compartmentFactor,
     } = MODULES[id]
     return [
       ...(freshnessDelay ? [g.freshnessDelay(freshnessDelay)] : []),
       ...(heatProof ? [g.heatProof] : []),
       ...(tagFactor
-        ? [tagFactor.factor === 0 ? g.tagOff(t.tag[tagFactor.tag].name) : g.tagFactor(t.tag[tagFactor.tag].name, multiplier(tagFactor.factor))]
+        ? [tagFactor.factor === 0 ? g.tagOff(t.tag[tagFactor.tag].name) : g.tagFactor(t.tag[tagFactor.tag].name, change(tagFactor.factor))]
         : []),
-      ...(flyingCheckFactor !== undefined ? [g.flyingChecks(multiplier(flyingCheckFactor))] : []),
+      ...(flyingCheckFactor !== undefined ? [g.flyingChecks(change(flyingCheckFactor))] : []),
       ...(smoothRide ? [g.smoothRide] : []),
-      ...(nightRiskFactor !== undefined ? [g.nightRisk(multiplier(nightRiskFactor))] : []),
+      ...(nightRiskFactor !== undefined ? [g.nightRisk(change(nightRiskFactor))] : []),
       ...(rotatingPlate ? [g.rotatingPlate] : []),
-      ...(ram ? [g.ram(signedPercent(ram.fleeBonus, 0), multiplier(ram.damageFactor))] : []),
+      ...(ram ? [g.ram(signedPercent(ram.fleeBonus, 0), change(ram.damageFactor))] : []),
       ...(trapdoor
         ? [
             g.trapdoor(
@@ -205,8 +252,9 @@ function useEquipmentTexts() {
             ),
           ]
         : []),
-      ...(fakeTerminal ? [g.fakeTerminal(signedPercent(fakeTerminal.bluffBonus, 0), multiplier(fakeTerminal.bribeRateFactor))] : []),
+      ...(fakeTerminal ? [g.fakeTerminal(signedPercent(fakeTerminal.bluffBonus, 0), change(fakeTerminal.bribeRateFactor))] : []),
       ...(droneJammer ? [g.droneJammer] : []),
+      ...(compartmentFactor !== undefined ? [g.ghostWall(change(compartmentFactor))] : []),
     ].join(' ')
   }
 

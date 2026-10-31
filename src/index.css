@@ -33,13 +33,15 @@
   --color-info: #7dd3fc;
   --color-night: #a5b4fc;
   --color-event: #f0abfc;
+  /* Diffusion d'Aeterna (téléscripteur) : une seconde zone en surbrillance, distincte de l'ambre de l'action et de la sélection */
+  --color-broadcast: #2dd4bf;
 
   /* Portefeuilles */
   --color-cash: #fde047;
   --color-offshore: #67e8f9;
 
-  /* Bandeau défilant du Flash Info : deux copies du texte, décalées d'une demi-largeur pour boucler sans saut */
-  --animate-marquee: marquee 28s linear infinite;
+  /* Téléscripteur d'Aeterna : deux copies de ses trois messages, décalées d'une demi-largeur pour boucler sans saut */
+  --animate-marquee: marquee 80s linear infinite;
   @keyframes marquee {
     from {
       transform: translateX(0);

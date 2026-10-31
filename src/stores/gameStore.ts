@@ -1,3 +1,4 @@
+import { featsOf } from '../engine/feats.ts'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { applyAction, type Action, type ActionError } from '../engine/actions.ts'
@@ -28,8 +29,8 @@ export const useGameStore = create<GameStore>()(
       dispatch: (action) => {
         const result = applyAction(get().game, action)
         if (!result.ok) return set({ lastError: result.error })
-        // Une partie qui s'achève entre au palmarès, une seule fois
-        if (result.state.ending && !get().game.ending) useRecordsStore.getState().record(result.state.ending)
+        // Une partie qui s'achève entre à la carrière, une seule fois, avec ses hauts faits
+        if (result.state.ending && !get().game.ending) useRecordsStore.getState().record(result.state.ending, featsOf(result.state))
         set({ game: result.state, lastError: null })
       },
       newGame: () => set({ game: createInitialState(randomSeed()), lastError: null }),
@@ -38,7 +39,7 @@ export const useGameStore = create<GameStore>()(
       name: 'concordia-save',
       storage: createJSONStorage(() => localStorage),
       // Incrémenter à chaque changement de forme de GameState et gérer la migration
-      version: 28,
+      version: 29,
       // Pas de migration avant la première version publique : une sauvegarde obsolète repart de zéro
       migrate: () => ({ game: createInitialState(randomSeed()) }),
       partialize: savedPart,

@@ -14,6 +14,7 @@ import ConfirmButton from '../shared/ConfirmButton.tsx'
 import { FOCUS_RING } from '../shared/focus.ts'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
+import Tip from '../shared/Tip.tsx'
 
 /** Un choix du soir : côte à côte sur grand écran, l'un sous l'autre quand la place manque */
 const CHOICE = 'flex min-w-0 flex-1 basis-48 flex-col gap-1'
@@ -25,7 +26,7 @@ const CHOICE = 'flex min-w-0 flex-1 basis-48 flex-col gap-1'
 export default function EveningPanel() {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
-  const { t, credits, multiplier, percent } = useI18n()
+  const { t, credits, change, percent } = useI18n()
 
   // Trois choix le soir (chap. 1) : dormir, livraison de nuit autorisée (mission), ou tournée clandestine
   const offer = missionOffer(game)
@@ -48,8 +49,8 @@ export default function EveningPanel() {
     <Hint tone="event" icon={PartyPopper} className="mt-1">
       {t.evening.after(
         t.district[game.after].name,
-        multiplier(AFTER.festiveFactor),
-        multiplier(TAGS[AFTER.tag].nightSale ?? 1),
+        change(AFTER.festiveFactor),
+        change(TAGS[AFTER.tag].nightSale ?? 1),
         percent(1 - AFTER.nightRiskFactor, 0),
       )}
     </Hint>
@@ -57,7 +58,18 @@ export default function EveningPanel() {
 
   return (
     <>
-      <Panel icon={Siren} title={t.evening.curfewTitle} collapseId="curfew">
+      <Panel
+        icon={Siren}
+        title={t.evening.curfewTitle}
+        info={
+          <>
+            <p>{t.evening.curfewInfo}</p>
+            <p className="mt-1">{t.evening.nightRule}</p>
+            <p className="mt-1">{t.evening.beforeEvening}</p>
+          </>
+        }
+        collapseId="curfew"
+      >
         {game.phase === 'day' ? (
           <>
             <Hint tone="info">
@@ -70,7 +82,6 @@ export default function EveningPanel() {
                     : t.evening.noMission}
             </Hint>
             {afterLine}
-            <Hint className="mt-1">{t.evening.nightRule}</Hint>
             {game.contract && (
               <Hint tone="warning" className="mt-1">
                 {t.evening.contractTonight(t.district[game.contract.to].name)}
@@ -78,13 +89,12 @@ export default function EveningPanel() {
             )}
             {!game.dayTripDone ? (
               // Journée en cours : rester sur place jusqu'au soir ; les trajets de jour partent de la carte (Aller)
-              <div className="mt-2 flex flex-wrap items-center gap-2">
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 <Button onClick={() => dispatch({ type: 'waitEvening' })}>
                   <Hourglass size={14} aria-hidden="true" />
                   {t.evening.wait}
                 </Button>
-                <Hint>{t.evening.waitHint}</Hint>
-                <Hint tone="night">{t.evening.beforeEvening}</Hint>
+                <Tip label={t.evening.wait} content={t.evening.waitHint} />
               </div>
             ) : (
               /* Le soir : les choix côte à côte */
@@ -94,12 +104,15 @@ export default function EveningPanel() {
                     <Button
                       className="w-full"
                       disabled={missionError !== null}
+                      reason={missionError ? t.error[missionError] : null}
                       onClick={() => dispatch({ type: 'forceCurfew', mission: true, drink })}
                     >
                       {t.evening.missionTour(t.district[offer].name, credits(missionFee(game)))}
                       {drinkLabel}
                     </Button>
-                    <Hint>{missionError ? t.error[missionError] : t.evening.missionTourHint(sealedCount(game))}</Hint>
+                    <Hint>
+                      {t.evening.missionTourShort} <Tip label={t.evening.missionTourShort} content={t.evening.missionTourHint(sealedCount(game))} />
+                    </Hint>
                   </li>
                 )}
                 <li className={CHOICE}>
@@ -107,6 +120,7 @@ export default function EveningPanel() {
                     variant="danger"
                     className="w-full"
                     disabled={curfewError !== null}
+                    reason={curfewError ? t.error[curfewError] : null}
                     onClick={() => dispatch({ type: 'forceCurfew', drink })}
                     confirm={
                       lethal
@@ -117,7 +131,10 @@ export default function EveningPanel() {
                     {t.evening.clandestineTour}
                     {drinkLabel}
                   </ConfirmButton>
-                  <Hint>{curfewError ? t.error[curfewError] : t.evening.clandestineHint(t.hud.wantedGain(WANTED.perOffense))}</Hint>
+                  <Hint>
+                    {t.evening.clandestineShort}{' '}
+                    <Tip label={t.evening.clandestineShort} content={t.evening.clandestineHint(t.hud.wantedGain(WANTED.perOffense))} />
+                  </Hint>
                   {canInject(game) && <Hint tone="accent">{t.evening.injectionHint(game.progress.injections + 1, ENDINGS.resident.injections)}</Hint>}
                 </li>
                 <li className={CHOICE}>
@@ -125,6 +142,9 @@ export default function EveningPanel() {
                     <BedDouble size={14} aria-hidden="true" />
                     {sleepLabel}
                   </Button>
+                  <Hint>
+                    {t.evening.sleepShort} <Tip label={sleepLabel} content={sleepsAtRelay(game) ? t.evening.sleepRelayHint : t.evening.bivouacHint} />
+                  </Hint>
                 </li>
               </ul>
             )}

@@ -10,8 +10,8 @@ export default function DeliveryCard() {
   // L'offre, la place et la prime se calculent sur l'état entier de la partie
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
-  const { t, credits, multiplier } = useI18n()
-  const trust = t.travel.trust(game.progress.deliveries, multiplier(trustFactor(game)))
+  const { t, credits, change } = useI18n()
+  const trust = t.travel.trust(game.progress.deliveries, change(trustFactor(game)))
   if (game.phase !== 'day') return null
   if (game.delivery)
     return (

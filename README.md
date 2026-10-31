@@ -99,6 +99,8 @@ Elles s'appliquent à tout le code, sans exception non justifiée. **Toute nouve
 - HTML sémantique : `<button>` pour tout clic, `<header>`, `<main>`, `<section>`, listes.
 - Icônes lucide : `size` explicite et `aria-hidden="true"` ; une information portée par une icône ou une couleur est doublée d'un texte `sr-only`.
 - Pas d'attribut `title` (invisible au toucher) : une explication passe par l'infobulle `Tip` (`src/ui/shared/Tip.tsx`, Floating UI).
+- Un bouton grisé dit pourquoi au survol, au toucher ou au focus (`reason` du `Button`), plutôt que dans un texte sous lui ; l'explication d'un encart, utile la première fois, va derrière le « i » de son titre (`info` du `Panel`).
+- Un facteur s'affiche en variation, lisible par tous : `change(0.85)` donne « −15 % », jamais « ×0,85 ».
 - Un bouton sans texte explicite porte un `aria-label` traduit (la page est en `lang="fr"`, un libellé anglais serait mal prononcé).
 - Focus clavier visible sur tout élément interactif (`FOCUS_RING`).
 - États d'affichage : données, liste vide, erreur (bandeau d'erreur d'action, `ErrorBoundary` autour de l'application). Pas d'état de chargement tant que rien n'est asynchrone.
