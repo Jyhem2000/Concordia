@@ -200,8 +200,11 @@ export const PATROL_RISK = 0.2
 /** Coupe-file des Citoyens Or dans les districts qui en ont un */
 export const GOLD_FAST_LANE_FACTOR = 0.9
 
-/** Fiche S algorithmique : niveau max, risque ajouté et chance de fuite retirée par niveau */
-export const WANTED = { maxLevel: 3, perOffense: 1, riskPerLevel: 0.05, fleePenaltyPerLevel: 0.1 }
+/**
+ * Fiche S algorithmique : niveau max, risque ajouté et chance de fuite retirée par niveau ; un niveau s'efface après
+ * `cleanDays` jours de suite sans nouvel écart
+ */
+export const WANTED = { maxLevel: 3, perOffense: 1, riskPerLevel: 0.05, fleePenaltyPerLevel: 0.1, cleanDays: 3 }
 
 // ─── Interception (chap. 5) ───
 

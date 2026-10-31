@@ -86,6 +86,7 @@ function BriefingLines({ briefing }: BriefingLinesProps) {
           {t.briefing.heat(t.product[heat.melts].name, briefing.heat?.melted ?? 0, briefing.heat?.aged ?? 0, briefing.heat?.rotten ?? 0)}
         </li>
       )}
+      {briefing.wantedCleared && <li className="text-success">{t.briefing.wantedCleared(wanted, WANTED.maxLevel, WANTED.cleanDays)}</li>}
       {raised && wanted > 0 && (
         <li className="text-danger">
           {t.briefing.wanted(wanted, WANTED.maxLevel, percent(WANTED.riskPerLevel * wanted, 0), percent(WANTED.fleePenaltyPerLevel * wanted, 0))}

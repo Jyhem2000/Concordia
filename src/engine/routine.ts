@@ -1,4 +1,4 @@
-import { ICC_MAX, CUSTODY, DEBT_LATE, ENDINGS, GAME_LENGTH_DAYS, PROTECTION, RELAY_SLEEP, VENTURE } from '../data/balance.ts'
+import { CUSTODY, DEBT_LATE, ENDINGS, GAME_LENGTH_DAYS, ICC_MAX, PROTECTION, RELAY_SLEEP, VENTURE, WANTED } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
 import { LOTTERY } from '../data/events.ts'
 import { FORGERY } from '../data/locations.ts'
@@ -66,9 +66,7 @@ function spendNight(state: GameState, night: Night): { state: GameState; sleep: 
     case 'relay': {
       const icc = gainRouteIcc(state, RELAY_SLEEP.icc)
       const health = changeHealth(icc.state, RELAY_SLEEP.health)
-      // Une nuit sage au relais, certifiée par les capteurs, fait baisser la Fiche S
-      const rested = { ...health.state, wanted: Math.max(0, state.wanted - 1) }
-      return { state: rested, sleep: { icc: icc.gained, health: health.delta }, custodyHealth: 0 }
+      return { state: health.state, sleep: { icc: icc.gained, health: health.delta }, custodyHealth: 0 }
     }
     case 'bivouac':
       return { state, sleep: null, custodyHealth: 0 }
@@ -113,6 +111,7 @@ function morningRoutine(state: GameState, night: Night): GameState {
     vipFailed: false,
     missionReclaimed: 0,
     informant: false,
+    wantedCleared: false,
     debtInterest: null,
     debtLate: false,
     protection: null,
@@ -220,6 +219,11 @@ function morningRoutine(state: GameState, night: Night): GameState {
     const scorched = scorch(s, heat.melts, heat.ageDays)
     s = scorched.state
     briefing.heat = scorched.report
+  }
+  // Fiche S : un niveau s'efface après quelques jours de suite sans nouvel écart (chap. 5)
+  if (s.wanted > 0 && day - s.wantedSince >= WANTED.cleanDays) {
+    s = { ...s, wanted: s.wanted - 1, wantedSince: day }
+    briefing.wantedCleared = true
   }
   if (hasEffect(s, s.districtId, 'halfDay')) {
     s = loseHalfDay(s)

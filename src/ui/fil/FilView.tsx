@@ -191,6 +191,7 @@ function AlertsPanel() {
               WANTED.maxLevel,
               percent(WANTED.riskPerLevel * game.wanted, 0),
               percent(WANTED.fleePenaltyPerLevel * game.wanted, 0),
+              WANTED.cleanDays,
             ),
             'danger',
           ),

@@ -1,11 +1,11 @@
-import { DISTRICT_IDS } from '../data/districts.ts'
+import { DISTRICT_IDS, DISTRICTS } from '../data/districts.ts'
 import { CONTRACT, LOCATIONS } from '../data/locations.ts'
-import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
+import { PRODUCTS } from '../data/products.ts'
 import type { ActionError } from './actions.ts'
 import { ownedQty, takeLots } from './cargo.ts'
 import { keysOf } from './records.ts'
 import type { Rng } from './rng.ts'
-import type { Contract, DistrictId, GameState } from './types.ts'
+import type { Contract, DistrictId, GameState, ProductId } from './types.ts'
 
 /** District du donneur d'ordre : celui de l'usurier (guichet de la dette) */
 function brokerDistrict(): DistrictId | undefined {
@@ -14,17 +14,25 @@ function brokerDistrict(): DistrictId | undefined {
     .find((location) => location.services.includes('debt'))?.district
 }
 
-/** Contrat proposé ce matin (chap. 3) : produit de Tier 1 à 3, caisses selon le tier, destination hors du district de Viktor */
+/** Produits qu'un contrat peut demander à ce district : sa Forte demande (jamais en boutique là-bas), dans les tiers du contrat */
+function contractProducts(districtId: DistrictId): ProductId[] {
+  return DISTRICTS[districtId].strongDemand.filter((id) => CONTRACT.tiers.includes(PRODUCTS[id].tier) && !PRODUCTS[id].sealed && !PRODUCTS[id].bulky)
+}
+
+/**
+ * Contrat proposé ce matin (chap. 3) : une destination hors du district de Viktor, et un produit de sa Forte demande
+ * (Viktor livre ce qui y manque, qu'on ne trouve pas sur place), caisses selon le tier
+ */
 export function drawContract(rng: Rng, day: number): Contract | null {
-  const products = PRODUCT_IDS.filter((id) => CONTRACT.tiers.includes(PRODUCTS[id].tier) && !PRODUCTS[id].sealed && !PRODUCTS[id].bulky)
-  const destinations = DISTRICT_IDS.filter((id) => id !== brokerDistrict())
-  if (products.length === 0 || destinations.length === 0) return null
-  const productId = rng.pick(products)
+  const destinations = DISTRICT_IDS.filter((id) => id !== brokerDistrict() && contractProducts(id).length > 0)
+  if (destinations.length === 0) return null
+  const to = rng.pick(destinations)
+  const productId = rng.pick(contractProducts(to))
   const qty = CONTRACT.crates[PRODUCTS[productId].tier] ?? 1
   return {
     productId,
     qty,
-    to: rng.pick(destinations),
+    to,
     deadline: day + rng.int(CONTRACT.delayDays.min, CONTRACT.delayDays.max),
     reward: Math.round(qty * PRODUCTS[productId].basePrice * CONTRACT.factor),
   }

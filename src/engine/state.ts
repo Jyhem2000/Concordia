@@ -67,6 +67,7 @@ export function createInitialState(seed: number): GameState {
     health: START_HEALTH,
     chassis: VEHICLES[START_VEHICLE].maxChassis,
     wanted: 0,
+    wantedSince: 1,
     patrolDistrict,
     suspiciousPeaks: [],
     oversold: [],

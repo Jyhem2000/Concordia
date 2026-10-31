@@ -632,3 +632,8 @@ Les deux services restaient négatifs aux retraits. Le bot les jouait mal : pani
 **Changements de règle :** la Lucidité et la Sédation quittent les mécaniques (l'eau sans sédatifs de la Cantine reste du lore) ; la Fiche S prend sa place dans le bandeau. La vente se fait par article, une quantité choisie (raccourcis 1, 5, MAX, plein cours jusqu'au rachat restant) et un seul bouton qui annonce le résultat ; plus de vente groupée. Un contrat de la Pègre ne se livre qu'avec des caisses qui ont voyagé.
 
 **Campagnes** (mêmes effectifs) : tout dans le bruit. Novice 79 % de survie (80 % avant). Sans la Sédation, les Casse-cou gagnent un peu (Sans build 143 → 151k, Fuite au sommet 134 → 151k), les autres plans ne bougent pas. Les bots ne dépendaient pas de la Lucidité pour leurs trajets ; Hives reste fréquenté pour Viktor, la Cantine et le Quai 9.
+
+## Fiche S plus tenace, contrat sur la Forte demande
+**Changements de règle :** la Fiche S ne baisse plus d'une nuit au relais, mais d'un niveau après trois jours de suite sans nouvel écart (chaque écart remet le compte à zéro) ; le contrat de la Pègre demande un produit en Forte demande à destination, et seules les caisses qui ont voyagé se livrent.
+
+**Campagnes** (mêmes effectifs) : tout dans le bruit. Novice 80 % de survie. Une Fiche S qui dure plus ne coûte pas de survie aux plans de nuit (Nuit festive en Équilibré 87 → 89 %, Fuite au sommet en Équilibré 81 → 85 %) : le risque ajouté par niveau reste modeste, c'est surtout la fuite qui s'en ressent. Le Fantôme reste dans sa marge (71 % et 65 %).

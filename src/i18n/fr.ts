@@ -259,8 +259,8 @@ export const fr = {
       `Synthanol : ${fuel} ration${fuel > 1 ? 's' : ''}, pas assez pour quitter le district (${shortest} au minimum)`,
     beacon: (product: string, risk: string) => `${product} à bord : sa balise ajoute ${risk} de risque de contrôle partout`,
     beaconJammed: (product: string) => `${product} à bord : sa balise est brouillée par votre équipière`,
-    wanted: (level: number, max: number, risk: string, flee: string) =>
-      `Fiche S ${level}/${max} : Aeterna vous recherche. Risque de contrôle +${risk} partout, fuite −${flee}. Chaque nuit au relais routier l'efface d'un niveau.`,
+    wanted: (level: number, max: number, risk: string, flee: string, days: number) =>
+      `Fiche S ${level}/${max} : Aeterna vous recherche. Risque de contrôle +${risk} partout, fuite −${flee}. Un niveau s'efface après ${days} jours sans écart.`,
     protectionTomorrow: (amount: string) =>
       `Collecte de Viktor demain matin : ≈ ${amount} (une part du Cash-Puce et de la soute ; l'offshore lui échappe).`,
     crewUnpaid: (name: string) => `${name} n'a pas été payé ce matin : pas de travail aujourd'hui.`,
@@ -384,8 +384,8 @@ export const fr = {
     wantedLabel: 'Fiche S',
     wantedValue: (level: number, max: number) => `${level}/${max}`,
     wantedNow: (risk: string, flee: string) => `Recherché : risque de contrôle +${risk} partout, fuite −${flee}`,
-    wantedInfo: (risk: string, flee: string, bivouac: string) =>
-      `Fiche S : votre niveau de recherche dans les fichiers d'Aeterna. Il monte d'un niveau à chaque fuite réussie devant la BRC et à chaque tournée de nuit hors mission passée sans contrôle (l'écart est filmé). Par niveau : risque de contrôle +${risk} partout, fuite −${flee}. Chaque nuit au relais routier l'efface d'un niveau : il y en a un dans chaque district, sauf à ${bivouac} (bivouac). La nuit qui suit une tournée ne compte pas.`,
+    wantedInfo: (risk: string, flee: string, days: number) =>
+      `Fiche S : votre niveau de recherche dans les fichiers d'Aeterna. Il monte d'un niveau à chaque fuite réussie devant la BRC et à chaque tournée de nuit hors mission passée sans contrôle (l'écart est filmé). Par niveau : risque de contrôle +${risk} partout, fuite −${flee}. Un niveau s'efface après ${days} jours de suite sans nouvel écart.`,
     wantedGain: (levels: number) => `+${levels} niveau${levels > 1 ? 'x' : ''} de Fiche S`,
     debtLate: 'Dette initiale en retard',
     debtDue: (when: string) => `Dette initiale à solder ${when}`,
@@ -506,8 +506,9 @@ export const fr = {
   },
 
   briefing: {
+    wantedCleared: (level: number, max: number, days: number) => `Fiche S effacée d'un niveau, après ${days} jours sans écart : ${level}/${max}.`,
     wanted: (level: number, max: number, risk: string, flee: string) =>
-      `Fiche S montée hier (fuite ou écart de nuit filmé) : ${level}/${max}. Risque de contrôle +${risk} partout, fuite −${flee} ; une nuit au relais l'efface d'un niveau.`,
+      `Fiche S montée hier (fuite ou écart de nuit filmé) : ${level}/${max}. Risque de contrôle +${risk} partout, fuite −${flee} ; quelques jours sans écart en effacent un niveau.`,
     title: (day: number) => `Briefing de 06h00 — Jour ${day}`,
     ventureRaid: (loss: string) => `Coup de filet de la BRC sur une filière du Cartel : le placement perd ${loss}.`,
     ventureInterest: 'Intérêts du placement',
@@ -554,10 +555,11 @@ export const fr = {
     demoted: (name: string, from: string, to: string) => `🌱 ${name}, ex-${from}, rejoint avec enthousiasme ${to}.`,
     vice: (product: string, district: string, until: number) =>
       `Son goût pour « ${product} » l'y suit : Forte demande à ${district} jusqu'au J${until}.`,
+    /** Citoyens tirés à la Loterie (promu, déclassé) : des inconnus, sans lien avec les personnages du jeu */
     names: [
-      'Mme R. Marini',
+      'Mme R. Delcourt',
       'M. K. Okafor',
-      'Mme L. Varga',
+      'Mme L. Ferreira',
       'M. T. Nguyen',
       'Mme S. Haddad',
       'M. J. Kowalski',
@@ -893,8 +895,8 @@ export const fr = {
     buy: 'Acheter',
     sell: 'Vendre',
     fullRateShort: 'Plein cours',
-    buyFor: (qty: number, cost: string) => `Acheter ${qty} : −${cost}`,
-    sellFor: (qty: number, total: string, margin: string) => `Vendre ${qty} : +${total} (marge ${margin})`,
+    buyCost: (cost: string) => `−${cost}`,
+    saleTotal: (total: string) => `+${total}`,
     less: (action: string) => `${action} : une caisse de moins`,
     more: (action: string) => `${action} : une caisse de plus`,
     quantity: (action: string, product: string) => `${action} : nombre de caisses de ${product}`,
@@ -1171,8 +1173,8 @@ export const fr = {
     clandestineShort: 'Hors mission : risque accru, Fiche S.',
     missionTourShort: 'Trajet couvert, prime.',
     sleepShort: "Repos jusqu'à 06h00.",
-    sleepRelayHint: "Nuit au relais routier du DSC : gain d'ICC et de Santé, épuisement effacé, Fiche S baissée d'un niveau.",
-    bivouacHint: 'Bivouac, faute de relais ici : épuisement effacé, mais ni ICC, ni Santé, et la Fiche S ne baisse pas.',
+    sleepRelayHint: "Nuit au relais routier du DSC : gain d'ICC et de Santé, épuisement effacé.",
+    bivouacHint: 'Bivouac, faute de relais ici : épuisement effacé, mais ni ICC, ni Santé.',
     clandestineHint: (wanted: string) => `Hors mission, vers le district de votre choix : risque accru, et ${wanted} si le trajet passe.`,
     injectionHint: (next: number, needed: number) =>
       `Serveur Aeterna en soute et Glitch au travail : si tu arrives sans garde à vue, elle injecte un morceau de ton dossier (${next}/${needed}).`,
@@ -1417,16 +1419,16 @@ export const fr = {
 
   crew: {
     'CREW-01': {
-      name: "« L'Ancien de la BRC » — Commandant Vance",
-      subtitle: 'Copilote accrédité',
+      name: 'Commandant Vance',
+      subtitle: "« L'Ancien de la BRC » : copilote accrédité, vieux limier d'avant Aeterna",
     },
     'CREW-02': {
-      name: '« Glitch »',
+      name: 'Glitch',
       subtitle: 'Jeune hackeuse sous caféine (opératrice radio distante)',
     },
     'CREW-03': {
-      name: '« La Matriarche » — Mama Rosa Marini',
-      subtitle: "Atelier d'affinage",
+      name: 'Mama Rosa',
+      subtitle: "« La Matriarche » : cheffe étoilée d'avant le Grand Reset, atelier d'affinage",
     },
   } satisfies Record<CrewId, NamedWithSubtitle>,
 

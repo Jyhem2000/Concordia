@@ -35,7 +35,7 @@ Le résultat est **borné, après** tous les multiplicateurs (`RISK_BOUNDS` dans
 ### Fiche S algorithmique (niveau de recherche)
 * Chaque **fuite réussie** ajoute **1 niveau**, jusqu'à un maximum ; chaque **trajet de nuit hors mission** qui passe sans interception aussi (l'écart est enregistré, chap. 1).
 * Par niveau : malus aux prochaines fuites et au risque d'interception partout (`WANTED` dans [`balance.ts`](../src/data/balance.ts)).
-* **−1 niveau** par nuit passée au relais routier (le bivouac ne compte pas).
+* **−1 niveau** après quelques jours de suite sans nouvel écart (`cleanDays` dans `WANTED`), où que l'on dorme ; chaque écart remet le compte à zéro. *Intention :* une tournée de nuit tous les deux jours ne s'efface plus d'une nuit au relais ; pour retrouver un profil propre, il faut vraiment se tenir à carreau.
 * Affichée en permanence dans le bandeau (chap. 7) : *« Votre profil suscite l'intérêt bienveillant d'Aeterna. »*
 
 ### Barrage fixe ou contrôle volant

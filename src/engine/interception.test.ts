@@ -37,6 +37,7 @@ import {
 } from './interception.ts'
 import { risk } from './risk.ts'
 import { createRng } from './rng.ts'
+import { raiseWanted } from './progress.ts'
 import { sleep } from './routine.ts'
 import { velvetDistrict } from './services.ts'
 import { defined, errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
@@ -317,9 +318,15 @@ describe('suites du barrage', () => {
     expect(sleep(sold).suspiciousPeaks).toEqual(['D1'])
   })
 
-  it('baisse la Fiche S après une nuit au relais, pas après une nuit blanche', () => {
-    expect(sleep(gameAt(2, { wanted: 2 })).wanted).toBe(1)
-    expect(sleep(gameAt(2, { wanted: 2, phase: 'night' })).wanted).toBe(2)
+  it('efface un niveau de Fiche S après assez de jours sans écart, où qu’on dorme', () => {
+    // Dernier écart au jour 2 : au matin du jour 2 + cleanDays, un niveau s'efface
+    const day = 2 + WANTED.cleanDays - 1
+    const cleared = sleep(gameAt(day, { wanted: 2, wantedSince: 2 }))
+    expect(cleared.wanted).toBe(1)
+    expect(cleared.wantedSince).toBe(day + 1)
+    expect(sleep(gameAt(day - 1, { wanted: 2, wantedSince: 2 })).wanted).toBe(2)
+    // Un nouvel écart remet le compte à zéro
+    expect(raiseWanted(gameAt(day, { wanted: 1, wantedSince: 2 })).wantedSince).toBe(day)
   })
 })
 

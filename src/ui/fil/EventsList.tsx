@@ -64,7 +64,7 @@ export default function EventsList() {
           <ul className="flex flex-col gap-1">
             {locals.map(({ district, event }) => (
               <li key={district} className="flex flex-wrap items-baseline gap-x-1.5">
-                <span className="font-bold text-ink">{t.district[district].name}</span>
+                <span className="font-bold text-ink">{t.district[district].name} :</span>
                 <EventDetails event={event} />
               </li>
             ))}

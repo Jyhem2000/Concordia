@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { DISTRICTS } from '../data/districts.ts'
 import { CONTRACT } from '../data/locations.ts'
 import { PRODUCTS } from '../data/products.ts'
 import { ownedQty } from './cargo.ts'
@@ -12,13 +13,14 @@ const lot = (qty: number): CargoLot => ({ productId: 'T1-04', qty, unitCost: 50,
 const stateWith = (patch: Partial<GameState>) => gameAt(4, { cash: 1_000, ...patch })
 
 describe('contrats de la Pègre (chap. 3)', () => {
-  it('propose un produit de Tier 1 à 3, hors du district de Viktor, avec sa prime et son délai', () => {
+  it('propose un produit de Tier 1 à 3 en Forte demande à destination, hors du district de Viktor, avec sa prime et son délai', () => {
     for (let seed = 1; seed <= 50; seed++) {
       const offer = defined(drawContract(createRng(seedRng(seed)), 3))
       const product = PRODUCTS[offer.productId]
       expect(CONTRACT.tiers).toContain(product.tier)
       expect(offer.qty).toBe(CONTRACT.crates[product.tier])
       expect(offer.to).not.toBe('D1')
+      expect(DISTRICTS[offer.to].strongDemand).toContain(offer.productId)
       expect(offer.deadline - 3).toBeGreaterThanOrEqual(CONTRACT.delayDays.min)
       expect(offer.deadline - 3).toBeLessThanOrEqual(CONTRACT.delayDays.max)
       expect(offer.reward).toBe(Math.round(offer.qty * product.basePrice * CONTRACT.factor))

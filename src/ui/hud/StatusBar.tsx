@@ -6,7 +6,6 @@ import { crewEffect } from '../../engine/crew.ts'
 import { effectiveOffshoreRate, nextDebtDeadline, offshoreBalance } from '../../engine/finance.ts'
 import { checkForceCurfew } from '../../engine/actions.ts'
 import { iccRouteGainLeft, iccTier, isWorn } from '../../engine/gauges.ts'
-import { DISTRICT_IDS, DISTRICTS } from '../../data/districts.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import { APPEAR } from '../shared/motion.ts'
@@ -58,10 +57,6 @@ export default function StatusBar() {
   const worn = isWorn(game)
   const debtStatus = game.debtLate ? t.hud.debtLate : deadline === null ? undefined : t.hud.debtDue(t.hud.daysLeft(deadline - game.day))
   const PhaseIcon = game.phase === 'day' ? Sun : Moon
-  // Districts sans relais routier : on y bivouaque, et la Fiche S ne baisse pas
-  const bivouacDistricts = DISTRICT_IDS.filter((id) => !DISTRICTS[id].relay)
-    .map((id) => t.district[id].name)
-    .join(', ')
 
   return (
     <header className="z-20 border-b border-line bg-base/95 backdrop-blur md:sticky md:top-0">
@@ -106,7 +101,7 @@ export default function StatusBar() {
                     : undefined
                 }
                 statusTone="wanted"
-                text={t.hud.wantedInfo(percent(WANTED.riskPerLevel, 0), percent(WANTED.fleePenaltyPerLevel, 0), bivouacDistricts)}
+                text={t.hud.wantedInfo(percent(WANTED.riskPerLevel, 0), percent(WANTED.fleePenaltyPerLevel, 0), WANTED.cleanDays)}
               />
             }
           >

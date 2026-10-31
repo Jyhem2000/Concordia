@@ -91,5 +91,6 @@ export function noteDelivery(state: GameState): GameState {
 /** Un niveau de Fiche S de plus (fuite, écart de nuit, faux dossier raté) : le nom du joueur entre dans les fichiers */
 export function raiseWanted(state: GameState): GameState {
   const wanted = Math.min(WANTED.maxLevel, state.wanted + WANTED.perOffense)
-  return { ...state, wanted, progress: { ...state.progress, flagged: true } }
+  // Un nouvel écart : le compte des jours sans écart repart de zéro
+  return { ...state, wanted, wantedSince: state.day, progress: { ...state.progress, flagged: true } }
 }

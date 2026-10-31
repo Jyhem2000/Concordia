@@ -506,6 +506,8 @@ export type MorningBriefing = {
   missionReclaimed: number
   /** Faux dossier de l'indic : Fiche S effacée, ICC gagné */
   informant: boolean
+  /** Fiche S : un niveau effacé ce matin, après assez de jours sans écart */
+  wantedCleared: boolean
   /** Vrai le matin où la dette passe en retard (taux majoré, embuscades) */
   debtLate: boolean
   /** Collecte de protection : montant dû, part payée en Cash-Puce, reliquat ajouté à la dette */
@@ -783,6 +785,8 @@ export type GameState = {
   chassis: number
   /** Fiche S algorithmique : niveau de recherche, 0 à 3 (chap. 5) */
   wanted: number
+  /** Jour du dernier changement de la Fiche S (écart, ou niveau effacé) : le compte des jours sans écart part de là */
+  wantedSince: number
   /** District de la ronde renforcée du jour, caché au joueur */
   patrolDistrict: DistrictId | null
   /** Districts en pic suspect aujourd'hui (ventes saturées la veille, chap. 2) */

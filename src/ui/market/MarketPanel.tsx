@@ -313,7 +313,7 @@ function Field({ label, children }: FieldProps) {
 function TradeControl({ productId, kind, max, fullRate }: TradeControlProps) {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
-  const { t, credits, signedCredits } = useI18n()
+  const { t, credits } = useI18n()
   // Quantité choisie : état d'interface éphémère, ramenée au maximum du moment
   const [picked, setPicked] = useState(1)
   const qty = Math.max(0, Math.min(picked, max))
@@ -325,12 +325,6 @@ function TradeControl({ productId, kind, max, fullRate }: TradeControlProps) {
     ...(kind === 'sell' && fullRate !== undefined && fullRate > 0 && fullRate < max ? [{ label: t.market.fullRateShort, qty: fullRate }] : []),
   ]
   const sale = kind === 'sell' && qty > 0 ? saleQuote(game, productId, qty) : null
-  const result =
-    kind === 'buy'
-      ? t.market.buyFor(qty, credits(quote(game, game.districtId, productId) * qty))
-      : sale
-        ? t.market.sellFor(qty, credits(sale.total), signedCredits(sale.total - sale.cost))
-        : t.market.sellFor(0, credits(0), signedCredits(0))
   const label = kind === 'buy' ? t.market.buy : t.market.sell
 
   return (
@@ -362,8 +356,19 @@ function TradeControl({ productId, kind, max, fullRate }: TradeControlProps) {
         disabled={qty < 1}
         onClick={() => dispatch(kind === 'buy' ? { type: 'buy', productId, qty } : { type: 'sell', productId, qty })}
       >
-        {result}
+        {label}
       </Button>
+      {/* Résultat exact de la quantité choisie, hors du bouton : coût de l'achat, ou produit et marge de la vente */}
+      {kind === 'buy' ? (
+        <span className="text-xs text-ink-soft tabular-nums">{t.market.buyCost(credits(quote(game, game.districtId, productId) * qty))}</span>
+      ) : (
+        sale && (
+          <span className="flex items-center gap-1 text-xs text-ink-soft tabular-nums">
+            {t.market.saleTotal(credits(sale.total))}
+            <Margin revenue={sale.total} cost={sale.cost} />
+          </span>
+        )
+      )}
     </div>
   )
 }

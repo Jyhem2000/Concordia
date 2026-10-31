@@ -165,9 +165,9 @@ Le joueur est officiellement livreur de Catégorie C : la plateforme logistique 
 
 ### Le dilemme de 20h00
 Les sirènes d'Aeterna annoncent le couvre-feu sanitaire : les citoyens rentrent, la logistique continue. Trois options :
-* **Dormir au relais routier du DSC** (dans chaque district sauf `[D4]`, côté quais de service) : jusqu'à 06h00. **Gain d'ICC et de Santé** (`RELAY_SLEEP` dans [`balance.ts`](../src/data/balance.ts)), réinitialise l'épuisement, baisse la Fiche S d'un niveau (chap. 5).
-* **Bivouac** (seule façon de dormir en `[D4]`) : réinitialise l'épuisement, mais **0 ICC, 0 PV**, et la Fiche S ne baisse pas (aucun capteur ne certifie ta nuit sage).
-* **Tournée de nuit :** un second trajet dans la journée, dans les galeries de service. Elle part **le soir** : après le trajet du jour, après avoir attendu le soir sur place, ou après une demi-journée perdue (corvée DSC). La nuit qui suit ne rapporte aucun gain de sommeil et ne baisse pas la Fiche S, même en dormant ensuite dans un district à relais.
+* **Dormir au relais routier du DSC** (dans chaque district sauf `[D4]`, côté quais de service) : jusqu'à 06h00. **Gain d'ICC et de Santé** (`RELAY_SLEEP` dans [`balance.ts`](../src/data/balance.ts)), réinitialise l'épuisement.
+* **Bivouac** (seule façon de dormir en `[D4]`) : réinitialise l'épuisement, mais **0 ICC, 0 PV**.
+* **Tournée de nuit :** un second trajet dans la journée, dans les galeries de service. Elle part **le soir** : après le trajet du jour, après avoir attendu le soir sur place, ou après une demi-journée perdue (corvée DSC). La nuit qui suit ne rapporte aucun gain de sommeil, même en dormant ensuite dans un district à relais.
 
 ### Tournée de nuit
 Tout est filmé : un camion la nuit n'est légitime que sur **ordre de mission** de la plateforme logistique du DSC. Chiffres : `NIGHT_MISSION` dans [`balance.ts`](../src/data/balance.ts).
