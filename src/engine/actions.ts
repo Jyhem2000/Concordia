@@ -21,6 +21,7 @@ import {
   requestVip,
   shieldSponsored,
   visitMorgue,
+  eatMeal,
   type MorgueService,
 } from './services.ts'
 import { buyModule, buyVehicle, mountedEffect, mountModule, repair } from './equipment.ts'
@@ -95,6 +96,7 @@ export type Action =
   | { type: 'repair'; pv: number }
   | { type: 'hireCrew'; crewId: CrewId }
   | { type: 'influence'; tag: TagId }
+  | { type: 'meal' }
   | { type: 'morgue'; service: MorgueService }
   | { type: 'prophecy' }
   | { type: 'forge'; card: ForgeryCard }
@@ -162,6 +164,8 @@ export type ActionError =
   | 'not-eligible'
   | 'cooldown'
   | 'already-healthy'
+  | 'full-health'
+  | 'already-fed'
   | 'prophecy-active'
   | 'too-late'
   | 'location-locked'
@@ -401,11 +405,17 @@ export function locationFor(state: GameState, service: LocationService): Locatio
   return keysOf(LOCATIONS).find((id) => LOCATIONS[id].district === state.districtId && LOCATIONS[id].services.includes(service)) ?? null
 }
 
-/** Un service s'obtient de jour, dans un lieu du district qui le rend ; renvoie la raison sinon */
+/** Un lieu spécial ouvre de 06h00 à 20h00, sauf ceux qui ne ferment jamais (l'arrière-salle de Viktor) */
+export function locationOpen(state: GameState, locationId: LocationId): boolean {
+  return LOCATIONS[locationId].nightOpen === true || (state.phase === 'day' && !state.dayOver)
+}
+
+/** Un service s'obtient dans un lieu ouvert du district qui le rend ; renvoie la raison sinon */
 export function checkService(state: GameState, service: LocationService): ActionError | null {
   if (state.status !== 'playing') return 'game-over'
-  if (!locationFor(state, service)) return 'not-at-location'
-  if (state.phase !== 'day' || state.dayOver) return 'location-closed'
+  const location = locationFor(state, service)
+  if (!location) return 'not-at-location'
+  if (!locationOpen(state, location)) return 'location-closed'
   return null
 }
 
@@ -597,6 +607,8 @@ function resolveAction(state: GameState, action: Action): ActionResult {
     }
     case 'influence':
       return atService(state, 'influence', () => orderInfluence(state, action.tag))
+    case 'meal':
+      return atService(state, 'cantine', () => eatMeal(state))
     case 'morgue':
       return atService(state, 'morgue', () => visitMorgue(state, action.service))
     case 'prophecy':

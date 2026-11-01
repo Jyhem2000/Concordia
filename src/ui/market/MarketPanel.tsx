@@ -253,7 +253,7 @@ function MarketRow({ productId }: MarketRowProps) {
             <Field label={t.market.demand}>
               {quota === null || demandLeft === undefined
                 ? t.market.unlimited
-                : t.market.demandLeft(demandLeft, Math.min(quota - demandLeft, demandRefill(quota)))}
+                : t.market.demandLeft(demandLeft, Math.min(quota - demandLeft, demandRefill(quota, productId)))}
             </Field>
             {owned > 0 && (
               <Field label={t.market.owned}>

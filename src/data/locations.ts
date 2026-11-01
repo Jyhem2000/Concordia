@@ -5,8 +5,8 @@ import type { DistrictId, GlobalEventId, Location, LocationId, ProductId, Requir
  * et le lore sont au chap. 3, les noms dans src/i18n/fr.ts.
  */
 
-/** Cantine des Chauffeurs : Synthanol au tarif syndical (la Lucidité se recharge dans son district, de jour) */
-export const CANTINE = { fuelPrice: 60 }
+/** Cantine des Chauffeurs : Synthanol au tarif syndical ; plat du routier, une fois par jour (prix, Santé rendue) */
+export const CANTINE = { fuelPrice: 60, meal: { cost: 250, health: 10 } }
 
 /** Garage de Mitch : prix d'un PV de châssis réparé ; adaptation d'un module mécanique à un nouveau châssis, en part de son prix */
 export const GARAGE = { repairPerPv: 60, refitShare: 0.25 }
@@ -17,7 +17,7 @@ export const KARMA = {
   costStep: 2_000,
   cooldownDays: 5,
   factor: 1.75,
-  tags: ['TAG-CULTURE', 'TAG-PERISHABLE', 'TAG-CHEMICAL'] as readonly TagId[],
+  tags: ['TAG-CULTURE', 'TAG-GOURMET', 'TAG-CHEMICAL'] as readonly TagId[],
 }
 
 /** Morgue du Dr. K. : laissez-passer, chirurgie, certificat */
@@ -79,7 +79,8 @@ export const SERVICE_REQUIREMENTS: Readonly<Partial<Record<ServiceKey, readonly 
 }
 
 export const LOCATIONS: Readonly<Record<LocationId, Location>> = {
-  'LOC-D1-1': { district: 'D1', services: ['debt'] },
+  // L'arrière-salle d'un usurier ne ferme jamais
+  'LOC-D1-1': { district: 'D1', services: ['debt'], nightOpen: true },
   'LOC-D1-2': { district: 'D1', services: ['cantine'] },
   'LOC-D1-3': { district: 'D1', services: ['crew'] },
   'LOC-D2-1': { district: 'D2', services: ['influence'] },

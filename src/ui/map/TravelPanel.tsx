@@ -98,6 +98,7 @@ function LastTrip() {
     ...(report.heatHealth > 0 ? [t.travel.heatStroke(report.heatHealth)] : []),
     ...(report.mission === 'delivered' ? [t.travel.delivered(credits(report.missionFee))] : []),
     ...(report.mission === 'deviated' ? [t.travel.deviated(t.hud.wantedGain(WANTED.perOffense))] : []),
+    ...(report.mission === 'unfilmed' ? [t.travel.unfilmed] : []),
     ...(report.injection > 0 ? [t.travel.injected(report.injection, ENDINGS.resident.injections)] : []),
   ]
   if (parts.length === 0) return null

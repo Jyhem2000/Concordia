@@ -6,6 +6,7 @@ import {
   ENDINGS,
   FLEE,
   GAME_LENGTH_DAYS,
+  HEALTH_MAX,
   HIGH_TIER,
   ICC_TIERS,
   SALE_COMMISSION,
@@ -14,7 +15,7 @@ import {
   SURVIVAL_ADVANCE,
 } from '../../src/data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../src/data/districts.ts'
-import { CONTRACT, KARMA, SERVICE_REQUIREMENTS, VELVET } from '../../src/data/locations.ts'
+import { CANTINE, CONTRACT, KARMA, SERVICE_REQUIREMENTS, VELVET } from '../../src/data/locations.ts'
 import { EVENT_MULT_CAP, ROAD_EVENTS } from '../../src/data/events.ts'
 import { PRODUCT_IDS, PRODUCTS, SEALED_PRODUCT } from '../../src/data/products.ts'
 import { CREW, MODULES, VEHICLES } from '../../src/data/vehicles.ts'
@@ -62,6 +63,7 @@ import {
   checkAuction,
   checkBlackmail,
   checkInfluence,
+  checkMeal,
   influenceFactor,
   checkMorgue,
   checkVipDelivery,
@@ -602,7 +604,8 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
   // Dette : à intérêts quotidiens, la rembourser passe avant tout, en gardant de quoi travailler
   if (!checkService(view, 'debt') && view.debt > 0) {
     const working = endgame ? fuelPrice(view) * 2 : workingCapital(view, reserve)
-    const amount = Math.min(view.debt, view.cash - working)
+    // En fin de partie, une dette qu'on peut solder d'un coup se solde, réserve ou pas : l'Audit ne pardonne rien
+    const amount = endgame && view.cash >= view.debt ? view.debt : Math.min(view.debt, view.cash - working)
     if (amount > 0) return { type: 'repay', amount }
     // Avance de survie : seulement pour ne pas rester bloqué
     if (uses('advance') && isBroke(view) && loanRoom(view) > 0 && !endgame) {
@@ -706,6 +709,9 @@ function panicStock(view: GameState, temperament: Temperament): Action | null {
 /** Lieux spéciaux du district, quand le plan les prévoit et que le seuil est atteint */
 function specialPlaces(view: GameState, uses: (place: PlaceUse) => boolean, reserve: number, iccFloor: number): Action | null {
   const spare = (cost: number) => view.cash - cost >= reserve + CAPITAL
+  // Plat du routier : un soin bon marché dès que la Santé a de quoi le recevoir en entier
+  if (view.health <= HEALTH_MAX - CANTINE.meal.health && !checkService(view, 'cantine') && !checkMeal(view) && spare(CANTINE.meal.cost))
+    return { type: 'meal' }
   if (!checkService(view, 'morgue')) {
     if (uses('surgery') && isWorn(view) && !checkMorgue(view, 'surgery') && spare(morgueCost(view, 'surgery'))) {
       return { type: 'morgue', service: 'surgery' }

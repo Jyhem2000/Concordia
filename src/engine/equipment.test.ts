@@ -120,7 +120,7 @@ describe('barrage et équipement', () => {
     expect(fleeChance(stopped({ vehicleId: 'VEH-03' })).total).toBeGreaterThan(fleeChance(stopped({})).total)
   })
 
-  it('fuit sans dégât avec le transpondeur, et sans perte d’ICC une fois par jour avec la plaque', () => {
+  it('fuit sans dégât avec le transpondeur, et sans perte d’ICC ni Fiche S une fois par jour avec la plaque', () => {
     const fled = run(
       gameAt(3, { districtId: 'D3', vehicleId: 'VEH-03', chassis: VEHICLES['VEH-03'].maxChassis, interception: brc, rng: LOW_ROLL_RNG }),
       { type: 'intercept', move: 'flee' },
@@ -128,7 +128,9 @@ describe('barrage et équipement', () => {
     expect(fled.chassis).toBe(VEHICLES['VEH-03'].maxChassis)
     expect(fled.icc).toBe(100 - Math.floor(FLEE.success.iccLoss * defined(VEHICLES['VEH-03'].transponder).iccLossFactor))
     const plated = run(withModules(['MOD-05'], { districtId: 'D2', interception: brc, rng: LOW_ROLL_RNG }), { type: 'intercept', move: 'flee' })
-    expect(plated).toMatchObject({ icc: 100, plateDay: 3 })
+    expect(plated).toMatchObject({ icc: 100, plateDay: 3, wanted: 0 })
+    const again = run({ ...plated, interception: brc, rng: LOW_ROLL_RNG }, { type: 'intercept', move: 'flee' })
+    expect(again.wanted).toBe(1)
   })
 
   it('choisit le mode d’éjection selon le district et l’équipement', () => {

@@ -37,6 +37,7 @@ export type TagId =
   | 'TAG-FESTIVE'
   | 'TAG-DIURNAL'
   | 'TAG-LUXURY'
+  | 'TAG-GOURMET'
 
 /** Districts (chap. 3) */
 export type DistrictId = `D${1 | 2 | 3 | 4 | 5 | 6}`
@@ -50,7 +51,7 @@ export type ModuleId = `MOD-${Eight | '09' | '10'}`
 export type CrewId = `CREW-${Three}`
 
 /** Événements (chap. 6) */
-export type GlobalEventId = `EVT-G${Six}`
+export type GlobalEventId = `EVT-G${Seven}`
 export type LocalEventId = `EVT-${DistrictId}-${Three}`
 export type RoadEventId = `EVT-R${Eight | '09' | '10' | '11' | '12' | '13' | '14' | '15'}`
 export type LotteryEventId = 'EVT-L01'
@@ -84,6 +85,10 @@ export type EventEffect = { districts?: readonly DistrictId[] } & (
   | { kind: 'heat'; melts: ProductId; ageDays: number; dayTripChassis: number; dayTripHealth: number }
   /** Prix des réparations du garage multiplié */
   | { kind: 'repair'; factor: number }
+  /** Drones cloués au sol : aucun contrôle volant */
+  | { kind: 'grounded' }
+  /** Galeries non filmées : un écart de nuit n'est pas enregistré (pas de Fiche S) */
+  | { kind: 'unfilmed' }
 )
 
 export type GameEvent = {
@@ -137,6 +142,10 @@ export type Tag = {
   smell?: boolean
   /** Cycle de fraîcheur (chap. 2) */
   perishable?: boolean
+  /** Vraie nourriture : ce que sublime Mama Rosa (chap. 4) */
+  gourmet?: boolean
+  /** Clientèle captive : facteur de la reconstitution matinale du rachat au cours (chap. 2) */
+  demandRefill?: number
   /** Casse : en fuite réussie, et aux chocs de châssis hors fuite (chap. 2) */
   breakage?: { fleeChance: number; shockChance: number; shockThreshold: number }
   /** Explosion des caisses non masquées en cas d'échec de fuite (chap. 2) */
@@ -238,7 +247,7 @@ export type District = {
 export type LocationService = 'debt' | 'cantine' | 'offshore' | 'garage' | 'crew' | 'influence' | 'morgue' | 'prophecy' | 'forgery' | 'velvet'
 
 /** Services à usage compté (coût croissant) ou à cooldown */
-export type ServiceKey = 'influence' | 'pass' | 'surgery' | 'certificate' | 'prophecy' | 'forgery' | 'auction' | 'blackmail' | 'vip'
+export type ServiceKey = 'meal' | 'influence' | 'pass' | 'surgery' | 'certificate' | 'prophecy' | 'forgery' | 'auction' | 'blackmail' | 'vip'
 
 /** Carte d'un faux dossier de Loterie (chap. 3) */
 export type ForgeryCard =
@@ -247,6 +256,8 @@ export type ForgeryCard =
 export type Location = {
   district: DistrictId
   services: readonly LocationService[]
+  /** Ouvert aussi le soir et la nuit (les autres lieux ferment à 20h00) */
+  nightOpen?: boolean
 }
 
 export type Vehicle = {
@@ -333,7 +344,7 @@ export type Requirement =
   | { kind: 'compartmentHeld'; count: number }
 
 export type Crew = {
-  /** Conditions pour qu'il se présente à la Cantine */
+  /** Conditions pour qu'il se présente au Quai 9 */
   requires: readonly Requirement[]
   /** Salaire quotidien */
   dailySalary: number
@@ -354,12 +365,12 @@ export type Crew = {
   fleeBonus?: number
   /** Bonus à la falsification d'un dossier de Loterie */
   forgeryBonus?: number
-  /** Savoir-faire des périssables */
-  perishableKnowHow?: number
-  /** Affinage : les caisses Standard se vendent au coefficient Extra-Frais */
+  /** Savoir-faire des produits Gourmet */
+  gourmetKnowHow?: number
+  /** Affinage : les caisses Gourmet Standard se vendent au coefficient Extra-Frais */
   refining?: boolean
-  /** Facteur des quotas de demande des périssables */
-  perishableQuota?: number
+  /** Facteur des quotas de demande des produits Gourmet */
+  gourmetQuota?: number
 }
 
 // ─── État de la partie ───
@@ -470,8 +481,8 @@ export type TripReport = {
   chassisWear: number
   /** Caisses consommées pour refroidir le moteur à la place de l'usure */
   coolingCrates: number
-  /** Commande du DSC livrée (livraison du jour, mission de nuit), ou écart de nuit enregistré */
-  mission: 'delivered' | 'deviated' | null
+  /** Commande du DSC livrée (livraison du jour, mission de nuit), écart de nuit enregistré, ou écart passé sans caméra */
+  mission: 'delivered' | 'deviated' | 'unfilmed' | null
   /** Prime de la commande livrée */
   missionFee: number
   /** Injection du serveur réussie pendant ce trajet : le total atteint, 0 sinon */

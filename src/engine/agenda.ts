@@ -19,8 +19,8 @@ export type AgendaItem =
   | { kind: 'audit'; day: number }
 
 /**
- * Échéances d'aujourd'hui à l'audit, triées par jour : dette, collectes de Viktor (dette initiale soldée), fin de
- * la Lucidité (si l'on ne repasse pas à la Cantine), tirages de la Loterie, fin d'un vice, prophétie de Cassandre-88,
+ * Échéances d'aujourd'hui à l'audit, triées par jour : dette, collectes de Viktor (dette initiale soldée),
+ * tirages de la Loterie, fin d'un vice, prophétie de Cassandre-88,
  * services et trappe de nouveau disponibles, dernier jour d'un contrat, audit.
  */
 export function agenda(state: GameState): AgendaItem[] {

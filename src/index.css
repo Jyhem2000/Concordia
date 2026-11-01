@@ -42,7 +42,6 @@
   --color-cash: #fde047;
   --color-offshore: #67e8f9;
 
-
   /* Changement d'onglet : le bloc qui réapparaît glisse en fondu */
   --animate-fade-in: fade-in 0.2s ease-out;
   @keyframes fade-in {
@@ -78,6 +77,32 @@
     font-family: var(--font-sans);
     font-variant-numeric: tabular-nums;
     color-scheme: dark;
+  }
+}
+
+/*
+ * Impression du bilan de fin de partie (chap. 7) : encre sombre sur papier blanc, les mêmes rôles de couleur
+ * en teintes lisibles à l'impression
+ */
+@media print {
+  :root {
+    --color-base: #ffffff;
+    --color-panel: #ffffff;
+    --color-raised: #f3f4f6;
+    --color-line: #d1d5db;
+    --color-line-strong: #9ca3af;
+    --color-ink: #111827;
+    --color-ink-soft: #1f2937;
+    --color-ink-muted: #4b5563;
+    --color-ink-faint: #6b7280;
+    --color-accent: #b45309;
+    --color-danger: #b91c1c;
+    --color-success: #15803d;
+    --color-offshore: #0e7490;
+    --color-broadcast: #0f766e;
+  }
+  body {
+    color-scheme: light;
   }
 }
 

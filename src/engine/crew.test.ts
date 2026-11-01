@@ -27,7 +27,7 @@ const withCrew = (active: CrewId, patch: Partial<GameState> = {}): GameState => 
 }
 const brc: Interception = { kind: 'brc', acted: false, bluffFailed: false }
 
-describe('recrutement à la Cantine', () => {
+describe('recrutement au Quai 9', () => {
   it('recrute gratuitement la première fois, salaire du jour payé d’avance, puis avec des frais', () => {
     const first = run(gameAt(3, { cash: 10_000, progress: EARNED }), { type: 'hireCrew', crewId: 'CREW-02' })
     expect(first.cash).toBe(10_000 - salary('CREW-02'))
@@ -87,6 +87,17 @@ describe('bonus des équipiers', () => {
     expect(line.lines.find((entry) => entry.source === 'rule.refining')?.value).toBe(FRESHNESS.extra)
     expect(saleQuote(rosa, 'T1-03', 1).total).toBeGreaterThan(saleQuote(alone, 'T1-03', 1).total)
     expect(demandQuota(rosa, 'D2', 'T1-03')).toBeGreaterThan(defined(demandQuota({ day: 3, phase: 'day', events: NO_EVENTS }, 'D2', 'T1-03')))
+  })
+
+  it('Mama Rosa sublime le Gourmet, même non périssable, et jamais les Cellules Souches', () => {
+    const curry = [lot('T2-01', 1, 2)]
+    expect(saleQuote(withCrew('CREW-03', { districtId: 'D2', cargo: curry }), 'T2-01', 1).total).toBeGreaterThan(
+      saleQuote(gameAt(3, { districtId: 'D2', cargo: curry }), 'T2-01', 1).total,
+    )
+    const cells = [lot('T4-05', 1, 2)]
+    expect(saleQuote(withCrew('CREW-03', { districtId: 'D6', cargo: cells }), 'T4-05', 1).total).toBe(
+      saleQuote(gameAt(3, { districtId: 'D6', cargo: cells }), 'T4-05', 1).total,
+    )
   })
 })
 

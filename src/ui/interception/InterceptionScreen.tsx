@@ -1,5 +1,5 @@
 import { ShieldAlert, Skull } from 'lucide-react'
-import { BLUFF, BRIBE, DAMAGED_FACTOR, EJECT, FINE, FLEE, ICC_MAX, RACKET, SEARCH, WANTED } from '../../data/balance.ts'
+import { BLUFF, BRIBE, DAMAGED_FACTOR, EJECT, FINE, FLEE, ICC_MAX, RACKET, SEARCH } from '../../data/balance.ts'
 import { TAGS } from '../../data/tags.ts'
 import { keysOf } from '../../engine/records.ts'
 import { ejectMode } from '../../engine/equipment.ts'
@@ -160,7 +160,7 @@ export default function InterceptionScreen() {
                     t.interception.fleeSuccess(
                       `${pv(fled.chassis.min)} / ${pv(fled.chassis.max)}`,
                       icc(-fled.iccLoss),
-                      t.hud.wantedGain(WANTED.perOffense),
+                      fled.wanted > 0 ? t.hud.wantedGain(fled.wanted) : t.interception.plateCovers,
                     ),
                     t.interception.fleeFailure(fine(caught.fineRate), icc(-caught.iccLoss), pv(fled.failChassis), pv(fled.failHealth)),
                     ...custody(caught.custodyDays),

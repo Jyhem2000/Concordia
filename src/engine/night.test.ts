@@ -4,7 +4,7 @@ import { DISTRICTS } from '../data/districts.ts'
 import { SEALED_PRODUCT } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import { arrive, drawRoadEvent } from './events.ts'
-import { checkpointPlace, drawInterception } from './interception.ts'
+import { checkpointPlace, drawInterception, flyingCheckShare } from './interception.ts'
 import { missionFee, sealedCount } from './night.ts'
 import { riskBreakdown } from './risk.ts'
 import { createRng, seedRng } from './rng.ts'
@@ -45,6 +45,16 @@ describe('mission de nuit', () => {
     expect(delivered.cash).toBe(night.cash + missionFee(night))
     expect(delivered).toMatchObject({ mission: null, wanted: 0 })
     expect(delivered.tripReport?.mission).toBe('delivered')
+  })
+
+  it('n’enregistre pas l’écart pendant la maintenance d’Aeterna, et cloue les drones au sol', () => {
+    const base = evening()
+    const maintenance = { ...base, events: { ...base.events, global: 'EVT-G07' as const } }
+    const strayed = run(run(maintenance, { type: 'forceCurfew', mission: true }), { type: 'travel', to: 'D4' })
+    expect(strayed.wanted).toBe(0)
+    expect(strayed.tripReport?.mission).toBe('unfilmed')
+    expect(flyingCheckShare(maintenance, 'D6', true)).toBe(0)
+    expect(flyingCheckShare(base, 'D6', true)).toBeGreaterThan(0)
   })
 
   it('enregistre un écart hors mission, puis reprend les caisses non livrées au matin', () => {

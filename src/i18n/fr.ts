@@ -31,11 +31,13 @@ const NBSP = String.fromCharCode(0xa0)
 type Named = { name: string }
 type NamedWithSubtitle = Named & { subtitle: string }
 type RoadTexts = { situation: string; a: string; b: string }
+/** Chapitre du manuel : paragraphes, puis la liste tirée des données (tags, lieux) */
+type ManualChapter = { title: string; paragraphs: string[]; list?: 'tags' | 'places' }
 
 /** Paniques algorithmiques de Karma-Cham, par tag proposé */
 const KARMA_OPTIONS: Partial<Record<TagId, string>> = {
   'TAG-CULTURE': '« Cancel Wave Culturelle »',
-  'TAG-PERISHABLE': '« Rumeur de Pénurie Alimentaire »',
+  'TAG-GOURMET': '« Rumeur de Pénurie Alimentaire »',
   'TAG-CHEMICAL': '« Scandale Chimique & Pharmaceutique »',
 }
 
@@ -155,7 +157,7 @@ export const fr = {
     fil: (qty: number, product: string, district: string, deadline: number) =>
       `Contrat de la Pègre : ${qty} ${product} à livrer à ${district} avant la fin du J${deadline}`,
     offerFil: (product: string, reward: string) =>
-      `Viktor propose un contrat aujourd'hui (${product}, prime ${reward}) : à accepter à son guichet, de jour`,
+      `Viktor propose un contrat aujourd'hui (${product}, prime ${reward}) : à accepter à son guichet, jour et nuit`,
   },
 
   /** Pompe à Synthanol du district (chap. 3) */
@@ -227,6 +229,7 @@ export const fr = {
     calendarCount: (count: number) => `${count} élément${count > 1 ? 's' : ''}`,
     agendaContract: (district: string) => `Dernier jour du contrat de la Pègre (livraison à ${district})`,
     service: {
+      meal: 'Plat du routier',
       influence: 'Karma-Cham',
       pass: 'Laissez-passer',
       surgery: 'Chirurgie',
@@ -281,7 +284,6 @@ export const fr = {
   /** Carrière, d'une partie à l'autre (chap. 7) */
   records: {
     title: 'Carrière',
-    open: 'Carrière',
     none: 'Aucune partie terminée pour l’instant : les fins atteintes et les hauts faits s’inscriront ici.',
     endings: 'Fins atteintes',
     feats: 'Hauts faits',
@@ -360,7 +362,7 @@ export const fr = {
     cash: 'Cash',
     daysLeft: (days: number) => (days <= 0 ? "aujourd'hui" : `dans ${days} j`),
     debtInfo: (lateDay: number, auditDay: number) =>
-      `Dette de Viktor, à intérêts chaque matin. Si la dette initiale n'est pas soldée avant le matin du J${lateDay}, elle passe en retard pour toute la partie : taux majoré et embuscades (risque de contrôle accru partout). À l'audit du J${auditDay} à minuit, le solde doit être nul. Remboursement à l'Arrière-Salle, de jour.`,
+      `Dette de Viktor, à intérêts chaque matin. Si la dette initiale n'est pas soldée avant le matin du J${lateDay}, elle passe en retard pour toute la partie : taux majoré et embuscades (risque de contrôle accru partout). À l'audit du J${auditDay} à minuit, le solde doit être nul. Remboursement à l'Arrière-Salle, jour et nuit.`,
     cashToday: (delta: string) => `${delta} aujourd'hui`,
     cashInfo:
       "Cash-Puce en poche : achats, Synthanol, services, corruption, collecte de Viktor. Il ne compte pas au score : seul ce qui dort à l'offshore et au placement du Cartel compte.",
@@ -393,7 +395,8 @@ export const fr = {
     placeInfo: 'District où se trouve le camion. Chaque district a sa propre économie : ses cours ne valent que chez lui.',
     offshore: 'Offshore',
     patrol: (district: string) => `Ronde renforcée : ${district}`,
-    countdown: (day: number) => `Audit le Jour ${day} à minuit : dernier remboursement et dernier dépôt offshore possibles le J${day} avant 20h00.`,
+    countdown: (day: number) =>
+      `Audit le Jour ${day} à minuit : dernier dépôt offshore possible le J${day} avant 20h00 ; Viktor encaisse jusqu'à minuit.`,
   },
 
   ticker: {
@@ -582,6 +585,8 @@ export const fr = {
       tag: (tag: string, factor: string) => `Effets ${tag} ${factor}`,
       halfDay: "Entrer dans le district, ou s'y trouver à 06h00, coûte une demi-journée au sas",
       repair: (factor: string) => `Réparations du garage ${factor}`,
+      grounded: 'Drones cloués au sol : aucun contrôle volant',
+      unfilmed: "Galeries non filmées : un trajet de nuit hors mission n'ajoute pas de Fiche S",
       heat: (product: string, days: number, chassis: number, health: number) =>
         `À 06h00 : ${product} fond en soute, les autres périssables vieillissent de ${days} jours. Trajets de jour : châssis −${chassis} (sauf refroidissement), Santé −${health}`,
       tagged: (tag: string) => `tout ${tag}`,
@@ -597,6 +602,7 @@ export const fr = {
     'EVT-G04': 'un documentaire choc sur le méthane serait en montage',
     'EVT-G05': 'les syndicats de transport se réunissent à huis clos',
     'EVT-G06': "les traiteurs de l'élite refusent toute nouvelle commande",
+    'EVT-G07': "une mise à jour d'Aeterna serait prévue « dans la plus grande transparence »",
   } satisfies Record<GlobalEventId, string>,
 
   road: {
@@ -677,9 +683,9 @@ export const fr = {
     offshore: (bonus: string) => `rendement offshore ${bonus}`,
     flee: (bonus: string) => `fuite ${bonus}`,
     forgery: (bonus: string) => `falsification de la Loterie ${bonus}`,
-    knowHow: (factor: string) => `périssables vendus ${factor}`,
-    refining: 'affinage : Standard vendu au prix Extra-Frais',
-    quota: (factor: string) => `quotas des périssables ${factor}`,
+    knowHow: (factor: string) => `produits Gourmet vendus ${factor}`,
+    refining: 'affinage : Gourmet Standard vendu au prix Extra-Frais',
+    quota: (factor: string) => `quotas des produits Gourmet ${factor}`,
     inKindRule: (amount: string, tier: number) => `salaire réduit à ${amount} contre une caisse addictive de Tier ${tier} ou plus`,
   },
 
@@ -799,7 +805,7 @@ export const fr = {
     smoothRide: "Fragiles immunisés à la casse ; pas d'usure de châssis la nuit.",
     nightRisk: (factor: string) => `Malus de risque d'un trajet de nuit hors mission ${factor}.`,
     flyingChecks: (factor: string) => `Contrôles volants ${factor} (les drones perdent le signal).`,
-    rotatingPlate: "Une fois par jour, une fuite réussie ne coûte pas d'ICC.",
+    rotatingPlate: 'Une fois par jour, une fuite réussie devant la BRC ne coûte ni ICC ni Fiche S (plaque illisible).',
     ram: (bonus: string, factor: string) => `Fuite et passage forcé ${bonus} ; dégâts de la fuite ${factor}.`,
     trapdoor: (chance: string, cooldown: number, recovery: string, sealed: string) =>
       `Éjection par les égouts (${chance}, sans dégât, sauf ${sealed}), recharge ${cooldown} jours ; le lendemain, 0 à ${recovery} des caisses rapportées.`,
@@ -811,7 +817,9 @@ export const fr = {
 
   place: {
     cantineLore:
-      "Ici, l'eau est servie sans sédatifs : un privilège syndical des routiers. Partout ailleurs, l'eau courante d'Aeterna apaise les citoyens.",
+      "Ici, l'eau est servie sans sédatifs et la cuisine sent encore quelque chose : un privilège syndical des routiers. Partout ailleurs, l'eau courante d'Aeterna apaise les citoyens.",
+    meal: 'Plat du routier',
+    mealEffect: (cost: string, health: number) => `${cost} · Santé +${health}, une fois par jour`,
     cantineFuel: 'Synthanol au tarif syndical · réserve',
     ventureTitle: 'Placement du Cartel',
     ventureRule: (rate: string, chance: string, loss: string) =>
@@ -1055,6 +1063,7 @@ export const fr = {
     bribe: 'Proposer',
     bribeFailure: (fine: string, icc: string) => `Échec : l'offre est perdue, confiscation, amende de ${fine}, ICC ${icc}.`,
     fleeSuccess: (chassis: string, icc: string, wanted: string) => `Succès : la cargaison est sauvée, châssis ${chassis}, ICC ${icc}, ${wanted}.`,
+    plateCovers: 'plaque rotative : ni ICC ni Fiche S',
     fleeSuccessRacket: (chassis: string) => `Succès : passage, châssis ${chassis}.`,
     fleeFailure: (seizure: string, icc: string, chassis: string, health: string) =>
       `Échec : confiscation, amende de ${seizure}, ICC ${icc}, châssis ${chassis}, Santé ${health}.`,
@@ -1135,6 +1144,7 @@ export const fr = {
     heatStroke: (health: number) => `coup de chaleur, Santé −${health}`,
     delivered: (fee: string) => `commande du DSC livrée, prime ${fee}`,
     deviated: (wanted: string) => `écart de mission enregistré, ${wanted}`,
+    unfilmed: "écart de nuit non filmé (maintenance d'Aeterna), Fiche S intacte",
     injected: (done: number, needed: number) => `Glitch a injecté un morceau de ton dossier dans Aeterna (${done}/${needed})`,
     mission: 'Mission de nuit',
     after: 'After du couvre-feu ce soir',
@@ -1194,7 +1204,7 @@ export const fr = {
   },
 
   end: {
-    score: 'Score final (compte offshore)',
+    score: 'Score final (offshore et placement)',
     gameOver: 'Game Over',
     endings: {
       saboteur: {
@@ -1294,6 +1304,8 @@ export const fr = {
     'not-eligible': "Impossible ici ou aujourd'hui.",
     cooldown: 'Pas encore disponible.',
     'already-healthy': 'Le Dr. K. ne touche pas à un patient en si bonne santé.',
+    'full-health': 'Vous êtes en pleine forme : gardez votre appétit pour demain.',
+    'already-fed': 'Déjà servi aujourd’hui : Borg vous ressert demain.',
     'prophecy-active': 'Une prédiction est déjà en cours.',
     'too-late': 'Trop tard.',
     'location-locked': 'Lieu verrouillé.',
@@ -1302,6 +1314,218 @@ export const fr = {
     'not-contract-district': 'Le contrat se livre dans son district de destination.',
     'contract-untravelled': "Viktor veut des caisses apportées d'ailleurs : celles achetées ici ne comptent pas.",
   } satisfies Record<ActionError, string>,
+
+  /** Écran d'accueil (chap. 7) */
+  title: {
+    broadcast: "Transmission d'Aeterna · canal citoyen",
+    name: 'Concordia',
+    tagline: 'Zéro-Risque, Zéro-Offense, Zéro-Saveur, Zéro-Carbone.',
+    worldTitle: 'Le monde',
+    world: [
+      "Derrière son mur-frontière, la République d'Autarcia s'est enfermée avec une mégalopole : Concordia. Le Directoire de la Santé Civique y a confié chaque calorie, chaque émotion et chaque trajet à une IA bienveillante, Aeterna.",
+      "Le gras, le sucre, l'alcool, l'art et la vie privée y sont des « bugs mortels ». L'eau des quartiers pauvres est sédative, l'ICC note chaque citoyen, et les Crédits expirent à la fin du mois.",
+    ],
+    roleTitle: 'Ton rôle',
+    role: [
+      "Livreur de Catégorie C, tu traverses tous les districts au volant d'un utilitaire d'État, des Ruches Grises à la Citadelle des élites. Officiellement, tu livres des caisses légales.",
+      "Officieusement, tu es un Passeur du Monde d'Avant : café, beurre, vinyles, whisky, cartes graphiques… tout ce qu'Aeterna interdit, et que tout le monde réclame.",
+    ],
+    goalTitle: 'Le but',
+    goal: (days: number, debt: string, cash: string) => [
+      `Tu démarres avec ${cash} en poche et ${debt} de dette envers Viktor Varga, l'usurier des Ruches. Ses intérêts courent chaque matin.`,
+      `Le Jour ${days} à minuit, c'est l'Audit : la dette doit être soldée, sinon Viktor te recycle en Bio-Briques. Le Cash-Puce est alors effacé.`,
+      "Seul compte ce que tu as mis à l'abri sur le compte offshore de la Laverie (et le placement du Cartel) : c'est ton score, et il décide de ta fin.",
+    ],
+    dayTitle: 'Une journée',
+    day: [
+      "Achète là où l'on produit, revends là où ça manque : la carte dit ce que chaque district fabrique et réclame.",
+      'Chaque trajet peut finir à un barrage de la BRC : fouille, bluff, corruption, fuite ou éjection. Chaque probabilité est affichée, ligne par ligne.',
+      'À 20h00, couvre-feu : dormir au relais, ou repartir de nuit, sur mission du DSC ou en clandestin.',
+    ],
+    endingsTitle: 'Les fins',
+    teaser: {
+      saboteur: 'Franchir le mur avec les preuves qui feront tomber Aeterna.',
+      resident: "Devenir un fantôme : réécrire ton dossier dans le code d'Aeterna.",
+      elite: "Être coopté par un oligarque et t'installer sous la verrière.",
+      mafia: 'Racheter la boucherie de Viktor et régner sur la contrebande.',
+      standard: "Survivre à l'Audit, et reprendre le volant en septembre.",
+    } satisfies Record<Exclude<EndingId, 'bio-bricks' | 'death' | 'execution'>, string>,
+    start: 'Lancer la partie',
+    resume: (day: number) => `Reprendre la partie (Jour ${day})`,
+    review: 'Revoir le bilan',
+    newGame: 'Nouvelle partie',
+    newGameConfirm: 'La partie en cours sera perdue. Commencer une nouvelle partie ?',
+  },
+
+  /** Bilan de fin de partie, à la victoire comme à la mort (chap. 7) */
+  recap: {
+    title: 'Bilan de la partie',
+    wealth: 'Patrimoine net, matin après matin',
+    reached: (day: number, district: string) => `Jour ${day}, ${district}`,
+    adviceTitle: 'Pour la prochaine fois',
+    advice: {
+      'bio-bricks':
+        "La dette se rembourse chez Viktor, à Hives, jour et nuit. Solde-la tôt : ses intérêts courent chaque matin, et l'Audit ne pardonne rien. La case Dette du bandeau et le compte à rebours de l'Audit le rappellent.",
+      death:
+        'La Santé ne remonte qu’au relais routier, au plat du routier de la Cantine ou à la Morgue. Chauffeur à bout, une fuite ratée peut être la dernière : sous le seuil, préfère la fouille ou le bluff.',
+      execution:
+        "Le Vieux Serveur Aeterna ne survit à aucune fouille : avec lui à bord, bluffe, corromps ou fuis, mais n'ouvre jamais la soute. Les trajets courts et une soute couverte de Tier 0 limitent le risque.",
+    } satisfies Record<'bio-bricks' | 'death' | 'execution', string>,
+    groups: { money: 'Argent', road: 'Route', jobs: 'Commandes', gear: 'Parcours' },
+    score: 'Score',
+    peak: 'Patrimoine au plus haut',
+    final: 'Patrimoine final',
+    bought: 'Achats de marchandise',
+    sold: 'Ventes',
+    trips: 'Trajets',
+    tripsValue: (day: number, night: number) => `${day} de jour · ${night} de nuit`,
+    controls: 'Contrôles',
+    controlsValue: (total: number, clean: number) => `${total}, dont ${clean} sans perte`,
+    tactics: 'Fuites · bluffs · corruptions réussis',
+    custody: 'Garde à vue',
+    days: (days: number) => `${days} jour${days > 1 ? 's' : ''}`,
+    cratesLost: 'Caisses perdues aux contrôles',
+    deliveries: 'Commandes du DSC livrées',
+    contracts: 'Contrats de la Pègre',
+    contractsValue: (done: number, failed: number) => `${done} livré${done > 1 ? 's' : ''} · ${failed} manqué${failed > 1 ? 's' : ''}`,
+    debtPaid: 'Dette initiale soldée',
+    debtPaidValue: (day: number | null) => (day === null ? 'jamais' : `Jour ${day}`),
+    wantedMax: 'Fiche S au plus haut',
+    vehicle: 'Véhicule final',
+    vehicleValue: (name: string, modules: number) => `${name}${modules > 0 ? ` · ${modules} module${modules > 1 ? 's' : ''}` : ''}`,
+    atDay: (amount: string, day: number) => `${amount} (J${day})`,
+    toDo: "Ce qu'il reste à accomplir",
+    print: 'Imprimer',
+    share: 'Partager',
+    copied: 'Bilan copié : il ne reste qu’à le coller.',
+    shareTitle: 'Concordia',
+    shareVictory: (ending: string, score: string, days: number) => `Concordia — ${ending}. Score : ${score} en ${days} jours.`,
+    shareDefeat: (ending: string, day: number) => `Concordia — ${ending}, au Jour ${day}.`,
+    shareStats: (controls: number, escapes: number, night: number) =>
+      `${controls} contrôle${controls > 1 ? 's' : ''} de la BRC, ${escapes} fuite${escapes > 1 ? 's' : ''}, ${night} trajet${night > 1 ? 's' : ''} de nuit.`,
+    shareFeats: (feats: string) => `Hauts faits : ${feats}.`,
+  },
+
+  /** Manuel du passeur : les règles en clair, depuis l'accueil et En bref (chap. 7) */
+  manual: {
+    title: 'Manuel du passeur',
+    open: 'Manuel',
+    previous: 'Précédent',
+    next: 'Suivant',
+    chapters: (days: number, debt: string): ManualChapter[] => [
+      {
+        title: 'Le but du jeu',
+        paragraphs: [
+          `La partie dure ${days} jours. Tu dois ${debt} à Viktor Varga, et sa dette grossit chaque matin : rembourse-la à son arrière-salle de Hives, ouverte jour et nuit.`,
+          `Le Jour ${days} à minuit, l'Audit d'Aeterna efface ton Cash-Puce. Si la dette n'est pas soldée, c'est la fin. Sinon, ton score est le solde de ton compte offshore et de ton placement du Cartel, tous deux à la Laverie de la Flèche de Verre, ouverte de jour seulement.`,
+          `Ce score, et ce que tu as accompli, décident de ta fin : de simple Survivant à Saboteur. Une fois la dette initiale soldée, l’encart « Objectifs du Jour ${days} » d’En bref montre ce que chaque grande fin exige.`,
+          'On perd aussi en mourant (Santé à zéro) ou en se faisant fouiller avec le Vieux Serveur Aeterna à bord.',
+        ],
+      },
+      {
+        title: 'Une journée',
+        paragraphs: [
+          "À 06h00, la routine : salaire de l'équipier, intérêts, collecte de Viktor les jours prévus, fraîcheur des périssables, événements du jour, cours et boutiques. Le briefing d'En bref résume ce qui a changé.",
+          'De jour : acheter, vendre, faire le plein, passer aux lieux spéciaux du district, accepter la livraison officielle du DSC, et 1 trajet. On peut aussi attendre le soir sur place.',
+          "À 20h00, le couvre-feu : dormir au relais routier (Santé et ICC), bivouaquer à Rust Valley, ou partir en tournée de nuit depuis la carte. Sur mission du DSC, le trajet est couvert et payé ; hors mission, il est risqué et ajoute un niveau de Fiche S s'il passe. Une tournée épuise : pas de seconde nuit d'affilée sans Tcherno-Bull.",
+          'Garde à vue, panne ou siphonage font perdre une demi-journée : on passe directement au soir.',
+        ],
+      },
+      {
+        title: 'Le marché',
+        paragraphs: [
+          "Chaque district a sa liste Production (pas cher) et sa Forte demande (bien payé, jamais en boutique là-bas). Le cours du jour se lit sur place ; ailleurs, tu n'as que ta mémoire du dernier passage, et la tendance publique du Fil.",
+          "Rachat au cours : un district ne rachète qu'un nombre limité de caisses de chaque produit au plein prix, et sa demande se reconstitue chaque matin. Au-delà, le prix s'effondre et Aeterna repère un pic suspect : le risque y monte le lendemain.",
+          "Une caisse revendue là où elle a été achetée, sans avoir voyagé, se vend mal. Les périssables perdent leur prime d'Extra-Frais à 20h00, puis se dégradent jusqu'à pourrir.",
+          "La nuit, le marché de rue reste ouvert : le Festif s'y vend mieux, surtout à l'after du couvre-feu, le Diurne moins bien.",
+        ],
+      },
+      {
+        title: 'Les tags',
+        paragraphs: ['Chaque produit porte des tags : ils disent ce qui le trahit, ce qui le protège et où il se vend le mieux.'],
+        list: 'tags',
+      },
+      {
+        title: 'La route et la BRC',
+        paragraphs: [
+          "Le risque d'un trajet s'affiche avant le départ, ligne par ligne : district, ICC, tags de la soute, nuit, districts traversés, Fiche S. Les caisses légales le diluent.",
+          "Un barrage fixe se voit de loin : toutes les options sont ouvertes. Un contrôle volant (un drone t'a repéré) ne laisse ni fuir ni éjecter : restent la fouille, le bluff et la corruption.",
+          "Fouille : formalité si la soute est légale, sinon saisie, amende et perte d'ICC, garde à vue pour le haut tier. Bluff : le Tier 0 et le masquage aident, l'odeur trahit. Corruption : du cash, et une caisse de Luxe pour la connivence. Fuite : sauve la soute, coûte du châssis et un niveau de Fiche S. Éjection : larguer l'illégal avant le barrage.",
+          'Le double fond cache quelques caisses illégales : à la fouille, un second jet décide si les agents le trouvent.',
+          'À Rust Valley, pas de BRC mais des milices : payer leur péage, forcer le passage ou refuser.',
+        ],
+      },
+      {
+        title: 'Les jauges',
+        paragraphs: [
+          "ICC : ta conformité. Basse, elle attire les contrôles et ferme des portes ; au palier Citoyen Or, les portiques s'ouvrent plus vite.",
+          "Santé : à zéro, c'est la mort. Elle remonte au relais, au plat du routier de la Cantine ou à la Morgue. Chauffeur à bout, bluff et fuite deviennent plus durs.",
+          "Châssis : il s'use la nuit et dans les coups durs ; Mitch le répare à Rust Valley. À zéro, la dépanneuse te coûte une facture et une demi-journée.",
+          "Synthanol : chaque trajet en consomme, davantage pour traverser des districts. Fiche S : le regard d'Aeterna ; chaque niveau ajoute du risque partout, et s'efface après quelques jours sans écart.",
+          "Cash-Puce : exposé aux amendes, au racket, à la collecte de Viktor et à l'Audit. Le compte offshore, lui, est intouchable.",
+        ],
+      },
+      {
+        title: 'Véhicules, modules et équipage',
+        paragraphs: [
+          "Le Garage « Faraday » de Mécano-Mitch, à Rust Valley, vend des châssis plus grands et des modules : chacun sert un build (couverture légale, chaîne du froid, fuite, corruption, haut tier). Certains ne sortent qu'aux clients qui ont fait leurs preuves.",
+          "Au changement de châssis, les modules démontables suivent, les adaptables se paient, les soudés restent sur l'ancien.",
+          'Au Quai 9 de Hives, un équipier à la fois : Vance réduit le risque et aide la corruption, Glitch voit tous les cours et pirate les feux, Mama Rosa sublime la vraie nourriture. Chacun se présente après un acte qui le fait remarquer.',
+        ],
+      },
+      {
+        title: 'Les lieux spéciaux',
+        paragraphs: [
+          "Ouverts de 06h00 à 20h00, sauf l'arrière-salle de Viktor qui ne ferme jamais. Certains services ne s'ouvrent qu'à qui s'est fait une place : le lieu affiche la condition et ta progression.",
+        ],
+        list: 'places',
+      },
+      {
+        title: 'Les événements',
+        paragraphs: [
+          'Événements globaux : tirés la veille, ils frappent toute la ville. Une rumeur les annonce parfois, avec sa fiabilité ; Cassandre-88 les garantit.',
+          "Événements locaux : visibles dès 06h00 sur la carte, pour la journée. Le lendemain d'une flambée, le contrecoup fait retomber le cours : on revend le jour même.",
+          'Aléas routiers : de jour, sans barrage, une rencontre et deux choix. La nuit, personne dans les galeries.',
+          "Loterie de l'Ascenseur Civique : chaque semaine, un promu (purge préventive dans son district, et parfois ton équipier qui disparaît) et parfois un déclassé, qui emporte ses vices un étage plus bas.",
+        ],
+      },
+      {
+        title: 'Conseils de passeur',
+        paragraphs: [
+          'Commence petit : les produits bon marché de Hives se revendent à Rust Valley, et ce qu’on y trouve remonte vers les Ruches et Pastel-Heights.',
+          'Solde la dette tôt : chaque matin la fait grossir, et une fois soldée, Viktor ouvre ses contrats et Mitch son matériel de contrebande.',
+          "Mets ton argent à l'abri à la Laverie dès que tu passes à la Flèche de Verre : la collecte de Viktor, les amendes et l'Audit ne touchent pas l'offshore.",
+          "Survole les pourcentages : chaque chance, chaque risque, chaque prix s'explique ligne par ligne au survol ou au toucher.",
+        ],
+      },
+    ],
+    tags: {
+      'TAG-LEGAL': 'Ne trahit rien : dilue le risque de la soute, aide le bluff, et chaque caisse masque une caisse illégale.',
+      'TAG-PERISHABLE': "Se dégrade de jour en jour : prime le jour de l'achat, puis décote, puis pourriture.",
+      'TAG-FRAGILE': 'Peut casser en fuite et aux chocs : une caisse endommagée se vend moins cher.',
+      'TAG-ADDICTIVE': 'Clientèle captive : le rachat au cours se reconstitue plus vite.',
+      'TAG-ODOROUS': 'Attire les contrôles en route et gêne le bluff ; doublé chez les chiens-robots d’Olympus.',
+      'TAG-CULTURE': 'Dénoncé par les Voisins-Vigiles de Pastel-Heights.',
+      'TAG-TECH': 'Repéré par les scanners de la Flèche de Verre et d’Olympus.',
+      'TAG-CHEMICAL': 'Flairé par les bio-scanners de Panacea.',
+      'TAG-FLAMMABLE': 'Explose quand une fuite échoue ; se largue en feu derrière soi pour semer la BRC.',
+      'TAG-FESTIVE': 'Se vend mieux la nuit, et bien mieux à l’after du couvre-feu.',
+      'TAG-DIURNAL': 'Se vend moins bien la nuit : ses clients dorment.',
+      'TAG-LUXURY': 'Seul cadeau qu’un agent accepte en corruption, avec la connivence en prime.',
+      'TAG-GOURMET': 'La vraie nourriture d’avant : Mama Rosa la vend plus cher.',
+    } satisfies Record<TagId, string>,
+    places: {
+      'LOC-D1-1': 'Viktor Varga : rembourser, emprunter une avance, et ses contrats de livraison.',
+      'LOC-D1-2': 'Le plat du routier, une fois par jour, et le Synthanol au tarif syndical.',
+      'LOC-D1-3': 'Recruter, remplacer ou renvoyer ton équipier.',
+      'LOC-D2-1': 'Commander une panique algorithmique : un tag flambe partout le lendemain.',
+      'LOC-D3-1': 'Laissez-passer sanitaire, chirurgie, certificat de décontamination (ICC).',
+      'LOC-D4-1': 'Châssis, modules, montage et réparations.',
+      'LOC-D4-2': "Savoir, et garantir, l'événement global d'après-demain.",
+      'LOC-D5-1': 'Compte offshore, placement du Cartel, et faux dossiers de Loterie.',
+      'LOC-D6-1': 'Enchères, chantage pour de l’ICC, commandes VIP et parrainage de l’élite.',
+    } satisfies Record<LocationId, string>,
+  },
 
   // ─── Données de jeu (chap. 2 à 6) ───
 
@@ -1326,6 +1550,7 @@ export const fr = {
     'TAG-LUXURY': { name: 'Luxe' },
     'TAG-FESTIVE': { name: 'Festif' },
     'TAG-DIURNAL': { name: 'Diurne' },
+    'TAG-GOURMET': { name: 'Gourmet' },
   } satisfies Record<TagId, Named>,
 
   product: {
@@ -1341,7 +1566,10 @@ export const fr = {
     'T1-05': { name: 'Chewing-gums à la Nicotine', lore: 'Le vice qui se mâche en silence, par cartons entiers.' },
     'T1-06': { name: 'Huile de Friture Usagée', lore: 'Bidons noirs de friteries clandestines, carburant des nuits grasses.' },
     'T2-01': { name: 'Curry Vindaloo « Lava-Grade »', lore: "Importé d'Inde par des routes oubliées, il brûle la langue et les capteurs." },
-    'T2-02': { name: 'Saucisson Ibérique & Chorizo', lore: "Charcuterie sèche du Monde d'Avant, au parfum de rébellion." },
+    'T2-02': {
+      name: 'Saucisson Ibérique & Chorizo',
+      lore: "Chorizo frais et saucisson à peine séché du Monde d'Avant : ça sent la rébellion, et ça tourne vite.",
+    },
     'T2-03': { name: 'Caisses de Vinyles Rock & Rap', lore: "Des sillons pleins de colère d'avant-guerre, sans aucune connexion." },
     'T2-04': { name: 'Lots de « Dumbphones »', lore: 'Des téléphones à clapet sans Cloud : on appelle sans être écouté.' },
     'T2-05': { name: 'Canettes « Tcherno-Bull »', lore: 'Taurine à dose déraisonnable : de quoi tenir une nuit, ou doubler un barrage.' },
@@ -1360,7 +1588,10 @@ export const fr = {
     'T4-01': { name: 'Bœuf Wagyu de Kobé', lore: 'Wagyu et côtes argentines : la viande rouge, luxe suprême des élites.' },
     'T4-02': { name: "Œuvres d'Art du Monde d'Avant", lore: 'Des toiles sauvées des purges, roulées dans des malles.' },
     'T4-03': { name: 'Pass Biométriques « ICC-100% »', lore: 'Une identité de Citoyen modèle, le temps de passer un contrôle.' },
-    'T4-04': { name: '« Placebo-Officiel » du DSC', lore: 'Le vaccin officiel est un placebo ; celui-ci, en glacière, soigne vraiment.' },
+    'T4-04': {
+      name: '« Placebo-Officiel » du DSC',
+      lore: 'Du sérum physiologique sous scellé officiel : le QR-code sanitaire validé, sans la molécule de docilité.',
+    },
     'T4-05': { name: 'Cellules Souches « Jouvence »', lore: 'Des cuves de clonage pour élites qui refusent de vieillir.' },
     'T4-06': { name: 'Vieux Serveur Aeterna', lore: "Une baie d'avant la mise à jour : la mémoire qu'Aeterna voudrait effacer." },
   } satisfies Record<ProductId, Named & { lore: string }>,
@@ -1437,12 +1668,13 @@ export const fr = {
     'EVT-G04': { name: 'Éco-Panique' },
     'EVT-G05': { name: 'Blocus Alimentaire & Grève des Transports' },
     'EVT-G06': { name: 'La Nuit des Fondateurs' },
+    'EVT-G07': { name: "Maintenance d'Aeterna" },
     'EVT-D1-01': { name: 'Grève des Éboueurs Automatisés' },
     'EVT-D1-02': { name: "Panne des Ascenseurs & Coupure d'Eau Chaude" },
     'EVT-D1-03': { name: "Descente d'Huissiers d'Aeterna" },
     'EVT-D2-01': { name: 'Tribunal Populaire « Détox & Repentance »' },
     'EVT-D2-02': { name: 'Festival Clandestin « Sans-Ondes »' },
-    'EVT-D2-03': { name: 'Invasion de Punaises de Lit Bio' },
+    'EVT-D2-03': { name: 'Semaine des Partiels « Zéro-Échec »' },
     'EVT-D3-01': { name: 'Fuite au Laboratoire P4' },
     'EVT-D3-02': { name: 'Burn-out Collectif des Internes' },
     'EVT-D3-03': { name: 'Inventaire de la Pharmacie Centrale' },

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { SHOP_MIN_PRODUCTS } from '../data/balance.ts'
+import { DEMAND_REFILL_DIVISOR, SHOP_MIN_PRODUCTS } from '../data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../data/districts.ts'
 import { EVENT_MULT_CAP } from '../data/events.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
@@ -49,8 +49,14 @@ describe('boutique du jour', () => {
     const yesterday = drawMarket(CALM, 'D1', rng)
     const quota = defined(demandQuota(CALM, 'D1', 'T2-01'))
     const today = drawMarket(CALM, 'D1', rng, { ...yesterday, demand: { ...yesterday.demand, 'T2-01': 0 } })
-    expect(today.demand['T2-01']).toBe(demandRefill(quota))
+    expect(today.demand['T2-01']).toBe(demandRefill(quota, 'T2-01'))
     expect(drawMarket(CALM, 'D1', rng, yesterday).demand['T2-01']).toBe(quota)
+  })
+
+  it('reconstitue deux fois plus vite le rachat des produits Addictifs (clientèle captive)', () => {
+    const quota = defined(demandQuota(CALM, 'D2', 'T1-05'))
+    expect(demandRefill(quota, 'T1-05')).toBe(Math.ceil((quota / DEMAND_REFILL_DIVISOR) * 2))
+    expect(demandRefill(quota, 'T1-03')).toBe(Math.ceil(quota / DEMAND_REFILL_DIVISOR))
   })
 
   it('laisse la demande du Tier 0 illimitée', () => {

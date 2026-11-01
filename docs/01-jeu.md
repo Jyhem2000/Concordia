@@ -68,7 +68,7 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 * **Pertes létales :** échec de fuite (chap. 5), racket des milices de `[D4]`.
 * **Pertes non-létales** (plancher à 1 PV, ou défini à la source) : aléas routiers, coup de chaleur de `[EVT-G01]`, garde à vue, nuit blanche sous `[T2-05]`.
 * **Chauffeur à bout :** sous un seuil de PV, malus au bluff et à la fuite (`WORN` dans [`balance.ts`](../src/data/balance.ts)), jusqu'à ce que la Santé remonte.
-* **Soins :** sommeil au relais routier, `[LOC-D3-1]`.
+* **Soins :** sommeil au relais routier, plat du routier à `[LOC-D1-2]`, chirurgie de `[LOC-D3-1]`.
 
 ### Intégrité du châssis (PV véhicule)
 * **Maximum :** selon le véhicule ([`vehicles.ts`](../src/data/vehicles.ts)). **Départ :** châssis intact. **Réparation :** `[LOC-D4-1]`.
@@ -182,14 +182,14 @@ Tout est filmé : un camion la nuit n'est légitime que sur **ordre de mission**
 * **Mission non livrée** (écart, garde à vue, caisses pillées…) : à 06h00, la plateforme reprend les caisses scellées restantes et note le retard (perte d'ICC).
 * *Avantages de la nuit :* écouler sa cargaison avant la dégradation de 06h00 ou la fin d'un événement ; tags de vente de nuit des produits (chap. 2) ; aucun aléa routier (personne dans les galeries, chap. 6).
 * *Galeries de service :* consommation de nuit du véhicule et usure du châssis (`NIGHT_TRIP_CHASSIS_WEAR` dans [`balance.ts`](../src/data/balance.ts)) : elles passent au-dessus des fermes de serveurs d'Aeterna (chap. 1). L'usure de châssis (pas la consommation) est annulée par `[MOD-04]` ou `[T0-02]`.
-* *Fermeture nocturne :* seul le marché de rue est ouvert ; tous les lieux spéciaux ferment jusqu'à 06h00, l'argent gagné reste donc en Cash-Puce.
+* *Fermeture nocturne :* le marché de rue reste ouvert, et l'arrière-salle de Viktor `[LOC-D1-1]`, qui ne ferme jamais ; tous les autres lieux spéciaux ferment jusqu'à 06h00. L'argent gagné de nuit peut rembourser la dette, mais pas rejoindre le compte offshore : il reste en Cash-Puce.
 
 ### Épuisement nerveux
 Si le joueur est parti en tournée de nuit le Jour J, la tournée est **verrouillée le soir du Jour J+1** — sauf via `[T2-05]`. Une 3e nuit blanche d'affilée est impossible.
 
 ### Perte d'une demi-journée
-* **De jour :** le joueur passe directement à 20h00 : son trajet de jour est perdu et les lieux spéciaux sont fermés (ils ouvrent de 06h00 à 20h00) ; seul le marché de rue reste ouvert avant le dilemme de 20h00. Même situation à la sortie de garde à vue (chap. 5).
-* **De nuit — Immobilisation :** la nuit s'arrête là, et le lendemain le joueur reste immobilisé jusqu'à 20h00 : il perd son trajet de jour et l'accès aux lieux spéciaux, mais peut commercer au marché de rue. L'immobilisation compte comme repos (réinitialise l'épuisement).
+* **De jour :** le joueur passe directement à 20h00 : son trajet de jour est perdu et les lieux spéciaux sont fermés (ils ouvrent de 06h00 à 20h00, sauf l'arrière-salle de Viktor) ; seul le marché de rue reste ouvert avant le dilemme de 20h00. Même situation à la sortie de garde à vue (chap. 5).
+* **De nuit — Immobilisation :** la nuit s'arrête là, et le lendemain le joueur reste immobilisé jusqu'à 20h00 : il perd son trajet de jour et l'accès aux lieux spéciaux (sauf l'arrière-salle de Viktor), mais peut commercer au marché de rue. L'immobilisation compte comme repos (réinitialise l'épuisement).
 
 ---
 
@@ -201,7 +201,7 @@ Minuit sonne quand le joueur se couche le Jour 30, après un éventuel trajet de
 2. Sinon, **Formatage Brutal** : le Cash-Puce est remis à 0 et la soute ne peut plus être vendue.
 3. **Score final = solde du compte offshore + solde du placement du Cartel.** Les fins sont évaluées de la plus prestigieuse à la plus modeste ; la première dont toutes les conditions sont remplies se déclenche.
 
-> **Attention :** la dette se rembourse à `[LOC-D1-1]` et le compte offshore s'alimente à `[LOC-D5-1]`, tous deux **de jour uniquement**. Un compte à rebours s'affiche les derniers jours (`AUDIT_COUNTDOWN_DAY` dans [`balance.ts`](../src/data/balance.ts) ; chap. 7).
+> **Attention :** la dette se rembourse à `[LOC-D1-1]`, jour et nuit ; le compte offshore s'alimente à `[LOC-D5-1]`, **de jour uniquement**. Un compte à rebours s'affiche les derniers jours (`AUDIT_COUNTDOWN_DAY` dans [`balance.ts`](../src/data/balance.ts) ; chap. 7).
 
 ### Défaites (Game Over)
 * **Mort biologique :** Santé à 0 PV.

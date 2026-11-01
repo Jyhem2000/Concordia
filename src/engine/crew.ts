@@ -8,8 +8,8 @@ import { keysOf } from './records.ts'
 import type { Crew, CrewId, DistrictId, GameState, ProductId } from './types.ts'
 
 /*
- * Équipage (chap. 4) et Lucidité (chap. 1) : recrutement à la Cantine, salaires
- * payés d'avance, bonus des équipiers qui travaillent, Sédation.
+ * Équipage (chap. 4) : recrutement au Quai 9, salaires payés d'avance, bonus des équipiers qui travaillent ;
+ * présence à la Cantine des Chauffeurs (chap. 3).
  */
 
 export type CrewResult = { ok: true; state: GameState } | { ok: false; error: ActionError }
@@ -93,12 +93,12 @@ export function payCrew(state: GameState, inCell: boolean): { state: GameState; 
   return { state: { ...state, cash: state.cash - due, cargo, crew: { ...state.crew, paidDay: state.day } }, paid: due, crate }
 }
 
-// ─── Lucidité et Sédation (chap. 1) ───
+// ─── Cantine des Chauffeurs (chap. 3) ───
 
-/** District de la Cantine des Chauffeurs, où la Lucidité se recharge */
+/** District de la Cantine des Chauffeurs */
 export const cantineDistrict = (): DistrictId => LOCATIONS['LOC-D1-2'].district
 
-/** De jour, au district de la Cantine : les routiers y passent tous (Lucidité, Synthanol au tarif syndical) */
+/** De jour, au district de la Cantine : Synthanol au tarif syndical, plat du routier */
 export function atCantine(state: GameState): boolean {
   return state.districtId === cantineDistrict() && state.phase === 'day' && !state.dayOver
 }

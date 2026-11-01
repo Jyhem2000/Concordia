@@ -22,7 +22,7 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
   'VEH-02': {
     requires: [{ kind: 'deliveries', count: 3 }],
     price: 15_000,
-    cargo: 20,
+    cargo: 25,
     hiddenCompartment: 3,
     moduleSlots: 2,
     maxChassis: 150,
@@ -33,7 +33,7 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
   'VEH-03': {
     requires: [{ kind: 'debtPaid' }],
     price: 25_000,
-    cargo: 30,
+    cargo: 25,
     hiddenCompartment: 4,
     moduleSlots: 3,
     maxChassis: 200,
@@ -99,7 +99,7 @@ export const MODULES: Readonly<Record<ModuleId, Module>> = {
   },
 }
 
-/** Frais de recrutement à la Cantine (le premier recrutement est gratuit) */
+/** Frais de recrutement au Quai 9 (le premier recrutement est gratuit) */
 export const CREW_HIRE_FEE = 1_500
 
 /** Salaires et bonus des équipiers (chap. 4) */
@@ -122,10 +122,10 @@ export const CREW: Readonly<Record<CrewId, Crew>> = {
     forgeryBonus: 0.2,
   },
   'CREW-03': {
-    requires: [{ kind: 'tagSales', tag: 'TAG-PERISHABLE', count: 10 }],
+    requires: [{ kind: 'tagSales', tag: 'TAG-GOURMET', count: 10 }],
     dailySalary: 250,
-    perishableKnowHow: 1.5,
+    gourmetKnowHow: 1.5,
     refining: true,
-    perishableQuota: 2.5,
+    gourmetQuota: 2.5,
   },
 }

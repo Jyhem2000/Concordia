@@ -23,7 +23,7 @@
 ### Rumeurs (événements globaux)
 * Chaque matin, le moteur tire l'événement global **du lendemain**. S'il y en a un, une rumeur le laisse fuiter **le jour même** avec une certaine chance ; s'il n'y en a pas, une fausse rumeur (un événement global au hasard) circule parfois. Chances : `RUMOR` dans [`events.ts`](../src/data/events.ts).
 * La rumeur est un texte « bateau » propre à chaque événement global (*« La météo annonce un épisode de chaleur historique »*), sans le nommer. L'app affiche sa **fiabilité**, calculée à partir des chances : la part des rumeurs qui se vérifient.
-* *Intention :* rendre le marché en partie prévisible. Acheter la veille ce qu'une rumeur fait monter est un pari lisible.
+* *Intention :* rendre le marché en partie prévisible. Acheter la veille ce qu'une rumeur fait monter est un pari lisible ; préparer la grosse tournée la veille d'une maintenance d'Aeterna aussi.
 * `[LOC-D4-2]` (chap. 3) donne la certitude, et le moyen de forcer l'événement.
 
 ### Contrecoups
@@ -66,6 +66,7 @@
 | `[EVT-G04]` | **Éco-Panique** — documentaire en boucle sur le méthane et le cholestérol. | ↑ `[T0-01]`, `[T3-05]` ; ↓ `[T2-02]`, `[T3-01]`, `[T4-01]` **jour seulement** (la nuit, la ville basse s'en gave en cachette) | Malus `[TAG-ODOROUS]` doublés partout. |
 | `[EVT-G05]` | **Blocus Alimentaire & Grève des Transports** — convois officiels paralysés. | ↑ tout Tier 1 et 2 ; ↑↑ `[T1-04]` | Stocks des boutiques réduits. |
 | `[EVT-G06]` | **La Nuit des Fondateurs** — gala anniversaire de la fermeture du mur. | En `[D5]` et `[D6]` seulement : ↑ `[T3-01]`, `[T3-02]`, `[T3-03]`, `[T4-01]`, `[T4-02]` | — |
+| `[EVT-G07]` | **Maintenance d'Aeterna** — mise à jour « dans la plus grande transparence » : l'IA se redémarre. | — | **Une journée à oser :** drones cloués au sol, aucun contrôle volant (barrage fixe seulement, fuite et éjection toujours possibles) ; galeries de service non filmées, une tournée de nuit hors mission n'ajoute pas de Fiche S. Les barrages fixes, eux, tiennent. |
 
 ---
 
@@ -78,7 +79,7 @@
 | `[EVT-D1-03]` | **Descente d'Huissiers d'Aeterna** — les concierges revendent les saisies. | Apparition à l'achat de `[T2-07]`, `[T3-02]`, `[T3-06]`, ↓ | Risque accru. |
 | `[EVT-D2-01]` | **Tribunal Populaire « Détox & Repentance »** — autodafé sur le campus. | ↑ `[T2-02]`, `[T1-03]` | Détection `[TAG-CULTURE]` doublée (la délation redouble). |
 | `[EVT-D2-02]` | **Festival Clandestin « Sans-Ondes »** — retraite loin des antennes 6G. | ↑ `[T2-04]`, `[T2-07]`, `[T2-03]` | — |
-| `[EVT-D2-03]` | **Invasion de Punaises de Lit Bio** — insecticides bannis. | ↑ tout `[TAG-CHEMICAL]` | — |
+| `[EVT-D2-03]` | **Semaine des Partiels « Zéro-Échec »** — le campus révise jour et nuit. | ↑ `[T1-04]`, `[T2-05]`, `[T1-05]`, `[T1-02]` (stimulants d'étudiants) | — |
 | `[EVT-D3-01]` | **Fuite au Laboratoire P4** — complexe bouclé. | ↑↑ `[T3-04]`, `[T2-07]` | Tout joueur qui entre en `[D3]` (à l'arrivée, après l'éventuel contrôle et l'aléa) ou s'y trouve à 06h00 perd une **demi-journée** au sas (chap. 1). |
 | `[EVT-D3-02]` | **Burn-out Collectif des Internes** — fin d'une garde marathon. | ↑ tout `[TAG-ADDICTIVE]` | Risque final divisé. |
 | `[EVT-D3-03]` | **Inventaire de la Pharmacie Centrale** — palettes à pilonner. | ↓↓ `[T0-03]`, `[T3-04]` | Stock de ces produits accru. |

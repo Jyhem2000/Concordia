@@ -79,6 +79,8 @@ export const GLOBAL_EVENTS: Readonly<Record<GlobalEventId, GameEvent>> = {
   'EVT-G06': {
     effects: [{ kind: 'price', products: ['T3-01', 'T3-02', 'T3-03', 'T4-01', 'T4-02'], factor: 3, districts: ['D5', 'D6'] }],
   },
+  // Maintenance d'Aeterna : une journée à oser, sans drones ni caméras de galerie
+  'EVT-G07': { effects: [{ kind: 'grounded' }, { kind: 'unfilmed' }] },
 }
 
 export const LOCAL_EVENTS: Readonly<Record<LocalEventId, GameEvent>> = {
@@ -103,7 +105,7 @@ export const LOCAL_EVENTS: Readonly<Record<LocalEventId, GameEvent>> = {
     ],
   },
   'EVT-D2-02': { effects: [{ kind: 'price', products: ['T2-04', 'T2-07', 'T2-03'], factor: 3 }] },
-  'EVT-D2-03': { effects: [{ kind: 'price', products: { tag: 'TAG-CHEMICAL' }, factor: 2.5 }] },
+  'EVT-D2-03': { effects: [{ kind: 'price', products: ['T1-04', 'T2-05', 'T1-05', 'T1-02'], factor: 2.5 }] },
   'EVT-D3-01': {
     effects: [{ kind: 'price', products: ['T3-04', 'T2-07'], factor: 4 }, { kind: 'halfDay' }],
   },

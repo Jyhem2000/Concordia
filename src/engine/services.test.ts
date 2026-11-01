@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { ICC_MAX } from '../data/balance.ts'
 import { LOTTERY } from '../data/events.ts'
-import { CASSANDRE, FORGERY, KARMA, MORGUE, VELVET } from '../data/locations.ts'
+import { CANTINE, CASSANDRE, FORGERY, KARMA, MORGUE, VELVET } from '../data/locations.ts'
 import { drawEvents, NO_EVENTS } from './events.ts'
 import { demandQuota, quoteBreakdown } from './market.ts'
 import { riskBreakdown } from './risk.ts'
@@ -22,6 +22,19 @@ const lot = (productId: ProductId, qty: number, boughtDay = 3): CargoLot => ({
 // Joueur établi : carnet complet, dette soldée, patrimoine à l'abri (services réservés, chap. 3)
 const at = (districtId: GameState['districtId'], patch: Partial<GameState> = {}) =>
   gameAt(3, { districtId, cash: 200_000, progress: EARNED, initialDebtPaid: true, debt: 0, offshore: { deposited: 100_000, interest: 0 }, ...patch })
+
+describe('Cantine des Chauffeurs : plat du routier', () => {
+  it('rend de la Santé une fois par jour, de jour, contre quelques crédits', () => {
+    const fed = run(at('D1', { health: 50 }), { type: 'meal' })
+    expect(fed.health).toBe(50 + CANTINE.meal.health)
+    expect(fed.cash).toBe(200_000 - CANTINE.meal.cost)
+    expect(errorOf(fed, { type: 'meal' })).toBe('already-fed')
+    expect(errorOf({ ...fed, day: 4 }, { type: 'meal' })).toBeNull()
+    expect(errorOf(at('D1', { health: 100 }), { type: 'meal' })).toBe('full-health')
+    expect(errorOf(at('D1', { health: 50, phase: 'night' }), { type: 'meal' })).toBe('location-closed')
+    expect(errorOf(at('D2', { health: 50 }), { type: 'meal' })).toBe('not-at-location')
+  })
+})
 
 describe('Karma-Cham', () => {
   it('dope un tag le lendemain seulement, puis entre en recharge avec un prix en hausse', () => {

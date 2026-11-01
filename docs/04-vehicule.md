@@ -11,6 +11,7 @@
 * *Conso :* par trajet, selon la phase, plus le surcoût des districts traversés (chap. 3).
 * *Bonus de risque :* les passifs qui réduisent le risque sont des **multiplicateurs** (chap. 5).
 * *Stats* (prix, soute, slots de modules, PV max, réservoir, consommation de jour et de nuit) et chiffres des passifs : `VEHICLES` dans [`vehicles.ts`](../src/data/vehicles.ts).
+* *Des builds, pas une échelle :* la Navette et la Panacea ont la même soute ; on choisit entre elles un passif (convoi couvert de Légal, ou fuite et fraîcheur), pas un volume. Seul le Bunker-Lourd achète du volume, au prix du risque et du carburant.
 
 | ID | Nom | Passif |
 | :--- | :--- | :--- |
@@ -56,7 +57,7 @@ Chaque châssis a un **double fond** d'origine, soudé par Mécano-Mitch : quelq
 | `[MOD-02]` | Diffuseur d'Échappement « Pin Sylvestre & Javel » | Réduit fortement les malus de `[TAG-ODOROUS]` (risque au trajet et malus de bluff), après les doublements de district ou d'événement. |
 | `[MOD-03]` | Doublure en Plomb & Cage de Faraday | Annule la détection de `[TAG-TECH]`. **Cage de Faraday :** les drones perdent le signal du camion, la part de contrôles volants est réduite partout (multiplicateur, chap. 5). |
 | `[MOD-04]` | Suspensions & Silentblocs « Velours » | Immunise `[TAG-FRAGILE]` à la casse (fuite et chocs). Annule l'usure de châssis des trajets de nuit (aucune caisse de refroidissement n'est alors consommée). **Silentblocs :** le camion glisse sans bruit dans les galeries ; le malus de risque d'un trajet de nuit hors mission est réduit (multiplicateur, chap. 1). |
-| `[MOD-05]` | Plaque d'Immatriculation Rotative « E-Ink » | **Une fois par jour**, lors d'une fuite réussie devant la BRC : annule la perte d'ICC des caméras de trafic. |
+| `[MOD-05]` | Plaque d'Immatriculation Rotative « E-Ink » | **Une fois par jour**, lors d'une fuite réussie devant la BRC : la plaque est illisible, ni perte d'ICC des caméras de trafic, ni niveau de Fiche S. |
 | `[MOD-06]` | Pare-Buffles en Acier Trempé | Fuite et passage forcé : chance en plus ; dégâts de châssis de la fuite (succès et échec) et perte de Santé de l'échec divisés (arrondis en faveur du joueur). |
 | `[MOD-07]` | Trappe de Largage « Égouts » | Mode d'éjection par les égouts : partout sauf en `[D6]` (dalle bio-scellée), y compris en `[D5]` où l'éjection manuelle est interdite. Cooldown en jours à compter de l'usage, réussi ou non. Réussite plus probable que le mode manuel, sans dégât. **Récupération :** le lendemain à 06h00, des complices rapportent une part tirée au hasard (uniformément, arrondie à la caisse inférieure) des caisses larguées, dans la limite de la place en soute ; le reste est perdu. Les caisses rapportées gardent leur état. |
 | `[MOD-08]` | Faux Terminal « Citoyen Or » | Bonus au bluff ; tarif standard de corruption réduit. |
@@ -66,11 +67,11 @@ Chaque châssis a un **double fond** d'origine, soudé par Mécano-Mitch : quelq
 ---
 
 ## Équipage
-* **Recrutement** au Quai 9 `[LOC-D1-3]`, de jour, **1 seul équipier actif** à la fois. Le premier recrutement est gratuit ; chaque recrutement suivant coûte des frais. **Renvoyer** l'équipier est gratuit. Chaque équipier ouvre un build différent : sûreté (Vance), information et finance (Glitch), gastronomie périssable (Mama Rosa).
+* **Recrutement** au Quai 9 `[LOC-D1-3]`, de jour, **1 seul équipier actif** à la fois. Le premier recrutement est gratuit ; chaque recrutement suivant coûte des frais. **Renvoyer** l'équipier est gratuit. Chaque équipier ouvre un build différent : sûreté (Vance), information et finance (Glitch), gastronomie (Mama Rosa).
 * **Salaire payé d'avance** : à l'embauche pour le jour même, puis à chaque routine matinale, avant toute prestation (chap. 1). S'il ne peut pas être payé en Cash-Puce, l'équipier **ne travaille pas ce jour-là** (aucun bonus) mais reste engagé ; le salaire manqué ne s'ajoute pas à la dette. Les matins passés en cellule, aucun salaire n'est dû et l'équipier reste à son poste. Montants : `CREW` dans [`vehicles.ts`](../src/data/vehicles.ts).
 * **Ils ne se présentent pas d'emblée.** Chacun rejoint le joueur après un acte qui le fait remarquer (`requires` de chaque équipier dans [`vehicles.ts`](../src/data/vehicles.ts)) ; d'ici là, le Quai 9 l'affiche avec sa condition et la progression vers elle :
   * **Vance :** après un contrôle de la BRC franchi sans garde à vue. Il vous a repéré au barrage : vous avez du sang-froid.
-  * **Mama Rosa :** après un certain nombre de caisses `[TAG-PERISHABLE]` vendues. Elle ne travaille qu'avec qui connaît la marchandise.
+  * **Mama Rosa :** après un certain nombre de caisses `[TAG-GOURMET]` vendues. Elle ne travaille qu'avec qui connaît la marchandise.
   * **Glitch :** à votre première Fiche S. Elle surveille les fichiers d'Aeterna et vous trouve quand votre nom y entre.
   * Une fois débloqué, un équipier le reste toute la partie (sauf disparition à la Loterie).
 * **Disparition** (Loterie, chap. 6) : l'équipier disparaît définitivement (il ne peut plus être recruté), son salaire s'arrête, et le prochain recrutement est gratuit.
@@ -80,7 +81,7 @@ Chaque châssis a un **double fond** d'origine, soudé par Mécano-Mitch : quelq
 | :--- | :--- | :--- |
 | `[CREW-01]` | Commandant Vance, « l'Ancien de la BRC » (copilote accrédité) | **Salaire réduit** s'il **consomme** à 06h00 une caisse `[TAG-ADDICTIVE]` de Tier 2 ou plus (la moins chère au prix de base ; réglage du joueur, activé par défaut) · risque d'interception réduit partout, zone hors-réseau comprise (multiplicateur) · bonus à la corruption · **révèle chaque matin** le district de la ronde renforcée (carte et prévision du risque) |
 | `[CREW-02]` | Glitch, jeune hackeuse sous caféine (opératrice radio distante) | **Flux pirate :** cours de tous les districts en temps réel (mémoire de marché toujours à jour) · rendement offshore majoré, sauf les matins en cellule · bonus à la fuite et au passage forcé (elle pirate les feux) · bonus pour falsifier un dossier de Loterie · brouille la balise de `[T4-06]` · **injection du serveur** (voir plus bas) |
-| `[CREW-03]` | Mama Rosa, « la Matriarche » (atelier d'affinage) | Produits `[TAG-PERISHABLE]` vendus plus cher (bonus de savoir-faire, chap. 2) · **affinage :** les caisses Standard se vendent au coefficient Extra-Frais · quotas de demande des produits `[TAG-PERISHABLE]` majorés (arrondis au supérieur ; ses maîtres d'hôtel répartissent les livraisons) |
+| `[CREW-03]` | Mama Rosa, « la Matriarche » (atelier d'affinage) | Produits `[TAG-GOURMET]` vendus plus cher (bonus de savoir-faire, chap. 2) · **affinage :** les caisses Gourmet Standard se vendent au coefficient Extra-Frais · quotas de demande des produits `[TAG-GOURMET]` majorés (arrondis au supérieur ; ses maîtres d'hôtel répartissent les livraisons) |
 
 * **Vance :** vieux limier désabusé de l'époque où la police n'était pas dirigée par Aeterna, avec un laissez-passer d'inspecteur honoraire.
 * **Glitch :** prodige du code bannie des écoles du DSC pour avoir fait réciter des poèmes anarchistes à Aeterna ; te guide depuis un cyber-squat blindé.

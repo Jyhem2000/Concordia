@@ -33,7 +33,7 @@ Le résultat est **borné, après** tous les multiplicateurs (`RISK_BOUNDS` dans
 **Ronde renforcée :** chaque matin (et dès le Jour 1), Aeterna tire **1 district** hors zone hors-réseau : malus de risque pour la journée (`PATROL_RISK` dans [`balance.ts`](../src/data/balance.ts)). Caché au joueur, sauf avec `[CREW-01]`.
 
 ### Fiche S algorithmique (niveau de recherche)
-* Chaque **fuite réussie** ajoute **1 niveau**, jusqu'à un maximum ; chaque **trajet de nuit hors mission** qui passe sans interception aussi (l'écart est enregistré, chap. 1).
+* Chaque **fuite réussie** ajoute **1 niveau**, jusqu'à un maximum (sauf sous la plaque rotative `[MOD-05]`, une fois par jour) ; chaque **trajet de nuit hors mission** qui passe sans interception aussi (l'écart est enregistré, chap. 1 ; sauf pendant `[EVT-G07]`, galeries non filmées).
 * Par niveau : malus aux prochaines fuites et au risque d'interception partout (`WANTED` dans [`balance.ts`](../src/data/balance.ts)).
 * **−1 niveau** après quelques jours de suite sans nouvel écart (`cleanDays` dans `WANTED`), où que l'on dorme ; chaque écart remet le compte à zéro. *Intention :* une tournée de nuit tous les deux jours ne s'efface plus d'une nuit au relais ; pour retrouver un profil propre, il faut vraiment se tenir à carreau.
 * Affichée en permanence dans le bandeau (chap. 7) : *« Votre profil suscite l'intérêt bienveillant d'Aeterna. »*
@@ -46,6 +46,7 @@ Une interception de la BRC prend l'une de deux formes, tirée au moment où elle
 * *Intention :* sans contrôle volant, la fuite (avec largage et dopage) devient le repli universel dès que la cargaison vaut cher. Le contrôle volant oblige à préparer aussi le bluff (masquage, Tier 0, aides) ou la corruption (cash de réserve, caisses de Luxe) : chaque build garde ses failles.
 * **Brouilleur de drones** (`[MOD-09]`, chap. 4) : une fois par jour, un contrôle volant devient un barrage fixe.
 * **Cage de Faraday** (`[MOD-03]`, chap. 4) : la part de contrôles volants est réduite (multiplicateur), dans tous les districts.
+* **Maintenance d'Aeterna** (`[EVT-G07]`, chap. 6) : drones cloués au sol, aucun contrôle volant ce jour-là.
 * **Lieu du barrage :** le texte suit la couche du réseau (chap. 3) : entrée du district de jour, galerie de service de nuit, sas du quai de service en `[D5]` et `[D6]`.
 * L'app annonce la forme du contrôle dès l'écran d'interception, et le panneau de prévision affiche la part de contrôles volants du district de destination (chap. 7).
 
@@ -113,7 +114,7 @@ Chance = min( plafond,  base + Offre + Connivence − malus × (étoiles du dist
 * **Chance de base** et **plafond** dégressif selon les étoiles du district : `FLEE` dans [`balance.ts`](../src/data/balance.ts).
 * **Bonus :** `[MOD-06]`, `[CREW-02]`, `[VEH-03]` (en `[D3]` et `[D5]`). **Malus :** Fiche S, chauffeur à bout.
 * **Sacrifices :** 1 largage offensif max (une caisse `[TAG-FLAMMABLE]`, huile ou alcool fort) + dopage `[T2-05]` (cumulable). Les caisses sacrifiées ou bues sont perdues quel que soit le résultat. Le joueur choisit le produit à sacrifier ; l'app montre le bonus de chacun.
-* **Succès :** cargaison sauvée, **+1 niveau de Fiche S**, mais perte de châssis (tirage uniforme entier dans une fourchette ; `[MOD-06]`, `[VEH-03]`), casse `[TAG-FRAGILE]`, et perte d'ICC (caméras de trafic ; `[VEH-03]`, `[MOD-05]`).
+* **Succès :** cargaison sauvée, **+1 niveau de Fiche S**, mais perte de châssis (tirage uniforme entier dans une fourchette ; `[MOD-06]`, `[VEH-03]`), casse `[TAG-FRAGILE]`, et perte d'ICC (caméras de trafic ; `[VEH-03]`). La plaque rotative `[MOD-05]` efface, une fois par jour, la perte d'ICC et le niveau de Fiche S.
 * **Échec :** explosions `[TAG-FLAMMABLE]` d'abord, puis confiscation + amende sur la valeur saisie + perte d'ICC ; perte de châssis et de Santé (`[MOD-06]`), mortelle si la Santé tombe à 0 ; garde à vue.
 * Avant validation, l'app affiche la chance et les conséquences du succès et de l'échec.
 * *Le largage n'est pas une éjection :* on ne cache rien, on déverse et on enflamme une caisse derrière soi pendant la fuite (route glissante en feu) pour semer les poursuivants. Se débarrasser de l'illégal, c'est l'éjection, avant le barrage.

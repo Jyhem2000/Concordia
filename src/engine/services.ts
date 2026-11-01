@@ -1,6 +1,6 @@
 import { DAMAGED_FACTOR, GAME_LENGTH_DAYS, HEALTH_MAX, ICC_MAX, SALE_COMMISSION } from '../data/balance.ts'
 import { LOTTERY } from '../data/events.ts'
-import { CASSANDRE, FORGERY, KARMA, LOCATIONS, MORGUE, SERVICE_REQUIREMENTS, VELVET } from '../data/locations.ts'
+import { CANTINE, CASSANDRE, FORGERY, KARMA, LOCATIONS, MORGUE, SERVICE_REQUIREMENTS, VELVET } from '../data/locations.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import type { ActionError } from './actions.ts'
 import { giveCrates, ownedQty, takeLots } from './cargo.ts'
@@ -63,6 +63,22 @@ function used(state: GameState, key: ServiceKey): GameState {
 }
 
 const gainIcc = (state: GameState, points: number): GameState => ({ ...state, icc: Math.min(ICC_MAX, state.icc + points) })
+
+// ─── Cantine des Chauffeurs : plat du routier (chap. 3) ───
+
+/** Un repas par jour, tant que la Santé n'est pas pleine */
+export function checkMeal(state: GameState): ActionError | null {
+  if (availableFrom(state, 'meal', 1) !== null) return 'already-fed'
+  if (state.health >= HEALTH_MAX) return 'full-health'
+  return CANTINE.meal.cost > state.cash ? 'not-enough-cash' : null
+}
+
+export function eatMeal(state: GameState): ServiceResult {
+  const error = checkMeal(state)
+  if (error) return fail(error)
+  const health = Math.min(HEALTH_MAX, state.health + CANTINE.meal.health)
+  return { ok: true, state: used({ ...state, cash: state.cash - CANTINE.meal.cost, health }, 'meal') }
+}
 
 // ─── Karma-Cham : bonus d'influence (chap. 2 et 3) ───
 

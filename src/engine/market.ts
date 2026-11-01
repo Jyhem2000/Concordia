@@ -48,22 +48,28 @@ export function demandQuota(ctx: MarketContext, districtId: DistrictId, productI
   const base = productStatus(ctx, districtId, productId) === 'strong' ? quota.strong : quota.neutral
   // Carte « contrebandier concurrent » d'un faux dossier : clientèle orpheline dans ce district
   const competitor = forgedCard(ctx, districtId) === 'competitor' ? FORGERY.competitorQuota : 1
-  return Math.ceil(base * perishableQuotaFactor(ctx, productId) * competitor)
+  return Math.ceil(base * gourmetQuotaFactor(ctx, productId) * competitor)
 }
 
 /** Ce que lisent les tirages du marché : les événements, et l'équipier pour les quotas */
 export type MarketContext = EventContext & Partial<Pick<GameState, 'crew'>>
 
-/** Quotas des périssables majorés par Mama Rosa, si elle travaille aujourd'hui */
-function perishableQuotaFactor(ctx: MarketContext, productId: ProductId): number {
+/** Quotas des produits Gourmet majorés par Mama Rosa, si elle travaille aujourd'hui */
+function gourmetQuotaFactor(ctx: MarketContext, productId: ProductId): number {
   const crew = ctx.crew
-  const factor = crew?.active && crew.paidDay === ctx.day ? CREW[crew.active].perishableQuota : undefined
-  return factor && PRODUCTS[productId].tags.some((tag) => TAGS[tag].perishable) ? factor : 1
+  const factor = crew?.active && crew.paidDay === ctx.day ? CREW[crew.active].gourmetQuota : undefined
+  return factor && isGourmet(productId) ? factor : 1
 }
 
-/** Demande reconstituée chaque matin */
-export function demandRefill(quota: number): number {
-  return Math.ceil(quota / DEMAND_REFILL_DIVISOR)
+/** Vraie nourriture, que sublime Mama Rosa (chap. 4) */
+export function isGourmet(productId: ProductId): boolean {
+  return PRODUCTS[productId].tags.some((tag) => TAGS[tag].gourmet)
+}
+
+/** Demande reconstituée chaque matin ; plus vite pour une clientèle captive (Addictif) */
+export function demandRefill(quota: number, productId: ProductId): number {
+  const captive = Math.max(1, ...PRODUCTS[productId].tags.map((tag) => TAGS[tag].demandRefill ?? 1))
+  return Math.ceil((quota / DEMAND_REFILL_DIVISOR) * captive)
 }
 
 // ─── Tirage de 06h00 ───
@@ -123,7 +129,7 @@ export function drawMarket(ctx: MarketContext, districtId: DistrictId, rng: Rng,
     const quota = demandQuota(ctx, districtId, id)
     if (quota !== null) {
       const left = previous?.demand[id]
-      demand[id] = left === undefined ? quota : Math.min(quota, left + demandRefill(quota))
+      demand[id] = left === undefined ? quota : Math.min(quota, left + demandRefill(quota, id))
     }
   }
   return { noise, stock: drawShop(ctx, districtId, rng), demand }
@@ -205,11 +211,12 @@ export function knowHowBreakdown(state: GameState, lot: CargoLot, districtId: Di
 
   // Coef_Fraîcheur des périssables (chap. 2)
   const freshness = freshnessOf(state, lot)
-  // Affinage de Mama Rosa : une caisse Standard se vend au coefficient Extra-Frais
-  if (freshness === 'standard' && crewEffect(state, 'refining')) knowHow.mul('rule.refining', freshnessFactor('extra'))
+  // Affinage de Mama Rosa : une caisse Gourmet Standard se vend au coefficient Extra-Frais
+  const gourmet = isGourmet(lot.productId)
+  if (freshness === 'standard' && gourmet && crewEffect(state, 'refining')) knowHow.mul('rule.refining', freshnessFactor('extra'))
   else if (freshness) knowHow.mul(FRESHNESS_RULES[freshness], freshnessFactor(freshness))
-  const perishableKnowHow = crewEffect(state, 'perishableKnowHow')
-  if (freshness && perishableKnowHow) knowHow.mul('CREW-03', perishableKnowHow)
+  const gourmetKnowHow = crewEffect(state, 'gourmetKnowHow')
+  if (gourmet && gourmetKnowHow) knowHow.mul('CREW-03', gourmetKnowHow)
 
   // Couvre-feu (chap. 2) : tags de vente de nuit ; à l'after, la fête paie le festif bien plus cher (chap. 1)
   if (state.phase === 'night') {

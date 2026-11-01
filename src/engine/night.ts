@@ -5,6 +5,7 @@ import { VEHICLES } from '../data/vehicles.ts'
 import type { ActionError } from './actions.ts'
 import { cargoUsed, ownedQty } from './cargo.ts'
 import { workingCrew } from './crew.ts'
+import { hasEffect } from './events.ts'
 import { nightUnlock, noteDelivery, raiseWanted, trustFactor } from './progress.ts'
 import type { Rng } from './rng.ts'
 import type { CargoLot, DistrictId, GameState } from './types.ts'
@@ -81,8 +82,10 @@ export function deliverMission(state: GameState): GameState {
   }
 }
 
-/** Trajet de nuit hors mission passé sans interception : Aeterna enregistre l'écart (+1 niveau de Fiche S) */
+/** Trajet de nuit hors mission passé sans interception : Aeterna enregistre l'écart (+1 niveau de Fiche S), sauf galeries non filmées */
 export function recordDeviation(state: GameState): GameState {
+  if (hasEffect(state, state.districtId, 'unfilmed'))
+    return { ...state, tripReport: state.tripReport ? { ...state.tripReport, mission: 'unfilmed' } : state.tripReport }
   return {
     ...state,
     ...raiseWanted(state),

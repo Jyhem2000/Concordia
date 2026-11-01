@@ -54,7 +54,7 @@ const MORGUE_SERVICES: readonly MorgueService[] = ['pass', 'surgery', 'certifica
 const CARD_KINDS: readonly CardKind[] = ['captain', 'competitor', 'informant', 'cadre']
 
 /** Une ligne de guichet : bouton, détail du coût et de l'effet, raison d'un refus */
-function DeskRow({ label, detail, error, onClick, requires }: DeskRowProps) {
+export function DeskRow({ label, detail, error, onClick, requires }: DeskRowProps) {
   const { t } = useI18n()
   return (
     <li className="text-xs">

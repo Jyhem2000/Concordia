@@ -35,6 +35,10 @@ export function useEventLines(): (event: GlobalEventId | LocalEventId) => string
         return fx.halfDay
       case 'repair':
         return fx.repair(change(effect.factor))
+      case 'grounded':
+        return fx.grounded
+      case 'unfilmed':
+        return fx.unfilmed
       case 'heat':
         return fx.heat(t.product[effect.melts].name, effect.ageDays, effect.dayTripChassis, effect.dayTripHealth)
     }

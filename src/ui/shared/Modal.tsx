@@ -9,6 +9,8 @@ type ModalProps = {
   open: boolean
   onClose: () => void
   title: ReactNode
+  /** Fenêtre large, pour un long texte (manuel) */
+  wide?: boolean
   children: ReactNode
 }
 
@@ -16,7 +18,7 @@ type ModalProps = {
  * Fenêtre par-dessus l'écran (fiche produit…) : élément `<dialog>` natif, qui piège le focus et se ferme avec Échap ;
  * un clic sur le fond la ferme aussi
  */
-export default function Modal({ open, onClose, title, children }: ModalProps) {
+export default function Modal({ open, onClose, title, wide = false, children }: ModalProps) {
   const { t } = useI18n()
   const dialog = useRef<HTMLDialogElement>(null)
 
@@ -35,7 +37,7 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
-      className="m-auto max-h-dvh w-full max-w-lg overflow-x-hidden overflow-y-auto rounded-lg border border-line-strong bg-panel p-0 text-sm text-ink shadow-xl shadow-black/60 backdrop:bg-black/70"
+      className={`m-auto max-h-dvh w-full ${wide ? 'max-w-3xl' : 'max-w-lg'} overflow-x-hidden overflow-y-auto rounded-lg border border-line-strong bg-panel p-0 text-sm text-ink shadow-xl shadow-black/60 backdrop:bg-black/70`}
     >
       {open && (
         <motion.div {...POP}>

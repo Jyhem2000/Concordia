@@ -78,9 +78,9 @@ function CrewOffer({ crewId }: CrewOfferProps) {
     ...(crew.offshoreBonus ? [t.crewDesk.offshore(signedPercent(crew.offshoreBonus, 1))] : []),
     ...(crew.fleeBonus ? [t.crewDesk.flee(signedPercent(crew.fleeBonus, 0))] : []),
     ...(crew.forgeryBonus ? [t.crewDesk.forgery(signedPercent(crew.forgeryBonus, 0))] : []),
-    ...(crew.perishableKnowHow ? [t.crewDesk.knowHow(change(crew.perishableKnowHow))] : []),
+    ...(crew.gourmetKnowHow ? [t.crewDesk.knowHow(change(crew.gourmetKnowHow))] : []),
     ...(crew.refining ? [t.crewDesk.refining] : []),
-    ...(crew.perishableQuota ? [t.crewDesk.quota(change(crew.perishableQuota))] : []),
+    ...(crew.gourmetQuota ? [t.crewDesk.quota(change(crew.gourmetQuota))] : []),
     ...(crew.inKindSalary ? [t.crewDesk.inKindRule(credits(salary(crewId, crew.inKindSalary.amount)), crew.inKindSalary.minTier)] : []),
   ]
 

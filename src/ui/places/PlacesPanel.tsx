@@ -1,9 +1,9 @@
 import { Landmark, Lock } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { SURVIVAL_ADVANCE, VENTURE } from '../../data/balance.ts'
-import { LOCATIONS } from '../../data/locations.ts'
+import { CANTINE, LOCATIONS } from '../../data/locations.ts'
 import { VEHICLES } from '../../data/vehicles.ts'
-import { maxRepay } from '../../engine/actions.ts'
+import { locationOpen, maxRepay } from '../../engine/actions.ts'
 import { atCantine, crewEffect } from '../../engine/crew.ts'
 import {
   breakEvenDays,
@@ -26,7 +26,8 @@ import ContractCard from './ContractCard.tsx'
 import GarageDesk from './GarageDesk.tsx'
 import { placesHere } from './placesHere.ts'
 import PumpPanel, { PumpControls } from './PumpPanel.tsx'
-import { CassandreDesk, ForgeryDesk, KarmaDesk, MorgueDesk, VelvetDesk } from './SpecialDesks.tsx'
+import { checkMeal } from '../../engine/services.ts'
+import { CassandreDesk, DeskRow, ForgeryDesk, KarmaDesk, MorgueDesk, VelvetDesk } from './SpecialDesks.tsx'
 
 type PlaceProps = {
   locationId: LocationId
@@ -64,9 +65,9 @@ export default function PlacesPanel({ garage = false }: PlacesPanelProps) {
   )
 }
 
-/** Les lieux spéciaux ouvrent de 06h00 à 20h00 (chap. 1) */
+/** Les lieux spéciaux ouvrent de 06h00 à 20h00, sauf l'arrière-salle de Viktor (chap. 3) */
 function Place({ locationId, children }: PlaceProps) {
-  const closed = useGameStore((s) => s.game.phase === 'night' || s.game.dayOver)
+  const closed = useGameStore((s) => !locationOpen(s.game, locationId))
   const { t } = useI18n()
 
   return (
@@ -107,14 +108,23 @@ function ServiceDesk({ service }: ServiceDeskProps) {
   }
 }
 
-/** Cantine des Chauffeurs : l'eau des routiers (Lucidité) et le Synthanol au tarif syndical */
+/** Cantine des Chauffeurs : le plat du routier et le Synthanol au tarif syndical */
 function CantineDesk() {
   const game = useGameStore((s) => s.game)
-  const { t } = useI18n()
+  const dispatch = useGameStore((s) => s.dispatch)
+  const { t, credits } = useI18n()
 
   return (
     <>
       <p className="text-ink-muted italic">{t.place.cantineLore}</p>
+      <ul>
+        <DeskRow
+          label={t.place.meal}
+          detail={t.place.mealEffect(credits(CANTINE.meal.cost), CANTINE.meal.health)}
+          error={checkMeal(game)}
+          onClick={() => dispatch({ type: 'meal' })}
+        />
+      </ul>
       <p>
         <span className="text-ink-muted">{t.place.cantineFuel} </span>
         <span className="font-bold">{t.pump.reserve(game.fuel, VEHICLES[game.vehicleId].tank)}</span>

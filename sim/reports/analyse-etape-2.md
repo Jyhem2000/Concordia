@@ -637,3 +637,15 @@ Les deux services restaient négatifs aux retraits. Le bot les jouait mal : pani
 **Changements de règle :** la Fiche S ne baisse plus d'une nuit au relais, mais d'un niveau après trois jours de suite sans nouvel écart (chaque écart remet le compte à zéro) ; le contrat de la Pègre demande un produit en Forte demande à destination, et seules les caisses qui ont voyagé se livrent.
 
 **Campagnes** (mêmes effectifs) : tout dans le bruit. Novice 80 % de survie. Une Fiche S qui dure plus ne coûte pas de survie aux plans de nuit (Nuit festive en Équilibré 87 → 89 %, Fuite au sommet en Équilibré 81 → 85 %) : le risque ajouté par niveau reste modeste, c'est surtout la fuite qui s'en ressent. Le Fantôme reste dans sa marge (71 % et 65 %).
+
+## Audits : Gourmet, clientèle captive, Viktor de nuit, plat du routier, maintenance d'Aeterna
+**Changements de règle :** tag Gourmet (beurre, charcuterie, curry, miel, roquefort, wagyu), sur lequel agit désormais Mama Rosa (savoir-faire, affinage des Gourmet périssables, quotas, déblocage) et l'option « pénurie alimentaire » de Karma-Cham ; les Cellules Souches deviennent périssables sans profiter de Mama. Addictif : le rachat au cours se reconstitue deux fois plus vite. L'arrière-salle de Viktor ouvre jour et nuit ; plat du routier à la Cantine (Santé, une fois par jour). Placebo hors de la Forte demande de Rust Valley. Navette et Panacea à 25 caisses. Plaque rotative : ni ICC ni Fiche S sur la fuite qu'elle couvre. Nouvel événement global « Maintenance d'Aeterna » (aucun contrôle volant, écart de nuit non filmé) ; « Semaine des Partiels » à Pastel-Heights (stimulants d'étudiants au lieu de tout le Chimique).
+
+**Défaut de bot corrigé :** en fin de partie, le marchand gardait de quoi faire le plein avant de rembourser : il pouvait finir recyclé pour quelques crédits de dette, Cash-Puce et offshore pleins. Une dette soldable d'un coup se solde désormais.
+
+**Campagnes** (mêmes effectifs) :
+- **Survie :** en hausse ou stable presque partout (Novice 80 → 82 %, Sans build Équilibré 81 → 86 %, Nuit festive Prudent 93 → 97 %, Saboteur Équilibré 74 → 80 %) : correctif du bot, Viktor de nuit et plat du routier. Corruption perd 3 points, dans le bruit.
+- **Fins :** l'Élite double par la Couverture légale (3 → 7 %) et monte par le Citoyen modèle (5 → 7 %) ; le reste dans la marge.
+- **Équipement :** la Panacea à 25 caisses passe de positive à neutre (+4 700 ₡ ± 8 600 ₡), Mama Rosa aussi (+5 400 ₡ ± 8 300 ₡) : le Gourmet élargit son champ, mais la chaîne du froid reste le build le plus faible. La nuit reste négative en score (`[MOD-04]` −9 800 ₡, `[MOD-06]` −6 600 ₡), comme avant. Le Bunker-Lourd devient nettement positif (+54 000 ₡) : seul à acheter du volume.
+- **Casse-cou :** scores moyens en baisse (Sans build 140 → 113k, Corruption 185 → 150k), sur des écarts-types plus grands que les moyennes : bruit des graines.
+- **Hasard :** inchangé.

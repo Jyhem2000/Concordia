@@ -24,7 +24,7 @@ import { breakOnFlee, breakOnShock, crateValue, explodeFlammable, paymentValue }
 import { crewEffect, workingCrew } from './crew.ts'
 import { isWorn } from './gauges.ts'
 import { ejectMode, moduleTagFactor, mountedEffect, mountedWith } from './equipment.ts'
-import { arrive, tagFactor } from './events.ts'
+import { arrive, hasEffect, tagFactor } from './events.ts'
 import { changeHealth, gainRouteIcc } from './gauges.ts'
 import { keysOf } from './records.ts'
 import { createRng, type Rng } from './rng.ts'
@@ -216,6 +216,8 @@ export function fleeChance(state: GameState, { drop, dope }: Tactics = NO_TACTIC
 export function fleeConsequences(state: GameState): {
   chassis: { min: number; max: number }
   iccLoss: number
+  /** Niveaux de Fiche S gagnés en cas de succès (0 sous la plaque rotative ou face aux milices) */
+  wanted: number
   failChassis: number
   failHealth: number
 } {
@@ -225,7 +227,8 @@ export function fleeConsequences(state: GameState): {
   const { min, max } = FLEE.success.chassisLoss
   return {
     chassis: unscathed ? { min: 0, max: 0 } : { min: Math.floor(min * ram), max: Math.floor(max * ram) },
-    iccLoss: flightIccLoss(state)[1],
+    iccLoss: plateCovers(state) || racket ? 0 : flightIccLoss(state),
+    wanted: plateCovers(state) || racket ? 0 : Math.min(WANTED.perOffense, WANTED.maxLevel - state.wanted),
     failChassis: Math.floor(FLEE.fail.chassisLoss * ram),
     failHealth: Math.floor(FLEE.fail.healthLoss * ram),
   }
@@ -426,8 +429,9 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
         const escaped = shake(loseChassis(prepared, ledger, lost), ledger, fragile(prepared, breakOnFlee(prepared.cargo, rng)))
         // Les milices ne fichent personne et ne coûtent pas d'ICC
         if (racket) return report(escaped, chance, true, true, false)
-        const [plated, iccLost] = flightIccLoss(addWanted(escaped, ledger))
-        return report(loseIcc(plated, ledger, iccLost), chance, true, true, false)
+        // Plaque rotative, une fois par jour : les caméras de trafic ne lisent rien, ni ICC perdu ni Fiche S
+        if (plateCovers(escaped)) return report({ ...escaped, plateDay: escaped.day }, chance, true, true, false)
+        return report(loseIcc(addWanted(escaped, ledger), ledger, flightIccLoss(escaped)), chance, true, true, false)
       }
       // Le véhicule part en tête-à-queue : les inflammables non masqués peuvent exploser
       const blown = explode(prepared, ledger, rng)
@@ -584,11 +588,15 @@ function ramFactor(state: GameState): number {
   return mountedEffect(state, 'ram')?.damageFactor ?? 1
 }
 
-/** Perte d'ICC d'une fuite réussie : effacée une fois par jour par la plaque rotative, réduite par le transpondeur */
-function flightIccLoss(state: GameState): [GameState, number] {
-  if (mountedEffect(state, 'rotatingPlate') && state.plateDay !== state.day) return [{ ...state, plateDay: state.day }, 0]
+/** Plaque rotative disponible aujourd'hui : la prochaine fuite réussie devant la BRC ne laisse aucune trace */
+export function plateCovers(state: GameState): boolean {
+  return mountedEffect(state, 'rotatingPlate') !== undefined && state.plateDay !== state.day
+}
+
+/** Perte d'ICC d'une fuite réussie, hors plaque rotative : réduite par le transpondeur */
+function flightIccLoss(state: GameState): number {
   const transponder = activeTransponder(state)
-  return [state, transponder ? Math.floor(FLEE.success.iccLoss * transponder.iccLossFactor) : FLEE.success.iccLoss]
+  return transponder ? Math.floor(FLEE.success.iccLoss * transponder.iccLossFactor) : FLEE.success.iccLoss
 }
 
 /** Retire `qty` caisses en commençant par les plus chères (prix de base) */
@@ -717,7 +725,8 @@ export function emergencyTow(state: GameState): { state: GameState; bill: number
 /** Part des contrôles volants dans un district : celle du district, majorée par la ronde renforcée (chap. 5) */
 export function flyingCheckShare(state: GameState, districtId: DistrictId, includePatrol: boolean): number {
   const share = DISTRICTS[districtId].flyingCheckShare
-  if (share === 0) return 0
+  // Maintenance d'Aeterna : drones cloués au sol (chap. 6)
+  if (share === 0 || hasEffect(state, districtId, 'grounded')) return 0
   // Cage de Faraday de [MOD-03] : les drones perdent le signal du camion
   const faraday = mountedEffect(state, 'flyingCheckFactor') ?? 1
   return Math.min(1, (share + (includePatrol && state.patrolDistrict === districtId ? FLYING_CHECK.patrolBonus : 0)) * faraday)

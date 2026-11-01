@@ -17,7 +17,7 @@ type CellProps = {
   tone?: Tone
   /** Précisions et explication de la règle, dans le « i » à côté du libellé */
   info: ReactNode
-  /** Une précision mérite l'attention (échéance, Sédation, épuisement) : le « i » prend cette couleur */
+  /** Une précision mérite l'attention (échéance, Fiche S, épuisement) : le « i » prend cette couleur */
   alert?: Tone
   /** Valeur longue (nom de district) : en plus petit, sur deux lignes au besoin */
   wrap?: boolean
@@ -59,7 +59,7 @@ export default function StatusBar() {
   const PhaseIcon = game.phase === 'day' ? Sun : Moon
 
   return (
-    <header className="z-20 border-b border-line bg-base/95 backdrop-blur md:sticky md:top-0">
+    <header className="z-20 border-b border-line bg-base/95 backdrop-blur md:sticky md:top-0 print:hidden">
       <div className="mx-auto max-w-8xl px-3 py-2 text-sm">
         {/* Téléphone : deux rangées de quatre cases ; desktop : une rangée de huit */}
         <div className="grid grid-cols-4 gap-y-2 sm:grid-cols-8 sm:divide-x sm:divide-line">

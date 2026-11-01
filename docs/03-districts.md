@@ -15,7 +15,7 @@
 ```
   Liaisons : `MAP_LINKS` dans [`districts.ts`](../src/data/districts.ts) (le schéma n'est qu'une illustration). *Ex. :* `[D4]` → `[D6]` traverse `[D1]`, `[D2]` et `[D5]` : trois districts traversés.
 * **Pompes :** chaque district a la sienne, où se fait le plein (onglet Lieux, chap. 7). *Officielle* = connectée à Aeterna, **fermée la nuit** sous un seuil d'ICC (`PUMP_NIGHT_MIN_ICC` dans [`balance.ts`](../src/data/balance.ts)) ; *fixe* (pirate) = toujours ouverte.
-* **Lieux spéciaux :** ouverts de jour seulement (06h00 – 20h00, chap. 1). **Cooldown :** un service utilisé le jour J redevient disponible le jour J + cooldown. Chiffres : [`locations.ts`](../src/data/locations.ts).
+* **Lieux spéciaux :** ouverts de jour seulement (06h00 – 20h00, chap. 1), sauf l'arrière-salle de Viktor `[LOC-D1-1]`, ouverte jour et nuit (`nightOpen` dans [`locations.ts`](../src/data/locations.ts)). **Cooldown :** un service utilisé le jour J redevient disponible le jour J + cooldown. Chiffres : [`locations.ts`](../src/data/locations.ts).
 * **Services réservés (deux voies) :** certains services ne s'ouvrent qu'à qui s'est fait une place (`SERVICE_REQUIREMENTS` dans [`locations.ts`](../src/data/locations.ts)). Le lieu les affiche quand même, avec leur condition et la progression vers elle.
   * **Voie officielle**, pour les citoyens présentables et solvables : panique de Karma-Cham (palier d'ICC et patrimoine), faux dossier de la Laverie (patrimoine), Velvet-Silo sur invitation (palier d'ICC et patrimoine).
   * **Voie pègre**, pour les fichés : Cassandre-88 ne parle qu'à qui a déjà une Fiche S.
@@ -40,18 +40,19 @@ Les stats de chaque district sont dans [`districts.ts`](../src/data/districts.ts
 * **Sécurité :** caméras bas de gamme souvent en panne, patrouilles humaines de la BRC fatiguées et corruptibles.
 
 ### `[LOC-D1-1]` L'Arrière-Salle de Viktor Varga (usurier mafieux)
-Boucherie clandestine de Viktor Varga et de ses « Bouchers ».
+Boucherie clandestine de Viktor Varga et de ses « Bouchers ». **Ouverte jour et nuit :** l'arrière-salle d'un usurier ne ferme jamais (rembourser, emprunter, accepter ou livrer un contrat, même après 20h00).
 * **Dette :** remboursement, et avance de survie (dans la limite d'un total fixe sur toute la partie, chap. 1, *Dette mafieuse*).
 * **Contrats de la Pègre** — les Bouchers ont des clients dans toute la ville, et pas de camion. Chiffres : `CONTRACT` dans [`locations.ts`](../src/data/locations.ts).
   * **Offre :** chaque matin, tant qu'aucun contrat n'est en cours, Viktor en propose un, dès le Jour 1 : un district de destination (jamais `[D1]`), un produit de Tier 1 à 3 tiré dans sa **Forte demande** (ce qui y manque, jamais en boutique là-bas sauf événement : Viktor livre ce qu'on ne trouve pas sur place), un nombre de caisses selon le tier et un délai de quelques jours. La **prime** est fixée d'avance : la valeur de base des caisses, multipliée par un facteur. L'offre du jour disparaît le lendemain matin.
-  * **Acceptation :** au guichet, de jour. Un seul contrat à la fois. Les caisses s'achètent où l'on veut, au prix du marché.
+  * **Acceptation :** au guichet, de jour comme de nuit. Un seul contrat à la fois. Les caisses s'achètent où l'on veut, au prix du marché.
   * **Livraison :** dans le district de destination, de jour comme de nuit, jusqu'au dernier jour du délai inclus, avec assez de caisses du produit en soute. Les caisses partent (les plus anciennes d'abord), la prime arrive en Cash-Puce, sans commission ni saturation.
   * **Échec :** le délai passé, à la routine matinale, Viktor ajoute une pénalité à la dette, une part de la prime. Pas de pardon.
   * *Intention :* un objectif à quelques jours, accessible à tous dès le début, qui fait planifier un achat et un trajet ; la prime ne bouge pas avec le marché, mais il faut traverser la ville avec la marchandise.
 * **Caisses apportées d'ailleurs :** seules les caisses qui ont voyagé depuis leur achat se livrent ; celles achetées dans le district de destination ne comptent pas (Viktor paie un transport, pas un achat sur place).
 
 ### `[LOC-D1-2]` La Cantine des Chauffeurs (« Chez Borg »)
-Bar enfumé réservé aux routiers, où l'on sert l'eau sans sédatifs (lore : le privilège syndical qui garde aux chauffeurs l'esprit clair).
+Bar enfumé réservé aux routiers, où l'on sert l'eau sans sédatifs et une cuisine qui sent encore quelque chose (lore : le privilège syndical qui garde aux chauffeurs l'esprit clair).
+* **Plat du routier :** une fois par jour, un vrai repas contre quelques crédits rend de la Santé, sans dépasser le maximum ; refusé en pleine forme (`CANTINE` dans [`locations.ts`](../src/data/locations.ts)). Le soin bon marché du quotidien, loin de la chirurgie de `[LOC-D3-1]`.
 * **Synthanol au tarif syndical :** en `[D1]`, de jour, le plein se fait à la Cantine, au tarif syndical, moins cher que les pompes (`CANTINE` dans [`locations.ts`](../src/data/locations.ts)) ; la pompe officielle du district ne sert que la nuit, une fois la Cantine fermée.
 
 ### `[LOC-D1-3]` Le Quai 9 (bar clandestin)
@@ -70,7 +71,7 @@ Bar sans licence sous les quais de service. La plupart des chauffeurs de catégo
 Icône officielle le jour, mercenaire vénale en coulisses. **Panique Algorithmique sur Commande :**
 * **Coût :** une base, plus une hausse par utilisation précédente. **Cooldown** en jours. Chiffres : `KARMA` dans [`locations.ts`](../src/data/locations.ts).
 * **Effet :** le joueur choisit **un** tag ; le soir même, une fausse polémique virale force Aeterna à réagir : **le lendemain seulement**, tous les produits de ce tag valent plus cher dans tous les districts (*bonus d'influence*, multiplié avec les événements, sous le même plafond, chap. 2). Le téléscripteur l'annonce.
-* **Options :** A « Cancel Wave Culturelle » `[TAG-CULTURE]` · B « Rumeur de Pénurie Alimentaire » `[TAG-PERISHABLE]` · C « Scandale Chimique & Pharmaceutique » `[TAG-CHEMICAL]`.
+* **Options :** A « Cancel Wave Culturelle » `[TAG-CULTURE]` · B « Rumeur de Pénurie Alimentaire » `[TAG-GOURMET]` · C « Scandale Chimique & Pharmaceutique » `[TAG-CHEMICAL]`.
 
 ---
 

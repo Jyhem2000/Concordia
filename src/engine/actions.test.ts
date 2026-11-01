@@ -162,11 +162,13 @@ describe('journées', () => {
 })
 
 describe('guichets : dette et compte offshore', () => {
-  it('ouvrent de jour, dans leur district seulement', () => {
+  it('ouvrent dans leur district seulement ; la Laverie de jour, l’arrière-salle de Viktor jour et nuit', () => {
     expect(checkService(gameAt(2, { districtId: 'D1' }), 'debt')).toBeNull()
     expect(checkService(gameAt(2, { districtId: 'D5' }), 'offshore')).toBeNull()
     expect(errorOf(gameAt(2, { districtId: 'D2' }), { type: 'repay', amount: 100 })).toBe('not-at-location')
-    expect(errorOf(gameAt(2, { phase: 'night' }), { type: 'repay', amount: 100 })).toBe('location-closed')
+    expect(checkService(gameAt(2, { phase: 'night' }), 'debt')).toBeNull()
+    expect(checkService(gameAt(2, { dayOver: true }), 'debt')).toBeNull()
+    expect(checkService(gameAt(2, { districtId: 'D5', phase: 'night' }), 'offshore')).toBe('location-closed')
     expect(errorOf(gameAt(2), { type: 'deposit', amount: 100 })).toBe('not-at-location')
   })
 

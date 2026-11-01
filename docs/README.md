@@ -32,28 +32,26 @@ Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la dé
 | **Risque d'interception** | formule, risque de base, suspicion, tags détectés, contexte (nuit, traversée, portique, balise, ronde renforcée, Fiche S, pic suspect, embuscades), couverture légale, bonus d'équipement, multiplicateurs finaux | chap. 5 → chap. 2 (tags, masquage) → chap. 3 (détection des districts) → chap. 6 (effets d'événements) |
 | **Contrôle** | barrage fixe ou contrôle volant, brouilleur de drones, fouille et sanctions, double fond, bluff (aides), corruption (offre, connivence, Drones-Juges), fuite (largage, dopage, casse, explosions), éjection, exécution sommaire, garde à vue | chap. 5 → chap. 2 (actions des produits, état des caisses) |
 | **Racket des milices** | péage en ₡ ou en caisses, passage forcé, refus | chap. 3 → chap. 5 |
-| **Produits** | tags (dont vente de nuit Festif et Diurne), masquage 1:1, tiers, catalogue, actions (aide au bluff, largage, dopage, nuit blanche, refroidissement, pass d'identité, balise) | chap. 2 |
+| **Produits** | tags (dont vente de nuit Festif et Diurne, clientèle captive des Addictifs, Gourmet de Mama Rosa), masquage 1:1, tiers, catalogue, actions (aide au bluff, largage, dopage, nuit blanche, refroidissement, pass d'identité, balise) | chap. 2 |
 | **État des caisses** | fraîcheur (Extra-Frais à Pourri), casse des fragiles, explosion des inflammables, valeur d'une caisse abîmée ou défraîchie | chap. 2 |
 | **Marché** | information (mémoire, historique, profil public des districts), boutique du jour, exclusion, cours (coefficient du district, tendance, Mult_Événement), quota de rachat, saturation, pic suspect | chap. 2 → chap. 6 (événements, contrecoups, vices de la Loterie) |
 | **Vente** | prix de vente, commission, savoir-faire (fraîcheur, nuit, rendements décroissants), clause anti-arbitrage, lots les plus anciens d'abord, paiement en nature | chap. 2 |
-| **Lieux spéciaux** | services, horaires, effets de chaque lieu, contrats de la Pègre, parrainage du Velvet-Silo | chap. 3 → chap. 1 (dette, offshore) |
+| **Lieux spéciaux** | services, horaires (l'arrière-salle de Viktor jour et nuit), effets de chaque lieu (plat du routier compris), contrats de la Pègre, parrainage du Velvet-Silo | chap. 3 → chap. 1 (dette, offshore) |
 | **Équipement** | véhicules (double fond et son contenu compris), modules (brouilleur de drones compris), équipage (injection du serveur par Glitch comprise), salaires | chap. 4 |
-| **Événements** | globaux, locaux, rumeurs, contrecoups, Loterie, aléas routiers | chap. 6 |
+| **Événements** | globaux (dont la maintenance d'Aeterna), locaux, rumeurs, contrecoups, Loterie, aléas routiers | chap. 6 → chap. 5 (contrôles volants, Fiche S) |
 | **Prévisibilité** | ce que le joueur sait ou peut deviner (cours, rumeurs, contrecoups, Loterie) et ce qui reste caché (ronde renforcée) | chap. 2 → chap. 6 → chap. 5 |
-| **Affichage** | charte graphique, onglets, En bref (actualités, agenda, bonnes affaires, alertes), carnet de route et courbe du patrimoine, carrière et hauts faits, téléscripteur, confirmations, où chaque règle est montrée et détaillée au joueur, manuel en jeu | chap. 7 |
+| **Affichage** | charte graphique, accueil, onglets, En bref (actualités, agenda, bonnes affaires, alertes), carnet de route et courbe du patrimoine, écran de fin (victoire, mort et conseil, bilan, impression, partage), carrière et hauts faits, téléscripteur, confirmations, où chaque règle est montrée et détaillée au joueur, manuel du passeur | chap. 7 |
 
 ## État d'implémentation
 Toutes les règles des chap. 1 à 6 sont en jeu. Ce tableau dit ce qui reste à faire, et se met à jour à chaque étape.
 
 | Chap. | À venir |
 | :---: | :--- |
-| 7 | Manuel en jeu |
 | 8 | Spéculation sur l'événement de demain (Cassandre-88, rumeur) et faux dossier de Loterie dans les bots, optimiseur et campagne 5 (reportés après l'interface, comme contrôle final) |
 
 ## Feuille de route
-Étapes restantes :
-1. **Interface et manuel du jeu** — interface restante (chap. 7) et manuel du joueur en jeu.
-2. **Optimiseur** (campagne 5, chap. 8) — contrôle final de l'équilibrage, gelé le 29/10/2026 ; les écarts assumés sont listés dans [`sim/reports/analyse-etape-2.md`](../sim/reports/analyse-etape-2.md).
+Étape restante :
+1. **Optimiseur** (campagne 5, chap. 8) — contrôle final de l'équilibrage, gelé le 29/10/2026 ; les écarts assumés sont listés dans [`sim/reports/analyse-etape-2.md`](../sim/reports/analyse-etape-2.md).
 
 ## Règles de rédaction
 1. **Un chiffre, un seul endroit.** Une valeur (prix, %, durée…) n'est écrite que là où la donnée est définie. Un bonus est écrit chez ce qui le produit (le module, le véhicule, l'événement…) ; les formules ne font que citer la source.
