@@ -20,7 +20,7 @@ import { MODULES, VEHICLES } from '../data/vehicles.ts'
 import type { ActionError } from './actions.ts'
 import { breakdown, type Breakdown } from './breakdown.ts'
 import { baseValue, cargoUsed, giveCrates, isIllegal, maskedQty, ownedQty, ownsCrates, splitHidden, tagShare, tierShare } from './cargo.ts'
-import { breakOnFlee, breakOnShock, crateValue, explodeFlammable, paymentValue } from './condition.ts'
+import { breakOnFlee, breakOnShock, crateValue, paymentValue } from './condition.ts'
 import { crewEffect, workingCrew } from './crew.ts'
 import { isWorn } from './gauges.ts'
 import { ejectMode, moduleTagFactor, mountedEffect, mountedWith } from './equipment.ts'
@@ -104,19 +104,13 @@ export function bluffAids(state: GameState): ProductId[] {
   })
 }
 
-/** Largage offensif (une caisse d'un produit qui le permet) et dopage (une fois par jour) */
-function checkFleeTactics(state: GameState, { drop, dope }: Tactics): ActionError | null {
-  if (drop !== undefined && (dropBonus(drop) === 0 || ownedQty(state.cargo, drop) < 1)) return 'move-unavailable'
+/** Dopage pilote (une fois par jour) */
+function checkFleeTactics(state: GameState, { dope }: Tactics): ActionError | null {
   if (dope !== undefined) {
-    if (!PRODUCTS[dope].doping || ownedQty(state.cargo, dope) < (drop === dope ? 2 : 1)) return 'move-unavailable'
+    if (!PRODUCTS[dope].doping || ownedQty(state.cargo, dope) < 1) return 'move-unavailable'
     if (state.lastDopingDay === state.day) return 'doping-used'
   }
   return null
-}
-
-/** Bonus de largage d'un produit : le meilleur de ses tags (chap. 2) */
-export function dropBonus(productId: ProductId): number {
-  return Math.max(0, ...PRODUCTS[productId].tags.map((tag) => TAGS[tag].fleeDropBonus ?? 0))
 }
 
 // ─── Chances (détaillables, chap. 7) ───
@@ -193,14 +187,13 @@ export function bribeChance(state: GameState, offer: Offer): Breakdown {
   return chance.build()
 }
 
-export function fleeChance(state: GameState, { drop, dope }: Tactics = NO_TACTICS): Breakdown {
+export function fleeChance(state: GameState, { dope }: Tactics = NO_TACTICS): Breakdown {
   const racket = state.interception?.kind === 'racket'
   const cap = FLEE.capBase - FLEE.capPerExtraStar * (stars(state) - 1)
   const chance = breakdown('rule.flee-base', FLEE.base)
     // Les milices ignorent la Fiche S
     .add('rule.wanted', racket ? 0 : -WANTED.fleePenaltyPerLevel * state.wanted, { level: state.wanted })
     .add('rule.bluff-failed', followUp(state.interception))
-  if (drop) chance.add(drop, dropBonus(drop))
   if (dope) chance.add(dope, PRODUCTS[dope].doping?.fleeBonus ?? 0)
   const ram = mountedWith(state, 'ram')
   if (ram) chance.add(ram, MODULES[ram].ram?.fleeBonus ?? 0)
@@ -208,7 +201,10 @@ export function fleeChance(state: GameState, { drop, dope }: Tactics = NO_TACTIC
   if (transponder) chance.add(state.vehicleId, transponder.fleeBonus)
   const fleeCrew = workingCrew(state)
   if (fleeCrew) chance.add(fleeCrew, crewEffect(state, 'fleeBonus') ?? 0)
-  chance.add('rule.worn', worn(state))
+  // L'assistance de conduite tient le volant quand le chauffeur est à bout
+  const assist = mountedWith(state, 'drivingAssist')
+  if (assist) chance.add(assist, MODULES[assist].drivingAssist?.fleeBonus ?? 0)
+  else chance.add('rule.worn', worn(state))
   return chance.clamp(0, cap, 'rule.flee-cap').build()
 }
 
@@ -346,7 +342,6 @@ const emptyLedger = (): Ledger => ({
   wanted: 0,
   custodyDays: 0,
   damaged: 0,
-  exploded: 0,
   sacrificed: 0,
   towBill: 0,
   jammerSeized: false,
@@ -433,11 +428,9 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
         if (plateCovers(escaped)) return report({ ...escaped, plateDay: escaped.day }, chance, true, true, false)
         return report(loseIcc(addWanted(escaped, ledger), ledger, flightIccLoss(escaped)), chance, true, true, false)
       }
-      // Le véhicule part en tête-à-queue : les inflammables non masqués peuvent exploser
-      const blown = explode(prepared, ledger, rng)
-      if (racket) return report(refuseToll(blown, ledger, rng), chance, false, true, false)
+      if (racket) return report(refuseToll(prepared, ledger, rng), chance, false, true, false)
       const { fineRate, iccLoss, chassisLoss, healthLoss, custodyDays } = FLEE.fail
-      const seized = frisk(blown, (s) => seize(s, ledger, fineRate))
+      const seized = frisk(prepared, (s) => seize(s, ledger, fineRate))
       const ram = ramFactor(state)
       const wrecked = loseHealth(
         loseChassis(loseIcc(seized, ledger, iccLoss), ledger, Math.floor(chassisLoss * ram)),
@@ -544,12 +537,9 @@ function refuseToll(state: GameState, ledger: Ledger, rng: Rng): GameState {
   return loseHealth(hitChassis({ ...state, cargo: looted }, ledger, chassisLoss, rng), ledger, healthLoss)
 }
 
-/**
- * Avant la fuite : largage offensif (une caisse perdue) et dopage pilote (une caisse bue, choc de
- * châssis, perte d'ICC sauf face aux milices)
- */
-function prepareFlight(state: GameState, ledger: Ledger, { drop, dope }: Tactics, rng: Rng, racket: boolean): GameState {
-  let s = drop ? sacrifice(state, ledger, [{ productId: drop, qty: 1 }]) : state
+/** Avant la fuite : dopage pilote (une caisse bue, choc de châssis, perte d'ICC sauf face aux milices) */
+function prepareFlight(state: GameState, ledger: Ledger, { dope }: Tactics, rng: Rng, racket: boolean): GameState {
+  let s = state
   const doping = dope ? PRODUCTS[dope].doping : undefined
   if (dope && doping) {
     s = sacrifice(s, ledger, [{ productId: dope, qty: 1 }])
@@ -557,14 +547,6 @@ function prepareFlight(state: GameState, ledger: Ledger, { drop, dope }: Tactics
     if (!racket) s = loseIcc(s, ledger, doping.iccLoss)
   }
   return s
-}
-
-/** Explosions des inflammables non masqués (échec de fuite) */
-function explode(state: GameState, ledger: Ledger, rng: Rng): GameState {
-  const { cargo, exploded, chassisLoss } = explodeFlammable(state.cargo, rng)
-  ledger.exploded += exploded
-  ledger.crates -= exploded
-  return loseChassis({ ...state, cargo }, ledger, chassisLoss)
 }
 
 /** Applique une casse de fragiles au compte rendu */

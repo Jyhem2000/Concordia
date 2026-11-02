@@ -32,10 +32,8 @@ export type TagId =
   | 'TAG-ODOROUS'
   | 'TAG-CULTURE'
   | 'TAG-TECH'
-  | 'TAG-CHEMICAL'
-  | 'TAG-FLAMMABLE'
+  | 'TAG-BIO'
   | 'TAG-FESTIVE'
-  | 'TAG-DIURNAL'
   | 'TAG-LUXURY'
   | 'TAG-GOURMET'
 
@@ -82,7 +80,7 @@ export type EventEffect = { districts?: readonly DistrictId[] } & (
   /** Demi-journée perdue à l'arrivée ou à 06h00 dans le district */
   | { kind: 'halfDay' }
   /** Canicule : fonte d'un produit, vieillissement des périssables, usure des trajets de jour */
-  | { kind: 'heat'; melts: ProductId; ageDays: number; dayTripChassis: number; dayTripHealth: number }
+  | { kind: 'heat'; melts: readonly ProductId[]; ageDays: number; dayTripChassis: number; dayTripHealth: number }
   /** Prix des réparations du garage multiplié */
   | { kind: 'repair'; factor: number }
   /** Drones cloués au sol : aucun contrôle volant */
@@ -148,10 +146,6 @@ export type Tag = {
   demandRefill?: number
   /** Casse : en fuite réussie, et aux chocs de châssis hors fuite (chap. 2) */
   breakage?: { fleeChance: number; shockChance: number; shockThreshold: number }
-  /** Explosion des caisses non masquées en cas d'échec de fuite (chap. 2) */
-  explosion?: { chance: number; chassisLoss: number }
-  /** Largage offensif en fuite : chance ajoutée en sacrifiant une caisse (chap. 2 et 5) */
-  fleeDropBonus?: number
   /** Cadeau d'agent : seuls ces produits s'offrent à la corruption, avec la connivence (chap. 5) */
   bribeGift?: boolean
   /** Coefficient de vente pendant le couvre-feu (chap. 2) ; pour le tag de l'after, la fête le remplace (chap. 1) */
@@ -281,6 +275,8 @@ export type Vehicle = {
   legalCamouflage?: { minShare: number; factor: number }
   /** Chaîne du froid : les périssables ne perdent de la fraîcheur qu'un matin sur deux */
   coldChain?: boolean
+  /** Immunité à la canicule : ni fonte, ni vieillissement, ni usure de châssis */
+  heatProof?: boolean
   /** Transpondeur d'urgence : bonus de fuite dans ces districts, sans dégât au succès, perte d'ICC réduite */
   transponder?: { districts: readonly DistrictId[]; fleeBonus: number; iccLossFactor: number }
   /** Monstre blindé : péage réduit, passage forcé sans dégât, broyeur acide, risque ajouté */
@@ -301,10 +297,8 @@ export type Module = {
   price: number
   category: ModuleCategory
   fitting: ModuleFitting
-  /** Jours de retard sur tout le cycle de fraîcheur */
-  freshnessDelay?: number
-  /** Immunité à la canicule : ni fonte, ni vieillissement, ni usure de châssis */
-  heatProof?: boolean
+  /** Assistance de conduite : chance de fuite ajoutée ; le chauffeur à bout ne pénalise plus la fuite */
+  drivingAssist?: { fleeBonus: number }
   /** Facteur sur les effets d'un tag (risque au trajet, détection, malus de bluff) */
   tagFactor?: { tag: TagId; factor: number }
   /** Fragiles immunisés à la casse ; usure des trajets de nuit annulée */
@@ -448,9 +442,7 @@ export type InterceptionReport = {
   custodyDays: number
   /** Caisses fragiles endommagées */
   damaged: number
-  /** Caisses inflammables détruites par explosion */
-  exploded: number
-  /** Caisses données, larguées ou bues par une tactique (aides au bluff, largage, dopage) */
+  /** Caisses données ou bues par une tactique (aides au bluff, dopage) */
   sacrificed: number
   /** Facture du dépannage d'urgence si le châssis est tombé à 0 */
   towBill: number
@@ -467,8 +459,6 @@ export type InterceptionReport = {
 /** Tactiques d'une option de barrage : aides au bluff, sacrifices et dopage en fuite (chap. 2 et 5) */
 export type Tactics = {
   /** Produits dont les caisses sont données ou sacrifiées à l'agent pendant le bluff */
-  /** Produit dont une caisse est larguée pendant la fuite (largage offensif) */
-  drop?: ProductId
   /** Produit bu pour le dopage pilote pendant la fuite */
   dope?: ProductId
 }

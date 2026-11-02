@@ -18,7 +18,7 @@ import { expireVip } from './services.ts'
 import { drawContract, expireContract } from './contracts.ts'
 import { drawDayOffer } from './delivery.ts'
 import { drawAfter, drawNightOffer, reclaimSealed } from './night.ts'
-import { mountedEffect, recoverDumped } from './equipment.ts'
+import { recoverDumped, vehicleOf } from './equipment.ts'
 import { changeHealth, gainRouteIcc, iccTier } from './gauges.ts'
 import { crewEffect, payCrew } from './crew.ts'
 import { drawEvents, hasEffect, heatWave } from './events.ts'
@@ -213,9 +213,9 @@ function morningRoutine(state: GameState, night: Night): GameState {
   s = { ...s, markets: drawMarkets(s, rng, s.markets), after: drawAfter(rng), rng: rng.state }
 
   // 7. Effets du matin des événements : canicule, sas (chap. 6)
-  // Le caisson cryo protège la soute de la canicule
+  // Le fourgon frigorifique protège la soute de la canicule
   const heat = heatWave(s)
-  if (heat && !mountedEffect(s, 'heatProof')) {
+  if (heat && !vehicleOf(s).heatProof) {
     const scorched = scorch(s, heat.melts, heat.ageDays)
     s = scorched.state
     briefing.heat = scorched.report
@@ -233,12 +233,12 @@ function morningRoutine(state: GameState, night: Night): GameState {
   return remember(publishBulletin({ ...s, briefing }), s.districtId)
 }
 
-/** Canicule à 06h00 : un produit fond, les autres périssables vieillissent ; ceux qui atteignent Pourri sont détruits */
-function scorch(state: GameState, melts: ProductId, ageDays: number): { state: GameState; report: NonNullable<MorningBriefing['heat']> } {
-  const melted = ownedQty(state.cargo, melts)
+/** Canicule à 06h00 : certains produits fondent, les autres périssables vieillissent ; ceux qui atteignent Pourri sont détruits */
+function scorch(state: GameState, melts: readonly ProductId[], ageDays: number): { state: GameState; report: NonNullable<MorningBriefing['heat']> } {
+  const melted = melts.reduce((sum, id) => sum + ownedQty(state.cargo, id), 0)
   let aged = 0
   const cargo = state.cargo.flatMap((lot) => {
-    if (lot.productId === melts) return []
+    if (melts.includes(lot.productId)) return []
     if (!isPerishable(lot)) return [lot]
     aged += lot.qty
     return [{ ...lot, boughtDay: lot.boughtDay - ageDays }]

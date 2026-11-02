@@ -42,7 +42,8 @@ describe('achat et vente', () => {
   })
 
   it('revend avec la commission : acheter puis revendre sur place fait perdre de l’argent', () => {
-    const id = cheapest(start)
+    // Un produit assez cher pour que l'arrondi à la caisse n'efface pas la commission
+    const id = defined(shopProducts(start.markets[start.districtId]).find((p) => quote(start, start.districtId, p) >= 50))
     const state = run(start, { type: 'buy', productId: id, qty: 3 }, { type: 'sell', productId: id, qty: 3 })
     expect(cargoUsed(state.cargo)).toBe(0)
     expect(state.cash).toBeLessThan(start.cash)

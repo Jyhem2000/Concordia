@@ -40,7 +40,12 @@ export function useEventLines(): (event: GlobalEventId | LocalEventId) => string
       case 'unfilmed':
         return fx.unfilmed
       case 'heat':
-        return fx.heat(t.product[effect.melts].name, effect.ageDays, effect.dayTripChassis, effect.dayTripHealth)
+        return fx.heat(
+          effect.melts.map((id) => t.product[id].name),
+          effect.ageDays,
+          effect.dayTripChassis,
+          effect.dayTripHealth,
+        )
     }
   }
 

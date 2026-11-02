@@ -720,8 +720,8 @@ function specialPlaces(view: GameState, uses: (place: PlaceUse) => boolean, rese
       return { type: 'morgue', service: 'certificate' }
     }
     // Laissez-passer : seulement avec du chimique illégal à faire passer par les bio-scanners
-    const chemical = view.cargo.some((lot) => isIllegal(lot) && PRODUCTS[lot.productId].tags.includes('TAG-CHEMICAL'))
-    if (uses('pass') && chemical && !checkMorgue(view, 'pass') && spare(morgueCost(view, 'pass'))) return { type: 'morgue', service: 'pass' }
+    const flagged = view.cargo.some((lot) => isIllegal(lot) && PRODUCTS[lot.productId].tags.includes('TAG-BIO'))
+    if (uses('pass') && flagged && !checkMorgue(view, 'pass') && spare(morgueCost(view, 'pass'))) return { type: 'morgue', service: 'pass' }
   }
   if (!checkService(view, 'velvet') && uses('vip')) {
     if (view.vip && !checkVipDelivery(view)) return { type: 'vipDeliver' }

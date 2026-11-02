@@ -15,6 +15,7 @@ import {
   RACKET,
   SEARCH,
   WANTED,
+  WORN,
 } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
 import { VELVET } from '../data/locations.ts'
@@ -246,6 +247,13 @@ describe('fuite', () => {
     expect(lost).toBeLessThanOrEqual(FLEE.success.chassisLoss.max)
   })
 
+  it("tient le volant du chauffeur à bout avec l'assistance de conduite", () => {
+    const worn = stopped([], { health: WORN.healthBelow - 1 })
+    expect(fleeChance(worn).total).toBeCloseTo(FLEE.base - WORN.penalty)
+    const assisted = stopped([], { health: WORN.healthBelow - 1, modules: { owned: ['MOD-01'], mounted: ['MOD-01'] } })
+    expect(fleeChance(assisted).total).toBeCloseTo(FLEE.base + defined(MODULES['MOD-01'].drivingAssist).fleeBonus)
+  })
+
   it('perd la Fiche S en chance de fuite', () => {
     expect(fleeChance(stopped([], { wanted: 2 })).total).toBeCloseTo(FLEE.base - 2 * WANTED.fleePenaltyPerLevel)
   })
@@ -344,26 +352,24 @@ describe('tactiques de barrage (chap. 2)', () => {
     expect(ownedQty(bluffed.cargo, 'T0-04')).toBe(manuals.crates)
   })
 
-  it('largue une caisse et dope le pilote pour fuir, une fois par jour', () => {
+  it('dope le pilote pour fuir, une fois par jour', () => {
     const doping = defined(PRODUCTS['T2-05'].doping)
     const state = stopped([lot('T1-06', 2), lot('T2-05', 2)])
-    const boosted = fleeChance(state, { drop: 'T1-06', dope: 'T2-05' })
+    const boosted = fleeChance(state, { dope: 'T2-05' })
     expect(boosted.total).toBeGreaterThan(fleeChance(state).total)
-    expect(errorOf(state, { type: 'intercept', move: 'flee', tactics: { drop: 'T2-03' } })).toBe('move-unavailable')
+    expect(errorOf(state, { type: 'intercept', move: 'flee', tactics: { dope: 'T1-06' } })).toBe('move-unavailable')
 
-    const fled = run({ ...state, rng: LOW_ROLL_RNG }, { type: 'intercept', move: 'flee', tactics: { drop: 'T1-06', dope: 'T2-05' } })
-    expect(ownedQty(fled.cargo, 'T1-06')).toBe(1)
+    const fled = run({ ...state, rng: LOW_ROLL_RNG }, { type: 'intercept', move: 'flee', tactics: { dope: 'T2-05' } })
     expect(ownedQty(fled.cargo, 'T2-05')).toBe(1)
     expect(fled.lastDopingDay).toBe(5)
-    expect(defined(fled.interceptionReport).sacrificed).toBe(2)
+    expect(defined(fled.interceptionReport).sacrificed).toBe(1)
     expect(fled.icc).toBe(100 - doping.iccLoss - FLEE.success.iccLoss)
     expect(errorOf({ ...fled, interception: brc }, { type: 'intercept', move: 'flee', tactics: { dope: 'T2-05' } })).toBe('doping-used')
   })
 
-  it('note la casse et les explosions au compte rendu', () => {
+  it('note la saisie au compte rendu d’une fuite ratée', () => {
     const failed = run(stopped([lot('T1-06', 4)], { rng: HIGH_ROLL_RNG }), { type: 'intercept', move: 'flee' })
     const report = defined(failed.interceptionReport)
-    expect(report.exploded).toBeGreaterThanOrEqual(0)
     expect(report.crates).toBe(-4 + VEHICLES['VEH-01'].hiddenCompartment)
   })
 })

@@ -24,7 +24,7 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
     price: 15_000,
     cargo: 25,
     hiddenCompartment: 3,
-    moduleSlots: 2,
+    moduleSlots: 3,
     maxChassis: 150,
     tank: 6,
     fuelPerTrip: { day: 1, night: 2 },
@@ -40,12 +40,13 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
     tank: 6,
     fuelPerTrip: { day: 1, night: 2 },
     coldChain: true,
+    heatProof: true,
     transponder: { districts: ['D3', 'D5'], fleeBonus: 0.25, iccLossFactor: 0.5 },
   },
   'VEH-04': {
     requires: [{ kind: 'debtPaid' }],
     price: 55_000,
-    cargo: 50,
+    cargo: 40,
     hiddenCompartment: 6,
     moduleSlots: 4,
     maxChassis: 300,
@@ -56,7 +57,7 @@ export const VEHICLES: Readonly<Record<VehicleId, Vehicle>> = {
 }
 
 export const MODULES: Readonly<Record<ModuleId, Module>> = {
-  'MOD-01': { requires: [{ kind: 'debtPaid' }], price: 2_000, category: 'conservation', fitting: 'adaptable', freshnessDelay: 2, heatProof: true },
+  'MOD-01': { requires: [{ kind: 'wanted' }], price: 3_500, category: 'tactical', fitting: 'portable', drivingAssist: { fleeBonus: 0.2 } },
   'MOD-02': { price: 3_500, category: 'camouflage', fitting: 'adaptable', tagFactor: { tag: 'TAG-ODOROUS', factor: 0.1 } },
   'MOD-03': {
     requires: [{ kind: 'debtPaid' }],

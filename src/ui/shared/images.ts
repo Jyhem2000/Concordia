@@ -13,11 +13,11 @@ import {
   Cigarette,
   Coffee,
   Cpu,
-  CupSoda,
   Disc3,
   Dna,
   Droplet,
   Droplets,
+  Egg,
   Fingerprint,
   Flame,
   Frame,
@@ -31,10 +31,10 @@ import {
   PackageCheck,
   Phone,
   Pill,
+  Gauge,
   Repeat,
   Server,
   Shield,
-  Snowflake,
   Soup,
   SprayCan,
   Sprout,
@@ -50,12 +50,16 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import type { CrewId, ModuleId, ProductId, VehicleId } from '../../engine/types.ts'
+import { keysOf } from '../../engine/records.ts'
 
 /** Données qui ont une image : produits, véhicules, modules, équipiers (chap. 7) */
 export type ImageId = ProductId | VehicleId | ModuleId | CrewId
 
 /** Images déposées dans `src/assets/images/`, nommées par l'ID de la donnée (`T1-03.png`) */
 const files = import.meta.glob<string>('../../assets/images/*.png', { eager: true, import: 'default' })
+
+/** Noms des fichiers déposés, sans extension (page de contrôle des images) */
+export const IMAGE_FILE_NAMES = keysOf(files).map((path) => path.replace(/^.*\/(.+)\.png$/, '$1'))
 
 /** Adresse de l'image déposée pour cette donnée, s'il y en a une */
 export function imageUrl(id: ImageId): string | undefined {
@@ -69,7 +73,7 @@ export const FALLBACK_ICONS: Record<ImageId, LucideIcon> = {
   'T0-03': Pill,
   'T0-04': BookOpen,
   'T0-05': PackageCheck,
-  'T1-01': CupSoda,
+  'T1-01': Egg,
   'T1-02': Coffee,
   'T1-03': Milk,
   'T1-04': Soup,
@@ -99,7 +103,7 @@ export const FALLBACK_ICONS: Record<ImageId, LucideIcon> = {
   'VEH-02': BusFront,
   'VEH-03': Ambulance,
   'VEH-04': Truck,
-  'MOD-01': Snowflake,
+  'MOD-01': Gauge,
   'MOD-02': SprayCan,
   'MOD-03': Grid3x3,
   'MOD-04': Waves,

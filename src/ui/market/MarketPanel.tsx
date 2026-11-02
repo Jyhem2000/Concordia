@@ -220,7 +220,7 @@ function MarketRow({ productId }: MarketRowProps) {
   return (
     <li
       onClick={openSheet}
-      className={`cursor-pointer rounded-md border border-l-4 border-line bg-raised/60 px-2 py-1.5 transition-colors hover:border-line-strong hover:bg-raised ${TIER_STYLES[product.tier].stripe}`}
+      className={`cursor-pointer rounded-md border border-l-4 border-line bg-raised/60 px-2 py-1.5 transition-colors ${TIER_STYLES[product.tier].stripe} ${TIER_STYLES[product.tier].hover}`}
     >
       <div className="flex items-start gap-2">
         <Thumb id={productId} tier={product.tier} />

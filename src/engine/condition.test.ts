@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { DAMAGED_FACTOR, FRESHNESS } from '../data/balance.ts'
 import { PRODUCTS } from '../data/products.ts'
 import { TAGS } from '../data/tags.ts'
-import { breakOnFlee, breakOnShock, crateValue, explodeFlammable, freshnessOf, paymentValue, removeRotten } from './condition.ts'
+import { breakOnFlee, breakOnShock, crateValue, freshnessOf, paymentValue, removeRotten } from './condition.ts'
 import { saleQuote } from './market.ts'
 import { createRng } from './rng.ts'
 import { sleep } from './routine.ts'
-import { defined, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG } from './test-helpers.ts'
+import { defined, gameAt, LOW_ROLL_RNG } from './test-helpers.ts'
 import type { CargoLot, ProductId } from './types.ts'
 
 const lot = (productId: ProductId, qty: number, boughtDay: number, damaged = false): CargoLot => ({
@@ -18,9 +18,8 @@ const lot = (productId: ProductId, qty: number, boughtDay: number, damaged = fal
   damaged,
 })
 
-/** Rng dont tous les tirages sont sous `p` (succès) ou au-dessus (échec) : une graine suffit pour un seul tirage */
+/** Rng dont tous les tirages sont sous `p` (succès) : une graine suffit pour un seul tirage */
 const allBelow = () => createRng(LOW_ROLL_RNG)
-const allAbove = () => createRng(HIGH_ROLL_RNG)
 
 describe('fraîcheur des périssables', () => {
   const meat = 'T3-01'
@@ -75,14 +74,5 @@ describe('casse et explosions', () => {
     const threshold = defined(TAGS['TAG-FRAGILE'].breakage).shockThreshold
     expect(breakOnShock([lot('T2-03', 1, 1)], allBelow(), threshold - 1).damaged).toBe(0)
     expect(breakOnShock([lot('T2-03', 1, 1)], allBelow(), threshold).damaged).toBe(1)
-  })
-
-  it('fait exploser les inflammables non masqués seulement', () => {
-    const explosion = defined(TAGS['TAG-FLAMMABLE'].explosion)
-    // T0-02 masque une caisse inflammable : seule la seconde peut exploser
-    const result = explodeFlammable([lot('T0-02', 1, 1), lot('T1-06', 2, 1)], allBelow())
-    expect(result.exploded).toBe(1)
-    expect(result.chassisLoss).toBe(explosion.chassisLoss)
-    expect(explodeFlammable([lot('T1-06', 2, 1)], allAbove()).exploded).toBe(0)
   })
 })

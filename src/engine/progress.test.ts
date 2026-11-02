@@ -56,13 +56,15 @@ describe('progression (chap. 1 et 4)', () => {
   it('vend le catalogue du garage en rayons : solvables, fichés, voie officielle', () => {
     const garage = gameAt(3, { districtId: 'D4', cash: 500_000 })
     expect(errorOf(garage, { type: 'buyModule', moduleId: 'MOD-04' })).toBeNull()
-    expect(errorOf(garage, { type: 'buyModule', moduleId: 'MOD-01' })).toBe('locked')
+    expect(errorOf(garage, { type: 'buyModule', moduleId: 'MOD-03' })).toBe('locked')
     expect(errorOf(garage, { type: 'buyModule', moduleId: 'MOD-09' })).toBe('locked')
+    expect(errorOf(garage, { type: 'buyModule', moduleId: 'MOD-01' })).toBe('locked')
     expect(errorOf(garage, { type: 'buyVehicle', vehicleId: 'VEH-02' })).toBe('locked')
     const solvent = { ...garage, initialDebtPaid: true, debt: 0 }
-    expect(errorOf(solvent, { type: 'buyModule', moduleId: 'MOD-01' })).toBeNull()
+    expect(errorOf(solvent, { type: 'buyModule', moduleId: 'MOD-03' })).toBeNull()
     const flagged = { ...garage, progress: { ...garage.progress, flagged: true } }
     expect(errorOf(flagged, { type: 'buyModule', moduleId: 'MOD-09' })).toBeNull()
+    expect(errorOf(flagged, { type: 'buyModule', moduleId: 'MOD-01' })).toBeNull()
   })
 
   it('réserve les services : Cassandre aux fichés, le Velvet-Silo aux présentables et fortunés', () => {

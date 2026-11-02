@@ -67,14 +67,11 @@ export default function InterceptionScreen() {
   // Dégâts et pertes annoncés avec l'équipement actuel (pare-buffles, transpondeur, plaque rotative)
   const fled = fleeConsequences(game)
   const mode = ejectMode(game)
-  // Risques propres à la soute pendant une fuite : casse des fragiles, explosion des inflammables (chap. 2)
+  // Risques propres à la soute pendant une fuite : casse des fragiles (chap. 2)
   const cargoRisks = keysOf(TAGS).flatMap((tag) => {
-    const { breakage, explosion } = TAGS[tag]
+    const { breakage } = TAGS[tag]
     if (!game.cargo.some((lot) => PRODUCTS[lot.productId].tags.includes(tag))) return []
-    return [
-      ...(breakage ? [t.interception.breakageRisk(t.tag[tag].name, pct(breakage.fleeChance), change(DAMAGED_FACTOR))] : []),
-      ...(explosion ? [t.interception.explosionRisk(t.tag[tag].name, pct(explosion.chance), pv(explosion.chassisLoss))] : []),
-    ]
+    return [...(breakage ? [t.interception.breakageRisk(t.tag[tag].name, pct(breakage.fleeChance), change(DAMAGED_FACTOR))] : [])]
   })
 
   return (

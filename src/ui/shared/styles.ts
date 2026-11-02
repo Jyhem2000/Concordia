@@ -52,14 +52,14 @@ export const TONE_CHIP: Record<Tone, string> = {
   wanted: 'border-wanted/40 bg-wanted/10 text-wanted',
 }
 
-/** Couleur de chaque tier (chap. 7) : texte, liseré gauche des lignes de produit, case d'image, emplacement de soute (plein ou caché) */
-/** Couleurs d'une caisse : texte, liseré, case d'image, emplacement de soute (plein ou caché) */
-export type CrateStyle = { text: string; stripe: string; tile: string; slot: string; hiddenSlot: string }
+/** Couleurs d'une caisse (chap. 7) : texte, liseré gauche des lignes de produit, fond teinté au survol, case d'image, emplacement de soute (plein ou caché) */
+export type CrateStyle = { text: string; stripe: string; hover: string; tile: string; slot: string; hiddenSlot: string }
 
 export const TIER_STYLES: Record<Tier, CrateStyle> = {
   0: {
     text: 'text-tier-0',
     stripe: 'border-l-tier-0',
+    hover: 'hover:bg-tier-0/10',
     tile: 'border-tier-0/50 bg-tier-0/10 text-tier-0',
     slot: 'bg-tier-0',
     hiddenSlot: 'border-tier-0 bg-tier-0/25',
@@ -67,6 +67,7 @@ export const TIER_STYLES: Record<Tier, CrateStyle> = {
   1: {
     text: 'text-tier-1',
     stripe: 'border-l-tier-1',
+    hover: 'hover:bg-tier-1/10',
     tile: 'border-tier-1/50 bg-tier-1/10 text-tier-1',
     slot: 'bg-tier-1',
     hiddenSlot: 'border-tier-1 bg-tier-1/25',
@@ -74,6 +75,7 @@ export const TIER_STYLES: Record<Tier, CrateStyle> = {
   2: {
     text: 'text-tier-2',
     stripe: 'border-l-tier-2',
+    hover: 'hover:bg-tier-2/10',
     tile: 'border-tier-2/50 bg-tier-2/10 text-tier-2',
     slot: 'bg-tier-2',
     hiddenSlot: 'border-tier-2 bg-tier-2/25',
@@ -81,6 +83,7 @@ export const TIER_STYLES: Record<Tier, CrateStyle> = {
   3: {
     text: 'text-tier-3',
     stripe: 'border-l-tier-3',
+    hover: 'hover:bg-tier-3/10',
     tile: 'border-tier-3/50 bg-tier-3/10 text-tier-3',
     slot: 'bg-tier-3',
     hiddenSlot: 'border-tier-3 bg-tier-3/25',
@@ -88,6 +91,7 @@ export const TIER_STYLES: Record<Tier, CrateStyle> = {
   4: {
     text: 'text-tier-4',
     stripe: 'border-l-tier-4',
+    hover: 'hover:bg-tier-4/10',
     tile: 'border-tier-4/50 bg-tier-4/10 text-tier-4',
     slot: 'bg-tier-4',
     hiddenSlot: 'border-tier-4 bg-tier-4/25',
@@ -112,6 +116,7 @@ export const FIELD = `rounded-md border border-line-strong bg-base px-2 py-1 tex
 export const SEALED_STYLE: CrateStyle = {
   text: 'text-ink-muted',
   stripe: 'border-l-ink-faint',
+  hover: 'hover:bg-raised',
   tile: 'border-line-strong bg-raised text-ink-muted',
   slot: 'bg-ink-faint',
   hiddenSlot: 'border-ink-faint bg-ink-faint/25',

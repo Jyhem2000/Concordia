@@ -1,28 +1,25 @@
 import { DAMAGED_FACTOR, FRESHNESS } from '../data/balance.ts'
 import { PRODUCTS } from '../data/products.ts'
 import { TAGS } from '../data/tags.ts'
-import { maskedQty, takeLots } from './cargo.ts'
-import { mountedEffect, vehicleOf } from './equipment.ts'
+import { takeLots } from './cargo.ts'
+import { vehicleOf } from './equipment.ts'
 import { keysOf } from './records.ts'
 import type { Rng } from './rng.ts'
 import type { CargoLot, CrateCount, FreshnessStage, GameState, TagId } from './types.ts'
 
 /*
- * État des caisses (chap. 2) : fraîcheur des périssables, casse des fragiles, explosion des
- * inflammables, et valeur d'une caisse donnée en paiement selon son état.
+ * État des caisses (chap. 2) : fraîcheur des produits au frais, casse des fragiles, et valeur
+ * d'une caisse donnée en paiement selon son état.
  */
 
 // ─── Fraîcheur ───
 
 export const isPerishable = (lot: CargoLot) => PRODUCTS[lot.productId].tags.some((tag) => TAGS[tag].perishable)
 
-/**
- * Âge effectif d'un lot : matins passés depuis l'achat, retardés par le caisson cryo puis comptés
- * un matin sur deux par la chaîne du froid (chap. 2 et 4)
- */
+/** Âge effectif d'un lot : matins passés depuis l'achat, comptés un matin sur deux par la chaîne du froid (chap. 2 et 4) */
 function ageOf(state: GameState, lot: CargoLot, day = state.day): number {
-  const delayed = Math.max(0, day - lot.boughtDay - (mountedEffect(state, 'freshnessDelay') ?? 0))
-  return vehicleOf(state).coldChain ? Math.ceil(delayed / 2) : delayed
+  const age = Math.max(0, day - lot.boughtDay)
+  return vehicleOf(state).coldChain ? Math.ceil(age / 2) : age
 }
 
 /** Matins avant qu'un lot périssable pourrisse (détruit à 06h00), ou null */
@@ -82,7 +79,7 @@ export function paymentValue(state: GameState, crates: readonly CrateCount[]): n
   return Math.round(total)
 }
 
-// ─── Casse et explosions ───
+// ─── Casse ───
 
 const tagsWith = (has: (tag: TagId) => boolean) => keysOf(TAGS).filter(has)
 
@@ -117,37 +114,4 @@ export function breakOnShock(cargo: readonly CargoLot[], rng: Rng, chassisLoss: 
     const breakage = TAGS[tag].breakage
     return breakage && chassisLoss >= breakage.shockThreshold ? breakage.shockChance : 0
   })
-}
-
-/**
- * Explosions en cas d'échec de fuite : chaque caisse inflammable non masquée peut exploser
- * (caisse détruite, châssis endommagé). Les caisses masquées sont protégées (chap. 2).
- */
-export function explodeFlammable(cargo: readonly CargoLot[], rng: Rng): { cargo: CargoLot[]; exploded: number; chassisLoss: number } {
-  let result: CargoLot[] = [...cargo]
-  let exploded = 0
-  let chassisLoss = 0
-  for (const tag of tagsWith((id) => TAGS[id].explosion !== undefined)) {
-    const explosion = TAGS[tag].explosion
-    if (!explosion) continue
-    // Les premières caisses du tag sont celles que le Tier 0 protège
-    let protectedLeft = maskedQty(result, tag)
-    const blown: CrateCount[] = []
-    for (const lot of result) {
-      if (!PRODUCTS[lot.productId].tags.includes(tag)) continue
-      for (let crate = 0; crate < lot.qty; crate++) {
-        if (protectedLeft > 0) {
-          protectedLeft--
-          continue
-        }
-        if (rng.chance(explosion.chance)) {
-          blown.push({ productId: lot.productId, qty: 1 })
-          exploded++
-          chassisLoss += explosion.chassisLoss
-        }
-      }
-    }
-    for (const { productId, qty } of blown) result = takeLots(result, productId, qty).remaining
-  }
-  return { cargo: result, exploded, chassisLoss }
 }

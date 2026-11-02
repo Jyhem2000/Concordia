@@ -28,6 +28,9 @@ import type {
 // Construite par code : un caractère insécable littéral serait invisible dans le source
 const NBSP = String.fromCharCode(0xa0)
 
+/** Énumération : « a », « a et b », « a, b et c » */
+const listOf = (items: readonly string[]) => new Intl.ListFormat('fr', { type: 'conjunction' }).format(items)
+
 type Named = { name: string }
 type NamedWithSubtitle = Named & { subtitle: string }
 type RoadTexts = { situation: string; a: string; b: string }
@@ -38,7 +41,7 @@ type ManualChapter = { title: string; paragraphs: string[]; list?: 'tags' | 'pla
 const KARMA_OPTIONS: Partial<Record<TagId, string>> = {
   'TAG-CULTURE': '« Cancel Wave Culturelle »',
   'TAG-GOURMET': '« Rumeur de Pénurie Alimentaire »',
-  'TAG-CHEMICAL': '« Scandale Chimique & Pharmaceutique »',
+  'TAG-BIO': '« Scandale Bio-Sanitaire »',
 }
 
 export const fr = {
@@ -124,10 +127,10 @@ export const fr = {
     'rule.bribe-base': 'Corruption : chance de base',
     'rule.offer': "Valeur de l'offre",
     'rule.connivance': 'Connivence',
-    'rule.freshness-extra': 'Extra-Frais',
+    'rule.freshness-extra': 'Extra-frais',
     'rule.freshness-standard': 'Fraîcheur standard',
-    'rule.freshness-gamey': 'Faisandé',
-    'rule.freshness-spoiled': 'Avarié',
+    'rule.freshness-gamey': 'Défraîchi',
+    'rule.freshness-spoiled': 'Dégradé',
     'rule.damaged': 'Caisse endommagée',
     'rule.bluff-failed': 'Bluff raté',
     'rule.drone-judges': 'Drones-Juges (incorruptibles)',
@@ -137,7 +140,7 @@ export const fr = {
     'rule.aftershock': 'Contrecoup',
     'rule.event-cap': 'Plafond des événements',
     'rule.repair': 'Réparation (par PV)',
-    'rule.refining': 'Affinage de Mama Rosa (Standard vendu Extra-Frais)',
+    'rule.refining': 'Affinage de Mama Rosa (Frais vendu Extra-frais)',
     'rule.worn': 'Chauffeur à bout',
     'rule.cantine': 'Tarif syndical',
   } satisfies Record<RuleSource, string>,
@@ -254,7 +257,7 @@ export const fr = {
     alerts: 'Alertes',
     worn: (below: number, penalty: string) =>
       `Chauffeur à bout (moins de ${below} PV) : bluff et fuite à −${penalty}. Le relais et la Morgue soignent.`,
-    rotsTomorrow: (qty: number, product: string) => `${qty} ${product} pourri${qty > 1 ? 'ssent' : 't'} demain matin`,
+    rotsTomorrow: (qty: number, product: string) => `${qty} × ${product} perdu${qty > 1 ? 's' : ''} demain matin`,
     damaged: (qty: number, product: string) => `${qty} ${product} abîmée${qty > 1 ? 's' : ''}`,
     fuelLow: (fuel: number, longest: number) =>
       `Synthanol bas : ${fuel} ration${fuel > 1 ? 's' : ''}, le trajet le plus long d'ici en coûte ${longest}`,
@@ -524,9 +527,10 @@ export const fr = {
     dismiss: 'Compris',
     sleep: (icc: string, health: number) => `Nuit au relais : ICC ${icc}, Santé +${health}`,
     custody: (health: number) => `Nuit en caisson blanc, hymnes à 90 décibels : −${health} PV.`,
-    rotten: (crates: number) => `${crates} caisse${crates > 1 ? 's' : ''} pourrie${crates > 1 ? 's' : ''}, détruite${crates > 1 ? 's' : ''} à 06h00.`,
-    heat: (product: string, melted: number, aged: number, rotten: number) =>
-      `Canicule : ${melted} × ${product} fondu en soute, ${aged} caisse${aged > 1 ? 's' : ''} périssable${aged > 1 ? 's' : ''} vieillie${aged > 1 ? 's' : ''}, ${rotten} pourrie${rotten > 1 ? 's' : ''} et détruite${rotten > 1 ? 's' : ''}.`,
+    rotten: (crates: number) =>
+      `${crates} caisse${crates > 1 ? 's' : ''} perdue${crates > 1 ? 's' : ''} (trop dégradée${crates > 1 ? 's' : ''}), détruite${crates > 1 ? 's' : ''} à 06h00.`,
+    heat: (products: readonly string[], melted: number, aged: number, rotten: number) =>
+      `Canicule : ${melted} caisse${melted > 1 ? 's' : ''} fondue${melted > 1 ? 's' : ''} en soute (${listOf(products)}), ${aged} caisse${aged > 1 ? 's' : ''} au frais vieillie${aged > 1 ? 's' : ''}, ${rotten} perdue${rotten > 1 ? 's' : ''} et détruite${rotten > 1 ? 's' : ''}.`,
     salary: (name: string, amount: string) => `Salaire de ${name} : ${amount}.`,
     salaryInKind: (name: string, amount: string, product: string) => `Salaire de ${name} : ${amount} et 1 × ${product}.`,
     salaryCell: (name: string) => `${name} reste à son poste pendant votre garde à vue (pas de salaire).`,
@@ -587,8 +591,8 @@ export const fr = {
       repair: (factor: string) => `Réparations du garage ${factor}`,
       grounded: 'Drones cloués au sol : aucun contrôle volant',
       unfilmed: "Galeries non filmées : un trajet de nuit hors mission n'ajoute pas de Fiche S",
-      heat: (product: string, days: number, chassis: number, health: number) =>
-        `À 06h00 : ${product} fond en soute, les autres périssables vieillissent de ${days} jours. Trajets de jour : châssis −${chassis} (sauf refroidissement), Santé −${health}`,
+      heat: (products: readonly string[], days: number, chassis: number, health: number) =>
+        `À 06h00 : ${listOf(products)} ${products.length > 1 ? 'fondent' : 'fond'} en soute, les autres produits au frais vieillissent de ${days} jours. Trajets de jour : châssis −${chassis} (sauf refroidissement), Santé −${health}`,
       tagged: (tag: string) => `tout ${tag}`,
       tiers: (tiers: string) => `tout Tier ${tiers}`,
       scope: (districts: string) => ` — ${districts}`,
@@ -684,7 +688,7 @@ export const fr = {
     flee: (bonus: string) => `fuite ${bonus}`,
     forgery: (bonus: string) => `falsification de la Loterie ${bonus}`,
     knowHow: (factor: string) => `produits Gourmet vendus ${factor}`,
-    refining: 'affinage : Gourmet Standard vendu au prix Extra-Frais',
+    refining: 'affinage : Gourmet Frais vendu au prix Extra-frais',
     quota: (factor: string) => `quotas des produits Gourmet ${factor}`,
     inKindRule: (amount: string, tier: number) => `salaire réduit à ${amount} contre une caisse addictive de Tier ${tier} ou plus`,
   },
@@ -793,13 +797,13 @@ export const fr = {
     ecoEngine: 'Consomme autant de nuit que de jour.',
     camouflage: (factor: string, share: string) =>
       `Camouflage corporatif : risque ${factor} si le Légal fait au moins ${share} de la soute (soute vide comprise).`,
-    coldChain: "Chaîne du froid : les périssables ne perdent de la fraîcheur qu'un matin sur deux.",
+    coldChain: "Chaîne du froid : les produits au frais ne perdent de la fraîcheur qu'un matin sur deux.",
     transponder: (districts: string, bonus: string, icc: string) =>
       `Transpondeur à ${districts} : fuite ${bonus}, aucun dégât de châssis au succès, perte d'ICC ${icc}.`,
     heavy: (toll: string, crusher: string, risk: string) =>
       `Monstre blindé : péage des milices ${toll}, passage forcé sans dégât, broyeur acide partout (${crusher}, sans dégât). Risque de contrôle ${risk}.`,
-    freshnessDelay: (days: number) => `Cycle de fraîcheur retardé de ${days} jour${days > 1 ? 's' : ''}.`,
     heatProof: 'Immunise soute et moteur contre la canicule.',
+    drivingAssist: (bonus: string) => `Fuite ${bonus} ; le chauffeur à bout ne pénalise plus la fuite.`,
     tagOff: (tag: string) => `Annule la détection ${tag}.`,
     tagFactor: (tag: string, factor: string) => `Malus ${tag} ${factor} (risque et bluff).`,
     smoothRide: "Fragiles immunisés à la casse ; pas d'usure de châssis la nuit.",
@@ -892,9 +896,9 @@ export const fr = {
     averageCost: (cost: string) => `acheté ${cost}/u`,
     trend: (change: string) => `${change} depuis hier`,
     condition: 'État',
-    freshness: { extra: 'Extra-Frais', standard: 'Standard', gamey: 'Faisandé', spoiled: 'Avarié' },
+    freshness: { extra: 'Extra-frais', standard: 'Frais', gamey: 'Défraîchi', spoiled: 'Dégradé' },
     damaged: 'abîmée',
-    rotsIn: (days: number) => (days <= 1 ? 'pourrit demain matin' : `pourrit dans ${days} jours`),
+    rotsIn: (days: number) => (days <= 1 ? 'perdu demain matin' : `perdu dans ${days} jours`),
     use: 'Utiliser',
     iccRestore: (icc: number) => `+${icc} % d'ICC, hors plafond, une seule fois par partie`,
     margin: 'Marge',
@@ -945,12 +949,9 @@ export const fr = {
       `+${risk} de risque de contrôle × sa part dans la soute, à chaque trajet (sauf ${offGrid}${doubled ? ` ; doublé à ${doubled}` : ''})`,
     detectedRisk: (risk: string, districts: string) => `+${risk} de risque de contrôle × sa part dans la soute, à ${districts}`,
     bluffMalus: (malus: string, doubled: string) => `−${malus} au bluff × sa part dans la soute${doubled ? ` (doublé à ${doubled})` : ''}`,
-    perishable: (rottenAge: number) =>
-      `Extra-Frais le jour de l'achat jusqu'à 20h00, puis Standard, Faisandé, Avarié ; pourrit le ${rottenAge}e matin`,
+    perishable: (rottenAge: number) => `Extra-frais le jour de l'achat jusqu'à 20h00, puis Frais, Défraîchi, Dégradé ; perdu le ${rottenAge}e matin`,
     breakage: (flee: string, shock: string, threshold: number, factor: string) =>
       `chaque caisse peut casser (${flee} en fuite réussie, ${shock} à chaque choc de ${threshold} PV de châssis ou plus) ; abîmée, elle vaut ${factor}`,
-    explosion: (chance: string, chassis: number) => `si une fuite échoue, chaque caisse non masquée peut exploser (${chance}, châssis −${chassis})`,
-    drop: (bonus: string) => `largage offensif en fuite (route en feu) : ${bonus} de chance de fuite pour 1 caisse`,
     bribeGift: "s'offre à un agent corrompu, avec la connivence",
     masks: (tag: string) => `Chaque caisse masque 1 caisse ${tag} (moins de risque, bonus au bluff)`,
     bluffAid: (crates: number, effect: string) => `Au bluff, dès ${crates} caisse${crates > 1 ? 's' : ''} en soute : ${effect}, sans rien donner`,
@@ -1042,21 +1043,17 @@ export const fr = {
     cancelsSmell: "annule le malus d'odeur",
     bluffAid: (product: string, effect: string) => `${product} (${effect})`,
     bluffAids: (aids: string) => `Aides en soute, déjà comptées : ${aids}`,
-    drop: 'Largage offensif (une caisse inflammable jetée derrière vous : route en feu, poursuivants semés)',
     searchInfo:
       "Utile quand la soute est légale (simple formalité, gain d'ICC), quand l'illégal tient au double fond, ou quand un échec des autres options coûterait plus cher (amende relevée, garde à vue, châssis).",
     bluffInfo:
       "Une fausse déclaration : elle passe mieux avec une soute couverte de Tier 0, sans odeur, dans un district peu gardé. Les aides en soute comptent d'elles-mêmes.",
     bribeInfo:
       "Une offre en Cash-Puce et en caisses de Luxe. Elle est perdue même en cas d'échec ; plus elle dépasse le tarif standard, plus la chance monte.",
-    fleeInfo: 'Pied au plancher : la cargaison est sauvée si ça passe, mais la Fiche S monte et le châssis souffre.',
+    fleeInfo:
+      "Pied au plancher : la cargaison est sauvée si ça passe, mais la Fiche S monte et le châssis souffre. La chance tient à l'équipement (assistance de conduite, pare-buffles, transpondeur, Glitch) et au dopage, jamais au reste de la soute ; la Fiche S et la fatigue la font baisser.",
     bribeSuccess: "Succès : l'agent coupe sa caméra-piéton, tout passe, ICC inchangé.",
     breakageRisk: (tag: string, chance: string, factor: string) =>
       `En cas de succès, chaque caisse ${tag} peut casser (${chance}) : elle se vendra et paiera ${factor}.`,
-    explosionRisk: (tag: string, chance: string, chassis: string) =>
-      `En cas d'échec, chaque caisse ${tag} non masquée peut exploser (${chance}, châssis ${chassis}).`,
-    noDrop: 'Aucun',
-    dropOption: (product: string, bonus: string) => `Jeter 1 × ${product} : ${bonus} de chance de fuite`,
     dope: (product: string, bonus: string, chassis: number, icc: number) =>
       `Dopage : boire 1 × ${product} (${bonus}, châssis −${chassis}, ICC −${icc} % sauf face aux milices ; une fois par jour)`,
     tollInKind: (crates: string, value: string) => `Les miliciens prendraient : ${crates} (valeur ${value}, sans rendre la monnaie).`,
@@ -1096,7 +1093,6 @@ export const fr = {
     chassis: 'Châssis',
     wanted: 'Fiche S',
     damaged: 'Caisses endommagées',
-    exploded: 'Caisses explosées',
     jammerSeized: "Brouilleur de drones découvert et saisi : sabotage d'infrastructure.",
     compartmentKept: (crates: number) => `Double fond non trouvé : ${crates} caisse${crates > 1 ? 's' : ''} sauvée${crates > 1 ? 's' : ''}.`,
     compartmentFound: 'Double fond découvert : tout est confisqué, ICC en moins pour dissimulation.',
@@ -1425,7 +1421,7 @@ export const fr = {
       {
         title: 'Une journée',
         paragraphs: [
-          "À 06h00, la routine : salaire de l'équipier, intérêts, collecte de Viktor les jours prévus, fraîcheur des périssables, événements du jour, cours et boutiques. Le briefing d'En bref résume ce qui a changé.",
+          "À 06h00, la routine : salaire de l'équipier, intérêts, collecte de Viktor les jours prévus, fraîcheur des produits au frais, événements du jour, cours et boutiques. Le briefing d'En bref résume ce qui a changé.",
           'De jour : acheter, vendre, faire le plein, passer aux lieux spéciaux du district, accepter la livraison officielle du DSC, et 1 trajet. On peut aussi attendre le soir sur place.',
           "À 20h00, le couvre-feu : dormir au relais routier (Santé et ICC), bivouaquer à Rust Valley, ou partir en tournée de nuit depuis la carte. Sur mission du DSC, le trajet est couvert et payé ; hors mission, il est risqué et ajoute un niveau de Fiche S s'il passe. Une tournée épuise : pas de seconde nuit d'affilée sans Tcherno-Bull.",
           'Garde à vue, panne ou siphonage font perdre une demi-journée : on passe directement au soir.',
@@ -1436,8 +1432,8 @@ export const fr = {
         paragraphs: [
           "Chaque district a sa liste Production (pas cher) et sa Forte demande (bien payé, jamais en boutique là-bas). Le cours du jour se lit sur place ; ailleurs, tu n'as que ta mémoire du dernier passage, et la tendance publique du Fil.",
           "Rachat au cours : un district ne rachète qu'un nombre limité de caisses de chaque produit au plein prix, et sa demande se reconstitue chaque matin. Au-delà, le prix s'effondre et Aeterna repère un pic suspect : le risque y monte le lendemain.",
-          "Une caisse revendue là où elle a été achetée, sans avoir voyagé, se vend mal. Les périssables perdent leur prime d'Extra-Frais à 20h00, puis se dégradent jusqu'à pourrir.",
-          "La nuit, le marché de rue reste ouvert : le Festif s'y vend mieux, surtout à l'after du couvre-feu, le Diurne moins bien.",
+          "Une caisse revendue là où elle a été achetée, sans avoir voyagé, se vend mal. Les produits au frais perdent leur prime d'Extra-frais à 20h00, puis se dégradent jusqu'à être perdus.",
+          "La nuit, le marché de rue reste ouvert : le Festif s'y vend mieux, surtout à l'after du couvre-feu.",
         ],
       },
       {
@@ -1450,7 +1446,7 @@ export const fr = {
         paragraphs: [
           "Le risque d'un trajet s'affiche avant le départ, ligne par ligne : district, ICC, tags de la soute, nuit, districts traversés, Fiche S. Les caisses légales le diluent.",
           "Un barrage fixe se voit de loin : toutes les options sont ouvertes. Un contrôle volant (un drone t'a repéré) ne laisse ni fuir ni éjecter : restent la fouille, le bluff et la corruption.",
-          "Fouille : formalité si la soute est légale, sinon saisie, amende et perte d'ICC, garde à vue pour le haut tier. Bluff : le Tier 0 et le masquage aident, l'odeur trahit. Corruption : du cash, et une caisse de Luxe pour la connivence. Fuite : sauve la soute, coûte du châssis et un niveau de Fiche S. Éjection : larguer l'illégal avant le barrage.",
+          "Fouille : formalité si la soute est légale, sinon saisie, amende et perte d'ICC, garde à vue pour le haut tier. Bluff : le Tier 0 et le masquage aident, l'odeur trahit. Corruption : du cash, et une caisse de Luxe pour la connivence. Fuite : sauve la soute, coûte du châssis et un niveau de Fiche S ; elle tient à l'équipement (assistance de conduite, pare-buffles, transpondeur) et au dopage, pas au reste de la soute. Éjection : larguer l'illégal avant le barrage.",
           'Le double fond cache quelques caisses illégales : à la fouille, un second jet décide si les agents le trouvent.',
           'À Rust Valley, pas de BRC mais des milices : payer leur péage, forcer le passage ou refuser.',
         ],
@@ -1501,16 +1497,14 @@ export const fr = {
     ],
     tags: {
       'TAG-LEGAL': 'Ne trahit rien : dilue le risque de la soute, aide le bluff, et chaque caisse masque une caisse illégale.',
-      'TAG-PERISHABLE': "Se dégrade de jour en jour : prime le jour de l'achat, puis décote, puis pourriture.",
+      'TAG-PERISHABLE': "Doit rester au frais : prime le jour de l'achat, puis décote jusqu'à être perdu. La canicule l'abîme.",
       'TAG-FRAGILE': 'Peut casser en fuite et aux chocs : une caisse endommagée se vend moins cher.',
       'TAG-ADDICTIVE': 'Clientèle captive : le rachat au cours se reconstitue plus vite.',
       'TAG-ODOROUS': 'Attire les contrôles en route et gêne le bluff ; doublé chez les chiens-robots d’Olympus.',
       'TAG-CULTURE': 'Dénoncé par les Voisins-Vigiles de Pastel-Heights.',
       'TAG-TECH': 'Repéré par les scanners de la Flèche de Verre et d’Olympus.',
-      'TAG-CHEMICAL': 'Flairé par les bio-scanners de Panacea.',
-      'TAG-FLAMMABLE': 'Explose quand une fuite échoue ; se largue en feu derrière soi pour semer la BRC.',
+      'TAG-BIO': 'Flairé par les bio-scanners de Panacea.',
       'TAG-FESTIVE': 'Se vend mieux la nuit, et bien mieux à l’after du couvre-feu.',
-      'TAG-DIURNAL': 'Se vend moins bien la nuit : ses clients dorment.',
       'TAG-LUXURY': 'Seul cadeau qu’un agent accepte en corruption, avec la connivence en prime.',
       'TAG-GOURMET': 'La vraie nourriture d’avant : Mama Rosa la vend plus cher.',
     } satisfies Record<TagId, string>,
@@ -1527,6 +1521,19 @@ export const fr = {
     } satisfies Record<LocationId, string>,
   },
 
+  // Page de contrôle des images, hors jeu (`?debug=true`, chap. 7)
+  debug: {
+    title: 'Contrôle des images',
+    intro:
+      "Toutes les données qui peuvent recevoir une image, pour vérifier qu'elles sont présentes, cohérentes et de même taille. Le cadre en pointillés montre les bords réels du fichier.",
+    summary: (present: number, total: number) => `${present} images sur ${total}`,
+    size: (width: number, height: number) => `${width} × ${height} px`,
+    missing: 'Manquante',
+    odd: 'Taille différente',
+    sections: { products: 'Produits', vehicles: 'Véhicules', modules: 'Modules', crew: 'Équipiers' },
+    orphans: 'Fichiers sans donnée',
+  },
+
   // ─── Données de jeu (chap. 2 à 6) ───
 
   tier: {
@@ -1539,27 +1546,31 @@ export const fr = {
 
   tag: {
     'TAG-LEGAL': { name: 'Légal' },
-    'TAG-PERISHABLE': { name: 'Périssable' },
+    'TAG-PERISHABLE': { name: 'Au frais' },
     'TAG-FRAGILE': { name: 'Fragile' },
     'TAG-ADDICTIVE': { name: 'Addictif' },
     'TAG-ODOROUS': { name: 'Odorant' },
     'TAG-CULTURE': { name: 'Culture' },
     'TAG-TECH': { name: 'Tech' },
-    'TAG-CHEMICAL': { name: 'Chimique' },
-    'TAG-FLAMMABLE': { name: 'Inflammable' },
+    'TAG-BIO': { name: 'Bio-signature' },
     'TAG-LUXURY': { name: 'Luxe' },
     'TAG-FESTIVE': { name: 'Festif' },
-    'TAG-DIURNAL': { name: 'Diurne' },
     'TAG-GOURMET': { name: 'Gourmet' },
   } satisfies Record<TagId, Named>,
 
   product: {
     'T0-01': { name: 'Bio-Briques « Nutri-Standard »', lore: 'Soja et insectes compressés, saveur neutre garantie par décret.' },
-    'T0-02': { name: 'Eau Minérale Déminéralisée', lore: "Rien dedans, et c'est bien là sa promesse." },
+    'T0-02': {
+      name: 'Eau Minérale Déminéralisée',
+      lore: "Rien dedans, et c'est bien là sa promesse. Empilée autour de l'électronique, elle boit les ondes des scanners.",
+    },
     'T0-03': { name: 'Antidépresseurs « Sourire+ »', lore: "La bonne humeur d'État, en comprimés doux, sur ordonnance automatique." },
     'T0-04': { name: "Manuels d'Auto-Censure", lore: "Le guide officiel du Citoyen qui se corrige avant qu'on le corrige." },
     'T0-05': { name: 'Caisses scellées du DSC', lore: 'Contenu inconnu, plombs intacts : on livre, on ne regarde pas.' },
-    'T1-01': { name: 'Sodas « Mega-Cola »', lore: 'Au vrai sucre, celui que le Comité de Pureté traque dans les poubelles.' },
+    'T1-01': {
+      name: 'Œufs en Chocolat Fourrés',
+      lore: 'Vrai cacao, vrai sucre, coquille qui casse pour un rien : le Comité de Pureté les cherche jusque dans les jardins.',
+    },
     'T1-02': { name: "Grains d'Arabica Torréfiés", lore: 'Une odeur qui trahit à trois rues : le café réveille, et Aeterna déteste ça.' },
     'T1-03': { name: 'Beurre de Baratte Demi-Sel', lore: 'Gras, salé, interdit : le cholestérol en motte.' },
     'T1-04': { name: 'Nouilles « MSG-621 »', lore: 'Instantanées, hyper-salées, exhausteur de goût dopé : la consolation des dortoirs.' },
@@ -1634,7 +1645,7 @@ export const fr = {
   } satisfies Record<VehicleId, Named>,
 
   module: {
-    'MOD-01': { name: "Caisson Cryo à l'Azote Volé" },
+    'MOD-01': { name: 'Assistance de Conduite « Esquive »' },
     'MOD-02': { name: "Diffuseur d'Échappement « Pin Sylvestre & Javel »" },
     'MOD-03': { name: 'Doublure en Plomb & Cage de Faraday' },
     'MOD-04': { name: 'Suspensions & Silentblocs « Velours »' },

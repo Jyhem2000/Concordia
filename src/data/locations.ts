@@ -17,12 +17,12 @@ export const KARMA = {
   costStep: 2_000,
   cooldownDays: 5,
   factor: 1.75,
-  tags: ['TAG-CULTURE', 'TAG-GOURMET', 'TAG-CHEMICAL'] as readonly TagId[],
+  tags: ['TAG-CULTURE', 'TAG-GOURMET', 'TAG-BIO'] as readonly TagId[],
 }
 
 /** Morgue du Dr. K. : laissez-passer, chirurgie, certificat */
 export const MORGUE = {
-  pass: { cost: 1_200, days: 5, district: 'D3' as DistrictId, tag: 'TAG-CHEMICAL' as TagId, cancels: 'EVT-G02' as GlobalEventId },
+  pass: { cost: 1_200, days: 5, district: 'D3' as DistrictId, tag: 'TAG-BIO' as TagId, cancels: 'EVT-G02' as GlobalEventId },
   surgery: { cost: 3_000, cashShare: 0.05, cooldownDays: 5, health: 35, healthCap: 85 },
   certificate: { cost: 3_500, costStep: 1_750, cooldownDays: 7, icc: 10 },
 }
@@ -61,7 +61,7 @@ export const SERVICE_REQUIREMENTS: Readonly<Partial<Record<ServiceKey, readonly 
     { kind: 'wealth', amount: 20_000 },
   ],
   certificate: [{ kind: 'debtPaid' }],
-  pass: [{ kind: 'tagSales', tag: 'TAG-CHEMICAL', count: 10 }],
+  pass: [{ kind: 'tagSales', tag: 'TAG-BIO', count: 10 }],
   prophecy: [{ kind: 'wanted' }],
   forgery: [{ kind: 'wealth', amount: 50_000 }],
   auction: [

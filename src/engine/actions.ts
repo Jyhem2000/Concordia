@@ -24,7 +24,7 @@ import {
   eatMeal,
   type MorgueService,
 } from './services.ts'
-import { buyModule, buyVehicle, mountedEffect, mountModule, repair } from './equipment.ts'
+import { buyModule, buyVehicle, mountedEffect, mountModule, repair, vehicleOf } from './equipment.ts'
 import { arrive, drawRoadEvent, heatWave } from './events.ts'
 import { changeHealth } from './gauges.ts'
 import { fuelPriceBreakdown, quote, saleQuote } from './market.ts'
@@ -327,9 +327,9 @@ function travel(state: GameState, to: DistrictId): ActionResult {
 
   // Usure du trajet : galeries de nuit, ou canicule de jour ; des caisses peuvent refroidir le moteur (chap. 1, 2 et 6)
   const heat = state.phase === 'day' ? heatWave(state) : null
-  // Les suspensions annulent l'usure de nuit, le caisson cryo celle de la canicule
+  // Les suspensions annulent l'usure de nuit, le fourgon frigorifique celle de la canicule
   const nightWear = mountedEffect(state, 'smoothRide') ? 0 : NIGHT_TRIP_CHASSIS_WEAR
-  const heatWear = mountedEffect(state, 'heatProof') ? 0 : (heat?.dayTripChassis ?? 0)
+  const heatWear = vehicleOf(state).heatProof ? 0 : (heat?.dayTripChassis ?? 0)
   const wear = tripWear(state, state.phase === 'night' ? nightWear : heatWear)
   const stroke = heat ? changeHealth(state, -heat.dayTripHealth, 1) : null
   const arrived: GameState = {

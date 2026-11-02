@@ -8,44 +8,41 @@
 | ID | Libellé | Règles |
 | :--- | :--- | :--- |
 | `[TAG-LEGAL]` | Légal | Ne peut jamais devenir illégal. Un produit Légal ne porte **aucun autre tag**. **Couverture :** risque retiré × part de Légal dans la cargaison (valeurs des tags : [`tags.ts`](../src/data/tags.ts)). Chaque caisse **masque 1 caisse** du tag indiqué dans sa fiche (voir *Masquage*). Interactions : `[VEH-02]`. Sans effet en `[D4]`. |
-| `[TAG-PERISHABLE]` | Périssable | **Cycle de fraîcheur** (ci-dessous). Modificateurs : `[MOD-01]`, `[VEH-03]`, `[EVT-G01]` ; l'affinage de `[CREW-03]` (périssables Gourmet seulement). |
-| `[TAG-GOURMET]` | Gourmet | La vraie nourriture d'avant, celle qu'une cheffe étoilée sait vendre : beurre, charcuterie, curry, miel, roquefort, viande rouge. Pas les biotechnologies (`[T4-05]` est périssable, mais pas Gourmet). Modificateurs : `[CREW-03]` (savoir-faire, affinage des Gourmet périssables, quotas), `[LOC-D2-1]`. |
+| `[TAG-PERISHABLE]` | Au frais | Tout ce qui doit rester au frais, pour se conserver ou pour ne pas fondre : **cycle de fraîcheur** (ci-dessous). Modificateurs : `[VEH-03]`, `[EVT-G01]` (qui fait fondre le beurre et le chocolat) ; l'affinage de `[CREW-03]` (produits au frais Gourmet seulement). |
+| `[TAG-GOURMET]` | Gourmet | La vraie nourriture d'avant, celle qu'une cheffe étoilée sait vendre : beurre, charcuterie, curry, miel, roquefort, viande rouge. Pas les biotechnologies (`[T4-05]` est au frais, mais pas Gourmet). Modificateurs : `[CREW-03]` (savoir-faire, affinage des Gourmet au frais, quotas), `[LOC-D2-1]`. |
 | `[TAG-FRAGILE]` | Fragile | Lors d'une **fuite réussie** (ou d'un passage forcé chez les milices), chaque caisse intacte peut être endommagée. **Chocs :** hors fuite, à chaque perte de châssis d'au moins un seuil en une fois (aléas, refus du racket, dopage, éjection…), chaque caisse intacte peut aussi être endommagée. Chances et seuil : `breakage` dans [`tags.ts`](../src/data/tags.ts). Une caisse endommagée le reste, forme un lot à part et se vend comme elle paie à prix réduit (`DAMAGED_FACTOR` dans [`balance.ts`](../src/data/balance.ts)). Immunité : `[MOD-04]`. |
 | `[TAG-ADDICTIVE]` | Addictif | **Clientèle captive :** les accros reviennent chaque matin, le rachat au cours se reconstitue plus vite (`demandRefill` dans [`tags.ts`](../src/data/tags.ts) ; *Quota de rachat*). Interactions : `[CREW-01]` (salaire en nature), `[EVT-D3-02]`, `[EVT-R01]`. |
 | `[TAG-ODOROUS]` | Odorant | **Au trajet :** risque ajouté × part odorante de la cargaison. **Au contrôle :** chance retirée au bluff × part odorante (*malus d'odeur*), annulable par `[T2-01]`. Modificateurs (sur les deux malus) : `[D6]`, `[EVT-G04]`, `[MOD-02]`, `[EVT-D1-01]` ; les doublements de `[D6]` et `[EVT-G04]` ne se cumulent pas. |
 | `[TAG-CULTURE]` | Culture | Cible idéologique : **risque ajouté × part culturelle** de la cargaison dans les districts à **délation idéologique** (chap. 3). Modificateur : `[EVT-D2-01]`. Interaction : `[LOC-D2-1]`. |
-| `[TAG-TECH]` | Tech | **risque ajouté × part Tech** de la cargaison dans les districts équipés de **scanners électromagnétiques** (chap. 3). Modificateurs : `[MOD-03]`, `[EVT-G03]`, `[EVT-D5-03]`. |
-| `[TAG-CHEMICAL]` | Chimique | Substances que flairent les **bio-scanners** : additifs, pharmacie, biotechnologies. **Risque ajouté × part chimique** de la cargaison dans les districts qui en sont équipés (chap. 3). Modificateur : `[LOC-D3-1]`. Interaction : `[LOC-D2-1]`. |
-| `[TAG-FESTIVE]` | Festif | **Vente de nuit :** pendant le couvre-feu, se vend mieux (la vie nocturne réclame ses vices : sodas et boissons énergisantes, alcool, cigares, musique interdite, charcuterie d'apéro, et la vraie viande du buffet). À l'**after du couvre-feu** (chap. 1), beaucoup mieux. Coefficients : `nightSale` dans [`tags.ts`](../src/data/tags.ts), `AFTER` dans [`balance.ts`](../src/data/balance.ts) (chap. 2). |
-| `[TAG-DIURNAL]` | Diurne | **Vente de nuit :** pendant le couvre-feu, se vend moins bien (excitants de bureau : leurs clients dorment). Coefficient : `nightSale` dans [`tags.ts`](../src/data/tags.ts). |
-| `[TAG-FLAMMABLE]` | Inflammable | L'huile et l'alcool fort : un danger et une arme. **Explosion :** en cas d'échec de fuite (passage forcé chez les milices compris : c'est le véhicule qui part en tête-à-queue), chaque caisse **non masquée** peut exploser : caisse détruite, châssis endommagé (`explosion` dans [`tags.ts`](../src/data/tags.ts)). Les explosions ont lieu avant la sanction. **Largage offensif** en fuite, seul tag qui le permet : déverser et enflammer 1 caisse derrière soi (route glissante en feu), chance de fuite en plus (`fleeDropBonus`). |
+| `[TAG-TECH]` | Tech | **risque ajouté × part Tech** de la cargaison dans les districts équipés de **scanners électromagnétiques** (chap. 3). Modificateurs : `[MOD-03]` (annulation), masquage par `[T0-02]`, `[EVT-G03]`, `[EVT-D5-03]`. |
+| `[TAG-BIO]` | Bio-signature | La trace moléculaire que flairent les **bio-scanners** : additifs, pharmacie, biotechnologies, semences vivantes (l'ADN non breveté). **Risque ajouté × part Bio-signature** de la cargaison dans les districts qui en sont équipés (chap. 3). Modificateur : `[LOC-D3-1]`. Interaction : `[LOC-D2-1]`. |
+| `[TAG-FESTIVE]` | Festif | **Vente de nuit :** pendant le couvre-feu, se vend mieux (la vie nocturne réclame ses vices : confiseries et boissons énergisantes, alcool, cigares, musique interdite, charcuterie d'apéro, et la vraie viande du buffet). À l'**after du couvre-feu** (chap. 1), beaucoup mieux. Coefficients : `nightSale` dans [`tags.ts`](../src/data/tags.ts), `AFTER` dans [`balance.ts`](../src/data/balance.ts) (chap. 2). |
 | `[TAG-LUXURY]` | Luxe | Ce qu'un agent corrompu accepte en nature : café, cigares, whisky, roquefort, viande rouge, œuvres d'art. **Seul le Luxe s'offre à la corruption**, avec le Cash-Puce, et une seule caisse apporte la **connivence** (chap. 5). |
 
 ### Masquage 1:1 (partiel)
-Chaque caisse de Tier 0 masque **1 caisse** du tag associé à ce produit (champ `masks`). Le masquage se compte **tag par tag** : pour un tag, le nombre de caisses masquées est le plus petit entre les caisses de Tier 0 qui masquent ce tag et les caisses qui le portent. Une caisse ne peut être masquée qu'une fois **par tag** : une caisse à deux tags masquables (ex. `[T1-06]`, odorante et inflammable) a besoin d'un Tier 0 pour chacun. Une caisse masquée :
-* **compte pour une fraction** (`MASKED_CRATE_WEIGHT` dans [`balance.ts`](../src/data/balance.ts)) dans la part de son tag pour la détection (odeur, culture, chimique) : le masquage réduit le risque sans jamais l'annuler ;
-* compte dans le bonus de bluff (chap. 5), qui compte les **masquages effectifs**, c'est-à-dire les caisses de Tier 0 qui masquent réellement une caisse ;
-* est protégée de l'explosion `[TAG-FLAMMABLE]`.
+Chaque caisse de Tier 0 masque **1 caisse** du tag associé à ce produit (champ `masks`). Le masquage se compte **tag par tag** : pour un tag, le nombre de caisses masquées est le plus petit entre les caisses de Tier 0 qui masquent ce tag et les caisses qui le portent. Une caisse ne peut être masquée qu'une fois **par tag** : une caisse qui porterait deux tags masquables aurait besoin d'un Tier 0 pour chacun. Une caisse masquée :
+* **compte pour une fraction** (`MASKED_CRATE_WEIGHT` dans [`balance.ts`](../src/data/balance.ts)) dans la part de son tag pour la détection (odeur, culture, Bio-signature) : le masquage réduit le risque sans jamais l'annuler ;
+* compte dans le bonus de bluff (chap. 5), qui compte les **masquages effectifs**, c'est-à-dire les caisses de Tier 0 qui masquent réellement une caisse.
 
-`[TAG-PERISHABLE]`, `[TAG-TECH]` et les autres tags sans colonne de masquage ne se masquent pas (pour la Tech : `[MOD-03]`).
+`[TAG-PERISHABLE]` et les autres tags sans colonne de masquage ne se masquent pas. Pour la Tech, le masquage par l'eau réduit le risque ; seul `[MOD-03]` l'annule.
 
 ### Cycle de fraîcheur
-Tout lot acheté démarre **Extra-Frais**. L'Extra-Frais est une **prime de livraison express** : elle ne survit pas à 20h00 (tournée de nuit, demi-journée perdue, sortie de garde à vue). Coefficients et âges : `FRESHNESS` dans [`balance.ts`](../src/data/balance.ts) ; le coefficient de fraîcheur entre dans le Savoir-Faire (chap. 2).
+Tout lot acheté démarre **Extra-frais**. L'Extra-frais est une **prime de livraison express** : elle ne survit pas à 20h00 (tournée de nuit, demi-journée perdue, sortie de garde à vue). Coefficients et âges : `FRESHNESS` dans [`balance.ts`](../src/data/balance.ts) ; le coefficient de fraîcheur entre dans le Savoir-Faire (chap. 2).
 
 | État | Coefficient de vente | Période (sans équipement) |
 | :--- | :--- | :--- |
-| Extra-Frais | prime | le jour de l'achat, jusqu'à 20h00 |
-| Standard | neutre | de 20h00 le jour d'achat jusqu'à la fin du lendemain |
-| Faisandé | décote | à partir du 2e matin après l'achat |
-| Avarié | forte décote | à partir du 3e matin |
-| Pourri | — | 4e matin : détruit à 06h00 (signalé au briefing) |
+| Extra-frais | prime | le jour de l'achat, jusqu'à 20h00 |
+| Frais | neutre | de 20h00 le jour d'achat jusqu'à la fin du lendemain |
+| Défraîchi | décote | à partir du 2e matin après l'achat |
+| Dégradé | forte décote | à partir du 3e matin |
+| Perdu | — | 4e matin : détruit à 06h00 (signalé au briefing) |
 
 * **Lecture :** livrer le jour même = prime ; livrer de nuit ou le lendemain = prix normal ; traîner = perte.
 * **La prime suppose un trajet :** une caisse revendue sans avoir quitté son district d'achat a son Savoir-Faire plafonné (clause anti-arbitrage, chap. 2). Livrer le jour même, c'est acheter, rouler, vendre avant 20h00.
 * **Ordre de vente :** les lots les plus anciens partent en premier (chap. 2) : on écoule d'abord ce qui se dégrade.
-* **Recours :** les lots Faisandés ou Avariés se revendent à prix réduit (coefficient de fraîcheur), ou se donnent en paiement (chap. 2).
-* **Équipement :** les états se calculent sur un **âge effectif**. `[MOD-01]` retarde tout le cycle de son retard (âge − `freshnessDelay`) ; `[VEH-03]` ne compte qu'un matin sur deux (âge divisé par deux, arrondi au supérieur). Les deux se cumulent dans cet ordre. *Ex. (valeurs indicatives) :* avec les deux et un retard de 2 jours, une caisse achetée le Jour 5 est Extra-Frais jusqu'au Jour 7 à 20h00, Standard jusqu'au Jour 9, Faisandée les Jours 10–11, Avariée les Jours 12–13, et pourrit le Jour 14 à 06h00.
-* *Pourquoi pas « jamais sous Standard » pour `[MOD-01]` :* avec l'affinage de `[CREW-03]`, les périssables Gourmet seraient devenus une rente sans risque, et le dilemme de la fraîcheur aurait disparu.
+* **Recours :** les lots Défraîchis ou Dégradés se revendent à prix réduit (coefficient de fraîcheur), ou se donnent en paiement (chap. 2).
+* **Équipement :** les états se calculent sur un **âge effectif**. Le fourgon frigorifique `[VEH-03]` ne compte qu'un matin sur deux (âge divisé par deux, arrondi au supérieur). *Ex. :* une caisse achetée le Jour 5 est Extra-frais jusqu'au Jour 5 à 20h00, Fraîche les Jours 6–7, Défraîchie les Jours 8–9, Dégradée les Jours 10–11, et perdue le Jour 12 à 06h00.
+* *Pourquoi pas « jamais sous Frais » :* avec l'affinage de `[CREW-03]`, les produits au frais Gourmet seraient devenus une rente sans risque, et le dilemme de la fraîcheur aurait disparu.
 
 ---
 
@@ -75,7 +72,7 @@ Stock par jour, quota de demande (chap. 2) et bonus de Forte demande de chaque t
 | `[T0-04]` | Manuels d'Auto-Censure |
 
 * **[T0-01]** — Briques de pâte nutritive grise (« Bug-Blocks »), base de la Camisole Métabolique. Leur odeur d'insecte fermenté couvre n'importe quel saucisson.
-* **[T0-02]** — Garantie 0 % d'électrolytes pour éviter l'excitation citoyenne. **Refroidissement moteur :** des caisses (`cooling` dans [`products.ts`](../src/data/products.ts)) sont consommées automatiquement pour annuler l'usure d'un trajet de nuit ou la surchauffe de `[EVT-G01]`, s'il en reste assez. Désactivable depuis le panneau du soir ; la carte indique ce que le dernier trajet a consommé ou usé.
+* **[T0-02]** — Garantie 0 % d'électrolytes pour éviter l'excitation citoyenne. Empilée autour de l'électronique, elle absorbe les ondes des scanners : elle masque la Tech. **Refroidissement moteur :** des caisses (`cooling` dans [`products.ts`](../src/data/products.ts)) sont consommées automatiquement pour annuler l'usure d'un trajet de nuit ou la surchauffe de `[EVT-G01]`, s'il en reste assez. Désactivable depuis le panneau du soir ; la carte indique ce que le dernier trajet a consommé ou usé.
 * **[T0-03]** — Pilules d'acceptation prescrites par Aeterna, aussi injectées dans l'eau courante.
 * **Caisses scellées du DSC** — chargées par la plateforme pour une mission de nuit (chap. 1) : légales, Tier 0, hors commerce (jamais en boutique, ni vendues, ni données, valeur nulle), livrées d'office ou reprises à 06h00. Elles n'existent que la nuit.
 * **[T0-04]** — Petit guide papier rédigé par Aeterna. **Aide au bluff, passive :** dès un certain nombre de caisses en soute, bonus au bluff, sans rien donner (`bluffAid` dans [`products.ts`](../src/data/products.ts)).
@@ -84,14 +81,14 @@ Stock par jour, quota de demande (chap. 2) et bonus de Forte demande de chaque t
 
 | ID | Nom |
 | :--- | :--- |
-| `[T1-01]` | Sodas « Mega-Cola » |
+| `[T1-01]` | Œufs en Chocolat Fourrés |
 | `[T1-02]` | Grains d'Arabica Torréfiés |
 | `[T1-03]` | Beurre de Baratte Demi-Sel |
 | `[T1-04]` | Nouilles « MSG-621 » |
 | `[T1-05]` | Chewing-gums à la Nicotine |
 | `[T1-06]` | Huile de Friture Usagée |
 
-* **[T1-01]** — Vrai saccharose non-édulcoré.
+* **[T1-01]** — Vrai cacao et saccharose non-édulcoré, sous une coquille qui casse au moindre choc.
 * **[T1-02]** — Torréfié en cachette sur le campus de `[D2]`. L'odeur du vrai café attire les patrouilles, mais il ouvre bien des portes.
 * **[T1-03]** — Classé « Poison Cardiovasculaire ». Particulièrement vulnérable à `[EVT-G01]`.
 * **[T1-04]** — Glutamate monosodique et exhausteurs E621 interdits. Valeur refuge en temps de crise.
@@ -135,7 +132,7 @@ Stock par jour, quota de demande (chap. 2) et bonus de Forte demande de chaque t
 
 * **[T3-01]** — Moisissure vivante au lait cru, classée Arme Biologique par le DSC.
 * **[T3-02]** — Feuilles de tabac entières importées en fraude. Luxe : monnaie de corruption, et de `[LOC-D6-1]`.
-* **[T3-03]** — Single malt à 46°. **Monnaie d'initié :** `[LOC-D4-2]`, corruption (Luxe), racket de `[D4]` ; inflammable, il s'enflamme derrière soi en fuite.
+* **[T3-03]** — Single malt à 46°. **Monnaie d'initié :** `[LOC-D4-2]`, corruption (Luxe), racket de `[D4]` .
 * **[T3-04]** — Génériques sans micropuce de traçage biométrique.
 * **[T3-05]** — Semences paysannes reproductibles, interdites par le monopole agro-industriel du DSC.
 * **[T3-06]** — GPU permettant de faire tourner des IA locales non-censurées.
@@ -156,7 +153,7 @@ Stock par jour, quota de demande (chap. 2) et bonus de Forte demande de chaque t
 * **[T4-02]** — Toiles de maîtres et sculptures d'avant la fermeture du mur, rayées des inventaires officiels : valeur refuge des élites, hors des Crédits périssables.
 * **[T4-03]** — Certificats administratifs vierges. Les bannis sans puce de `[D4]` s'en arrachent pour se refaire une identité. **Action joueur :** utiliser une mallette (consommée) restaure de l'ICC hors plafond (`iccRestore` dans [`products.ts`](../src/data/products.ts)), **1 seule fois par partie** (un double réenregistrement d'identité alerterait le noyau d'Aeterna).
 * **[T4-04]** — Sérum physiologique détourné de `[D3]`, qui valide le QR-code sanitaire sans injecter la molécule de docilité.
-* **[T4-05]** — Bioréacteurs de sang synthétique et greffons volés dans les cliniques de `[D3]`. Extrêmement sensibles aux chocs, et périssables : le fourgon bio-médical `[VEH-03]` est fait pour eux. Convoités par les gérontocrates en quête d'immortalité.
+* **[T4-05]** — Bioréacteurs de sang synthétique et greffons volés dans les cliniques de `[D3]`. Extrêmement sensibles aux chocs, et à garder au frais : le fourgon bio-médical `[VEH-03]` est fait pour eux. Convoités par les gérontocrates en quête d'immortalité.
 * **[T4-06]** — Serveur optronique arraché aux salles blanches ministérielles, contenant les preuves qu'Aeterna fabrique les pandémies et que le DSC revend la vraie nourriture au marché noir.
   * **Stock :** réduit, avec une apparition aléatoire dans son district producteur (`dailyStock` et `appearanceChance` dans [`products.ts`](../src/data/products.ts)).
   * **Mort subite :** une fouille effective avec au moins 1 caisse en soute déclenche l'exécution sommaire (Game Over).
@@ -202,7 +199,7 @@ Cours = Arrondi( Prix_Base × Coef_District × Bruit × Mult_Événement )
   * *Multiplicateurs d'événement :* 1.00 par défaut ; un par événement en vigueur et par contrecoup, qui se multiplient (chap. 6).
   * *Bonus_Influence :* `[LOC-D2-1]`, le lendemain de la commande seulement (1.00 sinon).
   * *Plafond :* quel que soit le cumul, jamais au-dessus. Le détail du cours montre chaque multiplicateur, puis la ligne du plafond s'il s'applique.
-* **Le cours est fixe toute la journée.** La nuit ne recalcule rien ; elle n'applique que deux ajustements connus dès le matin : les tags de vente de nuit (Festif, Diurne), et l'annulation des événements marqués « jour seulement ».
+* **Le cours est fixe toute la journée.** La nuit ne recalcule rien ; elle n'applique que deux ajustements connus dès le matin : le tag de vente de nuit (Festif), et l'annulation des événements marqués « jour seulement ».
 
 ## Quota de rachat
 Pendant de la boutique : un district ne rachète qu'une quantité limitée de chaque produit au plein cours. À ne pas confondre avec le statut *Forte demande* (qui fixe le cours et le quota) : tout produit a un quota, même produit sur place, où il se revend mal (coefficient de production).
@@ -229,7 +226,6 @@ Prix_Vente = Arrondi( Cours × Commission × Coef_Demande × Coef_Condition × S
 | Tag | Effet | Logique |
 | :--- | :---: | :--- |
 | `[TAG-FESTIVE]` Festif | léger bonus ; fort à l'after | Prime de fête clandestine : la vie nocturne réclame ses vices, surtout là où la fête bat son plein. |
-| `[TAG-DIURNAL]` Diurne | malus | Excitants de bureau : leurs clients dorment. |
 | aucun des deux | aucun | — |
 
   * *Bonus_Mama :* `[CREW-03]`, sur les produits `[TAG-GOURMET]`.
@@ -237,7 +233,7 @@ Prix_Vente = Arrondi( Cours × Commission × Coef_Demande × Coef_Condition × S
 * *Intention — des builds, pas une recette :* chaque axe de bonus vise une famille de produits différente (équipier, modules, `[LOC-D2-1]`, nuit). Les combinaisons rapportent davantage, mais les plafonds (`Mult_Événement`, `Savoir_Faire`) empêchent une seule combinaison d'écraser les autres.
 
 ## Paiement en nature
-Toute caisse donnée en paiement (corruption, seulement le Luxe ; chantage, salaire, péage…) est valorisée à son **prix de base** ([`products.ts`](../src/data/products.ts)), jamais au cours local ni à son prix d'achat, **réduit par son état** : une caisse endommagée ou défraîchie (Faisandée, Avariée) paie moins, l'Extra-Frais ne paie jamais plus. Les lots les plus anciens partent en premier. C'est un barème officieux, le même partout, que les agents et les milices appliquent sans discuter.
+Toute caisse donnée en paiement (corruption, seulement le Luxe ; chantage, salaire, péage…) est valorisée à son **prix de base** ([`products.ts`](../src/data/products.ts)), jamais au cours local ni à son prix d'achat, **réduit par son état** : une caisse endommagée ou défraîchie (Défraîchie, Dégradée) paie moins, l'Extra-frais ne paie jamais plus. Les lots les plus anciens partent en premier. C'est un barème officieux, le même partout, que les agents et les milices appliquent sans discuter.
 * **Pourquoi payer en caisses :**
   1. **Une économie réelle** sur les caisses achetées sous leur prix de base (production locale, bonne fluctuation) : elles paient plus qu'elles n'ont coûté. À l'inverse, une caisse achetée cher (forte demande, mauvais tirage) paie moins qu'elle n'a coûté.
   2. **La connivence** en corruption (chap. 5) : une caisse de Luxe rend l'agent plus conciliant.

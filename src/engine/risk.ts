@@ -127,7 +127,7 @@ function addGridRisks(risk: BreakdownBuilder, state: GameState, to: DistrictId, 
     if (share === 0) continue
     const { tripRisk, detectedRisk, cover, smell } = TAGS[tag]
     // Les événements annulent ou doublent les effets d'un tag ; l'odeur ne cumule pas avec le doublement du district
-    // Laissez-passer de la Morgue : les bio-scanners de D3 ne détectent plus le chimique
+    // Laissez-passer de la Morgue : les bio-scanners de D3 ne détectent plus la Bio-signature
     const passed = passActive(state) && to === MORGUE.pass.district && tag === MORGUE.pass.tag ? 0 : 1
     const factor = tagFactor(state, to, tag, smell ? destination.odorFactor : 1) * moduleTagFactor(state, tag) * passed
     if (tripRisk) risk.add(tag, tripRisk * share * factor)

@@ -67,7 +67,7 @@ export const DISTRICTS: Readonly<Record<DistrictId, District>> = {
     fuelPrice: 225,
     pump: 'official',
     relay: true,
-    detection: 'TAG-CHEMICAL', // bio-scanners
+    detection: 'TAG-BIO', // bio-scanners
     droneJudges: false,
     offGrid: false,
     exitGateRisk: 0,

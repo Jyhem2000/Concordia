@@ -230,15 +230,23 @@ describe('risque', () => {
 })
 
 describe('canicule et sas', () => {
-  it('fait fondre le beurre et vieillir les périssables à 06h00', () => {
-    const state = gameAt(3, { events: { ...NO_EVENTS, tomorrow: 'EVT-G01' }, cargo: [lot('T1-03', 2), lot('T2-02', 3, 3), lot('T3-01', 1, 1)] })
+  it('fait fondre le beurre et le chocolat, et vieillir les périssables à 06h00', () => {
+    const cargo = [lot('T1-03', 2), lot('T1-01', 1), lot('T2-02', 3, 3), lot('T3-01', 1, 1)]
+    const state = gameAt(3, { events: { ...NO_EVENTS, tomorrow: 'EVT-G01' }, cargo })
     const morning = sleep(state)
     const heat = defined(morning.briefing?.heat)
-    expect(heat.melted).toBe(2)
+    expect(heat.melted).toBe(3)
     // T3-01 acheté le jour 1, vieilli d'un jour au jour 4 : âge 4, pourri
     expect(heat.rotten).toBe(1)
     expect(morning.cargo.find((entry) => entry.productId === 'T2-02')?.boughtDay).toBe(2)
     expect(FRESHNESS.rottenFromAge).toBe(4)
+  })
+
+  it('épargne la soute du fourgon frigorifique', () => {
+    const state = gameAt(3, { vehicleId: 'VEH-03', events: { ...NO_EVENTS, tomorrow: 'EVT-G01' }, cargo: [lot('T1-03', 2), lot('T1-01', 1)] })
+    const morning = sleep(state)
+    expect(morning.briefing?.heat).toBeNull()
+    expect(morning.cargo).toHaveLength(2)
   })
 
   it('dure plusieurs jours, à côté des événements du jour, puis a son contrecoup', () => {

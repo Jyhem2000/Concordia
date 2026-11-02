@@ -17,19 +17,19 @@ export const TIERS: Readonly<Record<Tier, TierStats>> = {
 export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
   // Tier 0 : marchandises officielles, couverture et masquage
   'T0-01': { tier: 0, basePrice: 10, tags: ['TAG-LEGAL'], masks: 'TAG-ODOROUS' },
-  'T0-02': { tier: 0, basePrice: 15, tags: ['TAG-LEGAL'], masks: 'TAG-FLAMMABLE', cooling: { crates: 2 } },
-  'T0-03': { tier: 0, basePrice: 40, tags: ['TAG-LEGAL'], masks: 'TAG-CHEMICAL' },
+  'T0-02': { tier: 0, basePrice: 15, tags: ['TAG-LEGAL'], masks: 'TAG-TECH', cooling: { crates: 2 } },
+  'T0-03': { tier: 0, basePrice: 40, tags: ['TAG-LEGAL'], masks: 'TAG-BIO' },
   'T0-04': { tier: 0, basePrice: 25, tags: ['TAG-LEGAL'], masks: 'TAG-CULTURE', bluffAid: { crates: 5, bonus: 0.1, cancelsSmell: false } },
   // Caisses scellées du DSC : chargées pour une mission de nuit, hors commerce (chap. 1)
   'T0-05': { tier: 0, basePrice: 0, tags: ['TAG-LEGAL'], sealed: true },
 
   // Tier 1 : petits plaisirs coupables
-  'T1-01': { tier: 1, basePrice: 80, tags: ['TAG-ADDICTIVE', 'TAG-FRAGILE', 'TAG-FESTIVE'] },
-  'T1-02': { tier: 1, basePrice: 120, tags: ['TAG-ADDICTIVE', 'TAG-ODOROUS', 'TAG-DIURNAL', 'TAG-LUXURY'] },
+  'T1-01': { tier: 1, basePrice: 80, tags: ['TAG-PERISHABLE', 'TAG-ADDICTIVE', 'TAG-FRAGILE', 'TAG-FESTIVE'] },
+  'T1-02': { tier: 1, basePrice: 120, tags: ['TAG-ADDICTIVE', 'TAG-ODOROUS', 'TAG-LUXURY'] },
   'T1-03': { tier: 1, basePrice: 150, tags: ['TAG-PERISHABLE', 'TAG-GOURMET'] },
-  'T1-04': { tier: 1, basePrice: 95, tags: ['TAG-CHEMICAL'] },
-  'T1-05': { tier: 1, basePrice: 180, tags: ['TAG-ADDICTIVE', 'TAG-DIURNAL'] },
-  'T1-06': { tier: 1, basePrice: 110, tags: ['TAG-ODOROUS', 'TAG-FLAMMABLE'] },
+  'T1-04': { tier: 1, basePrice: 95, tags: ['TAG-BIO'] },
+  'T1-05': { tier: 1, basePrice: 180, tags: ['TAG-ADDICTIVE'] },
+  'T1-06': { tier: 1, basePrice: 110, tags: ['TAG-ODOROUS'] },
 
   // Tier 2 : contrebande culturelle & épicerie noire
   'T2-01': { tier: 2, basePrice: 350, tags: ['TAG-ODOROUS', 'TAG-GOURMET'], bluffAid: { crates: 1, bonus: 0, cancelsSmell: true } },
@@ -39,7 +39,7 @@ export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
   'T2-05': {
     tier: 2,
     basePrice: 380,
-    tags: ['TAG-CHEMICAL', 'TAG-ADDICTIVE', 'TAG-FESTIVE'],
+    tags: ['TAG-BIO', 'TAG-ADDICTIVE', 'TAG-FESTIVE'],
     doping: { fleeBonus: 0.25, chassisLoss: 10, iccLoss: 5 },
     sleeplessNight: { healthLoss: 10, minHealth: 10 },
   },
@@ -56,10 +56,10 @@ export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
   'T3-03': {
     tier: 3,
     basePrice: 1_800,
-    tags: ['TAG-FRAGILE', 'TAG-FLAMMABLE', 'TAG-ADDICTIVE', 'TAG-FESTIVE', 'TAG-LUXURY'],
+    tags: ['TAG-FRAGILE', 'TAG-ADDICTIVE', 'TAG-FESTIVE', 'TAG-LUXURY'],
   },
-  'T3-04': { tier: 3, basePrice: 2_200, tags: ['TAG-CHEMICAL'] },
-  'T3-05': { tier: 3, basePrice: 1_600, tags: ['TAG-CULTURE'] },
+  'T3-04': { tier: 3, basePrice: 2_200, tags: ['TAG-BIO'] },
+  'T3-05': { tier: 3, basePrice: 1_600, tags: ['TAG-BIO'] },
   'T3-06': { tier: 3, basePrice: 2_500, tags: ['TAG-TECH', 'TAG-FRAGILE'] },
   'T3-07': { tier: 3, basePrice: 3_200, tags: ['TAG-TECH', 'TAG-CULTURE'] },
 
@@ -67,8 +67,8 @@ export const PRODUCTS: Readonly<Record<ProductId, Product>> = {
   'T4-01': { tier: 4, basePrice: 6_000, tags: ['TAG-PERISHABLE', 'TAG-ODOROUS', 'TAG-FESTIVE', 'TAG-LUXURY', 'TAG-GOURMET'] },
   'T4-02': { tier: 4, basePrice: 8_500, tags: ['TAG-CULTURE', 'TAG-FRAGILE', 'TAG-LUXURY'] },
   'T4-03': { tier: 4, basePrice: 12_000, tags: ['TAG-TECH'], iccRestore: 25 },
-  'T4-04': { tier: 4, basePrice: 15_000, tags: ['TAG-CHEMICAL', 'TAG-FRAGILE'] },
-  'T4-05': { tier: 4, basePrice: 18_000, tags: ['TAG-CHEMICAL', 'TAG-FRAGILE', 'TAG-PERISHABLE'] },
+  'T4-04': { tier: 4, basePrice: 15_000, tags: ['TAG-BIO', 'TAG-FRAGILE'] },
+  'T4-05': { tier: 4, basePrice: 18_000, tags: ['TAG-BIO', 'TAG-FRAGILE', 'TAG-PERISHABLE'] },
   'T4-06': {
     tier: 4,
     basePrice: 25_000,

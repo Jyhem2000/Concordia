@@ -49,7 +49,7 @@ function findRng(accept: (draw: number) => boolean): RngState {
 /** Carnet où tout est débloqué : équipiers, mission de nuit, rayons du garage, services réservés (chap. 1, 3 et 4) */
 export const EARNED: GameState['progress'] = {
   controlsPassed: 1,
-  tagSales: { 'TAG-GOURMET': 10, 'TAG-CHEMICAL': 10 },
+  tagSales: { 'TAG-GOURMET': 10, 'TAG-BIO': 10 },
   flagged: true,
   deliveries: 3,
   vipOrders: 0,

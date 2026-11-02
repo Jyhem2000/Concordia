@@ -43,8 +43,8 @@ const GRID: readonly DistrictId[] = ['D1', 'D2', 'D3', 'D5', 'D6']
 export const GLOBAL_EVENTS: Readonly<Record<GlobalEventId, GameEvent>> = {
   'EVT-G01': {
     effects: [
-      { kind: 'price', products: ['T0-02', 'T1-01', 'T2-05'], factor: 2.5 },
-      { kind: 'heat', melts: 'T1-03', ageDays: 1, dayTripChassis: 5, dayTripHealth: 2 },
+      { kind: 'price', products: ['T0-02', 'T2-05'], factor: 2.5 },
+      { kind: 'heat', melts: ['T1-03', 'T1-01'], ageDays: 1, dayTripChassis: 5, dayTripHealth: 2 },
     ],
     days: 3,
   },

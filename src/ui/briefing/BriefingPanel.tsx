@@ -83,7 +83,12 @@ function BriefingLines({ briefing }: BriefingLinesProps) {
       {briefing.rotten > 0 && <li className="text-danger">{t.briefing.rotten(briefing.rotten)}</li>}
       {heat && (
         <li className="text-danger">
-          {t.briefing.heat(t.product[heat.melts].name, briefing.heat?.melted ?? 0, briefing.heat?.aged ?? 0, briefing.heat?.rotten ?? 0)}
+          {t.briefing.heat(
+            heat.melts.map((id) => t.product[id].name),
+            briefing.heat?.melted ?? 0,
+            briefing.heat?.aged ?? 0,
+            briefing.heat?.rotten ?? 0,
+          )}
         </li>
       )}
       {briefing.wantedCleared && <li className="text-success">{t.briefing.wantedCleared(wanted, WANTED.maxLevel, WANTED.cleanDays)}</li>}

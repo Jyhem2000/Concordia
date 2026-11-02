@@ -195,12 +195,13 @@ function useEquipmentTexts() {
   const g = t.garage
 
   const vehicle = (id: VehicleId): string => {
-    const { riskFactor, legalCamouflage, coldChain, transponder, heavy, fuelPerTrip } = VEHICLES[id]
+    const { riskFactor, legalCamouflage, coldChain, heatProof, transponder, heavy, fuelPerTrip } = VEHICLES[id]
     return [
       ...(riskFactor !== undefined ? [g.lowProfile(change(riskFactor))] : []),
       ...(fuelPerTrip.day === fuelPerTrip.night ? [g.ecoEngine] : []),
       ...(legalCamouflage ? [g.camouflage(change(legalCamouflage.factor), percent(legalCamouflage.minShare, 0))] : []),
       ...(coldChain ? [g.coldChain] : []),
+      ...(heatProof ? [g.heatProof] : []),
       ...(transponder
         ? [
             g.transponder(
@@ -216,8 +217,7 @@ function useEquipmentTexts() {
 
   const module = (id: ModuleId): string => {
     const {
-      freshnessDelay,
-      heatProof,
+      drivingAssist,
       tagFactor,
       smoothRide,
       nightRiskFactor,
@@ -230,8 +230,7 @@ function useEquipmentTexts() {
       compartmentFactor,
     } = MODULES[id]
     return [
-      ...(freshnessDelay ? [g.freshnessDelay(freshnessDelay)] : []),
-      ...(heatProof ? [g.heatProof] : []),
+      ...(drivingAssist ? [g.drivingAssist(signedPercent(drivingAssist.fleeBonus, 0))] : []),
       ...(tagFactor
         ? [tagFactor.factor === 0 ? g.tagOff(t.tag[tagFactor.tag].name) : g.tagFactor(t.tag[tagFactor.tag].name, change(tagFactor.factor))]
         : []),

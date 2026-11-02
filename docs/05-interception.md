@@ -17,7 +17,7 @@ Le résultat est **borné, après** tous les multiplicateurs (`RISK_BOUNDS` dans
 | :--- | :--- |
 | **Base_District** | risque de base du district ([`districts.ts`](../src/data/districts.ts)) ; remplacé par `[EVT-D5-02]` |
 | **Suspicion** | selon l'ICC (chap. 1) |
-| **Malus_Tags** | pour chaque tag détectable : *valeur du tag × part de la cargaison* — `[TAG-ODOROUS]`, `[TAG-TECH]`, `[TAG-CHEMICAL]`, `[TAG-CULTURE]` |
+| **Malus_Tags** | pour chaque tag détectable : *valeur du tag × part de la cargaison* — `[TAG-ODOROUS]`, `[TAG-TECH]`, `[TAG-BIO]`, `[TAG-CULTURE]` |
 | **Malus_Contexte** (additif) | trajet de nuit hors mission (chap. 1), districts traversés (chap. 3), portique du sas de `[D4]` (chap. 3), `[VEH-04]`, balise de `[T4-06]` (brouillée par `[CREW-02]`), ronde renforcée, Fiche S, pic suspect de la veille (chap. 2), embuscades de la dette (chap. 1), purge préventive de `[EVT-L01]`, carte « capitaine de la BRC » de `[LOC-D5-1]` (négative), `[EVT-G02]`, `[EVT-D1-03]`, `[EVT-D4-01]` |
 | **Couverture** (additive) | `[TAG-LEGAL]` |
 | **Bonus_Équipement** (multiplicatif) | produit des coefficients de `[VEH-01]`, `[VEH-02]`, `[CREW-01]` et du coupe-file Citoyen Or (chap. 1) |
@@ -112,10 +112,10 @@ Chance = min( plafond,  base + Offre + Connivence − malus × (étoiles du dist
 ### 3. Fuite — *« Pied au plancher ! »*
 * **Barrage fixe uniquement** (impossible en contrôle volant).
 * **Chance de base** et **plafond** dégressif selon les étoiles du district : `FLEE` dans [`balance.ts`](../src/data/balance.ts).
-* **Bonus :** `[MOD-06]`, `[CREW-02]`, `[VEH-03]` (en `[D3]` et `[D5]`). **Malus :** Fiche S, chauffeur à bout.
-* **Sacrifices :** 1 largage offensif max (une caisse `[TAG-FLAMMABLE]`, huile ou alcool fort) + dopage `[T2-05]` (cumulable). Les caisses sacrifiées ou bues sont perdues quel que soit le résultat. Le joueur choisit le produit à sacrifier ; l'app montre le bonus de chacun.
+* **Bonus :** `[MOD-01]` (qui annule aussi le malus du chauffeur à bout), `[MOD-06]`, `[CREW-02]`, `[VEH-03]` (en `[D3]` et `[D5]`), dopage `[T2-05]`. **Malus :** Fiche S, chauffeur à bout.
+* **Dopage :** boire 1 caisse de `[T2-05]` (une fois par jour). La caisse bue est perdue quel que soit le résultat ; l'app montre le bonus. La fuite tient sinon à l'équipement (`[MOD-01]`, `[MOD-06]`, `[VEH-03]`), pas à la soute.
 * **Succès :** cargaison sauvée, **+1 niveau de Fiche S**, mais perte de châssis (tirage uniforme entier dans une fourchette ; `[MOD-06]`, `[VEH-03]`), casse `[TAG-FRAGILE]`, et perte d'ICC (caméras de trafic ; `[VEH-03]`). La plaque rotative `[MOD-05]` efface, une fois par jour, la perte d'ICC et le niveau de Fiche S.
-* **Échec :** explosions `[TAG-FLAMMABLE]` d'abord, puis confiscation + amende sur la valeur saisie + perte d'ICC ; perte de châssis et de Santé (`[MOD-06]`), mortelle si la Santé tombe à 0 ; garde à vue.
+* **Échec :** confiscation + amende sur la valeur saisie + perte d'ICC ; perte de châssis et de Santé (`[MOD-06]`), mortelle si la Santé tombe à 0 ; garde à vue.
 * Avant validation, l'app affiche la chance et les conséquences du succès et de l'échec.
 * *Le largage n'est pas une éjection :* on ne cache rien, on déverse et on enflamme une caisse derrière soi pendant la fuite (route glissante en feu) pour semer les poursuivants. Se débarrasser de l'illégal, c'est l'éjection, avant le barrage.
 

@@ -57,6 +57,10 @@ const withPlaces = (base: Plan, extra: readonly PlaceUse[]): Plan => ({ ...base,
 
 /** Plan dédié au brouilleur de drones : fuite au sommet (chap. 8, étape 2 pour ses autres réglages) */
 const FLIGHT: Plan = { name: 'Fuite au sommet', modules: ['MOD-06', 'MOD-09'], crew: 'CREW-02', runner: true }
+
+/** Fuite au sommet avec l'assistance de conduite */
+const FLIGHT_ASSIST: Plan = { ...FLIGHT, name: 'Fuite au sommet + assistance', modules: [...FLIGHT.modules, 'MOD-01'] }
+
 /** Plan de nuit avec la plaque rotative */
 const NIGHT_PLATE: Plan = { name: 'Nuit festive + plaque', modules: ['MOD-04', 'MOD-06', 'MOD-05'], nightOwl: true, runner: true }
 
@@ -66,7 +70,7 @@ export const ABLATIONS: readonly Ablation[] = [
   pair('VEH-03', plan('Chaîne du froid'), 'Équilibré', { ...plan('Chaîne du froid'), vehicle: undefined }, bought('VEH-03')),
   pair('VEH-04', plan('Haut tier'), 'Casse-cou', { ...plan('Haut tier'), vehicle: undefined }, bought('VEH-04')),
   // Modules
-  pair('MOD-01', plan('Chaîne du froid'), 'Équilibré', withoutModule(plan('Chaîne du froid'), 'MOD-01'), bought('MOD-01')),
+  pair('MOD-01', FLIGHT_ASSIST, 'Casse-cou', withoutModule(FLIGHT_ASSIST, 'MOD-01'), bought('MOD-01')),
   pair('MOD-02', plan('Couverture légale'), 'Équilibré', withoutModule(plan('Couverture légale'), 'MOD-02'), bought('MOD-02')),
   pair('MOD-03', plan('Électronique'), 'Équilibré', withoutModule(plan('Électronique'), 'MOD-03'), bought('MOD-03')),
   pair('MOD-04', plan('Nuit festive'), 'Équilibré', withoutModule(plan('Nuit festive'), 'MOD-04'), bought('MOD-04')),

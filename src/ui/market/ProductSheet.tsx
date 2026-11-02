@@ -81,7 +81,7 @@ function SheetBody({ productId }: SheetBodyProps) {
 
   // Effets de chaque tag, tels que les applique le moteur (chap. 2)
   const tagLines = (tag: TagId): string[] => {
-    const { cover, tripRisk, detectedRisk, bluffMalus, smell, perishable, breakage, explosion, fleeDropBonus, nightSale, bribeGift } = TAGS[tag]
+    const { cover, tripRisk, detectedRisk, bluffMalus, smell, perishable, breakage, nightSale, bribeGift } = TAGS[tag]
     const smelly = smell ? names(where((district) => district.odorFactor > 1)) : ''
     return [
       ...(cover ? [t.sheet.cover(percent(cover, 0), offGrid)] : []),
@@ -92,8 +92,6 @@ function SheetBody({ productId }: SheetBodyProps) {
       ...(breakage
         ? [t.sheet.breakage(percent(breakage.fleeChance, 0), percent(breakage.shockChance, 0), breakage.shockThreshold, percent(DAMAGED_FACTOR, 0))]
         : []),
-      ...(explosion ? [t.sheet.explosion(percent(explosion.chance, 0), explosion.chassisLoss)] : []),
-      ...(fleeDropBonus ? [t.sheet.drop(signedPercent(fleeDropBonus, 0))] : []),
       ...(bribeGift ? [t.sheet.bribeGift] : []),
       ...(nightSale ? [t.sheet.nightSale(change(nightSale), tag === AFTER.tag ? change(AFTER.festiveFactor) : null)] : []),
     ]

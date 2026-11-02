@@ -11,13 +11,13 @@
 * *Conso :* par trajet, selon la phase, plus le surcoût des districts traversés (chap. 3).
 * *Bonus de risque :* les passifs qui réduisent le risque sont des **multiplicateurs** (chap. 5).
 * *Stats* (prix, soute, slots de modules, PV max, réservoir, consommation de jour et de nuit) et chiffres des passifs : `VEHICLES` dans [`vehicles.ts`](../src/data/vehicles.ts).
-* *Des builds, pas une échelle :* la Navette et la Panacea ont la même soute ; on choisit entre elles un passif (convoi couvert de Légal, ou fuite et fraîcheur), pas un volume. Seul le Bunker-Lourd achète du volume, au prix du risque et du carburant.
+* *Des builds, pas une échelle :* la Navette et la Panacea ont la même soute et autant de slots ; on choisit entre elles un passif (convoi couvert de Légal, ou chaîne du froid et fuite), pas un volume. Le froid est l'affaire du châssis, pas d'un module : un camion frigorifique ne craint pas la canicule. Seul le Bunker-Lourd achète du volume (et un slot de plus), au prix du risque et du carburant, sans servir de build précis.
 
 | ID | Nom | Passif |
 | :--- | :--- | :--- |
 | `[VEH-01]` | Fourgonnette « Citi-Volt » (départ) | **Profil bas :** risque d'interception réduit (multiplicateur, zone hors-réseau comprise). *Éco-Moteur :* consomme autant de nuit que de jour (les autres châssis consomment davantage la nuit). |
 | `[VEH-02]` | Navette « Zéro-C » | **Camouflage corporatif :** aux couleurs du DSC ; tant que les caisses `[TAG-LEGAL]` font au moins une part de la cargaison, risque réduit (multiplicateur). Une soute vide n'a rien à cacher : le camouflage s'applique. Sans effet en zone hors-réseau. |
-| `[VEH-03]` | Fourgon Bio-Médical « Panacea-V8 » | **Chaîne du froid médicale :** les périssables ne perdent de la fraîcheur qu'**un matin sur deux** (chap. 2). **Transpondeur d'urgence :** en `[D3]` et `[D5]`, lors d'une fuite : chance en plus, **aucun dégât** de châssis en cas de succès, perte d'ICC du succès réduite (arrondie en faveur du joueur). |
+| `[VEH-03]` | Fourgon Bio-Médical « Panacea-V8 » | **Chaîne du froid médicale :** les produits au frais ne perdent de la fraîcheur qu'**un matin sur deux** (chap. 2), et soute **et** moteur sont immunisés contre `[EVT-G01]` (ni fonte, ni vieillissement, ni usure de châssis ; le coup de chaleur du pilote reste). **Transpondeur d'urgence :** en `[D3]` et `[D5]`, lors d'une fuite : chance en plus, **aucun dégât** de châssis en cas de succès, perte d'ICC du succès réduite (arrondie en faveur du joueur). |
 | `[VEH-04]` | Compacteur Sanitaire « Bunker-Lourd » | **Monstre blindé & benne acide :** au racket de `[D4]`, péage réduit, et un passage forcé réussi ne coûte **aucun dégât** de châssis. **Broyeur acide :** mode d'éjection utilisable **partout** (`[D5]` et `[D6]` compris), sans cooldown, sans dégât, contrebande dissoute sans récupération (`[MOD-07]` reste prioritaire s'il est disponible). *Contrepartie :* risque accru partout, zone hors-réseau comprise (tonnage hors-norme, c'est physique). |
 
 ### Double fond
@@ -40,20 +40,20 @@ Chaque châssis a un **double fond** d'origine, soudé par Mécano-Mitch : quelq
 * Chaque châssis a un nombre strict de slots. Les modules s'achètent **définitivement** à `[LOC-D4-1]` ; un module acheté est monté aussitôt s'il reste un slot libre. C'est **uniquement là** qu'on monte ou démonte (gratuitement) ses modules. Le montage est donc un choix de build pour plusieurs jours, pas un réglage par trajet.
 * Seuls les modules **montés** agissent. Prix, catégorie, montage et chiffres : `MODULES` dans [`vehicles.ts`](../src/data/vehicles.ts).
 * **Montage,** affiché à l'achat (ce que devient le module au changement de châssis) :
-  * **Démontable** (électronique) : il se démonte et suit le joueur, sans frais : `[MOD-05]`, `[MOD-08]`, `[MOD-09]`.
-  * **Adaptable** (mécanique) : Mitch l'adapte au nouveau châssis contre une part de son prix (`GARAGE.refitShare` dans [`locations.ts`](../src/data/locations.ts)) : `[MOD-01]`, `[MOD-02]`, `[MOD-04]`, `[MOD-06]`.
+  * **Démontable** (électronique) : il se démonte et suit le joueur, sans frais : `[MOD-01]`, `[MOD-05]`, `[MOD-08]`, `[MOD-09]`.
+  * **Adaptable** (mécanique) : Mitch l'adapte au nouveau châssis contre une part de son prix (`GARAGE.refitShare` dans [`locations.ts`](../src/data/locations.ts)) : `[MOD-02]`, `[MOD-04]`, `[MOD-06]`.
   * **Soudé** au châssis : perdu avec lui : `[MOD-03]` (doublure de toute la soute), `[MOD-07]` (trappe découpée dans le plancher), `[MOD-10]` (cloison du double fond).
   * *Intention :* changer de véhicule devient un choix de build. Un module soudé s'achète pour le châssis qu'on garde.
 * **Le catalogue en rayons :** Mitch ne sort pas tout à n'importe qui (`requires` de chaque module et véhicule). Le garage affiche tout, avec la condition de ce qui est réservé et la progression vers elle.
   * **Rayon libre** dès le Jour 1 : `[MOD-02]`, `[MOD-04]`, réparations.
-  * **Matériel de contrebande**, une fois la dette initiale soldée (client solvable) : `[MOD-01]`, `[MOD-03]`, `[MOD-06]`, `[MOD-07]`, et les châssis `[VEH-03]` et `[VEH-04]`.
-  * **Voie pègre**, pour les fichés (première Fiche S) : `[MOD-05]`, `[MOD-09]`, de quoi tromper les caméras et les drones.
+  * **Matériel de contrebande**, une fois la dette initiale soldée (client solvable) : `[MOD-03]`, `[MOD-06]`, `[MOD-07]`, et les châssis `[VEH-03]` et `[VEH-04]`.
+  * **Voie pègre**, pour les fichés (première Fiche S) : `[MOD-01]`, `[MOD-05]`, `[MOD-09]`, de quoi semer la BRC et tromper les caméras et les drones.
   * **Voie officielle**, après quelques commandes du DSC livrées : `[VEH-02]` aux couleurs du DSC et `[MOD-08]`, le faux terminal « Citoyen Or ».
   * **Pièce de maître**, une fois que le double fond a tenu à une fouille de la BRC (Mitch aime les clients dont le travail tient) : `[MOD-10]`, la cloison fantôme.
 
 | ID | Nom | Effet |
 | :--- | :--- | :--- |
-| `[MOD-01]` | Caisson Cryo à l'Azote Volé | **Retard** sur tout le cycle de fraîcheur des `[TAG-PERISHABLE]` (`freshnessDelay`, en jours) : Extra-Frais jusqu'à 20h00 autant de jours après l'achat, et chaque état suivant d'autant plus tard (chap. 2). Protège soute **et** moteur contre `[EVT-G01]` (ni fonte, ni vieillissement, ni usure de châssis ; le coup de chaleur du pilote reste). |
+| `[MOD-01]` | Assistance de Conduite « Esquive » | Pilote automatique de course, détourné des véhicules de la BRC. **En fuite** (passage forcé compris) : chance en plus, et le malus du chauffeur à bout ne s'applique plus (l'assistance tient le volant). La fuite dépend de l'équipement, pas de la soute : seul le dopage `[T2-05]` s'y ajoute. |
 | `[MOD-02]` | Diffuseur d'Échappement « Pin Sylvestre & Javel » | Réduit fortement les malus de `[TAG-ODOROUS]` (risque au trajet et malus de bluff), après les doublements de district ou d'événement. |
 | `[MOD-03]` | Doublure en Plomb & Cage de Faraday | Annule la détection de `[TAG-TECH]`. **Cage de Faraday :** les drones perdent le signal du camion, la part de contrôles volants est réduite partout (multiplicateur, chap. 5). |
 | `[MOD-04]` | Suspensions & Silentblocs « Velours » | Immunise `[TAG-FRAGILE]` à la casse (fuite et chocs). Annule l'usure de châssis des trajets de nuit (aucune caisse de refroidissement n'est alors consommée). **Silentblocs :** le camion glisse sans bruit dans les galeries ; le malus de risque d'un trajet de nuit hors mission est réduit (multiplicateur, chap. 1). |
@@ -81,7 +81,7 @@ Chaque châssis a un **double fond** d'origine, soudé par Mécano-Mitch : quelq
 | :--- | :--- | :--- |
 | `[CREW-01]` | Commandant Vance, « l'Ancien de la BRC » (copilote accrédité) | **Salaire réduit** s'il **consomme** à 06h00 une caisse `[TAG-ADDICTIVE]` de Tier 2 ou plus (la moins chère au prix de base ; réglage du joueur, activé par défaut) · risque d'interception réduit partout, zone hors-réseau comprise (multiplicateur) · bonus à la corruption · **révèle chaque matin** le district de la ronde renforcée (carte et prévision du risque) |
 | `[CREW-02]` | Glitch, jeune hackeuse sous caféine (opératrice radio distante) | **Flux pirate :** cours de tous les districts en temps réel (mémoire de marché toujours à jour) · rendement offshore majoré, sauf les matins en cellule · bonus à la fuite et au passage forcé (elle pirate les feux) · bonus pour falsifier un dossier de Loterie · brouille la balise de `[T4-06]` · **injection du serveur** (voir plus bas) |
-| `[CREW-03]` | Mama Rosa, « la Matriarche » (atelier d'affinage) | Produits `[TAG-GOURMET]` vendus plus cher (bonus de savoir-faire, chap. 2) · **affinage :** les caisses Gourmet Standard se vendent au coefficient Extra-Frais · quotas de demande des produits `[TAG-GOURMET]` majorés (arrondis au supérieur ; ses maîtres d'hôtel répartissent les livraisons) |
+| `[CREW-03]` | Mama Rosa, « la Matriarche » (atelier d'affinage) | Produits `[TAG-GOURMET]` vendus plus cher (bonus de savoir-faire, chap. 2) · **affinage :** les caisses Gourmet Fraîches se vendent au coefficient Extra-frais · quotas de demande des produits `[TAG-GOURMET]` majorés (arrondis au supérieur ; ses maîtres d'hôtel répartissent les livraisons) |
 
 * **Vance :** vieux limier désabusé de l'époque où la police n'était pas dirigée par Aeterna, avec un laissez-passer d'inspecteur honoraire.
 * **Glitch :** prodige du code bannie des écoles du DSC pour avoir fait réciter des poèmes anarchistes à Aeterna ; te guide depuis un cyber-squat blindé.

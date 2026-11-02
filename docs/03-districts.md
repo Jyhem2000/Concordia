@@ -19,7 +19,7 @@
 * **Services réservés (deux voies) :** certains services ne s'ouvrent qu'à qui s'est fait une place (`SERVICE_REQUIREMENTS` dans [`locations.ts`](../src/data/locations.ts)). Le lieu les affiche quand même, avec leur condition et la progression vers elle.
   * **Voie officielle**, pour les citoyens présentables et solvables : panique de Karma-Cham (palier d'ICC et patrimoine), faux dossier de la Laverie (patrimoine), Velvet-Silo sur invitation (palier d'ICC et patrimoine).
   * **Voie pègre**, pour les fichés : Cassandre-88 ne parle qu'à qui a déjà une Fiche S.
-  * **Clientèle établie :** à la Morgue, le certificat après la dette initiale soldée, le laissez-passer après des ventes de chimique ; la chirurgie reste ouverte à tous.
+  * **Clientèle établie :** à la Morgue, le certificat après la dette initiale soldée, le laissez-passer après des ventes de Bio-signature ; la chirurgie reste ouverte à tous.
   * Les conditions d'ICC et de patrimoine valent **au moment de la demande** : qui retombe sous le seuil perd l'accès jusqu'à y remonter. Les autres sont acquises pour la partie.
   * *Patrimoine :* Cash-Puce plus compte offshore.
 * **Coefficients de marché** (chap. 2) : chaque district applique un coefficient à ses produits de **Production**, aux produits **Neutres** (1.00) et à ceux en **Forte demande** (plus le bonus de tier).
@@ -36,7 +36,7 @@ Les stats de chaque district sont dans [`districts.ts`](../src/data/districts.ts
 
 ## `[D1]` « Hives » — Les Ruches Grises (zone de départ)
 * **Échelon 1 — Catégorie C, prolétariat sous camisole.** 60 % de la population. Chaleur étouffante (38 °C), eau tiède rationnée, sédation maximale (`[T0-01]` + `[T0-03]`). Rêve anesthésié de monter en `[D2]`.
-* **Ambiance :** tours de béton brutales autour de la Cantine Centrale. Les ouvriers passent leurs soirées hypnotisés par les loteries virtuelles. Le marché noir est toléré comme « soupape de décompression » : un peu de vrai soda ou de saucisson le week-end suffit à empêcher les émeutes de la faim.
+* **Ambiance :** tours de béton brutales autour de la Cantine Centrale. Les ouvriers passent leurs soirées hypnotisés par les loteries virtuelles. Le marché noir est toléré comme « soupape de décompression » : un peu de vrai chocolat ou de saucisson le week-end suffit à empêcher les émeutes de la faim.
 * **Sécurité :** caméras bas de gamme souvent en panne, patrouilles humaines de la BRC fatiguées et corruptibles.
 
 ### `[LOC-D1-1]` L'Arrière-Salle de Viktor Varga (usurier mafieux)
@@ -71,7 +71,7 @@ Bar sans licence sous les quais de service. La plupart des chauffeurs de catégo
 Icône officielle le jour, mercenaire vénale en coulisses. **Panique Algorithmique sur Commande :**
 * **Coût :** une base, plus une hausse par utilisation précédente. **Cooldown** en jours. Chiffres : `KARMA` dans [`locations.ts`](../src/data/locations.ts).
 * **Effet :** le joueur choisit **un** tag ; le soir même, une fausse polémique virale force Aeterna à réagir : **le lendemain seulement**, tous les produits de ce tag valent plus cher dans tous les districts (*bonus d'influence*, multiplié avec les événements, sous le même plafond, chap. 2). Le téléscripteur l'annonce.
-* **Options :** A « Cancel Wave Culturelle » `[TAG-CULTURE]` · B « Rumeur de Pénurie Alimentaire » `[TAG-GOURMET]` · C « Scandale Chimique & Pharmaceutique » `[TAG-CHEMICAL]`.
+* **Options :** A « Cancel Wave Culturelle » `[TAG-CULTURE]` · B « Rumeur de Pénurie Alimentaire » `[TAG-GOURMET]` · C « Scandale Bio-Sanitaire » `[TAG-BIO]`.
 
 ---
 
@@ -85,7 +85,7 @@ Coûts, durées et effets chiffrés : `MORGUE` dans [`locations.ts`](../src/data
 
 | Service | Coût | Cooldown | Effet |
 | :--- | :--- | :--- | :--- |
-| Laissez-passer sanitaire falsifié | fixe | sa durée de validité (jour d'achat compris) | Pendant sa validité : détection `[TAG-CHEMICAL]` annulée en `[D3]` (bio-scanners), et le risque de `[EVT-G02]` ne s'applique pas en `[D3]`. |
+| Laissez-passer sanitaire falsifié | fixe | sa durée de validité (jour d'achat compris) | Pendant sa validité : détection `[TAG-BIO]` annulée en `[D3]` (bio-scanners), et le risque de `[EVT-G02]` ne s'applique pas en `[D3]`. |
 | Chirurgie d'urgence | fixe + une part du Cash-Puce | oui | Gain de Santé, sans dépasser un plafond (refusée si la Santé y est déjà). |
 | Certificat de décontamination | hausse à chaque utilisation | oui | Gain d'ICC **hors plafond** de gains de route (ce n'est pas un gain de route, chap. 1). |
 

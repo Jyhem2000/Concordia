@@ -45,7 +45,6 @@ function ReportLines({ report }: ReportLinesProps) {
     { key: 'chassis', label: t.report.chassis, value: report.chassis, text: signed(report.chassis) },
     { key: 'wanted', label: t.report.wanted, value: report.wanted, text: signed(report.wanted) },
     { key: 'damaged', label: t.report.damaged, value: -report.damaged, text: number(report.damaged) },
-    { key: 'exploded', label: t.report.exploded, value: -report.exploded, text: number(report.exploded) },
   ]
 
   return (

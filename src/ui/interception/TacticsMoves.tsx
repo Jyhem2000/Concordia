@@ -3,17 +3,7 @@ import { BRIBE } from '../../data/balance.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { averageCost, ownedQty } from '../../engine/cargo.ts'
 import { paymentValue } from '../../engine/condition.ts'
-import {
-  bluffAids,
-  bluffChance,
-  bribeChance,
-  bribeRate,
-  dropBonus,
-  fleeChance,
-  isBribeGift,
-  minimumOffer,
-  offerValue,
-} from '../../engine/interception.ts'
+import { bluffAids, bluffChance, bribeChance, bribeRate, fleeChance, isBribeGift, minimumOffer, offerValue } from '../../engine/interception.ts'
 import type { Offer, ProductId, Tactics } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
@@ -60,32 +50,17 @@ export function BluffMove({ label, outcomes, info }: TacticalMoveProps) {
   )
 }
 
-/** Fuite (ou forcer le passage), avec largage offensif et dopage pilote (chap. 2 et 5) */
+/** Fuite (ou forcer le passage), avec dopage pilote (chap. 2 et 5) */
 export function FleeMove({ label, outcomes, info }: TacticalMoveProps) {
   const game = useGameStore((s) => s.game)
   const { t, signedPercent } = useI18n()
   // Tactiques choisies : état d'interface éphémère
-  const [drop, setDrop] = useState<ProductId | undefined>(undefined)
   const [dope, setDope] = useState<ProductId | undefined>(undefined)
-  const droppable = PRODUCT_IDS.filter((id) => dropBonus(id) > 0 && ownedQty(game.cargo, id) > 0)
   const dopes = PRODUCT_IDS.filter((id) => PRODUCTS[id].doping && ownedQty(game.cargo, id) > 0)
-  const tactics: Tactics = { drop, dope }
+  const tactics: Tactics = { dope }
 
   return (
     <MoveCard move="flee" label={label} chance={fleeChance(game, tactics)} outcomes={outcomes} tactics={tactics} info={info}>
-      {droppable.length > 0 && (
-        <label className="flex flex-wrap items-center gap-1.5 text-xs">
-          <span className="text-ink-muted">{t.interception.drop}</span>
-          <select value={drop ?? ''} onChange={(event) => setDrop(droppable.find((id) => id === event.target.value))} className={FIELD}>
-            <option value="">{t.interception.noDrop}</option>
-            {droppable.map((id) => (
-              <option key={id} value={id}>
-                {t.interception.dropOption(t.product[id].name, signedPercent(dropBonus(id), 0))}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
       {dopes.map((id) => {
         const doping = PRODUCTS[id].doping
         if (!doping) return null

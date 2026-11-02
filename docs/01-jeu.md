@@ -72,7 +72,7 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 
 ### Intégrité du châssis (PV véhicule)
 * **Maximum :** selon le véhicule ([`vehicles.ts`](../src/data/vehicles.ts)). **Départ :** châssis intact. **Réparation :** `[LOC-D4-1]`.
-* **Pertes :** trajet de nuit, `[EVT-G01]`, `[T2-05]`, éjection manuelle, fuite, explosion `[TAG-FLAMMABLE]`, racket de `[D4]`, aléas `[EVT-R02]`, `[EVT-R05]`, `[EVT-R08]`, `[EVT-R09]`, `[EVT-R10]`.
+* **Pertes :** trajet de nuit, `[EVT-G01]`, `[T2-05]`, éjection manuelle, fuite, racket de `[D4]`, aléas `[EVT-R02]`, `[EVT-R05]`, `[EVT-R08]`, `[EVT-R09]`, `[EVT-R10]`.
 * **Dépannage d'urgence (anti soft-lock) :** à 0 PV, une dépanneuse du DSC intervient (en `[D4]`, celle des mécanos pirates, aux mêmes conditions) : **demi-journée** perdue, châssis remis à une part de ses PV max, facture fixe (`EMERGENCY_TOW` dans [`balance.ts`](../src/data/balance.ts)) (si le Cash-Puce ne suffit pas, le reliquat s'ajoute à la dette). Si le châssis tombe à 0 pendant un trajet, le trajet se termine (arrivée à destination), puis le dépannage s'applique.
 
 ### Réservoir de Synthanol
@@ -140,7 +140,7 @@ Le Jour 1 commence sans routine : pas d'intérêts, boutiques et événements ti
 4. Récupération des caisses larguées la veille via `[MOD-07]` ; échéance d'une commande VIP de `[LOC-D6-1]` ou d'un contrat de la Pègre de `[LOC-D1-1]` dépassée (chap. 3).
 5. Dégradation de fraîcheur des caisses `[TAG-PERISHABLE]`, caisses récupérées comprises (chap. 2).
 6. Tirage de la livraison officielle du jour, de la mission de nuit proposée pour ce soir et du contrat de la Pègre proposé (s'il n'y en a pas en cours) ; tirage de la ronde renforcée ; entrée en vigueur de l'événement global tiré la veille, tirage des événements locaux, de la Loterie les jours de tirage, de l'événement global du lendemain et de sa rumeur ; contrecoups (chap. 6). Puis, parce que les événements les modifient : reconstitution des quotas de demande, cours et boutiques (chap. 2) ; enfin, tirage de l'after du couvre-feu de ce soir (voir *Tournée de nuit*).
-7. Effets du matin des événements : canicule sur les périssables, sas de `[EVT-D3-01]` si le joueur se trouve en `[D3]` (chap. 6).
+7. Effets du matin des événements : canicule sur les produits au frais, sas de `[EVT-D3-01]` si le joueur se trouve en `[D3]` (chap. 6).
 
 ### Service de jour (06h00 – 20h00)
 Acheter / vendre au marché, faire le plein, utiliser les lieux spéciaux du district, accepter la livraison officielle du jour, et effectuer **1 trajet de jour**, ou rester sur place et attendre le soir. Une fois arrivé, on peut à nouveau commercer avant 20h00.

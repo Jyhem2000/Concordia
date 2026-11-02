@@ -38,8 +38,8 @@ describe('Cantine des Chauffeurs : plat du routier', () => {
 
 describe('Karma-Cham', () => {
   it('dope un tag le lendemain seulement, puis entre en recharge avec un prix en hausse', () => {
-    const ordered = run(at('D2'), { type: 'influence', tag: 'TAG-CHEMICAL' })
-    expect(ordered.influence).toEqual({ tag: 'TAG-CHEMICAL', day: 4 })
+    const ordered = run(at('D2'), { type: 'influence', tag: 'TAG-BIO' })
+    expect(ordered.influence).toEqual({ tag: 'TAG-BIO', day: 4 })
     expect(errorOf(ordered, { type: 'influence', tag: 'TAG-CULTURE' })).toBe('cooldown')
     expect(karmaCost(ordered)).toBeGreaterThan(karmaCost(at('D2')))
     const next = { ...ordered, day: 4 }
@@ -52,10 +52,10 @@ describe('Morgue du Dr. K.', () => {
   it('aveugle les bio-scanners de Panacea pendant la validité du laissez-passer', () => {
     const passed = run(at('D3', { cargo: [lot('T1-04', 4)] }), { type: 'morgue', service: 'pass' })
     expect(passed.morguePass).toBe(3 + MORGUE.pass.days - 1)
-    const chemical = (state: GameState) =>
-      riskBreakdown({ ...state, districtId: 'D2' }, 'D3', { includePatrol: false }).lines.some((line) => line.source === 'TAG-CHEMICAL')
-    expect(chemical(passed)).toBe(false)
-    expect(chemical(at('D3', { cargo: [lot('T1-04', 4)] }))).toBe(true)
+    const scanned = (state: GameState) =>
+      riskBreakdown({ ...state, districtId: 'D2' }, 'D3', { includePatrol: false }).lines.some((line) => line.source === 'TAG-BIO')
+    expect(scanned(passed)).toBe(false)
+    expect(scanned(at('D3', { cargo: [lot('T1-04', 4)] }))).toBe(true)
   })
 
   it('soigne jusqu’au plafond, refuse un patient en forme, et vend de l’ICC hors plafond', () => {
