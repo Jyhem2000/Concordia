@@ -1,4 +1,4 @@
-import { START_CASH, START_DEBT, START_DISTRICT, START_HEALTH, START_ICC } from '../data/balance.ts'
+import { DEFAULT_DIFFICULTY, DIFFICULTIES, START_CASH, START_DISTRICT, START_HEALTH, START_ICC } from '../data/balance.ts'
 import { START_VEHICLE, VEHICLES } from '../data/vehicles.ts'
 import { DISTRICT_IDS } from '../data/districts.ts'
 import { crewEffect } from './crew.ts'
@@ -9,17 +9,18 @@ import { drawDayOffer } from './delivery.ts'
 import { drawAfter, drawNightOffer } from './night.ts'
 import { drawPatrol } from './risk.ts'
 import { createRng, seedRng } from './rng.ts'
-import type { DistrictId, GameState } from './types.ts'
+import type { DifficultyId, DistrictId, GameState } from './types.ts'
 import { firstDayLog } from './journal.ts'
 
 /** Nouvelle partie au Jour 1, 06h00 : pas de routine matinale, marchés tirés une première fois. */
-export function createInitialState(seed: number): GameState {
+export function createInitialState(seed: number, difficulty: DifficultyId = DEFAULT_DIFFICULTY): GameState {
   const rng = createRng(seedRng(seed))
   const patrolDistrict = drawPatrol(rng)
   const events = drawEvents(NO_EVENTS, 1, rng, true)
   const markets = drawMarkets({ day: 1, phase: 'day', events }, rng)
   const state: GameState = {
     status: 'playing',
+    difficulty,
     day: 1,
     phase: 'day',
     districtId: START_DISTRICT,
@@ -33,11 +34,12 @@ export function createInitialState(seed: number): GameState {
     events,
     roadEvent: null,
     roadReport: null,
+    routes: [],
     dayTripDone: false,
     nightTripDone: false,
     lastCurfewDay: null,
     cash: START_CASH,
-    debt: START_DEBT,
+    debt: DIFFICULTIES[difficulty].startDebt,
     initialDebtPaid: false,
     advanced: 0,
     modules: { owned: [], mounted: [] },

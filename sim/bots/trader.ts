@@ -12,7 +12,6 @@ import {
   SALE_COMMISSION,
   OFFSHORE_WITHDRAW_FACTOR,
   SEARCH,
-  SURVIVAL_ADVANCE,
 } from '../../src/data/balance.ts'
 import { DISTRICT_IDS, DISTRICTS } from '../../src/data/districts.ts'
 import { CANTINE, CONTRACT, KARMA, SERVICE_REQUIREMENTS, VELVET } from '../../src/data/locations.ts'
@@ -609,7 +608,7 @@ function services(view: GameState, plan: Plan, temperament: Temperament, objecti
     if (amount > 0) return { type: 'repay', amount }
     // Avance de survie : seulement pour ne pas rester bloqué
     if (uses('advance') && isBroke(view) && loanRoom(view) > 0 && !endgame) {
-      return { type: 'borrow', amount: Math.min(loanRoom(view), SURVIVAL_ADVANCE) }
+      return { type: 'borrow', amount: loanRoom(view) }
     }
   }
 

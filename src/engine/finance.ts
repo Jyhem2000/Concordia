@@ -6,7 +6,7 @@ import {
   OFFSHORE_DAILY_RATE,
   VENTURE,
   PROTECTION,
-  SURVIVAL_ADVANCE,
+  DIFFICULTIES,
 } from '../data/balance.ts'
 import { baseValue } from './cargo.ts'
 import { breakdown, type Breakdown } from './breakdown.ts'
@@ -40,7 +40,7 @@ export function nextDebtDeadline(state: GameState): number | null {
 
 /** Avance de survie qu'on peut encore emprunter à `[LOC-D1-1]` : un total sur toute la partie */
 export function loanRoom(state: GameState): number {
-  return Math.max(0, SURVIVAL_ADVANCE - state.advanced)
+  return Math.max(0, DIFFICULTIES[state.difficulty].survivalAdvance - state.advanced)
 }
 
 // ─── Collecte de protection ───
@@ -93,6 +93,11 @@ export function raided(account: OffshoreAccount): OffshoreAccount {
 /** Score : compte offshore et placement du Cartel (chap. 1) */
 export function scoreOf(state: GameState): number {
   return offshoreBalance(state.offshore) + offshoreBalance(state.venture)
+}
+
+/** Patrimoine qui fait la notoriété (chap. 5) : Cash-Puce, offshore et placement, dette non déduite */
+export function notorietyWealth(state: GameState): number {
+  return state.cash + scoreOf(state)
 }
 
 /** Cash-Puce reçu pour un retrait de `amount` ₡ débités du compte, commission déduite */

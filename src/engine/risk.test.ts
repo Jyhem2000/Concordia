@@ -6,8 +6,10 @@ import {
   GOLD_FAST_LANE_FACTOR,
   MASKED_CRATE_WEIGHT,
   NIGHT_TRIP_RISK,
+  NOTORIETY,
   PATROL_RISK,
   RISK_BOUNDS,
+  ROUTE_WATCH,
   SUSPICION_PER_ICC_POINT,
   SUSPICIOUS_PEAK_RISK,
   WANTED,
@@ -16,8 +18,8 @@ import { DISTRICTS } from '../data/districts.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import { TAGS } from '../data/tags.ts'
 import { VEHICLES } from '../data/vehicles.ts'
-import { risk, riskBreakdown } from './risk.ts'
-import { defined, gameAt } from './test-helpers.ts'
+import { nextNotorietyStep, notorietyRisk, risk, riskBreakdown, routeRepeats } from './risk.ts'
+import { defined, gameAt, run } from './test-helpers.ts'
 import type { CargoLot, DistrictId, GameState, ProductId } from './types.ts'
 
 const lot = (productId: ProductId, qty: number): CargoLot => ({ productId, qty, unitCost: 1, travelled: true, boughtDay: 1, damaged: false })
@@ -109,5 +111,44 @@ describe('risque d’interception', () => {
   it('intercepte à coup sûr un Déviant notoire aux détecteurs biométriques', () => {
     expect(risk(gameAt(2, { icc: 10, districtId: 'D5' }), 'D6', { includePatrol: false })).toBe(1)
     expect(risk(gameAt(2, { icc: 10 }), 'D2', { includePatrol: false })).toBeLessThan(1)
+  })
+})
+
+describe('itinéraire repéré et notoriété (chap. 5)', () => {
+  const trip = (day: number, from: DistrictId, to: DistrictId) => ({ day, from, to })
+
+  it('repère une liaison refaite ces derniers jours, dans les deux sens, jusqu’au plafond', () => {
+    const state = gameAt(6, { routes: [trip(4, 'D1', 'D2'), trip(5, 'D2', 'D1'), trip(5, 'D2', 'D3')] })
+    expect(routeRepeats(state, 'D2')).toBe(2)
+    expect(termOf(state, 'D2', 'rule.route-watch')).toBeCloseTo((2 - ROUTE_WATCH.freeTrips) * ROUTE_WATCH.riskPerTrip)
+    // Un simple aller-retour est toléré
+    expect(termOf(gameAt(6, { routes: [trip(5, 'D2', 'D1')] }), 'D2', 'rule.route-watch')).toBe(0)
+    // Une autre liaison n'est pas repérée
+    expect(termOf(state, 'D3', 'rule.route-watch')).toBe(0)
+    const habit = gameAt(6, { routes: Array.from({ length: 6 }, (_, i) => trip(6 - (i % 3), i % 2 ? 'D2' : 'D1', i % 2 ? 'D1' : 'D2')) })
+    expect(termOf(habit, 'D2', 'rule.route-watch')).toBeCloseTo(ROUTE_WATCH.max)
+  })
+
+  it('oublie les trajets sortis de la fenêtre, et ne compte rien en zone hors-réseau', () => {
+    const old = gameAt(10, { routes: [trip(10 - ROUTE_WATCH.days, 'D1', 'D2')] })
+    expect(routeRepeats(old, 'D2')).toBe(0)
+    const toRust = gameAt(6, { routes: [trip(5, 'D4', 'D1')] })
+    expect(termOf(toRust, 'D4', 'rule.route-watch')).toBe(0)
+  })
+
+  it('enregistre chaque trajet fait', () => {
+    const moved = run(gameAt(3), { type: 'travel', to: 'D2' })
+    expect(moved.routes.at(-1)).toEqual({ day: 3, from: 'D1', to: 'D2' })
+  })
+
+  it('ajoute la notoriété par palier de patrimoine, moitié moins au palier Or', () => {
+    const [first, second] = NOTORIETY.steps
+    expect(notorietyRisk(gameAt(10, { cash: first.wealth - 1 }))).toBe(0)
+    expect(nextNotorietyStep(gameAt(10, { cash: first.wealth - 1 }))).toEqual(first)
+    const rich = gameAt(10, { cash: 1_000, offshore: { deposited: second.wealth, interest: 0 }, icc: 80 })
+    expect(notorietyRisk(rich)).toBe(second.risk)
+    expect(termOf(rich, 'D2', 'rule.notoriety')).toBeCloseTo(second.risk)
+    expect(notorietyRisk({ ...rich, icc: 100 })).toBeCloseTo(second.risk * NOTORIETY.goldFactor)
+    expect(termOf(rich, 'D4', 'rule.notoriety')).toBe(0)
   })
 })

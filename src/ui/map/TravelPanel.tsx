@@ -8,7 +8,7 @@ import { averageCost, ownedQty } from '../../engine/cargo.ts'
 import { crewEffect } from '../../engine/crew.ts'
 import { estimatedUnitSale, fuelPriceBreakdown, lastSeen, productStatus } from '../../engine/market.ts'
 import { flyingCheckShare } from '../../engine/interception.ts'
-import { riskBreakdown } from '../../engine/risk.ts'
+import { riskBreakdown, routeRepeats, routeWatchRisk } from '../../engine/risk.ts'
 import { missionFee, missionOffer } from '../../engine/night.ts'
 import type { DistrictId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
@@ -216,7 +216,7 @@ function TravelBar({ districtId }: DistrictIdProps) {
   // planTravel lit plusieurs champs de la partie (phase, carburant, trajets faits…) : on passe l'état entier
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
-  const { t, percent, credits } = useI18n()
+  const { t, percent, signedPercent, credits } = useI18n()
   // Le soir venu, le départ est une tournée de nuit : aperçu sur l'état une fois la nuit tombée (mission comprise)
   const evening = game.phase === 'day' && game.dayTripDone
   const drink = evening ? sleeplessDrink(game) : undefined
@@ -228,6 +228,9 @@ function TravelBar({ districtId }: DistrictIdProps) {
   // Ronde renforcée cachée : la part affichée est celle du district
   const revealed = Boolean(crewEffect(game, 'revealsPatrol'))
   const flying = flyingCheckShare(from, districtId, revealed)
+  // Liaison déjà faite ces derniers jours : Aeterna la surveille (chap. 5), hors zone hors-réseau
+  const repeats = routeRepeats(from, districtId)
+  const watched = DISTRICTS[districtId].offGrid ? 0 : routeWatchRisk(from, districtId)
   const route = plan.crossed.length === 0 ? t.travel.direct : t.travel.via(plan.crossed.map((id) => t.district[id].name).join(', '))
   // Produit qui mène à l'exécution sommaire si la soute est fouillée : la tournée de nuit demande confirmation
   const lethal = PRODUCT_IDS.find((id) => PRODUCTS[id].lethalOnSearch && ownedQty(game.cargo, id) > 0)
@@ -256,6 +259,7 @@ function TravelBar({ districtId }: DistrictIdProps) {
           />
         </span>
         {flying > 0 && <span>· {t.travel.flyingShare(percent(flying, 0))}</span>}
+        {watched > 0 && <span className="text-warning">· {t.travel.routeWatched(repeats, signedPercent(watched, 0))}</span>}
       </div>
       <ConfirmButton
         variant={evening && !mission ? 'danger' : 'primary'}

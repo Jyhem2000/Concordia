@@ -372,6 +372,12 @@ export type Crew = {
 /** Service de jour (06h00 – 20h00) ou tournée de nuit (chap. 1) */
 export type Phase = 'day' | 'night'
 
+/** Mode de difficulté (chap. 1) : Citoyen, Passeur, Hors-la-loi */
+export type DifficultyId = 'citizen' | 'smuggler' | 'outlaw'
+
+/** Trajet fait, pour l'itinéraire repéré (chap. 5) */
+export type RouteTrip = { day: number; from: DistrictId; to: DistrictId }
+
 /** `finished` : audit du Jour 30 passé ou défaite ; la fin est dans `GameState.ending` */
 export type GameStatus = 'playing' | 'finished'
 
@@ -678,6 +684,8 @@ export type MarketMemory = {
  */
 export type GameState = {
   status: GameStatus
+  /** Mode de difficulté, fixé au lancement (chap. 1) */
+  difficulty: DifficultyId
   /** Jour 1 à 30 */
   day: number
   phase: Phase
@@ -698,6 +706,8 @@ export type GameState = {
   /** Aléa routier en attente du choix du joueur : le trajet est suspendu */
   roadEvent: RoadEventId | null
   roadReport: RoadReport | null
+  /** Trajets des derniers jours, pour l'itinéraire repéré (chap. 5) */
+  routes: readonly RouteTrip[]
   dayTripDone: boolean
   nightTripDone: boolean
   /** Dernier jour où le couvre-feu a été forcé (épuisement nerveux, chap. 1) */

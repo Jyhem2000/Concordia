@@ -1,6 +1,6 @@
 import { Landmark, Lock } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { SURVIVAL_ADVANCE, VENTURE } from '../../data/balance.ts'
+import { DIFFICULTIES, VENTURE } from '../../data/balance.ts'
 import { CANTINE, LOCATIONS } from '../../data/locations.ts'
 import { VEHICLES } from '../../data/vehicles.ts'
 import { locationOpen, maxRepay } from '../../engine/actions.ts'
@@ -139,6 +139,7 @@ function DebtDesk() {
   const dispatch = useGameStore((s) => s.dispatch)
   const { t, credits } = useI18n()
   const room = loanRoom(game)
+  const advance = DIFFICULTIES[game.difficulty].survivalAdvance
 
   return (
     <>
@@ -149,7 +150,9 @@ function DebtDesk() {
       <AmountForm label={t.place.repay} max={maxRepay(game)} onSubmit={(amount) => dispatch({ type: 'repay', amount })} />
       <AmountForm label={t.place.borrow} variant="danger" max={room} onSubmit={(amount) => dispatch({ type: 'borrow', amount })} />
       <Hint>
-        {t.place.loanRoom(credits(room))} · {t.place.advanceRule(credits(SURVIVAL_ADVANCE))}
+        {advance > 0
+          ? `${t.place.loanRoom(credits(room))} · ${t.place.advanceRule(credits(advance))}`
+          : t.place.noAdvance(t.difficulty.modes[game.difficulty].name)}
       </Hint>
       <ContractCard kind="offer" />
       <ContractCard kind="active" />

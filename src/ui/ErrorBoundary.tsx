@@ -36,7 +36,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     const { t } = getI18n(useSettingsStore.getState().locale)
     const retry = () => this.setState({ failed: false })
     const restart = () => {
-      useGameStore.getState().newGame()
+      useGameStore.getState().newGame(useSettingsStore.getState().difficulty)
       retry()
     }
 

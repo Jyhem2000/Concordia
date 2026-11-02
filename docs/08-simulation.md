@@ -25,7 +25,7 @@ Le cœur de la stratégie : l'équipement visé, la famille de produits, les mé
 | **Couverture légale** | `[VEH-02]`, `[MOD-02]` | soute diluée de Tier 0, masquage, produits odorants | La dilution vaut-elle la place perdue en soute ? |
 | **Électronique** | `[MOD-03]` | `[TAG-TECH]` vers `[D5]` et `[D6]` | Le blindage rend-il la Tech rentable ? |
 | **Nuit festive** | `[MOD-04]`, `[MOD-06]` | tournées de nuit sur mission (et hors mission quand la marge le justifie), produits Festifs, fuite | La nuit paie-t-elle son risque, son usure et la place des caisses scellées ? |
-| **Fuite au sommet** | `[MOD-06]`, `[MOD-09]`, `[CREW-02]` (et `[MOD-01]` en variante mesurée par retrait) | haut tier vers `[D5]` et `[D6]`, fuite, brouilleur contre les contrôles volants | Le brouilleur rend-il la fuite viable au sommet sans devenir incontournable ? |
+| **Fuite au sommet** | `[VEH-03]`, `[MOD-06]`, `[MOD-09]`, `[CREW-02]` (et `[MOD-01]` en variante mesurée par retrait) | haut tier vers `[D5]` et `[D6]`, fuite, brouilleur contre les contrôles volants | Le brouilleur rend-il la fuite viable au sommet sans devenir incontournable ? |
 | **Corruption** | `[CREW-01]`, `[MOD-08]` | paiement en nature, connivence, `[TAG-ADDICTIVE]` | Payer les agents est-il une stratégie, pas un dernier recours ? |
 | **Citoyen modèle** | `[VEH-02]`, `[MOD-08]` | ICC au palier Or, bluff, coupe-file, services qui rendent de l'ICC | Garder l'ICC haut est-il tenable et rentable ? |
 | **Rentier** | `[CREW-02]` | cours en temps réel, dépôts offshore précoces | Les intérêts suffisent-ils à porter une partie ? |
@@ -74,7 +74,7 @@ L'objectif change surtout les décisions de fin de partie et quelques contrainte
 ---
 
 ## Mise en œuvre
-* **Où :** tout ce qui concerne la simulation est regroupé dans le dossier `sim/`, à part du jeu (`src/`), qu'il utilise sans jamais le modifier : moteur de parties, bots, campagnes, rapports (`sim/reports/`, versionnés) et commande `npm run simulate -- <campagne> [parties]` (`sim/cli.ts` ; campagnes `controle`, `plans` (1), `fins` (2), `hasard` (3), `retraits` (4)). Le jeu ne dépend jamais de `sim/`. Les données brutes par partie restent hors du dépôt.
+* **Où :** tout ce qui concerne la simulation est regroupé dans le dossier `sim/`, à part du jeu (`src/`), qu'il utilise sans jamais le modifier : moteur de parties, bots, campagnes, rapports (`sim/reports/`, versionnés) et commande `npm run simulate -- <campagne> [parties]` (`sim/cli.ts` ; campagnes `controle`, `plans` (1), `fins` (2), `hasard` (3), `retraits` (4), `difficulte` (modes)). Le jeu ne dépend jamais de `sim/`. Les données brutes par partie restent hors du dépôt.
 * **Une partie :** une graine, un bot, puis une boucle « le bot choisit une action, le moteur l'applique » jusqu'à la fin. Un bot est sans mémoire de la partie : il décide à partir de la vue publique seule (l'Aléatoire tire en plus avec son propre générateur, jamais avec celui de la partie). Une action refusée par le moteur est comptée (c'est un défaut du bot) ; au-delà d'un plafond d'actions dans une même journée, la partie force le sommeil et le note.
 * **Robustesse :** après chaque action de l'Aléatoire, des **invariants** sont vérifiés (Cash-Puce et dette jamais négatifs, soute dans sa capacité, jauges dans leurs bornes, réservoir plein au plus, une seule interception à la fois…). Une violation est un bug du moteur, rejoué depuis sa graine.
 * **Paramètres des bots :** plans, tempéraments et seuils dans `sim/plans.ts` et `sim/bots/trader.ts` ; chaque rapport les cite.
@@ -91,7 +91,7 @@ L'objectif change surtout les décisions de fin de partie et quelques contrainte
   2. plans à logique propre (Fuite au sommet, Citoyen modèle, Opportuniste, Saboteur), objectifs de grande fin : campagnes 2 et 3 ;
 
 ### Étape 2 : plans à logique propre et objectifs de grande fin
-* **Fuite au sommet :** pare-buffles, brouilleur et Glitch ; préfère la fuite à espérance proche ; favorise la Culture (haut de gamme des districts du sommet).
+* **Fuite au sommet :** pare-buffles, brouilleur et Glitch, sur la Panacea (transpondeur en `[D3]` et `[D5]`, et assez d'emplacements pour monter tous ses modules : sur la fourgonnette de départ, à un seul emplacement, le brouilleur restait au garage) ; préfère la fuite à espérance proche ; favorise la Culture (haut de gamme des districts du sommet).
 * **Citoyen modèle :** `[VEH-02]` et faux terminal, soute diluée de Tier 0 ; défend un ICC de 90 : certificat de la Morgue et chantage du Velvet-Silo sous ce seuil, pertes d'ICC pesées quatre fois plus lourd au barrage.
 * **Opportuniste :** aucun équipement ; joue les événements du jour (visibles dans tous les districts, voir ci-dessous), prend les commandes VIP du Velvet-Silo (achète les caisses demandées, revient livrer) et commande des paniques à Karma-Cham. **Non joué :** la spéculation sur l'événement de demain (rumeur, prédiction de Cassandre-88). Essayée, elle perdait la moitié du score : parier sur demain sans lier ce pari à l'itinéraire revient à garder des caisses qui ne se vendent pas. Elle est laissée à l'optimiseur (étape 4), comme le faux dossier de Loterie.
 * **Saboteur :** `[VEH-04]` et brouillage Tech, Tech favorisée.
@@ -147,6 +147,7 @@ Cibles de départ, à recaler avec les premières mesures.
 | 3 | À graine égale (mêmes tirages), un choix meilleur en moyenne gagne au moins 60 % des parties départagées : l'Équilibré contre le Prudent, chaque plan équipé contre le Sans build. L'écart entre graines d'un même bot, lui, peut rester grand : c'est l'effet boule de neige d'un jeu de négoce. |
 | 4 | Chaque équipement, équipier et lieu spécial améliore le plan qui le vise ; un élément sans effet mesurable est à revoir. |
 | 5 | L'optimiseur ne dépasse pas de loin le meilleur plan conçu ; sinon, la stratégie trouvée est documentée puis corrigée ou assumée comme build. |
+| Modes | Toutes les campagnes jouent le mode Passeur, sauf la campagne des modes (`difficulte` : Novice et Sans build dans les trois tempéraments, dans chaque mode). En Citoyen, le Novice survit presque toujours ; en Hors-la-loi, le Sans build Équilibré perd nettement plus souvent qu'en Passeur. Dans chaque mode, l'ordre des tempéraments tient (le casse-cou gagne plus et survit moins). |
 
 ## Lecture des résultats
 * Rapports et analyses : dossier `sim/reports/` (un rapport généré par campagne, plus une analyse rédigée par étape).

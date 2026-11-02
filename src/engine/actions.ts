@@ -1,4 +1,4 @@
-import { FUEL_PER_CROSSED_DISTRICT, ICC_MAX, NIGHT_TRIP_CHASSIS_WEAR, PUMP_NIGHT_MIN_ICC, SIPHON } from '../data/balance.ts'
+import { FUEL_PER_CROSSED_DISTRICT, ICC_MAX, NIGHT_TRIP_CHASSIS_WEAR, PUMP_NIGHT_MIN_ICC, ROUTE_WATCH, SIPHON } from '../data/balance.ts'
 import { DISTRICTS } from '../data/districts.ts'
 import { LOCATIONS } from '../data/locations.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
@@ -335,6 +335,8 @@ function travel(state: GameState, to: DistrictId): ActionResult {
   const arrived: GameState = {
     ...state,
     districtId: to,
+    // Aeterna recoupe les passages aux portiques : le trajet compte pour l'itinéraire repéré (chap. 5)
+    routes: [...state.routes.filter((trip) => trip.day > state.day - ROUTE_WATCH.days), { day: state.day, from: state.districtId, to }],
     fuel: state.fuel - plan.fuelCost,
     health: stroke?.state.health ?? state.health,
     chassis: Math.max(0, state.chassis - wear.chassisWear),

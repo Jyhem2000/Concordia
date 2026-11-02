@@ -7,6 +7,7 @@ import { isDefeat } from '../../engine/routine.ts'
 import type { EndingId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
+import { useSettingsStore } from '../../stores/settingsStore.ts'
 import CareerView, { FeatChips } from '../fil/CareerView.tsx'
 import { useHighlightText } from '../fil/useHighlightText.ts'
 import WealthChart from '../fil/WealthChart.tsx'
@@ -31,6 +32,8 @@ type RecapStatsProps = {
 export default function EndScreen() {
   const game = useGameStore((s) => s.game)
   const newGame = useGameStore((s) => s.newGame)
+  // La nouvelle partie reprend le dernier mode choisi (chap. 1)
+  const difficulty = useSettingsStore((s) => s.difficulty)
   const { t, credits } = useI18n()
   const text = useHighlightText()
   // Bilan copié faute de partage natif : état d'interface éphémère
@@ -39,6 +42,7 @@ export default function EndScreen() {
   const defeat = isDefeat(id)
   const score = defeat || !game.ending ? null : game.ending.score
   const recap = recapOf(game)
+  const mode = t.difficulty.modes[game.difficulty].name
   const feats = featsOf(game)
   // Cartouche de la partie : les faits marquants de chaque journée, sans les simples trajets
   const highlights = game.journal.flatMap((log) =>
@@ -49,7 +53,9 @@ export default function EndScreen() {
   const share = async () => {
     const r = t.recap
     const lines = [
-      score === null ? r.shareDefeat(t.end.endings[id].title, recap.days) : r.shareVictory(t.end.endings[id].title, credits(score), recap.days),
+      score === null
+        ? r.shareDefeat(t.end.endings[id].title, recap.days, mode)
+        : r.shareVictory(t.end.endings[id].title, credits(score), recap.days, mode),
       r.shareStats(recap.controls, recap.escapes, recap.trips.night),
       ...(feats.length > 0 ? [r.shareFeats(feats.map((feat) => t.records.feat[feat].name).join(', '))] : []),
     ]
@@ -68,7 +74,9 @@ export default function EndScreen() {
       <header className={`rounded-lg border p-4 text-center ${defeat ? 'border-danger/40 bg-danger/10' : 'border-accent/40 bg-accent/10'}`}>
         {defeat && <p className="text-sm font-bold tracking-widest text-danger uppercase">{t.end.gameOver}</p>}
         <h1 className={`mt-1 text-3xl font-bold ${defeat ? 'text-danger' : 'text-accent'}`}>{t.end.endings[id].title}</h1>
-        <p className="mt-1 text-xs text-ink-muted uppercase">{t.recap.reached(recap.days, t.district[game.districtId].name)}</p>
+        <p className="mt-1 text-xs text-ink-muted uppercase">
+          {t.recap.reached(recap.days, t.district[game.districtId].name)} · {t.hud.dayMode(mode)}
+        </p>
         <p className="mx-auto mt-3 max-w-2xl text-ink-soft">{t.end.endings[id].epilogue}</p>
         {score !== null && (
           <p className="mt-3">
@@ -120,7 +128,7 @@ export default function EndScreen() {
       </Panel>
 
       <div className="flex flex-wrap justify-center gap-2 print:hidden">
-        <Button variant="primary" onClick={newGame}>
+        <Button variant="primary" onClick={() => newGame(difficulty)}>
           <RotateCcw size={14} aria-hidden="true" />
           {t.hud.newGame}
         </Button>

@@ -55,8 +55,8 @@ function pair(
 const withoutModule = (base: Plan, id: ModuleId): Plan => ({ ...base, modules: base.modules.filter((module) => module !== id) })
 const withPlaces = (base: Plan, extra: readonly PlaceUse[]): Plan => ({ ...base, places: ['advance', ...extra] })
 
-/** Plan dédié au brouilleur de drones : fuite au sommet (chap. 8, étape 2 pour ses autres réglages) */
-const FLIGHT: Plan = { name: 'Fuite au sommet', modules: ['MOD-06', 'MOD-09'], crew: 'CREW-02', runner: true }
+/** Plan dédié au brouilleur de drones : fuite au sommet, sur la Panacea pour monter tous ses modules (chap. 8, étape 2 pour ses autres réglages) */
+const FLIGHT: Plan = { name: 'Fuite au sommet', vehicle: 'VEH-03', modules: ['MOD-06', 'MOD-09'], crew: 'CREW-02', runner: true }
 
 /** Fuite au sommet avec l'assistance de conduite */
 const FLIGHT_ASSIST: Plan = { ...FLIGHT, name: 'Fuite au sommet + assistance', modules: [...FLIGHT.modules, 'MOD-01'] }

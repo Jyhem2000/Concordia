@@ -5,16 +5,16 @@
 
 | Bot | Parties | Survie | dont ruinés à 0 ₡ | Défaites | Fins | Score moyen | Score p10 / médiane / p90 | Score médian des survivants | Dette soldée (jour médian) | Interceptions | Jours de garde à vue | Équipement acheté |
 | :--- | ---: | ---: | ---: | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |
-| Couverture légale · Équilibré · Baron | 200 | 86 % | 4 % | bio-bricks 14 % | standard 60 %, mafia 26 % | 86 678 ₡ | 0 ₡ / 72 120 ₡ / 207 144 ₡ | 87 016 ₡ | 93 % (J3) | 9.3 (30 % des trajets) | 2.5 | MOD-02 77 %, VEH-02 39 % |
-| Haut tier · Équilibré · Baron | 200 | 82 % | 9 % | bio-bricks 18 % | standard 68 %, mafia 14 % | 52 798 ₡ | 0 ₡ / 19 706 ₡ / 172 610 ₡ | 43 925 ₡ | 90 % (J4) | 9.1 (34 % des trajets) | 2.9 | MOD-07 56 %, MOD-10 31 %, VEH-04 23 % |
-| Rentier · Équilibré · Baron | 200 | 84 % | 8 % | bio-bricks 17 % | standard 73 %, mafia 11 % | 55 755 ₡ | 0 ₡ / 36 782 ₡ / 153 204 ₡ | 58 512 ₡ | 91 % (J2) | 9.1 (35 % des trajets) | 2.7 | CREW-02 75 % |
-| Citoyen modèle · Équilibré · Élite | 200 | 88 % | 24 % | bio-bricks 13 % | standard 57 %, mafia 24 %, elite 7 % | 99 402 ₡ | 0 ₡ / 49 650 ₡ / 263 681 ₡ | 70 553 ₡ | 94 % (J3) | 10.3 (32 % des trajets) | 2.6 | VEH-02 37 %, MOD-08 35 % |
-| Couverture légale · Équilibré · Élite | 200 | 85 % | 21 % | bio-bricks 16 % | standard 57 %, mafia 21 %, elite 7 % | 94 487 ₡ | 0 ₡ / 48 480 ₡ / 268 915 ₡ | 86 630 ₡ | 94 % (J3) | 9.9 (31 % des trajets) | 2.9 | MOD-02 76 %, VEH-02 39 % |
-| Rentier · Équilibré · Élite | 200 | 85 % | 24 % | bio-bricks 15 % | standard 71 %, mafia 11 %, elite 3 % | 59 845 ₡ | 0 ₡ / 32 060 ₡ / 188 934 ₡ | 47 597 ₡ | 91 % (J2) | 9.9 (36 % des trajets) | 2.8 | CREW-02 74 % |
-| Fuite au sommet · Équilibré · Fantôme | 200 | 74 % | 23 % | bio-bricks 18 %, execution 9 % | standard 62 %, resident 9 %, mafia 4 % | 46 591 ₡ | 0 ₡ / 49 ₡ / 159 487 ₡ | 39 328 ₡ | 93 % (J2) | 8.9 (36 % des trajets) | 2.2 | MOD-06 76 %, CREW-02 74 %, MOD-09 70 % |
-| Rentier · Équilibré · Fantôme | 200 | 64 % | 14 % | bio-bricks 21 %, execution 16 % | standard 55 %, resident 6 %, mafia 4 % | 41 621 ₡ | 0 ₡ / 16 ₡ / 149 584 ₡ | 34 836 ₡ | 91 % (J2) | 8.5 (35 % des trajets) | 2.5 | CREW-02 75 % |
-| Saboteur · Équilibré · Saboteur | 200 | 80 % | 11 % | bio-bricks 21 % | standard 69 %, mafia 11 % | 54 114 ₡ | 0 ₡ / 5 955 ₡ / 151 337 ₡ | 33 620 ₡ | 91 % (J4) | 9.4 (35 % des trajets) | 3.1 | MOD-03 61 %, VEH-04 26 % |
-| Haut tier · Équilibré · Saboteur | 200 | 82 % | 9 % | bio-bricks 18 % | standard 69 %, mafia 13 % | 57 873 ₡ | 0 ₡ / 19 706 ₡ / 176 928 ₡ | 43 925 ₡ | 90 % (J4) | 9.5 (34 % des trajets) | 3.1 | MOD-07 56 %, MOD-10 31 %, VEH-04 24 % |
+| Couverture légale · Équilibré · Baron | 200 | 87 % | 4 % | bio-bricks 14 % | standard 56 %, mafia 31 % | 91 372 ₡ | 0 ₡ / 74 603 ₡ / 205 421 ₡ | 92 284 ₡ | 94 % (J3) | 9.8 (32 % des trajets) | 2.4 | MOD-02 78 %, VEH-02 43 % |
+| Haut tier · Équilibré · Baron | 200 | 83 % | 9 % | bio-bricks 17 % | standard 73 %, mafia 10 % | 52 843 ₡ | 0 ₡ / 22 429 ₡ / 152 019 ₡ | 48 346 ₡ | 91 % (J4) | 9.4 (34 % des trajets) | 2.7 | MOD-07 59 %, MOD-10 34 %, VEH-04 28 % |
+| Rentier · Équilibré · Baron | 200 | 89 % | 10 % | bio-bricks 12 % | standard 77 %, mafia 12 % | 58 285 ₡ | 0 ₡ / 40 363 ₡ / 153 586 ₡ | 54 163 ₡ | 92 % (J2) | 8.9 (33 % des trajets) | 2.5 | CREW-02 74 % |
+| Citoyen modèle · Équilibré · Élite | 200 | 87 % | 20 % | bio-bricks 14 % | standard 53 %, mafia 27 %, elite 7 % | 109 030 ₡ | 0 ₡ / 68 189 ₡ / 279 306 ₡ | 87 730 ₡ | 95 % (J3) | 10.7 (32 % des trajets) | 2.4 | VEH-02 44 %, MOD-08 40 % |
+| Couverture légale · Équilibré · Élite | 200 | 85 % | 20 % | bio-bricks 16 % | standard 57 %, mafia 19 %, elite 9 % | 92 997 ₡ | 0 ₡ / 62 116 ₡ / 247 527 ₡ | 82 411 ₡ | 95 % (J3) | 10.3 (32 % des trajets) | 2.8 | MOD-02 77 %, VEH-02 40 % |
+| Rentier · Équilibré · Élite | 200 | 84 % | 23 % | bio-bricks 16 % | standard 71 %, mafia 11 %, elite 3 % | 57 635 ₡ | 0 ₡ / 24 829 ₡ / 173 699 ₡ | 39 776 ₡ | 92 % (J2) | 9.9 (36 % des trajets) | 2.6 | CREW-02 75 % |
+| Fuite au sommet · Équilibré · Fantôme | 200 | 75 % | 28 % | bio-bricks 19 %, execution 7 % | standard 70 %, resident 3 %, mafia 2 % | 38 183 ₡ | 0 ₡ / 0 ₡ / 131 678 ₡ | 12 827 ₡ | 92 % (J2) | 9.1 (37 % des trajets) | 2.7 | CREW-02 77 %, MOD-06 64 %, MOD-09 55 %, VEH-03 47 % |
+| Rentier · Équilibré · Fantôme | 200 | 70 % | 16 % | bio-bricks 17 %, execution 14 % | standard 64 %, mafia 4 %, resident 3 % | 37 415 ₡ | 0 ₡ / 487 ₡ / 135 150 ₡ | 32 385 ₡ | 92 % (J2) | 8.5 (35 % des trajets) | 2.5 | CREW-02 74 % |
+| Saboteur · Équilibré · Saboteur | 200 | 83 % | 11 % | bio-bricks 17 % | standard 69 %, mafia 14 % | 60 818 ₡ | 0 ₡ / 15 438 ₡ / 182 339 ₡ | 35 382 ₡ | 93 % (J4) | 9.5 (35 % des trajets) | 3.1 | MOD-03 61 %, VEH-04 30 % |
+| Haut tier · Équilibré · Saboteur | 200 | 83 % | 9 % | bio-bricks 18 % | standard 72 %, mafia 11 % | 54 116 ₡ | 0 ₡ / 21 774 ₡ / 153 726 ₡ | 46 528 ₡ | 91 % (J4) | 9.7 (35 % des trajets) | 2.8 | MOD-07 60 %, MOD-10 34 %, VEH-04 29 % |
 
 ## Parcours type
 
@@ -22,16 +22,16 @@ Lu dans le carnet de route de chaque partie : patrimoine net médian (cash + off
 
 | Bot | Patrimoine J5 | Patrimoine J10 | Patrimoine J20 | Patrimoine J30 | 1er équipement | Contrôles avec pertes | Contrats livrés / manqués | Coups de filet |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Couverture légale · Équilibré · Baron | 6 587 ₡ | 20 087 ₡ | 43 092 ₡ | 75 226 ₡ | J6 | 3.6 | 0.7 / 0.2 | 0.3 |
-| Haut tier · Équilibré · Baron | 3 159 ₡ | 5 134 ₡ | 10 510 ₡ | 24 493 ₡ | J9 | 4.0 | 0.6 / 0.2 | 0.1 |
-| Rentier · Équilibré · Baron | 3 305 ₡ | 9 020 ₡ | 30 873 ₡ | 37 194 ₡ | J5 | 3.3 | 0.5 / 0.2 | 0.2 |
-| Citoyen modèle · Équilibré · Élite | 6 638 ₡ | 12 363 ₡ | 41 326 ₡ | 64 525 ₡ | J11 | 3.8 | 0.7 / 0.2 | 0.2 |
-| Couverture légale · Équilibré · Élite | 6 587 ₡ | 17 183 ₡ | 42 378 ₡ | 58 438 ₡ | J6 | 4.1 | 0.7 / 0.3 | 0.2 |
-| Rentier · Équilibré · Élite | 3 415 ₡ | 8 956 ₡ | 31 520 ₡ | 34 671 ₡ | J5 | 4.1 | 0.5 / 0.1 | 0.4 |
-| Fuite au sommet · Équilibré · Fantôme | 4 156 ₡ | 6 287 ₡ | 15 228 ₡ | 12 300 ₡ | J4 | 2.5 | 0.5 / 0.2 | 0.1 |
-| Rentier · Équilibré · Fantôme | 3 305 ₡ | 7 871 ₡ | 26 620 ₡ | 19 481 ₡ | J5 | 3.3 | 0.4 / 0.2 | 0.2 |
-| Saboteur · Équilibré · Saboteur | 1 958 ₡ | 6 397 ₡ | 3 271 ₡ | 7 857 ₡ | J10 | 4.0 | 0.6 / 0.2 | 0.1 |
-| Haut tier · Équilibré · Saboteur | 3 159 ₡ | 5 134 ₡ | 10 510 ₡ | 24 493 ₡ | J9 | 4.3 | 0.6 / 0.2 | 0.2 |
+| Couverture légale · Équilibré · Baron | 5 345 ₡ | 17 722 ₡ | 50 111 ₡ | 74 603 ₡ | J6 | 3.4 | 0.6 / 0.2 | 0.2 |
+| Haut tier · Équilibré · Baron | 1 763 ₡ | 7 750 ₡ | 15 886 ₡ | 24 351 ₡ | J9 | 4.3 | 0.6 / 0.2 | 0.3 |
+| Rentier · Équilibré · Baron | 3 415 ₡ | 10 667 ₡ | 32 454 ₡ | 40 363 ₡ | J4 | 3.4 | 0.5 / 0.1 | 0.3 |
+| Citoyen modèle · Équilibré · Élite | 5 468 ₡ | 12 778 ₡ | 57 554 ₡ | 77 601 ₡ | J12 | 3.8 | 0.7 / 0.2 | 0.3 |
+| Couverture légale · Équilibré · Élite | 5 363 ₡ | 15 700 ₡ | 45 667 ₡ | 71 172 ₡ | J6 | 4.0 | 0.6 / 0.2 | 0.2 |
+| Rentier · Équilibré · Élite | 3 445 ₡ | 10 667 ₡ | 28 333 ₡ | 31 137 ₡ | J4 | 4.2 | 0.5 / 0.2 | 0.3 |
+| Fuite au sommet · Équilibré · Fantôme | 3 723 ₡ | 3 443 ₡ | 485 ₡ | 486 ₡ | J4 | 2.5 | 0.5 / 0.1 | 0.1 |
+| Rentier · Équilibré · Fantôme | 3 415 ₡ | 9 368 ₡ | 18 104 ₡ | 17 096 ₡ | J4 | 3.3 | 0.4 / 0.2 | 0.3 |
+| Saboteur · Équilibré · Saboteur | 1 958 ₡ | 6 967 ₡ | 8 826 ₡ | 16 133 ₡ | J9 | 4.3 | 0.6 / 0.2 | 0.2 |
+| Haut tier · Équilibré · Saboteur | 1 763 ₡ | 7 750 ₡ | 15 886 ₡ | 24 351 ₡ | J9 | 4.5 | 0.6 / 0.2 | 0.3 |
 
 ## Défauts relevés
 Aucun : pas d’action refusée, pas de sommeil forcé, aucun invariant violé.

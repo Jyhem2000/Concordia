@@ -86,13 +86,13 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 * *Lore :* les transactions du marché noir se font de puce à puce, en local. Pour économiser ses serveurs, Aeterna n'analyse jamais l'historique P2P : à l'audit, elle formate brutalement toutes les puces. Personne n'est démasqué, mais tout crédit non transféré offshore est vaporisé.
 
 ### Dette mafieuse
-* **Créancier :** `[LOC-D1-1]`. **Solde unique :** la dette de départ, l'avance de survie et les reliquats (dépannage, collecte) s'ajoutent au même solde. **Départ :** [`balance.ts`](../src/data/balance.ts).
+* **Créancier :** `[LOC-D1-1]`. **Solde unique :** la dette de départ, l'avance de survie et les reliquats (dépannage, collecte) s'ajoutent au même solde. **Départ :** selon le mode de difficulté (voir *Modes de difficulté*).
 * **Dette initiale soldée :** statut acquis **définitivement** la première fois que le solde atteint 0. Il débloque la collecte de protection et la modale « Objectifs du Jour 30 ».
 * **Taux :** un taux quotidien, arrondi au ₡ chaque matin (`DEBT_DAILY_RATE` dans [`balance.ts`](../src/data/balance.ts)) sur tout le solde, composés à chaque routine matinale (pas le Jour 1).
 * **Échéances :**
   * **Retard** (jour, taux majoré et malus de risque : `DEBT_LATE` dans [`balance.ts`](../src/data/balance.ts)) **:** à 06h00 du jour d'échéance, si la dette initiale n'a **jamais** été soldée, le taux est majoré et ses hommes de main renseignent patrouilles et milices : malus au risque d'interception partout (*embuscades*). Ces deux pénalités restent acquises jusqu'à la fin de la partie, même après remboursement.
   * **Jour 30, minuit :** audit — le solde doit être à 0 (chap. 1).
-* **Avance de survie :** Viktor avance au plus une somme fixe **sur toute la partie**, dette initiale soldée ou non (`SURVIVAL_ADVANCE` dans [`balance.ts`](../src/data/balance.ts)), ajoutée au solde au taux en vigueur. *Lore :* un débiteur à sec ne rembourse rien ; Viktor avance de quoi repartir, une fois. *Intention :* un joueur ruiné par un barrage n'est jamais bloqué sans issue, mais sa dette, et la menace de l'audit, grossissent ; prise tard, elle remet une dette en jeu avant l'audit. Les remboursements ne reconstituent pas l'avance.
+* **Avance de survie :** Viktor avance au plus une somme fixe **sur toute la partie**, dette initiale soldée ou non, selon le mode de difficulté (réduite en Hors-la-loi), ajoutée au solde au taux en vigueur. *Lore :* un débiteur à sec ne rembourse rien ; Viktor avance de quoi repartir, une fois. *Intention :* un joueur ruiné par un barrage n'est jamais bloqué sans issue, mais sa dette, et la menace de l'audit, grossissent ; prise tard, elle remet une dette en jeu avant l'audit. Les remboursements ne reconstituent pas l'avance.
 * **Augmentée** par l'avance de survie, le dépannage d'urgence (chap. 1) et la collecte de protection ; **réduite** par les remboursements à `[LOC-D1-1]`.
 
 ### Collecte de protection
@@ -120,6 +120,13 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 
 ### Score
 * **Score final** = solde du compte offshore + solde du placement du Cartel, à l'audit.
+
+### Modes de difficulté
+* **Choix :** à l'accueil, avant chaque nouvelle partie (le dernier choix est retenu dans les réglages du joueur). Le mode est fixé pour toute la partie, rappelé dans le bandeau et inscrit au bilan de fin.
+* **Citoyen** pour découvrir, **Passeur** (le jeu tel que décrit dans ces docs, mode par défaut), **Hors-la-loi** pour qui connaît le jeu.
+* **Trois réglages seulement** (`DIFFICULTIES` dans [`balance.ts`](../src/data/balance.ts)) : la dette de départ, l'avance de survie de Viktor (réduite en Hors-la-loi : la supprimer coûtait près de la moitié des parties) et un facteur sur les amendes de la BRC (chap. 5). Tout le reste est commun : risque, marché, événements, et les seuils des grandes fins.
+* **Carrière :** un meilleur score par mode ; les fins atteintes et les hauts faits comptent quel que soit le mode.
+* *Intention :* la difficulté se choisit plutôt qu'elle ne se subit. Le débutant a de la marge pour apprendre, l'habitué retrouve la peur des premiers jours. Les réglages retenus frappent le début de partie et ce qu'on transporte, sans casser l'ordre des tempéraments (chap. 8) : une dette plus lourde pèse sur tous, des amendes plus lourdes surtout sur qui transporte cher.
 
 ---
 

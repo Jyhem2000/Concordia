@@ -74,7 +74,7 @@ export const MODULES: Readonly<Record<ModuleId, Module>> = {
     price: 4_000,
     category: 'tactical',
     fitting: 'adaptable',
-    ram: { fleeBonus: 0.4, damageFactor: 0.5 },
+    ram: { fleeBonus: 0.2, damageFactor: 0.5 },
   },
   'MOD-07': {
     requires: [{ kind: 'debtPaid' }],

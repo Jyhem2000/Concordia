@@ -3,6 +3,7 @@ import { traderBot } from './bots/trader.ts'
 import { NOVICE, NOVICE_TEMPERAMENT, PLANS, TEMPERAMENTS } from './plans.ts'
 import { renderReport, renderSpread, summarize } from './report.ts'
 import { playGame, type Bot } from './runner.ts'
+import type { DifficultyId } from '../src/engine/types.ts'
 
 /*
  * Campagnes de simulation (chap. 8). Chaque bot joue les mêmes graines, pour comparer à hasard égal.
@@ -19,6 +20,16 @@ export type Campaign = {
 
 const plan = (name: string) => PLANS.find((entry) => entry.name === name) ?? PLANS[0]
 const balanced = TEMPERAMENTS[1]
+
+/** Modes de difficulté joués par la campagne des modes, avec leur nom de rapport (chap. 1) */
+const MODES: readonly { id: DifficultyId; name: string }[] = [
+  { id: 'citizen', name: 'Citoyen' },
+  { id: 'smuggler', name: 'Passeur' },
+  { id: 'outlaw', name: 'Hors-la-loi' },
+]
+
+/** Le même bot, dans un mode de difficulté */
+const inMode = (bot: Bot, mode: (typeof MODES)[number]): Bot => ({ ...bot, name: `${bot.name} · ${mode.name}`, difficulty: mode.id })
 
 export const CAMPAIGNS: Readonly<Record<string, Campaign>> = {
   controle: {
@@ -56,6 +67,16 @@ export const CAMPAIGNS: Readonly<Record<string, Campaign>> = {
       () => traderBot(plan('Couverture légale'), balanced, 'mafia'),
     ],
     spread: true,
+  },
+  difficulte: {
+    title: 'Campagne des modes — Citoyen, Passeur, Hors-la-loi',
+    notes: [
+      'Le Novice et le plan Sans build dans les trois tempéraments, dans chaque mode de difficulté (chap. 1) : chaque mode garde l’ordre des tempéraments, le Citoyen laisse le Novice survivre presque toujours, le Hors-la-loi fait réellement peur.',
+    ],
+    bots: MODES.flatMap((mode) => [
+      () => inMode(traderBot(NOVICE, NOVICE_TEMPERAMENT, 'survive'), mode),
+      ...TEMPERAMENTS.map((temperament) => () => inMode(traderBot(plan('Sans build'), temperament, 'score'), mode)),
+    ]),
   },
 }
 

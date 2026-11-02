@@ -1,10 +1,11 @@
 import { BookOpen, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useState } from 'react'
-import { GAME_LENGTH_DAYS, START_DEBT } from '../../data/balance.ts'
+import { DIFFICULTIES, GAME_LENGTH_DAYS } from '../../data/balance.ts'
 import { LOCATIONS } from '../../data/locations.ts'
 import { TAGS } from '../../data/tags.ts'
 import { keysOf } from '../../engine/records.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
+import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import { FOCUS_RING } from '../shared/focus.ts'
 import Modal from '../shared/Modal.tsx'
@@ -37,8 +38,10 @@ type ManualModalProps = {
 /** Manuel du passeur : un chapitre à la fois, sommaire en tête, précédent et suivant en pied */
 function ManualModal({ open, onClose }: ManualModalProps) {
   const { t, credits } = useI18n()
+  // La dette de départ dépend du mode de la partie (chap. 1)
+  const difficulty = useGameStore((s) => s.game.difficulty)
   const m = t.manual
-  const chapters = m.chapters(GAME_LENGTH_DAYS, credits(START_DEBT))
+  const chapters = m.chapters(GAME_LENGTH_DAYS, credits(DIFFICULTIES[difficulty].startDebt))
   const [index, setIndex] = useState(0)
   const chapter = chapters[index]
   // Listes tirées des données : chaque tag et chaque lieu, avec son nom du jeu

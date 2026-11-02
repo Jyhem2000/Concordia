@@ -62,7 +62,7 @@ Elles s'appliquent à tout le code, sans exception non justifiée. **Toute nouve
 
 - Une formule n'existe qu'une fois, dans `src/engine/`. L'interface appelle la fonction du moteur (sanction d'une saisie, tendance publique, exposition de la soute…) et ne la recopie jamais, même simplifiée.
 - Un texte de `src/i18n/` qui explique une règle reçoit ses valeurs en paramètres, lues dans `src/data/` : aucun chiffre de règle en dur. Un test (`i18n.test.ts`) refuse tout chiffre des textes d'interface hors liste blanche (horaires fixes, une unité, zéro, lore).
-- Changer une formule ou une règle, c'est mettre à jour dans le même commit le code, le chapitre de `docs/` qui la décrit et les textes de `src/i18n/` qui l'expliquent (rechercher ses constantes et ses fonctions dans `src/ui/` donne les textes concernés).
+- Changer une formule ou une règle, c'est mettre à jour dans le même commit le code, le chapitre de `docs/` qui la décrit et les textes de `src/i18n/` qui l'expliquent, manuel en jeu compris (`manual` dans `fr.ts`, relu à chaque changement de règle et corrigé s'il en parle) ; rechercher ses constantes et ses fonctions dans `src/ui/` donne les autres textes concernés.
 
 **TypeScript**
 

@@ -2,7 +2,7 @@ import { ROAD_EVENTS } from '../src/data/events.ts'
 import { applyAction, type Action } from '../src/engine/actions.ts'
 import { isDefeat } from '../src/engine/routine.ts'
 import { createInitialState } from '../src/engine/state.ts'
-import type { DayLog, EndingId, GameState, InterceptionMove } from '../src/engine/types.ts'
+import type { DayLog, DifficultyId, EndingId, GameState, InterceptionMove } from '../src/engine/types.ts'
 import { violations } from './invariants.ts'
 import { publicView } from './view.ts'
 
@@ -13,6 +13,8 @@ import { publicView } from './view.ts'
 
 export type Bot = {
   name: string
+  /** Mode de difficulté de ses parties ; Passeur, le jeu de référence, par défaut (chap. 1) */
+  difficulty?: DifficultyId
   /** Choisit la prochaine action, à partir de la vue publique seulement */
   decide: (view: GameState) => Action
 }
@@ -70,7 +72,7 @@ const SERVICE_ACTIONS: readonly Action['type'][] = [
 const ACTIONS_PER_DAY = 300
 
 export function playGame(bot: Bot, seed: number): GameRecord {
-  let state = createInitialState(seed)
+  let state = createInitialState(seed, bot.difficulty)
   const record: GameRecord = {
     seed,
     bot: bot.name,

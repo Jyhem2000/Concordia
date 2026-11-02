@@ -1,4 +1,4 @@
-import type { CrewId, DistrictId, IccTier, ProductId, TagId } from '../engine/types.ts'
+import type { CrewId, DifficultyId, DistrictId, IccTier, ProductId, TagId } from '../engine/types.ts'
 
 /*
  * Constantes globales d'équilibrage. Ce fichier fait foi ; chaque valeur cite le chapitre
@@ -22,8 +22,18 @@ export const WORN = { healthBelow: 30, penalty: 0.15 }
 /** Pompes officielles : fermées la nuit sous ce seuil d'ICC (chap. 3) */
 export const PUMP_NIGHT_MIN_ICC = 50
 
-/** Dette mafieuse de départ (chap. 1) */
-export const START_DEBT = 5_000
+/**
+ * Modes de difficulté (chap. 1) : dette de départ, avance de survie de Viktor (total sur la partie)
+ * et facteur sur les amendes de la BRC (chap. 5). Passeur : le jeu de référence des docs et des campagnes
+ */
+export const DIFFICULTIES: Readonly<Record<DifficultyId, { startDebt: number; survivalAdvance: number; fineFactor: number }>> = {
+  citizen: { startDebt: 3_000, survivalAdvance: 3_000, fineFactor: 0.5 },
+  smuggler: { startDebt: 5_000, survivalAdvance: 2_000, fineFactor: 1 },
+  outlaw: { startDebt: 7_500, survivalAdvance: 1_000, fineFactor: 1.5 },
+}
+
+/** Mode d'une partie lancée sans choix (sauvegarde, simulations) */
+export const DEFAULT_DIFFICULTY: DifficultyId = 'smuggler'
 
 /** Bornes hautes des jauges du joueur (ICC en %, Santé en PV), plancher à 0 */
 export const ICC_MAX = 100
@@ -128,9 +138,6 @@ export const DEBT_DAILY_RATE = 0.05
 /** Échéance du retard : dette initiale jamais soldée → taux majoré et embuscades, jusqu'à la fin de la partie */
 export const DEBT_LATE = { day: 20, dailyRate: 0.2, ambushRisk: 0.15 }
 
-/** Avance de survie (dette initiale pas encore soldée) : total empruntable sur toute la partie */
-export const SURVIVAL_ADVANCE = 2_000
-
 /** Collecte de protection (dette initiale soldée) : jours et part de la richesse visible */
 export const PROTECTION = { days: [7, 14, 21, 28] as readonly number[], rate: 0.1 }
 
@@ -193,6 +200,19 @@ export const DSC_TRUST = { feeBonusPerDelivery: 0.1, maxBonus: 1, nightAfterDeli
 export const DAY_DELIVERY = { chance: 0.6, sealedShare: 0.3, fee: 375, undeliveredIccLoss: 3 }
 export const CROSSED_DISTRICT_RISK = 0.05
 export const SUSPICIOUS_PEAK_RISK = 0.1
+
+/** Itinéraire repéré (chap. 5) : fenêtre en jours, passages tolérés, risque par passage au-delà, plafond */
+export const ROUTE_WATCH = { days: 4, freeTrips: 1, riskPerTrip: 0.04, max: 0.12 }
+
+/** Notoriété (chap. 5) : risque ajouté par palier de patrimoine (Cash-Puce + offshore + placement), moitié moins au palier Or */
+export const NOTORIETY = {
+  steps: [
+    { wealth: 60_000, risk: 0.03 },
+    { wealth: 120_000, risk: 0.06 },
+    { wealth: 240_000, risk: 0.1 },
+  ] as readonly { wealth: number; risk: number }[],
+  goldFactor: 0.5,
+}
 
 /** Ronde renforcée : chaque matin, un district (hors zone hors-réseau) est tiré, cachée au joueur */
 export const PATROL_RISK = 0.2

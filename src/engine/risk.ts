@@ -5,8 +5,10 @@ import {
   GOLD_FAST_LANE_FACTOR,
   ICC_MAX,
   NIGHT_TRIP_RISK,
+  NOTORIETY,
   PATROL_RISK,
   RISK_BOUNDS,
+  ROUTE_WATCH,
   SUSPICION_PER_ICC_POINT,
   SUSPICIOUS_PEAK_RISK,
   WANTED,
@@ -23,6 +25,7 @@ import { crewEffect, workingCrew } from './crew.ts'
 import { moduleTagFactor, mountedWith } from './equipment.ts'
 import { activeEffects, forgedCard, isPurged, tagFactor } from './events.ts'
 import { passActive, sponsorCover } from './services.ts'
+import { notorietyWealth } from './finance.ts'
 import { iccTier } from './gauges.ts'
 import { atAfter, isOnMission } from './night.ts'
 import { crossedDistricts, shortestRoute } from './map.ts'
@@ -116,6 +119,38 @@ export function risk(state: GameState, to: DistrictId, options: RiskOptions): nu
   return riskBreakdown(state, to, options).total
 }
 
+/** Trajets déjà faits ces derniers jours sur la liaison vers `to`, dans un sens ou dans l'autre (chap. 5) */
+export function routeRepeats(state: GameState, to: DistrictId): number {
+  const from = state.districtId
+  return state.routes.filter(
+    (trip) => trip.day > state.day - ROUTE_WATCH.days && ((trip.from === from && trip.to === to) || (trip.from === to && trip.to === from)),
+  ).length
+}
+
+/** Risque ajouté par l'itinéraire repéré (chap. 5) : un aller-retour est toléré, seule une boucle se paie */
+export function routeWatchRisk(state: GameState, to: DistrictId): number {
+  return Math.min(ROUTE_WATCH.max, Math.max(0, routeRepeats(state, to) - ROUTE_WATCH.freeTrips) * ROUTE_WATCH.riskPerTrip)
+}
+
+/** Palier de notoriété atteint (le plus haut dont le patrimoine est atteint), ou null */
+export function notorietyStep(state: GameState): (typeof NOTORIETY.steps)[number] | null {
+  const wealth = notorietyWealth(state)
+  return NOTORIETY.steps.filter((step) => wealth >= step.wealth).at(-1) ?? null
+}
+
+/** Prochain palier de notoriété, ou null au plus haut */
+export function nextNotorietyStep(state: GameState): (typeof NOTORIETY.steps)[number] | null {
+  const wealth = notorietyWealth(state)
+  return NOTORIETY.steps.find((step) => wealth < step.wealth) ?? null
+}
+
+/** Risque ajouté par la notoriété : celui du palier atteint, moitié moins au palier Or (chap. 5) */
+export function notorietyRisk(state: GameState): number {
+  const step = notorietyStep(state)
+  if (!step) return 0
+  return iccTier(state.icc) === 'gold' ? step.risk * NOTORIETY.goldFactor : step.risk
+}
+
 /** Termes qui dépendent d'Aeterna : ils n'existent que hors zone hors-réseau */
 function addGridRisks(risk: BreakdownBuilder, state: GameState, to: DistrictId, includePatrol: boolean) {
   const destination = DISTRICTS[to]
@@ -137,4 +172,6 @@ function addGridRisks(risk: BreakdownBuilder, state: GameState, to: DistrictId, 
 
   if (includePatrol && state.patrolDistrict === to) risk.add('rule.patrol', PATROL_RISK)
   risk.add('rule.wanted', state.wanted * WANTED.riskPerLevel, { level: state.wanted })
+  risk.add('rule.route-watch', routeWatchRisk(state, to), { count: routeRepeats(state, to) })
+  risk.add('rule.notoriety', notorietyRisk(state))
 }

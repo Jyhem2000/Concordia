@@ -2,6 +2,7 @@ import type { ActionError } from '../engine/actions.ts'
 import type { RuleSource } from '../engine/breakdown.ts'
 import type {
   CrewId,
+  DifficultyId,
   DistrictId,
   EndingId,
   EventId,
@@ -116,6 +117,8 @@ export const fr = {
     'rule.ambush': 'Embuscades de la dette',
     'rule.patrol': 'Ronde renforcée',
     'rule.wanted': 'Fiche S',
+    'rule.route-watch': 'Itinéraire repéré',
+    'rule.notoriety': 'Notoriété',
     'rule.gold-fast-lane': 'Coupe-file Citoyen Or',
     'rule.icc-scanners': 'Détecteurs biométriques (Déviant notoire)',
     'rule.bluff-base': 'Bluff : chance de base',
@@ -306,7 +309,7 @@ export const fr = {
     },
     summary: (games: number, defeats: number) =>
       `${games} partie${games > 1 ? 's' : ''} terminée${games > 1 ? 's' : ''}, dont ${defeats} défaite${defeats > 1 ? 's' : ''}.`,
-    best: (score: string) => `Meilleur score : ${score}`,
+    best: (score: string, mode: string) => `Meilleur score (${mode}) : ${score}`,
     reached: (title: string, count: number) => `${title} ×${count}`,
   },
 
@@ -367,11 +370,14 @@ export const fr = {
     debtInfo: (lateDay: number, auditDay: number) =>
       `Dette de Viktor, à intérêts chaque matin. Si la dette initiale n'est pas soldée avant le matin du J${lateDay}, elle passe en retard pour toute la partie : taux majoré et embuscades (risque de contrôle accru partout). À l'audit du J${auditDay} à minuit, le solde doit être nul. Remboursement à l'Arrière-Salle, jour et nuit.`,
     cashToday: (delta: string) => `${delta} aujourd'hui`,
+    dayMode: (mode: string) => `Mode ${mode}`,
+    notoriety: (risk: string) => `Notoriété : risque de contrôle ${risk}`,
+    notorietyNext: (wealth: string) => `Prochain palier de notoriété à ${wealth} de patrimoine`,
     cashInfo:
       "Cash-Puce en poche : achats, Synthanol, services, corruption, collecte de Viktor. Il ne compte pas au score : seul ce qui dort à l'offshore et au placement du Cartel compte.",
     withVenture: (amount: string) => `Placement du Cartel : ${amount}`,
     offshoreInfo: (rate: string) =>
-      `Compte offshore : à l'abri de la collecte de Viktor et de l'audit, ${rate} d'intérêts simples par jour. Avec le placement du Cartel, c'est le score de fin de partie. Guichet à la Laverie, de jour.`,
+      `Compte offshore : à l'abri de la collecte de Viktor et de l'audit, ${rate} d'intérêts simples par jour. Avec le placement du Cartel, c'est le score de fin de partie. Guichet à la Laverie, de jour. Rien n'y est saisi, mais un gros patrimoine fait parler : la notoriété ajoute du risque de contrôle par palier (Cash-Puce, offshore et placement), moitié moins au palier Citoyen Or.`,
     iccInfo: (left: number, cap: number) =>
       `Gains d'ICC « de route » (relais, contrôle avec soute légale, bluff réussi, certains aléas) : ${left} sur ${cap} encore possibles aujourd'hui ; au-delà, ils sont perdus jusqu'au lendemain 06h00. Les services payants n'ont pas de plafond.`,
     healthValue: (health: string) => `${health} PV`,
@@ -382,7 +388,7 @@ export const fr = {
       `Santé du chauffeur : à zéro, la partie est perdue. Sous ${below} PV, chauffeur à bout : bluff et fuite à −${penalty}. Fuite ratée, racket, aléas, canicule et cellule en coûtent ; le relais et la Morgue en rendent.`,
     worn: 'À bout : bluff et fuite diminués',
     newGame: 'Nouvelle partie',
-    newGameConfirm: 'Abandonner la partie en cours et recommencer au Jour 1 ? Elle ne comptera pas à la carrière.',
+    newGameConfirm: (mode: string) => `Abandonner la partie en cours et recommencer au Jour 1, en mode ${mode} ? Elle ne comptera pas à la carrière.`,
     newGameAction: 'Abandonner et recommencer',
     offshoreRate: (rate: string) => `Intérêts : ${rate} par jour`,
     wanted: (level: number, max: number) => `Fiche S ${level}/${max}`,
@@ -839,6 +845,7 @@ export const fr = {
     advanceRule: (total: string) =>
       `Avance de survie : Viktor avance jusqu'à ${total} au total sur toute la partie, au taux de la dette ; rembourser ne la reconstitue pas.`,
     loanRoom: (amount: string) => `Encore ${amount} empruntables`,
+    noAdvance: (mode: string) => `Mode ${mode} : Viktor n'avance rien, la dette ne fait que grossir.`,
     offshoreTitle: 'Compte offshore',
     deposit: 'Déposer',
     withdraw: 'Retirer',
@@ -1126,6 +1133,8 @@ export const fr = {
     risk: "Risque d'interception",
     flyingShare: (share: string) => `dont ${share} de contrôles volants (ni fuite ni éjection)`,
     riskHint: 'La ronde renforcée du jour reste cachée.',
+    routeWatched: (count: number, risk: string) =>
+      `Itinéraire repéré : ${count} passage${count > 1 ? 's' : ''} sur cette liaison ces derniers jours (${risk})`,
     riskHintRevealed: 'Ronde renforcée comprise : Vance la révèle chaque matin.',
     peak: "Pic suspect : risque accru aujourd'hui",
     lastTrip: 'Dernier trajet',
@@ -1350,7 +1359,8 @@ export const fr = {
     resume: (day: number) => `Reprendre la partie (Jour ${day})`,
     review: 'Revoir le bilan',
     newGame: 'Nouvelle partie',
-    newGameConfirm: 'La partie en cours sera perdue. Commencer une nouvelle partie ?',
+    newGameConfirm: (mode: string) => `La partie en cours sera perdue. Commencer une nouvelle partie en mode ${mode} ?`,
+    currentMode: (mode: string) => `Partie en cours : mode ${mode}. Le mode choisi vaut pour la prochaine partie.`,
   },
 
   /** Bilan de fin de partie, à la victoire comme à la mort (chap. 7) */
@@ -1395,8 +1405,9 @@ export const fr = {
     share: 'Partager',
     copied: 'Bilan copié : il ne reste qu’à le coller.',
     shareTitle: 'Concordia',
-    shareVictory: (ending: string, score: string, days: number) => `Concordia — ${ending}. Score : ${score} en ${days} jours.`,
-    shareDefeat: (ending: string, day: number) => `Concordia — ${ending}, au Jour ${day}.`,
+    shareVictory: (ending: string, score: string, days: number, mode: string) =>
+      `Concordia (${mode}) — ${ending}. Score : ${score} en ${days} jours.`,
+    shareDefeat: (ending: string, day: number, mode: string) => `Concordia (${mode}) — ${ending}, au Jour ${day}.`,
     shareStats: (controls: number, escapes: number, night: number) =>
       `${controls} contrôle${controls > 1 ? 's' : ''} de la BRC, ${escapes} fuite${escapes > 1 ? 's' : ''}, ${night} trajet${night > 1 ? 's' : ''} de nuit.`,
     shareFeats: (feats: string) => `Hauts faits : ${feats}.`,
@@ -1416,6 +1427,7 @@ export const fr = {
           `Le Jour ${days} à minuit, l'Audit d'Aeterna efface ton Cash-Puce. Si la dette n'est pas soldée, c'est la fin. Sinon, ton score est le solde de ton compte offshore et de ton placement du Cartel, tous deux à la Laverie de la Flèche de Verre, ouverte de jour seulement.`,
           `Ce score, et ce que tu as accompli, décident de ta fin : de simple Survivant à Saboteur. Une fois la dette initiale soldée, l’encart « Objectifs du Jour ${days} » d’En bref montre ce que chaque grande fin exige.`,
           'On perd aussi en mourant (Santé à zéro) ou en se faisant fouiller avec le Vieux Serveur Aeterna à bord.',
+          "Trois modes de difficulté, au choix à l'accueil : Citoyen pour découvrir, Passeur pour le jeu normal, Hors-la-loi pour qui le connaît. Ils changent la dette de départ, l'avance de Viktor et les amendes de la BRC ; la carrière garde un meilleur score par mode.",
         ],
       },
       {
@@ -1445,6 +1457,7 @@ export const fr = {
         title: 'La route et la BRC',
         paragraphs: [
           "Le risque d'un trajet s'affiche avant le départ, ligne par ligne : district, ICC, tags de la soute, nuit, districts traversés, Fiche S. Les caisses légales le diluent.",
+          'Aeterna a de la mémoire. Refaire la même liaison plusieurs jours de suite la fait repérer : le risque monte, et retombe quand tu varies tes routes. Et plus ton patrimoine grossit, plus on parle de toi : la notoriété rend chaque contrôle plus probable, sauf à Rust Valley. Un Citoyen Or attire deux fois moins les regards.',
           "Un barrage fixe se voit de loin : toutes les options sont ouvertes. Un contrôle volant (un drone t'a repéré) ne laisse ni fuir ni éjecter : restent la fouille, le bluff et la corruption.",
           "Fouille : formalité si la soute est légale, sinon saisie, amende et perte d'ICC, garde à vue pour le haut tier. Bluff : le Tier 0 et le masquage aident, l'odeur trahit. Corruption : du cash, et une caisse de Luxe pour la connivence. Fuite : sauve la soute, coûte du châssis et un niveau de Fiche S ; elle tient à l'équipement (assistance de conduite, pare-buffles, transpondeur) et au dopage, pas au reste de la soute. Éjection : larguer l'illégal avant le barrage.",
           'Le double fond cache quelques caisses illégales : à la fouille, un second jet décide si les agents le trouvent.',
@@ -1455,7 +1468,7 @@ export const fr = {
         title: 'Les jauges',
         paragraphs: [
           "ICC : ta conformité. Basse, elle attire les contrôles et ferme des portes ; au palier Citoyen Or, les portiques s'ouvrent plus vite.",
-          "Santé : à zéro, c'est la mort. Elle remonte au relais, au plat du routier de la Cantine ou à la Morgue. Chauffeur à bout, bluff et fuite deviennent plus durs.",
+          "Santé : à zéro, c'est la mort. Elle remonte au relais, au plat du routier de la Cantine ou à la Morgue. Chauffeur à bout, bluff et fuite deviennent plus durs ; en fuite, l'assistance de conduite compense.",
           "Châssis : il s'use la nuit et dans les coups durs ; Mitch le répare à Rust Valley. À zéro, la dépanneuse te coûte une facture et une demi-journée.",
           "Synthanol : chaque trajet en consomme, davantage pour traverser des districts. Fiche S : le regard d'Aeterna ; chaque niveau ajoute du risque partout, et s'efface après quelques jours sans écart.",
           "Cash-Puce : exposé aux amendes, au racket, à la collecte de Viktor et à l'Audit. Le compte offshore, lui, est intouchable.",
@@ -1519,6 +1532,18 @@ export const fr = {
       'LOC-D5-1': 'Compte offshore, placement du Cartel, et faux dossiers de Loterie.',
       'LOC-D6-1': 'Enchères, chantage pour de l’ICC, commandes VIP et parrainage de l’élite.',
     } satisfies Record<LocationId, string>,
+  },
+
+  // Modes de difficulté (chap. 1)
+  difficulty: {
+    title: 'Mode de difficulté',
+    modes: {
+      citizen: { name: 'Citoyen', blurb: 'Pour découvrir : une dette légère, une avance généreuse et des amendes adoucies.' },
+      smuggler: { name: 'Passeur', blurb: 'Le jeu tel qu’il est pensé : chaque erreur se paie, sans être fatale.' },
+      outlaw: { name: 'Hors-la-loi', blurb: 'Pour qui connaît le jeu : une dette lourde, une avance de Viktor réduite, des amendes salées.' },
+    } satisfies Record<DifficultyId, { name: string; blurb: string }>,
+    settings: (debt: string, advance: string | null, fines: string | null) =>
+      [`dette ${debt}`, advance ? `avance ${advance}` : 'aucune avance', fines ? `amendes ${fines}` : 'amendes normales'].join(' · '),
   },
 
   // Page de contrôle des images, hors jeu (`?debug=true`, chap. 7)

@@ -6,6 +6,7 @@ import { crewEffect } from '../../engine/crew.ts'
 import { effectiveOffshoreRate, nextDebtDeadline, offshoreBalance } from '../../engine/finance.ts'
 import { checkForceCurfew } from '../../engine/actions.ts'
 import { iccRouteGainLeft, iccTier, isWorn } from '../../engine/gauges.ts'
+import { nextNotorietyStep, notorietyRisk } from '../../engine/risk.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import { APPEAR } from '../shared/motion.ts'
@@ -41,10 +42,13 @@ export default function StatusBar() {
   // Les échéances et la collecte se calculent sur l'état entier de la partie
   const game = useGameStore((s) => s.game)
   const lastError = useGameStore((s) => s.lastError)
-  const { t, credits, signedCredits, number, percent } = useI18n()
+  const { t, credits, signedCredits, number, percent, signedPercent } = useI18n()
   const offshore = offshoreBalance(game.offshore)
   const venture = offshoreBalance(game.venture)
   const offshoreRate = effectiveOffshoreRate(crewEffect(game, 'offshoreBonus') ?? 0)
+  // Notoriété : risque du palier atteint et prochain palier de patrimoine (chap. 5)
+  const notoriety = notorietyRisk(game)
+  const nextStep = nextNotorietyStep(game)
   const tier = iccTier(game.icc)
   const deadline = nextDebtDeadline(game)
   // Moment de la journée : Journée, 20h00 (journée finie avant l'heure), Nuit (chap. 1)
@@ -67,7 +71,13 @@ export default function StatusBar() {
             label={t.hud.day}
             tone="accent"
             valueKey={`${game.day}-${game.phase}`}
-            info={<CellInfo status={[t.moment.short[moment]]} statusTone="accent" text={t.hud.dayInfo(GAME_LENGTH_DAYS)} />}
+            info={
+              <CellInfo
+                status={[t.moment.short[moment], t.hud.dayMode(t.difficulty.modes[game.difficulty].name)]}
+                statusTone="accent"
+                text={t.hud.dayInfo(GAME_LENGTH_DAYS)}
+              />
+            }
           >
             <PhaseIcon size={14} aria-hidden="true" />
             {t.format.dayShort(game.day, GAME_LENGTH_DAYS)}
@@ -142,7 +152,12 @@ export default function StatusBar() {
             valueKey={offshore}
             info={
               <CellInfo
-                status={[t.hud.offshoreRate(percent(offshoreRate, 2)), ...(venture > 0 ? [t.hud.withVenture(credits(venture))] : [])]}
+                status={[
+                  t.hud.offshoreRate(percent(offshoreRate, 2)),
+                  ...(venture > 0 ? [t.hud.withVenture(credits(venture))] : []),
+                  ...(notoriety > 0 ? [t.hud.notoriety(signedPercent(notoriety, 0))] : []),
+                  ...(nextStep ? [t.hud.notorietyNext(credits(nextStep.wealth))] : []),
+                ]}
                 statusTone="offshore"
                 text={t.hud.offshoreInfo(percent(offshoreRate, 2))}
               />

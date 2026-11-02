@@ -6,7 +6,7 @@ import {
   OFFSHORE_WITHDRAW_FACTOR,
   OFFSHORE_DAILY_RATE,
   PROTECTION,
-  SURVIVAL_ADVANCE,
+  DIFFICULTIES,
 } from '../data/balance.ts'
 import {
   debtInterestBreakdown,
@@ -21,7 +21,11 @@ import {
   withdrawFrom,
   withdrawalBreakdown,
 } from './finance.ts'
+import { fineAmount } from './interception.ts'
+import { keysOf } from './records.ts'
+import { createInitialState } from './state.ts'
 import { defined, gameAt } from './test-helpers.ts'
+import type { CargoLot, DifficultyId } from './types.ts'
 
 describe('dette', () => {
   it('compose les intérêts au taux normal, puis au taux majoré en retard', () => {
@@ -37,9 +41,9 @@ describe('dette', () => {
   })
 
   it("limite l'avance de survie à un total sur toute la partie, dette initiale soldée ou non", () => {
-    expect(loanRoom(gameAt(2))).toBe(SURVIVAL_ADVANCE)
-    expect(loanRoom(gameAt(2, { advanced: SURVIVAL_ADVANCE }))).toBe(0)
-    expect(loanRoom(gameAt(2, { initialDebtPaid: true, debt: 0 }))).toBe(SURVIVAL_ADVANCE)
+    expect(loanRoom(gameAt(2))).toBe(DIFFICULTIES.smuggler.survivalAdvance)
+    expect(loanRoom(gameAt(2, { advanced: DIFFICULTIES.smuggler.survivalAdvance }))).toBe(0)
+    expect(loanRoom(gameAt(2, { initialDebtPaid: true, debt: 0 }))).toBe(DIFFICULTIES.smuggler.survivalAdvance)
   })
 })
 
@@ -82,5 +86,25 @@ describe('compte offshore', () => {
   it('retire les intérêts avant les dépôts', () => {
     expect(withdrawFrom({ deposited: 1_000, interest: 50 }, 80)).toEqual({ deposited: 970, interest: 0 })
     expect(offshoreBalance({ deposited: 10, interest: 5 })).toBe(15)
+  })
+})
+
+describe('modes de difficulté (chap. 1)', () => {
+  it('fixent la dette de départ et l’avance de survie du mode', () => {
+    for (const difficulty of keysOf(DIFFICULTIES)) {
+      const state = createInitialState(7, difficulty)
+      expect(state.difficulty).toBe(difficulty)
+      expect(state.debt).toBe(DIFFICULTIES[difficulty].startDebt)
+      expect(loanRoom(state)).toBe(DIFFICULTIES[difficulty].survivalAdvance)
+    }
+    expect(DIFFICULTIES.outlaw.survivalAdvance).toBeLessThan(DIFFICULTIES.smuggler.survivalAdvance)
+  })
+
+  it('pèsent sur les amendes de la BRC', () => {
+    const cargo: CargoLot[] = [{ productId: 'T2-03', qty: 2, unitCost: 1, travelled: true, boughtDay: 1, damaged: false }]
+    const fine = (difficulty: DifficultyId) => fineAmount({ ...createInitialState(7, difficulty), cargo }, 1)
+    expect(fine('outlaw')).toBeGreaterThan(fine('smuggler'))
+    expect(fine('citizen')).toBeLessThan(fine('smuggler'))
+    expect(fine('outlaw')).toBe(Math.round(fine('smuggler') * DIFFICULTIES.outlaw.fineFactor))
   })
 })

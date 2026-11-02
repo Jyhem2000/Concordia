@@ -44,6 +44,8 @@ export type RuleId =
   | 'laundry-fee'
   | 'suspicion'
   | 'suspicious-peak'
+  | 'route-watch'
+  | 'notoriety'
   | 'night-trip'
   | 'crossed-districts'
   | 'exit-gate'

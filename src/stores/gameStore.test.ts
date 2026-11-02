@@ -8,7 +8,7 @@ import { savedPart, useGameStore } from './gameStore.ts'
 
 describe('gameStore', () => {
   beforeEach(() => {
-    useGameStore.getState().newGame()
+    useGameStore.getState().newGame('smuggler')
   })
 
   it('remplace la partie quand le moteur accepte une action', () => {
@@ -34,7 +34,7 @@ describe('gameStore', () => {
   it('repart au Jour 1 avec une nouvelle partie', () => {
     useGameStore.getState().dispatch({ type: 'waitEvening' })
     useGameStore.getState().dispatch({ type: 'sleep' })
-    useGameStore.getState().newGame()
+    useGameStore.getState().newGame('smuggler')
     expect(useGameStore.getState()).toMatchObject({ game: { day: 1, status: 'playing' }, lastError: null })
   })
 

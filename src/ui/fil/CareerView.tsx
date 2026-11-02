@@ -1,6 +1,7 @@
 import { Award, Lock, Trophy } from 'lucide-react'
-import { FEATS, WANTED } from '../../data/balance.ts'
+import { DIFFICULTIES, FEATS, WANTED } from '../../data/balance.ts'
 import { FEAT_IDS, type FeatId } from '../../engine/feats.ts'
+import { keysOf } from '../../engine/records.ts'
 import type { EndingId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useRecordsStore } from '../../stores/recordsStore.ts'
@@ -25,7 +26,7 @@ const SECTION = 'mt-3 mb-1.5 text-xs font-bold text-ink-soft uppercase'
 export default function CareerView() {
   const games = useRecordsStore((s) => s.games)
   const endings = useRecordsStore((s) => s.endings)
-  const bestScore = useRecordsStore((s) => s.bestScore)
+  const bestScores = useRecordsStore((s) => s.bestScores)
   const feats = useRecordsStore((s) => s.feats)
   const { t, credits } = useI18n()
   const defeats = DEFEATS.reduce((total, id) => total + (endings[id] ?? 0), 0)
@@ -37,7 +38,15 @@ export default function CareerView() {
       ) : (
         <p className="text-xs text-ink-soft">
           {t.records.summary(games, defeats)}
-          {bestScore !== null && <span className="ml-2 font-bold text-offshore">{t.records.best(credits(bestScore))}</span>}
+          {/* Un meilleur score par mode joué (chap. 1) */}
+          {keysOf(DIFFICULTIES).map((mode) => {
+            const best = bestScores[mode]
+            return best === undefined ? null : (
+              <span key={mode} className="ml-2 font-bold text-offshore">
+                {t.records.best(credits(best), t.difficulty.modes[mode].name)}
+              </span>
+            )
+          })}
         </p>
       )}
       <h3 className={SECTION}>{t.records.endings}</h3>

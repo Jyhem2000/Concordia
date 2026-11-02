@@ -4,6 +4,7 @@ import {
   COMPARTMENT,
   EJECT,
   EMERGENCY_TOW,
+  DIFFICULTIES,
   FINE,
   FLEE,
   FLYING_CHECK,
@@ -488,7 +489,8 @@ export function searchSanction(state: GameState): { fineRate: number; iccLoss: n
 
 /** Amende d'un taux donné si toute la soute illégale est saisie (double fond trouvé) : part de sa valeur au prix de base */
 export function fineAmount(state: GameState, rate: number): number {
-  return Math.round(rate * baseValue(state.cargo.filter(isIllegal)))
+  // Le mode de difficulté alourdit ou allège toutes les amendes (chap. 1 et 5)
+  return Math.round(rate * DIFFICULTIES[state.difficulty].fineFactor * baseValue(state.cargo.filter(isIllegal)))
 }
 
 /** Fouille effective : formalité si la soute est légale, sinon sanction de base selon le tier */

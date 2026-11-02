@@ -18,7 +18,7 @@ Le résultat est **borné, après** tous les multiplicateurs (`RISK_BOUNDS` dans
 | **Base_District** | risque de base du district ([`districts.ts`](../src/data/districts.ts)) ; remplacé par `[EVT-D5-02]` |
 | **Suspicion** | selon l'ICC (chap. 1) |
 | **Malus_Tags** | pour chaque tag détectable : *valeur du tag × part de la cargaison* — `[TAG-ODOROUS]`, `[TAG-TECH]`, `[TAG-BIO]`, `[TAG-CULTURE]` |
-| **Malus_Contexte** (additif) | trajet de nuit hors mission (chap. 1), districts traversés (chap. 3), portique du sas de `[D4]` (chap. 3), `[VEH-04]`, balise de `[T4-06]` (brouillée par `[CREW-02]`), ronde renforcée, Fiche S, pic suspect de la veille (chap. 2), embuscades de la dette (chap. 1), purge préventive de `[EVT-L01]`, carte « capitaine de la BRC » de `[LOC-D5-1]` (négative), `[EVT-G02]`, `[EVT-D1-03]`, `[EVT-D4-01]` |
+| **Malus_Contexte** (additif) | trajet de nuit hors mission (chap. 1), districts traversés (chap. 3), portique du sas de `[D4]` (chap. 3), `[VEH-04]`, balise de `[T4-06]` (brouillée par `[CREW-02]`), ronde renforcée, Fiche S, itinéraire repéré et notoriété (voir plus bas), pic suspect de la veille (chap. 2), embuscades de la dette (chap. 1), purge préventive de `[EVT-L01]`, carte « capitaine de la BRC » de `[LOC-D5-1]` (négative), `[EVT-G02]`, `[EVT-D1-03]`, `[EVT-D4-01]` |
 | **Couverture** (additive) | `[TAG-LEGAL]` |
 | **Bonus_Équipement** (multiplicatif) | produit des coefficients de `[VEH-01]`, `[VEH-02]`, `[CREW-01]` et du coupe-file Citoyen Or (chap. 1) |
 | **Multiplicateurs_finaux** | `[EVT-D3-02]`, `[EVT-D5-03]` |
@@ -31,6 +31,14 @@ Le résultat est **borné, après** tous les multiplicateurs (`RISK_BOUNDS` dans
 `( 24 (base) + 10 (suspicion) + 50 × 4/12 (Tech) − 10 × 6/12 (couverture) ) × 0,85 (Zéro-C) = 45,7 × 0,85 = 38,8 % → 39 %`
 
 **Ronde renforcée :** chaque matin (et dès le Jour 1), Aeterna tire **1 district** hors zone hors-réseau : malus de risque pour la journée (`PATROL_RISK` dans [`balance.ts`](../src/data/balance.ts)). Caché au joueur, sauf avec `[CREW-01]`.
+
+**Itinéraire repéré :** Aeterna recoupe les passages aux portiques. Chaque trajet déjà fait sur la même liaison (entre les deux mêmes districts, dans un sens ou dans l'autre) pendant les derniers jours ajoute du risque au-delà des premiers passages tolérés, jusqu'à un plafond (`ROUTE_WATCH` dans [`balance.ts`](../src/data/balance.ts) : fenêtre en jours, passages tolérés, risque par passage, plafond). Un simple aller-retour ne coûte rien : seule une boucle refaite jour après jour se paie. Tous les trajets comptent, de jour comme de nuit, sur mission ou non. Hors zone hors-réseau seulement : les milices de `[D4]` ne recoupent rien.
+* Le détail du risque en fait une ligne, avec le nombre de passages ; la carte l'annonce sur chaque destination concernée. Varier ses routes l'efface en quelques jours.
+* *Intention :* casser la boucle rentable refaite chaque jour en pilote automatique. Le milieu de partie redevient un choix d'itinéraire, sans menacer le joueur qui explore.
+
+**Notoriété :** le train de vie se voit, même quand l'argent est à l'abri : les indics d'Aeterna entendent parler d'un passeur qui roule sur l'or. Risque ajouté par palier de **patrimoine** (Cash-Puce + offshore + placement du Cartel, dette non déduite ; `NOTORIETY` dans [`balance.ts`](../src/data/balance.ts)). Moitié moins au palier Citoyen Or : un citoyen modèle n'attire pas les regards. Hors zone hors-réseau seulement.
+* Rien n'est saisi sur l'offshore : la notoriété ne rend que la route plus dangereuse. Le détail du risque la montre sur sa ligne, avec le palier atteint ; la bulle Offshore du bandeau annonce le prochain palier.
+* *Intention :* la fin de partie reste tendue pour qui a réussi, il faut protéger ce qu'on a gagné (couverture, équipement, ICC). Le débutant, loin des paliers, n'en voit rien.
 
 ### Fiche S algorithmique (niveau de recherche)
 * Chaque **fuite réussie** ajoute **1 niveau**, jusqu'à un maximum (sauf sous la plaque rotative `[MOD-05]`, une fois par jour) ; chaque **trajet de nuit hors mission** qui passe sans interception aussi (l'écart est enregistré, chap. 1 ; sauf pendant `[EVT-G07]`, galeries non filmées).
@@ -75,6 +83,8 @@ Montants et taux : `SEARCH` dans [`balance.ts`](../src/data/balance.ts) ; le hau
 | Illégal de bas tier uniquement | Confiscation des caisses illégales + amende sur leur valeur + perte d'ICC. |
 | Au moins 1 caisse de haut tier | Confiscation + amende à un taux plus lourd + perte d'ICC plus lourde + garde à vue. |
 
+**Amendes et mode de difficulté :** toute amende de la BRC (fouille, bluff raté, corruption ratée, fuite ratée) est multipliée par le facteur du mode (chap. 1).
+
 ### 1. Bluff administratif — *« Circulez, je livre des briques nutritives ! »*
 Valeurs : `BLUFF` dans [`balance.ts`](../src/data/balance.ts).
 ```
@@ -113,6 +123,7 @@ Chance = min( plafond,  base + Offre + Connivence − malus × (étoiles du dist
 * **Barrage fixe uniquement** (impossible en contrôle volant).
 * **Chance de base** et **plafond** dégressif selon les étoiles du district : `FLEE` dans [`balance.ts`](../src/data/balance.ts).
 * **Bonus :** `[MOD-01]` (qui annule aussi le malus du chauffeur à bout), `[MOD-06]`, `[CREW-02]`, `[VEH-03]` (en `[D3]` et `[D5]`), dopage `[T2-05]`. **Malus :** Fiche S, chauffeur à bout.
+  * *Bonus modestes, plafond lointain :* chaque bonus pèse peu seul, pour que le plafond ne s'atteigne qu'en cumulant l'équipement de fuite, et jamais dans les districts les mieux gardés. Le pare-buffles, à fort bonus, atteignait le plafond avec Glitch : l'assistance de conduite n'y ajoutait plus rien. Pare-buffles et assistance ont désormais le même bonus, l'un pour la force (dégâts réduits, passage forcé), l'autre pour le pilotage (fatigue compensée).
 * **Dopage :** boire 1 caisse de `[T2-05]` (une fois par jour). La caisse bue est perdue quel que soit le résultat ; l'app montre le bonus. La fuite tient sinon à l'équipement (`[MOD-01]`, `[MOD-06]`, `[VEH-03]`), pas à la soute.
 * **Succès :** cargaison sauvée, **+1 niveau de Fiche S**, mais perte de châssis (tirage uniforme entier dans une fourchette ; `[MOD-06]`, `[VEH-03]`), casse `[TAG-FRAGILE]`, et perte d'ICC (caméras de trafic ; `[VEH-03]`). La plaque rotative `[MOD-05]` efface, une fois par jour, la perte d'ICC et le niveau de Fiche S.
 * **Échec :** confiscation + amende sur la valeur saisie + perte d'ICC ; perte de châssis et de Santé (`[MOD-06]`), mortelle si la Santé tombe à 0 ; garde à vue.

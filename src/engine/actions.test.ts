@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { GAME_LENGTH_DAYS, OFFSHORE_WITHDRAW_FACTOR, SIPHON, SURVIVAL_ADVANCE } from '../data/balance.ts'
+import { DIFFICULTIES, GAME_LENGTH_DAYS, OFFSHORE_WITHDRAW_FACTOR, SIPHON } from '../data/balance.ts'
 import { PRODUCTS } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import { canSiphon, checkService, fuelPrice, fullRateQty, maxBuy, maxRepay, planTravel, type Action } from './actions.ts'
@@ -11,6 +11,8 @@ import { defined, errorOf, gameAt, HIGH_ROLL_RNG, play, run } from './test-helpe
 import type { GameState, ProductId } from './types.ts'
 
 // Tirage haut : le premier trajet ne tombe sur aucun barrage
+/** Avance de survie du mode Passeur, celui des parties de test */
+const ADVANCE = DIFFICULTIES.smuggler.survivalAdvance
 const start: GameState = { ...createInitialState(2024), rng: HIGH_ROLL_RNG }
 const cheapest = (state: GameState): ProductId =>
   shopProducts(state.markets[state.districtId]).sort((a, b) => quote(state, state.districtId, a) - quote(state, state.districtId, b))[0]
@@ -175,12 +177,12 @@ describe('guichets : dette et compte offshore', () => {
 
   it('avancent de quoi repartir tant que la dette initiale court, une seule fois sur la partie', () => {
     const broke = gameAt(2, { cash: 2 })
-    const advanced = run(broke, { type: 'borrow', amount: SURVIVAL_ADVANCE - 500 })
-    expect(advanced).toMatchObject({ cash: SURVIVAL_ADVANCE - 498, debt: start.debt + SURVIVAL_ADVANCE - 500, advanced: SURVIVAL_ADVANCE - 500 })
+    const advanced = run(broke, { type: 'borrow', amount: ADVANCE - 500 })
+    expect(advanced).toMatchObject({ cash: ADVANCE - 498, debt: start.debt + ADVANCE - 500, advanced: ADVANCE - 500 })
     // Rembourser ne reconstitue pas l'avance
     const repaid = run(advanced, { type: 'repay', amount: 1_000 })
     expect(errorOf(repaid, { type: 'borrow', amount: 501 })).toBe('advance-used')
-    expect(run(repaid, { type: 'borrow', amount: 500 }).advanced).toBe(SURVIVAL_ADVANCE)
+    expect(run(repaid, { type: 'borrow', amount: 500 }).advanced).toBe(ADVANCE)
   })
 
   it("soldent la dette initiale pour de bon, l'avance de survie restant ouverte", () => {
