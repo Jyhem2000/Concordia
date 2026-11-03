@@ -110,7 +110,7 @@ Stock par jour, quota de demande (chap. 2) et bonus de Forte demande de chaque t
 * **[T2-01]** — Épices importées en fraude. **Aide au bluff, passive :** une caisse en soute sature le nez des chiens-robots et annule le malus d'odeur du bluff (`bluffAid` dans [`products.ts`](../src/data/products.ts)), sans rien donner.
 * **[T2-02]** — Chorizo frais et saucisson à peine séché : ça tourne vite. Recherché dans les zones ouvrières et chez les bobos, surtout la nuit.
 * **[T2-03]** — Paroles jugées « micro-agressives » par Aeterna.
-* **[T2-04]** — Téléphones 2G sans GPS ni micro d'écoute, retapés dans les ateliers clandestins des Ruches.
+* **[T2-04]** — Téléphones 2G sans GPS ni micro d'écoute, retapés dans les ateliers clandestins de Hives.
 * **[T2-05]** — Boisson énergisante bannie. **Double action :**
   1. **Dopage pilote** (fuite ou passage forcé, une fois par jour) : chance de fuite en plus, mais perte de châssis (un choc, qui peut casser les fragiles) et d'ICC, sauf face aux milices (`doping` dans [`products.ts`](../src/data/products.ts)).
   2. **Nuit blanche** (à 20h00) : lève l'épuisement pour une 2e tournée de nuit consécutive, au prix de Santé, et interdite sous un seuil de Santé (`sleeplessNight` dans [`products.ts`](../src/data/products.ts)). Une 3e nuit d'affilée reste impossible.
@@ -131,12 +131,12 @@ Stock par jour, quota de demande (chap. 2) et bonus de Forte demande de chaque t
 | `[T3-07]` | Clones Vocaux & Deepfakes |
 
 * **[T3-01]** — Moisissure vivante au lait cru, classée Arme Biologique par le DSC.
-* **[T3-02]** — Feuilles de tabac entières importées en fraude. Luxe : monnaie de corruption, et de `[LOC-D6-1]`.
+* **[T3-02]** — Feuilles de tabac entières importées en fraude. Luxe : monnaie de corruption.
 * **[T3-03]** — Single malt à 46°. **Monnaie d'initié :** `[LOC-D4-2]`, corruption (Luxe), racket de `[D4]` .
 * **[T3-04]** — Génériques sans micropuce de traçage biométrique.
 * **[T3-05]** — Semences paysannes reproductibles, interdites par le monopole agro-industriel du DSC.
 * **[T3-06]** — GPU permettant de faire tourner des IA locales non-censurées.
-* **[T3-07]** — Kits détournés des studios du ministère, ceux qui fabriquent les faux gagnants de la Loterie. Espionnage et chantage. Monnaie de `[LOC-D6-1]`.
+* **[T3-07]** — Kits détournés des studios du ministère, ceux qui fabriquent les faux gagnants de la Loterie. Espionnage et manipulation : elles trompent les portiques.
 
 ## Tier 4
 
@@ -233,7 +233,7 @@ Prix_Vente = Arrondi( Cours × Commission × Coef_Demande × Coef_Condition × S
 * *Intention — des builds, pas une recette :* chaque axe de bonus vise une famille de produits différente (équipier, modules, `[LOC-D2-1]`, nuit). Les combinaisons rapportent davantage, mais les plafonds (`Mult_Événement`, `Savoir_Faire`) empêchent une seule combinaison d'écraser les autres.
 
 ## Paiement en nature
-Toute caisse donnée en paiement (corruption, seulement le Luxe ; chantage, salaire, péage…) est valorisée à son **prix de base** ([`products.ts`](../src/data/products.ts)), jamais au cours local ni à son prix d'achat, **réduit par son état** : une caisse endommagée ou défraîchie (Défraîchie, Dégradée) paie moins, l'Extra-frais ne paie jamais plus. Les lots les plus anciens partent en premier. C'est un barème officieux, le même partout, que les agents et les milices appliquent sans discuter.
+Toute caisse donnée en paiement (corruption, seulement le Luxe ; salaire, péage…) est valorisée à son **prix de base** ([`products.ts`](../src/data/products.ts)), jamais au cours local ni à son prix d'achat, **réduit par son état** : une caisse endommagée ou défraîchie (Défraîchie, Dégradée) paie moins, l'Extra-frais ne paie jamais plus. Les lots les plus anciens partent en premier. C'est un barème officieux, le même partout, que les agents et les milices appliquent sans discuter.
 * **Pourquoi payer en caisses :**
   1. **Une économie réelle** sur les caisses achetées sous leur prix de base (production locale, bonne fluctuation) : elles paient plus qu'elles n'ont coûté. À l'inverse, une caisse achetée cher (forte demande, mauvais tirage) paie moins qu'elle n'a coûté.
   2. **La connivence** en corruption (chap. 5) : une caisse de Luxe rend l'agent plus conciliant.

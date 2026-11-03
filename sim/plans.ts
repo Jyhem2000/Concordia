@@ -24,7 +24,7 @@ export const PLANS: readonly Plan[] = [
     vehicle: 'VEH-02',
     modules: ['MOD-08'],
     legalShare: 0.3,
-    places: ['advance', 'certificate', 'blackmail'],
+    places: ['advance', 'certificate'],
     iccFloor: 90,
   },
   { name: 'Opportuniste', modules: [], places: ['advance', 'influence', 'vip'] },

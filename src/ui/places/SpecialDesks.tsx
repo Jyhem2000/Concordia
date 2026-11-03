@@ -8,10 +8,7 @@ import { viceChoices } from '../../engine/events.ts'
 import {
   auctionPrice,
   availableFrom,
-  blackmailCost,
-  blackmailCrates,
   checkAuction,
-  checkBlackmail,
   checkForgery,
   checkInfluence,
   checkMorgue,
@@ -285,7 +282,6 @@ export function VelvetDesk() {
     return <p className="border-t border-line pt-2 text-xs text-danger">{d.locked(game.velvetLock)}</p>
 
   const lots = PRODUCT_IDS.filter((id) => PRODUCTS[id].tier >= VELVET.auction.minTier && ownedQty(game.cargo, id) > 0)
-  const crates = blackmailCrates(game)
   const vip = game.vip
   const value = vipValue(game)
 
@@ -306,25 +302,6 @@ export function VelvetDesk() {
               onClick={() => dispatch({ type: 'auction', productId: id })}
             />
           ))}
-        </ul>
-      </div>
-
-      <div className="border-t border-line pt-2">
-        <p className="font-bold">{d.blackmailTitle}</p>
-        <Hint>{d.blackmailRule(VELVET.blackmail.icc, VELVET.blackmail.cooldownDays)}</Hint>
-        <ul className="mt-1 space-y-1">
-          <DeskRow
-            label={d.payCash}
-            detail={credits(blackmailCost(game))}
-            error={checkBlackmail(game, false)}
-            onClick={() => dispatch({ type: 'blackmail', inKind: false })}
-          />
-          <DeskRow
-            label={d.payCrates}
-            detail={crates ? crates.map((crate) => `${crate.qty} × ${t.product[crate.productId].name}`).join(', ') : d.notEnoughCrates}
-            error={checkBlackmail(game, true)}
-            onClick={() => dispatch({ type: 'blackmail', inKind: true })}
-          />
         </ul>
       </div>
 

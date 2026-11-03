@@ -50,7 +50,7 @@
 
 * Les noms du promu et du déclassé sont tirés au hasard parmi des inconnus (lore) ; quand le promu est ton équipier, c'est son nom qui s'affiche.
 * Un faux dossier « cadre » de `[LOC-D5-1]` garantit le déclassement de ce tirage (chap. 3).
-* *Ex. de bandeau :* « 🎉 Félicitations à Mama Rosa, promue Citoyenne d'Honneur ! Elle ne pourra pas vous répondre : elle est très occupée à être heureuse. » · « 🌱 M. K. Okafor, ex-Glass Spire, rejoint avec enthousiasme les Ruches Grises. Son goût pour les cigares l'y suit. »
+* *Ex. de bandeau :* « 🎉 Félicitations à Mama Rosa, promue Citoyenne d'Honneur ! Elle ne pourra pas vous répondre : elle est très occupée à être heureuse. » · « 🌱 M. K. Okafor, ex-cadre de The Glass Spire, rejoint avec enthousiasme Hives. Son goût pour les cigares l'y suit. »
 
 ---
 

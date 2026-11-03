@@ -228,7 +228,6 @@ export const fr = {
     lottery: 'Tirage de la Loterie',
     viceEnd: (product: string, district: string) => `Fin du vice : ${product} en Forte demande à ${district}`,
     serviceReady: (service: string) => `${service} : de nouveau disponible`,
-    trapdoorReady: 'Trappe de largage rechargée',
     prophecy: (event: string) => `Prophétie de Cassandre-88 : ${event}, garanti`,
     calendarDay: (day: number) => `Jour ${day}`,
     calendarEmpty: 'Rien de connu ce jour-là.',
@@ -243,7 +242,6 @@ export const fr = {
       prophecy: 'Cassandre-88',
       forgery: 'Faux dossier',
       auction: 'Enchères du Velvet-Silo',
-      blackmail: 'Chantage',
       vip: 'Commande VIP',
     },
     deals: 'Bonnes affaires connues',
@@ -343,7 +341,8 @@ export const fr = {
     modules: (mounted: number, slots: number) => `Modules ${mounted}/${slots}`,
     noModule: 'Aucun module monté : ils se montent au garage.',
     noCrew: 'Aucun équipier : ils se recrutent au Quai 9.',
-    garageAt: (district: string) => `Garage de Mécano-Mitch à ${district}, de jour : modules, châssis et réparations s'y font, dans cet onglet.`,
+    garageAt: (district: string) =>
+      `Garage « Faraday » de Mécano-Mitch à ${district}, de jour : modules, châssis et réparations s'y font, dans cet onglet.`,
     title: (used: number, capacity: number) => `Soute ${used}/${capacity}`,
     empty: 'Soute vide.',
     cargoSlots: (used: number, capacity: number) => `Soute ${used}/${capacity}`,
@@ -752,20 +751,18 @@ export const fr = {
       rejected: (icc: number, wanted: string) => `Dossier rejeté : « trop enthousiaste ». ICC −${icc} %, ${wanted}.`,
     },
     velvet: {
-      locked: (day: number) => `Commande VIP manquée : le Silo vous est fermé jusqu'au J${day}.`,
+      locked: (day: number) => `Commande VIP manquée : le Velvet-Silo vous est fermé jusqu'au J${day}.`,
       auctionTitle: 'Vente aux enchères masquée',
       auctionRule: (tier: number, factor: string, cooldown: number) =>
         `1 caisse de Tier ${tier} ou plus au cours local ${factor}, hors quota. Recharge ${cooldown} jours.`,
       nothingToAuction: (tier: number) => `Aucune caisse de Tier ${tier} ou plus en soute.`,
       auction: (product: string) => `Vendre 1 × ${product}`,
-      blackmailTitle: "Chantage sur l'oreiller",
-      blackmailRule: (icc: number, cooldown: number) => `ICC +${icc} %, hors plafond. Recharge ${cooldown} jours, prix en hausse à chaque fois.`,
       payCash: 'Payer en Cash-Puce',
       payCrates: 'Payer en caisses',
       notEnoughCrates: 'pas assez de caisses acceptées en soute',
       vipTitle: 'Commande spéciale VIP',
       vipRule: (crates: number, factor: string, icc: number, lock: number) =>
-        `${crates} caisses d'un produit tiré au hasard, absent de la soute, à livrer avant 20h00 le lendemain, au cours local ${factor}, hors quota. Échec : ICC −${icc} % et Silo fermé ${lock} jours.`,
+        `${crates} caisses d'un produit tiré au hasard, absent de la soute, à livrer avant 20h00 le lendemain, au cours local ${factor}, hors quota. Échec : ICC −${icc} % et Velvet-Silo fermé ${lock} jours.`,
       request: 'Demander une commande',
       requestDetail: (tiers: string) => `Produit de Tier ${tiers}`,
       deliver: 'Livrer',
@@ -815,12 +812,13 @@ export const fr = {
     smoothRide: "Fragiles immunisés à la casse ; pas d'usure de châssis la nuit.",
     nightRisk: (factor: string) => `Malus de risque d'un trajet de nuit hors mission ${factor}.`,
     flyingChecks: (factor: string) => `Contrôles volants ${factor} (les drones perdent le signal).`,
-    rotatingPlate: 'Une fois par jour, une fuite réussie devant la BRC ne coûte ni ICC ni Fiche S (plaque illisible).',
+    noFlyingChecks: 'Plus aucun contrôle volant : les drones perdent le signal du camion.',
+    rotatingPlate: 'Une fuite réussie devant la BRC ne coûte ni ICC ni Fiche S (plaque illisible).',
     ram: (bonus: string, factor: string) => `Fuite et passage forcé ${bonus} ; dégâts de la fuite ${factor}.`,
-    trapdoor: (chance: string, cooldown: number, recovery: string, sealed: string) =>
-      `Éjection par les égouts (${chance}, sans dégât, sauf ${sealed}), recharge ${cooldown} jours ; le lendemain, 0 à ${recovery} des caisses rapportées.`,
+    trapdoor: (chance: string, recovery: string, sealed: string) =>
+      `Éjection par les égouts (${chance}, sans dégât, sauf ${sealed}), à chaque barrage ; le lendemain, 0 à ${recovery} des caisses rapportées.`,
     fakeTerminal: (bonus: string, factor: string) => `Bluff ${bonus} ; tarif standard de corruption ${factor}.`,
-    droneJammer: 'Une fois par jour, un contrôle volant devient un barrage fixe. Découvert à la fouille : saisi, garde à vue.',
+    droneJammer: 'Une fois par jour, un contrôle volant devient un barrage fixe. Découvert à la fouille : saisi.',
     ghostWall: (factor: string) =>
       `Isolation anti-odeur, anti-scanner, anti-chien : à la fouille, chance que les agents trouvent le double fond ${factor}. Ne cache pas l'odeur de la soute, ni le chauffeur.`,
   },
@@ -1077,8 +1075,8 @@ export const fr = {
       crusher: 'Broyeur acide',
       manual: "Éjection d'urgence (ruelle)",
     },
-    ejectTrapdoor: (recovery: string, cooldown: number) =>
-      `Succès : l'illégal file aux égouts, sans dégât ; demain à 06h00, des complices en rapportent entre 0 et ${recovery}. Trappe indisponible ${cooldown} jours.`,
+    ejectTrapdoor: (recovery: string) =>
+      `Succès : l'illégal file aux égouts, sans dégât ; demain à 06h00, des complices en rapportent entre 0 et ${recovery}.`,
     ejectCrusher: 'Succès : la contrebande est dissoute dans la benne, sans dégât ni récupération.',
     ejectSuccess: (chassis: string) => `Succès : l'illégal finit dans une ruelle, la fouille ne trouve rien. Châssis ${chassis}.`,
     ejectFailure: (raise: string, icc: string) => `Échec : sanction de base, amende relevée de ${raise} de la valeur saisie, ICC ${icc} de plus.`,
@@ -1100,7 +1098,7 @@ export const fr = {
     chassis: 'Châssis',
     wanted: 'Fiche S',
     damaged: 'Caisses endommagées',
-    jammerSeized: "Brouilleur de drones découvert et saisi : sabotage d'infrastructure.",
+    jammerSeized: 'Brouilleur de drones découvert et saisi.',
     compartmentKept: (crates: number) => `Double fond non trouvé : ${crates} caisse${crates > 1 ? 's' : ''} sauvée${crates > 1 ? 's' : ''}.`,
     compartmentFound: 'Double fond découvert : tout est confisqué, ICC en moins pour dissimulation.',
     sacrificed: 'dont caisses sacrifiées',
@@ -1332,12 +1330,12 @@ export const fr = {
     ],
     roleTitle: 'Ton rôle',
     role: [
-      "Livreur de Catégorie C, tu traverses tous les districts au volant d'un utilitaire d'État, des Ruches Grises à la Citadelle des élites. Officiellement, tu livres des caisses légales.",
+      "Livreur de Catégorie C, tu traverses tous les districts au volant d'un utilitaire d'État, de Hives à Olympus-Green, la citadelle des élites. Officiellement, tu livres des caisses légales.",
       "Officieusement, tu es un Passeur du Monde d'Avant : café, beurre, vinyles, whisky, cartes graphiques… tout ce qu'Aeterna interdit, et que tout le monde réclame.",
     ],
     goalTitle: 'Le but',
     goal: (days: number, debt: string, cash: string) => [
-      `Tu démarres avec ${cash} en poche et ${debt} de dette envers Viktor Varga, l'usurier des Ruches. Ses intérêts courent chaque matin.`,
+      `Tu démarres avec ${cash} en poche et ${debt} de dette envers Viktor Varga, l'usurier de Hives. Ses intérêts courent chaque matin.`,
       `Le Jour ${days} à minuit, c'est l'Audit : la dette doit être soldée, sinon Viktor te recycle en Bio-Briques. Le Cash-Puce est alors effacé.`,
       "Seul compte ce que tu as mis à l'abri sur le compte offshore de la Laverie (et le placement du Cartel) : c'est ton score, et il décide de ta fin.",
     ],
@@ -1423,8 +1421,8 @@ export const fr = {
       {
         title: 'Le but du jeu',
         paragraphs: [
-          `La partie dure ${days} jours. Tu dois ${debt} à Viktor Varga, et sa dette grossit chaque matin : rembourse-la à son arrière-salle de Hives, ouverte jour et nuit.`,
-          `Le Jour ${days} à minuit, l'Audit d'Aeterna efface ton Cash-Puce. Si la dette n'est pas soldée, c'est la fin. Sinon, ton score est le solde de ton compte offshore et de ton placement du Cartel, tous deux à la Laverie de la Flèche de Verre, ouverte de jour seulement.`,
+          `La partie dure ${days} jours. Tu dois ${debt} à Viktor Varga, et sa dette grossit chaque matin : rembourse-la à l'Arrière-Salle de Viktor Varga, à Hives, ouverte jour et nuit.`,
+          `Le Jour ${days} à minuit, l'Audit d'Aeterna efface ton Cash-Puce. Si la dette n'est pas soldée, c'est la fin. Sinon, ton score est le solde de ton compte offshore et de ton placement du Cartel, tous deux à la Laverie de The Glass Spire, ouverte de jour seulement.`,
           `Ce score, et ce que tu as accompli, décident de ta fin : de simple Survivant à Saboteur. Une fois la dette initiale soldée, l’encart « Objectifs du Jour ${days} » d’En bref montre ce que chaque grande fin exige.`,
           'On perd aussi en mourant (Santé à zéro) ou en se faisant fouiller avec le Vieux Serveur Aeterna à bord.',
           "Trois modes de difficulté, au choix à l'accueil : Citoyen pour découvrir, Passeur pour le jeu normal, Hors-la-loi pour qui le connaît. Ils changent la dette de départ, l'avance de Viktor et les amendes de la BRC ; la carrière garde un meilleur score par mode.",
@@ -1485,7 +1483,7 @@ export const fr = {
       {
         title: 'Les lieux spéciaux',
         paragraphs: [
-          "Ouverts de 06h00 à 20h00, sauf l'arrière-salle de Viktor qui ne ferme jamais. Certains services ne s'ouvrent qu'à qui s'est fait une place : le lieu affiche la condition et ta progression.",
+          "Ouverts de 06h00 à 20h00, sauf l'Arrière-Salle de Viktor qui ne ferme jamais. Certains services ne s'ouvrent qu'à qui s'est fait une place : le lieu affiche la condition et ta progression.",
         ],
         list: 'places',
       },
@@ -1501,9 +1499,9 @@ export const fr = {
       {
         title: 'Conseils de passeur',
         paragraphs: [
-          'Commence petit : les produits bon marché de Hives se revendent à Rust Valley, et ce qu’on y trouve remonte vers les Ruches et Pastel-Heights.',
+          'Commence petit : les produits bon marché de Hives se revendent à Rust Valley, et ce qu’on y trouve remonte vers Hives et Pastel-Heights.',
           'Solde la dette tôt : chaque matin la fait grossir, et une fois soldée, Viktor ouvre ses contrats et Mitch son matériel de contrebande.',
-          "Mets ton argent à l'abri à la Laverie dès que tu passes à la Flèche de Verre : la collecte de Viktor, les amendes et l'Audit ne touchent pas l'offshore.",
+          "Mets ton argent à l'abri à la Laverie dès que tu passes à The Glass Spire : la collecte de Viktor, les amendes et l'Audit ne touchent pas l'offshore.",
           "Survole les pourcentages : chaque chance, chaque risque, chaque prix s'explique ligne par ligne au survol ou au toucher.",
         ],
       },
@@ -1513,9 +1511,9 @@ export const fr = {
       'TAG-PERISHABLE': "Doit rester au frais : prime le jour de l'achat, puis décote jusqu'à être perdu. La canicule l'abîme.",
       'TAG-FRAGILE': 'Peut casser en fuite et aux chocs : une caisse endommagée se vend moins cher.',
       'TAG-ADDICTIVE': 'Clientèle captive : le rachat au cours se reconstitue plus vite.',
-      'TAG-ODOROUS': 'Attire les contrôles en route et gêne le bluff ; doublé chez les chiens-robots d’Olympus.',
+      'TAG-ODOROUS': 'Attire les contrôles en route et gêne le bluff ; doublé chez les chiens-robots d’Olympus-Green.',
       'TAG-CULTURE': 'Dénoncé par les Voisins-Vigiles de Pastel-Heights.',
-      'TAG-TECH': 'Repéré par les scanners de la Flèche de Verre et d’Olympus.',
+      'TAG-TECH': 'Repéré par les scanners de The Glass Spire et d’Olympus-Green.',
       'TAG-BIO': 'Flairé par les bio-scanners de Panacea.',
       'TAG-FESTIVE': 'Se vend mieux la nuit, et bien mieux à l’after du couvre-feu.',
       'TAG-LUXURY': 'Seul cadeau qu’un agent accepte en corruption, avec la connivence en prime.',
@@ -1530,7 +1528,7 @@ export const fr = {
       'LOC-D4-1': 'Châssis, modules, montage et réparations.',
       'LOC-D4-2': "Savoir, et garantir, l'événement global d'après-demain.",
       'LOC-D5-1': 'Compte offshore, placement du Cartel, et faux dossiers de Loterie.',
-      'LOC-D6-1': 'Enchères, chantage pour de l’ICC, commandes VIP et parrainage de l’élite.',
+      'LOC-D6-1': 'Enchères, commandes VIP et parrainage de l’élite.',
     } satisfies Record<LocationId, string>,
   },
 
@@ -1633,14 +1631,14 @@ export const fr = {
   } satisfies Record<ProductId, Named & { lore: string }>,
 
   district: {
-    D1: { name: 'Hives', subtitle: 'Les Ruches Grises' },
+    D1: { name: 'Hives', subtitle: 'Cités-dortoirs ouvrières' },
     D2: { name: 'Pastel-Heights', subtitle: "L'Éco-Ghetto Bobo & Campus Idéologique" },
     D3: { name: 'Panacea', subtitle: 'Le Complexe Pharmaceutique & Médical' },
     D4: {
       name: 'Rust Valley',
       subtitle: 'La Zone Tampon (friche industrielle & anciens abattoirs)',
     },
-    D5: { name: 'The Glass Spire', subtitle: 'La Flèche de Verre (ministères, banques & censure)' },
+    D5: { name: 'The Glass Spire', subtitle: 'Ministères, banques & censure' },
     D6: { name: 'Olympus-Green', subtitle: 'La Citadelle Zéro-Carbone des Ultra-Élites' },
   } satisfies Record<DistrictId, NamedWithSubtitle>,
 

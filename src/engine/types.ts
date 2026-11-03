@@ -241,7 +241,7 @@ export type District = {
 export type LocationService = 'debt' | 'cantine' | 'offshore' | 'garage' | 'crew' | 'influence' | 'morgue' | 'prophecy' | 'forgery' | 'velvet'
 
 /** Services à usage compté (coût croissant) ou à cooldown */
-export type ServiceKey = 'meal' | 'influence' | 'pass' | 'surgery' | 'certificate' | 'prophecy' | 'forgery' | 'auction' | 'blackmail' | 'vip'
+export type ServiceKey = 'meal' | 'influence' | 'pass' | 'surgery' | 'certificate' | 'prophecy' | 'forgery' | 'auction' | 'vip'
 
 /** Carte d'un faux dossier de Loterie (chap. 3) */
 export type ForgeryCard =
@@ -305,17 +305,17 @@ export type Module = {
   smoothRide?: boolean
   /** Silentblocs : facteur sur le malus de risque d'un trajet de nuit hors mission */
   nightRiskFactor?: number
-  /** Cage de Faraday : facteur sur la part de contrôles volants */
+  /** Cage de Faraday : facteur sur la part de contrôles volants (0 : plus aucun) */
   flyingCheckFactor?: number
-  /** Une fois par jour, une fuite réussie ne coûte pas d'ICC */
+  /** Plaque rotative : une fuite réussie devant la BRC ne coûte ni ICC ni Fiche S */
   rotatingPlate?: boolean
   /** Fuite et passage forcé : chance ajoutée, dégâts de châssis et perte de Santé multipliés */
   ram?: { fleeBonus: number; damageFactor: number }
-  /** Trappe de largage : mode d'éjection, cooldown, récupération d'une part tirée entre 0 et maxRecovery */
-  trapdoor?: { chance: number; cooldownDays: number; maxRecovery: number }
+  /** Trappe de largage : mode d'éjection, récupération d'une part tirée entre 0 et maxRecovery */
+  trapdoor?: { chance: number; maxRecovery: number }
   /** Faux terminal : bonus au bluff, tarif standard de corruption multiplié */
   fakeTerminal?: { bluffBonus: number; bribeRateFactor: number }
-  /** Brouilleur de drones : une fois par jour, un contrôle volant devient un barrage fixe ; saisi à la fouille */
+  /** Brouilleur de drones : une fois par jour, un contrôle volant devient un barrage fixe ; saisi à la fouille, sans autre sanction */
   droneJammer?: boolean
   /** Cloison fantôme : facteur sur la chance que les agents trouvent le double fond */
   compartmentFactor?: number
@@ -722,12 +722,8 @@ export type GameState = {
   advanced: number
   /** Modules possédés et modules montés sur le véhicule (chap. 4) */
   modules: { owned: readonly ModuleId[]; mounted: readonly ModuleId[] }
-  /** Dernier jour d'usage de la trappe de largage (cooldown) */
-  trapdoorDay: number | null
   /** Caisses larguées par la trappe, récupérées en partie à la prochaine routine */
   dumped: readonly CargoLot[]
-  /** Dernier jour où la plaque rotative a effacé une perte d'ICC */
-  plateDay: number | null
   /** Équipage (chap. 4) : équipier actif, jour payé (il travaille), recrutements, disparus */
   crew: {
     active: CrewId | null

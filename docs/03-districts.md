@@ -15,7 +15,7 @@
 ```
   Liaisons : `MAP_LINKS` dans [`districts.ts`](../src/data/districts.ts) (le schéma n'est qu'une illustration). *Ex. :* `[D4]` → `[D6]` traverse `[D1]`, `[D2]` et `[D5]` : trois districts traversés.
 * **Pompes :** chaque district a la sienne, où se fait le plein (onglet Lieux, chap. 7). *Officielle* = connectée à Aeterna, **fermée la nuit** sous un seuil d'ICC (`PUMP_NIGHT_MIN_ICC` dans [`balance.ts`](../src/data/balance.ts)) ; *fixe* (pirate) = toujours ouverte.
-* **Lieux spéciaux :** ouverts de jour seulement (06h00 – 20h00, chap. 1), sauf l'arrière-salle de Viktor `[LOC-D1-1]`, ouverte jour et nuit (`nightOpen` dans [`locations.ts`](../src/data/locations.ts)). **Cooldown :** un service utilisé le jour J redevient disponible le jour J + cooldown. Chiffres : [`locations.ts`](../src/data/locations.ts).
+* **Lieux spéciaux :** ouverts de jour seulement (06h00 – 20h00, chap. 1), sauf l'Arrière-Salle de Viktor `[LOC-D1-1]`, ouverte jour et nuit (`nightOpen` dans [`locations.ts`](../src/data/locations.ts)). **Cooldown :** un service utilisé le jour J redevient disponible le jour J + cooldown. Chiffres : [`locations.ts`](../src/data/locations.ts).
 * **Services réservés (deux voies) :** certains services ne s'ouvrent qu'à qui s'est fait une place (`SERVICE_REQUIREMENTS` dans [`locations.ts`](../src/data/locations.ts)). Le lieu les affiche quand même, avec leur condition et la progression vers elle.
   * **Voie officielle**, pour les citoyens présentables et solvables : panique de Karma-Cham (palier d'ICC et patrimoine), faux dossier de la Laverie (patrimoine), Velvet-Silo sur invitation (palier d'ICC et patrimoine).
   * **Voie pègre**, pour les fichés : Cassandre-88 ne parle qu'à qui a déjà une Fiche S.
@@ -34,9 +34,9 @@ Les stats de chaque district sont dans [`districts.ts`](../src/data/districts.ts
 
 ---
 
-## `[D1]` « Hives » — Les Ruches Grises (zone de départ)
+## `[D1]` « Hives » — Cités-dortoirs ouvrières (zone de départ)
 * **Échelon 1 — Catégorie C, prolétariat sous camisole.** 60 % de la population. Chaleur étouffante (38 °C), eau tiède rationnée, sédation maximale (`[T0-01]` + `[T0-03]`). Rêve anesthésié de monter en `[D2]`.
-* **Ambiance :** tours de béton brutales autour de la Cantine Centrale. Les ouvriers passent leurs soirées hypnotisés par les loteries virtuelles. Le marché noir est toléré comme « soupape de décompression » : un peu de vrai chocolat ou de saucisson le week-end suffit à empêcher les émeutes de la faim.
+* **Ambiance :** tours de béton brutales autour de la Cantine des Chauffeurs. Les ouvriers passent leurs soirées hypnotisés par les loteries virtuelles. Le marché noir est toléré comme « soupape de décompression » : un peu de vrai chocolat ou de saucisson le week-end suffit à empêcher les émeutes de la faim.
 * **Sécurité :** caméras bas de gamme souvent en panne, patrouilles humaines de la BRC fatiguées et corruptibles.
 
 ### `[LOC-D1-1]` L'Arrière-Salle de Viktor Varga (usurier mafieux)
@@ -122,7 +122,7 @@ Ancien analyste de données d'Aeterna, terré dans une caravane blindée sous le
 
 ---
 
-## `[D5]` « The Glass Spire » — La Flèche de Verre (ministères, banques & censure)
+## `[D5]` « The Glass Spire » — Ministères, banques & censure
 * **Échelon 4 — Catégorie A, haute bureaucratie sous pression.** Appartements de verre à 20 °C, accès occulte au luxe, zéro sédatif pour garder une productivité maximale.
 * **Ambiance :** gratte-ciels où travaillent les bureaucrates du DSC, les superviseurs d'Aeterna et les truqueurs de la Loterie. Totalement lucides mais bloqués par le plafond de verre de `[D6]`, ils survivent sous caféine, nicotine, antidépresseurs et délation entre collègues.
 * **Sécurité :** portiques à rayons X, scanners électromagnétiques, douaniers d'élite et Drones-Juges.
@@ -162,9 +162,8 @@ Lupanar clandestin et bar à oxygène caché dans les galeries de climatisation 
 | Service | Cooldown | Coût | Effet |
 | :--- | :--- | :--- | :--- |
 | Vente aux enchères masquée | oui | — | Vendre **1 caisse** de Tier 3 ou 4 à un multiple du cours local (lot le plus ancien d'abord, état de la caisse compris). |
-| Chantage sur l'oreiller | oui | une base plus une hausse par utilisation précédente, en ₡ **ou** en caisses de `[T3-07]` puis `[T3-02]` (lots les plus anciens d'abord) jusqu'à couvrir le montant à la valeur en paiement, sans rendu de monnaie (chap. 2) | Gain d'ICC **hors plafond** (vidéos compromettantes de juges). Les juges finissent par se méfier. |
-| Commande spéciale VIP | après résolution (1 contrat actif max) | — | Sur demande, un produit précis de Tier 2 ou 3 **absent de la soute**, tiré au hasard : livrer quelques caisses (`crates`) au Silo avant 20h00 le jour même ou l'un des jours suivants (délai : `deadlineDays` de `VELVET` dans [`locations.ts`](../src/data/locations.ts)), rachetées à un multiple du cours local. **Échec** (constaté à la routine suivant l'échéance) : perte d'ICC et lieu verrouillé plusieurs jours. |
+| Commande spéciale VIP | après résolution (1 contrat actif max) | — | Sur demande, un produit précis de Tier 2 ou 3 **absent de la soute**, tiré au hasard : livrer quelques caisses (`crates`) au Velvet-Silo avant 20h00 le jour même ou l'un des jours suivants (délai : `deadlineDays` de `VELVET` dans [`locations.ts`](../src/data/locations.ts)), rachetées à un multiple du cours local. **Échec** (constaté à la routine suivant l'échéance) : perte d'ICC et lieu verrouillé plusieurs jours. |
 
 * **Parrainage (fin Élite, chap. 1) :** chaque commande VIP livrée rapproche d'un parrain ; une commande manquée en efface une (le parrain n'aime pas attendre). Le guichet affiche la progression (nombre exigé : `ENDINGS` dans [`balance.ts`](../src/data/balance.ts)).
-* **Protection du parrain :** les clients du Silo tiennent les douaniers d'élite. Dans le district du Silo, les caisses d'une commande en cours sont hors de vue des agents : ni risque, ni fouille (chap. 5). Le reste de la soute n'est pas couvert.
+* **Protection du parrain :** les clients du Velvet-Silo tiennent les douaniers d'élite. Dans le district du Velvet-Silo, les caisses d'une commande en cours sont hors de vue des agents : ni risque, ni fouille (chap. 5). Le reste de la soute n'est pas couvert.
 * **Enchères & Commande VIP :** le multiple s'applique au cours local ; la commission de puce est prélevée, ainsi que l'effet de l'état de la caisse (abîmée, fraîcheur), mais pas le savoir-faire ; ces ventes sont **hors quota** (elles ne consomment pas la demande et ne déclenchent pas de pic suspect).

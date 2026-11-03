@@ -24,7 +24,6 @@ const AGENDA_TONES: Record<AgendaItem['kind'], Tone> = {
   vice: 'neutral',
   prophecy: 'accent',
   service: 'muted',
-  trapdoor: 'muted',
   contract: 'warning',
   audit: 'accent',
 }
@@ -60,8 +59,6 @@ export default function CalendarPanel() {
         return { text: t.fil.prophecy(t.event[item.event].name), tone }
       case 'service':
         return { text: t.fil.serviceReady(t.fil.service[item.key]), tone }
-      case 'trapdoor':
-        return { text: t.fil.trapdoorReady, tone }
       case 'contract':
         return { text: t.fil.agendaContract(t.district[item.districtId].name), tone }
       case 'audit':

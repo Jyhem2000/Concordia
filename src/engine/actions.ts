@@ -13,7 +13,6 @@ import { noteSale } from './progress.ts'
 import { acceptMission, checkMission, isOnMission, missionOffer, recordDeviation } from './night.ts'
 import {
   auction,
-  blackmail,
   consultCassandre,
   deliverVip,
   forge,
@@ -102,7 +101,6 @@ export type Action =
   | { type: 'forge'; card: ForgeryCard }
   | { type: 'auction'; productId: ProductId }
   /** Chantage payé en caisses (`inKind`) ou en Cash-Puce */
-  | { type: 'blackmail'; inKind: boolean }
   | { type: 'vipRequest' }
   | { type: 'vipDeliver' }
   | { type: 'dismissCrew' }
@@ -619,8 +617,6 @@ function resolveAction(state: GameState, action: Action): ActionResult {
       return atService(state, 'forgery', () => forge(state, action.card))
     case 'auction':
       return atService(state, 'velvet', () => auction(state, action.productId))
-    case 'blackmail':
-      return atService(state, 'velvet', () => blackmail(state, action.inKind))
     case 'vipRequest':
       return atService(state, 'velvet', () => requestVip(state))
     case 'vipDeliver':

@@ -173,7 +173,7 @@ export default function InterceptionScreen() {
             chance={ejectChance(game)}
             outcomes={[
               mode === 'trapdoor'
-                ? t.interception.ejectTrapdoor(pct(MODULES['MOD-07'].trapdoor?.maxRecovery ?? 0), MODULES['MOD-07'].trapdoor?.cooldownDays ?? 0)
+                ? t.interception.ejectTrapdoor(pct(MODULES['MOD-07'].trapdoor?.maxRecovery ?? 0))
                 : mode === 'crusher'
                   ? t.interception.ejectCrusher
                   : t.interception.ejectSuccess(pv(EJECT.chassisLoss)),

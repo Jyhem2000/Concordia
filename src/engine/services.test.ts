@@ -7,7 +7,7 @@ import { demandQuota, quoteBreakdown } from './market.ts'
 import { riskBreakdown } from './risk.ts'
 import { createRng, seedRng } from './rng.ts'
 import { sleep } from './routine.ts'
-import { auctionPrice, blackmailCost, forgeryCost, karmaCost, morgueCost, pendingServices } from './services.ts'
+import { auctionPrice, forgeryCost, karmaCost, morgueCost, pendingServices } from './services.ts'
 import { defined, EARNED, errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
 import type { CargoLot, GameState, ProductId } from './types.ts'
 
@@ -123,13 +123,6 @@ describe('Velvet-Silo', () => {
     expect(errorOf(at('D6', { cargo: [lot('T2-03', 1)] }), { type: 'auction', productId: 'T2-03' })).toBe('not-eligible')
   })
 
-  it('accepte le chantage en caisses, sans rendre la monnaie', () => {
-    const paid = run(at('D6', { cash: 0, icc: 50, cargo: [lot('T3-07', 10)] }), { type: 'blackmail', inKind: true })
-    expect(paid.icc).toBe(50 + VELVET.blackmail.icc)
-    expect(errorOf(at('D6', { cash: 0 }), { type: 'blackmail', inKind: false })).toBe('not-enough-cash')
-    expect(blackmailCost(at('D6'))).toBeGreaterThan(0)
-  })
-
   it('commande un produit absent de la soute, et punit une livraison manquée', () => {
     const ordered = run(at('D6', { cargo: [lot('T2-03', 1)] }), { type: 'vipRequest' })
     const vip = defined(ordered.vip)
@@ -155,7 +148,7 @@ describe('Velvet-Silo', () => {
 
 describe('agenda des services (chap. 7)', () => {
   it('donne le jour où chaque service utilisé redevient disponible', () => {
-    const state = gameAt(10, { services: { uses: { influence: 1, blackmail: 1 }, lastDay: { influence: 9, blackmail: 2 } } })
+    const state = gameAt(10, { services: { uses: { influence: 1, auction: 1 }, lastDay: { influence: 9, auction: 2 } } })
     expect(pendingServices(state)).toEqual([{ key: 'influence', day: 9 + KARMA.cooldownDays }])
   })
 })

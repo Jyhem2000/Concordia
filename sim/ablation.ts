@@ -55,7 +55,7 @@ function pair(
 const withoutModule = (base: Plan, id: ModuleId): Plan => ({ ...base, modules: base.modules.filter((module) => module !== id) })
 const withPlaces = (base: Plan, extra: readonly PlaceUse[]): Plan => ({ ...base, places: ['advance', ...extra] })
 
-/** Plan dédié au brouilleur de drones : fuite au sommet, sur la Panacea pour monter tous ses modules (chap. 8, étape 2 pour ses autres réglages) */
+/** Plan dédié au brouilleur de drones : fuite au sommet, sur le Fourgon « Panacea-V8 » pour monter tous ses modules (chap. 8, étape 2 pour ses autres réglages) */
 const FLIGHT: Plan = { name: 'Fuite au sommet', vehicle: 'VEH-03', modules: ['MOD-06', 'MOD-09'], crew: 'CREW-02', runner: true }
 
 /** Fuite au sommet avec l'assistance de conduite */
@@ -91,8 +91,8 @@ export const ABLATIONS: readonly Ablation[] = [
   pair('Morgue : laissez-passer', withPlaces(plan('Sans build'), ['pass']), 'Équilibré', plan('Sans build'), usedService('morgue:pass')),
   pair('Karma-Cham', withPlaces(plan('Sans build'), ['influence']), 'Équilibré', plan('Sans build'), usedService('influence')),
   pair('Velvet-Silo : enchères', withPlaces(plan('Haut tier'), ['auction']), 'Casse-cou', plan('Haut tier'), usedService('auction')),
-  pair('Velvet-Silo : chantage', withPlaces(plan('Sans build'), ['blackmail']), 'Équilibré', plan('Sans build'), usedService('blackmail')),
   // Mécanique
+  pair('Dopage au Tcherno-Bull', FLIGHT, 'Casse-cou', { ...FLIGHT, noDoping: true }, usedService('dope')),
   pair('Dilution en Tier 0', plan('Couverture légale'), 'Équilibré', { ...plan('Couverture légale'), legalShare: undefined }, () => true),
 ]
 

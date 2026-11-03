@@ -65,7 +65,7 @@ export const MODULES: Readonly<Record<ModuleId, Module>> = {
     category: 'camouflage',
     fitting: 'welded',
     tagFactor: { tag: 'TAG-TECH', factor: 0 },
-    flyingCheckFactor: 0.5,
+    flyingCheckFactor: 0,
   },
   'MOD-04': { price: 2_000, category: 'conservation', fitting: 'adaptable', smoothRide: true, nightRiskFactor: 0.5 },
   'MOD-05': { requires: [{ kind: 'wanted' }], price: 4_000, category: 'tactical', fitting: 'portable', rotatingPlate: true },
@@ -81,7 +81,7 @@ export const MODULES: Readonly<Record<ModuleId, Module>> = {
     price: 4_000,
     category: 'tactical',
     fitting: 'welded',
-    trapdoor: { chance: 0.75, cooldownDays: 3, maxRecovery: 1 },
+    trapdoor: { chance: 0.75, maxRecovery: 1 },
   },
   'MOD-08': {
     requires: [{ kind: 'deliveries', count: 3 }],

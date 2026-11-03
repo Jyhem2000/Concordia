@@ -47,23 +47,10 @@ export function moduleTagFactor(state: GameState, tag: TagId): number {
 
 export type EjectMode = 'trapdoor' | 'crusher' | 'manual'
 
-/** Jour où la trappe de largage montée sera rechargée, ou null si elle l'est déjà (ou n'est pas montée) */
-export function trapdoorReadyDay(state: GameState): number | null {
-  const trapdoor = mountedEffect(state, 'trapdoor')
-  if (trapdoor === undefined || state.trapdoorDay === null) return null
-  const ready = state.trapdoorDay + trapdoor.cooldownDays
-  return state.day < ready ? ready : null
-}
-
-/** La trappe de largage est-elle hors cooldown ? */
-export function trapdoorReady(state: GameState): boolean {
-  return mountedEffect(state, 'trapdoor') !== undefined && trapdoorReadyDay(state) === null
-}
-
 /** Mode d'éjection retenu, par priorité : trappe, broyeur, manuel ; null si aucun n'est possible ici */
 export function ejectMode(state: GameState): EjectMode | null {
   const allowed = DISTRICTS[state.districtId].ejection
-  if (allowed.trapdoor && trapdoorReady(state)) return 'trapdoor'
+  if (allowed.trapdoor && mountedEffect(state, 'trapdoor') !== undefined) return 'trapdoor'
   if (vehicleOf(state).heavy) return 'crusher'
   if (allowed.manual) return 'manual'
   return null

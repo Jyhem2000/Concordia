@@ -36,7 +36,7 @@ Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la dé
 | **État des caisses** | fraîcheur (Extra-frais à Perdu), casse des fragiles, valeur d'une caisse abîmée ou défraîchie | chap. 2 |
 | **Marché** | information (mémoire, historique, profil public des districts), boutique du jour, exclusion, cours (coefficient du district, tendance, Mult_Événement), quota de rachat, saturation, pic suspect | chap. 2 → chap. 6 (événements, contrecoups, vices de la Loterie) |
 | **Vente** | prix de vente, commission, savoir-faire (fraîcheur, nuit, rendements décroissants), clause anti-arbitrage, lots les plus anciens d'abord, paiement en nature | chap. 2 |
-| **Lieux spéciaux** | services, horaires (l'arrière-salle de Viktor jour et nuit), effets de chaque lieu (plat du routier compris), contrats de la Pègre, parrainage du Velvet-Silo | chap. 3 → chap. 1 (dette, offshore) |
+| **Lieux spéciaux** | services, horaires (l'Arrière-Salle de Viktor jour et nuit), effets de chaque lieu (plat du routier compris), contrats de la Pègre, parrainage du Velvet-Silo | chap. 3 → chap. 1 (dette, offshore) |
 | **Équipement** | véhicules (double fond et son contenu compris), modules (brouilleur de drones compris), équipage (injection du serveur par Glitch comprise), salaires | chap. 4 |
 | **Événements** | globaux (dont la maintenance d'Aeterna), locaux, rumeurs, contrecoups, Loterie, aléas routiers | chap. 6 → chap. 5 (contrôles volants, Fiche S) |
 | **Prévisibilité** | ce que le joueur sait ou peut deviner (cours, rumeurs, contrecoups, Loterie) et ce qui reste caché (ronde renforcée) | chap. 2 → chap. 6 → chap. 5 |

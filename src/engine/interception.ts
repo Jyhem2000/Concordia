@@ -425,8 +425,8 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
         const escaped = shake(loseChassis(prepared, ledger, lost), ledger, fragile(prepared, breakOnFlee(prepared.cargo, rng)))
         // Les milices ne fichent personne et ne coûtent pas d'ICC
         if (racket) return report(escaped, chance, true, true, false)
-        // Plaque rotative, une fois par jour : les caméras de trafic ne lisent rien, ni ICC perdu ni Fiche S
-        if (plateCovers(escaped)) return report({ ...escaped, plateDay: escaped.day }, chance, true, true, false)
+        // Plaque rotative : les caméras de trafic ne lisent rien, ni ICC perdu ni Fiche S
+        if (plateCovers(escaped)) return report(escaped, chance, true, true, false)
         return report(loseIcc(addWanted(escaped, ledger), ledger, flightIccLoss(escaped)), chance, true, true, false)
       }
       if (racket) return report(refuseToll(prepared, ledger, rng), chance, false, true, false)
@@ -445,17 +445,16 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
     case 'eject': {
       const mode = ejectMode(state)
       const chance = ejectChance(state)
-      // La trappe entre en cooldown à l'usage, réussi ou non
-      const used = mode === 'trapdoor' ? { ...state, trapdoorDay: state.day } : state
       if (roll(chance)) {
         // Soute vidée avant le barrage : la fouille ne trouve rien, balise comprise ; le double fond reste fermé
-        const { hidden, visible } = hiddenCargo(used)
-        const dumped = keepHidden(confiscate({ ...used, cargo: visible }, ledger), ledger, hidden)
-        if (mode === 'trapdoor') return report({ ...dumped, dumped: visible.filter(isIllegal) }, chance, true, true, false)
+        const { hidden, visible } = hiddenCargo(state)
+        const dumped = keepHidden(confiscate({ ...state, cargo: visible }, ledger), ledger, hidden)
+        // Les caisses larguées attendent les complices au matin, avec celles d'un largage plus tôt dans la journée
+        if (mode === 'trapdoor') return report({ ...dumped, dumped: [...state.dumped, ...visible.filter(isIllegal)] }, chance, true, true, false)
         if (mode === 'crusher') return report(dumped, chance, true, true, false)
         return report(hitChassis(dumped, ledger, EJECT.chassisLoss, rng), chance, true, true, false)
       }
-      const filmed = loseIcc(used, ledger, EJECT.fail.iccLoss)
+      const filmed = loseIcc(state, ledger, EJECT.fail.iccLoss)
       const sanctioned = frisk(filmed, (s) => search(s, ledger, EJECT.fail.fineRaise))
       noteCustody(ledger, EJECT.fail.custodyDays)
       return report(sanctioned, chance, false, true, true)
@@ -574,7 +573,7 @@ function ramFactor(state: GameState): number {
 
 /** Plaque rotative disponible aujourd'hui : la prochaine fuite réussie devant la BRC ne laisse aucune trace */
 export function plateCovers(state: GameState): boolean {
-  return mountedEffect(state, 'rotatingPlate') !== undefined && state.plateDay !== state.day
+  return mountedEffect(state, 'rotatingPlate') !== undefined
 }
 
 /** Perte d'ICC d'une fuite réussie, hors plaque rotative : réduite par le transpondeur */
@@ -664,11 +663,11 @@ function finish(state: GameState, report: InterceptionReport, executed: boolean,
   const fullReport: InterceptionReport = { ...report, towBill: towed.bill }
   if (!report.over) return { ...towed.state, interceptionReport: fullReport }
 
-  // Brouilleur de drones découvert à la fouille : sabotage d'infrastructure, saisi, garde à vue (chap. 4)
+  // Brouilleur de drones découvert à la fouille : saisi, sans autre sanction (chap. 4)
   const jammer = searched ? mountedWith(towed.state, 'droneJammer') : undefined
   // Amende impayée : la garde à vue s'allonge
   const unpaid = report.unpaidFine > 0 ? FINE.unpaidCustodyDays : 0
-  const custodyDays = (jammer ? Math.max(1, report.custodyDays) : report.custodyDays) + unpaid
+  const custodyDays = report.custodyDays + unpaid
   const seized = jammer
     ? {
         ...towed.state,

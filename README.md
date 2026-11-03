@@ -37,6 +37,7 @@ Conventions du moteur :
 Traductions :
 
 - **Un seul fichier par langue :** `src/i18n/fr.ts` est le catalogue de référence (tous les textes, indexés par les IDs des docs). L'anglais se fera en copiant ce fichier en `en.ts` (`satisfies Messages` : toute clé manquante casse la compilation), puis en l'ajoutant à `locales` dans `src/i18n/index.ts`.
+- **Noms propres invariables :** un district, un lieu, un véhicule, un module, un produit ou un personnage garde partout son nom officiel, celui de `fr.ts` (« Hives », jamais « les Ruches » ; « The Glass Spire », jamais « la Flèche de Verre »). Un nom propre ne se traduit pas, même s'il a une traduction possible. Seule abréviation permise : le nom sans son complément entre guillemets (« la Laverie », « le Garage », « le Fourgon « Panacea-V8 » » plutôt que « la Panacea », qui est un district). Un sous-titre décrit, il ne traduit pas le nom.
 - **Aucun texte en dur dans les composants :** `const { t, credits, percent, label } = useI18n()`. Les nombres passent par les formateurs (`credits(2500)` → « 2 500 ₡ »), les lignes de `Breakdown` par `label(source)`.
 - Le moteur ne manipule jamais de texte, seulement des IDs.
 

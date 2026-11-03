@@ -77,8 +77,6 @@ function candidates(state: GameState): Action[] {
     { type: 'morgue', service: 'certificate' },
     { type: 'prophecy' },
     { type: 'forge', card: { kind: 'informant' } },
-    { type: 'blackmail', inKind: false },
-    { type: 'blackmail', inKind: true },
     { type: 'vipRequest' },
     { type: 'vipDeliver' },
   ]

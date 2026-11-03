@@ -1,6 +1,5 @@
 import { GAME_LENGTH_DAYS, PROTECTION } from '../data/balance.ts'
 import { LOTTERY } from '../data/events.ts'
-import { trapdoorReadyDay } from './equipment.ts'
 import { nextDebtDeadline } from './finance.ts'
 import { pendingServices } from './services.ts'
 import type { DistrictId, GameState, GlobalEventId, ProductId, ServiceKey } from './types.ts'
@@ -14,7 +13,6 @@ export type AgendaItem =
   | { kind: 'vice'; day: number; productId: ProductId; districtId: DistrictId }
   | { kind: 'prophecy'; day: number; event: GlobalEventId }
   | { kind: 'service'; day: number; key: ServiceKey }
-  | { kind: 'trapdoor'; day: number }
   | { kind: 'contract'; day: number; districtId: DistrictId }
   | { kind: 'audit'; day: number }
 
@@ -28,7 +26,6 @@ export function agenda(state: GameState): AgendaItem[] {
   const debt = nextDebtDeadline(state)
   const vice = state.events.lottery
   const prophecy = state.events.prophecy
-  const trapdoor = trapdoorReadyDay(state)
   const items: AgendaItem[] = []
   if (debt !== null) items.push({ kind: 'debt', day: debt })
   if (state.debtLate) items.push({ kind: 'debtLate', day })
@@ -38,7 +35,6 @@ export function agenda(state: GameState): AgendaItem[] {
     items.push({ kind: 'vice', day: vice.viceUntil, productId: vice.vice, districtId: vice.viceDistrict })
   if (prophecy && prophecy.day >= day) items.push({ kind: 'prophecy', day: prophecy.day, event: prophecy.event })
   for (const { key, day: ready } of pendingServices(state)) items.push({ kind: 'service', day: ready, key })
-  if (trapdoor !== null) items.push({ kind: 'trapdoor', day: trapdoor })
   if (state.contract) items.push({ kind: 'contract', day: state.contract.deadline, districtId: state.contract.to })
   items.push({ kind: 'audit', day: GAME_LENGTH_DAYS })
   return items.filter((item) => item.day <= GAME_LENGTH_DAYS).sort((a, b) => a.day - b.day)

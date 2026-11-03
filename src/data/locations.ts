@@ -44,10 +44,9 @@ export const CONTRACT = {
   failDebtShare: 0.5,
 }
 
-/** Velvet-Silo : enchères, chantage, commande VIP */
+/** Velvet-Silo : enchères, commande VIP */
 export const VELVET = {
   auction: { cooldownDays: 3, factor: 2, minTier: 3 },
-  blackmail: { cooldownDays: 4, cost: 7_000, costStep: 3_500, icc: 12, crates: ['T3-07', 'T3-02'] as readonly ProductId[] },
   vip: { cooldownDays: 3, deadlineDays: 2, crates: 3, factor: 3.5, tiers: [2, 3] as readonly Tier[], failIccLoss: 10, lockDays: 5 },
 }
 
@@ -65,10 +64,6 @@ export const SERVICE_REQUIREMENTS: Readonly<Partial<Record<ServiceKey, readonly 
   prophecy: [{ kind: 'wanted' }],
   forgery: [{ kind: 'wealth', amount: 50_000 }],
   auction: [
-    { kind: 'iccTier', tier: 'ordinary' },
-    { kind: 'wealth', amount: 40_000 },
-  ],
-  blackmail: [
     { kind: 'iccTier', tier: 'ordinary' },
     { kind: 'wealth', amount: 40_000 },
   ],

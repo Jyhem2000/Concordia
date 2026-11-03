@@ -57,7 +57,6 @@ const SERVICE_ACTIONS: readonly Action['type'][] = [
   'morgue',
   'influence',
   'auction',
-  'blackmail',
   'prophecy',
   'forge',
   'vipRequest',
@@ -148,6 +147,8 @@ function observe(record: GameRecord, before: GameState, after: GameState, action
     const stats = record.moves[move] ?? { played: 0, won: 0 }
     record.moves[move] = { played: stats.played + 1, won: stats.won + (success ? 1 : 0) }
     if (over) record.custodyDays += custodyDays
+    // Dopage pilote : compté avec les services, pour son test par retrait
+    if (action.tactics?.dope) record.services.dope = (record.services.dope ?? 0) + 1
   }
   if (SERVICE_ACTIONS.includes(action.type)) {
     const key = action.type === 'morgue' ? `morgue:${action.service}` : action.type

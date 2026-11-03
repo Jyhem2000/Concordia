@@ -121,7 +121,7 @@ describe('barrage et équipement', () => {
     expect(fleeChance(stopped({ vehicleId: 'VEH-03' })).total).toBeGreaterThan(fleeChance(stopped({})).total)
   })
 
-  it('fuit sans dégât avec le transpondeur, et sans perte d’ICC ni Fiche S une fois par jour avec la plaque', () => {
+  it('fuit sans dégât avec le transpondeur, et sans perte d’ICC ni Fiche S à chaque fuite avec la plaque', () => {
     const fled = run(
       gameAt(3, { districtId: 'D3', vehicleId: 'VEH-03', chassis: VEHICLES['VEH-03'].maxChassis, interception: brc, rng: LOW_ROLL_RNG }),
       { type: 'intercept', move: 'flee' },
@@ -129,9 +129,9 @@ describe('barrage et équipement', () => {
     expect(fled.chassis).toBe(VEHICLES['VEH-03'].maxChassis)
     expect(fled.icc).toBe(100 - Math.floor(FLEE.success.iccLoss * defined(VEHICLES['VEH-03'].transponder).iccLossFactor))
     const plated = run(withModules(['MOD-05'], { districtId: 'D2', interception: brc, rng: LOW_ROLL_RNG }), { type: 'intercept', move: 'flee' })
-    expect(plated).toMatchObject({ icc: 100, plateDay: 3, wanted: 0 })
+    expect(plated).toMatchObject({ icc: 100, wanted: 0 })
     const again = run({ ...plated, interception: brc, rng: LOW_ROLL_RNG }, { type: 'intercept', move: 'flee' })
-    expect(again.wanted).toBe(1)
+    expect(again).toMatchObject({ icc: 100, wanted: 0 })
   })
 
   it('choisit le mode d’éjection selon le district et l’équipement', () => {
@@ -140,7 +140,19 @@ describe('barrage et équipement', () => {
     expect(ejectMode(withModules(['MOD-07'], { districtId: 'D5' }))).toBe('trapdoor')
     expect(ejectMode(withModules(['MOD-07'], { districtId: 'D6' }))).toBeNull()
     expect(ejectMode(gameAt(3, { districtId: 'D6', vehicleId: 'VEH-04' }))).toBe('crusher')
-    expect(ejectMode(withModules(['MOD-07'], { districtId: 'D2', trapdoorDay: 2 }))).toBe('manual')
+  })
+
+  it('largue par la trappe à chaque barrage, et garde toutes les caisses larguées du jour pour le matin', () => {
+    const first = run(withModules(['MOD-07'], { districtId: 'D2', interception: brc, cargo: [lot('T2-03', 6)], rng: LOW_ROLL_RNG }), {
+      type: 'intercept',
+      move: 'eject',
+    })
+    expect(ejectMode({ ...first, interception: brc })).toBe('trapdoor')
+    const second = run(
+      { ...first, interception: brc, cargo: [...first.cargo, lot('T2-04', 6)], rng: LOW_ROLL_RNG },
+      { type: 'intercept', move: 'eject' },
+    )
+    expect(second.dumped.map((entry) => entry.productId)).toEqual(['T2-03', 'T2-04'])
   })
 
   it('largue par la trappe sans dégât, puis récupère une part des caisses au matin', () => {
@@ -149,7 +161,7 @@ describe('barrage et équipement', () => {
       withModules(['MOD-07'], { districtId: 'D2', interception: brc, cargo: [lot('T2-03', 6), lot('T0-01', 2)], rng: LOW_ROLL_RNG }),
     )
     const dumped = run(state, { type: 'intercept', move: 'eject' })
-    expect(dumped).toMatchObject({ trapdoorDay: 3, chassis: VEHICLES['VEH-01'].maxChassis })
+    expect(dumped).toMatchObject({ chassis: VEHICLES['VEH-01'].maxChassis })
     // Le double fond reste fermé : seules les caisses visibles sont larguées
     const hidden = VEHICLES['VEH-01'].hiddenCompartment
     expect(dumped.dumped).toEqual([lot('T2-03', 6 - hidden)])

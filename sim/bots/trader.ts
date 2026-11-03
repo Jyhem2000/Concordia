@@ -58,9 +58,7 @@ import { checkDelivery, deliveryCrates, deliveryFee, deliveryOffer } from '../..
 import { canInject, checkMission, missionOffer } from '../../src/engine/night.ts'
 import { checkRoadChoice } from '../../src/engine/road.ts'
 import {
-  blackmailCost,
   checkAuction,
-  checkBlackmail,
   checkInfluence,
   checkMeal,
   influenceFactor,
@@ -127,12 +125,14 @@ export type Plan = {
   sponsorOrder?: boolean
   /** Fuite préférée à espérance égale (pare-buffles, brouilleur, transpondeur) */
   runner?: boolean
+  /** Ne se dope jamais au barrage (test par retrait du dopage) */
+  noDoping?: boolean
   /** ICC à défendre : certificat et chantage sous ce seuil, pertes d'ICC pesées plus lourd au barrage */
   iccFloor?: number
 }
 
 /** Usages des lieux spéciaux que sait faire le marchand (chap. 8, tests par retrait) */
-export type PlaceUse = 'advance' | 'surgery' | 'certificate' | 'pass' | 'influence' | 'auction' | 'blackmail' | 'vip'
+export type PlaceUse = 'advance' | 'surgery' | 'certificate' | 'pass' | 'influence' | 'auction' | 'vip'
 
 const DEFAULT_PLACES: readonly PlaceUse[] = ['advance']
 
@@ -242,7 +242,7 @@ function secured(view: GameState, objective: Objective): boolean {
 function goalPlan(plan: Plan, objective: Objective): Plan {
   if (objective !== 'elite') return plan
   const gold = ICC_TIERS.find((tier) => tier.tier === ENDINGS.elite.iccTier)?.min ?? 0
-  return { ...plan, places: [...(plan.places ?? DEFAULT_PLACES), 'certificate', 'blackmail', 'vip'], iccFloor: gold + ELITE_ICC_MARGIN }
+  return { ...plan, places: [...(plan.places ?? DEFAULT_PLACES), 'certificate', 'vip'], iccFloor: gold + ELITE_ICC_MARGIN }
 }
 
 /** Seuil atteint : on sécurise plutôt que maximiser, plus aucun illégal (livraisons et légal seulement) ; le Fantôme, une fois la greffe complète */
@@ -363,8 +363,8 @@ function injectionMove(view: GameState): Action {
     const refuel = refuelFor(view, VEHICLES[view.vehicleId].tank)
     if (refuel) return refuel
     const free = VEHICLES[view.vehicleId].cargo - cargoUsed(view.cargo)
-    const cover = Math.min(free, maxBuy(view, 'T0-01'))
-    if (cover > 0) return { type: 'buy', productId: 'T0-01', qty: cover }
+    const [cover] = coverBuys(view, [], free)
+    if (cover) return { type: 'buy', productId: cover.productId, qty: cover.qty }
   }
   if (tourTonight(view)) return { type: 'sleep' }
   // La tournée part le soir : sans trajet de jour, attendre le soir sur place
@@ -504,6 +504,38 @@ function bestElsewhere(view: GameState, productId: ProductId, lot: CargoLot = fr
     ...DISTRICT_IDS.filter((id) => id !== view.districtId).map((id) => estimatedSale(view, id, productId) * saleFactor(view, lot, id)),
   )
 }
+
+/**
+ * Caisses de Tier 0 à acheter ici pour couvrir la soute (chap. 2) : chacune masque d'abord le tag le plus présent et
+ * encore à découvert dans la soute prévue (caisses déjà là et achats d'ici) ; sans tag à masquer, la moins chère dilue
+ */
+function coverBuys(view: GameState, buys: readonly CrateCount[], need: number): CrateCount[] {
+  const shop = shopProducts(view.markets[view.districtId]).filter((id) => PRODUCTS[id].tier === 0 && !PRODUCTS[id].sealed)
+  const crates = [...view.cargo, ...buys]
+  const count = (has: (id: ProductId) => boolean) => crates.reduce((total, crate) => (has(crate.productId) ? total + crate.qty : total), 0)
+  const picks = new Map<ProductId, number>()
+  const picked = (id: ProductId) => picks.get(id) ?? 0
+  // Caisses du tag de ce Tier 0 que rien ne masque encore
+  const open = (id: ProductId) => {
+    const tag = PRODUCTS[id].masks
+    if (!tag) return 0
+    const tagged = count((other) => PRODUCTS[other].tier > 0 && PRODUCTS[other].tags.includes(tag))
+    return tagged - count((other) => other === id) - picked(id)
+  }
+  for (let crate = 0; crate < need; crate++) {
+    const affordable = shop.filter((id) => picked(id) < maxBuy(view, id))
+    if (affordable.length === 0) break
+    const masker = affordable.reduce((best, id) => (open(id) > open(best) ? id : best))
+    const cheapest = affordable.reduce((best, id) => (quote(view, view.districtId, id) < quote(view, view.districtId, best) ? id : best))
+    const pick = open(masker) > 0 ? masker : cheapest
+    picks.set(pick, picked(pick) + 1)
+  }
+  return [...picks].map(([productId, qty]) => ({ productId, qty }))
+}
+
+/** Caisses de Tier 0 en soute (caisses scellées exclues) : la couverture déjà là */
+const coverCrates = (view: GameState) =>
+  view.cargo.reduce((total, lot) => (PRODUCTS[lot.productId].tier === 0 && !PRODUCTS[lot.productId].sealed ? total + lot.qty : total), 0)
 
 /** Valeur d'achat des caisses illégales : ce qu'une saisie ferait perdre */
 function illegalValue(cargo: GameState['cargo']): number {
@@ -729,9 +761,6 @@ function specialPlaces(view: GameState, uses: (place: PlaceUse) => boolean, rese
   if (!checkService(view, 'velvet')) {
     const lot = PRODUCT_IDS.find((id) => uses('auction') && !checkAuction(view, id))
     if (lot) return { type: 'auction', productId: lot }
-    if (uses('blackmail') && view.icc < iccFloor && !checkBlackmail(view, false) && spare(blackmailCost(view))) {
-      return { type: 'blackmail', inKind: false }
-    }
   }
   return null
 }
@@ -832,7 +861,7 @@ function buysFor(
 function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route | null {
   const revealed = Boolean(crewEffect(view, 'revealsPatrol'))
   const capacity = VEHICLES[view.vehicleId].cargo
-  const legalNeed = plan.legalShare ? Math.max(0, Math.ceil(capacity * plan.legalShare) - ownedQty(view.cargo, 'T0-01')) : 0
+  const legalNeed = plan.legalShare ? Math.max(0, Math.ceil(capacity * plan.legalShare) - coverCrates(view)) : 0
   const free = capacity - cargoUsed(view.cargo) - legalNeed
   const goods = tradable(view)
   const night = view.phase === 'night'
@@ -855,8 +884,8 @@ function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route
       const room = contract ? free - deliveryCrates(view) : free
       for (const shopping of [true, false]) {
         const { buys, margin } = shopping && budget > 0 && room > 0 ? buysFor(view, to, plan, temperament, budget, room) : { buys: [], margin: 0 }
-        const legalBuys =
-          shopping && legalNeed > 0 && budget > 0 ? [{ productId: 'T0-01' as const, qty: Math.min(legalNeed, maxBuy(view, 'T0-01')) }] : []
+        // Couverture : le Tier 0 qui masque ce que la soute transportera
+        const legalBuys = shopping && legalNeed > 0 && budget > 0 ? coverBuys(view, buys, legalNeed) : []
 
         // Risque et exposition avec la soute prévue (après les achats d'ici)
         const planned = [
@@ -1000,7 +1029,7 @@ function barrage(view: GameState, plan: Plan, temperament: Temperament): Action 
     return { type: 'intercept', move: 'refuseToll' }
   }
   // Serveur en soute : la fouille tue, on joue l'option la plus sûre
-  if (isLethalSearch(view)) return survivalMove(view)
+  if (isLethalSearch(view)) return survivalMove(view, plan)
   const illegal = illegalValue(view.cargo)
   if (plan.novice || illegal === 0) return { type: 'intercept', move: 'search' }
 
@@ -1036,12 +1065,23 @@ function barrage(view: GameState, plan: Plan, temperament: Temperament): Action 
       flight.failChassis * VALUE.chassisPoint +
       25 * iccPoint
     const runnerBias = plan.runner ? 0.8 : 1
-    const chance = fleeChance(view).total
     if (!checkMove(view, 'flee')) {
+      const chance = fleeChance(view).total
       options.push({
         action: { type: 'intercept', move: 'flee' },
         loss: (chance * success + (1 - chance) * failure) * temperament.boldness * runnerBias,
       })
+      // Dopage pilote : une caisse bue, un choc de châssis et de l'ICC, contre de la chance en plus (devant la BRC, les milices ont leur propre choix)
+      const dope = dopeFor(view, plan)
+      const doping = dope ? PRODUCTS[dope].doping : undefined
+      if (dope && doping) {
+        const doped = fleeChance(view, { dope }).total
+        const price = PRODUCTS[dope].basePrice + doping.chassisLoss * VALUE.chassisPoint + doping.iccLoss * iccPoint
+        options.push({
+          action: { type: 'intercept', move: 'flee', tactics: { dope } },
+          loss: (price + doped * success + (1 - doped) * failure) * temperament.boldness * runnerBias,
+        })
+      }
     }
   }
   // Éjection : la trappe rapporte en moyenne une partie des caisses larguées le lendemain
@@ -1066,11 +1106,21 @@ function barrage(view: GameState, plan: Plan, temperament: Temperament): Action 
   return options.reduce((best, option) => (option.loss < best.loss ? option : best)).action
 }
 
+/** Produit en soute qui dope le pilote, si le dopage du jour n'est pas déjà pris (chap. 5) */
+function dopeFor(view: GameState, plan: Plan): ProductId | undefined {
+  if (plan.noDoping || view.lastDopingDay === view.day) return undefined
+  return PRODUCT_IDS.find((id) => PRODUCTS[id].doping && ownedQty(view.cargo, id) > 0)
+}
+
 /** Fouille mortelle (serveur en soute) : l'option qui a le plus de chances d'éviter la fouille, corruption au plus offrant */
-function survivalMove(view: GameState): Action {
+function survivalMove(view: GameState, plan: Plan): Action {
   const options: { action: Action; chance: number }[] = []
   if (!checkMove(view, 'bluff')) options.push({ action: { type: 'intercept', move: 'bluff' }, chance: bluffChance(view).total })
-  if (!checkMove(view, 'flee')) options.push({ action: { type: 'intercept', move: 'flee' }, chance: fleeChance(view).total })
+  if (!checkMove(view, 'flee')) {
+    const dope = dopeFor(view, plan)
+    const tactics = dope ? { dope } : {}
+    options.push({ action: { type: 'intercept', move: 'flee', tactics }, chance: fleeChance(view, tactics).total })
+  }
   if (!checkMove(view, 'eject')) options.push({ action: { type: 'intercept', move: 'eject' }, chance: ejectChance(view).total })
   const offer = { cash: Math.min(view.cash, Math.max(minimumOffer(view), bribeRate(view).total * 3)), crates: [] }
   if (!checkMove(view, 'bribe', offer)) options.push({ action: { type: 'intercept', move: 'bribe', offer }, chance: bribeChance(view, offer).total })

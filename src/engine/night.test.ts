@@ -163,11 +163,11 @@ describe('brouilleur de drones', () => {
     expect(drawInterception(createRng(flyingSeed), 1, jammer({ jammerDay: 3 }), 'D6')?.kind).toBe('flying')
   })
 
-  it('est saisi à la fouille, avec une garde à vue même sur une soute légale', () => {
+  it('est saisi à la fouille, sans garde à vue sur une soute légale', () => {
     const stopped: Interception = { kind: 'brc', acted: false, bluffFailed: false }
     const searched = run(jammer({ districtId: 'D2', interception: stopped, cargo: [lot('T0-01', 2)] }), { type: 'intercept', move: 'search' })
     expect(searched.modules.owned).not.toContain('MOD-09')
-    expect(defined(searched.interceptionReport)).toMatchObject({ jammerSeized: true, custodyDays: 1 })
-    expect(searched.day).toBe(4)
+    expect(defined(searched.interceptionReport)).toMatchObject({ jammerSeized: true, custodyDays: 0 })
+    expect(searched.day).toBe(3)
   })
 })

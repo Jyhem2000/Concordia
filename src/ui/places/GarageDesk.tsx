@@ -234,7 +234,7 @@ function useEquipmentTexts() {
       ...(tagFactor
         ? [tagFactor.factor === 0 ? g.tagOff(t.tag[tagFactor.tag].name) : g.tagFactor(t.tag[tagFactor.tag].name, change(tagFactor.factor))]
         : []),
-      ...(flyingCheckFactor !== undefined ? [g.flyingChecks(change(flyingCheckFactor))] : []),
+      ...(flyingCheckFactor !== undefined ? [flyingCheckFactor === 0 ? g.noFlyingChecks : g.flyingChecks(change(flyingCheckFactor))] : []),
       ...(smoothRide ? [g.smoothRide] : []),
       ...(nightRiskFactor !== undefined ? [g.nightRisk(change(nightRiskFactor))] : []),
       ...(rotatingPlate ? [g.rotatingPlate] : []),
@@ -243,7 +243,6 @@ function useEquipmentTexts() {
         ? [
             g.trapdoor(
               percent(trapdoor.chance, 0),
-              trapdoor.cooldownDays,
               percent(trapdoor.maxRecovery, 0),
               DISTRICT_IDS.filter((id) => !DISTRICTS[id].ejection.trapdoor)
                 .map((id) => t.district[id].name)

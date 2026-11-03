@@ -4,13 +4,13 @@ import { CANTINE, CASSANDRE, FORGERY, KARMA, LOCATIONS, MORGUE, SERVICE_REQUIREM
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import type { ActionError } from './actions.ts'
 import { giveCrates, ownedQty, takeLots } from './cargo.ts'
-import { crateValue, freshnessFactor, freshnessOf, paymentValue } from './condition.ts'
+import { freshnessFactor, freshnessOf } from './condition.ts'
 import { crewEffect } from './crew.ts'
 import { GLOBAL_EVENT_IDS, viceChoices } from './events.ts'
 import { checkRequirements, raiseWanted } from './progress.ts'
 import { quote } from './market.ts'
 import { createRng } from './rng.ts'
-import type { CargoLot, CrateCount, DistrictId, ForgeryCard, GameState, ProductId, ServiceKey, TagId } from './types.ts'
+import type { CargoLot, DistrictId, ForgeryCard, GameState, ProductId, ServiceKey, TagId } from './types.ts'
 
 /*
  * Lieux spéciaux (chap. 3) : Karma-Cham, Morgue, Cassandre-88, faux dossier de la Laverie, Velvet-Silo.
@@ -41,13 +41,12 @@ const COOLDOWNS: Partial<Record<ServiceKey, number>> = {
   surgery: MORGUE.surgery.cooldownDays,
   certificate: MORGUE.certificate.cooldownDays,
   auction: VELVET.auction.cooldownDays,
-  blackmail: VELVET.blackmail.cooldownDays,
   vip: VELVET.vip.cooldownDays,
 }
 
 /** Services en attente, avec le jour où chacun redevient disponible (agenda, chap. 7) */
 export function pendingServices(state: GameState): { key: ServiceKey; day: number }[] {
-  const keys: ServiceKey[] = ['influence', 'surgery', 'certificate', 'auction', 'blackmail', 'vip']
+  const keys: ServiceKey[] = ['influence', 'surgery', 'certificate', 'auction', 'vip']
   return keys.flatMap((key) => {
     const day = availableFrom(state, key, COOLDOWNS[key] ?? 0)
     return day === null ? [] : [{ key, day }]
@@ -250,50 +249,6 @@ export function auction(state: GameState, productId: ProductId): ServiceResult {
   if (error) return fail(error)
   const price = auctionPrice(state, productId) ?? 0
   return { ok: true, state: used({ ...state, cash: state.cash + price, cargo: takeLots(state.cargo, productId, 1).remaining }, 'auction') }
-}
-
-export function blackmailCost(state: GameState): number {
-  return serviceCost(state, 'blackmail', VELVET.blackmail.cost, VELVET.blackmail.costStep)
-}
-
-/** Caisses données pour le chantage : produits acceptés dans l'ordre, lots les plus anciens d'abord, jusqu'à couvrir le montant */
-export function blackmailCrates(state: GameState): CrateCount[] | null {
-  const due = blackmailCost(state)
-  let covered = 0
-  const crates: CrateCount[] = []
-  for (const productId of VELVET.blackmail.crates) {
-    for (const lot of state.cargo.filter((entry) => entry.productId === productId)) {
-      let qty = 0
-      while (qty < lot.qty && covered < due) {
-        covered += crateValue(state, lot)
-        qty++
-      }
-      if (qty > 0) crates.push({ productId, qty })
-    }
-  }
-  const merged = PRODUCT_IDS.flatMap((id) => {
-    const qty = crates.filter((crate) => crate.productId === id).reduce((total, crate) => total + crate.qty, 0)
-    return qty > 0 ? [{ productId: id, qty }] : []
-  })
-  return paymentValue(state, merged) >= due ? merged : null
-}
-
-export function checkBlackmail(state: GameState, inKind: boolean): ActionError | null {
-  if (velvetLocked(state)) return 'location-locked'
-  if (checkRequirements(state, SERVICE_REQUIREMENTS.blackmail)) return 'locked'
-  if (availableFrom(state, 'blackmail', VELVET.blackmail.cooldownDays) !== null) return 'cooldown'
-  if (inKind) return blackmailCrates(state) ? null : 'not-enough-cargo'
-  return blackmailCost(state) > state.cash ? 'not-enough-cash' : null
-}
-
-/** Chantage sur l'oreiller : ICC gagné hors plafond, payé en ₡ ou en caisses */
-export function blackmail(state: GameState, inKind: boolean): ServiceResult {
-  const error = checkBlackmail(state, inKind)
-  if (error) return fail(error)
-  const paid = inKind
-    ? { ...state, cargo: giveCrates(state.cargo, blackmailCrates(state) ?? []) }
-    : { ...state, cash: state.cash - blackmailCost(state) }
-  return { ok: true, state: used(gainIcc(paid, VELVET.blackmail.icc), 'blackmail') }
 }
 
 export function checkVipRequest(state: GameState): ActionError | null {
