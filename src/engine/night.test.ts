@@ -1,17 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { ENDINGS, NIGHT_MISSION } from '../data/balance.ts'
-import { DISTRICTS } from '../data/districts.ts'
 import { SEALED_PRODUCT } from '../data/products.ts'
 import { VEHICLES } from '../data/vehicles.ts'
 import { arrive, drawRoadEvent } from './events.ts'
-import { checkpointPlace, drawInterception, flyingCheckShare } from './interception.ts'
+import { checkpointPlace, flyingCheckShare } from './interception.ts'
 import { missionFee, sealedCount } from './night.ts'
 import { riskBreakdown } from './risk.ts'
-import { createRng, seedRng } from './rng.ts'
+import { createRng } from './rng.ts'
 import { sleep } from './routine.ts'
 import { createInitialState } from './state.ts'
-import { defined, EARNED, errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
-import type { CargoLot, GameState, Interception, ProductId } from './types.ts'
+import { EARNED, errorOf, gameAt, HIGH_ROLL_RNG, LOW_ROLL_RNG, run } from './test-helpers.ts'
+import type { CargoLot, GameState, ProductId } from './types.ts'
 
 const lot = (productId: ProductId, qty: number): CargoLot => ({ productId, qty, unitCost: 10, travelled: true, boughtDay: 3, damaged: false })
 const evening = (patch: Partial<GameState> = {}) =>
@@ -146,28 +145,10 @@ describe('réseau logistique', () => {
   })
 })
 
-describe('brouilleur de drones', () => {
-  const jammer = (patch: Partial<GameState> = {}) => gameAt(3, { modules: { owned: ['MOD-09'], mounted: ['MOD-09'] }, ...patch })
-
-  it('change un contrôle volant en barrage fixe, une fois par jour', () => {
-    // Graine dont le 2e tirage déclenche le contrôle volant (part d'Olympus-Green) ; le 1er, à risque certain, déclenche l'interception
-    const flyingSeed = defined(
-      Array.from({ length: 100 }, (_, i) => seedRng(i + 1)).find((seed) => {
-        const rng = createRng(seed)
-        rng.next()
-        return rng.next() < DISTRICTS.D6.flyingCheckShare
-      }),
-    )
-    expect(drawInterception(createRng(flyingSeed), 1, gameAt(3), 'D6')?.kind).toBe('flying')
-    expect(drawInterception(createRng(flyingSeed), 1, jammer(), 'D6')).toEqual({ kind: 'brc', acted: false, bluffFailed: false, jammed: true })
-    expect(drawInterception(createRng(flyingSeed), 1, jammer({ jammerDay: 3 }), 'D6')?.kind).toBe('flying')
-  })
-
-  it('est saisi à la fouille, sans garde à vue sur une soute légale', () => {
-    const stopped: Interception = { kind: 'brc', acted: false, bluffFailed: false }
-    const searched = run(jammer({ districtId: 'D2', interception: stopped, cargo: [lot('T0-01', 2)] }), { type: 'intercept', move: 'search' })
-    expect(searched.modules.owned).not.toContain('MOD-09')
-    expect(defined(searched.interceptionReport)).toMatchObject({ jammerSeized: true, custodyDays: 0 })
-    expect(searched.day).toBe(3)
+describe('plaque rotative', () => {
+  it('n’enregistre pas l’écart d’un trajet de nuit hors mission : la caméra ne lit pas la plaque', () => {
+    const plated: GameState['modules'] = { owned: ['MOD-05'], mounted: ['MOD-05'] }
+    const night = run(evening({ modules: plated }), { type: 'forceCurfew' })
+    expect(run(night, { type: 'travel', to: 'D2' }).wanted).toBe(0)
   })
 })

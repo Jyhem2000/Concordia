@@ -84,7 +84,6 @@ export default function InterceptionScreen() {
           <p className="text-ink-soft">
             {t.interception.intro[interception.kind](t.interception.place[checkpointPlace(game)](t.district[game.districtId].name))}
           </p>
-          {interception.jammed && <p className="text-info">{t.interception.jammed}</p>}
           {!racket && hidden.length > 0 && (
             <p className="text-info">
               {t.interception.compartment(hidden.join(', '))} <Detailed breakdown={compartmentDetection(game)} format={pct} percent />
@@ -173,7 +172,7 @@ export default function InterceptionScreen() {
             chance={ejectChance(game)}
             outcomes={[
               mode === 'trapdoor'
-                ? t.interception.ejectTrapdoor(pct(MODULES['MOD-07'].trapdoor?.maxRecovery ?? 0))
+                ? t.interception.ejectTrapdoor(pct(MODULES['MOD-07'].trapdoor?.minRecovery ?? 0), pct(MODULES['MOD-07'].trapdoor?.maxRecovery ?? 0))
                 : mode === 'crusher'
                   ? t.interception.ejectCrusher
                   : t.interception.ejectSuccess(pv(EJECT.chassisLoss)),

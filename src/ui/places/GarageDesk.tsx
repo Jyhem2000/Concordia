@@ -226,7 +226,6 @@ function useEquipmentTexts() {
       ram,
       trapdoor,
       fakeTerminal,
-      droneJammer,
       compartmentFactor,
     } = MODULES[id]
     return [
@@ -243,6 +242,7 @@ function useEquipmentTexts() {
         ? [
             g.trapdoor(
               percent(trapdoor.chance, 0),
+              percent(trapdoor.minRecovery, 0),
               percent(trapdoor.maxRecovery, 0),
               DISTRICT_IDS.filter((id) => !DISTRICTS[id].ejection.trapdoor)
                 .map((id) => t.district[id].name)
@@ -251,7 +251,6 @@ function useEquipmentTexts() {
           ]
         : []),
       ...(fakeTerminal ? [g.fakeTerminal(signedPercent(fakeTerminal.bluffBonus, 0), change(fakeTerminal.bribeRateFactor))] : []),
-      ...(droneJammer ? [g.droneJammer] : []),
       ...(compartmentFactor !== undefined ? [g.ghostWall(change(compartmentFactor))] : []),
     ].join(' ')
   }

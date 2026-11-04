@@ -45,7 +45,7 @@ export type LocationId = 'LOC-D1-1' | 'LOC-D1-2' | 'LOC-D1-3' | 'LOC-D2-1' | 'LO
 
 /** Véhicules, modules, équipiers (chap. 4) */
 export type VehicleId = `VEH-${Four}`
-export type ModuleId = `MOD-${Eight | '09' | '10'}`
+export type ModuleId = `MOD-${Eight | '10'}`
 export type CrewId = `CREW-${Three}`
 
 /** Événements (chap. 6) */
@@ -311,12 +311,10 @@ export type Module = {
   rotatingPlate?: boolean
   /** Fuite et passage forcé : chance ajoutée, dégâts de châssis et perte de Santé multipliés */
   ram?: { fleeBonus: number; damageFactor: number }
-  /** Trappe de largage : mode d'éjection, récupération d'une part tirée entre 0 et maxRecovery */
-  trapdoor?: { chance: number; maxRecovery: number }
+  /** Trappe de largage : mode d'éjection, récupération d'une part tirée entre minRecovery et maxRecovery */
+  trapdoor?: { chance: number; minRecovery: number; maxRecovery: number }
   /** Faux terminal : bonus au bluff, tarif standard de corruption multiplié */
   fakeTerminal?: { bluffBonus: number; bribeRateFactor: number }
-  /** Brouilleur de drones : une fois par jour, un contrôle volant devient un barrage fixe ; saisi à la fouille, sans autre sanction */
-  droneJammer?: boolean
   /** Cloison fantôme : facteur sur la chance que les agents trouvent le double fond */
   compartmentFactor?: number
 }
@@ -409,8 +407,6 @@ export type Interception = {
   acted: boolean
   /** Bluff raté : bluff et éjection fermés, amende relevée, malus à la corruption et à la fuite */
   bluffFailed: boolean
-  /** Le brouilleur de drones a fait décrocher le drone : le contrôle volant est devenu un barrage fixe */
-  jammed?: boolean
   /** Caisses de la commande VIP sous la protection du parrain, hors de portée des agents, rendues à la fin du contrôle */
   covered?: CargoLot[]
 }
@@ -452,8 +448,6 @@ export type InterceptionReport = {
   sacrificed: number
   /** Facture du dépannage d'urgence si le châssis est tombé à 0 */
   towBill: number
-  /** Brouilleur de drones découvert à la fouille et saisi */
-  jammerSeized: boolean
   /** Part de l'amende restée impayée faute de Cash-Puce : garde à vue prolongée */
   unpaidFine: number
   /** Double fond : gardé (non trouvé à la fouille, ou éjection), trouvé, ou sans objet */
@@ -478,7 +472,7 @@ export type TripReport = {
   /** Caisses consommées pour refroidir le moteur à la place de l'usure */
   coolingCrates: number
   /** Commande du DSC livrée (livraison du jour, mission de nuit), écart de nuit enregistré, ou écart passé sans caméra */
-  mission: 'delivered' | 'deviated' | 'unfilmed' | null
+  mission: 'delivered' | 'deviated' | 'unfilmed' | 'plated' | null
   /** Prime de la commande livrée */
   missionFee: number
   /** Injection du serveur réussie pendant ce trajet : le total atteint, 0 sinon */
@@ -775,8 +769,6 @@ export type GameState = {
   after: DistrictId
   /** Mission de nuit acceptée, jusqu'à sa livraison ou à 06h00 */
   mission: { to: DistrictId } | null
-  /** Dernier jour où le brouilleur de drones a servi (une fois par jour) */
-  jammerDay: number | null
   /** Échéance du retard franchie : taux majoré et embuscades jusqu'à la fin de la partie */
   debtLate: boolean
   offshore: OffshoreAccount

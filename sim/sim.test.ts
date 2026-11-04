@@ -90,7 +90,6 @@ describe('tests par retrait', () => {
       'MOD-06',
       'MOD-07',
       'MOD-08',
-      'MOD-09',
       'CREW-01',
       'CREW-02',
       'CREW-03',

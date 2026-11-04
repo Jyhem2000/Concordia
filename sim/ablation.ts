@@ -55,14 +55,14 @@ function pair(
 const withoutModule = (base: Plan, id: ModuleId): Plan => ({ ...base, modules: base.modules.filter((module) => module !== id) })
 const withPlaces = (base: Plan, extra: readonly PlaceUse[]): Plan => ({ ...base, places: ['advance', ...extra] })
 
-/** Plan dédié au brouilleur de drones : fuite au sommet, sur le Fourgon « Panacea-V8 » pour monter tous ses modules (chap. 8, étape 2 pour ses autres réglages) */
-const FLIGHT: Plan = { name: 'Fuite au sommet', vehicle: 'VEH-03', modules: ['MOD-06', 'MOD-09'], crew: 'CREW-02', runner: true }
+/** Plan de fuite au sommet, avec la cage de Faraday contre les drones, sur le Fourgon « Panacea-V8 » pour monter tous ses modules (chap. 8, étape 2 pour ses autres réglages) */
+const FLIGHT: Plan = { name: 'Fuite au sommet', vehicle: 'VEH-03', modules: ['MOD-06', 'MOD-03'], crew: 'CREW-02', runner: true }
 
 /** Fuite au sommet avec l'assistance de conduite */
 const FLIGHT_ASSIST: Plan = { ...FLIGHT, name: 'Fuite au sommet + assistance', modules: [...FLIGHT.modules, 'MOD-01'] }
 
-/** Plan de nuit avec la plaque rotative */
-const NIGHT_PLATE: Plan = { name: 'Nuit festive + plaque', modules: ['MOD-04', 'MOD-06', 'MOD-05'], nightOwl: true, runner: true }
+/** Plan de nuit avec la plaque rotative, sur le Fourgon « Panacea-V8 » pour monter ses trois modules */
+const NIGHT_PLATE: Plan = { name: 'Nuit festive + plaque', vehicle: 'VEH-03', modules: ['MOD-04', 'MOD-06', 'MOD-05'], nightOwl: true, runner: true }
 
 export const ABLATIONS: readonly Ablation[] = [
   // Véhicules
@@ -73,12 +73,13 @@ export const ABLATIONS: readonly Ablation[] = [
   pair('MOD-01', FLIGHT_ASSIST, 'Casse-cou', withoutModule(FLIGHT_ASSIST, 'MOD-01'), bought('MOD-01')),
   pair('MOD-02', plan('Couverture légale'), 'Équilibré', withoutModule(plan('Couverture légale'), 'MOD-02'), bought('MOD-02')),
   pair('MOD-03', plan('Électronique'), 'Équilibré', withoutModule(plan('Électronique'), 'MOD-03'), bought('MOD-03')),
+  // Contre les drones, là où ils pèsent : la fuite au sommet
+  pair('MOD-03', FLIGHT, 'Casse-cou', withoutModule(FLIGHT, 'MOD-03'), bought('MOD-03')),
   pair('MOD-04', plan('Nuit festive'), 'Équilibré', withoutModule(plan('Nuit festive'), 'MOD-04'), bought('MOD-04')),
   pair('MOD-05', NIGHT_PLATE, 'Casse-cou', withoutModule(NIGHT_PLATE, 'MOD-05'), bought('MOD-05')),
   pair('MOD-06', plan('Nuit festive'), 'Équilibré', withoutModule(plan('Nuit festive'), 'MOD-06'), bought('MOD-06')),
   pair('MOD-07', plan('Haut tier'), 'Équilibré', withoutModule(plan('Haut tier'), 'MOD-07'), bought('MOD-07')),
   pair('MOD-08', plan('Corruption'), 'Équilibré', withoutModule(plan('Corruption'), 'MOD-08'), bought('MOD-08')),
-  pair('MOD-09', FLIGHT, 'Casse-cou', withoutModule(FLIGHT, 'MOD-09'), bought('MOD-09')),
   pair('MOD-10', plan('Haut tier'), 'Casse-cou', withoutModule(plan('Haut tier'), 'MOD-10'), bought('MOD-10')),
   // Équipiers
   pair('CREW-01', plan('Corruption'), 'Équilibré', { ...plan('Corruption'), crew: undefined }, bought('CREW-01')),

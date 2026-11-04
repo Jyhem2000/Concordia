@@ -65,3 +65,11 @@ Chantage du Velvet-Silo retiré ; doublure Faraday `[MOD-03]` sans aucun contrô
 - **Campagne 4 : aucun des quatre modules ne devient significatif.** `[MOD-03]` −4 600 ₡ (−5 500 avant), `[MOD-07]` +2 400 ₡ (+1 200), `[MOD-09]` −12 500 ₡ (−17 100), tous dans le bruit.
 - **La plaque rotative ne change pas du tout** (mêmes chiffres au ₡ près) : deux fuites réussies le même jour n'arrivent presque jamais, « une fois par jour » et « à chaque fuite » reviennent au même. Son renforcement est sans effet ; il faut chercher ailleurs (par exemple effacer aussi la perte de châssis, ou un niveau de Fiche S déjà acquis).
 - **Lecture :** ces modules apportent peu face à l'écart entre graines (intervalles de ±6 000 à ±17 000 ₡). Ils servent des builds précis sans peser sur la moyenne : à décider s'ils restent comme options de niche ou doivent être fusionnés.
+
+## Modules recentrés : contre-surveillance, plaque anti-caméras, complices fiables
+Le brouilleur de drones est fondu dans la doublure `[MOD-03]` (Tech non détectée, plus de contrôle volant, désormais adaptable) ; la plaque rotative `[MOD-05]` rend aussi les tournées de nuit hors mission invisibles aux caméras (pas de Fiche S) ; les complices de la trappe `[MOD-07]` rapportent de la moitié à la totalité des caisses larguées. Neuf modules au lieu de dix.
+
+- **Piège de mesure, encore :** le plan de test de la plaque (Nuit festive + plaque) roulait en fourgonnette de départ, à un emplacement ; la plaque, achetée en troisième, restait au garage. Il roule désormais en Fourgon « Panacea-V8 ».
+- **`[MOD-05]` devient positif** : +30 300 ₡ ± 22 500 (neutre jusque-là). Ne plus être filmé la nuit fait de la plaque le module des tournées hors mission.
+- **`[MOD-07]`** : +3 300 ₡ ± 6 000 (+2 400 avant), dans le bruit ; Haut tier +3 à +4 % en campagne 1, Haut tier Casse-cou +5 % en campagne 3.
+- **`[MOD-03]` reste neutre** dans ses deux plans de mesure (Électronique −4 600 ₡, Fuite au sommet −9 200 ₡ ± 19 100). La Fuite au sommet y gagne pourtant par rapport au brouilleur (+23 % de score en Équilibré, survie Fantôme 68 → 73 %) : le brouilleur lui coûtait plus que la doublure ne rapporte. Effet réel mais sous le bruit.

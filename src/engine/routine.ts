@@ -171,7 +171,7 @@ function morningRoutine(state: GameState, night: Night): GameState {
   const trapdoor = MODULES['MOD-07'].trapdoor
   if (s.dumped.length > 0 && trapdoor) {
     const shareRng = createRng(s.rng)
-    const recovered = recoverDumped(s, shareRng.float(0, trapdoor.maxRecovery))
+    const recovered = recoverDumped(s, shareRng.float(trapdoor.minRecovery, trapdoor.maxRecovery))
     briefing.recovered = { back: recovered.back, lost: recovered.lost }
     s = { ...s, cargo: recovered.cargo, dumped: [], rng: shareRng.state }
   }

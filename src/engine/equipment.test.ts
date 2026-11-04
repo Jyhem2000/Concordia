@@ -170,6 +170,8 @@ describe('barrage et équipement', () => {
     const recovered = defined(morning.briefing?.recovered)
     expect(recovered.back + recovered.lost).toBe(6 - hidden)
     expect(recovered.back).toBeLessThanOrEqual(Math.floor((6 - hidden) * defined(MODULES['MOD-07'].trapdoor).maxRecovery))
+    // Des complices fiables : au moins la moitié revient
+    expect(recovered.back).toBeGreaterThanOrEqual(Math.floor((6 - hidden) * defined(MODULES['MOD-07'].trapdoor).minRecovery))
     expect(morning.dumped).toEqual([])
   })
 

@@ -345,7 +345,6 @@ const emptyLedger = (): Ledger => ({
   damaged: 0,
   sacrificed: 0,
   towBill: 0,
-  jammerSeized: false,
   compartment: null,
   hiddenCrates: 0,
   unpaidFine: 0,
@@ -358,10 +357,8 @@ export function resolveMove(state: GameState, move: InterceptionMove, offer: Off
   const roll = (chance: Breakdown) => rng.chance(chance.total)
   // La règle de mort se juge sur la soute avant confiscation
   const lethalCargo = isLethalSearch(state)
-  // Un bluff raté a déjà valu une fouille effective
-  const searchedBefore = state.interception?.bluffFailed === true
   const report = (s: GameState, chance: Breakdown | null, success: boolean | null, over: boolean, effectiveSearch: boolean): GameState =>
-    finish({ ...s, rng: rng.state }, { move, chance, success, over, ...ledger }, effectiveSearch && lethalCargo, effectiveSearch || searchedBefore)
+    finish({ ...s, rng: rng.state }, { move, chance, success, over, ...ledger }, effectiveSearch && lethalCargo)
   // Double fond : à la fouille qui confisque, second jet ; non trouvé, la sanction se juge sur la soute visible (chap. 4)
   const frisk = (s: GameState, sanctionOf: (searched: GameState) => GameState): GameState => {
     const { hidden, visible } = hiddenCargo(s)
@@ -655,7 +652,7 @@ function noteCustody(ledger: Ledger, days: number) {
  * Fin de résolution, dans l'ordre : exécution sommaire (fouille effective avec un produit fatal),
  * mort si la Santé est tombée à 0, dépannage si le châssis est à 0, puis garde à vue.
  */
-function finish(state: GameState, report: InterceptionReport, executed: boolean, searched: boolean): GameState {
+function finish(state: GameState, report: InterceptionReport, executed: boolean): GameState {
   if (executed) return endGame(state, report, 'execution')
   if (state.health <= 0) return endGame(state, report, 'death')
 
@@ -663,20 +660,10 @@ function finish(state: GameState, report: InterceptionReport, executed: boolean,
   const fullReport: InterceptionReport = { ...report, towBill: towed.bill }
   if (!report.over) return { ...towed.state, interceptionReport: fullReport }
 
-  // Brouilleur de drones découvert à la fouille : saisi, sans autre sanction (chap. 4)
-  const jammer = searched ? mountedWith(towed.state, 'droneJammer') : undefined
   // Amende impayée : la garde à vue s'allonge
   const unpaid = report.unpaidFine > 0 ? FINE.unpaidCustodyDays : 0
   const custodyDays = report.custodyDays + unpaid
-  const seized = jammer
-    ? {
-        ...towed.state,
-        modules: {
-          owned: towed.state.modules.owned.filter((id) => id !== jammer),
-          mounted: towed.state.modules.mounted.filter((id) => id !== jammer),
-        },
-      }
-    : towed.state
+  const seized = towed.state
   // Contrôle de la BRC franchi sans garde à vue : noté au carnet (Vance, chap. 4)
   const brc = state.interception !== null && state.interception.kind !== 'racket'
   const noted = brc && custodyDays === 0 ? noteControlPassed(seized) : seized
@@ -686,7 +673,7 @@ function finish(state: GameState, report: InterceptionReport, executed: boolean,
     ...noted,
     cargo: [...noted.cargo, ...covered],
     interception: null,
-    interceptionReport: { ...fullReport, custodyDays, jammerSeized: jammer !== undefined },
+    interceptionReport: { ...fullReport, custodyDays },
   }
   return custodyDays > 0 ? serveCustody(passed, custodyDays) : arrive(passed)
 }
@@ -720,8 +707,5 @@ export function drawInterception(rng: Rng, risk: number, state: GameState, to: D
   if (!rng.chance(risk)) return null
   if (DISTRICTS[to].offGrid) return { kind: 'racket', acted: false, bluffFailed: false }
   const flying = rng.chance(flyingCheckShare(state, to, true))
-  // Brouilleur de drones, une fois par jour : le drone décroche, la BRC dresse un barrage fixe plus loin
-  if (flying && mountedEffect(state, 'droneJammer') && state.jammerDay !== state.day)
-    return { kind: 'brc', acted: false, bluffFailed: false, jammed: true }
   return { kind: flying ? 'flying' : 'brc', acted: false, bluffFailed: false }
 }

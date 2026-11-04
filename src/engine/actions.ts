@@ -319,7 +319,6 @@ function travel(state: GameState, to: DistrictId): ActionResult {
   const tripRisk = risk(state, to, { includePatrol: true })
   const rng = createRng(state.rng)
   const interception = drawInterception(rng, tripRisk, state, to)
-  const jammed = interception?.jammed === true
   // Sans barrage ni racket, un aléa routier peut survenir (chap. 6)
   const roadEvent = interception ? null : drawRoadEvent(state, rng)
 
@@ -347,7 +346,6 @@ function travel(state: GameState, to: DistrictId): ActionResult {
       missionFee: 0,
       injection: 0,
     },
-    jammerDay: jammed ? state.day : state.jammerDay,
     dayTripDone: state.dayTripDone || state.phase === 'day',
     nightTripDone: state.nightTripDone || state.phase === 'night',
     interception,

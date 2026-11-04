@@ -60,7 +60,6 @@ function ReportLines({ report }: ReportLinesProps) {
       {report.custodyDays > 0 && <li className="text-danger">{t.report.custody(report.custodyDays)}</li>}
       {report.towBill > 0 && <li className="text-danger">{t.report.tow(credits(report.towBill))}</li>}
       {report.unpaidFine > 0 && <li className="text-danger">{t.report.unpaidFine(credits(report.unpaidFine), FINE.unpaidCustodyDays)}</li>}
-      {report.jammerSeized && <li className="text-danger">{t.report.jammerSeized}</li>}
       {report.compartment === 'kept' && <li className="text-success">{t.report.compartmentKept(report.hiddenCrates)}</li>}
       {report.compartment === 'found' && <li className="text-danger">{t.report.compartmentFound}</li>}
       <li className="text-ink-soft">{report.over ? t.report.passed : t.report.ongoing}</li>

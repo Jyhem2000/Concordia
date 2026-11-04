@@ -58,7 +58,6 @@ export function createInitialState(seed: number, difficulty: DifficultyId = DEFA
     nightOffer: drawNightOffer(rng),
     after: drawAfter(rng),
     mission: null,
-    jammerDay: null,
     debtLate: false,
     offshore: { deposited: 0, interest: 0 },
     venture: { deposited: 0, interest: 0 },

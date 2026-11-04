@@ -41,7 +41,7 @@ Le résultat est **borné, après** tous les multiplicateurs (`RISK_BOUNDS` dans
 * *Intention :* la fin de partie reste tendue pour qui a réussi, il faut protéger ce qu'on a gagné (couverture, équipement, ICC). Le débutant, loin des paliers, n'en voit rien.
 
 ### Fiche S algorithmique (niveau de recherche)
-* Chaque **fuite réussie** ajoute **1 niveau**, jusqu'à un maximum (sauf sous la plaque rotative `[MOD-05]`) ; chaque **trajet de nuit hors mission** qui passe sans interception aussi (l'écart est enregistré, chap. 1 ; sauf pendant `[EVT-G07]`, galeries non filmées).
+* Chaque **fuite réussie** ajoute **1 niveau**, jusqu'à un maximum (sauf sous la plaque rotative `[MOD-05]`) ; chaque **trajet de nuit hors mission** qui passe sans interception aussi (l'écart est enregistré, chap. 1 ; sauf pendant `[EVT-G07]`, galeries non filmées, et sous la plaque rotative `[MOD-05]`).
 * Par niveau : malus aux prochaines fuites et au risque d'interception partout (`WANTED` dans [`balance.ts`](../src/data/balance.ts)).
 * **−1 niveau** après quelques jours de suite sans nouvel écart (`cleanDays` dans `WANTED`), où que l'on dorme ; chaque écart remet le compte à zéro. *Intention :* une tournée de nuit tous les deux jours ne s'efface plus d'une nuit au relais ; pour retrouver un profil propre, il faut vraiment se tenir à carreau.
 * Affichée en permanence dans le bandeau (chap. 7) : *« Votre profil suscite l'intérêt bienveillant d'Aeterna. »*
@@ -52,7 +52,6 @@ Une interception de la BRC prend l'une de deux formes, tirée au moment où elle
 * **Contrôle volant** — un drone a repéré le véhicule et une unité de la BRC le coince (contre le trottoir de jour, dans la galerie de nuit, au quai de service de `[D5]` et `[D6]`) ; l'agent a déjà la main sur la portière. **Ni éjection ni fuite** : trop tard pour vider la soute ou démarrer. Restent la fouille, le bluff et la corruption.
 * **Part des contrôles volants :** propre à chaque district (`flyingCheckShare` dans [`districts.ts`](../src/data/districts.ts) : rare à Hives, où la BRC manque de drones, fréquente au sommet), majorée dans le district de la ronde renforcée, faite d'unités mobiles (`FLYING_CHECK` dans [`balance.ts`](../src/data/balance.ts)). En zone hors-réseau, les milices tiennent toujours une barricade visible (chap. 3).
 * *Intention :* sans contrôle volant, la fuite (avec largage et dopage) devient le repli universel dès que la cargaison vaut cher. Le contrôle volant oblige à préparer aussi le bluff (masquage, Tier 0, aides) ou la corruption (cash de réserve, caisses de Luxe) : chaque build garde ses failles.
-* **Brouilleur de drones** (`[MOD-09]`, chap. 4) : une fois par jour, un contrôle volant devient un barrage fixe.
 * **Cage de Faraday** (`[MOD-03]`, chap. 4) : plus aucun contrôle volant, dans tous les districts.
 * **Maintenance d'Aeterna** (`[EVT-G07]`, chap. 6) : drones cloués au sol, aucun contrôle volant ce jour-là.
 * **Lieu du barrage :** le texte suit la couche du réseau (chap. 3) : entrée du district de jour, galerie de service de nuit, sas du quai de service en `[D5]` et `[D6]`.
@@ -67,7 +66,7 @@ Le joueur accepte la fouille (**0**) ou tente une action : **1** Bluff, **2** Co
 * *Intention :* la sanction suit l'infraction. Le petit contrebandier perd peu ; celui qui roule chargé de haut tier risque gros, quel que soit son compte. Le Cash-Puce reste exposé à l'audit (chap. 1), pas aux contrôles.
 **Compte rendu :** après chaque option, l'app détaille ce qui a été perdu ou gagné (₡, caisses dont celles sacrifiées par une tactique, ICC, Santé, châssis, Fiche S, garde à vue, dépannage).
 
-**Fouille effective :** fouille acceptée, ou échec d'un bluff, d'une corruption, d'une fuite ou d'une éjection — déclencheur de la règle de mort de `[T4-06]` et de la saisie du brouilleur `[MOD-09]` (garde à vue d'au moins un jour).
+**Fouille effective :** fouille acceptée, ou échec d'un bluff, d'une corruption, d'une fuite ou d'une éjection — déclencheur de la règle de mort de `[T4-06]` (garde à vue d'au moins un jour).
 **Double fond** (chap. 4) : à chaque fouille effective qui confisque, un second jet décide si les agents le trouvent (chance selon les étoiles du district, réduite par `[MOD-10]`). Non trouvé, ses caisses sont gardées et la sanction se juge sur la soute visible ; trouvé, tout est confisqué, avec une perte d'ICC en plus. L'écran annonce les caisses cachées et la chance qu'il soit trouvé ici.
 
 **Protection du parrain** (chap. 3) : dans le district du Velvet-Silo, les caisses d'une commande VIP en cours (au plus le nombre commandé, échéance non passée) sont hors de vue des agents. Elles ne comptent pas dans le risque du trajet, et au barrage elles sont mises de côté : ni fouille, ni saisie, ni amende, ni éjection ; elles reviennent à bord à la fin du contrôle. L'écran les annonce.

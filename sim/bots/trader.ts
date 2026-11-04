@@ -123,7 +123,7 @@ export type Plan = {
   vipErrand?: boolean
   /** Commande VIP en cours dont dépend le parrain (Élite) : la livraison au Silo vaut plus que sa recette */
   sponsorOrder?: boolean
-  /** Fuite préférée à espérance égale (pare-buffles, brouilleur, transpondeur) */
+  /** Fuite préférée à espérance égale (pare-buffles, cage de Faraday, transpondeur) */
   runner?: boolean
   /** Ne se dope jamais au barrage (test par retrait du dopage) */
   noDoping?: boolean
@@ -917,7 +917,8 @@ function bestRoute(view: GameState, plan: Plan, temperament: Temperament): Route
         // Marchandise déjà en soute et trajet trop risqué : seulement en dernier recours
         if (tooRisky) value -= 1_000_000
         // Hors mission, l'écart coûte une Fiche S… sauf pour qui la cherche (équipier à débloquer)
-        if (night && !view.mission) value += seeksFlag(view, plan) ? VALUE.wantedLevel : -VALUE.wantedLevel
+        // Sous la plaque rotative, l'écart n'est pas filmé : ni Fiche S à craindre, ni à obtenir
+        if (night && !view.mission && !mountedEffect(view, 'rotatingPlate')) value += seeksFlag(view, plan) ? VALUE.wantedLevel : -VALUE.wantedLevel
         // Raisons d'aller quelque part : dette à solder, équipement à acheter
         if (to === 'D1') value += debtVisit(view, reserveOf(view, temperament))
         // Fantôme sans serveur : passer à son district producteur, où il apparaît parfois
@@ -1000,7 +1001,7 @@ function trustWanted(view: GameState, plan: Plan): boolean {
 function seeksFlag(view: GameState, plan: Plan): boolean {
   if (view.progress.flagged) return false
   const crewWaits = plan.crew !== undefined && !view.crew.lost.includes(plan.crew) && CREW[plan.crew].requires.some((r) => r.kind === 'wanted')
-  // Modules de la voie pègre (plaque rotative, brouilleur) : réservés aux fichés
+  // Modules de la voie pègre (assistance de conduite, plaque rotative) : réservés aux fichés
   const gearWaits = plan.modules.some((id) => MODULES[id].requires?.some((r) => r.kind === 'wanted'))
   return crewWaits || gearWaits
 }
@@ -1085,7 +1086,8 @@ function barrage(view: GameState, plan: Plan, temperament: Temperament): Action 
     }
   }
   // Éjection : la trappe rapporte en moyenne une partie des caisses larguées le lendemain
-  const trapdoor = ejectMode(view) === 'trapdoor' ? (mountedEffect(view, 'trapdoor')?.maxRecovery ?? 0) / 2 : 0
+  const recovery = mountedEffect(view, 'trapdoor')
+  const trapdoor = ejectMode(view) === 'trapdoor' && recovery ? (recovery.minRecovery + recovery.maxRecovery) / 2 : 0
   consider('eject', ejectChance(view).total, (illegal - hidden) * (1 - trapdoor), searchLoss * 1.3, false)
 
   // Corruption : une caisse de Luxe, la moins chère, apporte la connivence et remplace une part du cash

@@ -395,7 +395,7 @@ export const fr = {
     wantedValue: (level: number, max: number) => `${level}/${max}`,
     wantedNow: (risk: string, flee: string) => `Recherché : risque de contrôle +${risk} partout, fuite −${flee}`,
     wantedInfo: (risk: string, flee: string, days: number) =>
-      `Fiche S : votre niveau de recherche dans les fichiers d'Aeterna. Il monte d'un niveau à chaque fuite réussie devant la BRC et à chaque tournée de nuit hors mission passée sans contrôle (l'écart est filmé). Par niveau : risque de contrôle +${risk} partout, fuite −${flee}. Un niveau s'efface après ${days} jours de suite sans nouvel écart.`,
+      `Fiche S : votre niveau de recherche dans les fichiers d'Aeterna. Il monte d'un niveau à chaque fuite réussie devant la BRC et à chaque tournée de nuit hors mission passée sans contrôle (l'écart est filmé, sauf sous la plaque rotative). Par niveau : risque de contrôle +${risk} partout, fuite −${flee}. Un niveau s'efface après ${days} jours de suite sans nouvel écart.`,
     wantedGain: (levels: number) => `+${levels} niveau${levels > 1 ? 'x' : ''} de Fiche S`,
     debtLate: 'Dette initiale en retard',
     debtDue: (when: string) => `Dette initiale à solder ${when}`,
@@ -813,12 +813,12 @@ export const fr = {
     nightRisk: (factor: string) => `Malus de risque d'un trajet de nuit hors mission ${factor}.`,
     flyingChecks: (factor: string) => `Contrôles volants ${factor} (les drones perdent le signal).`,
     noFlyingChecks: 'Plus aucun contrôle volant : les drones perdent le signal du camion.',
-    rotatingPlate: 'Une fuite réussie devant la BRC ne coûte ni ICC ni Fiche S (plaque illisible).',
+    rotatingPlate:
+      "Plaque illisible pour les caméras : une fuite réussie devant la BRC ne coûte ni ICC ni Fiche S, et un trajet de nuit hors mission n'est pas filmé (pas de Fiche S).",
     ram: (bonus: string, factor: string) => `Fuite et passage forcé ${bonus} ; dégâts de la fuite ${factor}.`,
-    trapdoor: (chance: string, recovery: string, sealed: string) =>
-      `Éjection par les égouts (${chance}, sans dégât, sauf ${sealed}), à chaque barrage ; le lendemain, 0 à ${recovery} des caisses rapportées.`,
+    trapdoor: (chance: string, minRecovery: string, maxRecovery: string, sealed: string) =>
+      `Éjection par les égouts (${chance}, sans dégât, sauf ${sealed}), à chaque barrage ; le double fond reste fermé. Le lendemain, ${minRecovery} à ${maxRecovery} des caisses larguées rapportées.`,
     fakeTerminal: (bonus: string, factor: string) => `Bluff ${bonus} ; tarif standard de corruption ${factor}.`,
-    droneJammer: 'Une fois par jour, un contrôle volant devient un barrage fixe. Découvert à la fouille : saisi.',
     ghostWall: (factor: string) =>
       `Isolation anti-odeur, anti-scanner, anti-chien : à la fouille, chance que les agents trouvent le double fond ${factor}. Ne cache pas l'odeur de la soute, ni le chauffeur.`,
   },
@@ -1009,8 +1009,6 @@ export const fr = {
     },
     compartment: (crates: string) => `Double fond : ${crates} ; à la fouille, chance que les agents le trouvent :`,
     sponsorCovered: (crates: string) => `Commande du Velvet-Silo : ${crates}, sous la protection de ton parrain. Les agents ne les verront pas.`,
-    jammed:
-      'Votre brouilleur a fait décrocher le drone : la BRC a dû dresser ce barrage plus loin. Attention : découvert à la fouille, il vaut une garde à vue.',
     chance: 'Chance',
     moves: {
       search: 'Accepter la fouille',
@@ -1075,8 +1073,8 @@ export const fr = {
       crusher: 'Broyeur acide',
       manual: "Éjection d'urgence (ruelle)",
     },
-    ejectTrapdoor: (recovery: string) =>
-      `Succès : l'illégal file aux égouts, sans dégât ; demain à 06h00, des complices en rapportent entre 0 et ${recovery}.`,
+    ejectTrapdoor: (minRecovery: string, maxRecovery: string) =>
+      `Succès : l'illégal visible file aux égouts, sans dégât, le double fond reste fermé ; demain à 06h00, des complices en rapportent entre ${minRecovery} et ${maxRecovery}.`,
     ejectCrusher: 'Succès : la contrebande est dissoute dans la benne, sans dégât ni récupération.',
     ejectSuccess: (chassis: string) => `Succès : l'illégal finit dans une ruelle, la fouille ne trouve rien. Châssis ${chassis}.`,
     ejectFailure: (raise: string, icc: string) => `Échec : sanction de base, amende relevée de ${raise} de la valeur saisie, ICC ${icc} de plus.`,
@@ -1098,7 +1096,6 @@ export const fr = {
     chassis: 'Châssis',
     wanted: 'Fiche S',
     damaged: 'Caisses endommagées',
-    jammerSeized: 'Brouilleur de drones découvert et saisi.',
     compartmentKept: (crates: number) => `Double fond non trouvé : ${crates} caisse${crates > 1 ? 's' : ''} sauvée${crates > 1 ? 's' : ''}.`,
     compartmentFound: 'Double fond découvert : tout est confisqué, ICC en moins pour dissimulation.',
     sacrificed: 'dont caisses sacrifiées',
@@ -1148,6 +1145,7 @@ export const fr = {
     delivered: (fee: string) => `commande du DSC livrée, prime ${fee}`,
     deviated: (wanted: string) => `écart de mission enregistré, ${wanted}`,
     unfilmed: "écart de nuit non filmé (maintenance d'Aeterna), Fiche S intacte",
+    plated: 'écart de nuit non filmé (plaque rotative illisible), Fiche S intacte',
     injected: (done: number, needed: number) => `Glitch a injecté un morceau de ton dossier dans Aeterna (${done}/${needed})`,
     mission: 'Mission de nuit',
     after: 'After du couvre-feu ce soir',
@@ -1188,6 +1186,8 @@ export const fr = {
     sleepRelayHint: "Nuit au relais routier du DSC : gain d'ICC et de Santé, épuisement effacé.",
     bivouacHint: 'Bivouac, faute de relais ici : épuisement effacé, mais ni ICC, ni Santé.',
     clandestineHint: (wanted: string) => `Hors mission, vers le district de votre choix : risque accru, et ${wanted} si le trajet passe.`,
+    clandestineHintPlated:
+      'Hors mission, vers le district de votre choix : risque accru ; la plaque rotative rend le trajet illisible pour les caméras, sans Fiche S.',
     injectionHint: (next: number, needed: number) =>
       `Serveur Aeterna en soute et Glitch au travail : si tu arrives sans garde à vue, elle injecte un morceau de ton dossier (${next}/${needed}).`,
     missionLocked: (done: number, needed: number) =>
@@ -1433,7 +1433,7 @@ export const fr = {
         paragraphs: [
           "À 06h00, la routine : salaire de l'équipier, intérêts, collecte de Viktor les jours prévus, fraîcheur des produits au frais, événements du jour, cours et boutiques. Le briefing d'En bref résume ce qui a changé.",
           'De jour : acheter, vendre, faire le plein, passer aux lieux spéciaux du district, accepter la livraison officielle du DSC, et 1 trajet. On peut aussi attendre le soir sur place.',
-          "À 20h00, le couvre-feu : dormir au relais routier (Santé et ICC), bivouaquer à Rust Valley, ou partir en tournée de nuit depuis la carte. Sur mission du DSC, le trajet est couvert et payé ; hors mission, il est risqué et ajoute un niveau de Fiche S s'il passe. Une tournée épuise : pas de seconde nuit d'affilée sans Tcherno-Bull.",
+          "À 20h00, le couvre-feu : dormir au relais routier (Santé et ICC), bivouaquer à Rust Valley, ou partir en tournée de nuit depuis la carte. Sur mission du DSC, le trajet est couvert et payé ; hors mission, il est risqué et ajoute un niveau de Fiche S s'il passe (sauf sous la plaque rotative, illisible pour les caméras). Une tournée épuise : pas de seconde nuit d'affilée sans Tcherno-Bull.",
           'Garde à vue, panne ou siphonage font perdre une demi-journée : on passe directement au soir.',
         ],
       },
@@ -1676,7 +1676,6 @@ export const fr = {
     'MOD-06': { name: 'Pare-Buffles en Acier Trempé' },
     'MOD-07': { name: 'Trappe de Largage « Égouts »' },
     'MOD-08': { name: 'Faux Terminal « Citoyen Or »' },
-    'MOD-09': { name: 'Brouilleur de Drones « Grésil »' },
     'MOD-10': { name: 'Cloison Fantôme' },
   } satisfies Record<ModuleId, Named>,
 

@@ -3,6 +3,7 @@ import { AFTER, ENDINGS, WANTED } from '../../data/balance.ts'
 import { TAGS } from '../../data/tags.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { ownedQty } from '../../engine/cargo.ts'
+import { mountedEffect } from '../../engine/equipment.ts'
 import { checkForceCurfew, sleeplessDrink } from '../../engine/actions.ts'
 import { canInject, missionFee, missionOffer, sealedCount } from '../../engine/night.ts'
 import { nightUnlock } from '../../engine/progress.ts'
@@ -21,6 +22,8 @@ import Tip from '../shared/Tip.tsx'
  */
 export default function EveningPanel() {
   const game = useGameStore((s) => s.game)
+  // Plaque rotative montée : la tournée hors mission échappe aux caméras (chap. 4)
+  const plated = mountedEffect(game, 'rotatingPlate') !== undefined
   const dispatch = useGameStore((s) => s.dispatch)
   const { t, credits, change, percent } = useI18n()
 
@@ -94,7 +97,7 @@ export default function EveningPanel() {
                     label={t.evening.nightFromMap}
                     content={
                       <>
-                        <p>{t.evening.clandestineHint(t.hud.wantedGain(WANTED.perOffense))}</p>
+                        <p>{plated ? t.evening.clandestineHintPlated : t.evening.clandestineHint(t.hud.wantedGain(WANTED.perOffense))}</p>
                         {offer && <p className="mt-1">{t.evening.missionTourHint(sealedCount(game))}</p>}
                       </>
                     }
