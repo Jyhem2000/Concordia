@@ -439,7 +439,7 @@ export const fr = {
       'Le cholestérol est un complot contre la République. Exigez le label Nutri-Standard.',
       "Une Bio-Brique par jour éloigne l'infarctus pour toujours. Goût soja-grillon garanti sans surprise.",
       "Alerte du DSC : le beurre demi-sel tue plus sûrement qu'une balle. Signalez toute odeur suspecte.",
-      "L'Eau Minérale Déminéralisée : 0 % d'électrolytes, 100 % de sérénité civique.",
+      "L'Eau Déminéralisée « Pax-Aeterna » : 0 % d'électrolytes, 100 % de sérénité civique.",
       'La nostalgie gustative est un trouble psychiatrique, pris en charge à Panacea.',
       "Mâcher lentement votre ration d'insectes augmente la sensation de satiété de 14 %. Faites un effort.",
       "La caféine fausse votre jugement ; la tisane d'État le remet d'aplomb.",
@@ -496,7 +496,7 @@ export const fr = {
       // ─── Monde Extérieur, économie & contrebande ───
       'Les prix montent pour votre sécurité. Merci de votre compréhension.',
       "Météo du Monde Extérieur : pluies acides, cannibalisme et chaos. N'êtes-vous pas bien derrière le Mur ?",
-      "La musique rock d'avant-guerre provoque des arythmies cardiaques et des pensées séditieuses.",
+      "La musique d'avant-guerre provoque des arythmies cardiaques et des pensées séditieuses.",
       "Tout objet non connecté au Cloud d'Aeterna est considéré comme un déchet dangereux.",
       'Les rumeurs de banquets de viande bovine à Olympus-Green sont des hallucinations collectives.',
       "L'Audit Mensuel approche toujours : un portefeuille remis à zéro est une âme purifiée.",
@@ -1340,13 +1340,13 @@ export const fr = {
     tagline: 'Zéro-Risque, Zéro-Offense, Zéro-Saveur, Zéro-Carbone.',
     worldTitle: 'Le monde',
     world: [
-      "Derrière son mur-frontière, la République d'Autarcia s'est enfermée avec une mégalopole : Concordia. Le Directoire de la Santé Civique y a confié chaque calorie, chaque émotion et chaque trajet à une IA bienveillante, Aeterna.",
-      "Le gras, le sucre, l'alcool, l'art et la vie privée y sont des « bugs mortels ». L'eau des quartiers pauvres est sédative, l'ICC note chaque citoyen, et les Crédits expirent à la fin du mois.",
+      "Derrière son mur-frontière, la République de Concordia s'est complètement refermée sur elle-même. Le Directoire de la Santé Civique y a confié chaque calorie, chaque émotion et chaque trajet à une IA « bienveillante », Aeterna.",
+      "Le gras, le sucre, l'alcool, l'art et la vie privée y sont des « périls mortels ». L'eau des quartiers pauvres est sédative, l'ICC note chaque citoyen, et les Crédits expirent à la fin du mois.",
     ],
     roleTitle: 'Ton rôle',
     role: [
       "Livreur de Catégorie C, tu traverses tous les districts au volant d'un utilitaire d'État, de Hives à Olympus-Green, la citadelle des élites. Officiellement, tu livres des caisses légales.",
-      "Officieusement, tu es un Passeur du Monde d'Avant : café, beurre, vinyles, whisky, cartes graphiques… tout ce qu'Aeterna interdit, et que tout le monde réclame.",
+      "Officieusement, tu es un « passeur du monde d'avant » : café, beurre, vinyles, whisky, cartes graphiques… tout ce qu'Aeterna interdit, et que tout le monde réclame.",
     ],
     goalTitle: 'Le but',
     goal: (days: number, debt: string, cash: string) => [
@@ -1601,7 +1601,7 @@ export const fr = {
   product: {
     'T0-01': { name: 'Bio-Briques « Nutri-Standard »', lore: 'Soja et insectes compressés, saveur neutre garantie par décret.' },
     'T0-02': {
-      name: 'Eau Minérale Déminéralisée',
+      name: 'Eau Déminéralisée « Pax-Aeterna »',
       lore: "Rien dedans, et c'est bien là sa promesse. Empilée autour de l'électronique, elle boit les ondes des scanners.",
     },
     'T0-03': { name: 'Antidépresseurs « Sourire+ »', lore: "La bonne humeur d'État, en comprimés doux, sur ordonnance automatique." },
@@ -1621,7 +1621,7 @@ export const fr = {
       name: 'Saucisson Ibérique & Chorizo',
       lore: "Chorizo frais et saucisson à peine séché du Monde d'Avant : ça sent la rébellion, et ça tourne vite.",
     },
-    'T2-03': { name: 'Caisses de Vinyles Rock & Rap', lore: "Des sillons pleins de colère d'avant-guerre, sans aucune connexion." },
+    'T2-03': { name: 'Caisses de Vinyles', lore: "Des sillons pleins de colère d'avant-guerre, sans aucune connexion." },
     'T2-04': { name: 'Lots de « Dumbphones »', lore: 'Des téléphones à clapet sans Cloud : on appelle sans être écouté.' },
     'T2-05': { name: 'Canettes « Tcherno-Bull »', lore: 'Taurine à dose déraisonnable : de quoi tenir une nuit, ou doubler un barrage.' },
     'T2-06': { name: 'Clés USB « Monde Libre »', lore: "Des valises de mémoires interdites : livres, films, archives d'avant." },
@@ -1634,11 +1634,11 @@ export const fr = {
       lore: "Antibiotiques et ivermectine d'avant les protocoles : ils soignent sans demander l'avis d'Aeterna.",
     },
     'T3-05': { name: 'Graines de Tomates Fertiles', lore: 'Des semences qui repoussent : un crime contre le monopole agricole.' },
-    'T3-06': { name: 'Cartes Graphiques Sans Bride', lore: 'Du matériel rétro sans bride IA, assez puissant pour penser tout seul.' },
+    'T3-06': { name: 'Vieilles Cartes Graphiques RTX', lore: 'Du matériel rétro sans bride IA, assez puissant pour penser tout seul.' },
     'T3-07': { name: 'Clones Vocaux & Deepfakes', lore: 'Des voix et des visages sur mesure, pour mentir aux portiques.' },
     'T4-01': { name: 'Bœuf Wagyu de Kobé', lore: 'Wagyu et côtes argentines : la viande rouge, luxe suprême des élites.' },
     'T4-02': { name: "Œuvres d'Art du Monde d'Avant", lore: 'Des toiles sauvées des purges, roulées dans des malles.' },
-    'T4-03': { name: 'Pass Biométriques « ICC-100% »', lore: 'Une identité de Citoyen modèle, le temps de passer un contrôle.' },
+    'T4-03': { name: 'Pass Biométriques', lore: 'Une identité de Citoyen modèle, le temps de passer un contrôle.' },
     'T4-04': {
       name: '« Placebo-Officiel » du DSC',
       lore: 'Du sérum physiologique sous scellé officiel : le QR-code sanitaire validé, sans la molécule de docilité.',
@@ -1685,13 +1685,13 @@ export const fr = {
   } satisfies Record<VehicleId, Named>,
 
   module: {
-    'MOD-01': { name: 'Assistance de Conduite « Esquive »' },
+    'MOD-01': { name: 'Assistance de Conduite' },
     'MOD-02': { name: "Diffuseur d'Échappement « Pin Sylvestre & Javel »" },
     'MOD-03': { name: 'Doublure en Plomb & Cage de Faraday' },
     'MOD-04': { name: 'Suspensions & Silentblocs « Velours »' },
     'MOD-05': { name: "Plaque d'Immatriculation Rotative « E-Ink »" },
     'MOD-06': { name: 'Pare-Buffles en Acier Trempé' },
-    'MOD-07': { name: 'Trappe de Largage « Égouts »' },
+    'MOD-07': { name: 'Trappe de Largage' },
     'MOD-08': { name: 'Faux Terminal « Citoyen Or »' },
     'MOD-10': { name: 'Cloison Fantôme' },
   } satisfies Record<ModuleId, Named>,

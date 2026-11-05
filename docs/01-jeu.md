@@ -1,7 +1,7 @@
 # 1. Le jeu : univers, joueur & argent
 
-## La République d'Autarcia
-Dans un futur proche, au cœur d'un mois d'août caniculaire, ce micro-État totalitaire de 1 500 km² a coupé tout pont avec une planète en plein effondrement climatique en s'enfermant derrière un mur-frontière infranchissable, par « protectionnisme écologique radical ».
+## La République de Concordia
+Dans un futur proche, au cœur d'un mois d'août caniculaire, ce micro-État totalitaire a coupé tout pont avec une planète en plein effondrement climatique en s'enfermant derrière un mur-frontière infranchissable, par « protectionnisme écologique radical ».
 
 En son centre s'étend **Concordia**, une mégalopole tentaculaire qui engloutit l'essentiel du territoire, uniquement bordée par une ceinture de serres industrielles de soja OGM et de fermes d'insectes d'État. Vitrine absolue du Directoire de la Santé Civique (**DSC**), c'est une prison à ciel ouvert où chaque calorie, chaque émotion et chaque déplacement sont dictés par un super-calculateur gouvernemental.
 

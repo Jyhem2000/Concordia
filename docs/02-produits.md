@@ -67,7 +67,7 @@ Stock par jour, quota de demande (chap. 2) et bonus de Forte demande de chaque t
 | ID | Nom |
 | :--- | :--- |
 | `[T0-01]` | Bio-Briques « Nutri-Standard » |
-| `[T0-02]` | Eau Minérale Déminéralisée |
+| `[T0-02]` | Eau Déminéralisée « Pax-Aeterna » |
 | `[T0-03]` | Antidépresseurs « Sourire+ » |
 | `[T0-04]` | Manuels d'Auto-Censure |
 
@@ -101,7 +101,7 @@ Stock par jour, quota de demande (chap. 2) et bonus de Forte demande de chaque t
 | :--- | :--- |
 | `[T2-01]` | Curry Vindaloo « Lava-Grade » |
 | `[T2-02]` | Saucisson Ibérique & Chorizo |
-| `[T2-03]` | Caisses de Vinyles Rock & Rap |
+| `[T2-03]` | Caisses de Vinyles |
 | `[T2-04]` | Lots de « Dumbphones » |
 | `[T2-05]` | Canettes « Tcherno-Bull » |
 | `[T2-06]` | Clés USB « Monde Libre » |
@@ -127,7 +127,7 @@ Stock par jour, quota de demande (chap. 2) et bonus de Forte demande de chaque t
 | `[T3-03]` | Whisky Écossais Vieilli |
 | `[T3-04]` | Antibiotiques « Old-School » |
 | `[T3-05]` | Graines de Tomates Fertiles |
-| `[T3-06]` | Cartes Graphiques Sans Bride |
+| `[T3-06]` | Vieilles Cartes Graphiques RTX |
 | `[T3-07]` | Clones Vocaux & Deepfakes |
 
 * **[T3-01]** — Moisissure vivante au lait cru, classée Arme Biologique par le DSC.
@@ -144,7 +144,7 @@ Stock par jour, quota de demande (chap. 2) et bonus de Forte demande de chaque t
 | :--- | :--- |
 | `[T4-01]` | Bœuf Wagyu de Kobé |
 | `[T4-02]` | Œuvres d'Art du Monde d'Avant |
-| `[T4-03]` | Pass Biométriques « ICC-100% » |
+| `[T4-03]` | Pass Biométriques |
 | `[T4-04]` | « Placebo-Officiel » du DSC |
 | `[T4-05]` | Cellules Souches « Jouvence » |
 | `[T4-06]` | Vieux Serveur Aeterna |
