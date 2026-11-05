@@ -12,7 +12,7 @@ Le plan n'avait pas de véhicule. Sur la fourgonnette de départ, à un seul emp
 
 ## Calibrage des leviers (campagne des modes)
 Premier passage : un passage répété coûtait déjà du risque, et le Hors-la-loi n'avait aucune avance de survie.
-- **Passeur :** le Prudent tombait de 93 à 86 % de survie, sous l'Équilibré. Il refait ses routes les plus sûres, et l'itinéraire repéré le punissait. **Correction :** le premier passage répété est toléré, un aller-retour ne coûte rien.
+- **Contrebandier :** le Prudent tombait de 93 à 86 % de survie, sous l'Équilibré. Il refait ses routes les plus sûres, et l'itinéraire repéré le punissait. **Correction :** le premier passage répété est toléré, un aller-retour ne coûte rien.
 - **Hors-la-loi :** l'Équilibré survivait à 57 % (score médian quasi nul), le Novice à 54 %. Sans avance, le premier barrage raté devenait fatal (l'avance vaut +12 à +14 points de survie). **Correction :** une avance réduite (1 000 ₡).
 
 Après calibrage, survie par mode :
@@ -20,12 +20,12 @@ Après calibrage, survie par mode :
 | Mode | Novice | Prudent | Équilibré | Casse-cou |
 | :--- | ---: | ---: | ---: | ---: |
 | Citoyen | 90 % | 95 % | 90 % | 85 % |
-| Passeur | 83 % | 93 % | 86 % | 79 % |
+| Contrebandier | 83 % | 93 % | 86 % | 79 % |
 | Hors-la-loi | 66 % | 79 % | 72 % | 70 % |
 
-L'ordre des tempéraments tient dans chaque mode. Le Novice reste au-dessus de 80 % en Passeur (84 % avant les leviers).
+L'ordre des tempéraments tient dans chaque mode. Le Novice reste au-dessus de 80 % en Contrebandier (84 % avant les leviers).
 
-## Effet des leviers en mode Passeur
+## Effet des leviers en mode Contrebandier
 - **Campagne 1 :** survie inchangée en moyenne sur les 36 combinaisons (−0,2 point), score −3,4 % en moyenne. Les profils qui bouclent ou s'enrichissent perdent 5 à 15 % : Électronique (score moyen −6 à −14 % selon le tempérament), Haut tier Équilibré (−12 %, survie 87 → 83 %), Fuite au sommet. Le Citoyen modèle gagne un peu : au palier Or, sa notoriété est divisée par deux.
 - **Campagne 3 (1 000 graines) :** survie identique, scores −3 à −8 %, surtout pour les plans qui gagnent gros (Haut tier Casse-cou −7 %, Couverture légale −7 %).
 - **Campagne 2 :** la fin Résident recule (7 → 3 % pour le Fantôme). Les injections imposent des tournées de nuit répétées, que l'itinéraire repéré surveille. Elle reste atteignable, mais c'est la fin la plus touchée.

@@ -38,7 +38,7 @@ export const useRecordsStore = create<RecordsStore>()(
       name: 'concordia-records',
       storage: createJSONStorage(() => localStorage),
       version: 3,
-      // Version 1 sans hauts faits (partis de zéro) ; avant la version 3, un seul meilleur score, joué en mode Passeur
+      // Version 1 sans hauts faits (partis de zéro) ; avant la version 3, un seul meilleur score, joué en mode Contrebandier
       migrate: (saved) => {
         const old = typeof saved === 'object' && saved !== null ? saved : {}
         const best = 'bestScore' in old && typeof old.bestScore === 'number' ? old.bestScore : null

@@ -32,6 +32,9 @@ const NBSP = String.fromCharCode(0xa0)
 /** Énumération : « a », « a et b », « a, b et c » */
 const listOf = (items: readonly string[]) => new Intl.ListFormat('fr', { type: 'conjunction' }).format(items)
 
+/** Énumération d'alternatives : « a ou b », « a, b ou c » */
+const oneOf = (items: readonly string[]) => new Intl.ListFormat('fr', { type: 'disjunction' }).format(items)
+
 type Named = { name: string }
 type NamedWithSubtitle = Named & { subtitle: string }
 type RoadTexts = { situation: string; a: string; b: string }
@@ -860,6 +863,8 @@ export const fr = {
     score: 'Score (compte offshore)',
     threshold: (amount: string) => `≥ ${amount}`,
     goldStatus: 'Statut Citoyen Or à minuit (portiques de la dalle)',
+    goldAtMidnight: 'Statut Citoyen Or à minuit',
+    cleanRecord: 'Fiche S vierge à minuit',
     sponsor: (done: number, needed: number) => `Parrain au Velvet-Silo : ${done}/${needed} commandes VIP livrées`,
     injections: (done: number, needed: number) => `Injections du serveur par Glitch : ${done}/${needed}`,
     met: 'Atteint :',
@@ -1230,6 +1235,16 @@ export const fr = {
         epilogue:
           'Trop grillé pour la haute société, tu rachètes la boucherie de Viktor et les quais de Rust Valley : la contrebande a un nouveau parrain.',
       },
+      notable: {
+        title: 'Notable de Hives',
+        epilogue:
+          "Tu rachètes la Cantine des Chauffeurs et deviens l'homme qu'on salue dans les tours de Hives. Viktor y mange gratuitement : certaines dettes ne s'éteignent jamais.",
+      },
+      exemplary: {
+        title: 'Citoyen exemplaire',
+        epilogue:
+          'Aeterna te cite en exemple : te voilà formateur des nouveaux livreurs de Catégorie C. Personne ne soupçonne ce que cache ton double fond.',
+      },
       standard: {
         title: 'Survivant',
         epilogue:
@@ -1351,6 +1366,8 @@ export const fr = {
       resident: "Devenir un fantôme : réécrire ton dossier dans le code d'Aeterna.",
       elite: "Être coopté par un oligarque et t'installer sous la verrière.",
       mafia: 'Racheter la boucherie de Viktor et régner sur la contrebande.',
+      notable: 'Mettre assez de côté pour devenir quelqu’un à Hives.',
+      exemplary: 'Finir la saison au-dessus de tout soupçon, aux yeux d’Aeterna.',
       standard: "Survivre à l'Audit, et reprendre le volant en septembre.",
     } satisfies Record<Exclude<EndingId, 'bio-bricks' | 'death' | 'execution'>, string>,
     start: 'Lancer la partie',
@@ -1417,15 +1434,15 @@ export const fr = {
     open: 'Manuel',
     previous: 'Précédent',
     next: 'Suivant',
-    chapters: (days: number, debt: string): ManualChapter[] => [
+    chapters: (days: number, debts: readonly { mode: string; debt: string }[]): ManualChapter[] => [
       {
         title: 'Le but du jeu',
         paragraphs: [
-          `La partie dure ${days} jours. Tu dois ${debt} à Viktor Varga, et sa dette grossit chaque matin : rembourse-la à l'Arrière-Salle de Viktor Varga, à Hives, ouverte jour et nuit.`,
+          `La partie dure ${days} jours. Tu dois de l'argent à Viktor Varga (${oneOf(debts.map(({ mode, debt }) => `${debt} en mode ${mode}`))}), et sa dette grossit chaque matin : rembourse-la à l'Arrière-Salle de Viktor Varga, à Hives, ouverte jour et nuit.`,
           `Le Jour ${days} à minuit, l'Audit d'Aeterna efface ton Cash-Puce. Si la dette n'est pas soldée, c'est la fin. Sinon, ton score est le solde de ton compte offshore et de ton placement du Cartel, tous deux à la Laverie de The Glass Spire, ouverte de jour seulement.`,
           `Ce score, et ce que tu as accompli, décident de ta fin : de simple Survivant à Saboteur. Une fois la dette initiale soldée, l’encart « Objectifs du Jour ${days} » d’En bref montre ce que chaque grande fin exige.`,
           'On perd aussi en mourant (Santé à zéro) ou en se faisant fouiller avec le Vieux Serveur Aeterna à bord.',
-          "Trois modes de difficulté, au choix à l'accueil : Citoyen pour découvrir, Passeur pour le jeu normal, Hors-la-loi pour qui le connaît. Ils changent la dette de départ, l'avance de Viktor et les amendes de la BRC ; la carrière garde un meilleur score par mode.",
+          "Trois modes de difficulté, au choix à l'accueil : Citoyen pour découvrir, Contrebandier pour le jeu normal, Hors-la-loi pour qui le connaît. Ils changent la dette de départ, l'avance de Viktor et les amendes de la BRC ; la carrière garde un meilleur score par mode.",
         ],
       },
       {
@@ -1497,7 +1514,7 @@ export const fr = {
         ],
       },
       {
-        title: 'Conseils de passeur',
+        title: 'Conseils du passeur',
         paragraphs: [
           'Commence petit : les produits bon marché de Hives se revendent à Rust Valley, et ce qu’on y trouve remonte vers Hives et Pastel-Heights.',
           'Solde la dette tôt : chaque matin la fait grossir, et une fois soldée, Viktor ouvre ses contrats et Mitch son matériel de contrebande.',
@@ -1537,7 +1554,7 @@ export const fr = {
     title: 'Mode de difficulté',
     modes: {
       citizen: { name: 'Citoyen', blurb: 'Pour découvrir : une dette légère, une avance généreuse et des amendes adoucies.' },
-      smuggler: { name: 'Passeur', blurb: 'Le jeu tel qu’il est pensé : chaque erreur se paie, sans être fatale.' },
+      smuggler: { name: 'Contrebandier', blurb: 'Le jeu tel qu’il est pensé : chaque erreur se paie, sans être fatale.' },
       outlaw: { name: 'Hors-la-loi', blurb: 'Pour qui connaît le jeu : une dette lourde, une avance de Viktor réduite, des amendes salées.' },
     } satisfies Record<DifficultyId, { name: string; blurb: string }>,
     settings: (debt: string, advance: string | null, fines: string | null) =>

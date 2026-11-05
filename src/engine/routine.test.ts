@@ -75,7 +75,7 @@ describe('audit du Jour 30', () => {
   })
 
   it('évalue les fins de la plus prestigieuse à la plus modeste', () => {
-    const { saboteur, resident, elite, mafia } = ENDINGS
+    const { saboteur, resident, elite, mafia, notable, exemplary } = ENDINGS
     const beacon = [{ productId: saboteur.requiredProduct, qty: 1, unitCost: 1, travelled: true, boughtDay: 1, damaged: false }]
     expect(endingFor(solvent({ offshore: offshore(saboteur.minScore), cargo: beacon, districtId: saboteur.district })).id).toBe('saboteur')
     // Sans la balise mais greffe complète : le Fantôme, sans condition de lieu ni d'ICC
@@ -89,6 +89,11 @@ describe('audit du Jour 30', () => {
     expect(endingFor(solvent({ offshore: offshore(elite.minScore), progress: sponsored })).id).toBe('elite')
     expect(endingFor(solvent({ offshore: offshore(elite.minScore) })).id).toBe('mafia')
     expect(endingFor(solvent({ offshore: offshore(elite.minScore), icc: 50, progress: sponsored })).id).toBe('mafia')
-    expect(endingFor(solvent({ offshore: offshore(mafia.minScore - 1) })).id).toBe('standard')
+    // Fins intermédiaires : le Notable sur le score seul, le Citoyen exemplaire sur l'ICC et une Fiche S vierge
+    expect(endingFor(solvent({ offshore: offshore(mafia.minScore - 1) })).id).toBe('notable')
+    expect(endingFor(solvent({ offshore: offshore(notable.minScore - 1) })).id).toBe('exemplary')
+    expect(endingFor(solvent({ offshore: offshore(notable.minScore - 1), wanted: 1 })).id).toBe('standard')
+    expect(endingFor(solvent({ offshore: offshore(notable.minScore - 1), icc: 60 })).id).toBe('standard')
+    expect(endingFor(solvent({ offshore: offshore(exemplary.minScore - 1) })).id).toBe('standard')
   })
 })

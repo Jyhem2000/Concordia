@@ -5,11 +5,11 @@
 
 | Bot | Parties | Survie | dont ruinés à 0 ₡ | Défaites | Fins | Score moyen | Score p10 / médiane / p90 | Score médian des survivants | Dette soldée (jour médian) | Interceptions | Jours de garde à vue | Équipement acheté |
 | :--- | ---: | ---: | ---: | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |
-| Sans build · Prudent · score | 1000 | 89 % | 3 % | bio-bricks 11 % | standard 89 % | 22 540 ₡ | 0 ₡ / 21 725 ₡ / 47 555 ₡ | 24 276 ₡ | 92 % (J5) | 6.2 (21 % des trajets) | 1.5 | — |
-| Couverture légale · Équilibré · score | 1000 | 90 % | 6 % | bio-bricks 10 % | standard 63 %, mafia 27 % | 98 891 ₡ | 0 ₡ / 68 582 ₡ / 245 967 ₡ | 86 552 ₡ | 95 % (J3) | 10.4 (33 % des trajets) | 2.7 | MOD-02 79 %, VEH-02 44 % |
-| Rentier · Équilibré · score | 1000 | 85 % | 9 % | bio-bricks 15 % | standard 73 %, mafia 12 % | 61 096 ₡ | 0 ₡ / 39 923 ₡ / 159 875 ₡ | 60 214 ₡ | 89 % (J3) | 9.1 (34 % des trajets) | 2.6 | CREW-02 76 % |
-| Haut tier · Casse-cou · score | 1000 | 75 % | 16 % | bio-bricks 24 %, execution 1 % | standard 47 %, mafia 29 % | 171 591 ₡ | 0 ₡ / 102 ₡ / 652 837 ₡ | 19 827 ₡ | 83 % (J2) | 11.4 (44 % des trajets) | 3.5 | MOD-07 55 %, VEH-04 40 %, MOD-10 39 % |
-| Couverture légale · Équilibré · Baron | 1000 | 90 % | 6 % | bio-bricks 10 % | standard 61 %, mafia 30 % | 87 901 ₡ | 0 ₡ / 72 612 ₡ / 200 457 ₡ | 87 451 ₡ | 95 % (J3) | 9.9 (32 % des trajets) | 2.4 | MOD-02 79 %, VEH-02 44 % |
+| Sans build · Prudent · score | 1000 | 89 % | 3 % | bio-bricks 11 % | standard 59 %, exemplary 29 %, notable 1 % | 22 540 ₡ | 0 ₡ / 21 725 ₡ / 47 555 ₡ | 24 276 ₡ | 92 % (J5) | 6.2 (21 % des trajets) | 1.5 | — |
+| Couverture légale · Équilibré · score | 1000 | 90 % | 6 % | bio-bricks 10 % | standard 41 %, mafia 27 %, notable 21 %, exemplary 0 % | 98 891 ₡ | 0 ₡ / 68 582 ₡ / 245 967 ₡ | 86 552 ₡ | 95 % (J3) | 10.4 (33 % des trajets) | 2.7 | MOD-02 79 %, VEH-02 44 % |
+| Rentier · Équilibré · score | 1000 | 85 % | 9 % | bio-bricks 15 % | standard 49 %, notable 23 %, mafia 12 %, exemplary 0 % | 61 096 ₡ | 0 ₡ / 39 923 ₡ / 159 875 ₡ | 60 214 ₡ | 89 % (J3) | 9.1 (34 % des trajets) | 2.6 | CREW-02 76 % |
+| Haut tier · Casse-cou · score | 1000 | 75 % | 16 % | bio-bricks 24 %, execution 1 % | standard 42 %, mafia 29 %, notable 4 % | 171 591 ₡ | 0 ₡ / 102 ₡ / 652 837 ₡ | 19 827 ₡ | 83 % (J2) | 11.4 (44 % des trajets) | 3.5 | MOD-07 55 %, VEH-04 40 %, MOD-10 39 % |
+| Couverture légale · Équilibré · Baron | 1000 | 90 % | 6 % | bio-bricks 10 % | standard 41 %, mafia 30 %, notable 19 %, exemplary 0 % | 87 901 ₡ | 0 ₡ / 72 612 ₡ / 200 457 ₡ | 87 451 ₡ | 95 % (J3) | 9.9 (32 % des trajets) | 2.4 | MOD-02 79 %, VEH-02 44 % |
 
 ## Parcours type
 

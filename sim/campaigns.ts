@@ -24,7 +24,7 @@ const balanced = TEMPERAMENTS[1]
 /** Modes de difficulté joués par la campagne des modes, avec leur nom de rapport (chap. 1) */
 const MODES: readonly { id: DifficultyId; name: string }[] = [
   { id: 'citizen', name: 'Citoyen' },
-  { id: 'smuggler', name: 'Passeur' },
+  { id: 'smuggler', name: 'Contrebandier' },
   { id: 'outlaw', name: 'Hors-la-loi' },
 ]
 
@@ -69,7 +69,7 @@ export const CAMPAIGNS: Readonly<Record<string, Campaign>> = {
     spread: true,
   },
   difficulte: {
-    title: 'Campagne des modes — Citoyen, Passeur, Hors-la-loi',
+    title: 'Campagne des modes — Citoyen, Contrebandier, Hors-la-loi',
     notes: [
       'Le Novice et le plan Sans build dans les trois tempéraments, dans chaque mode de difficulté (chap. 1) : chaque mode garde l’ordre des tempéraments, le Citoyen laisse le Novice survivre presque toujours, le Hors-la-loi fait réellement peur.',
     ],

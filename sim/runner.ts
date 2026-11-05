@@ -13,7 +13,7 @@ import { publicView } from './view.ts'
 
 export type Bot = {
   name: string
-  /** Mode de difficulté de ses parties ; Passeur, le jeu de référence, par défaut (chap. 1) */
+  /** Mode de difficulté de ses parties ; Contrebandier, le jeu de référence, par défaut (chap. 1) */
   difficulty?: DifficultyId
   /** Choisit la prochaine action, à partir de la vue publique seulement */
   decide: (view: GameState) => Action

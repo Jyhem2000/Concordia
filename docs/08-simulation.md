@@ -143,11 +143,12 @@ Cibles de départ, à recaler avec les premières mesures.
 | 1 | Chaque plan bat le plan « Sans build » en score moyen pour au moins un tempérament. Aucun plan ne domine tous les autres à la fois en score moyen et en taux de survie. La prise de risque paie : un build qui réduit le risque ne rapporte pas aussi le plus. |
 | 1 | Le tempérament compte : pour un même plan, le casse-cou a un score plus dispersé et un taux de Game Over plus élevé que le prudent. |
 | 2 | Le but de chaque partie est le score : les grandes fins sont des accomplissements, pas des objectifs imposés. Chacune reste atteignable par qui la vise (quelques parties sur cent), du Baron, le plus courant, au Saboteur, le plus rare. Le Saboteur récompense la prise de risque : il s'obtient surtout en Casse-cou. |
+| 2 | Chaque tempérament a une fin intermédiaire à sa portée, dans une part notable des parties (de l'ordre d'une sur quatre) : le Citoyen exemplaire pour le Prudent, le Notable de Hives pour l'Équilibré, le Baron pour le Casse-cou. Le Survivant n'est plus la fin de la majorité des parties gagnées. |
 | 2 | La fin de partie reste tendue : la dette et l'audit pèsent encore dans les derniers jours. |
 | 3 | À graine égale (mêmes tirages), un choix meilleur en moyenne gagne au moins 60 % des parties départagées : l'Équilibré contre le Prudent, chaque plan équipé contre le Sans build. L'écart entre graines d'un même bot, lui, peut rester grand : c'est l'effet boule de neige d'un jeu de négoce. |
 | 4 | Chaque équipement, équipier et lieu spécial améliore le plan qui le vise ; un élément sans effet mesurable est à revoir. |
 | 5 | L'optimiseur ne dépasse pas de loin le meilleur plan conçu ; sinon, la stratégie trouvée est documentée puis corrigée ou assumée comme build. |
-| Modes | Toutes les campagnes jouent le mode Passeur, sauf la campagne des modes (`difficulte` : Novice et Sans build dans les trois tempéraments, dans chaque mode). En Citoyen, le Novice survit presque toujours ; en Hors-la-loi, le Sans build Équilibré perd nettement plus souvent qu'en Passeur. Dans chaque mode, l'ordre des tempéraments tient (le casse-cou gagne plus et survit moins). |
+| Modes | Toutes les campagnes jouent le mode Contrebandier, sauf la campagne des modes (`difficulte` : Novice et Sans build dans les trois tempéraments, dans chaque mode). En Citoyen, le Novice survit presque toujours ; en Hors-la-loi, le Sans build Équilibré perd nettement plus souvent qu'en Contrebandier. Dans chaque mode, l'ordre des tempéraments tient (le casse-cou gagne plus et survit moins). |
 
 ## Lecture des résultats
 * Rapports et analyses : dossier `sim/reports/` (un rapport généré par campagne, plus une analyse rédigée par étape).

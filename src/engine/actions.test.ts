@@ -11,7 +11,7 @@ import { defined, errorOf, gameAt, HIGH_ROLL_RNG, play, run } from './test-helpe
 import type { GameState, ProductId } from './types.ts'
 
 // Tirage haut : le premier trajet ne tombe sur aucun barrage
-/** Avance de survie du mode Passeur, celui des parties de test */
+/** Avance de survie du mode Contrebandier, celui des parties de test */
 const ADVANCE = DIFFICULTIES.smuggler.survivalAdvance
 const start: GameState = { ...createInitialState(2024), rng: HIGH_ROLL_RNG }
 const cheapest = (state: GameState): ProductId =>

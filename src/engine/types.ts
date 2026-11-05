@@ -370,7 +370,7 @@ export type Crew = {
 /** Service de jour (06h00 – 20h00) ou tournée de nuit (chap. 1) */
 export type Phase = 'day' | 'night'
 
-/** Mode de difficulté (chap. 1) : Citoyen, Passeur, Hors-la-loi */
+/** Mode de difficulté (chap. 1) : Citoyen, Contrebandier, Hors-la-loi */
 export type DifficultyId = 'citizen' | 'smuggler' | 'outlaw'
 
 /** Trajet fait, pour l'itinéraire repéré (chap. 5) */
@@ -383,7 +383,7 @@ export type GameStatus = 'playing' | 'finished'
 export type IccTier = 'gold' | 'ordinary' | 'probation' | 'deviant'
 
 /** Fins de partie (chap. 1) : les quatre grandes fins, puis les défaites */
-export type EndingId = 'saboteur' | 'resident' | 'elite' | 'mafia' | 'standard' | 'bio-bricks' | 'death' | 'execution'
+export type EndingId = 'saboteur' | 'resident' | 'elite' | 'mafia' | 'notable' | 'exemplary' | 'standard' | 'bio-bricks' | 'death' | 'execution'
 
 export type Ending = {
   id: EndingId

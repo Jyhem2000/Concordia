@@ -16,7 +16,7 @@ type FeatChipsProps = {
 }
 
 /** Fins qui sont des accomplissements, de la plus prestigieuse à la plus modeste (chap. 1) */
-const ACCOMPLISHMENTS: readonly EndingId[] = ['saboteur', 'resident', 'elite', 'mafia', 'standard']
+const ACCOMPLISHMENTS: readonly EndingId[] = ['saboteur', 'resident', 'elite', 'mafia', 'notable', 'exemplary', 'standard']
 const DEFEATS: readonly EndingId[] = ['bio-bricks', 'death', 'execution']
 
 /** Section de la carrière : intitulé, puis son contenu */

@@ -5,7 +5,6 @@ import { LOCATIONS } from '../../data/locations.ts'
 import { TAGS } from '../../data/tags.ts'
 import { keysOf } from '../../engine/records.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
-import { useGameStore } from '../../stores/gameStore.ts'
 import Button from '../shared/Button.tsx'
 import { FOCUS_RING } from '../shared/focus.ts'
 import Modal from '../shared/Modal.tsx'
@@ -38,10 +37,10 @@ type ManualModalProps = {
 /** Manuel du passeur : un chapitre à la fois, sommaire en tête, précédent et suivant en pied */
 function ManualModal({ open, onClose }: ManualModalProps) {
   const { t, credits } = useI18n()
-  // La dette de départ dépend du mode de la partie (chap. 1)
-  const difficulty = useGameStore((s) => s.game.difficulty)
   const m = t.manual
-  const chapters = m.chapters(GAME_LENGTH_DAYS, credits(DIFFICULTIES[difficulty].startDebt))
+  // Le même manuel dans tous les modes : la dette de départ de chacun (chap. 1)
+  const debts = keysOf(DIFFICULTIES).map((id) => ({ mode: t.difficulty.modes[id].name, debt: credits(DIFFICULTIES[id].startDebt) }))
+  const chapters = m.chapters(GAME_LENGTH_DAYS, debts)
   const [index, setIndex] = useState(0)
   const chapter = chapters[index]
   // Listes tirées des données : chaque tag et chaque lieu, avec son nom du jeu

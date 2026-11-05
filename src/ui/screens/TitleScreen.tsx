@@ -28,7 +28,7 @@ type BlockProps = {
 }
 
 /** Fins qui sont des accomplissements, de la plus prestigieuse à la plus modeste (chap. 1) */
-const ENDINGS = ['saboteur', 'resident', 'elite', 'mafia', 'standard'] as const satisfies readonly EndingId[]
+const ENDINGS = ['saboteur', 'resident', 'elite', 'mafia', 'notable', 'exemplary', 'standard'] as const satisfies readonly EndingId[]
 
 /** Une partie entamée : un jour passé, un trajet fait ou une caisse achetée */
 function started(game: GameState): boolean {

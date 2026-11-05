@@ -258,7 +258,7 @@ export function isDefeat(ending: EndingId): boolean {
 export function endingFor(state: GameState): Ending {
   if (state.debt > 0) return { id: 'bio-bricks', score: 0 }
   const score = scoreOf(state)
-  const { saboteur, resident, elite, mafia } = ENDINGS
+  const { saboteur, resident, elite, mafia, notable, exemplary } = ENDINGS
   if (score >= saboteur.minScore && ownedQty(state.cargo, saboteur.requiredProduct) > 0 && state.districtId === saboteur.district) {
     return { id: 'saboteur', score }
   }
@@ -269,6 +269,11 @@ export function endingFor(state: GameState): Ending {
     return { id: 'elite', score }
   }
   if (score >= mafia.minScore) return { id: 'mafia', score }
+  if (score >= notable.minScore) return { id: 'notable', score }
+  // Citoyen exemplaire : au-dessus de tout soupçon à minuit, ICC au palier et aucun écart en cours
+  if (score >= exemplary.minScore && iccTier(state.icc) === exemplary.iccTier && state.wanted <= exemplary.maxWanted) {
+    return { id: 'exemplary', score }
+  }
   return { id: 'standard', score }
 }
 

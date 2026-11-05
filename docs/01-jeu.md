@@ -123,7 +123,7 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 
 ### Modes de difficulté
 * **Choix :** à l'accueil, avant chaque nouvelle partie (le dernier choix est retenu dans les réglages du joueur). Le mode est fixé pour toute la partie, rappelé dans le bandeau et inscrit au bilan de fin.
-* **Citoyen** pour découvrir, **Passeur** (le jeu tel que décrit dans ces docs, mode par défaut), **Hors-la-loi** pour qui connaît le jeu.
+* **Citoyen** pour découvrir, **Contrebandier** (le jeu tel que décrit dans ces docs, mode par défaut), **Hors-la-loi** pour qui connaît le jeu.
 * **Trois réglages seulement** (`DIFFICULTIES` dans [`balance.ts`](../src/data/balance.ts)) : la dette de départ, l'avance de survie de Viktor (réduite en Hors-la-loi : la supprimer coûtait près de la moitié des parties) et un facteur sur les amendes de la BRC (chap. 5). Tout le reste est commun : risque, marché, événements, et les seuils des grandes fins.
 * **Carrière :** un meilleur score par mode ; les fins atteintes et les hauts faits comptent quel que soit le mode.
 * *Intention :* la difficulté se choisit plutôt qu'elle ne se subit. Le débutant a de la marge pour apprendre, l'habitué retrouve la peur des premiers jours. Les réglages retenus frappent le début de partie et ce qu'on transporte, sans casser l'ordre des tempéraments (chap. 8) : une dette plus lourde pèse sur tous, des amendes plus lourdes surtout sur qui transporte cher.
@@ -224,9 +224,12 @@ L'écran « Objectifs du Jour 30 » les affiche une fois la dette initiale sold�
 | **Pègre — « Le Fantôme »** | Score ≥ seuil du Fantôme + **injection complète** du serveur par Glitch (plusieurs tournées de nuit clandestines, chap. 4). Ni lieu à minuit, ni ICC, ni serveur à bord exigés | Le code d'Aeterna se réécrit : résident de Catégorie S, né sous la verrière, casier vierge. Les douaniers d'élite te saluent par ton nom. |
 | **Élite — « Nouvel Oligarque »** (cooptation) | Score ≥ seuil Élite + un **parrain** au Velvet-Silo (commandes VIP livrées, chap. 3) + statut **Citoyen Or** à minuit (les portiques biométriques de la dalle lisent l'ICC). Sinon, fin suivante | Ton parrain glisse ton nom pour le fauteuil d'un Haut-Commissaire « suicidé » ; le Conseil vote à l'unanimité, par habitude. Tu emménages sous la verrière de `[D6]` : c'est toi qui commandes de la vraie viande aux petits livreurs. |
 | **Mafieuse — « Baron de Rust Valley »** | Score ≥ seuil Mafieuse (aucun prérequis d'ICC) | Ton casier est trop grillé pour la haute société, mais tu rachètes la boucherie de `[LOC-D1-1]` et les quais de `[D4]` : tu es le nouveau parrain de la contrebande. |
+| **Aisée — « Notable de Hives »** | Score ≥ seuil Notable (sans autre condition) | Tu rachètes la Cantine des Chauffeurs et deviens l'homme qu'on salue dans les tours de `[D1]`. Viktor y mange gratuitement : certaines dettes ne s'éteignent jamais. |
+| **Probe — « Citoyen exemplaire »** | Score ≥ seuil du Citoyen exemplaire + statut **Citoyen Or** à minuit + **Fiche S vierge** à minuit | Aeterna te cite en exemple : te voilà formateur des nouveaux livreurs de Catégorie C. Personne ne soupçonne ce que cache ton double fond. |
 | **Standard — « Survivant »** | Aucune autre fin atteinte | Tu as échappé au recyclage, mais ton pécule ne rachète pas ta liberté. Demain 06h00, septembre commence et tu remontes dans ta fourgonnette… |
 
 *Seuils de score, injections et commandes exigées : `ENDINGS` dans [`balance.ts`](../src/data/balance.ts), à recaler en jouant.*
 
+* **Deux fins intermédiaires,** entre le Baron et le Survivant, pour qui n'atteint pas les grandes : le Notable récompense le commerce, le Citoyen exemplaire la prudence (un petit score, mais l'ICC au plus haut et aucun écart en cours). *Intention :* les fins de prestige restent rares ; une bonne partie sans exploit a quand même sa fin.
 * **Trois voies de prestige :** la rébellion (Saboteur), la pègre (Fantôme), la voie officielle (Élite). Seule la possession du serveur `[T4-06]` est commune au Saboteur et au Résident (pour le Résident, pendant les injections seulement).
 * *Lore :* on ne monte jamais sous la verrière sur son seul mérite (chap. 3) : il faut qu'un oligarque te coopte, ou qu'Aeterna croie que tu y es né.

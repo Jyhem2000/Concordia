@@ -142,14 +142,14 @@ Options numérotées **0** Fouille · **1** Bluff · **2** Corruption · **3** F
 * **Fuite :** le dopage, chance recalculée au choix ; le compte rendu compte à part la caisse bue ; la fuite annonce aussi les risques de casse de la soute. Face aux milices, l'option « Payer en caisses » annonce à l'avance les caisses qui seraient prises et leur valeur.
 
 ## Objectifs du Jour 30
-Panneau d'En bref, affiché une fois la dette initiale soldée : les grandes fins et la progression vers chacune (score, `[T4-06]` en soute et position en `[D4]` à minuit, injections de Glitch, commandes VIP du parrain, statut Citoyen Or).
+Panneau d'En bref, affiché une fois la dette initiale soldée : les fins à accomplir, des grandes fins au Citoyen exemplaire, et la progression vers chacune (score, `[T4-06]` en soute et position en `[D4]` à minuit, injections de Glitch, commandes VIP du parrain, statut Citoyen Or, Fiche S vierge).
 * **Suivi en route :** le bureau de Glitch et la tournée clandestine du soir annoncent l'injection à venir (« 2/3 ») quand le serveur est à bord et Glitch au travail ; le compte rendu du trajet la confirme. Le guichet VIP du Velvet-Silo affiche le parrainage.
 
 ## Écrans d'accueil et de fin
 ### Accueil
-À chaque ouverture du jeu, avant l'écran de jeu, dans la charte du terminal d'Aeterna : l'en-tête de la transmission (sarcelle), le titre **Concordia** et la devise du régime. Puis le **choix du mode** (Citoyen, Passeur, Hors-la-loi, chap. 1) : trois boutons, chacun avec sa description et ses réglages chiffrés (dette de départ, avance de survie, amendes), le mode choisi en surbrillance ; le choix est retenu d'une partie à l'autre. Il s'applique à la prochaine partie lancée, pas à celle en cours (qui affiche le sien). Puis les boutons : **Lancer la partie** ; une partie entamée propose **Reprendre la partie (Jour X)** et **Nouvelle partie** (avec confirmation) ; une partie finie, **Nouvelle partie** et **Revoir le bilan**. Le **Manuel** est toujours là.
+À chaque ouverture du jeu, avant l'écran de jeu, dans la charte du terminal d'Aeterna : l'en-tête de la transmission (sarcelle), le titre **Concordia** et la devise du régime. Puis le **choix du mode** (Citoyen, Contrebandier, Hors-la-loi, chap. 1) : trois boutons, chacun avec sa description et ses réglages chiffrés (dette de départ, avance de survie, amendes), le mode choisi en surbrillance ; le choix est retenu d'une partie à l'autre. Il s'applique à la prochaine partie lancée, pas à celle en cours (qui affiche le sien). Puis les boutons : **Lancer la partie** ; une partie entamée propose **Reprendre la partie (Jour X)** et **Nouvelle partie** (avec confirmation) ; une partie finie, **Nouvelle partie** et **Revoir le bilan**. Le **Manuel** est toujours là.
 * Quatre encarts : **le monde** (Autarcia, Concordia, le DSC, Aeterna), **ton rôle** (livreur de Catégorie C, Passeur du Monde d'Avant), **le but** (cash et dette de départ, l'Audit du dernier jour, le score offshore ; chiffres lus dans [`balance.ts`](../src/data/balance.ts)), **une journée** (acheter où l'on produit, revendre où ça manque ; les barrages ; le couvre-feu).
-* **Les fins :** les cinq grandes fins, chacune avec une phrase d'accroche ; celles déjà atteintes portent un trophée, les autres un cadenas.
+* **Les fins :** les fins à accomplir, de la plus prestigieuse au Survivant, chacune avec une phrase d'accroche ; celles déjà atteintes portent un trophée, les autres un cadenas.
 * **Carrière,** une fois une partie terminée.
 
 ### Écran de fin
@@ -162,5 +162,5 @@ Panneau d'En bref, affiché une fois la dette initiale soldée : les grandes fin
 
 ## Manuel en jeu
 Le **manuel du passeur**, en fenêtre large, s'ouvre depuis l'accueil, le bas d'En bref et l'écran de fin. Il est écrit pour le joueur, pas recopié de ces docs, sans renvoi au code : un sommaire en pastilles, un chapitre à la fois, précédent et suivant en pied.
-* **Chapitres :** le but du jeu, une journée, le marché, les tags, la route et la BRC, les jauges, véhicules, modules et équipage, les lieux spéciaux, les événements, conseils de passeur.
+* **Chapitres :** le but du jeu, une journée, le marché, les tags, la route et la BRC, les jauges, véhicules, modules et équipage, les lieux spéciaux, les événements, conseils du passeur. Le manuel est le même quel que soit le mode de difficulté : il cite la dette de départ de chacun.
 * **Chiffres lus dans les données :** le texte reçoit ses valeurs en paramètres (durée de la partie, dette de départ), et les listes de référence (chaque tag, chaque lieu spécial, avec son nom du jeu) sont tirées de `src/data/`. Le reste parle en mots : les chiffres exacts sont à l'écran, détaillables à l'endroit du choix.

@@ -24,7 +24,7 @@ export const PUMP_NIGHT_MIN_ICC = 50
 
 /**
  * Modes de difficulté (chap. 1) : dette de départ, avance de survie de Viktor (total sur la partie)
- * et facteur sur les amendes de la BRC (chap. 5). Passeur : le jeu de référence des docs et des campagnes
+ * et facteur sur les amendes de la BRC (chap. 5). Contrebandier : le jeu de référence des docs et des campagnes
  */
 export const DIFFICULTIES: Readonly<Record<DifficultyId, { startDebt: number; survivalAdvance: number; fineFactor: number }>> = {
   citizen: { startDebt: 3_000, survivalAdvance: 3_000, fineFactor: 0.5 },
@@ -67,6 +67,10 @@ type EndingRules = {
   /** Élite par cooptation : commandes VIP livrées au Velvet-Silo pour gagner un parrain, palier d'ICC à minuit */
   elite: { minScore: number; iccTier: IccTier; sponsorOrders: number }
   mafia: { minScore: number }
+  /** Notable : un score, sans autre condition */
+  notable: { minScore: number }
+  /** Citoyen exemplaire : un petit score, le palier d'ICC et une Fiche S vierge à minuit */
+  exemplary: { minScore: number; iccTier: IccTier; maxWanted: number }
 }
 
 /** Fins de partie (dette soldée), de la plus prestigieuse à la plus modeste : seuils de score offshore et conditions propres */
@@ -75,6 +79,8 @@ export const ENDINGS: Readonly<EndingRules> = {
   resident: { minScore: 150_000, injections: 3, requiredProduct: 'T4-06', crew: 'CREW-02' },
   elite: { minScore: 200_000, iccTier: 'gold', sponsorOrders: 2 },
   mafia: { minScore: 150_000 },
+  notable: { minScore: 75_000 },
+  exemplary: { minScore: 25_000, iccTier: 'gold', maxWanted: 0 },
 }
 
 /**
