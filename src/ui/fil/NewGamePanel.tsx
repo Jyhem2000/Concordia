@@ -21,8 +21,8 @@ export default function NewGamePanel({ onHome }: NewGamePanelProps) {
   const { t } = useI18n()
   const mode = t.difficulty.modes[difficulty].name
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap gap-2">
+    <div className="flex flex-col items-center gap-2 text-center">
+      <div className="flex flex-wrap justify-center gap-2">
         <ManualButton />
         <Button onClick={onHome}>
           <House size={14} aria-hidden="true" />

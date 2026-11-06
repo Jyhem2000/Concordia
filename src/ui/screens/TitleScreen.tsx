@@ -63,27 +63,38 @@ export default function TitleScreen({ onPlay, onBoard }: TitleScreenProps) {
   const mode = t.difficulty.modes[difficulty].name
 
   return (
-    <main className="mx-auto flex min-h-full w-full max-w-4xl flex-col gap-6 px-4 py-8 motion-safe:animate-fade-in">
+    <main className="mx-auto flex min-h-full w-full max-w-4xl flex-col gap-6 px-4 pt-3 pb-8 motion-safe:animate-fade-in">
       <LanguagePicker />
-      <header className="-mt-4 text-center">
+      {/* Le choix de la langue tout en haut, le titre à bonne distance dessous */}
+      <header className="mt-2 text-center">
         <p className="text-xs font-bold tracking-widest text-broadcast uppercase">{title.broadcast}</p>
         <h1 className="mt-3 text-5xl font-bold tracking-widest text-accent uppercase sm:text-6xl">{title.name}</h1>
         <p className="mt-3 text-ink-soft italic">{title.tagline}</p>
       </header>
 
+      {/* Le classement et le manuel, indépendants du mode : sous le titre, visibles sans défiler sur téléphone */}
+      <div className="flex flex-wrap justify-center gap-2">
+        <Button variant="ranked" onClick={onBoard}>
+          <ListOrdered size={14} aria-hidden="true" />
+          {t.ranked.board.open}
+        </Button>
+        <ManualButton />
+      </div>
+
       <DifficultyPicker />
 
       {/* Deux blocs : la partie libre et la partie classée du jour, chacun avec le mode de la partie qu'il lance */}
       <div className="grid gap-6 md:grid-cols-2">
-        <Panel icon={Play} title={title.freeTitle}>
-          <div className="flex flex-col gap-3">
+        <Panel icon={Play} title={title.freeTitle} fill>
+          <div className="flex flex-1 flex-col gap-3">
             <p className="flex flex-wrap items-center gap-2 text-sm">
               <span className="text-ink-muted">{t.ranked.mode}</span>
               <Chip tone="accent">{mode}</Chip>
             </p>
             <p className="text-ink-soft">{title.freeBlurb}</p>
             {ongoing && !ranked && <Hint>{title.currentMode(t.difficulty.modes[game.difficulty].name)}</Hint>}
-            <div className="flex flex-wrap gap-2">
+            {/* Les boutons au centre de la place qui reste, quand le bloc s'aligne sur la hauteur de la partie classée */}
+            <div className="flex flex-1 flex-wrap items-center justify-center gap-2">
               {!ranked && finished ? (
                 <>
                   <Button variant="primary" onClick={restart}>
@@ -120,14 +131,6 @@ export default function TitleScreen({ onPlay, onBoard }: TitleScreenProps) {
           </div>
         </Panel>
         <RankedPanel ongoing={ongoing} onPlay={onPlay} />
-      </div>
-
-      <div className="flex flex-wrap justify-center gap-2">
-        <Button variant="ranked" onClick={onBoard}>
-          <ListOrdered size={14} aria-hidden="true" />
-          {t.ranked.board.open}
-        </Button>
-        <ManualButton />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

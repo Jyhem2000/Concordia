@@ -213,26 +213,28 @@ export default function StatusBar() {
   )
 }
 
-/** Case de la rangée de tête : libellé en petit avec son « i », valeur en gras sur une seule ligne */
+/**
+ * Case de la rangée de tête : libellé en petit avec son « i », valeur en gras sur une seule ligne. Toute la case ouvre
+ * sa bulle, au survol comme au toucher : le « i » seul serait trop petit à viser sur un téléphone
+ */
 function Cell({ label, tone = 'neutral', info, alert, wrap = false, valueKey, children }: CellProps) {
   return (
-    <div className="flex min-w-0 flex-col px-1 text-center first:pl-0 last:pr-0">
-      <div className="flex items-center justify-center gap-0.5 text-xs text-ink-muted uppercase">
-        <span className="truncate">{label}</span>
-        <Tip label={label} content={info}>
-          {/* « i » coloré quand une précision mérite l'attention ; le nom accessible reste le libellé */}
-          <Info size={13} aria-hidden="true" className={alert ? TONE_TEXT[alert] : 'text-ink-faint hover:text-ink-soft'} />
-          <span className="sr-only">{label}</span>
-        </Tip>
-      </div>
-      {/* Nouvelle valeur, nouvelle clé : Motion rejoue l'apparition */}
-      <motion.div
-        key={valueKey}
-        {...APPEAR}
-        className={`flex flex-1 items-center justify-center gap-1 font-bold ${wrap ? 'text-xs leading-tight' : 'whitespace-nowrap'} ${TONE_TEXT[tone]}`}
-      >
-        {children}
-      </motion.div>
+    <div className="flex min-w-0 px-1 text-center first:pl-0 last:pr-0">
+      <Tip content={info} area className="min-w-0 flex-col">
+        <span className="flex items-center justify-center gap-0.5 text-xs text-ink-muted uppercase">
+          <span className="truncate">{label}</span>
+          {/* « i » coloré quand une précision mérite l'attention : il signale la bulle, la case entière l'ouvre */}
+          <Info size={13} aria-hidden="true" className={`shrink-0 ${alert ? TONE_TEXT[alert] : 'text-ink-faint'}`} />
+        </span>
+        {/* Nouvelle valeur, nouvelle clé : Motion rejoue l'apparition */}
+        <motion.span
+          key={valueKey}
+          {...APPEAR}
+          className={`flex flex-1 items-center justify-center gap-1 font-bold ${wrap ? 'text-xs leading-tight' : 'whitespace-nowrap'} ${TONE_TEXT[tone]}`}
+        >
+          {children}
+        </motion.span>
+      </Tip>
     </div>
   )
 }

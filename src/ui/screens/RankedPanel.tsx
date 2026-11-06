@@ -70,14 +70,13 @@ export default function RankedPanel({ ongoing, onPlay }: RankedPanelProps) {
           </div>
         )}
         {/* Le pseudo et le bouton sur une ligne, à la même hauteur */}
+        {/* Le pseudo en texte indicatif du champ, sans libellé au-dessus : le bloc reste court */}
         <div className="flex flex-col gap-1">
-          <label htmlFor="ranked-pseudo" className="text-xs text-ink-muted">
-            {r.pseudo}
-          </label>
           <div className="flex flex-wrap items-center gap-2">
             <input
-              id="ranked-pseudo"
-              className={`${FIELD} min-w-0 flex-1 basis-40`}
+              aria-label={r.pseudo}
+              placeholder={r.pseudo}
+              className={`${FIELD} min-w-0 flex-1 basis-40 placeholder:text-ink-faint`}
               value={pseudo}
               maxLength={RANKED.pseudoMax}
               autoComplete="nickname"

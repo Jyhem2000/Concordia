@@ -67,9 +67,12 @@
   --color-tier-4: #a78bfa;
 }
 
-/* Marge basse de la barre d'onglets : au moins un cran, et toute la zone sûre de l'écran (barre de gestes, coins arrondis) */
+/*
+ * Marge basse de la barre d'onglets : un léger cran, et la moitié de la zone sûre de l'écran (barre de gestes, coins
+ * arrondis) ; la zone entière remontait trop les libellés
+ */
 @utility pb-safe {
-  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  padding-bottom: max(0.25rem, calc(env(safe-area-inset-bottom) / 2));
 }
 
 @layer base {

@@ -57,7 +57,7 @@ export type ImageId = ProductId | VehicleId | ModuleId | CrewId
 /** Images déposées dans `src/assets/images/`, nommées par l'ID de la donnée (`T1-03.png`) */
 const files = import.meta.glob<string>('../../assets/images/*.png', { eager: true, import: 'default' })
 
-/** Noms des fichiers déposés, sans extension (page de contrôle des images) */
+/** Noms des fichiers déposés, sans extension : chacun doit porter l'ID d'une donnée (images.test.ts) */
 export const IMAGE_FILE_NAMES = keysOf(files).map((path) => path.replace(/^.*\/(.+)\.png$/, '$1'))
 
 /** Adresse de l'image déposée pour cette donnée, s'il y en a une */

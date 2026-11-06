@@ -35,6 +35,8 @@ type TipProps = {
   onClick?: MouseEventHandler<HTMLButtonElement>
   /** Curseur du déclencheur : une explication par défaut, une action, ou un bouton grisé */
   cursor?: 'help' | 'pointer' | 'not-allowed'
+  /** Déclencheur en bloc : toute une zone (une case du bandeau) ouvre la bulle, plus facile à toucher qu'un « i » */
+  area?: boolean
 }
 
 const cursors = { help: 'cursor-help', pointer: 'cursor-pointer', 'not-allowed': 'cursor-not-allowed' }
@@ -43,7 +45,7 @@ const cursors = { help: 'cursor-help', pointer: 'cursor-pointer', 'not-allowed':
  * Infobulle (chap. 7) : s'ouvre au survol de la souris, au toucher sur mobile et au focus clavier ;
  * se ferme en quittant, en touchant ailleurs ou avec Échap. Rendue hors du panneau pour ne jamais être coupée.
  */
-export default function Tip({ content, children, label, className = '', wide = false, onClick, cursor = 'help' }: TipProps) {
+export default function Tip({ content, children, label, className = '', wide = false, onClick, cursor = 'help', area = false }: TipProps) {
   // Bulle ouverte : état d'interface éphémère
   const [open, setOpen] = useState(false)
   // Éléments passés par état plutôt que par `refs` : le React Compiler interdit de lire un ref pendant le rendu
@@ -73,7 +75,8 @@ export default function Tip({ content, children, label, className = '', wide = f
         type="button"
         ref={setReference}
         aria-label={children ? undefined : label}
-        className={`inline-flex items-center rounded ${cursors[cursor]} ${children ? '' : 'align-middle text-ink-faint hover:text-ink-soft'} ${FOCUS_RING} ${className}`}
+        // Icône « i » seule : une zone de toucher plus large que l'icône, sans décaler la ligne
+        className={`${area ? 'flex w-full' : 'inline-flex items-center'} rounded ${cursors[cursor]} ${children ? '' : '-m-1 p-1 align-middle text-ink-faint hover:text-ink-soft'} ${FOCUS_RING} ${className}`}
         {...getReferenceProps({ onClick })}
       >
         {children ?? <Info size={13} aria-hidden="true" />}

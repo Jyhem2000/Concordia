@@ -353,7 +353,7 @@ export const en = {
     vehicleTitle: 'Vehicle & crew',
     modules: (mounted: number, slots: number) => `Modules ${mounted}/${slots}`,
     noModule: 'No module fitted: they are fitted at the garage.',
-    noCrew: 'No crewmate: they are recruited at Quai 9.',
+    noCrew: 'No crewmate: they are recruited at Dock 9.',
     garageAt: (district: string) =>
       `Mécano-Mitch's “Faraday” garage in ${district}, by day: modules, chassis and repairs are done there, in this tab.`,
     title: (used: number, capacity: number) => `Hold ${used}/${capacity}`,
@@ -1550,7 +1550,7 @@ export const en = {
         paragraphs: [
           "Mécano-Mitch's **“Faraday” garage**, in Rust Valley, sells bigger chassis and modules: each one serves a build (legal cover, cold chain, escape, bribery, high tier). *Some only come out for clients who have proven themselves.*",
           'When changing chassis, **removable** modules follow, **adaptable** ones cost a fee, **welded** ones stay on the old one.',
-          'At **Quai 9** in Hives, one crewmate at a time: **Vance** lowers the risk and helps bribery, **Glitch** sees every price and hacks the lights, **Mama Rosa** elevates real food. Each one shows up after a deed that gets them to notice you.',
+          'At **Dock 9** in Hives, one crewmate at a time: **Vance** lowers the risk and helps bribery, **Glitch** sees every price and hacks the lights, **Mama Rosa** elevates real food. Each one shows up after a deed that gets them to notice you.',
         ],
       },
       {
@@ -1616,19 +1616,6 @@ export const en = {
     } satisfies Record<DifficultyId, { name: string; blurb: string }>,
     settings: (debt: string, advance: string | null, fines: string | null) =>
       [`debt ${debt}`, advance ? `advance ${advance}` : 'no advance', fines ? `fines ${fines}` : 'normal fines'].join(' · '),
-  },
-
-  // Page de contrôle des images, hors jeu (`?debug=true`, chap. 7)
-  debug: {
-    title: 'Image check',
-    intro:
-      'Every piece of data that can receive an image, to check that they are present, consistent and the same size. The dotted frame shows the actual edges of the file.',
-    summary: (present: number, total: number) => `${present} images out of ${total}`,
-    size: (width: number, height: number) => `${width} × ${height} px`,
-    missing: 'Missing',
-    odd: 'Different size',
-    sections: { products: 'Products', vehicles: 'Vehicles', modules: 'Modules', crew: 'Crewmates' },
-    orphans: 'Files without data',
   },
 
   // ─── Données de jeu (chap. 2 à 6) ───
@@ -1722,7 +1709,7 @@ export const en = {
   location: {
     'LOC-D1-1': { name: "Viktor Varga's Back Room", subtitle: 'Mafia loan shark' },
     'LOC-D1-2': { name: "The Drivers' Canteen", subtitle: '“Chez Borg”' },
-    'LOC-D1-3': { name: 'Quai 9', subtitle: 'Clandestine bar of the service docks' },
+    'LOC-D1-3': { name: 'Dock 9', subtitle: 'Clandestine bar of the service docks' },
     'LOC-D2-1': { name: 'The “Karma-Cham” studio', subtitle: 'Corrupt State influencer' },
     'LOC-D3-1': { name: 'The Back Morgue', subtitle: 'Dr. K.' },
     'LOC-D4-1': { name: 'The “Faraday” garage', subtitle: 'Mécano-Mitch' },

@@ -37,7 +37,7 @@ const allowedDigits: Record<Locale, RegExp[]> = {
     /[Dd]ay 1\b/g, // début de partie
     /\b0 (to|and) |at 0\b/g, // zéro
     /out of 5\b/g, // échelle des étoiles de sécurité
-    /Cassandre-88|Quai 9|300 m|90 decibels|3 bullets|400 ml|8 seconds|70 km\/h|15 km\/h/g, // lore
+    /Cassandre-88|Dock 9|300 m|90 decibels|3 bullets|400 ml|8 seconds|70 km\/h|15 km\/h/g, // lore
   ],
 }
 

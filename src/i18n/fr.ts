@@ -1628,19 +1628,6 @@ export const fr = {
       [`dette ${debt}`, advance ? `avance ${advance}` : 'aucune avance', fines ? `amendes ${fines}` : 'amendes normales'].join(' · '),
   },
 
-  // Page de contrôle des images, hors jeu (`?debug=true`, chap. 7)
-  debug: {
-    title: 'Contrôle des images',
-    intro:
-      "Toutes les données qui peuvent recevoir une image, pour vérifier qu'elles sont présentes, cohérentes et de même taille. Le cadre en pointillés montre les bords réels du fichier.",
-    summary: (present: number, total: number) => `${present} images sur ${total}`,
-    size: (width: number, height: number) => `${width} × ${height} px`,
-    missing: 'Manquante',
-    odd: 'Taille différente',
-    sections: { products: 'Produits', vehicles: 'Véhicules', modules: 'Modules', crew: 'Équipiers' },
-    orphans: 'Fichiers sans donnée',
-  },
-
   // ─── Données de jeu (chap. 2 à 6) ───
 
   tier: {

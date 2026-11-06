@@ -21,6 +21,8 @@ type PanelProps = {
   tone?: 'default' | 'highlight' | 'report'
   /** Corps sans marge intérieure, pour les listes pleine largeur */
   flush?: boolean
+  /** Corps étiré sur toute la hauteur du panneau (panneaux côte à côte de même hauteur) */
+  fill?: boolean
   children: ReactNode
 }
 
@@ -31,7 +33,18 @@ const tones = {
 }
 
 /** Panneau de l'écran : titre en capitales (repliable au besoin), puis son contenu. Pas de `overflow-hidden` : les bulles de détail débordent du panneau */
-export default function Panel({ title, icon: Icon, collapseId, aside, subtitle, info, tone = 'default', flush = false, children }: PanelProps) {
+export default function Panel({
+  title,
+  icon: Icon,
+  collapseId,
+  aside,
+  subtitle,
+  info,
+  tone = 'default',
+  flush = false,
+  fill = false,
+  children,
+}: PanelProps) {
   // Sans identifiant, le panneau ne se replie jamais : aucun réglage ne porte le nom vide
   const collapsed = useCollapsed(collapseId ?? '')
   const heading = (
@@ -42,7 +55,7 @@ export default function Panel({ title, icon: Icon, collapseId, aside, subtitle, 
   )
 
   return (
-    <motion.section {...(tone === 'default' ? {} : ARRIVE)} className={`rounded-lg border text-sm ${tones[tone]}`}>
+    <motion.section {...(tone === 'default' ? {} : ARRIVE)} className={`rounded-lg border text-sm ${fill ? 'flex flex-col' : ''} ${tones[tone]}`}>
       <div className={`px-3 py-2 ${collapsed ? '' : 'border-b border-line'}`}>
         <div className="flex items-center gap-2">
           <div className="flex min-w-0 flex-1 items-center gap-1.5">
@@ -56,7 +69,7 @@ export default function Panel({ title, icon: Icon, collapseId, aside, subtitle, 
         {subtitle && <div className="mt-0.5 text-xs text-ink-muted">{subtitle}</div>}
       </div>
       {!collapsed && (
-        <motion.div {...APPEAR} className={flush ? '' : 'p-3'}>
+        <motion.div {...APPEAR} className={`${flush ? '' : 'p-3'} ${fill ? 'flex flex-1 flex-col' : ''}`}>
           {children}
         </motion.div>
       )}
