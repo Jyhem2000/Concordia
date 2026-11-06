@@ -7,7 +7,7 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [react(), babel({ presets: [reactCompilerPreset()] }), tailwindcss()],
   define: {
-    // Version des règles d'une partie classée : le commit déployé par Cloudflare Pages, « dev » ailleurs (README)
+    // Version des règles d'une partie classée : le commit déployé par Cloudflare Pages, « dev » ailleurs (chap. 9)
     __RULES_VERSION__: JSON.stringify(process.env.CF_PAGES_COMMIT_SHA ?? 'dev'),
   },
 })

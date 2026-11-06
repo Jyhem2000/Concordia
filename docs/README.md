@@ -6,7 +6,7 @@
 - **Ton :** Satire mordante, humour noir, paranoïa bureaucratique, dystopie algorithmique (Brazil, Papers Please, South Park, Black Mirror, Demolition Man).
 
 ## Chapitres
-Les chapitres 1 à 6 décrivent le jeu : univers, règles, données. Les deux derniers décrivent comment on le fabrique : le chap. 7 l'interface, le chap. 8 l'équilibrage par simulation.
+Les chapitres 1 à 6 décrivent le jeu : univers, règles, données. Les trois derniers décrivent comment on le fabrique : le chap. 7 l'interface, le chap. 8 l'équilibrage par simulation, le chap. 9 le code (règles de code, commandes, mise en ligne).
 
 | # | Fichier | Contenu |
 | :---: | :--- | :--- |
@@ -18,6 +18,7 @@ Les chapitres 1 à 6 décrivent le jeu : univers, règles, données. Les deux de
 | 6 | [06-evenements.md](06-evenements.md) | Événements globaux, locaux, Loterie, aléas routiers |
 | 7 | [07-interface.md](07-interface.md) | Écrans et feedback |
 | 8 | [08-simulation.md](08-simulation.md) | Bots de test (plan × tempérament × objectif), routes de référence, campagnes, critères d'équilibrage |
+| 9 | [09-developpement.md](09-developpement.md) | Outils, arborescence, conventions du moteur et des traductions, règles de code, commandes, mise en ligne sur Cloudflare et vérification des parties classées |
 
 ## Où trouver une règle
 Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la décrivent, dans l'ordre de lecture (le premier porte la règle, les suivants ses modificateurs). Une mécanique ajoutée aux docs s'ajoute ici dans le même changement (règle 9).

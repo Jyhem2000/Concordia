@@ -17,7 +17,7 @@ export type D1Database = {
 }
 
 export type Env = {
-  /** Base D1 liée au projet Pages sous ce nom (README) */
+  /** Base D1 liée au projet Pages sous ce nom (chap. 9, « Mise en ligne ») */
   DB: D1Database
 }
 

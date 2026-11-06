@@ -1,4 +1,4 @@
--- Parties classées (chap. 1, README « Mise en ligne ») : une par joueur, par jour et par mode.
+-- Parties classées (chap. 1, chap. 9 « Mise en ligne ») : une par joueur, par jour et par mode.
 -- À exécuter une fois dans la console D1 de Cloudflare (ou `wrangler d1 execute <base> --remote --file server/schema.sql`).
 CREATE TABLE IF NOT EXISTS runs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -2,7 +2,7 @@ import type { Board, RunSubmission } from '../../server/runs.ts'
 import type { DifficultyId } from '../engine/types.ts'
 
 /*
- * Appels au serveur du classement (README, Mise en ligne) : les fonctions Cloudflare de `functions/api/`, sur le même
+ * Appels au serveur du classement (chap. 9, « Mise en ligne ») : les fonctions Cloudflare de `functions/api/`, sur le même
  * domaine que le jeu. Le seul code réseau du jeu.
  */
 

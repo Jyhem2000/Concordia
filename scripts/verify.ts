@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import { isVerdict, type PendingRun, type Verdict } from './verdict.ts'
 
 /*
- * Vérification des parties classées (chap. 1, README « Mise en ligne »), lancée toutes les heures par GitHub Actions :
+ * Vérification des parties classées (chap. 1, chap. 9 « Mise en ligne »), lancée toutes les heures par GitHub Actions :
  * lit les parties en attente dans D1, rejoue chacune avec les règles du commit qui l'a vue naître, inscrit le verdict.
  * Usage : CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… D1_DATABASE_ID=… node scripts/verify.ts
  */

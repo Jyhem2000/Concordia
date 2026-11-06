@@ -43,7 +43,7 @@ type GameStore = {
   submit: () => Promise<void>
 }
 
-/** Version de la sauvegarde ; la première version publique est la référence des migrations (README) */
+/** Version de la sauvegarde ; la première version publique est la référence des migrations (chap. 9, « Sauvegardes migrées ») */
 export const SAVE_VERSION = 36
 export const PUBLIC_SAVE_VERSION = 36
 
@@ -113,7 +113,7 @@ export const useGameStore = create<GameStore>()(
     {
       name: 'concordia-save',
       storage: createJSONStorage(() => localStorage),
-      // Incrémenter à chaque changement de forme de l'état sauvegardé, et ajouter sa migration (README, Sauvegardes migrées)
+      // Incrémenter à chaque changement de forme de l'état sauvegardé, et ajouter sa migration (chap. 9, « Sauvegardes migrées »)
       version: SAVE_VERSION,
       migrate: migrateSave,
       partialize: savedPart,
