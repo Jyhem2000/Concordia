@@ -113,8 +113,11 @@ export const ICC_TONE: Record<IccTier, Tone> = {
 /** Bulle flottante (infobulle, menu) : placée par Floating UI */
 export const BUBBLE = 'z-50 rounded-lg border border-line-strong bg-raised p-2 text-xs text-ink-soft shadow-lg shadow-black/40'
 
-/** Champ de saisie ou liste déroulante, à la hauteur d'un bouton : un champ et son bouton s'alignent */
-export const FIELD = `rounded-md border border-line-strong bg-base px-2 py-1.5 text-sm disabled:opacity-35 ${FOCUS_RING}`
+/**
+ * Champ de saisie ou liste déroulante, à la hauteur d'un bouton : un champ et son bouton s'alignent. Sur téléphone, le
+ * texte garde les 16 px de `src/index.css` (en dessous, Safari zoome la page au toucher du champ et ne la dézoome pas)
+ */
+export const FIELD = `rounded-md border border-line-strong bg-base px-2 py-1 sm:py-1.5 sm:text-sm disabled:opacity-35 ${FOCUS_RING}`
 
 /** Caisses scellées du DSC : hors commerce, en gris plutôt qu'au vert du Tier 0 (chap. 2) */
 export const SEALED_STYLE: CrateStyle = {

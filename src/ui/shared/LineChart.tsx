@@ -79,8 +79,16 @@ export default function LineChart({ points, from, to, tick, format, reference, r
             {format(value)}
           </text>
         ))}
+        {/* Dernière graduation calée sur le bord droit : un libellé long (« maintenant ») ne sort pas du tracé */}
         {[from, to].map((value) => (
-          <text key={value} x={x(value)} y={HEIGHT - 6} textAnchor="middle" fontSize={9} className="fill-ink-faint">
+          <text
+            key={value}
+            x={value === to ? WIDTH - 2 : x(value)}
+            y={HEIGHT - 6}
+            textAnchor={value === to ? 'end' : 'middle'}
+            fontSize={9}
+            className="fill-ink-faint"
+          >
             {tick(value)}
           </text>
         ))}

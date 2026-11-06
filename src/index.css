@@ -93,6 +93,17 @@
     scrollbar-gutter: stable;
   }
 
+  /*
+   * Champs en 16 px : en dessous, Safari sur iPhone zoome la page au toucher d'un champ et la laisse zoomée. Les
+   * utilitaires (`sm:text-sm` des champs sur grand écran) l'emportent sur cette règle de base
+   */
+  input,
+  select,
+  textarea {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
   /* Tout élément cliquable montre la main ; un bouton grisé, l'interdiction (Tailwind laisse le curseur par défaut) */
   button:not(:disabled),
   [role='button']:not([aria-disabled='true']),

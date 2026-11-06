@@ -278,9 +278,14 @@ function MarketRow({ productId }: MarketRowProps) {
         </div>
       </div>
 
-      {/* Barre d'achat et de vente, toujours à la même place : acheter à gauche, vendre à droite */}
+      {/*
+        Barre d'achat et de vente, toujours à la même place. Grand écran, sur une ligne : acheter à gauche, vendre à droite,
+        même seul. Téléphone, l'un sous l'autre : tous deux à gauche, sans case vide quand le produit n'est pas en boutique
+      */}
       <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-1.5">
-        <div>{stock !== undefined && <TradeControl productId={productId} kind="buy" max={buyMax} />}</div>
+        <div className={stock === undefined ? 'hidden sm:block' : ''}>
+          {stock !== undefined && <TradeControl productId={productId} kind="buy" max={buyMax} />}
+        </div>
         <div className="flex flex-wrap items-center gap-1.5">
           {owned > 0 && iccRestore !== undefined && (
             <Button

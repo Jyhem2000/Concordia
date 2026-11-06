@@ -24,7 +24,7 @@ export default function RoadEventScreen() {
   if (!eventId) return null
 
   return (
-    <Scene tone="accent" icon={Signpost} title={`${t.road.title} — ${t.event[eventId].name}`} intro={<p>{t.road.events[eventId].situation}</p>}>
+    <Scene tone="accent" icon={Signpost} title={t.road.title} subtitle={t.event[eventId].name} intro={<p>{t.road.events[eventId].situation}</p>}>
       <ul className="flex flex-col gap-3">
         <RoadOption eventId={eventId} choice="a" />
         <RoadOption eventId={eventId} choice="b" />
