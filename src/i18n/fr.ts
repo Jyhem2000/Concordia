@@ -1411,7 +1411,7 @@ export const fr = {
       open: 'Classement',
       back: 'Accueil',
       intro:
-        'Un classement par jour et par mode, sur la graine du jour. Seuls les scores vérifiés y figurent : la vérification passe toutes les heures. Une défaite vaut zéro ; à égalité, la première partie envoyée passe devant. Le classement de la veille est clos.',
+        'Un classement par jour et par mode, sur la graine du jour. Seuls les scores vérifiés y figurent : la vérification passe toutes les heures. Les défaites passent après toutes les victoires ; à égalité, la première partie envoyée passe devant. Le classement de la veille est clos.',
       modes: 'Mode',
       days: 'Jour',
       top: (count: number) => `Les ${count} meilleurs scores`,
@@ -1424,6 +1424,8 @@ export const fr = {
       rank: (rank: number) => (rank > 1 ? `${rank}e` : `${rank}er`),
       pending: 'Ta partie : en attente de vérification.',
       own: (rank: string, score: string) => `Ta partie : ${rank}, ${score}.`,
+      defeat: 'Défaite',
+      ownDefeat: (rank: string) => `Ta partie : ${rank}, défaite (après toutes les victoires).`,
       rejected: 'Ta partie a été rejetée à la vérification.',
     },
     status: {

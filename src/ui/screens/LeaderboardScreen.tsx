@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { openDays, type Board } from '../../../server/runs.ts'
 import { DIFFICULTIES, RANKED } from '../../data/balance.ts'
 import { keysOf } from '../../engine/records.ts'
+import { isDefeat } from '../../engine/routine.ts'
 import type { DifficultyId } from '../../engine/types.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { fetchBoard } from '../../net/leaderboard.ts'
@@ -97,7 +98,13 @@ export default function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
         {board === undefined ? <Hint>{b.loading}</Hint> : board === null ? <Hint tone="warning">{b.offline}</Hint> : <BoardList board={board} />}
         {own && (
           <p className="mt-3 border-t border-line pt-2 text-sm font-bold text-ranked-soft">
-            {own.status === 'pending' ? b.pending : own.status === 'rejected' ? b.rejected : b.own(b.rank(own.rank ?? 0), credits(own.score ?? 0))}
+            {own.status === 'pending'
+              ? b.pending
+              : own.status === 'rejected'
+                ? b.rejected
+                : own.ending && isDefeat(own.ending)
+                  ? b.ownDefeat(b.rank(own.rank ?? 0))
+                  : b.own(b.rank(own.rank ?? 0), credits(own.score ?? 0))}
           </p>
         )}
       </Panel>
@@ -134,7 +141,7 @@ function Pills<T extends string>({ label, options, value, onChange }: PillsProps
   )
 }
 
-/** Les lignes du classement : rang, pseudo, fin atteinte, score ; la ligne du joueur ressort */
+/** Les lignes du classement : rang, pseudo, fin atteinte, score (ou « Défaite ») ; la ligne du joueur ressort */
 function BoardList({ board }: BoardListProps) {
   const { t, credits } = useI18n()
   const b = t.ranked.board
@@ -155,7 +162,10 @@ function BoardList({ board }: BoardListProps) {
               {mine && <span className="ml-2 text-xs font-normal text-ranked-soft">{b.you}</span>}
             </span>
             <span className="hidden text-ink-muted sm:inline">{t.end.endings[entry.ending].title}</span>
-            <span className="w-24 shrink-0 text-right text-ink-soft">{credits(entry.score)}</span>
+            {/* Une défaite n'a pas de score : elle le dit, et passe après toutes les victoires (chap. 1) */}
+            <span className={`w-24 shrink-0 text-right ${isDefeat(entry.ending) ? 'font-bold text-danger' : 'text-ink-soft'}`}>
+              {isDefeat(entry.ending) ? b.defeat : credits(entry.score)}
+            </span>
           </li>
         )
       })}

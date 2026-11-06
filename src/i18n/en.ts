@@ -1402,7 +1402,7 @@ export const en = {
       open: 'Leaderboard',
       back: 'Home',
       intro:
-        "One leaderboard per day and per mode, on the daily seed. Only verified scores appear: verification runs every hour. A defeat is worth zero; on a tie, the first game sent goes ahead. Yesterday's leaderboard is closed.",
+        "One leaderboard per day and per mode, on the daily seed. Only verified scores appear: verification runs every hour. Defeats come after all victories; on a tie, the first game sent goes ahead. Yesterday's leaderboard is closed.",
       modes: 'Mode',
       days: 'Day',
       top: (count: number) => `The ${count} best scores`,
@@ -1415,6 +1415,8 @@ export const en = {
       rank: (rank: number) => ordinal(rank),
       pending: 'Your game: awaiting verification.',
       own: (rank: string, score: string) => `Your game: ${rank}, ${score}.`,
+      defeat: 'Defeat',
+      ownDefeat: (rank: string) => `Your game: ${rank}, defeat (after all victories).`,
       rejected: 'Your game was rejected at verification.',
     },
     status: {

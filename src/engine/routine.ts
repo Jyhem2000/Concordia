@@ -248,7 +248,8 @@ function scorch(state: GameState, melts: readonly ProductId[], ageDays: number):
 }
 
 /** Fins qui sont des défaites (Game Over), par opposition aux grandes fins de l'audit */
-const DEFEATS: readonly EndingId[] = ['bio-bricks', 'death', 'execution']
+/** Fins qui sont des défaites (chap. 1) : elles valent zéro, et passent après toutes les victoires au classement */
+export const DEFEATS: readonly EndingId[] = ['bio-bricks', 'death', 'execution']
 
 export function isDefeat(ending: EndingId): boolean {
   return DEFEATS.includes(ending)

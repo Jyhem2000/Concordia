@@ -32,7 +32,7 @@ export type Board = {
   day: string
   difficulty: DifficultyId
   entries: readonly BoardEntry[]
-  own: { status: RunStatus; rank: number | null; score: number | null } | null
+  own: { status: RunStatus; rank: number | null; score: number | null; ending: EndingId | null } | null
 }
 
 const PLAYER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
