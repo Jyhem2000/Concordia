@@ -17,6 +17,11 @@ import RoadReportPanel from './road/RoadReportPanel.tsx'
 import TabBar, { DesktopTabs, type Tab } from './TabBar.tsx'
 import { TAB_GROUP } from './tabs.ts'
 
+type GameScreenProps = {
+  /** Revenir à l'accueil */
+  onHome: () => void
+}
+
 type Picked = {
   tab: Tab
   /** Scène (jour, moment, district) où l'onglet a été ouvert */
@@ -31,7 +36,7 @@ type Picked = {
  * Écran unique (chap. 7). Téléphone : bandeau, comptes rendus, puis l'onglet ouvert (En bref, Marché, Lieux, Véhicule, Carte).
  * Grand écran : trois onglets (En bref ; Marché & véhicule ; Carte & lieux), chacun en colonnes côte à côte. Un barrage ou un aléa routier prend tout l'écran.
  */
-export default function GameScreen() {
+export default function GameScreen({ onHome }: GameScreenProps) {
   const finished = useGameStore((s) => s.game.status === 'finished')
   const intercepted = useGameStore((s) => s.game.interception !== null)
   const roadEvent = useGameStore((s) => s.game.roadEvent !== null)
@@ -81,7 +86,7 @@ export default function GameScreen() {
         <RoadEventScreen />
       ) : (
         <>
-          <main className="mx-auto flex w-full max-w-8xl flex-1 flex-col gap-4 p-4 pb-24 md:grid md:grid-cols-5 md:content-start md:items-start md:pb-4">
+          <main className="mx-auto flex w-full max-w-8xl flex-1 flex-col gap-4 p-4 pb-28 md:grid md:grid-cols-5 md:content-start md:items-start md:pb-4">
             <DesktopTabs current={tab} onPick={pick} />
             {/* Message Aeterna : téléscripteur sous les onglets, sur toute la largeur */}
             <AeternaTicker className="md:col-span-5" />
@@ -99,7 +104,7 @@ export default function GameScreen() {
             <div
               className={`min-w-0 flex-col gap-4 motion-safe:animate-fade-in md:col-span-5 md:columns-xs md:*:mb-4 md:*:break-inside-avoid ${tab === 'fil' ? 'flex' : 'hidden'} ${TAB_GROUP[tab] === 'brief' ? 'md:block' : 'md:hidden'}`}
             >
-              <FilView />
+              <FilView onHome={onHome} />
             </div>
             {/* Marché & véhicule, puis Carte & lieux : le bloc principal à gauche, l'autre à droite */}
             <div className={`min-w-0 flex-col md:col-span-3 ${shown('market')}`}>

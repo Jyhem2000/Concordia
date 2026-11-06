@@ -26,7 +26,7 @@ type MoveCardProps = {
 }
 
 /** Intitulé d'une conséquence (« Succès », « Échec »…) : en gras, le reste à la suite */
-const OUTCOME_HEAD = /^([^:]{1,24}) : (.*)$/s
+const OUTCOME_HEAD = /^([^:]{1,24}?)\s?: (.*)$/s
 
 /** Une option du barrage, toutes présentées pareil : bouton et chance, conséquences, réglages (chap. 7) */
 export default function MoveCard({ move, label, chance, outcomes, tactics, offer = NO_OFFER, info, children }: MoveCardProps) {
@@ -60,7 +60,7 @@ export default function MoveCard({ move, label, chance, outcomes, tactics, offer
             <li key={outcome}>
               {head ? (
                 <>
-                  <span className="font-bold text-ink-soft">{head[1]} :</span> {head[2]}
+                  <span className="font-bold text-ink-soft">{t.format.label(head[1] ?? '')}</span> {head[2]}
                 </>
               ) : (
                 outcome

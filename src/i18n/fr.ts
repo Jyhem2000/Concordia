@@ -56,10 +56,17 @@ export const fr = {
     title: 'Concordia',
   },
 
+  /** Choix de la langue, sur l'accueil (chap. 7) : chaque langue garde son propre nom */
+  language: {
+    label: 'Langue',
+  },
+
   format: {
     /** `amount` est déjà formaté selon la langue ; espace insécable avant le symbole */
     credits: (amount: string) => `${amount}${NBSP}₡`,
     dayShort: (day: number, total: number) => `${day}/${total}`,
+    /** Intitulé suivi de deux-points, à la française : espace insécable avant */
+    label: (text: string) => `${text}${NBSP}:`,
   },
 
   /** Moment de la journée (chap. 1) : Journée, 20h00, Nuit */
@@ -200,8 +207,8 @@ export const fr = {
     news: 'Actualités',
     newsGlobal: 'Dans toute la ville',
     lastsUntil: (day: number) => `jusqu'au J${day}`,
-    newsLocal: 'Événements locaux, district par district',
-    newsAftershock: "Contrecoups d'hier",
+    newsLocal: 'Événements locaux',
+    newsAftershock: "Contrecoups des événements d'hier",
     newsAftershockInfo:
       "Le lendemain d'un événement qui a fait bouger des cours, le marché se corrige le temps d'une journée : ce qui a flambé retombe, ce qui a été bradé remonte.",
     newsInfo:
@@ -392,6 +399,8 @@ export const fr = {
     newGame: 'Nouvelle partie',
     newGameConfirm: (mode: string) => `Abandonner la partie en cours et recommencer au jour 1, en mode ${mode} ? Elle ne comptera pas à la carrière.`,
     newGameAction: 'Abandonner et recommencer',
+    home: 'Accueil',
+    homeHint: "Le mode de difficulté et la partie classée du jour se choisissent à l'accueil.",
     offshoreRate: (rate: string) => `Intérêts : ${rate} par jour`,
     wanted: (level: number, max: number) => `Fiche S ${level}/${max}`,
     wantedLabel: 'Fiche S',
@@ -1370,13 +1379,15 @@ export const fr = {
       exemplary: 'Finir la saison au-dessus de tout soupçon, aux yeux d’Aeterna.',
       standard: "Survivre à l'audit, et reprendre le volant en septembre.",
     } satisfies Record<Exclude<EndingId, 'bio-bricks' | 'death' | 'execution'>, string>,
+    freeTitle: 'Partie libre',
+    freeBlurb: 'Un nouveau hasard à chaque partie, autant de fois que tu veux.',
     start: 'Lancer la partie',
     resume: (day: number) => `Reprendre la partie (jour ${day})`,
     review: 'Revoir le bilan',
     newGame: 'Nouvelle partie',
     newGameConfirm: (mode: string) => `La partie en cours sera perdue. Commencer une nouvelle partie en mode ${mode} ?`,
     currentMode: (mode: string) => `Partie en cours : mode ${mode}. Le mode choisi vaut pour la prochaine partie.`,
-    currentRanked: (mode: string, day: string) => `Partie en cours : classée du ${day}, mode ${mode}. Le mode choisi vaut pour la prochaine partie.`,
+    currentRanked: (mode: string, day: string) => `Partie en cours : classée du ${day}, mode ${mode}.`,
   },
 
   /** Partie classée et classement du jour (chap. 1 et 7) */
@@ -1385,7 +1396,10 @@ export const fr = {
     info: "La même graine pour tous les joueurs aujourd'hui, une seule tentative par mode : l'abandonner la consomme. À la fin, le serveur rejoue ta partie pour vérifier ton score avant de l'inscrire au classement.",
     pseudo: 'Pseudo',
     pseudoHint: (min: number, max: number) => `De ${min} à ${max} caractères : lettres, chiffres, espaces, points et tirets.`,
-    play: (mode: string) => `Jouer la classée du jour (${mode})`,
+    play: 'Jouer en classé',
+    mode: 'Mode',
+    blurb: "La même graine pour tous aujourd'hui, une seule tentative par mode.",
+    resume: (day: number) => `Reprendre la classée (jour ${day})`,
     confirmTitle: 'Partie classée du jour',
     confirm: (mode: string) =>
       `La partie en cours sera abandonnée. Lancer la partie classée du jour en mode ${mode} ? Tu n'as qu'une tentative par jour dans ce mode.`,
@@ -1393,8 +1407,15 @@ export const fr = {
     noPseudo: "Choisis d'abord un pseudo valide.",
     taken: (mode: string) => `Tentative du jour déjà prise en mode ${mode} : une nouvelle graine arrive à minuit UTC.`,
     board: {
-      title: 'Classement du jour',
-      info: 'Les scores vérifiés seulement : la vérification passe toutes les heures. Une défaite vaut zéro ; à égalité, la première partie envoyée passe devant. Le classement de la veille est clos.',
+      title: 'Classement',
+      open: 'Classement',
+      back: 'Accueil',
+      intro:
+        'Un classement par jour et par mode, sur la graine du jour. Seuls les scores vérifiés y figurent : la vérification passe toutes les heures. Une défaite vaut zéro ; à égalité, la première partie envoyée passe devant. Le classement de la veille est clos.',
+      modes: 'Mode',
+      days: 'Jour',
+      top: (count: number) => `Les ${count} meilleurs scores`,
+      you: 'Toi',
       today: "Aujourd'hui",
       yesterday: 'Hier',
       loading: 'Chargement du classement…',
@@ -1409,7 +1430,7 @@ export const fr = {
       title: 'Partie classée',
       idle: "Partie classée finie : prête à l'envoi.",
       sending: 'Envoi de ta partie au classement…',
-      sent: 'Partie envoyée : elle entrera au classement après la vérification, toutes les heures. Résultat sur l’accueil.',
+      sent: 'Partie envoyée : elle entrera au classement après la vérification, toutes les heures. Résultat dans le classement, depuis l’accueil.',
       duplicate: 'Partie déjà reçue pour ce jour et ce mode.',
       refused: 'Le serveur a refusé ta partie : classement clos, ou pseudo refusé.',
       failed: 'Envoi impossible : pas de connexion au serveur.',
@@ -1484,7 +1505,7 @@ export const fr = {
           `Ce score, et ce que tu as accompli, décident de ta fin : de simple Survivant à Saboteur. Une fois la dette initiale soldée, l’encart **« Objectifs du jour ${days} »** d’En bref montre ce que chaque grande fin exige.`,
           'On perd aussi en **mourant** (santé à zéro) ou en se faisant **fouiller avec le vieux serveur Aeterna** à bord.',
           "**Trois modes de difficulté**, au choix à l'accueil : Citoyen pour découvrir, Contrebandier pour le jeu normal, Hors-la-loi pour qui le connaît. Ils changent la dette de départ, l'avance de Viktor et les amendes de la BRC ; la carrière garde un meilleur score par mode.",
-          "**Partie libre ou classée** : la partie libre tire un nouveau hasard à chaque fois. La **partie classée du jour** est la même pour tous les joueurs, avec une seule tentative par mode ; à la fin, le serveur la rejoue pour vérifier ton score, puis l'inscrit au classement de l'accueil.",
+          "**Partie libre ou classée** : la partie libre tire un nouveau hasard à chaque fois. La **partie classée du jour** est la même pour tous les joueurs, avec une seule tentative par mode ; à la fin, le serveur la rejoue pour vérifier ton score, puis l'inscrit au classement (bouton Classement de l'accueil).",
         ],
       },
       {
@@ -1597,6 +1618,7 @@ export const fr = {
   // Modes de difficulté (chap. 1)
   difficulty: {
     title: 'Mode de difficulté',
+    scope: 'pour la partie libre comme pour la classée',
     modes: {
       citizen: { name: 'Citoyen', blurb: 'Pour découvrir : une dette légère, une avance généreuse et des amendes adoucies.' },
       smuggler: { name: 'Contrebandier', blurb: 'Le jeu tel qu’il est pensé : chaque erreur se paie, sans être fatale.' },

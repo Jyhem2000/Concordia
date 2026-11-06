@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { DEFAULT_DIFFICULTY } from '../data/balance.ts'
 import type { DifficultyId } from '../engine/types.ts'
-import { DEFAULT_LOCALE, type Locale } from '../i18n/index.ts'
+import { detectLocale, type Locale } from '../i18n/index.ts'
 
 type SettingsStore = {
   locale: Locale
@@ -20,11 +20,14 @@ type SettingsStore = {
   toggleCollapsed: (id: string) => void
 }
 
+/** Langue d'un premier lancement : celle du navigateur si le jeu la parle, sinon l'anglais (chap. 7) */
+const firstLocale = (): Locale => detectLocale(typeof navigator === 'undefined' ? [] : navigator.languages)
+
 /** Réglages du joueur, sauvegardés à part de la partie (survivent à une nouvelle partie) */
 export const useSettingsStore = create<SettingsStore>()(
   persist(
     (set) => ({
-      locale: DEFAULT_LOCALE,
+      locale: firstLocale(),
       collapsed: [],
       difficulty: DEFAULT_DIFFICULTY,
       pseudo: '',
@@ -42,7 +45,7 @@ export const useSettingsStore = create<SettingsStore>()(
       // Version 1 : la langue seulement ; 2 : sans mode de difficulté (mode par défaut) ; 3 : sans pseudo ni identifiant
       // (ceux de l'état initial). Les réglages déjà là sont gardés
       migrate: (saved, version) => ({
-        locale: DEFAULT_LOCALE,
+        locale: firstLocale(),
         collapsed: [],
         difficulty: DEFAULT_DIFFICULTY,
         pseudo: '',

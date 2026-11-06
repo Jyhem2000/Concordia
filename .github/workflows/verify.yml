@@ -20,11 +20,11 @@ jobs:
     timeout-minutes: 15
     steps:
       # Tout l'historique : chaque partie se rejoue avec les règles de son propre commit
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       # Le moteur n'a aucune dépendance : Node suffit, sans installation
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
       - run: node scripts/verify.ts

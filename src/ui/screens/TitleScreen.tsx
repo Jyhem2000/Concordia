@@ -1,4 +1,4 @@
-import { Clock, Globe, Lock, Play, RotateCcw, Target, Trophy, Truck } from 'lucide-react'
+import { Clock, Globe, ListOrdered, Lock, Play, RotateCcw, Target, Trophy, Truck } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { DIFFICULTIES, GAME_LENGTH_DAYS, START_CASH } from '../../data/balance.ts'
@@ -16,12 +16,14 @@ import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
 import Rich from '../shared/Rich.tsx'
 import DifficultyPicker from './DifficultyPicker.tsx'
-import LeaderboardPanel from './LeaderboardPanel.tsx'
+import LanguagePicker from './LanguagePicker.tsx'
 import RankedPanel from './RankedPanel.tsx'
 
 type TitleScreenProps = {
   /** Entrer dans la partie (nouvelle, reprise, ou son bilan si elle est finie) */
   onPlay: () => void
+  /** Ouvrir l'écran du classement */
+  onBoard: () => void
 }
 
 type BlockProps = {
@@ -39,10 +41,10 @@ function started(game: GameState): boolean {
 }
 
 /**
- * Écran d'accueil (chap. 7) : le mode, puis lancer, reprendre ou recommencer une partie libre, et le manuel ; la partie
- * classée du jour et son classement ; le monde, le rôle du joueur, le but et la journée type, les fins à atteindre
+ * Écran d'accueil (chap. 7) : la langue, le mode, puis lancer, reprendre ou recommencer une partie libre, le classement et le
+ * manuel ; la partie classée du jour ; le monde, le rôle du joueur, le but et la journée type, les fins à atteindre
  */
-export default function TitleScreen({ onPlay }: TitleScreenProps) {
+export default function TitleScreen({ onPlay, onBoard }: TitleScreenProps) {
   const game = useGameStore((s) => s.game)
   const newGame = useGameStore((s) => s.newGame)
   const ranked = useGameStore((s) => s.ranked)
@@ -50,7 +52,7 @@ export default function TitleScreen({ onPlay }: TitleScreenProps) {
   const reached = useRecordsStore((s) => s.endings)
   // Mode de la prochaine partie, retenu dans les réglages (chap. 1)
   const difficulty = useSettingsStore((s) => s.difficulty)
-  const { t, credits, calendarDay } = useI18n()
+  const { t, credits } = useI18n()
   const title = t.title
   const finished = game.status === 'finished'
   const ongoing = !finished && started(game)
@@ -62,57 +64,73 @@ export default function TitleScreen({ onPlay }: TitleScreenProps) {
 
   return (
     <main className="mx-auto flex min-h-full w-full max-w-4xl flex-col gap-6 px-4 py-8 motion-safe:animate-fade-in">
-      <header className="text-center">
+      <LanguagePicker />
+      <header className="-mt-4 text-center">
         <p className="text-xs font-bold tracking-widest text-broadcast uppercase">{title.broadcast}</p>
         <h1 className="mt-3 text-5xl font-bold tracking-widest text-accent uppercase sm:text-6xl">{title.name}</h1>
         <p className="mt-3 text-ink-soft italic">{title.tagline}</p>
       </header>
 
       <DifficultyPicker />
-      {ongoing && (
-        <Hint>
-          {ranked
-            ? title.currentRanked(t.difficulty.modes[game.difficulty].name, calendarDay(ranked.day))
-            : title.currentMode(t.difficulty.modes[game.difficulty].name)}
-        </Hint>
-      )}
+
+      {/* Deux blocs : la partie libre et la partie classée du jour, chacun avec le mode de la partie qu'il lance */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Panel icon={Play} title={title.freeTitle}>
+          <div className="flex flex-col gap-3">
+            <p className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="text-ink-muted">{t.ranked.mode}</span>
+              <Chip tone="accent">{mode}</Chip>
+            </p>
+            <p className="text-ink-soft">{title.freeBlurb}</p>
+            {ongoing && !ranked && <Hint>{title.currentMode(t.difficulty.modes[game.difficulty].name)}</Hint>}
+            <div className="flex flex-wrap gap-2">
+              {!ranked && finished ? (
+                <>
+                  <Button variant="primary" onClick={restart}>
+                    <Play size={14} aria-hidden="true" />
+                    {title.newGame}
+                  </Button>
+                  <Button onClick={onPlay}>{title.review}</Button>
+                </>
+              ) : ongoing ? (
+                <>
+                  {!ranked && (
+                    <Button variant="primary" onClick={onPlay}>
+                      <Play size={14} aria-hidden="true" />
+                      {title.resume(game.day)}
+                    </Button>
+                  )}
+                  <ConfirmButton
+                    variant={ranked ? 'primary' : 'default'}
+                    onClick={restart}
+                    confirm={{ title: title.newGame, message: title.newGameConfirm(mode), action: title.newGame }}
+                  >
+                    <RotateCcw size={14} aria-hidden="true" />
+                    {title.newGame}
+                  </ConfirmButton>
+                </>
+              ) : (
+                // Rien n'est en cours : la partie se lance dans le mode choisi
+                <Button variant="primary" onClick={restart}>
+                  <Play size={14} aria-hidden="true" />
+                  {title.start}
+                </Button>
+              )}
+            </div>
+          </div>
+        </Panel>
+        <RankedPanel ongoing={ongoing} onPlay={onPlay} />
+      </div>
 
       <div className="flex flex-wrap justify-center gap-2">
-        {finished ? (
-          <>
-            <Button variant="primary" onClick={restart}>
-              <Play size={14} aria-hidden="true" />
-              {title.newGame}
-            </Button>
-            <Button onClick={onPlay}>{title.review}</Button>
-          </>
-        ) : ongoing ? (
-          <>
-            <Button variant="primary" onClick={onPlay}>
-              <Play size={14} aria-hidden="true" />
-              {title.resume(game.day)}
-            </Button>
-            <ConfirmButton onClick={restart} confirm={{ title: title.newGame, message: title.newGameConfirm(mode), action: title.newGame }}>
-              <RotateCcw size={14} aria-hidden="true" />
-              {title.newGame}
-            </ConfirmButton>
-          </>
-        ) : (
-          // Rien n'est encore joué : la partie se lance dans le mode choisi
-          <Button variant="primary" onClick={restart}>
-            <Play size={14} aria-hidden="true" />
-            {title.start}
-          </Button>
-        )}
+        <Button variant="ranked" onClick={onBoard}>
+          <ListOrdered size={14} aria-hidden="true" />
+          {t.ranked.board.open}
+        </Button>
         <ManualButton />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <RankedPanel ongoing={ongoing} onPlay={onPlay} />
-        <LeaderboardPanel />
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         <Block icon={Globe} title={title.worldTitle}>
           {title.world.map((line) => (
             <p key={line}>
@@ -146,9 +164,10 @@ export default function TitleScreen({ onPlay }: TitleScreenProps) {
       </div>
 
       <Block icon={Trophy} title={title.endingsTitle}>
-        <ul className="flex flex-col gap-2">
+        {/* Téléphone : un filet entre les fins, dont l'accroche passe à la ligne ; grand écran : une fin par ligne */}
+        <ul className="flex flex-col divide-y divide-line sm:gap-2 sm:divide-y-0">
           {ENDINGS.map((id) => (
-            <li key={id} className="flex flex-wrap items-center gap-2">
+            <li key={id} className="flex flex-wrap items-center gap-2 py-2 first:pt-0 last:pb-0 sm:py-0">
               <Chip tone={(reached[id] ?? 0) > 0 ? 'success' : 'muted'} icon={(reached[id] ?? 0) > 0 ? Trophy : Lock}>
                 {t.end.endings[id].title}
               </Chip>

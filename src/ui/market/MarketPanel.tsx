@@ -109,7 +109,16 @@ export default function MarketPanel() {
         </div>
       )}
       <FilterBar tiers={tiers} tags={tags} current={filter} onPick={setPicked} sort={sort} onSort={setSort} />
-      {shown.length === 0 && <Hint className="px-3 pt-2">{t.market.noMatch}</Hint>}
+      {/* Rien ne correspond : la remise à zéro des filtres, à l'endroit où le joueur la cherche */}
+      {shown.length === 0 && (
+        <div className="flex flex-wrap items-center gap-2 px-3 pt-2">
+          <Hint>{t.market.noMatch}</Hint>
+          <Button size="sm" onClick={() => setPicked(NO_FILTER)}>
+            <RotateCcw size={12} aria-hidden="true" />
+            {t.market.resetFilters}
+          </Button>
+        </div>
+      )}
       <ul className="space-y-2 p-2">
         {shown.map((id) => (
           <MarketRow key={id} productId={id} />
@@ -119,13 +128,13 @@ export default function MarketPanel() {
   )
 }
 
-/** Filtres par tier et par tag, cumulables, avec leur remise à zéro (chap. 7) */
+/** Filtres par tier et par tag, cumulables ; chaque liste revient à « tous » par sa première option (chap. 7) */
 function FilterBar({ tiers, tags, current, onPick, sort, onSort }: FilterBarProps) {
   const { t } = useI18n()
-  const active = current.tier !== null || current.tag !== null
   return (
     <div role="group" aria-label={t.market.filters} className="flex flex-wrap items-center gap-2 px-3 pt-3">
-      <Filter size={14} aria-hidden="true" className="text-ink-muted" />
+      {/* Icônes sur grand écran seulement : sur téléphone, les deux filtres et le tri tiennent sur une ligne */}
+      <Filter size={14} aria-hidden="true" className="hidden text-ink-muted sm:block" />
       <select
         aria-label={t.market.filterTierLabel}
         value={current.tier ?? ''}
@@ -152,14 +161,8 @@ function FilterBar({ tiers, tags, current, onPick, sort, onSort }: FilterBarProp
           </option>
         ))}
       </select>
-      {active && (
-        <Button size="sm" onClick={() => onPick(NO_FILTER)}>
-          <RotateCcw size={12} aria-hidden="true" />
-          {t.market.resetFilters}
-        </Button>
-      )}
       <span className="ml-auto flex items-center gap-1.5">
-        <ArrowUpDown size={14} aria-hidden="true" className="text-ink-muted" />
+        <ArrowUpDown size={14} aria-hidden="true" className="hidden text-ink-muted sm:block" />
         <select
           aria-label={t.market.sortLabel}
           value={sort}
@@ -335,7 +338,8 @@ function TradeControl({ productId, kind, max, fullRate }: TradeControlProps) {
 
   return (
     <div className="flex flex-wrap items-center gap-1">
-      <span className="text-xs font-bold text-ink uppercase">{kind === 'buy' ? t.market.buy : t.market.sell}</span>
+      {/* Libellés de même largeur : les boutons d'achat et de vente s'alignent, à bonne distance du mot */}
+      <span className="w-20 shrink-0 text-xs font-bold text-ink uppercase">{kind === 'buy' ? t.market.buy : t.market.sell}</span>
       {choices.map(({ label, qty }) => (
         <Button
           key={label}

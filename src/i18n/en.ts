@@ -1,0 +1,1817 @@
+import type { ActionError } from '../engine/actions.ts'
+import type { RuleSource } from '../engine/breakdown.ts'
+import type {
+  CrewId,
+  DifficultyId,
+  DistrictId,
+  EndingId,
+  EventId,
+  GlobalEventId,
+  LocationId,
+  ModuleId,
+  ProductId,
+  RoadEventId,
+  TagId,
+  Tier,
+  VehicleId,
+} from '../engine/types.ts'
+import type { Messages } from './index.ts'
+
+/*
+ * Catalogue anglais : la traduction de fr.ts, de même forme (`satisfies Messages`, toute clé manquante casse la
+ * compilation). Noms propres (chap. 9, « Traductions ») : les districts, les personnages, les marques et les sigles
+ * (ICC, DSC, BRC) restent tels quels ; la partie descriptive d'un lieu ou d'un produit se traduit.
+ */
+
+// Construite par code : un caractère insécable littéral serait invisible dans le source
+const NBSP = String.fromCharCode(0xa0)
+
+/** Énumération : « a », « a and b », « a, b, and c » */
+const listOf = (items: readonly string[]) => new Intl.ListFormat('en', { type: 'conjunction' }).format(items)
+
+/** Énumération d'alternatives : « a or b », « a, b, or c » */
+const oneOf = (items: readonly string[]) => new Intl.ListFormat('en', { type: 'disjunction' }).format(items)
+
+/** Pluriel anglais régulier : `s(2)` → « s » */
+const s = (count: number) => (count === 1 ? '' : 's')
+
+/** Ordinal anglais : 1 → « 1st », 2 → « 2nd », 11 → « 11th », 23 → « 23rd » */
+const ordinal = (n: number) => {
+  const teen = n % 100 >= 11 && n % 100 <= 13
+  const suffix = teen ? 'th' : (({ 1: 'st', 2: 'nd', 3: 'rd' } as const satisfies Record<number, string>)[n % 10] ?? 'th')
+  return `${n}${suffix}`
+}
+
+type Named = { name: string }
+type NamedWithSubtitle = Named & { subtitle: string }
+type RoadTexts = { situation: string; a: string; b: string }
+/** Chapitre du manuel : paragraphes, puis la liste tirée des données (tags, lieux) */
+type ManualChapter = { title: string; paragraphs: string[]; list?: 'tags' | 'places' }
+
+/** Paniques algorithmiques de Karma-Cham, par tag proposé */
+const KARMA_OPTIONS: Partial<Record<TagId, string>> = {
+  'TAG-CULTURE': '“Cultural Cancel Wave”',
+  'TAG-GOURMET': '“Food Shortage Rumor”',
+  'TAG-BIO': '“Bio-Sanitary Scandal”',
+}
+
+export const en = {
+  /** Balise de langue BCP 47 pour Intl (séparateurs, décimales, pourcentages) */
+  intlLocale: 'en-US',
+
+  app: {
+    title: 'Concordia',
+  },
+
+  /** Choix de la langue, sur l'accueil (chap. 7) : chaque langue garde son propre nom */
+  language: {
+    label: 'Language',
+  },
+
+  format: {
+    /** `amount` est déjà formaté selon la langue ; espace insécable avant le symbole */
+    credits: (amount: string) => `${amount}${NBSP}₡`,
+    dayShort: (day: number, total: number) => `${day}/${total}`,
+    /** Intitulé suivi de deux-points, à l'anglaise : sans espace avant */
+    label: (text: string) => `${text}:`,
+  },
+
+  /** Moment de la journée (chap. 1) : Journée, 20h00, Nuit */
+  moment: {
+    short: { day: 'Daytime', curfew: '20:00', night: 'Night' },
+    tripLeft: 'Trip available',
+    tripDone: 'Trip done',
+  },
+
+  gauge: {
+    cash: 'Cash-Chip',
+    offshore: 'Offshore account',
+    debt: 'Debt',
+    icc: 'ICC',
+    health: 'Health',
+    chassis: 'Chassis',
+    fuel: 'Synthanol',
+  },
+
+  /** Paliers de crédit social (chap. 1) */
+  iccTier: {
+    gold: 'Gold Citizen',
+    ordinary: 'Ordinary Citizen',
+    probation: 'Citizen on Probation',
+    deviant: 'Notorious Deviant',
+  },
+
+  /** Libellés des lignes de Breakdown sans ID de donnée (`rule.*`) */
+  rule: {
+    'rule.clamp': 'Cap',
+    'rule.round': 'Rounding',
+    'rule.production': 'Local production',
+    'rule.strong-demand': 'Strong demand',
+    'rule.tier-bonus': 'Tier bonus',
+    'rule.noise': 'Market trend',
+    'rule.quote': "Today's price",
+    'rule.commission': 'Chip commission',
+    'rule.saturation': 'Saturated market',
+    'rule.know-how': 'Know-how',
+    'rule.after': 'Curfew after-party',
+    'rule.diminishing-returns': 'Diminishing returns',
+    'rule.anti-arbitrage': 'No trip, no bonus',
+    'rule.debt-balance': "Yesterday's balance",
+    'rule.debt-rate': "Today's interest",
+    'rule.debt-late-rate': 'Increased interest (late)',
+    'rule.cash': 'Cash-Chip',
+    'rule.cargo-value': 'Cargo (base price)',
+    'rule.protection': "Viktor's cut",
+    'rule.offshore-rate': 'Offshore rate',
+    'rule.venture-rate': 'Investment rate',
+    'rule.withdrawal': 'Withdrawal',
+    'rule.laundry-fee': 'Laundromat commission',
+    'rule.suspicion': 'Suspicion (ICC)',
+    'rule.suspicious-peak': "Yesterday's suspicious spike",
+    'rule.night-trip': 'Night trip',
+    'rule.crossed-districts': 'Districts crossed',
+    'rule.exit-gate': 'Airlock gate',
+    'rule.ambush': 'Debt ambushes',
+    'rule.patrol': 'Reinforced patrol',
+    'rule.wanted': 'Watchlist',
+    'rule.route-watch': 'Route flagged',
+    'rule.notoriety': 'Notoriety',
+    'rule.gold-fast-lane': 'Gold Citizen fast lane',
+    'rule.icc-scanners': 'Biometric scanners (Notorious Deviant)',
+    'rule.bluff-base': 'Bluff: base chance',
+    'rule.tier0-share': 'Tier 0 share',
+    'rule.masked-crates': 'Masked crates',
+    'rule.security-stars': 'Security stars',
+    'rule.bribe-rate': 'Standard rate (stars)',
+    'rule.bribe-cargo-share': 'Standard rate (illegal crates)',
+    'rule.bribe-base': 'Bribery: base chance',
+    'rule.offer': 'Value of the offer',
+    'rule.connivance': 'Connivance',
+    'rule.freshness-extra': 'Extra-fresh',
+    'rule.freshness-standard': 'Standard freshness',
+    'rule.freshness-gamey': 'Stale',
+    'rule.freshness-spoiled': 'Degraded',
+    'rule.damaged': 'Damaged crate',
+    'rule.bluff-failed': 'Failed bluff',
+    'rule.drone-judges': 'Drone-Judges (incorruptible)',
+    'rule.flee-base': 'Escape: base chance',
+    'rule.flee-cap': 'Escape cap',
+    'rule.eject-manual': 'Manual ejection',
+    'rule.aftershock': 'Aftershock',
+    'rule.event-cap': 'Event cap',
+    'rule.repair': 'Repair (per HP)',
+    'rule.refining': "Mama Rosa's refining (fresh sold as extra-fresh)",
+    'rule.worn': 'Driver worn out',
+    'rule.cantine': 'Union rate',
+  } satisfies Record<RuleSource, string>,
+
+  // ─── Interface ───
+
+  /** Contrats de la pègre, chez Viktor (chap. 3) */
+  contract: {
+    offerTitle: 'Underworld contract offered',
+    activeTitle: 'Underworld contract in progress',
+    terms: (qty: number, product: string, district: string, deadline: number, reward: string) =>
+      `${qty} ${product} to deliver to ${district} by the end of D${deadline}, bonus ${reward}.`,
+    owned: (owned: number, needed: number) => `In the hold: ${owned}/${needed}`,
+    rule: (penalty: string) => `One contract at a time. Missed deadline: Viktor adds ${penalty} of the bonus to your debt.`,
+    accept: 'Accept the contract',
+    deliver: (reward: string) => `Deliver (${reward})`,
+    fil: (qty: number, product: string, district: string, deadline: number) =>
+      `Underworld contract: ${qty} ${product} to deliver to ${district} by the end of D${deadline}`,
+    offerFil: (product: string, reward: string) =>
+      `Viktor offers a contract today (${product}, bonus ${reward}): accept it at his counter, day or night`,
+  },
+
+  /** Pompe à Synthanol du district (chap. 3) */
+  pump: {
+    name: { official: 'Official Aeterna pump', fixed: 'Pirate pump' },
+    rule: {
+      official: 'Connected to Aeterna: closed at night below a certain ICC level.',
+      fixed: 'Off the grid: always open.',
+    },
+    reserve: (fuel: number, tank: number) => `${fuel}/${tank}`,
+  },
+
+  modal: {
+    close: 'Close',
+    cancel: 'Cancel',
+  },
+
+  /** Onglets en bas d'écran du téléphone (chap. 7) */
+  tabs: {
+    label: 'Screens',
+    market: 'Market',
+    places: 'Places',
+    fil: 'Briefing',
+    vehicle: 'Vehicle',
+    map: 'Map',
+    groups: { brief: 'Briefing', trade: 'Market & vehicle', road: 'Map & places' },
+  },
+
+  /** Onglet En bref : tout ce qui compte aujourd'hui, avant d'aller au marché puis sur la carte (chap. 7) */
+  fil: {
+    news: 'News',
+    newsGlobal: 'Citywide',
+    lastsUntil: (day: number) => `until D${day}`,
+    newsLocal: 'Local events',
+    newsAftershock: "Aftershocks of yesterday's events",
+    newsAftershockInfo:
+      'The day after an event that moved prices, the market corrects itself for one day: what soared falls back, what was dumped climbs again.',
+    newsInfo:
+      "Aeterna's Feed broadcasts every district's events to the whole city: you know what happens elsewhere without going there. Each event opens to show its effects.",
+    newsLottery: 'Lottery',
+    newsInfluence: 'Karma-Cham',
+    newsTomorrow: 'Tomorrow',
+    noNews: 'Nothing to report today.',
+    today: 'Today',
+    forYou: 'For you',
+    deliveryOffer: (district: string, crates: number, fee: string) =>
+      `Official delivery: ${crates} sealed crates for ${district}, fee ${fee} (accept it on the map)`,
+    deliveryActive: (district: string) => `Official delivery in progress to ${district}`,
+    missionTonight: (district: string, crates: number, fee: string) => `Night mission tonight: ${crates} sealed crates for ${district}, fee ${fee}`,
+    patrol: (district: string) => `Reinforced patrol today: ${district}`,
+    peaks: (districts: string) => `Suspicious spike (higher risk): ${districts}`,
+    nothingToday: 'No order or particular alert today.',
+    agenda: 'Agenda',
+    agendaEmpty: 'No upcoming deadline.',
+    /** `ahead` : jours d'ici l'échéance */
+    dayLabel: (day: number, ahead: number) => (ahead <= 0 ? 'Today' : ahead < 2 ? 'Tomorrow' : `D${day}`),
+    debt: (amount: string) => `Debt payment due (${amount})`,
+    debtLate: 'Debt overdue: the next deadline is an audit',
+    protection: (amount: string) => `Viktor's collection (≈ ${amount})`,
+    audit: (day: number) => `Audit on day ${day}, at midnight`,
+    lottery: 'Lottery draw',
+    viceEnd: (product: string, district: string) => `End of the vice: ${product} in strong demand in ${district}`,
+    serviceReady: (service: string) => `${service}: available again`,
+    prophecy: (event: string) => `Cassandre-88's prophecy: ${event}, guaranteed`,
+    calendarDay: (day: number) => `Day ${day}`,
+    calendarEmpty: 'Nothing known for that day.',
+    calendarCount: (count: number) => `${count} item${s(count)}`,
+    agendaContract: (district: string) => `Last day of the underworld contract (delivery to ${district})`,
+    service: {
+      meal: "Trucker's meal",
+      influence: 'Karma-Cham',
+      pass: 'Pass',
+      surgery: 'Surgery',
+      certificate: 'Certificate',
+      prophecy: 'Cassandre-88',
+      forgery: 'Forged file',
+      auction: 'Velvet-Silo auction',
+      vip: 'VIP order',
+    },
+    deals: 'Known good deals',
+    dealsEmpty: 'No prices seen elsewhere: you discover other districts’ markets by passing through them.',
+    dealsOwned: 'Where to sell the hold',
+    dealsShop: 'To buy here',
+    canBuy: (qty: number) => `up to ${qty} crate${s(qty)} you can buy`,
+    held: (qty: number) => `${qty} in the hold`,
+    dealsSeen:
+      'Prices noted on your last visit to each district: they may have moved since. You discover other districts’ markets by passing through them.',
+    bestQuote: (quote: string, age: number) => `${quote} (${age === 0 ? 'seen today' : `seen ${age} day${s(age)} ago`})`,
+    neverSeen: 'never seen elsewhere',
+    strongAt: (districts: string) => `Strong demand: ${districts}`,
+    alerts: 'Alerts',
+    worn: (below: number, penalty: string) =>
+      `Driver worn out (under ${below} HP): bluff and escape at −${penalty}. The truck stop and the Morgue heal you.`,
+    rotsTomorrow: (qty: number, product: string) => `${qty} × ${product} lost tomorrow morning`,
+    damaged: (qty: number, product: string) => `${qty} ${product} damaged`,
+    fuelLow: (fuel: number, longest: number) => `Synthanol low: ${fuel} ration${s(fuel)}, the longest trip from here costs ${longest}`,
+    fuelOut: (fuel: number, shortest: number) => `Synthanol: ${fuel} ration${s(fuel)}, not enough to leave the district (${shortest} at least)`,
+    beacon: (product: string, risk: string) => `${product} on board: its beacon adds ${risk} inspection risk everywhere`,
+    beaconJammed: (product: string) => `${product} on board: its beacon is jammed by your crewmate`,
+    wanted: (level: number, max: number, risk: string, flee: string, days: number) =>
+      `Watchlist ${level}/${max}: Aeterna is looking for you. Inspection risk +${risk} everywhere, escape −${flee}. One level clears after ${days} days without an offense.`,
+    protectionTomorrow: (amount: string) =>
+      `Viktor's collection tomorrow morning: ≈ ${amount} (a share of the Cash-Chip and the hold; the offshore account escapes him).`,
+    crewUnpaid: (name: string) => `${name} wasn't paid this morning: no work today.`,
+    compartmentRoom: (room: number) => `${room} free slot${s(room)} in the false bottom`,
+    journal: 'Results & logbook',
+    yesterday: (day: number) => `Results of D${day}`,
+    noYesterday: 'First day: no results yet.',
+    flows: (bought: string, sold: string) => `Bought ${bought} · sold ${sold}`,
+    wealth: 'Net worth (cash + offshore − debt)',
+    wealthLabel: 'Net worth (cash + offshore − debt) each morning, then now',
+    wealthReadout: (when: string, amount: string) => `Net worth, ${when}: ${amount}`,
+    morningOf: (day: number) => `D${day} at 06:00`,
+    now: 'now',
+    showAll: 'Full logbook',
+    hideAll: 'Hide the logbook',
+  },
+
+  /** Carrière, d'une partie à l'autre (chap. 7) */
+  records: {
+    title: 'Career',
+    none: 'No finished game yet: endings reached and feats will be recorded here.',
+    endings: 'Endings reached',
+    feats: 'Feats',
+    featsThisGame: 'Feats this game',
+    feat: {
+      escapes: { name: 'Pedal to the metal', how: (count: number) => `${count} successful escapes from the BRC in a single game.` },
+      summitBluff: {
+        name: 'Silver tongue',
+        how: (stars: number) => `A successful bluff against the BRC in a district of ${stars} stars or more.`,
+      },
+      clean: { name: 'Clean record', how: () => 'A game won without a single day in custody.' },
+      wantedMax: { name: 'Public enemy', how: (level: number) => `Watchlist at level ${level}, and the game won anyway.` },
+      contracts: { name: "Viktor's loyal hand", how: (count: number) => `${count} underworld contracts delivered in a single game.` },
+      nightOwl: { name: 'Night owl', how: (count: number) => `${count} night trips in a single game.` },
+      earlyDebt: { name: 'Slate wiped clean', how: (day: number) => `The initial debt paid off by D${day} at the latest.` },
+      gold: { name: 'Gold-plated', how: () => 'Reach the Gold Citizen tier.' },
+    },
+    summary: (games: number, defeats: number) => `${games} game${s(games)} finished, including ${defeats} defeat${s(defeats)}.`,
+    best: (score: string, mode: string) => `Best score (${mode}): ${score}`,
+    reached: (title: string, count: number) => `${title} ×${count}`,
+  },
+
+  /** Carnet de route : faits marquants d'une journée (chap. 7) */
+  journal: {
+    trip: (from: string, to: string, night: boolean) => `${night ? 'Night' : 'Trip'}: ${from} → ${to}`,
+    control: (move: string, outcome: string) => `Inspection: ${move}${outcome ? ` — ${outcome}` : ''}`,
+    lostCrates: (qty: number) => `${qty} crate${s(qty)} lost`,
+    custody: (days: number) => `custody ${days} day${s(days)}`,
+    road: (event: string, outcome: string) => `Hazard: ${event}${outcome ? ` — ${outcome}` : ''}`,
+    delivered: (fee: string) => `Order delivered (fee ${fee})`,
+    deviated: 'Night deviation recorded',
+    injection: (total: number, needed: number) => `Server injection (${total}/${needed})`,
+    vehicle: (name: string) => `New chassis: ${name}`,
+    module: (name: string) => `Module bought: ${name}`,
+    crew: (name: string) => `Recruit: ${name}`,
+    debtPaid: 'Initial debt paid off',
+    wanted: (level: number) => `Watchlist: level ${level}`,
+    iccTier: (tier: string) => `New status: ${tier}`,
+    ending: (title: string, score: string) => `Ending: ${title} (${score})`,
+    raid: (loss: string) => `Raid on the Cartel investment: −${loss}`,
+    contractDone: (reward: string) => `Underworld contract delivered (bonus ${reward})`,
+    contractFailed: (penalty: string) => `Underworld contract missed: +${penalty} of debt`,
+    highlights: 'Highlights',
+    noHighlight: 'No highlight.',
+  },
+
+  /** Vue véhicule, soute et équipage (chap. 7) */
+  hold: {
+    vehicleTitle: 'Vehicle & crew',
+    modules: (mounted: number, slots: number) => `Modules ${mounted}/${slots}`,
+    noModule: 'No module fitted: they are fitted at the garage.',
+    noCrew: 'No crewmate: they are recruited at Quai 9.',
+    garageAt: (district: string) =>
+      `Mécano-Mitch's “Faraday” garage in ${district}, by day: modules, chassis and repairs are done there, in this tab.`,
+    title: (used: number, capacity: number) => `Hold ${used}/${capacity}`,
+    empty: 'Empty hold.',
+    cargoSlots: (used: number, capacity: number) => `Hold ${used}/${capacity}`,
+    compartment: (used: number, capacity: number) => `False bottom ${used}/${capacity}`,
+    compartmentRule:
+      'Incoming illegal crates go there on their own, taking the place of the cheapest ones. Click a hidden crate to take it out; “Hide” fills the free slots. The false bottom is part of the hold: when there is nothing to hide, its slots take visible crates.',
+    hidden: (qty: number) => `${qty} in the false bottom`,
+    beacon: 'Beacon',
+    hide: 'Hide in the false bottom',
+    hiddenSlot: (product: string) => `${product}, hidden in the false bottom: click to take it out (one crate)`,
+    notice: (product: string, crates: string) => `False bottom: ${product} takes the place of ${crates}.`,
+    profile: 'Cargo profile',
+    profileRule: 'These shares drive the inspection risk; a crate masked by a tier 0 counts less.',
+    masked: (qty: number) => `${qty} masked`,
+  },
+
+  hud: {
+    day: 'Day',
+    dayInfo: (auditDay: number) =>
+      `Each day: one daytime trip, then the curfew at 20:00: sleep, or a second trip by night. Audit on day ${auditDay} at midnight.`,
+    /** Libellé court du Cash-Puce dans la rangée de tête du bandeau */
+    cash: 'Cash',
+    daysLeft: (days: number) => (days <= 0 ? 'today' : `in ${days} d`),
+    debtInfo: (lateDay: number, auditDay: number) =>
+      `Viktor's debt, with interest every morning. If the initial debt isn't paid off before the morning of D${lateDay}, it goes overdue for the rest of the game: higher rate and ambushes (higher inspection risk everywhere). At the audit of D${auditDay} at midnight, the balance must be zero. Repay at the Back Room, day and night.`,
+    cashToday: (delta: string) => `${delta} today`,
+    dayMode: (mode: string) => `${mode} mode`,
+    notoriety: (risk: string) => `Notoriety: inspection risk ${risk}`,
+    notorietyNext: (wealth: string) => `Next notoriety tier at ${wealth} of net worth`,
+    cashInfo:
+      "Cash-Chip in your pocket: purchases, Synthanol, services, bribes, Viktor's collection. It doesn't count toward the score: only what sleeps offshore and in the Cartel investment counts.",
+    withVenture: (amount: string) => `Cartel investment: ${amount}`,
+    offshoreInfo: (rate: string) =>
+      `Offshore account: safe from Viktor's collection and the audit, ${rate} simple interest per day. With the Cartel investment, it is the end-of-game score. Counter at the laundromat, by day. Nothing is seized there, but a big fortune gets people talking: notoriety adds inspection risk by tier (Cash-Chip, offshore and investment), half as much at the Gold Citizen tier.`,
+    iccInfo: (left: number, cap: number) =>
+      `“Road” ICC gains (truck stop, inspection with a legal hold, successful bluff, some hazards): ${left} of ${cap} still possible today; beyond that, they are lost until 06:00 tomorrow. Paid services have no cap.`,
+    healthValue: (health: string) => `${health} HP`,
+    exhausted: 'Exhausted',
+    exhaustedInfo:
+      'Night run yesterday: no new night on the road tonight, except with a drink for a sleepless night. A night at the truck stop or a bivouac clears the exhaustion.',
+    healthInfo: (below: number, penalty: string) =>
+      `Driver's health: at zero, the game is lost. Under ${below} HP, driver worn out: bluff and escape at −${penalty}. Failed escapes, rackets, hazards, heatwaves and cells cost some; the truck stop and the Morgue give some back.`,
+    worn: 'Worn out: bluff and escape reduced',
+    newGame: 'New game',
+    newGameConfirm: (mode: string) => `Abandon the current game and start over on day 1, in ${mode} mode? It won't count toward your career.`,
+    newGameAction: 'Abandon and restart',
+    home: 'Home',
+    homeHint: 'The difficulty mode and the daily ranked game are chosen on the home screen.',
+    offshoreRate: (rate: string) => `Interest: ${rate} per day`,
+    wanted: (level: number, max: number) => `Watchlist ${level}/${max}`,
+    wantedLabel: 'Watchlist',
+    wantedValue: (level: number, max: number) => `${level}/${max}`,
+    wantedNow: (risk: string, flee: string) => `Wanted: inspection risk +${risk} everywhere, escape −${flee}`,
+    wantedInfo: (risk: string, flee: string, days: number) =>
+      `Watchlist: your search level in Aeterna's files. It rises one level with each successful escape from the BRC and each off-mission night run that goes uninspected (the deviation is filmed, except under the rotating plate). Per level: inspection risk +${risk} everywhere, escape −${flee}. One level clears after ${days} days in a row without a new offense.`,
+    wantedGain: (levels: number) => `+${levels} watchlist level${s(levels)}`,
+    debtLate: 'Initial debt overdue',
+    debtDue: (when: string) => `Initial debt to pay off ${when}`,
+    place: 'Place',
+    placeInfo: 'District where the truck is. Each district has its own economy: its prices only apply there.',
+    offshore: 'Offshore',
+    patrol: (district: string) => `Reinforced patrol: ${district}`,
+    countdown: (day: number) =>
+      `Audit on day ${day} at midnight: last possible offshore deposit on D${day} before 20:00; Viktor collects until midnight.`,
+  },
+
+  ticker: {
+    label: 'Aeterna message',
+    messages: [
+      // ─── Hygiène mentale, sédation & IA Aeterna ───
+      'A smiling citizen-courier is a productive citizen-courier.',
+      'Any undeclared emotion is subject to contribution.',
+      'The sanitary curfew protects those who sleep. Close your eyes: Aeterna is watching.',
+      'Aeterna never punishes you: she optimizes your civic potential.',
+      'Sarcasm is a micro-aggression against collective harmony. Choose kindness.',
+      'You seem tense, citizen. Did you take your Smile+ pill this morning?',
+      'Free will is the leading cause of avoidable anxiety.',
+      'A detected negative thought is a thought already forgiven by sensory custody.',
+      'Doubt is a bug. Our servers think for you, 99.98% error-free.',
+      'Boredom does not exist on the Pink Feed. Scroll, smile, repeat.',
+      'Your dreams last night were found compliant. No action required on your part.',
+      'Aeterna never lies: she rewrites the truth before it can hurt you.',
+      'Happiness is mandatory, but it remains free. Enjoy it while the Directorate allows.',
+      'Thinking for yourself tires your neurons. Let them rest on our servers.',
+      "A calm citizen is a citizen who hasn't read the news yet. Stay calm.",
+      "Your neighbors' silence is proof of their serenity. Or of their next report.",
+      'Tap water now contains a civic soothing agent. Truckers’ water stays lucid: envy them without hatred.',
+      'Unauthorized tears are recycled into cooling water. Cry usefully.',
+      "Aeterna has calculated tomorrow's mood. It will be excellent. Do not upset it.",
+
+      // ─── Camisole Métabolique & terrorisme gastronomique ───
+      'Aeterna reminds you that sobriety is the most beautiful of freedoms.',
+      'Cholesterol is a plot against the Republic. Demand the Nutri-Standard label.',
+      'A bio-brick a day keeps the heart attack away for good. Soy-cricket flavor, guaranteed surprise-free.',
+      'DSC alert: salted butter kills more surely than a bullet. Report any suspicious smell.',
+      '“Pax-Aeterna” demineralized water: 0% electrolytes, 100% civic serenity.',
+      'Taste nostalgia is a psychiatric disorder, treated at Panacea.',
+      'Chewing your insect ration slowly increases satiety by 14%. Make an effort.',
+      'Caffeine distorts your judgment; State herbal tea sets it straight.',
+      'Real sugar rots your teeth and your civic compliance index. Prefer the sweetness of obedience.',
+      'Aged cheese is a biological weapon. Any wheel detected will be confiscated and tasted by a licensed expert.',
+      'A smell of frying in your neighborhood? Do not panic, alert the Purity Committee.',
+      'Taste is a bourgeois illusion. Texture, a mere suggestion.',
+      'Pre-war spices stirred passions. Passions stirred wars. Eat bland.',
+      'Dark chocolate is classified as an agitating substance. White chocolate, a simple error of taste.',
+      'Your cricket ration has been enriched with gratitude. Chew thankfully.',
+      'A dinner with friends without prior declaration is a clandestine banquet. Remember the form.',
+      'DSC canteens serve a single menu: the one that suits you, according to Aeterna.',
+      'Salivating in front of a shop window is a symptom. Consult your civic health terminal.',
+
+      // ─── Délation, surveillance & Loterie ───
+      'The Purity Committee thanks the citizens who report deviant citizens.',
+      'You love your neighbor? Help them improve by reporting their misconduct.',
+      'Walls have no ears, but your terminal has a high-fidelity microphone.',
+      'Privacy is a selfish privilege. Transparency is the virtue of the just.',
+      "Congratulations to this week's civic elevator winners! Their replacements start at 06:00.",
+      'Gold Citizen status is the best social deodorant.',
+      'Parents: the Aeterna Youth recruit from age 6. A child vigilante makes a peaceful home.',
+      'If you have nothing to hide, why do you lock your van doors?',
+      'BRC drone-judges have no prejudice, no fatigue, no pity. Respect the delivery lanes.',
+      'One report a day, and your ICC will thank you.',
+      'The BRC only searches the guilty. If it searches you, ask yourself why.',
+      'The service network cameras never sleep. That is why they love you.',
+      'Your van strayed from its usual route? Aeterna is wondering too.',
+      'The civic elevator Lottery rewards the deserving. The others deserve something too, something else.',
+      'Honorary citizens do not pay for water. They pay by example.',
+      'A flagged citizen is a known citizen. Being known is already being loved.',
+      'Rumors are viruses. Any verified rumor becomes information, and all information belongs to the DSC.',
+      'Informing is not betrayal: it is society’s after-sales service.',
+
+      // ─── Éco-panique, infrastructure & Délestage Thermique ───
+      'Your water consumption has been found exemplary. Almost.',
+      'The heatwave is an opinion. The algorithm is a fact.',
+      'Water cuts in Hives cool the servers that compute your happiness. Please sweat usefully.',
+      'It is 42 °C in the dormitories, but always 21 °C in Aeterna’s heart.',
+      'Holding your breath 10 seconds per minute cuts your carbon footprint by 8%. Try it now.',
+      'Hot air vented by the heat exchangers is free heating, delivered early for this winter.',
+      'Every drop of Synthanol saved is a victory against collapse.',
+      'The synthetic lawn of Pastel-Heights never turns yellow, just like our faith in the Directorate.',
+      'Service tunnels are reserved for authorized vehicles. Others are filmed there with great attention.',
+      'The sun is overbilled this summer. Stay in the shade of the servers.',
+      'An elevator breakdown in Hives frees energy to light up The Glass Spire. Climb the stairs with pride.',
+      'Recycling your old memories fuels collective heating. Forget generously.',
+      'The pigeons of Rust Valley are not drones. Do not talk to them anyway.',
+      "Tonight's thermal load-shedding is a celebration: switch everything off and celebrate the regulatory darkness.",
+      'Every stopped van reduces smog. Every moving van reduces debt. Choose debt.',
+      'The purple fumes of the Docks are perfectly harmless, according to the fumes themselves.',
+      'Pirate Synthanol destroys engines and souls. Official Synthanol only destroys your budget.',
+
+      // ─── Monde extérieur, économie & contrebande ───
+      'Prices are rising for your safety. Thank you for your understanding.',
+      "Outside-world weather: acid rain, cannibalism and chaos. Aren't you comfortable behind the wall?",
+      'Pre-war music causes heart arrhythmias and seditious thoughts.',
+      "Any object not connected to Aeterna's cloud is considered hazardous waste.",
+      'Rumors of beef banquets in Olympus-Green are collective hallucinations.',
+      'The monthly audit is always approaching: a wallet reset to zero is a purified soul.',
+      'Your heart rate at the last gate has been archived. Safe travels, citizen-courier.',
+      'Debt is an affectionate bond between you and your creditor. Nurture it.',
+      'Offshore does not exist. Neither will those who put their money there, soon.',
+      'A free market is a market that freely obeys the prices set by Aeterna.',
+      "Smuggling seriously harms the trade balance and smugglers' kneecaps.",
+      'The wall protects Concordia from the outside. The outside never asked to come in. Suspicious.',
+      'Barter is forbidden. Payment in kind too. Payment, period, is strongly encouraged.',
+      'Cartels are an urban myth kept alive by citizens with overstuffed wallets.',
+      'Buying low and selling high is speculation. Buying high and selling low is civic duty.',
+      'Rust Valley trawlers carry only fish. The fish carry whatever they want.',
+      'Viktor Varga does not exist. His interest rates do.',
+      'An empty wallet is a transparent wallet. The DSC thanks you for your transparency.',
+    ],
+  },
+
+  chart: {
+    dayTick: (day: number) => `D${day}`,
+  },
+
+  briefing: {
+    wantedCleared: (level: number, max: number, days: number) => `Watchlist down one level, after ${days} days without an offense: ${level}/${max}.`,
+    wanted: (level: number, max: number, risk: string, flee: string) =>
+      `Watchlist rose yesterday (escape or filmed night deviation): ${level}/${max}. Inspection risk +${risk} everywhere, escape −${flee}; a few days without an offense clear one level.`,
+    title: (day: number) => `06:00 briefing — Day ${day}`,
+    ventureRaid: (loss: string) => `BRC raid on a Cartel network: the investment loses ${loss}.`,
+    ventureInterest: 'Investment interest',
+    contractFailed: (penalty: string) => `Underworld contract missed: Viktor adds ${penalty} to the debt.`,
+    nightRelay: (district: string) => `Waking up in ${district}, after a night at the truck stop.`,
+    nightBivouac: (district: string) => `Waking up in ${district}, after a night in a bivouac.`,
+    nightCell: (district: string) => `Waking up in ${district}, just out of the cell.`,
+    places: (names: string) => `Open here by day: ${names}.`,
+    noPlace: 'No special place here: market and road only.',
+    dismiss: 'Got it',
+    sleep: (icc: string, health: number) => `Night at the truck stop: ICC ${icc}, health +${health}`,
+    custody: (health: number) => `A night in a white box, anthems at 90 decibels: −${health} HP.`,
+    rotten: (crates: number) => `${crates} crate${s(crates)} lost (too degraded), destroyed at 06:00.`,
+    heat: (products: readonly string[], melted: number, aged: number, rotten: number) =>
+      `Heatwave: ${melted} crate${s(melted)} melted in the hold (${listOf(products)}), ${aged} chilled crate${s(aged)} aged, ${rotten} lost and destroyed.`,
+    salary: (name: string, amount: string) => `${name}'s salary: ${amount}.`,
+    salaryInKind: (name: string, amount: string, product: string) => `${name}'s salary: ${amount} and 1 × ${product}.`,
+    salaryCell: (name: string) => `${name} stays at their post during your custody (no salary).`,
+    unpaid: (name: string) => `Not enough Cash-Chip: ${name} doesn't work today.`,
+    missionReclaimed: (crates: number) => `DSC order not delivered: the platform takes back ${crates} sealed crates and notes the delay (ICC down).`,
+    vipFailed: 'VIP order missed: ICC down, the Velvet-Silo closes its doors to you.',
+    informant: 'Forged file: the informant was “promoted.” Watchlist cleared, ICC up.',
+    crewLost: (name: string) => `Lottery: ${name} was “promoted.” You won't see them again; the next recruitment is free.`,
+    recovered: (back: number, lost: number) => `Drop hatch: the accomplices bring back ${back} crate${s(back)}, ${lost} lost.`,
+    lockedIn: (district: string) => `Complex locked down: you stay in the ${district} airlock, the day starts at 20:00.`,
+    debtInterest: 'Debt after interest',
+    debtLate: 'Initial debt never paid off: higher rate and ambushes until the end of the game.',
+    protection: 'Protection collection',
+    protectionToDebt: (amount: string) => `Not enough Cash-Chip: ${amount} added to the debt.`,
+    offshoreInterest: 'Offshore interest',
+  },
+
+  events: {
+    prophecy: (text: string) => `Cassandre-88's prediction for tomorrow: ${text} (certain)`,
+    influence: (tag: string, factor: string) => `Algorithmic panic: all ${tag} ${factor} today`,
+    rumor: (text: string, reliability: string) => `Rumor for tomorrow: ${text} (comes true ${reliability} of the time)`,
+    aftershock: (name: string, rush: string, sale: string) =>
+      `Aftershock of “${name}”: prices ${rush} on what soared yesterday, ${sale} on what was dumped`,
+    local: (district: string, name: string) => `${district}: ${name}`,
+    promoted: (name: string, district: string) =>
+      `🎉 Congratulations to ${name}, promoted to honorary citizen of ${district}! Preventive purge: reinforced inspections today.`,
+    demoted: (name: string, from: string, to: string) => `🌱 ${name}, formerly of ${from}, enthusiastically joins ${to}.`,
+    vice: (product: string, district: string, until: number) =>
+      `Their taste for “${product}” follows them there: Strong demand in ${district} until D${until}.`,
+    /** Citoyens tirés à la Loterie (promu, déclassé) : des inconnus, sans lien avec les personnages du jeu */
+    names: [
+      'Mrs R. Delcourt',
+      'Mr K. Okafor',
+      'Mrs L. Ferreira',
+      'Mr T. Nguyen',
+      'Mrs S. Haddad',
+      'Mr J. Kowalski',
+      'Mrs A. Lindqvist',
+      'Mr D. Mbeki',
+      'Mrs E. Rossi',
+      'Mr P. Tanaka',
+    ],
+    effects: {
+      price: (products: string, factor: string, dayOnly: boolean) => `Prices ${factor}: ${products}${dayOnly ? ' (daytime only)' : ''}`,
+      appear: (products: string, factor: string) => `On exceptional sale, prices ${factor}: ${products}`,
+      appearSome: (min: number, max: number, products: string, factor: string) =>
+        `${min} to ${max} products on exceptional sale, prices ${factor} on all: ${products}`,
+      stockAll: (factor: string) => `Shop stocks ${factor}`,
+      stock: (products: string, factor: string) => `Stock ${factor}: ${products}`,
+      risk: (add: string) => `Inspection risk ${add}`,
+      finalRisk: (factor: string) => `Final inspection risk ${factor}`,
+      baseRisk: (value: string) => `Base risk raised to ${value}`,
+      tagOff: (tag: string) => `${tag} effects cancelled`,
+      tag: (tag: string, factor: string) => `${tag} effects ${factor}`,
+      halfDay: 'Entering the district, or being there at 06:00, costs half a day at the airlock',
+      repair: (factor: string) => `Garage repairs ${factor}`,
+      grounded: 'Drones grounded: no flying checks',
+      unfilmed: "Unfilmed tunnels: an off-mission night trip doesn't add to the watchlist",
+      heat: (products: readonly string[], days: number, chassis: number, health: number) =>
+        `At 06:00: ${listOf(products)} ${products.length > 1 ? 'melt' : 'melts'} in the hold, other chilled products age ${days} days. Daytime trips: chassis −${chassis} (unless cooled), health −${health}`,
+      tagged: (tag: string) => `all ${tag}`,
+      tiers: (tiers: string) => `all Tier ${tiers}`,
+      scope: (districts: string) => ` — ${districts}`,
+    },
+  },
+
+  rumor: {
+    'EVT-G01': 'the weather service announces a “historic” heat episode',
+    'EVT-G02': 'suspicious coughs are reported in the DSC queues',
+    'EVT-G03': 'cloud technicians came out of the data centers drenched in sweat',
+    'EVT-G04': 'a shocking documentary about methane is said to be in editing',
+    'EVT-G05': 'the transport unions are meeting behind closed doors',
+    'EVT-G06': "the elite's caterers are refusing any new order",
+    'EVT-G07': 'an Aeterna update is reportedly planned “in complete transparency”',
+  } satisfies Record<GlobalEventId, string>,
+
+  road: {
+    title: 'Road hazard',
+    payWith: 'Pay with',
+    cost: {
+      fuel: (rations: number) => `${rations} ration${s(rations)}`,
+      crates: (qty: number, product: string) => `${qty} × ${product}`,
+      cratesMissing: (qty: number, what: string) => `${qty} crate${s(qty)} ${what}`,
+      tier: (tiers: string) => `of Tier ${tiers}`,
+      freeSlot: 'one free slot in the hold',
+    },
+    outcome: {
+      cash: (amount: string) => `Cash-Chip ${amount}`,
+      icc: (points: string) => `ICC ${points}`,
+      health: (pv: string) => `Health ${pv}`,
+      chassis: (pv: string) => `Chassis ${pv}`,
+      fuel: (rations: string) => `Rations ${rations}`,
+      crate: (tier: number) => `A random Tier ${tier} crate`,
+      nothing: 'No effect',
+    },
+    gamble: (chance: string, win: string, lose: string) => `Gamble, ${chance} chance: ${win}; otherwise: ${lose}`,
+    won: 'gamble won',
+    lost: 'gamble lost',
+    fuelGain: 'Rations',
+    events: {
+      'EVT-R01': { situation: 'An Aeterna Youth schoolboy writes down your tire number.', a: 'Buy his silence', b: 'Ignore him' },
+      'EVT-R02': { situation: 'An unemployed man photographs your open hold to collect the bounty.', a: 'Buy his silence', b: 'Floor it' },
+      'EVT-R03': { situation: 'Three retirees from the “Clean Air” Committee block a crosswalk.', a: 'Listen to the sermon', b: 'Smoke them out' },
+      'EVT-R04': { situation: "A hitchhiker raises his thumb. His boots look like an informant's.", a: 'Refuse', b: 'Pick him up' },
+      'EVT-R05': { situation: 'The terminal demands you stare at the camera for 8 seconds, at 70 km/h.', a: 'Obey', b: 'Blow the fuse' },
+      'EVT-R06': { situation: 'Re-education voice quiz: recite the Zero-Carbon decree.', a: 'Pay for “civic training”', b: 'Stammer' },
+      'EVT-R07': { situation: 'Blood drive at the toll: 400 ml, “voluntary.”', a: 'Give', b: 'Pay the exemption' },
+      'EVT-R08': { situation: 'Forced engine limiter at 15 km/h across the whole sector.', a: 'Put up with it', b: 'Short-circuit it' },
+      'EVT-R09': { situation: 'A hypoglycemic citizen collapses in front of your bumper.', a: 'Go around via the sidewalk', b: 'Help him' },
+      'EVT-R10': { situation: 'A convoy of “Lottery winners” blocks the expressway.', a: 'Wait', b: 'Take the construction ramp' },
+      'EVT-R11': { situation: 'Aerial disinfection cloud: bleach and sedatives.', a: 'Hold your breath', b: 'Hose down the cab' },
+      'EVT-R12': { situation: 'A delivery drone crashed on the road, battery intact.', a: 'Report it (statement at the station)', b: 'Loot it' },
+      'EVT-R13': { situation: 'A broken-down DSC tanker, its rookie driver in tears.', a: 'Help', b: 'Drive on' },
+      'EVT-R14': { situation: 'Charity toll: “I love Aeterna” stickers.', a: 'Buy', b: 'Refuse' },
+      'EVT-R15': { situation: 'Another smuggler offers a swap in a blind spot.', a: 'Blind trade', b: 'Refuse' },
+    } satisfies Record<RoadEventId, RoadTexts>,
+  },
+
+  /** Conditions de progression (chap. 1, 3 et 4) : ce qui manque, et où en est le joueur */
+  requirement: {
+    debtPaid: 'Once the initial debt is paid off.',
+    deliveries: (done: number, needed: number) => `After ${needed} DSC orders delivered (${done}/${needed}).`,
+    wanted: "Watchlisted only: after a first watchlist entry (your name in Aeterna's files).",
+    iccTier: (tier: string, icc: string) => `ICC at the ${tier} tier or better (currently ${icc}).`,
+    wealth: (needed: string, current: string) => `Net worth of at least ${needed} (Cash-Chip and offshore: ${current}).`,
+    tagSales: (tag: string, done: number, needed: number) => `After ${needed} ${tag} crates sold (${done}/${needed}).`,
+    controls: (done: number, needed: number) => `After ${needed} BRC inspection${s(needed)} passed without custody (${done}/${needed}).`,
+    compartmentHeld: (done: number, needed: number) =>
+      `After ${needed > 1 ? `${needed} searches` : 'one search'} where the BRC didn't find your false bottom (${done}/${needed}): Mitch likes clients whose work holds up.`,
+  },
+
+  crewDesk: {
+    title: 'Crew',
+    rule: (fee: string) => `One crewmate at a time, salary paid in advance every morning. Next recruitment: ${fee} in fees, plus the day's salary.`,
+    active: (name: string) => `Crewmate: ${name}`,
+    working: 'paid, working today',
+    unpaid: 'unpaid, not working',
+    inKind: (amount: string, product: string) => `Pay ${amount} and a crate instead of the full salary (next: ${product})`,
+    noCrate: 'none in the hold',
+    dismiss: 'Dismiss',
+    hire: 'Recruit',
+    salary: (amount: string) => `${amount}/day`,
+    risk: (factor: string) => `inspection risk ${factor} everywhere`,
+    bribe: (bonus: string) => `bribery ${bonus}`,
+    patrol: 'reveals the reinforced patrol',
+    liveQuotes: 'real-time prices in every district',
+    masksBeacon: "jams the Aeterna server's tracking beacon (its risk penalty is cancelled)",
+    injection: (done: number, needed: number) =>
+      `with the Aeterna server in the hold, each clandestine run that arrives without custody injects a piece of your file (${done}/${needed}, “The Heir” ending)`,
+    offshore: (bonus: string) => `offshore yield ${bonus}`,
+    flee: (bonus: string) => `escape ${bonus}`,
+    forgery: (bonus: string) => `Lottery forgery ${bonus}`,
+    knowHow: (factor: string) => `gourmet products sold ${factor}`,
+    refining: 'refining: fresh gourmet sold at the extra-fresh price',
+    quota: (factor: string) => `gourmet product quotas ${factor}`,
+    inKindRule: (amount: string, tier: number) => `salary reduced to ${amount} in exchange for an addictive crate of Tier ${tier} or higher`,
+  },
+
+  desks: {
+    availableFrom: (day: number) => `Available again on D${day}.`,
+    karma: {
+      title: 'Algorithmic panic on demand',
+      rule: (factor: string, cooldown: number) =>
+        `Tomorrow only, every product with the chosen tag is worth ${factor} in every district (cap included). Cooldown ${cooldown} days, price rising with each order.`,
+      pick: 'Panic tag',
+      held: (qty: number) => (qty > 0 ? `${qty} in the hold` : 'nothing in the hold'),
+      order: (cost: string) => `Order the panic (${cost})`,
+      pending: (tag: string, day: number) => `Panic ordered: ${tag}, on D${day}.`,
+      options: KARMA_OPTIONS,
+    },
+    morgue: {
+      title: "Dr. K.'s services",
+      services: { pass: 'Sanitary pass', surgery: 'Emergency surgery', certificate: 'Decontamination certificate' },
+      passEffect: (days: number, district: string, tag: string, event: string) =>
+        `${days} days: ${district}'s bio-scanners blind to ${tag}, “${event}” has no effect in ${district}`,
+      surgeryEffect: (health: number, cap: number) => `Health +${health}, up to ${cap} HP`,
+      certificateEffect: (icc: number) => `ICC +${icc}%, beyond the cap`,
+      passValid: (day: number) => `Pass valid until D${day}.`,
+    },
+    cassandre: {
+      title: 'Prediction',
+      consult: 'Consult',
+      cost: (cost: string, product: string, ahead: number) => `${cost} and 1 × ${product}: the global event of D+${ahead}, guaranteed`,
+      foretold: (day: number, event: string) => `Predicted for D${day}: ${event}.`,
+    },
+    forgery: {
+      title: 'Forged Lottery file',
+      nextDraw: (day: number) => `Next draw: D${day}. The file is slipped in the day before.`,
+      noDraw: 'No more draws before the audit.',
+      rule: (cost: string, chance: string) => `${cost}, lost even on failure; ${chance} chance of getting through.`,
+      card: 'Card',
+      district: 'District',
+      vice: 'Vice carried along',
+      cards: {
+        captain: 'A BRC captain',
+        competitor: 'A rival smuggler',
+        informant: 'The informant tailing you',
+        cadre: 'An executive to denounce',
+      },
+      effects: {
+        captain: (days: number) => `Promoted: lower risk in this district for ${days} days, no purge.`,
+        competitor: (days: number) => `Promoted: higher demand quotas in this district for ${days} days, no purge.`,
+        informant: 'Promoted at random: watchlist cleared and ICC up at the draw, no purge.',
+        cadre: 'Demoted: you choose the vice they carry one floor down.',
+      },
+      submit: 'Slip in the file',
+      failure: (icc: number, wanted: string) => `Failure: ICC −${icc}% and ${wanted}.`,
+      accepted: 'File accepted: “Thank you for your contribution to social mobility.” Your crewmate is protected from the draw.',
+      rejected: (icc: number, wanted: string) => `File rejected: “too enthusiastic.” ICC −${icc}%, ${wanted}.`,
+    },
+    velvet: {
+      locked: (day: number) => `VIP order missed: the Velvet-Silo is closed to you until D${day}.`,
+      auctionTitle: 'Masked auction',
+      auctionRule: (tier: number, factor: string, cooldown: number) =>
+        `1 crate of Tier ${tier} or higher at the local price ${factor}, outside the quota. Cooldown ${cooldown} days.`,
+      nothingToAuction: (tier: number) => `No crate of Tier ${tier} or higher in the hold.`,
+      auction: (product: string) => `Sell 1 × ${product}`,
+      payCash: 'Pay in Cash-Chip',
+      payCrates: 'Pay in crates',
+      notEnoughCrates: 'not enough accepted crates in the hold',
+      vipTitle: 'Special VIP order',
+      vipRule: (crates: number, factor: string, icc: number, lock: number) =>
+        `${crates} crates of a random product, absent from the hold, to deliver before 20:00 the next day, at the local price ${factor}, outside the quota. Failure: ICC −${icc}% and Velvet-Silo closed for ${lock} days.`,
+      request: 'Ask for an order',
+      requestDetail: (tiers: string) => `Tier ${tiers} product`,
+      deliver: 'Deliver',
+      sponsor: (done: number, needed: number) =>
+        `Sponsorship: ${done}/${needed} orders delivered. An oligarch served often enough sponsors you for a seat (“The High Commissioner” ending); a missed order erases one.`,
+      contract: (crates: number, product: string, deadline: number, value: string) =>
+        `${crates} × ${product}, before D${deadline} at 20:00 (value: ${value})`,
+    },
+  },
+
+  garage: {
+    repairTitle: 'Chassis repair',
+    repairRule: (missing: number) => `${missing} HP to repair, price per HP:`,
+    repair: 'Repair (HP)',
+    modulesTitle: (mounted: number, slots: number) => `Modules (${mounted}/${slots} slots fitted)`,
+    vehiclesTitle: 'Chassis',
+    vehicleRule:
+      'The new chassis takes over the goods and fuel; the old one is lost, with no trade-in. Electronic modules follow, mechanical ones are adapted (included in the price), welded ones stay on the old one.',
+    withRefit: (refit: string) => `(including ${refit} for adapting modules)`,
+    weldedLost: (modules: string) => `Lost with the old chassis (welded): ${modules}.`,
+    fitting: { portable: 'Removable', adaptable: 'Adaptable', welded: 'Welded' },
+    fittingInfo: {
+      portable: () => 'Electronic: it comes off and follows you to a new chassis, free of charge.',
+      adaptable: (refit: string) => `Mechanical: Mitch adapts it to a new chassis for ${refit}.`,
+      welded: () => 'Welded to the chassis: lost if you change vehicles.',
+    },
+    vehicleStats: (cargo: number, hidden: number, slots: number, chassis: number, tank: number, day: number, night: number) =>
+      `Hold ${cargo} (false bottom ${hidden}) · ${slots} slot${s(slots)} · chassis ${chassis} HP · tank ${tank} · ${day} ration${s(day)} by day, ${night} by night`,
+    buy: 'Buy',
+    mount: 'Fit',
+    unmount: 'Remove',
+    mounted: 'fitted',
+    stored: 'in storage',
+    lowProfile: (factor: string) => `Low profile: inspection risk ${factor}.`,
+    ecoEngine: 'Uses as much fuel by night as by day.',
+    camouflage: (factor: string, share: string) =>
+      `Corporate camouflage: risk ${factor} if legal crates make up at least ${share} of the hold (empty hold included).`,
+    coldChain: 'Cold chain: chilled products only lose freshness every other morning.',
+    transponder: (districts: string, bonus: string, icc: string) =>
+      `Transponder in ${districts}: escape ${bonus}, no chassis damage on success, ICC loss ${icc}.`,
+    heavy: (toll: string, crusher: string, risk: string) =>
+      `Armored monster: militia toll ${toll}, forced passage without damage, acid crusher everywhere (${crusher}, without damage). Inspection risk ${risk}.`,
+    heatProof: 'Makes the hold and engine immune to heatwaves.',
+    drivingAssist: (bonus: string) => `Escape ${bonus}; a worn-out driver no longer hurts escapes.`,
+    tagOff: (tag: string) => `Cancels ${tag} detection.`,
+    tagFactor: (tag: string, factor: string) => `${tag} penalty ${factor} (risk and bluff).`,
+    smoothRide: 'Fragile goods immune to breakage; no chassis wear at night.',
+    nightRisk: (factor: string) => `Risk penalty of an off-mission night trip ${factor}.`,
+    flyingChecks: (factor: string) => `Flying checks ${factor} (the drones lose the signal).`,
+    noFlyingChecks: "No more flying checks: the drones lose the truck's signal.",
+    rotatingPlate:
+      "Plate unreadable by cameras: a successful escape from the BRC costs neither ICC nor watchlist, and an off-mission night trip isn't filmed (no watchlist).",
+    ram: (bonus: string, factor: string) => `Escape and forced passage ${bonus}; escape damage ${factor}.`,
+    trapdoor: (chance: string, minRecovery: string, maxRecovery: string, sealed: string) =>
+      `Ejection through the sewers (${chance}, without damage, except ${sealed}), at every roadblock; the false bottom stays closed. The next day, ${minRecovery} to ${maxRecovery} of the dropped crates are brought back.`,
+    fakeTerminal: (bonus: string, factor: string) => `Bluff ${bonus}; standard bribery rate ${factor}.`,
+    ghostWall: (factor: string) =>
+      `Anti-odor, anti-scanner, anti-dog insulation: during a search, the chance that officers find the false bottom ${factor}. Doesn't hide the smell of the hold, nor the driver.`,
+  },
+
+  place: {
+    cantineLore:
+      "Here, the water is served without sedatives and the food still tastes of something: a truckers' union privilege. Everywhere else, Aeterna's tap water soothes the citizens.",
+    meal: "Trucker's meal",
+    mealEffect: (cost: string, health: number) => `${cost} · health +${health}, once a day`,
+    cantineFuel: 'Synthanol at the union rate · reserve',
+    ventureTitle: 'Cartel investment',
+    ventureRule: (rate: string, chance: string, loss: string) =>
+      `More profitable than offshore (${rate} per day), but every morning a ${chance} risk of a raid: the investment then loses ${loss} of its balance. Withdrawal with the same commission. Counts toward the score.`,
+    invest: 'Invest',
+    divest: 'Withdraw',
+    closedAtNight: 'Closed: open from 06:00 to 20:00.',
+    amount: 'Amount',
+    max: 'MAX',
+    debtTitle: 'Debt',
+    repay: 'Repay',
+    borrow: 'Borrow',
+    advanceRule: (total: string) =>
+      `Survival advance: Viktor lends up to ${total} in total over the whole game, at the debt rate; repaying doesn't restore it.`,
+    loanRoom: (amount: string) => `${amount} still available to borrow`,
+    noAdvance: (mode: string) => `${mode} mode: Viktor lends nothing, the debt only grows.`,
+    offshoreTitle: 'Offshore account',
+    deposit: 'Deposit',
+    withdraw: 'Withdraw',
+    received: 'Received in Cash-Chip',
+    breakEven: (days: number) =>
+      `Deposits are credited in full; withdrawals are taxed by the laundromat. At today's rate, a deposit covers this commission in ${days} day${s(days)}.`,
+    balance: (deposited: string, interest: string) => `including deposits ${deposited}, interest ${interest}`,
+    rate: "Today's rate",
+    nextInterest: (amount: string) => `+${amount} tomorrow morning`,
+  },
+
+  objectives: {
+    title: (day: number) => `Objectives for day ${day}`,
+    score: 'Score (offshore account)',
+    threshold: (amount: string) => `≥ ${amount}`,
+    goldStatus: 'Gold Citizen status at midnight (slab gates)',
+    goldAtMidnight: 'Gold Citizen status at midnight',
+    cleanRecord: 'Clean watchlist at midnight',
+    sponsor: (done: number, needed: number) => `Sponsor at the Velvet-Silo: ${done}/${needed} VIP orders delivered`,
+    injections: (done: number, needed: number) => `Server injections by Glitch: ${done}/${needed}`,
+    met: 'Achieved:',
+    unmet: 'Not yet:',
+    inCargo: (product: string) => `${product} in the hold`,
+    atMidnight: (district: string) => `Be in ${district} at midnight`,
+  },
+
+  breakdown: {
+    total: 'Total',
+  },
+
+  market: {
+    title: 'Black market',
+    localEconomy: (district: string) => `Each district has its own economy: these prices, stocks and buybacks only apply in ${district}.`,
+    filters: 'Filter products',
+    filterTierLabel: 'Filter by tier',
+    filterTagLabel: 'Filter by tag',
+    allTiers: 'Tiers',
+    allTags: 'Tags',
+    filterTier: (tier: number) => `Tier ${tier}`,
+    resetFilters: 'Clear',
+    rowHint: (product: string) => `${product}: open the sheet`,
+    sortLabel: 'Sort products',
+    sort: { tier: 'By tier', priceAsc: 'Price ↑', priceDesc: 'Price ↓' },
+    noMatch: 'No product matching this filter here.',
+    streetOnly: 'After 20:00: only the street market is open.',
+    quote: 'Price',
+    stock: 'Stock',
+    owned: 'In hold',
+    demand: 'Buyback',
+    demandHint:
+      'Crates this district still buys back today at the full price. Beyond that, the price is saturated and Aeterna notes a suspicious spike. Buyback refills every morning.',
+    sale: 'Sale',
+    notInShop: 'Not in the shop',
+    unlimited: 'Unlimited',
+    demandLeft: (left: number, refill: number) => (refill > 0 ? `${left} (+${refill} tomorrow)` : `${left}`),
+    saturated: (qty: number) => `including ${qty} at a saturated price`,
+    averageCost: (cost: string) => `bought ${cost}/u`,
+    trend: (change: string) => `${change} since yesterday`,
+    condition: 'Condition',
+    freshness: { extra: 'Extra-fresh', standard: 'Fresh', gamey: 'Stale', spoiled: 'Degraded' },
+    damaged: 'damaged',
+    rotsIn: (days: number) => (days <= 1 ? 'lost tomorrow morning' : `lost in ${days} days`),
+    use: 'Use',
+    iccRestore: (icc: number) => `+${icc}% ICC, beyond the cap, only once per game`,
+    margin: 'Margin',
+    marginUnit: '/u',
+    marginAll: (qty: number) => `Selling everything (${qty}):`,
+    buy: 'Buy',
+    sell: 'Sell',
+    buyCost: (cost: string) => `Cost: −${cost}`,
+    fullRate: (qty: number) => `Full price (${qty})`,
+    all: (qty: number) => `All (${qty})`,
+    maxOf: (qty: number) => `Max (${qty})`,
+    saleTotal: (total: string) => `Sale: +${total}`,
+    max: 'MAX',
+    status: {
+      production: 'Regular supply',
+      strong: 'Strong demand',
+      neutral: '',
+    },
+    origin: {
+      production: 'Regular supply: the product arrives here every day, hence a low price; it sells better elsewhere.',
+      official: 'Official staple: tier 0 is in shops everywhere, every day.',
+      arrival: "Today's arrival: an extra drawn at random this morning.",
+      exceptional: "Event arrival: in the shop thanks to today's event.",
+    },
+  },
+
+  /** Sens d'une tendance publique (chap. 2) */
+  trend: { up: 'rising', down: 'falling', flat: 'stable' },
+  trendSince: (trend: string, days: number) => `${trend} for ${days} day${s(days)}`,
+
+  sheet: {
+    title: 'Sheet',
+    quotesTitle: 'Public trend, district by district',
+    seenTitle: 'Prices seen on site',
+    seenDay: 'Day',
+    seenQuote: 'Price',
+    trendSoon: 'The Feed will publish the trend from tomorrow.',
+    trendReadout: (district: string, day: number, trend: string) => `${district}, D${day}: ${trend}`,
+    historyDistrict: 'District of the chart',
+    trendRule:
+      "Each district has its own economy: a product has neither the same price nor the same trend from one district to another. Prices drift from day to day; a drop often lasts a few days, then the price returns toward normal. Events add to this. It's up to you to spot the right moments.",
+    tagsTitle: 'Tags',
+    actionsTitle: 'Actions',
+    seizureTitle: 'Inspection',
+    saleTitle: 'Where to sell it',
+    cover: (risk: string, offGrid: string) => `cover, −${risk} inspection risk × its share of the hold (except ${offGrid})`,
+    tripRisk: (risk: string, offGrid: string, doubled: string) =>
+      `+${risk} inspection risk × its share of the hold, on every trip (except ${offGrid}${doubled ? `; doubled in ${doubled}` : ''})`,
+    detectedRisk: (risk: string, districts: string) => `+${risk} inspection risk × its share of the hold, in ${districts}`,
+    bluffMalus: (malus: string, doubled: string) => `−${malus} to bluff × its share of the hold${doubled ? ` (doubled in ${doubled})` : ''}`,
+    perishable: (rottenAge: number) =>
+      `Extra-fresh on the day of purchase until 20:00, then fresh, stale, degraded; lost on the ${ordinal(rottenAge)} morning`,
+    breakage: (flee: string, shock: string, threshold: number, factor: string) =>
+      `each crate can break (${flee} on a successful escape, ${shock} on each shock of ${threshold} chassis HP or more); damaged, it is worth ${factor}`,
+    bribeGift: 'can be offered to a corrupt officer, with connivance',
+    masks: (tag: string) => `Each crate masks one ${tag} crate (less risk, bluff bonus)`,
+    bluffAid: (crates: number, effect: string) => `When bluffing, from ${crates} crate${s(crates)} in the hold: ${effect}, without giving anything`,
+    doping: (bonus: string, chassis: number, icc: number) =>
+      `When escaping: driver doping, ${bonus} chance (chassis −${chassis}, ICC −${icc}%), once a day`,
+    sleepless: (health: number) => `In the evening: one more sleepless night despite exhaustion (health −${health})`,
+    cooling: (crates: number) => `At night: ${crates} crates cool the engine instead of wearing the chassis`,
+    beacon: (risk: string) => `Tracking beacon: ${risk} inspection risk everywhere while it is in the hold`,
+    lethal: 'Actual search with this product in the hold: summary execution',
+    nightSale: (factor: string, after: string | null) => `at night, sells ${factor}${after ? `, and ${after} at the curfew after-party` : ''}`,
+    legal: 'Search: nothing to fear, a mere formality',
+    seizure: (fine: string, icc: number, custodyDays: number, high: boolean) =>
+      `Seizure: confiscation, fine of ${fine} of their value (base price), ICC −${icc}${high ? `, custody ${custodyDays} day${s(custodyDays)} (high tier)` : ''}`,
+    tollFavorite: (districts: string) => `Taken first by the militias of ${districts}`,
+    strong: (districts: string) => `Strong demand: ${districts} (never in the shop there, except during events)`,
+    nowhere: 'nowhere',
+    produced: (districts: string) => `Regular supply: ${districts} (in the shop every day, cheaper)`,
+    hereTitle: (district: string) => `In ${district}, today`,
+    boughtAt: (qty: number, cost: string) => `${qty} in the hold, bought at ${cost}/u on average`,
+    condition: (condition: string) => `Condition: ${condition}`,
+    best: (quote: string, district: string, age: number) =>
+      `Best price seen elsewhere: ${quote} in ${district} (${age === 0 ? 'today' : `${age} day${s(age)} ago`})`,
+    noMemory: 'No price seen elsewhere for this product',
+    historyEmpty: 'Never seen on site: the exact price is discovered by passing through.',
+    historyLabel: (district: string) => `Public trend in ${district}, day by day, without prices, with the normal price dotted`,
+  },
+
+  margin: {
+    trend: {
+      up: 'Profitable sale',
+      flat: 'Thin margin',
+      down: 'Sale at a loss',
+    },
+  },
+
+  interception: {
+    title: { brc: 'BRC roadblock', flying: 'BRC flying check', racket: 'Militia racket' },
+    /** Lieu du contrôle selon la couche du réseau (chap. 3) */
+    place: {
+      street: (district: string) => `at the entrance to ${district}`,
+      gallery: (district: string) => `in the ${district} service tunnel`,
+      docks: (district: string) => `at the airlock of the ${district} service dock`,
+    },
+    intro: {
+      brc: (place: string) =>
+        `BRC roadblock 300 m ahead, ${place}. An officer signals you to pull over: there's still time to empty the hold or turn back.`,
+      flying: (place: string) =>
+        `A drone spotted you ${place}: a BRC unit corners you and the officer already has a hand on the door. Too late to flee or empty the hold.`,
+      racket: (place: string) => `A militia barricade blocks the way, ${place}. The militiamen demand their due.`,
+    },
+    compartment: (crates: string) => `False bottom: ${crates}; during a search, chance that officers find it:`,
+    sponsorCovered: (crates: string) => `Velvet-Silo order: ${crates}, under your sponsor's protection. The officers won't see them.`,
+    chance: 'Chance',
+    moves: {
+      search: 'Accept the search',
+      bluff: 'Administrative bluff',
+      bribe: 'Bribery',
+      flee: 'Escape',
+      eject: 'Emergency ejection',
+      payToll: 'Pay the toll',
+      payTollInKind: 'Pay in crates',
+      refuseToll: 'Refuse',
+    },
+    forceThrough: 'Force your way through',
+    lethal: (product: string) => `The search will find “${product}”: summary execution.`,
+    formality: (icc: string) => `Legal hold: a mere formality, ICC ${icc}.`,
+    sanction: (fine: string, icc: string) => `Confiscation of illegal goods, fine of ${fine}, ICC ${icc}.`,
+    fine: (rate: string, amount: string) => `${rate} of the seized value (≈ ${amount} if everything is seized)`,
+    unpaid: (days: number) => `Not enough Cash-Chip for the fine: all of it goes, and custody grows by ${days} day${s(days)}.`,
+    custody: (days: number) => `Custody: ${days} day${s(days)}.`,
+    bluffSuccess: (icc: string) => `Success: everything goes through, ICC ${icc}.`,
+    bluffFailure: (icc: string, fine: string, penalty: string, canFlee: boolean) =>
+      `Failure: ICC ${icc}, fine raised to ${fine}, bribery${canFlee ? ' and escape' : ''} chance ${penalty}.`,
+    bribeRate: 'Standard rate',
+    offer: 'Offer',
+    offerCash: 'Cash-Chip offered',
+    offerCrates: 'Luxury crates offered (payment value: base price; a single one is enough for connivance)',
+    noGift: 'No luxury crate in the hold: the officer only takes cash. Luxury goods (cigars, whisky…) can be offered too, and win him over better.',
+    bribeRateInfo: (minimum: string) =>
+      `The officer weighs what he lets through: the higher of a fixed amount per district star and a share of the value of your illegal crates. Below ${minimum}, he refuses; above the rate, the chance rises in steps.`,
+    offerTotal: (amount: string) => `Total value of the offer: ${amount}`,
+    crateValue: (value: string, cost: string) => `${value}/u as payment, bought at ${cost}/u`,
+    crateGain: (gain: string) => `${gain}/u compared with cash`,
+    addCrate: (product: string) => `Offer one more crate: ${product}`,
+    removeCrate: (product: string) => `Offer one less crate: ${product}`,
+    cancelsSmell: 'cancels the smell penalty',
+    bluffAid: (product: string, effect: string) => `${product} (${effect})`,
+    bluffAids: (aids: string) => `Aids in the hold, already counted: ${aids}`,
+    searchInfo:
+      'Useful when the hold is legal (a mere formality, ICC gain), when the illegal goods fit in the false bottom, or when failing the other options would cost more (higher fine, custody, chassis).',
+    bluffInfo:
+      'A false declaration: it goes down better with a hold covered by tier 0, without smell, in a lightly guarded district. Aids in the hold count on their own.',
+    bribeInfo: 'An offer in Cash-Chip and luxury crates. It is lost even on failure; the more it exceeds the standard rate, the higher the chance.',
+    fleeInfo:
+      'Pedal to the metal: the cargo is saved if it works, but the watchlist rises and the chassis suffers. The chance depends on equipment (driving assist, bull bars, transponder, Glitch) and doping, never on the rest of the hold; the watchlist and fatigue lower it.',
+    bribeSuccess: 'Success: the officer switches off his body camera, everything goes through, ICC unchanged.',
+    breakageRisk: (tag: string, chance: string, factor: string) =>
+      `On success, each ${tag} crate can break (${chance}): it will sell and pay ${factor}.`,
+    dope: (product: string, bonus: string, chassis: number, icc: number) =>
+      `Doping: drink 1 × ${product} (${bonus}, chassis −${chassis}, ICC −${icc}% except against militias; once a day)`,
+    tollInKind: (crates: string, value: string) => `The militiamen would take: ${crates} (value ${value}, no change given).`,
+    bribe: 'Offer',
+    bribeFailure: (fine: string, icc: string) => `Failure: the offer is lost, confiscation, fine of ${fine}, ICC ${icc}.`,
+    fleeSuccess: (chassis: string, icc: string, wanted: string) => `Success: the cargo is saved, chassis ${chassis}, ICC ${icc}, ${wanted}.`,
+    plateCovers: 'rotating plate: neither ICC nor watchlist',
+    fleeSuccessRacket: (chassis: string) => `Success: through, chassis ${chassis}.`,
+    fleeFailure: (seizure: string, icc: string, chassis: string, health: string) =>
+      `Failure: confiscation, fine of ${seizure}, ICC ${icc}, chassis ${chassis}, health ${health}.`,
+    fleeFailureRacket: 'Failure: the militiamen apply the refusal penalty.',
+    ejectMode: {
+      trapdoor: 'Drop hatch (sewers)',
+      crusher: 'Acid crusher',
+      manual: 'Emergency ejection (alley)',
+    },
+    ejectTrapdoor: (minRecovery: string, maxRecovery: string) =>
+      `Success: the visible illegal goods slide into the sewers, without damage, the false bottom stays closed; tomorrow at 06:00, accomplices bring back between ${minRecovery} and ${maxRecovery}.`,
+    ejectCrusher: 'Success: the contraband is dissolved in the dumpster, no damage and no recovery.',
+    ejectSuccess: (chassis: string) => `Success: the illegal goods end up in an alley, the search finds nothing. Chassis ${chassis}.`,
+    ejectFailure: (raise: string, icc: string) => `Failure: base penalty, fine raised by ${raise} of the seized value, ICC ${icc} more.`,
+    toll: (amount: string) => `Toll: ${amount}.`,
+    refuse: (share: string, health: string, chassis: string) =>
+      `Looting of ${share} of the hold (the most expensive crates), health ${health}, chassis ${chassis}.`,
+  },
+
+  report: {
+    title: 'Inspection report',
+    success: 'succeeded',
+    failure: 'failed',
+    passed: 'Roadblock passed.',
+    ongoing: 'The inspection continues.',
+    cash: 'Cash-Chip',
+    crates: 'Crates',
+    icc: 'ICC',
+    health: 'Health',
+    chassis: 'Chassis',
+    wanted: 'Watchlist',
+    damaged: 'Damaged crates',
+    compartmentKept: (crates: number) => `False bottom not found: ${crates} crate${s(crates)} saved.`,
+    compartmentFound: 'False bottom discovered: everything is confiscated, ICC lost for concealment.',
+    sacrificed: 'including crates sacrificed',
+    custody: (days: number) => `Custody: ${days} day${s(days)}, released at 20:00.`,
+    tow: (bill: string) => `Chassis at 0: emergency towing billed ${bill}.`,
+    unpaidFine: (amount: string, days: number) => `Unpaid fine (${amount}): custody extended by ${days} day${s(days)}.`,
+    dismiss: 'Got it',
+  },
+
+  travel: {
+    title: 'Map',
+    fuelPrice: (price: string) => `Synthanol ${price} per ration`,
+    places: (names: string) => `Places: ${names}`,
+    mapHint:
+      'Hover or tap a district: its full sheet and route appear below the map. In blue, you are here; in amber, the chosen district. The other destinations are listed separately.',
+    destinations: 'Other destinations',
+    here: 'You are here',
+    direct: 'Direct link',
+    via: (names: string) => `Via ${names}`,
+    fuel: (rations: number) => `${rations} ration${s(rations)}`,
+    go: 'Go',
+    goNight: 'Go by night',
+    goMission: (fee: string) => `Deliver by night (fee ${fee})`,
+    goNightDrink: (product: string, health: number) => `Go by night — sleepless night: 1 × ${product} (health −${health})`,
+    deliveryTarget: "Today's official delivery (market)",
+    memoryNever: 'Prices never observed',
+    memoryToday: 'Prices seen today',
+    memoryDaysAgo: (days: number) => `Prices seen ${days} day${s(days)} ago`,
+    security: (stars: number) => `Security ${stars} out of 5`,
+    risk: 'Interception risk',
+    flyingShare: (share: string) => `including ${share} flying checks (no escape or ejection)`,
+    riskHint: "Today's reinforced patrol stays hidden.",
+    routeWatched: (count: number, risk: string) => `Route flagged: ${count} pass${count === 1 ? '' : 'es'} on this link in recent days (${risk})`,
+    riskHintRevealed: 'Reinforced patrol included: Vance reveals it every morning.',
+    peak: 'Suspicious spike: higher risk today',
+    lastTrip: 'Last trip',
+    exposed: (crates: number, cost: string, hidden: number) =>
+      `Exposed hold: ${crates} illegal crate${s(crates)}, paid ${cost}${hidden > 0 ? `, including ${hidden} in the false bottom` : ''}.`,
+    exposedSanction: (fine: string, custodyDays: number) =>
+      `A seizure confiscates them, with a fine of ${fine}${custodyDays > 0 ? ' and custody (high tier on board)' : ''}.`,
+    neverSeen: 'never seen',
+    patrol: 'Reinforced patrol (revealed by Vance)',
+    wear: (pv: number) => `chassis wear −${pv}`,
+    cooled: (crates: number, product: string) => `engine cooled: ${crates} × ${product} used up`,
+    heatStroke: (health: number) => `heatstroke, health −${health}`,
+    delivered: (fee: string) => `DSC order delivered, fee ${fee}`,
+    deviated: (wanted: string) => `mission deviation recorded, ${wanted}`,
+    unfilmed: "night deviation not filmed (Aeterna's maintenance), watchlist intact",
+    plated: 'night deviation not filmed (rotating plate unreadable), watchlist intact',
+    injected: (done: number, needed: number) => `Glitch injected a piece of your file into Aeterna (${done}/${needed})`,
+    mission: 'Night mission',
+    after: 'Curfew after-party tonight',
+    trust: (deliveries: number, factor: string) => `DSC trust: ${deliveries} order${s(deliveries)} delivered, fee ${factor}.`,
+    deliveryTitle: "Today's official delivery",
+    deliveryOffer: (district: string, crates: number, fee: string) =>
+      `The DSC platform offers ${crates} sealed crates to deliver to ${district} on the daytime trip, fee ${fee}. Legal, they cover the hold; if not delivered, they are taken back at 06:00 (ICC down).`,
+    deliveryActive: (district: string) => `Delivery in progress: sealed crates to hand over in ${district}, on the daytime trip.`,
+    acceptDelivery: 'Accept the delivery',
+    sealed: (crates: number, district: string) => `${crates} sealed DSC crates to deliver to ${district}`,
+    estimateHint: 'Estimated margin on the price seen, commission deducted (excluding know-how and saturation)',
+  },
+
+  evening: {
+    pricePerRation: (price: string) => `${price} per ration`,
+    refuelOne: '+1 ration',
+    refuelFull: 'Fill up',
+    siphon: 'DSC chore',
+    siphonHint: 'One ration in exchange for ICC and half a day.',
+    curfewTitle: '20:00 — sanitary curfew',
+    curfewInfo:
+      'At 20:00, Aeterna confines citizens to their homes, for their sleep hygiene: empty streets, street market only, places closed. The night belongs to authorized DSC vehicles, in the filmed service tunnels, and to after-parties, those clandestine celebrations where the crowd defies the curfew.',
+    wait: 'Wait for the evening',
+    waitHint: 'Stay put without a daytime trip: the day goes by, street market only, places closed.',
+    beforeEvening: 'Once evening comes (after the daytime trip, or by waiting for the evening): night mission, clandestine run or sleep.',
+    contractTonight: (district: string) => `Viktor's contract in progress: deliver it to ${district} on any trip, by night too.`,
+    nightRule:
+      'Tonight: sleep, or a second trip through the service tunnels, where everything is filmed. A night run rules out another the next day, unless you force a sleepless night.',
+    missionTourHint: (crates: number) =>
+      `The platform loads ${crates} sealed crates (free space required): the trip to this district is covered, and your goods can travel along.`,
+    lethalConfirm: 'Clandestine run with the server?',
+    lethalWarning: (product: string) => `${product} is on board: if the officers search the hold, it's summary execution and game over.`,
+    lethalAction: 'Leave anyway',
+    nightFromMap: 'To leave tonight, choose the destination on the map: “Go by night,” or “Deliver by night” to the mission.',
+    sleepShort: 'Rest until 06:00.',
+    sleepRelayHint: 'A night at the DSC truck stop: ICC and health gain, exhaustion cleared.',
+    bivouacHint: 'Bivouac, for lack of a truck stop here: exhaustion cleared, but neither ICC nor health.',
+    clandestineHint: (wanted: string) => `Off mission, to the district of your choice: higher risk, and ${wanted} if the trip goes through.`,
+    clandestineHintPlated:
+      'Off mission, to the district of your choice: higher risk; the rotating plate makes the trip unreadable for cameras, no watchlist.',
+    injectionHint: (next: number, needed: number) =>
+      `Aeterna server in the hold and Glitch at work: if you arrive without custody, she injects a piece of your file (${next}/${needed}).`,
+    missionLocked: (done: number, needed: number) =>
+      `The platform doesn't trust you with the night yet: ${done}/${needed} orders delivered (daily official deliveries). Only the clandestine run remains possible.`,
+    missionOffer: (district: string, crates: number, fee: string) => `Tonight's mission: deliver ${crates} sealed crates to ${district}, fee ${fee}.`,
+    missionHere: (district: string) => `Tonight's mission to ${district}: you're already there, nothing to deliver.`,
+    noMission: 'No night mission tonight: any run will be off mission.',
+    after: (district: string, festive: string, elsewhere: string, cover: string) =>
+      `Curfew after-party tonight in ${district}: the party pays festive goods ${festive} (${elsewhere} elsewhere at night), and the crowd removes ${cover} from the off-mission run penalty.`,
+    missionActive: (district: string) => `Night run on mission: deliver to ${district}.`,
+    offMission: 'Off-mission night run: any trip will be a recorded deviation.',
+    sleepRelay: 'Sleep at the truck stop',
+    bivouac: 'Bivouac',
+    nightNotice: 'Night run: 1 trip, then sleep.',
+    cooling: (crates: number, product: string) => `Cool the engine at night with ${crates} × ${product} instead of wearing the chassis`,
+  },
+
+  end: {
+    score: 'Final score (offshore and investment)',
+    gameOver: 'Game Over',
+    endings: {
+      saboteur: {
+        title: 'The Saboteur',
+        epilogue:
+          "The cartels' armored trawler clears the Rust Valley lock. Behind the wall, the evidence floods the Pink Feed and Concordia goes up in flames while you taste a real whisky under the sun of the free islands.",
+      },
+      resident: {
+        title: 'The Heir',
+        epilogue:
+          "The last graft takes at 03:12. Aeterna's code rewrites itself line by line: category S resident, born under the glass dome, clean record. The next day, the elite customs officers greet you by name. The algorithm is never wrong: so you must always have been one of them.",
+      },
+      elite: {
+        title: 'The High Commissioner',
+        epilogue:
+          'Your Velvet-Silo sponsor slips your name forward for the seat of a high commissioner who “committed suicide” last week. The Council votes unanimously, out of habit. Under the glass dome, you are now the one ordering real meat from the little couriers.',
+      },
+      mafia: {
+        title: 'Baron of Rust Valley',
+        epilogue: "Too exposed for high society, you buy Viktor's butcher shop and the Rust Valley docks: smuggling has a new godfather.",
+      },
+      notable: {
+        title: 'Pillar of Hives',
+        epilogue:
+          "You buy the Drivers' Canteen. In the towers of Hives, where sedation snuffs everything out, you are the only one who keeps their eyes open: you give credit, you run the black market the regime tolerates, and people greet you without quite knowing why. Viktor eats there for free: some debts are never settled.",
+      },
+      exemplary: {
+        title: 'Model Citizen',
+        epilogue: 'Aeterna holds you up as an example: you now train the new category C couriers. Nobody suspects what your false bottom hides.',
+      },
+      standard: {
+        title: 'Survivor',
+        epilogue:
+          "You escaped recycling, but your savings don't buy back your freedom. Tomorrow at 06:00, September begins and you climb back into your van…",
+      },
+      'bio-bricks': {
+        title: 'Recycled into bio-bricks',
+        epilogue: "The audit falls, the debt is still running. Viktor doesn't buy back, he recycles: next stop, the bio-brick factory.",
+      },
+      death: {
+        title: 'Biological death',
+        epilogue: 'Your heart gives out before your van does. The DSC recycles both.',
+      },
+      execution: {
+        title: 'Suicide by 3 bullets in the back',
+        epilogue: 'The search found the beacon. The official report concludes it was suicide.',
+      },
+    } satisfies Record<EndingId, { title: string; epilogue: string }>,
+  },
+
+  crash: {
+    title: 'On-board terminal failure',
+    body: 'An unexpected error interrupted the display. The save may be corrupted: starting a new game sets everything right.',
+    retry: 'Retry',
+  },
+
+  error: {
+    'game-over': 'The game is over.',
+    'invalid-quantity': 'Invalid quantity.',
+    'not-for-sale': 'This product is not in the shop here.',
+    'out-of-stock': 'Not enough stock.',
+    'cargo-full': 'Hold full.',
+    'not-enough-cash': 'Not enough Cash-Chip.',
+    'not-enough-cargo': 'Not enough crates in the hold.',
+    'cannot-hide': 'Nothing to hide: only illegal crates, except bulky ones, go in the false bottom.',
+    'compartment-full': 'False bottom full: take out a product first.',
+    'tank-full': 'Tank full.',
+    'same-district': "You're already there.",
+    'trip-done': 'Trip already made for this phase.',
+    'not-enough-fuel': 'Not enough Synthanol.',
+    'not-daytime': 'Only possible by day.',
+    exhausted: 'Nervous exhaustion: no second sleepless night in a row.',
+    'not-evening': 'Night runs leave in the evening: after the daytime trip, or by waiting for the evening.',
+    'siphon-unavailable': 'The DSC chore is only possible when stuck, with no fuel, no cargo and no Cash-Chip.',
+    'invalid-amount': 'Invalid amount.',
+    'not-at-location': 'This place is not in this district.',
+    'location-closed': 'Closed: special places open from 06:00 to 20:00.',
+    'no-debt': 'No debt to repay.',
+    'advance-used': 'Survival advance used up: Viktor only lends once per game.',
+    'not-enough-venture': "The investment doesn't hold that much.",
+    'not-enough-offshore': 'Not enough offshore balance.',
+    intercepted: 'A roadblock awaits you: deal with the inspection first.',
+    'not-intercepted': 'No inspection in progress.',
+    'move-unavailable': 'This option is not possible here.',
+    'offer-too-low': 'The officer refuses such a low offer.',
+    'doping-used': 'Doping already used today.',
+    'not-usable': "This product can't be used that way.",
+    'already-used': 'Already used: only once per game.',
+    'third-night': 'Another sleepless night? Impossible, even doped: the body can’t keep up.',
+    'too-weak': 'Health too low for another sleepless night.',
+    'road-event': 'A road hazard awaits your choice.',
+    'no-road-event': 'No road hazard in progress.',
+    'already-owned': 'Already owned.',
+    'not-owned': 'Module not owned or not fitted.',
+    'no-free-slot': 'No free slot left on this chassis: remove a module.',
+    'crew-lost': "Vanished in the Lottery: they won't come back.",
+    'no-crew': 'No crewmate hired.',
+    'no-mission': 'No valid night mission tonight.',
+    'mission-locked': "The platform doesn't trust you with the night yet: deliver a few orders first.",
+    locked: 'Not unlocked yet: see its condition.',
+    'nothing-to-sell': 'Nothing to sell.',
+    'no-delivery': 'No valid official delivery today.',
+    'delivery-pending': "Today's delivery still on board: the platform won't assign a night mission.",
+    'pump-closed': 'Official pump closed at night for your ICC level.',
+    'not-eligible': 'Not possible here or today.',
+    cooldown: 'Not available yet.',
+    'already-healthy': "Dr. K. won't touch a patient in such good health.",
+    'full-health': "You're in perfect shape: save your appetite for tomorrow.",
+    'already-fed': 'Already served today: Borg will serve you again tomorrow.',
+    'prophecy-active': 'A prediction is already in progress.',
+    'too-late': 'Too late.',
+    'location-locked': 'Place locked.',
+    'contract-active': 'An order is already in progress.',
+    'no-contract': 'No order in progress.',
+    'not-contract-district': 'The contract is delivered in its destination district.',
+    'contract-untravelled': "Viktor wants crates brought from elsewhere: those bought here don't count.",
+  } satisfies Record<ActionError, string>,
+
+  /** Écran d'accueil (chap. 7) */
+  title: {
+    broadcast: 'Aeterna transmission · citizen channel',
+    name: 'Concordia',
+    tagline: 'Zero-Risk, Zero-Offense, Zero-Flavor, Zero-Carbon.',
+    worldTitle: 'The world',
+    world: [
+      'Behind its border wall, the Republic of Concordia has shut itself off completely. The Directorate of Civic Health has entrusted every calorie, every emotion and every journey to a “benevolent” AI, **Aeterna**.',
+      'Fat, sugar, alcohol, art and privacy are “deadly perils” there. The water in poor neighborhoods is sedative, the **ICC** rates every citizen, and credits expire at the end of the month.',
+    ],
+    roleTitle: 'Your role',
+    role: [
+      'A **category C courier**, you cross every district at the wheel of a State utility van, from Hives to Olympus-Green, the citadel of the elites. *Officially*, you deliver legal crates.',
+      '*Unofficially*, you are a **“smuggler of the world before”**: coffee, butter, vinyl, whisky, graphics cards… everything Aeterna bans, and everyone craves.',
+    ],
+    goalTitle: 'The goal',
+    goal: (days: number, debt: string, cash: string) => [
+      `You start with **${cash}** in your pocket and **${debt} of debt** to Viktor Varga, the loan shark of Hives. His interest runs every morning.`,
+      `On **day ${days} at midnight**, it's the audit: the debt must be paid off, or Viktor recycles you into bio-bricks. The Cash-Chip is then wiped.`,
+      "Only what you've put away in the laundromat's **offshore account** (and the Cartel investment) counts: it's your score, and it decides your ending.",
+    ],
+    dayTitle: 'A day',
+    day: [
+      '**Buy** where it is produced, **sell** where it is lacking: the map tells you what each district makes and craves.',
+      'Every trip can end at a **BRC roadblock**: search, bluff, bribery, escape or ejection. Every probability is shown, line by line.',
+      'At **20:00, curfew**: sleep at the truck stop, or head out again by night, on a DSC mission or clandestinely.',
+    ],
+    endingsTitle: 'The endings',
+    teaser: {
+      saboteur: 'Cross the wall with the evidence that will bring Aeterna down.',
+      resident: "Rewrite your file in Aeterna's code: to have been born under the glass dome.",
+      elite: 'Be co-opted by an oligarch and sit on the Council, under the glass dome.',
+      mafia: "Buy Viktor's butcher shop and rule over smuggling.",
+      notable: 'Put enough aside to run the Hives Canteen, and the neighborhood with it.',
+      exemplary: 'End the season above all suspicion, in Aeterna’s eyes.',
+      standard: 'Survive the audit, and get back behind the wheel in September.',
+    } satisfies Record<Exclude<EndingId, 'bio-bricks' | 'death' | 'execution'>, string>,
+    freeTitle: 'Free game',
+    freeBlurb: 'New randomness every game, as many times as you like.',
+    start: 'Start the game',
+    resume: (day: number) => `Resume the game (day ${day})`,
+    review: 'Review the results',
+    newGame: 'New game',
+    newGameConfirm: (mode: string) => `The current game will be lost. Start a new game in ${mode} mode?`,
+    currentMode: (mode: string) => `Game in progress: ${mode} mode. The chosen mode applies to the next game.`,
+    currentRanked: (mode: string, day: string) => `Game in progress: ranked game of ${day}, ${mode} mode.`,
+  },
+
+  /** Partie classée et classement du jour (chap. 1 et 7) */
+  ranked: {
+    title: 'Daily ranked game',
+    info: 'The same seed for every player today, a single attempt per mode: abandoning it uses it up. At the end, the server replays your game to verify your score before entering it on the leaderboard.',
+    pseudo: 'Nickname',
+    pseudoHint: (min: number, max: number) => `${min} to ${max} characters: letters, digits, spaces, dots and dashes.`,
+    play: 'Play ranked',
+    mode: 'Mode',
+    blurb: 'The same seed for everyone today, a single attempt per mode.',
+    resume: (day: number) => `Resume the ranked game (day ${day})`,
+    confirmTitle: 'Daily ranked game',
+    confirm: (mode: string) =>
+      `The current game will be abandoned. Start today's ranked game in ${mode} mode? You only get one attempt per day in this mode.`,
+    confirmAction: 'Start the ranked game',
+    noPseudo: 'Choose a valid nickname first.',
+    taken: (mode: string) => `Today's attempt already used in ${mode} mode: a new seed arrives at midnight UTC.`,
+    board: {
+      title: 'Leaderboard',
+      open: 'Leaderboard',
+      back: 'Home',
+      intro:
+        "One leaderboard per day and per mode, on the daily seed. Only verified scores appear: verification runs every hour. A defeat is worth zero; on a tie, the first game sent goes ahead. Yesterday's leaderboard is closed.",
+      modes: 'Mode',
+      days: 'Day',
+      top: (count: number) => `The ${count} best scores`,
+      you: 'You',
+      today: 'Today',
+      yesterday: 'Yesterday',
+      loading: 'Loading the leaderboard…',
+      offline: 'Leaderboard unavailable: the server is not responding.',
+      empty: 'No verified score yet.',
+      rank: (rank: number) => ordinal(rank),
+      pending: 'Your game: awaiting verification.',
+      own: (rank: string, score: string) => `Your game: ${rank}, ${score}.`,
+      rejected: 'Your game was rejected at verification.',
+    },
+    status: {
+      title: 'Ranked game',
+      idle: 'Ranked game finished: ready to send.',
+      sending: 'Sending your game to the leaderboard…',
+      sent: 'Game sent: it will enter the leaderboard after verification, every hour. See the result in the leaderboard, from the home screen.',
+      duplicate: 'Game already received for this day and mode.',
+      refused: 'The server refused your game: leaderboard closed, or nickname refused.',
+      failed: 'Sending failed: no connection to the server.',
+      retry: 'Retry',
+      stale: 'Unranked: the game was updated during your run, so it no longer replays identically.',
+      local: "Development build: the ranked game isn't sent.",
+    },
+  },
+
+  /** Bilan de fin de partie, à la victoire comme à la mort (chap. 7) */
+  recap: {
+    title: 'Game results',
+    wealth: 'Net worth, morning after morning',
+    reached: (day: number, district: string) => `Day ${day}, ${district}`,
+    adviceTitle: 'For next time',
+    advice: {
+      'bio-bricks':
+        "The debt is repaid at Viktor's, in Hives, day and night. Pay it off early: his interest runs every morning, and the audit forgives nothing. The “Debt” box in the status bar and the audit countdown remind you.",
+      death:
+        "Health only goes back up at the truck stop, with the Canteen's trucker's meal or at the Morgue. With a worn-out driver, a failed escape can be the last one: below the threshold, prefer the search or the bluff.",
+      execution:
+        'The old Aeterna server survives no search: with it on board, bluff, bribe or flee, but never open the hold. Short trips and a hold covered with tier 0 limit the risk.',
+    } satisfies Record<'bio-bricks' | 'death' | 'execution', string>,
+    groups: { money: 'Money', road: 'Road', jobs: 'Orders', gear: 'Journey' },
+    score: 'Score',
+    peak: 'Peak net worth',
+    final: 'Final net worth',
+    bought: 'Goods bought',
+    sold: 'Sales',
+    trips: 'Trips',
+    tripsValue: (day: number, night: number) => `${day} by day · ${night} by night`,
+    controls: 'Inspections',
+    controlsValue: (total: number, clean: number) => `${total}, including ${clean} without loss`,
+    tactics: 'Successful escapes · bluffs · bribes',
+    custody: 'Custody',
+    days: (days: number) => `${days} day${s(days)}`,
+    cratesLost: 'Crates lost at inspections',
+    deliveries: 'DSC orders delivered',
+    contracts: 'Underworld contracts',
+    contractsValue: (done: number, failed: number) => `${done} delivered · ${failed} missed`,
+    debtPaid: 'Initial debt paid off',
+    debtPaidValue: (day: number | null) => (day === null ? 'never' : `Day ${day}`),
+    wantedMax: 'Peak watchlist',
+    vehicle: 'Final vehicle',
+    vehicleValue: (name: string, modules: number) => `${name}${modules > 0 ? ` · ${modules} module${s(modules)}` : ''}`,
+    atDay: (amount: string, day: number) => `${amount} (D${day})`,
+    toDo: 'Still to accomplish',
+    print: 'Print',
+    share: 'Share',
+    copied: 'Results copied: just paste them.',
+    shareTitle: 'Concordia',
+    shareVictory: (ending: string, score: string, days: number, mode: string) => `Concordia (${mode}) — ${ending}. Score: ${score} in ${days} days.`,
+    shareDefeat: (ending: string, day: number, mode: string) => `Concordia (${mode}) — ${ending}, on day ${day}.`,
+    shareStats: (controls: number, escapes: number, night: number) =>
+      `${controls} BRC inspection${s(controls)}, ${escapes} escape${s(escapes)}, ${night} night trip${s(night)}.`,
+    shareFeats: (feats: string) => `Feats: ${feats}.`,
+  },
+
+  /** Manuel du passeur : les règles en clair, depuis l'accueil et En bref (chap. 7) */
+  manual: {
+    title: "The smuggler's manual",
+    open: 'Manual',
+    previous: 'Previous',
+    next: 'Next',
+    chapters: (days: number, debts: readonly { mode: string; debt: string }[]): ManualChapter[] => [
+      {
+        title: 'The goal of the game',
+        paragraphs: [
+          `The game lasts **${days} days**. You owe money to Viktor Varga (${oneOf(debts.map(({ mode, debt }) => `${debt} in ${mode} mode`))}), and his debt grows every morning: repay it at **Viktor Varga's Back Room**, in Hives, open day and night.`,
+          `On **day ${days} at midnight**, Aeterna's audit wipes your Cash-Chip. *If the debt isn't paid off, it's over.* Otherwise, your **score** is the balance of your offshore account and your Cartel investment, both at **the laundromat** in The Glass Spire, open by day only.`,
+          `That score, and what you've accomplished, decide your ending: from mere Survivor to Saboteur. Once the initial debt is paid off, the Briefing's **“Objectives for day ${days}”** panel shows what each major ending requires.`,
+          'You also lose by **dying** (health at zero) or by getting **searched with the old Aeterna server** on board.',
+          '**Three difficulty modes**, chosen on the home screen: Citizen to discover, Smuggler for the normal game, Outlaw for those who know it. They change the starting debt, Viktor’s advance and the BRC’s fines; your career keeps a best score per mode.',
+          '**Free or ranked game**: the free game draws new randomness each time. The **daily ranked game** is the same for every player, with a single attempt per mode; at the end, the server replays it to verify your score, then enters it on the leaderboard (the Leaderboard button on the home screen).',
+        ],
+      },
+      {
+        title: 'A day',
+        paragraphs: [
+          "**At 06:00, the routine**: crewmate's salary, interest, Viktor's collection on scheduled days, freshness of chilled products, the day's events, prices and shops. The Briefing summary sums up what changed.",
+          "**By day**: buy, sell, refuel, visit the district's special places, accept the DSC's official delivery, and **1 trip**. You can also wait for the evening where you are.",
+          "**At 20:00, the curfew**: sleep at the truck stop (health and ICC), bivouac in Rust Valley, or head out on a night run from the map. On a **DSC mission**, the trip is covered and paid; off mission, it's risky and adds a watchlist level if it goes through (except under the rotating plate, unreadable for cameras). *A night run wears you out: no second night in a row without Tcherno-Bull.*",
+          'Custody, a breakdown or siphoning make you **lose half a day**: you skip straight to the evening.',
+        ],
+      },
+      {
+        title: 'The market',
+        paragraphs: [
+          "Each district has its **“Production”** list (cheap) and its **“Strong demand”** list (well paid, never in the shop there). Today's price is read on site; elsewhere, you only have your memory of your last visit, and the Feed's public trend.",
+          '**Buyback at the price**: a district only buys back a limited number of crates of each product at full price, and its demand refills every morning. Beyond that, the price collapses and Aeterna spots a **suspicious spike**: the risk there rises the next day.',
+          'A crate sold back where it was bought, without having travelled, *sells poorly*. **Chilled products** lose their extra-fresh bonus at 20:00, then degrade until they are lost.',
+          '**At night**, the street market stays open: festive goods sell better there, especially at the curfew after-party.',
+        ],
+      },
+      {
+        title: 'Tags',
+        paragraphs: ['Each product carries tags: they tell **what gives it away**, **what protects it** and **where it sells best**.'],
+        list: 'tags',
+      },
+      {
+        title: 'The road and the BRC',
+        paragraphs: [
+          "A **trip's risk** is shown before departure, line by line: district, ICC, hold tags, night, districts crossed, watchlist. Legal crates dilute it.",
+          '**Aeterna has a memory.** Repeating the same link several days in a row gets it flagged: the risk rises, and falls back when you vary your routes. And the bigger your fortune, the more people talk about you: **notoriety** makes every inspection more likely, except in Rust Valley. A Gold Citizen draws half as many looks.',
+          'A **fixed roadblock** can be seen from afar: every option is open. A **flying check** (a drone spotted you) allows neither escape nor ejection: the search, the bluff and bribery remain.',
+          '**Search**: a formality if the hold is legal, otherwise seizure, fine and ICC loss, custody for high tiers.',
+          '**Bluff**: tier 0 and masking help, smell gives you away. **Bribery**: cash, and a luxury crate for connivance.',
+          '**Escape**: saves the hold, costs chassis and a watchlist level; it depends on equipment (driving assist, bull bars, transponder) and doping, not on the rest of the hold. **Ejection**: dump the illegal goods before the roadblock.',
+          'The **false bottom** hides a few illegal crates: during a search, a second roll decides whether the officers find it.',
+          'In **Rust Valley**, no BRC but militias: pay their toll, force your way through or refuse.',
+        ],
+      },
+      {
+        title: 'The gauges',
+        paragraphs: [
+          '**ICC**: your compliance. Low, it attracts inspections and closes doors; at the Gold Citizen tier, the gates open faster.',
+          "**Health**: *at zero, it's death.* It goes back up at the truck stop, with the Canteen's trucker's meal or at the Morgue. With a worn-out driver, bluffs and escapes get harder; when escaping, driving assist compensates.",
+          '**Chassis**: it wears at night and in hard knocks; Mitch repairs it in Rust Valley. At zero, the tow truck costs you a bill and half a day.',
+          '**Synthanol**: every trip uses some, more to cross districts.',
+          "**Watchlist**: Aeterna's gaze; each level adds risk everywhere, and clears after a few days without an offense.",
+          "**Cash-Chip**: exposed to fines, rackets, Viktor's collection and the audit. The **offshore account**, though, is untouchable.",
+        ],
+      },
+      {
+        title: 'Vehicles, modules and crew',
+        paragraphs: [
+          "Mécano-Mitch's **“Faraday” garage**, in Rust Valley, sells bigger chassis and modules: each one serves a build (legal cover, cold chain, escape, bribery, high tier). *Some only come out for clients who have proven themselves.*",
+          'When changing chassis, **removable** modules follow, **adaptable** ones cost a fee, **welded** ones stay on the old one.',
+          'At **Quai 9** in Hives, one crewmate at a time: **Vance** lowers the risk and helps bribery, **Glitch** sees every price and hacks the lights, **Mama Rosa** elevates real food. Each one shows up after a deed that gets them to notice you.',
+        ],
+      },
+      {
+        title: 'Special places',
+        paragraphs: [
+          "Open **from 06:00 to 20:00**, except Viktor's Back Room, which never closes. Some services only open to those who have made a name for themselves: the place shows the condition and your progress.",
+        ],
+        list: 'places',
+      },
+      {
+        title: 'Events',
+        paragraphs: [
+          '**Global events**: drawn the day before, they hit the whole city. A rumor sometimes announces them, with its reliability; Cassandre-88 guarantees them.',
+          '**Local events**: visible from 06:00 on the map, for the day. *The day after a spike, the aftershock brings the price back down: sell on the same day.*',
+          '**Road hazards**: by day, without a roadblock, an encounter and two choices. At night, nobody in the tunnels.',
+          '**Civic elevator Lottery**: every week, one promoted citizen (preventive purge in their district, and sometimes your crewmate who vanishes) and sometimes a demoted one, who carries their vices one floor down.',
+        ],
+      },
+      {
+        title: "Smuggler's tips",
+        paragraphs: [
+          "**Start small**: Hives's cheap products sell well in Rust Valley, and what you find there goes back up to Hives and Pastel-Heights.",
+          '**Pay off the debt early**: every morning makes it grow, and once it is paid off, Viktor opens his contracts and Mitch his smuggling gear.',
+          "**Put your money away** at the laundromat whenever you pass through The Glass Spire: Viktor's collection, fines and the audit don't touch the offshore account.",
+          '**Hover over the percentages**: every chance, every risk, every price is explained line by line on hover or tap.',
+        ],
+      },
+    ],
+    tags: {
+      'TAG-LEGAL': 'Gives nothing away: dilutes the risk of the hold, helps the bluff, and each crate masks an illegal crate.',
+      'TAG-PERISHABLE': 'Must stay chilled: bonus on the day of purchase, then loses value until it is lost. Heatwaves damage it.',
+      'TAG-FRAGILE': 'Can break during escapes and shocks: a damaged crate sells for less.',
+      'TAG-ADDICTIVE': 'Captive clientele: buyback at the price refills faster.',
+      'TAG-ODOROUS': 'Attracts inspections on the road and hampers the bluff; doubled with the robot dogs of Olympus-Green.',
+      'TAG-CULTURE': 'Denounced by the neighbor-vigilantes of Pastel-Heights.',
+      'TAG-TECH': 'Spotted by the scanners of The Glass Spire and Olympus-Green.',
+      'TAG-BIO': 'Sniffed out by the bio-scanners of Panacea.',
+      'TAG-FESTIVE': 'Sells better at night, and much better at the curfew after-party.',
+      'TAG-LUXURY': 'The only gift an officer accepts as a bribe, with connivance thrown in.',
+      'TAG-GOURMET': 'The real food from before: Mama Rosa sells it for more.',
+    } satisfies Record<TagId, string>,
+    places: {
+      'LOC-D1-1': 'Viktor Varga: repay, borrow an advance, and his delivery contracts.',
+      'LOC-D1-2': "The trucker's meal, once a day, and Synthanol at the union rate.",
+      'LOC-D1-3': 'Recruit, replace or dismiss your crewmate.',
+      'LOC-D2-1': 'Order an algorithmic panic: one tag soars everywhere the next day.',
+      'LOC-D3-1': 'Sanitary pass, surgery, decontamination certificate (ICC).',
+      'LOC-D4-1': 'Chassis, modules, fitting and repairs.',
+      'LOC-D4-2': 'Know, and guarantee, the global event of the day after tomorrow.',
+      'LOC-D5-1': 'Offshore account, Cartel investment, and forged Lottery files.',
+      'LOC-D6-1': 'Auctions, VIP orders and elite sponsorship.',
+    } satisfies Record<LocationId, string>,
+  },
+
+  // Modes de difficulté (chap. 1)
+  difficulty: {
+    title: 'Difficulty mode',
+    scope: 'for both the free and the ranked game',
+    modes: {
+      citizen: { name: 'Citizen', blurb: 'To discover: a light debt, a generous advance and softened fines.' },
+      smuggler: { name: 'Smuggler', blurb: 'The game as designed: every mistake costs you, without being fatal.' },
+      outlaw: { name: 'Outlaw', blurb: 'For those who know the game: a heavy debt, a reduced advance from Viktor, steep fines.' },
+    } satisfies Record<DifficultyId, { name: string; blurb: string }>,
+    settings: (debt: string, advance: string | null, fines: string | null) =>
+      [`debt ${debt}`, advance ? `advance ${advance}` : 'no advance', fines ? `fines ${fines}` : 'normal fines'].join(' · '),
+  },
+
+  // Page de contrôle des images, hors jeu (`?debug=true`, chap. 7)
+  debug: {
+    title: 'Image check',
+    intro:
+      'Every piece of data that can receive an image, to check that they are present, consistent and the same size. The dotted frame shows the actual edges of the file.',
+    summary: (present: number, total: number) => `${present} images out of ${total}`,
+    size: (width: number, height: number) => `${width} × ${height} px`,
+    missing: 'Missing',
+    odd: 'Different size',
+    sections: { products: 'Products', vehicles: 'Vehicles', modules: 'Modules', crew: 'Crewmates' },
+    orphans: 'Files without data',
+  },
+
+  // ─── Données de jeu (chap. 2 à 6) ───
+
+  tier: {
+    0: 'Official goods',
+    1: 'Guilty little pleasures',
+    2: 'Cultural contraband & black grocery',
+    3: 'Heavy trafficking & gastronomic “weapons”',
+    4: 'Public enemies no. 1',
+  } satisfies Record<Tier, string>,
+
+  tag: {
+    'TAG-LEGAL': { name: 'Legal' },
+    'TAG-PERISHABLE': { name: 'Chilled' },
+    'TAG-FRAGILE': { name: 'Fragile' },
+    'TAG-ADDICTIVE': { name: 'Addictive' },
+    'TAG-ODOROUS': { name: 'Odorous' },
+    'TAG-CULTURE': { name: 'Culture' },
+    'TAG-TECH': { name: 'Tech' },
+    'TAG-BIO': { name: 'Bio-signature' },
+    'TAG-LUXURY': { name: 'Luxury' },
+    'TAG-FESTIVE': { name: 'Festive' },
+    'TAG-GOURMET': { name: 'Gourmet' },
+  } satisfies Record<TagId, Named>,
+
+  product: {
+    'T0-01': { name: '“Nutri-Standard” bio-bricks', lore: 'Compressed soy and insects, neutral flavor guaranteed by decree.' },
+    'T0-02': {
+      name: '“Pax-Aeterna” demineralized water',
+      lore: "Nothing in it, and that's exactly its promise. Stacked around electronics, it soaks up the scanners' waves.",
+    },
+    'T0-03': { name: '“Smile+” antidepressants', lore: 'State-issued good mood, in gentle pills, on automatic prescription.' },
+    'T0-04': { name: 'Self-censorship manuals', lore: 'The official guide for citizens who correct themselves before they are corrected.' },
+    'T0-05': { name: 'Sealed DSC crates', lore: 'Unknown contents, seals intact: you deliver, you don’t look.' },
+    'T1-01': {
+      name: 'Filled chocolate eggs',
+      lore: 'Real cocoa, real sugar, a shell that breaks at the slightest knock: the Purity Committee hunts for them even in gardens.',
+    },
+    'T1-02': {
+      name: 'Roasted arabica beans',
+      lore: 'A smell that gives you away three streets off: coffee wakes people up, and Aeterna hates that.',
+    },
+    'T1-03': { name: 'Salted churned butter', lore: 'Fatty, salty, forbidden: cholesterol by the block.' },
+    'T1-04': { name: '“MSG-621” noodles', lore: 'Instant, ultra-salty, boosted flavor enhancer: the consolation of the dormitories.' },
+    'T1-05': { name: 'Nicotine chewing gum', lore: 'The vice you chew in silence, by the carton.' },
+    'T1-06': { name: 'Used frying oil', lore: 'Black jerrycans from clandestine chip shops, the fuel of greasy nights.' },
+    'T2-01': { name: '“Lava-Grade” vindaloo curry', lore: 'Imported from India by forgotten roads, it burns the tongue and the sensors.' },
+    'T2-02': {
+      name: 'Iberian saucisson & chorizo',
+      lore: 'Fresh chorizo and barely dried saucisson from the world before: it smells of rebellion, and it turns fast.',
+    },
+    'T2-03': { name: 'Crates of vinyl records', lore: 'Grooves full of pre-war anger, with no connection whatsoever.' },
+    'T2-04': { name: 'Batches of “dumbphones”', lore: 'Flip phones without a cloud: you call without being listened to.' },
+    'T2-05': { name: '“Tcherno-Bull” cans', lore: 'Taurine at an unreasonable dose: enough to last a night, or to outrun a roadblock.' },
+    'T2-06': { name: '“Free World” USB sticks', lore: 'Suitcases of forbidden memories: books, films, archives from before.' },
+    'T2-07': { name: 'Raw wild honey', lore: 'Unregistered hives, bees without badges.' },
+    'T3-01': { name: '“Bio-Hazard” Roquefort', lore: 'A French cheese classified as a biological weapon, and adored for it.' },
+    'T3-02': { name: 'Boxes of Cuban cigars', lore: 'Hand-rolled, smoked in secret at the top of the pyramid.' },
+    'T3-03': { name: 'Aged Scotch whisky', lore: 'Casks older than the Directorate, and far more respected.' },
+    'T3-04': {
+      name: '“Old-School” antibiotics',
+      lore: 'Antibiotics and ivermectin from before the protocols: they heal without asking Aeterna’s opinion.',
+    },
+    'T3-05': { name: 'Fertile tomato seeds', lore: 'Seeds that grow back: a crime against the agricultural monopoly.' },
+    'T3-06': { name: 'Old RTX graphics cards', lore: 'Retro hardware without an AI limiter, powerful enough to think on its own.' },
+    'T3-07': { name: 'Voice clones & deepfakes', lore: 'Tailor-made voices and faces, to lie to the gates.' },
+    'T4-01': { name: 'Kobe wagyu beef', lore: 'Wagyu and Argentine ribs: red meat, the supreme luxury of the elites.' },
+    'T4-02': { name: 'Artworks from the world before', lore: 'Canvases saved from the purges, rolled up in trunks.' },
+    'T4-03': { name: 'Biometric passes', lore: 'A model citizen’s identity, just long enough to get through an inspection.' },
+    'T4-04': {
+      name: 'DSC “Official-Placebo”',
+      lore: 'Saline solution under official seal: the health QR code validated, without the docility molecule.',
+    },
+    'T4-05': { name: '“Jouvence” stem cells', lore: 'Cloning vats for elites who refuse to grow old.' },
+    'T4-06': { name: 'Old Aeterna server', lore: 'A rack from before the update: the memory Aeterna would like to erase.' },
+  } satisfies Record<ProductId, Named & { lore: string }>,
+
+  district: {
+    D1: { name: 'Hives', subtitle: "Workers' dormitory towns" },
+    D2: { name: 'Pastel-Heights', subtitle: 'The bohemian eco-ghetto & ideological campus' },
+    D3: { name: 'Panacea', subtitle: 'The pharmaceutical & medical complex' },
+    D4: {
+      name: 'Rust Valley',
+      subtitle: 'The buffer zone (industrial wasteland & old slaughterhouses)',
+    },
+    D5: { name: 'The Glass Spire', subtitle: 'Ministries, banks & censorship' },
+    D6: { name: 'Olympus-Green', subtitle: 'The Zero-Carbon citadel of the ultra-elites' },
+  } satisfies Record<DistrictId, NamedWithSubtitle>,
+
+  location: {
+    'LOC-D1-1': { name: "Viktor Varga's Back Room", subtitle: 'Mafia loan shark' },
+    'LOC-D1-2': { name: "The Drivers' Canteen", subtitle: '“Chez Borg”' },
+    'LOC-D1-3': { name: 'Quai 9', subtitle: 'Clandestine bar of the service docks' },
+    'LOC-D2-1': { name: 'The “Karma-Cham” studio', subtitle: 'Corrupt State influencer' },
+    'LOC-D3-1': { name: 'The Back Morgue', subtitle: 'Dr. K.' },
+    'LOC-D4-1': { name: 'The “Faraday” garage', subtitle: 'Mécano-Mitch' },
+    'LOC-D4-2': { name: 'The “Cassandre-88” bunker', subtitle: 'The lead-shielded informant' },
+    'LOC-D5-1': {
+      name: 'The “Crypto-Clean” laundromat',
+      subtitle: 'Ministerial offshore bank',
+    },
+    'LOC-D6-1': {
+      name: 'The “Velvet-Silo”',
+      subtitle: 'Sensory cabaret & debauchery basement',
+    },
+  } satisfies Record<LocationId, NamedWithSubtitle>,
+
+  vehicle: {
+    'VEH-01': { name: '“Citi-Volt” minivan' },
+    'VEH-02': { name: '“Zéro-C” shuttle' },
+    'VEH-03': { name: '“Panacea-V8” biomedical van' },
+    'VEH-04': { name: '“Bunker-Lourd” sanitation compactor' },
+  } satisfies Record<VehicleId, Named>,
+
+  module: {
+    'MOD-01': { name: 'Driving assist' },
+    'MOD-02': { name: '“Pine & Bleach” exhaust diffuser' },
+    'MOD-03': { name: 'Lead lining & Faraday cage' },
+    'MOD-04': { name: '“Velvet” suspension & bushings' },
+    'MOD-05': { name: '“E-Ink” rotating license plate' },
+    'MOD-06': { name: 'Tempered steel bull bars' },
+    'MOD-07': { name: 'Drop hatch' },
+    'MOD-08': { name: 'Fake “Gold Citizen” terminal' },
+    'MOD-10': { name: 'Ghost wall' },
+  } satisfies Record<ModuleId, Named>,
+
+  crew: {
+    'CREW-01': {
+      name: 'Commander Vance',
+      subtitle: '“The BRC Veteran”: accredited co-driver, an old bloodhound from before Aeterna',
+    },
+    'CREW-02': {
+      name: 'Glitch',
+      subtitle: 'Young caffeinated hacker (remote radio operator)',
+    },
+    'CREW-03': {
+      name: 'Mama Rosa',
+      subtitle: '“The Matriarch”: Michelin-starred chef from before the Great Reset, refining workshop',
+    },
+  } satisfies Record<CrewId, NamedWithSubtitle>,
+
+  event: {
+    'EVT-G01': { name: 'Heatwave alert & thermal load-shedding' },
+    'EVT-G02': { name: '“Variant-X” health alert' },
+    'EVT-G03': { name: 'Cloud blackout & Pink Feed withdrawal' },
+    'EVT-G04': { name: 'Eco-Panic' },
+    'EVT-G05': { name: 'Food blockade & transport strike' },
+    'EVT-G06': { name: "The Founders' Night" },
+    'EVT-G07': { name: "Aeterna's maintenance" },
+    'EVT-D1-01': { name: 'Automated garbage collectors’ strike' },
+    'EVT-D1-02': { name: 'Elevator breakdown & hot water cut' },
+    'EVT-D1-03': { name: 'Aeterna bailiffs’ raid' },
+    'EVT-D2-01': { name: '“Detox & Repentance” people’s tribunal' },
+    'EVT-D2-02': { name: '“Wave-Free” clandestine festival' },
+    'EVT-D2-03': { name: '“Zero-Failure” exam week' },
+    'EVT-D3-01': { name: 'Leak at the P4 laboratory' },
+    'EVT-D3-02': { name: 'Collective intern burnout' },
+    'EVT-D3-03': { name: 'Central pharmacy inventory' },
+    'EVT-D4-01': { name: '“Chemtrails” alert' },
+    'EVT-D4-02': { name: 'Arrival of a ghost freighter' },
+    'EVT-D4-03': { name: 'Exoskeleton demolition tournament' },
+    'EVT-D5-01': { name: 'Quarterly close & algorithmic crash' },
+    'EVT-D5-02': { name: 'Ideological Purity Committee audit' },
+    'EVT-D5-03': { name: 'X-ray gate bug' },
+    'EVT-D6-01': { name: '“Zero-Carbon” world summit' },
+    'EVT-D6-02': { name: 'Political purge at the top' },
+    'EVT-D6-03': { name: 'Oligarch’s whim: “Proletarian Nostalgia”' },
+    'EVT-R01': { name: 'Child vigilante' },
+    'EVT-R02': { name: 'ICC bounty hunter' },
+    'EVT-R03': { name: '“Clean Air” Committee' },
+    'EVT-R04': { name: 'Fake hitchhiker' },
+    'EVT-R05': { name: 'Retinal scan while driving' },
+    'EVT-R06': { name: 'Re-education voice quiz' },
+    'EVT-R07': { name: 'Blood drive at the toll' },
+    'EVT-R08': { name: 'Forced engine limiter' },
+    'EVT-R09': { name: 'Hypoglycemic citizen' },
+    'EVT-R10': { name: 'Convoy of “Lottery winners”' },
+    'EVT-R11': { name: 'Aerial disinfection cloud' },
+    'EVT-R12': { name: 'Crashed delivery drone' },
+    'EVT-R13': { name: 'Broken-down DSC tanker' },
+    'EVT-R14': { name: 'Charity toll' },
+    'EVT-R15': { name: 'Blind-spot swap' },
+    'EVT-L01': { name: 'Civic elevator Lottery' },
+  } satisfies Record<EventId, Named>,
+} satisfies Messages

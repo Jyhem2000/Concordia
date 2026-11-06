@@ -75,7 +75,8 @@ export function DestinationsPanel() {
       {tripDone && <Hint className="px-3 pt-2">{t.error['trip-done']}</Hint>}
       <LastTrip />
       <Exposure className="px-3 pt-2" />
-      <ul className="mt-2 divide-y divide-line border-t border-line">
+      {/* Une carte par district, espacées : chaque destination se lit d'un bloc */}
+      <ul className="flex flex-col gap-2 p-2">
         {order
           .filter((id) => id !== pinned)
           .map((id) => (
@@ -105,7 +106,7 @@ function LastTrip() {
   if (parts.length === 0) return null
   return (
     <Hint className="px-3 pt-2">
-      {t.travel.lastTrip} : {parts.join(' · ')}
+      {t.format.label(t.travel.lastTrip)} {parts.join(' · ')}
     </Hint>
   )
 }
@@ -113,7 +114,7 @@ function LastTrip() {
 /**
  * Un district, avec tout ce qu'il faut pour choisir où aller : en-tête (nom, étoiles, indices), description sur toute la
  * largeur, faits (événement, Synthanol, lieux, mémoire), produits en soute (statut, tendance, cours vu), puis une barre
- * de départ pleine largeur : itinéraire, rations et risque à gauche, « Aller » à droite.
+ * de départ pleine largeur : itinéraire, rations et risque à gauche, « Aller » toujours à droite.
  */
 function DistrictDetails({ districtId, featured = false }: DistrictDetailsProps) {
   const here = useGameStore((s) => s.game.districtId === districtId)
@@ -131,7 +132,7 @@ function DistrictDetails({ districtId, featured = false }: DistrictDetailsProps)
   // Position actuelle en bleu, district choisi en ambre : deux surbrillances distinctes
   const frame = featured
     ? `rounded-lg border p-3 ${here ? 'border-info/40 bg-info/5' : 'border-accent/40 bg-accent/5'}`
-    : `px-3 py-2 ${here ? 'bg-info/5' : ''}`
+    : `rounded-md border px-3 py-2 ${here ? 'border-info/30 bg-info/5' : 'border-line bg-raised/40'}`
   const Wrapper = featured ? motion.section : motion.li
 
   return (
@@ -212,7 +213,7 @@ function DestinationFacts({ districtId }: DistrictIdProps) {
   )
 }
 
-/** Barre de départ, sur toute la largeur : itinéraire, rations, risque détaillable et part de contrôles volants, puis « Aller » */
+/** Barre de départ, sur toute la largeur : itinéraire, rations, risque détaillable et part de contrôles volants, puis « Aller » à droite */
 function TravelBar({ districtId }: DistrictIdProps) {
   // planTravel lit plusieurs champs de la partie (phase, carburant, trajets faits…) : on passe l'état entier
   const game = useGameStore((s) => s.game)
@@ -245,8 +246,9 @@ function TravelBar({ districtId }: DistrictIdProps) {
         : t.travel.goNight
 
   return (
-    <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 border-t border-line pt-2 text-xs">
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-ink-muted">
+    // Les infos du trajet à gauche, sur une ou plusieurs lignes ; « Aller » toujours à droite, centré verticalement
+    <div className="mt-2 flex items-center gap-3 border-t border-line pt-2 text-xs">
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-0.5 text-ink-muted">
         <span>{route}</span>
         <span>· {t.travel.fuel(plan.fuelCost)}</span>
         <span className="flex items-center gap-1">
@@ -263,6 +265,7 @@ function TravelBar({ districtId }: DistrictIdProps) {
         {watched > 0 && <span className="text-warning">· {t.travel.routeWatched(repeats, signedPercent(watched, 0))}</span>}
       </div>
       <ConfirmButton
+        className="shrink-0"
         variant={evening && !mission ? 'danger' : 'primary'}
         disabled={error !== null}
         reason={error ? t.error[error] : null}

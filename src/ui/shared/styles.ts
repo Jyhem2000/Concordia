@@ -2,7 +2,8 @@ import { FOCUS_RING } from './focus.ts'
 import type { IccTier, Tier } from '../../engine/types.ts'
 
 /** Rôles de couleur de la charte (chap. 7) ; chaque rôle est une variable du thème dans `src/index.css` */
-export type Tone = 'neutral' | 'muted' | 'accent' | 'danger' | 'success' | 'warning' | 'info' | 'night' | 'event' | 'cash' | 'offshore' | 'wanted'
+export type Tone =
+  'neutral' | 'muted' | 'accent' | 'danger' | 'success' | 'warning' | 'info' | 'night' | 'event' | 'cash' | 'offshore' | 'wanted' | 'ranked'
 
 /** Texte dans la couleur d'un rôle */
 export const TONE_TEXT: Record<Tone, string> = {
@@ -18,6 +19,7 @@ export const TONE_TEXT: Record<Tone, string> = {
   cash: 'text-cash',
   offshore: 'text-offshore',
   wanted: 'text-wanted',
+  ranked: 'text-ranked-soft',
 }
 
 /** Fond plein d'un rôle (barre de jauge) */
@@ -34,6 +36,7 @@ export const TONE_BG: Record<Tone, string> = {
   cash: 'bg-cash',
   offshore: 'bg-offshore',
   wanted: 'bg-wanted',
+  ranked: 'bg-ranked',
 }
 
 /** Pastille teintée d'un rôle : bord, fond et texte */
@@ -50,6 +53,7 @@ export const TONE_CHIP: Record<Tone, string> = {
   cash: 'border-cash/40 bg-cash/10 text-cash',
   offshore: 'border-offshore/40 bg-offshore/10 text-offshore',
   wanted: 'border-wanted/40 bg-wanted/10 text-wanted',
+  ranked: 'border-ranked-soft/40 bg-ranked/15 text-ranked-soft',
 }
 
 /** Couleurs d'une caisse (chap. 7) : texte, liseré gauche des lignes de produit, fond teinté au survol, case d'image, emplacement de soute (plein ou caché) */
@@ -109,8 +113,8 @@ export const ICC_TONE: Record<IccTier, Tone> = {
 /** Bulle flottante (infobulle, menu) : placée par Floating UI */
 export const BUBBLE = 'z-50 rounded-lg border border-line-strong bg-raised p-2 text-xs text-ink-soft shadow-lg shadow-black/40'
 
-/** Champ de saisie ou liste déroulante */
-export const FIELD = `rounded-md border border-line-strong bg-base px-2 py-1 text-sm disabled:opacity-35 ${FOCUS_RING}`
+/** Champ de saisie ou liste déroulante, à la hauteur d'un bouton : un champ et son bouton s'alignent */
+export const FIELD = `rounded-md border border-line-strong bg-base px-2 py-1.5 text-sm disabled:opacity-35 ${FOCUS_RING}`
 
 /** Caisses scellées du DSC : hors commerce, en gris plutôt qu'au vert du Tier 0 (chap. 2) */
 export const SEALED_STYLE: CrateStyle = {

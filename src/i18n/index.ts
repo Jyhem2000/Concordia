@@ -1,14 +1,32 @@
 import { isRuleSource, type BreakdownSource } from '../engine/breakdown.ts'
+import { en } from './en.ts'
 import { fr } from './fr.ts'
 
 export type Messages = typeof fr
 
-/** Langues disponibles. Pour l'anglais : créer en.ts (`satisfies Messages`) et l'ajouter ici. */
-export const locales = { fr } satisfies Record<string, Messages>
+/** Langues disponibles : fr.ts est la référence, chaque autre catalogue a sa forme exacte (`satisfies Messages`) */
+export const locales = { fr, en } satisfies Record<string, Messages>
 
 export type Locale = keyof typeof locales
 
-export const DEFAULT_LOCALE: Locale = 'fr'
+/** Langue sans correspondance avec celles du navigateur */
+export const FALLBACK_LOCALE: Locale = 'en'
+
+/** Nom de chaque langue dans cette langue même, pour le choix de la langue (chap. 7) */
+export const LOCALE_NAMES: Record<Locale, string> = { fr: 'Français', en: 'English' }
+
+function isLocale(value: string): value is Locale {
+  return Object.hasOwn(locales, value)
+}
+
+/** Première langue du navigateur que le jeu parle (« fr-CA » → fr), sinon l'anglais (chap. 7) */
+export function detectLocale(preferred: readonly string[]): Locale {
+  for (const tag of preferred) {
+    const base = tag.toLowerCase().split('-')[0] ?? ''
+    if (isLocale(base)) return base
+  }
+  return FALLBACK_LOCALE
+}
 
 export type I18n = {
   locale: Locale

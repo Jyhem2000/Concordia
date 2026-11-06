@@ -171,9 +171,9 @@ function SheetBody({ productId }: SheetBodyProps) {
               if (effects.length === 0) return null
               return (
                 <li key={tag}>
-                  <span className="font-bold text-ink">{t.tag[tag].name}</span>
+                  <span className="font-bold text-ink">{effects.length === 1 ? t.format.label(t.tag[tag].name) : t.tag[tag].name}</span>
                   {effects.length === 1 ? (
-                    <> : {effects[0]}</>
+                    <> {effects[0]}</>
                   ) : (
                     <ul className="mt-0.5 list-disc space-y-0.5 pl-4">
                       {effects.map((effect) => (

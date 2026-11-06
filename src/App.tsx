@@ -1,16 +1,40 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSettingsStore } from './stores/settingsStore.ts'
 import ErrorBoundary from './ui/ErrorBoundary.tsx'
 import GameScreen from './ui/GameScreen.tsx'
 import ImageGallery from './ui/debug/ImageGallery.tsx'
+import LeaderboardScreen from './ui/screens/LeaderboardScreen.tsx'
 import TitleScreen from './ui/screens/TitleScreen.tsx'
+
+/** Écran affiché : l'accueil, la partie ou le classement */
+type Screen = 'title' | 'game' | 'board'
 
 /** Page de contrôle des images à la place du jeu (chap. 7) : lue une fois, à l'ouverture */
 const DEBUG = new URLSearchParams(window.location.search).get('debug') === 'true'
 
-/** L'accueil à chaque ouverture, puis l'écran de jeu (chap. 7) ; la page de contrôle des images avec `?debug=true` */
+/** L'accueil à chaque ouverture, puis l'écran de jeu ou le classement (chap. 7) ; la page de contrôle des images avec `?debug=true` */
 export default function App() {
-  // Entré dans la partie depuis l'accueil : état d'interface éphémère, l'accueil revient à la prochaine ouverture
-  const [playing, setPlaying] = useState(false)
+  // Écran ouvert : état d'interface éphémère, l'accueil revient à la prochaine ouverture
+  const [screen, setScreen] = useState<Screen>('title')
+  const locale = useSettingsStore((s) => s.locale)
+  // Synchronisation externe : la langue de la page, pour les lecteurs d'écran et la césure
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
+  const show = (next: Screen) => {
+    setScreen(next)
+    window.scrollTo({ top: 0 })
+  }
   if (DEBUG) return <ImageGallery />
-  return <ErrorBoundary>{playing ? <GameScreen /> : <TitleScreen onPlay={() => setPlaying(true)} />}</ErrorBoundary>
+  return (
+    <ErrorBoundary>
+      {screen === 'game' ? (
+        <GameScreen onHome={() => show('title')} />
+      ) : screen === 'board' ? (
+        <LeaderboardScreen onBack={() => show('title')} />
+      ) : (
+        <TitleScreen onPlay={() => show('game')} onBoard={() => show('board')} />
+      )}
+    </ErrorBoundary>
+  )
 }

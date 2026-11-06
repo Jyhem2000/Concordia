@@ -41,7 +41,7 @@ Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la dé
 | **Équipement** | véhicules (double fond et son contenu compris), modules (cage de Faraday comprise), équipage (injection du serveur par Glitch comprise), salaires | chap. 4 |
 | **Événements** | globaux (dont la maintenance d'Aeterna), locaux, rumeurs, contrecoups, Loterie, aléas routiers | chap. 6 → chap. 5 (contrôles volants, Fiche S) |
 | **Prévisibilité** | ce que le joueur sait ou peut deviner (cours, rumeurs, contrecoups, Loterie) et ce qui reste caché (ronde renforcée) | chap. 2 → chap. 6 → chap. 5 |
-| **Affichage** | charte graphique, accueil, onglets, En bref (actualités, agenda, bonnes affaires, alertes), carnet de route et courbe du patrimoine, écran de fin (victoire, mort et conseil, bilan, impression, partage), carrière et hauts faits, téléscripteur, confirmations, où chaque règle est montrée et détaillée au joueur, manuel du passeur | chap. 7 |
+| **Affichage** | charte graphique, langues (français, anglais, langue du navigateur), boutons (survol, curseurs, variantes), accueil, écran du classement, onglets, En bref (actualités, agenda, bonnes affaires, alertes), carnet de route et courbe du patrimoine, écran de fin (victoire, mort et conseil, bilan, impression, partage), carrière et hauts faits, téléscripteur, confirmations, où chaque règle est montrée et détaillée au joueur, manuel du passeur | chap. 7 |
 
 ## État d'implémentation
 Toutes les règles des chap. 1 à 6 sont en jeu. Ce tableau dit ce qui reste à faire, et se met à jour à chaque étape.

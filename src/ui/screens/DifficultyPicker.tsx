@@ -15,7 +15,9 @@ export default function DifficultyPicker() {
 
   return (
     <fieldset className="flex flex-col gap-1.5">
-      <legend className="mb-1.5 text-xs font-bold text-ink-muted uppercase">{t.difficulty.title}</legend>
+      <legend className="mb-1.5 text-xs text-ink-muted">
+        <span className="font-bold uppercase">{t.difficulty.title}</span> · {t.difficulty.scope}
+      </legend>
       <div className="grid gap-2 sm:grid-cols-3">
         {keysOf(DIFFICULTIES).map((id) => {
           const { startDebt, survivalAdvance, fineFactor } = DIFFICULTIES[id]

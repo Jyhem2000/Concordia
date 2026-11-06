@@ -38,6 +38,10 @@
   /* Diffusion d'Aeterna (téléscripteur) : une seconde zone en surbrillance, distincte de l'ambre de l'action et de la sélection */
   --color-broadcast: #2dd4bf;
 
+  /* Partie classée et classement : le seul violet de l'interface, pour les reconnaître d'un coup d'œil */
+  --color-ranked: #7c3aed;
+  --color-ranked-soft: #c4b5fd;
+
   /* Portefeuilles */
   --color-cash: #fde047;
   --color-offshore: #67e8f9;
@@ -63,11 +67,38 @@
   --color-tier-4: #a78bfa;
 }
 
+/* Marge basse de la barre d'onglets : au moins un cran, et toute la zone sûre de l'écran (barre de gestes, coins arrondis) */
+@utility pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
 @layer base {
   html,
   body,
   #root {
     height: 100%;
+  }
+
+  /* La page s'étend jusqu'aux bords de l'écran (viewport-fit=cover) : en paysage, l'encoche ne cache aucun contenu */
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Place de la barre de défilement toujours réservée : une page qui change de hauteur ne décale pas tout l'écran */
+  html {
+    scrollbar-gutter: stable;
+  }
+
+  /* Tout élément cliquable montre la main ; un bouton grisé, l'interdiction (Tailwind laisse le curseur par défaut) */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  summary,
+  label:has(input:not(:disabled)) {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
   }
 
   /* Terminal d'Aeterna : un seul thème sombre, chiffres alignés dans les tableaux */

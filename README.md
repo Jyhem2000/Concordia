@@ -12,7 +12,9 @@ En 30 jours, il faut rembourser la mafia, déjouer les contrôles de la Brigade 
 - **Vise une fin :** de la Bio-Brique au Haut-Commissaire, en passant par quelques fins bien cachées.
 - **Partie libre ou partie classée :** une graine différente à chaque partie, ou la même pour tous chaque jour, avec un classement par mode de difficulté.
 
-Le jeu est en français, sur téléphone comme sur ordinateur, sans compte ni publicité.
+Le jeu est en français et en anglais, sur téléphone comme sur ordinateur, sans compte ni publicité.
+
+**[Jouer à Concordia](https://concordia-game.pages.dev/)**
 
 ## Lancer le jeu en local
 

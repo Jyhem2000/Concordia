@@ -66,8 +66,13 @@ type DealRowProps = {
 const SECTION = 'mb-1.5 text-xs font-bold text-ink-soft uppercase'
 const SEPARATED = 'mt-3 border-t border-line pt-2'
 
+type FilViewProps = {
+  /** Revenir à l'accueil */
+  onHome: () => void
+}
+
 /** Onglet En bref (chap. 7) : ce qui compte aujourd'hui, avant d'aller au marché puis sur la carte */
-export default function FilView() {
+export default function FilView({ onHome }: FilViewProps) {
   return (
     <>
       {/* Dans l'ordre de lecture : la journée, les décisions, le bilan ; sur grand écran, répartis en colonnes */}
@@ -78,7 +83,7 @@ export default function FilView() {
       <CalendarPanel />
       <ObjectivesPanel />
       <JournalPanel />
-      <NewGamePanel />
+      <NewGamePanel onHome={onHome} />
     </>
   )
 }

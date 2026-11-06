@@ -27,12 +27,15 @@ const icons: Record<Tab, LucideIcon> = {
   map: MapIcon,
 }
 
-/** Barre d'onglets fixée en bas de l'écran du téléphone, masquée sur grand écran */
+/**
+ * Barre d'onglets fixée en bas de l'écran du téléphone, masquée sur grand écran. Marges en bas et sur les côtés : les
+ * libellés restent hors des coins arrondis de l'écran et de la barre de gestes
+ */
 export default function TabBar({ current, tabs, onPick }: TabBarProps) {
   const { t } = useI18n()
   return (
     <nav aria-label={t.tabs.label} className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-panel/95 backdrop-blur md:hidden">
-      <ul className="flex">
+      <ul className="flex px-3 pb-safe">
         {tabs.map((tab) => {
           const Icon = icons[tab]
           const active = tab === current
