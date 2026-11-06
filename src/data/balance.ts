@@ -62,9 +62,9 @@ export const AUDIT_COUNTDOWN_DAY = 28
 
 type EndingRules = {
   saboteur: { minScore: number; requiredProduct: ProductId; district: DistrictId }
-  /** Fantôme : injections du serveur par l'équipier, chacune une tournée de nuit hors mission */
+  /** Héritier : injections du serveur par l'équipier, chacune une tournée de nuit hors mission */
   resident: { minScore: number; injections: number; requiredProduct: ProductId; crew: CrewId }
-  /** Élite par cooptation : commandes VIP livrées au Velvet-Silo pour gagner un parrain, palier d'ICC à minuit */
+  /** Haut-Commissaire par cooptation : commandes VIP livrées au Velvet-Silo pour gagner un parrain, palier d'ICC à minuit */
   elite: { minScore: number; iccTier: IccTier; sponsorOrders: number }
   mafia: { minScore: number }
   /** Notable : un score, sans autre condition */

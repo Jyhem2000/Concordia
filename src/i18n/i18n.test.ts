@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { GAME_LENGTH_DAYS } from '../data/balance.ts'
 import { TICKER_PER_DAY, TICKER_STRIDE, tickerSlots } from '../ui/hud/tickerSlot.ts'
+import { isWellFormed } from '../ui/shared/rich.ts'
 import { getI18n } from './index.ts'
 import { fr } from './fr.ts'
 import frSource from './fr.ts?raw'
@@ -9,7 +10,7 @@ import frSource from './fr.ts?raw'
 const plain = (text: string) => text.replace(/\s/g, ' ')
 
 /** Longueur maximale d'un nom de produit (chap. 2) : il tient sur une ligne du marché */
-const PRODUCT_NAME_MAX = 30
+const PRODUCT_NAME_MAX = 35
 
 describe('i18n (fr)', () => {
   const i18n = getI18n('fr')
@@ -34,10 +35,10 @@ describe('i18n (fr)', () => {
 
   it('résout les sources de Breakdown en libellés', () => {
     expect(i18n.label('D5')).toBe('The Glass Spire')
-    expect(i18n.label('T4-06')).toBe('Vieux Serveur Aeterna')
+    expect(i18n.label('T4-06')).toBe('Vieux serveur Aeterna')
     expect(i18n.label('TAG-TECH')).toBe('Tech')
-    expect(i18n.label('LOC-D1-1')).toBe("L'Arrière-Salle de Viktor Varga")
-    expect(i18n.label('EVT-D1-01')).toBe('Grève des Éboueurs Automatisés')
+    expect(i18n.label('LOC-D1-1')).toBe("L'Arrière-salle de Viktor Varga")
+    expect(i18n.label('EVT-D1-01')).toBe('Grève des éboueurs automatisés')
     expect(i18n.label('rule.clamp')).toBe('Plafond')
   })
 
@@ -60,8 +61,8 @@ describe('i18n (fr)', () => {
     const allowed = [
       /\d{2}h\d{2}/g, // horaires fixes : 06h00, 20h00
       /\b1 (×|caisse|trajet|ration)/g, // une unité
-      /Tier 0/g, // nom de la règle de bluff
-      /Jour 1\b/g, // début de partie
+      /[Tt]ier 0/g, // nom de la règle de bluff
+      /[Jj]our 1\b/g, // début de partie
       /1 \+ \(jour − 1\)/g, // formule de l'indice, affichée telle quelle
       /\b0 (à|et) |à 0\b/g, // zéro
       /sur 5\b/g, // échelle des étoiles de sécurité
@@ -85,6 +86,27 @@ describe('i18n (fr)', () => {
       return /\d/.test(text) ? [line.trim()] : []
     })
     expect(offending).toEqual([])
+  })
+
+  it('ne balise que les textes longs, et les ferme tous', () => {
+    // Accueil et manuel, rendus par `Rich` : un balisage mal fermé laisserait des astérisques à l'écran
+    const chapters = fr.manual.chapters(GAME_LENGTH_DAYS, [{ mode: 'Citoyen', debt: 'dette' }])
+    const rich = [
+      ...fr.title.world,
+      ...fr.title.role,
+      ...fr.title.goal(GAME_LENGTH_DAYS, 'dette', 'cash'),
+      ...fr.title.day,
+      ...Object.values(fr.title.teaser),
+      ...chapters.flatMap((chapter) => chapter.paragraphs),
+      ...Object.values(fr.manual.tags),
+      ...Object.values(fr.manual.places),
+    ]
+    expect(rich.filter((text) => !isWellFormed(text))).toEqual([])
+    // Ailleurs, aucun astérisque : ces textes s'affichent tels quels
+    const leaves = (value: unknown): string[] =>
+      typeof value === 'string' ? [value] : typeof value === 'object' && value !== null ? Object.values(value).flatMap(leaves) : []
+    const others = Object.entries(fr).flatMap(([key, section]) => (key === 'title' || key === 'manual' ? [] : leaves(section)))
+    expect(others.filter((text) => text.includes('*'))).toEqual([])
   })
 
   it('réutilise la même instance par langue', () => {

@@ -197,7 +197,7 @@ export function heatWave(ctx: EventContext): Extract<EventEffect, { kind: 'heat'
 /** Arrivée dans un district (chap. 1) : effets d'arrivée des événements locaux, comme le sas de `[EVT-D3-01]` */
 export function arrive(state: GameState): GameState {
   const halted = hasEffect(state, state.districtId, 'halfDay') ? loseHalfDay(state) : state
-  // Tournée de nuit hors mission arrivée sans garde à vue (contrôle franchi compris) : injection du Fantôme (chap. 4)
+  // Tournée de nuit hors mission arrivée sans garde à vue (contrôle franchi compris) : injection de l'Héritier (chap. 4)
   const arrived = halted.phase === 'night' && !isOnMission(halted, halted.districtId) ? injectServer(halted) : halted
   // Arriver dans le district d'une commande du DSC (livraison du jour, mission de nuit), c'est livrer les caisses scellées
   return deliverDay(deliverMission(arrived))

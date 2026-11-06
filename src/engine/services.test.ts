@@ -134,7 +134,7 @@ describe('Velvet-Silo', () => {
     expect(errorOf(lastDay, { type: 'vipDeliver' })).toBeNull()
     expect(errorOf({ ...lastDay, day: lastDay.day + 1 }, { type: 'vipDeliver' })).toBe('too-late')
     expect(delivered.cash).toBeGreaterThan(ordered.cash)
-    // Parrainage de l'Élite : une commande livrée compte, une commande manquée en efface une
+    // Parrainage du Haut-Commissaire : une commande livrée compte, une commande manquée en efface une
     expect(delivered.progress.vipOrders).toBe(ordered.progress.vipOrders + 1)
     // Échec constaté à la routine qui suit l'échéance
     let missed: GameState = { ...ordered, districtId: 'D1', progress: { ...ordered.progress, vipOrders: 2 } }

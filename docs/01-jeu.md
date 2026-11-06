@@ -54,7 +54,7 @@ La partie dure **30 jours consécutifs** (Jour 1 à Jour 30), en plein été. Le
 
 | Palier | Statut | Effet |
 | :--- | :--- | :--- |
-| 1 | Citoyen Or | **Coupe-file :** risque réduit aux portiques des districts qui en ont un (`goldFastLane` dans [`districts.ts`](../src/data/districts.ts), `GOLD_FAST_LANE_FACTOR` dans [`balance.ts`](../src/data/balance.ts)). Requis pour la fin Élite. |
+| 1 | Citoyen Or | **Coupe-file :** risque réduit aux portiques des districts qui en ont un (`goldFastLane` dans [`districts.ts`](../src/data/districts.ts), `GOLD_FAST_LANE_FACTOR` dans [`balance.ts`](../src/data/balance.ts)). Requis pour la fin Haut-Commissaire. |
 | 2 | Citoyen ordinaire | — |
 | 3 | Citoyen sous réserve | Pompes officielles **fermées la nuit**. `[LOC-D6-1]` inaccessible (services réservés, chap. 3). |
 | 4 | Déviant notoire | Effets du palier précédent, et toute entrée en `[D6]` déclenche **automatiquement** une interception. |
@@ -221,15 +221,15 @@ L'écran « Objectifs du Jour 30 » les affiche une fois la dette initiale sold�
 | Fin | Conditions (dette soldée) | Épilogue |
 | :--- | :--- | :--- |
 | **Ultime — « Le Saboteur »** | Score ≥ seuil Ultime + au moins **1 caisse de `[T4-06]`** en soute + être **en `[D4]`** à minuit | Tu achètes le passage sur le chalutier blindé des cartels à l'écluse de `[D4]`. En franchissant le mur vers les îles libres, tu diffuses les preuves sur le Fil Rose : Concordia s'embrase derrière toi pendant que tu sirotes un vrai whisky au soleil. |
-| **Pègre — « Le Fantôme »** | Score ≥ seuil du Fantôme + **injection complète** du serveur par Glitch (plusieurs tournées de nuit clandestines, chap. 4). Ni lieu à minuit, ni ICC, ni serveur à bord exigés | Le code d'Aeterna se réécrit : résident de Catégorie S, né sous la verrière, casier vierge. Les douaniers d'élite te saluent par ton nom. |
-| **Élite — « Nouvel Oligarque »** (cooptation) | Score ≥ seuil Élite + un **parrain** au Velvet-Silo (commandes VIP livrées, chap. 3) + statut **Citoyen Or** à minuit (les portiques biométriques de la dalle lisent l'ICC). Sinon, fin suivante | Ton parrain glisse ton nom pour le fauteuil d'un Haut-Commissaire « suicidé » ; le Conseil vote à l'unanimité, par habitude. Tu emménages sous la verrière de `[D6]` : c'est toi qui commandes de la vraie viande aux petits livreurs. |
+| **Pègre — « L'Héritier »** | Score ≥ seuil de l'Héritier + **injection complète** du serveur par Glitch (plusieurs tournées de nuit clandestines, chap. 4). Ni lieu à minuit, ni ICC, ni serveur à bord exigés | Le code d'Aeterna se réécrit : résident de Catégorie S, né sous la verrière, casier vierge. Les douaniers d'élite te saluent par ton nom. |
+| **Élite — « Le Haut-Commissaire »** (cooptation) | Score ≥ seuil du Haut-Commissaire + un **parrain** au Velvet-Silo (commandes VIP livrées, chap. 3) + statut **Citoyen Or** à minuit (les portiques biométriques de la dalle lisent l'ICC). Sinon, fin suivante | Ton parrain glisse ton nom pour le fauteuil d'un Haut-Commissaire « suicidé » ; le Conseil vote à l'unanimité, par habitude. Tu emménages sous la verrière de `[D6]` : c'est toi qui commandes de la vraie viande aux petits livreurs. |
 | **Mafieuse — « Baron de Rust Valley »** | Score ≥ seuil Mafieuse (aucun prérequis d'ICC) | Ton casier est trop grillé pour la haute société, mais tu rachètes la boucherie de `[LOC-D1-1]` et les quais de `[D4]` : tu es le nouveau parrain de la contrebande. |
-| **Aisée — « Notable de Hives »** | Score ≥ seuil Notable (sans autre condition) | Tu rachètes la Cantine des Chauffeurs et deviens l'homme qu'on salue dans les tours de `[D1]`. Viktor y mange gratuitement : certaines dettes ne s'éteignent jamais. |
+| **Aisée — « Notable de Hives »** | Score ≥ seuil Notable (sans autre condition) | Tu rachètes la Cantine des chauffeurs. Dans les tours sédatées de `[D1]`, tu es le seul à garder les yeux ouverts : tu fais crédit, tu tiens le marché noir que le régime tolère (sa « soupape », chap. 3), et l'on te salue sans trop savoir pourquoi. Viktor y mange gratuitement : certaines dettes ne s'éteignent jamais. *Lore :* à Hives, être quelqu'un, ce n'est pas monter, c'est rester éveillé. |
 | **Probe — « Citoyen exemplaire »** | Score ≥ seuil du Citoyen exemplaire + statut **Citoyen Or** à minuit + **Fiche S vierge** à minuit | Aeterna te cite en exemple : te voilà formateur des nouveaux livreurs de Catégorie C. Personne ne soupçonne ce que cache ton double fond. |
 | **Standard — « Survivant »** | Aucune autre fin atteinte | Tu as échappé au recyclage, mais ton pécule ne rachète pas ta liberté. Demain 06h00, septembre commence et tu remontes dans ta fourgonnette… |
 
 *Seuils de score, injections et commandes exigées : `ENDINGS` dans [`balance.ts`](../src/data/balance.ts), à recaler en jouant.*
 
 * **Deux fins intermédiaires,** entre le Baron et le Survivant, pour qui n'atteint pas les grandes : le Notable récompense le commerce, le Citoyen exemplaire la prudence (un petit score, mais l'ICC au plus haut et aucun écart en cours). *Intention :* les fins de prestige restent rares ; une bonne partie sans exploit a quand même sa fin.
-* **Trois voies de prestige :** la rébellion (Saboteur), la pègre (Fantôme), la voie officielle (Élite). Seule la possession du serveur `[T4-06]` est commune au Saboteur et au Résident (pour le Résident, pendant les injections seulement).
+* **Trois voies de prestige :** la rébellion (Saboteur), la pègre (Héritier), la voie officielle (Haut-Commissaire). Seule la possession du serveur `[T4-06]` est commune au Saboteur et à l'Héritier (pour l'Héritier, pendant les injections seulement).
 * *Lore :* on ne monte jamais sous la verrière sur son seul mérite (chap. 3) : il faut qu'un oligarque te coopte, ou qu'Aeterna croie que tu y es né.

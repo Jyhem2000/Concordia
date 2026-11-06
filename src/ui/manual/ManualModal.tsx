@@ -8,6 +8,7 @@ import { useI18n } from '../../i18n/useI18n.ts'
 import Button from '../shared/Button.tsx'
 import { FOCUS_RING } from '../shared/focus.ts'
 import Modal from '../shared/Modal.tsx'
+import Rich from '../shared/Rich.tsx'
 
 type ManualButtonProps = {
   variant?: 'default' | 'primary'
@@ -75,7 +76,9 @@ function ManualModal({ open, onClose }: ManualModalProps) {
         <h3 className="font-bold text-base text-ink">{chapter.title}</h3>
         <div className="mt-2 flex flex-col gap-2 text-ink-soft">
           {chapter.paragraphs.map((paragraph) => (
-            <p key={paragraph}>{paragraph}</p>
+            <p key={paragraph}>
+              <Rich text={paragraph} />
+            </p>
           ))}
         </div>
         {terms.length > 0 && (
@@ -83,7 +86,9 @@ function ManualModal({ open, onClose }: ManualModalProps) {
             {terms.map(({ id, term, text }) => (
               <div key={id} className="sm:flex sm:gap-3">
                 <dt className="font-bold text-ink sm:w-48 sm:shrink-0">{term}</dt>
-                <dd>{text}</dd>
+                <dd>
+                  <Rich text={text} />
+                </dd>
               </div>
             ))}
           </dl>

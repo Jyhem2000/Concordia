@@ -97,7 +97,7 @@ export function recordDeviation(state: GameState): GameState {
   }
 }
 
-/** Fantôme (chap. 4) : serveur en soute et Glitch au travail ce jour-là, tant que l'injection n'est pas complète */
+/** Héritier (chap. 4) : serveur en soute et Glitch au travail ce jour-là, tant que l'injection n'est pas complète */
 export function canInject(state: GameState): boolean {
   const { injections, requiredProduct, crew } = ENDINGS.resident
   return state.progress.injections < injections && workingCrew(state) === crew && ownedQty(state.cargo, requiredProduct) > 0

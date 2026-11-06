@@ -14,6 +14,7 @@ import Chip from '../shared/Chip.tsx'
 import ConfirmButton from '../shared/ConfirmButton.tsx'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
+import Rich from '../shared/Rich.tsx'
 import DifficultyPicker from './DifficultyPicker.tsx'
 
 type TitleScreenProps = {
@@ -100,23 +101,31 @@ export default function TitleScreen({ onPlay }: TitleScreenProps) {
       <div className="grid gap-4 md:grid-cols-2">
         <Block icon={Globe} title={title.worldTitle}>
           {title.world.map((line) => (
-            <p key={line}>{line}</p>
+            <p key={line}>
+              <Rich text={line} />
+            </p>
           ))}
         </Block>
         <Block icon={Truck} title={title.roleTitle}>
           {title.role.map((line) => (
-            <p key={line}>{line}</p>
+            <p key={line}>
+              <Rich text={line} />
+            </p>
           ))}
         </Block>
         <Block icon={Target} title={title.goalTitle}>
           {title.goal(GAME_LENGTH_DAYS, credits(DIFFICULTIES[difficulty].startDebt), credits(START_CASH)).map((line) => (
-            <p key={line}>{line}</p>
+            <p key={line}>
+              <Rich text={line} />
+            </p>
           ))}
         </Block>
         <Block icon={Clock} title={title.dayTitle}>
           <ul className="flex list-disc flex-col gap-1.5 pl-4">
             {title.day.map((line) => (
-              <li key={line}>{line}</li>
+              <li key={line}>
+                <Rich text={line} />
+              </li>
             ))}
           </ul>
         </Block>
@@ -129,7 +138,9 @@ export default function TitleScreen({ onPlay }: TitleScreenProps) {
               <Chip tone={(reached[id] ?? 0) > 0 ? 'success' : 'muted'} icon={(reached[id] ?? 0) > 0 ? Trophy : Lock}>
                 {t.end.endings[id].title}
               </Chip>
-              <span className="text-ink-soft">{title.teaser[id]}</span>
+              <span className="text-ink-soft">
+                <Rich text={title.teaser[id]} />
+              </span>
             </li>
           ))}
         </ul>

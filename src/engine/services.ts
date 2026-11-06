@@ -281,7 +281,7 @@ export function deliverVip(state: GameState): ServiceResult {
   if (error || !state.vip) return fail(error ?? 'no-contract')
   const { taken, remaining } = takeLots(state.cargo, state.vip.productId, VELVET.vip.crates)
   const total = taken.reduce((sum, lot) => sum + silverPrice(state, lot, VELVET.vip.factor) * lot.qty, 0)
-  // Parrainage de l'Élite : chaque commande livrée compte
+  // Parrainage du Haut-Commissaire : chaque commande livrée compte
   const progress = { ...state.progress, vipOrders: state.progress.vipOrders + 1 }
   return { ok: true, state: used({ ...state, cash: state.cash + total, cargo: remaining, vip: null, progress }, 'vip') }
 }

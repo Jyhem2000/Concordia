@@ -60,7 +60,7 @@ Stock par jour, quota de demande (chap. 2) et bonus de Forte demande de chaque t
 
 ---
 
-**Noms :** un nom de produit tient sur une ligne du marché, 30 caractères au plus ; le reste (origine, détail de lore) va dans la ligne de lore de la fiche produit (chap. 7).
+**Noms :** un nom de produit tient sur une ligne du marché, 35 caractères au plus ; le reste (origine, détail de lore) va dans la ligne de lore de la fiche produit (chap. 7).
 
 ## Tier 0
 
@@ -159,7 +159,7 @@ Stock par jour, quota de demande (chap. 2) et bonus de Forte demande de chaque t
   * **Mort subite :** une fouille effective avec au moins 1 caisse en soute déclenche l'exécution sommaire (Game Over).
   * **Encombrant :** une baie de serveur n'entre pas dans le double fond (chap. 4).
   * **Balise de traçage :** tant qu'au moins 1 caisse est en soute, un malus au risque d'interception partout (`beaconRisk` dans [`products.ts`](../src/data/products.ts)), racket de `[D4]` compris (les milices captent aussi le signal) ; annulé tant que `[CREW-02]` travaille (chap. 4).
-  * **Grandes fins :** condition de la fin « Saboteur » (en `[D4]` à minuit), et outil des injections de Glitch pour la fin « Fantôme » (chap. 1 et 4).
+  * **Grandes fins :** condition de la fin « Saboteur » (en `[D4]` à minuit), et outil des injections de Glitch pour la fin « L'Héritier » (chap. 1 et 4).
 
 ---
 

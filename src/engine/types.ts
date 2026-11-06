@@ -754,9 +754,9 @@ export type GameState = {
     flagged: boolean
     /** Commandes du DSC livrées (jour et nuit) */
     deliveries: number
-    /** Commandes VIP du Velvet-Silo livrées, moins celles manquées (parrainage de l'Élite) */
+    /** Commandes VIP du Velvet-Silo livrées, moins celles manquées (parrainage du Haut-Commissaire) */
     vipOrders: number
-    /** Injections du serveur réussies par Glitch (Fantôme) */
+    /** Injections du serveur réussies par Glitch (Héritier) */
     injections: number
     /** Fouilles où les agents n'ont pas trouvé le double fond (catalogue de Mitch) */
     compartmentHeld: number
