@@ -15,6 +15,7 @@ import ManualButton from '../manual/ManualModal.tsx'
 import Button from '../shared/Button.tsx'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
+import RankedStatus from './RankedStatus.tsx'
 
 type Defeat = Extract<EndingId, 'bio-bricks' | 'death' | 'execution'>
 
@@ -85,6 +86,8 @@ export default function EndScreen() {
           </p>
         )}
       </header>
+
+      <RankedStatus />
 
       {defeat && isDefeatId(id) && (
         <Panel icon={Lightbulb} title={t.recap.adviceTitle} tone="highlight">

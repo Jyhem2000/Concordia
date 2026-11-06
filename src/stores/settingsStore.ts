@@ -10,8 +10,13 @@ type SettingsStore = {
   collapsed: readonly string[]
   /** Mode de difficulté de la prochaine partie (chap. 1) */
   difficulty: DifficultyId
+  /** Pseudo du classement (chap. 1), tel que saisi */
+  pseudo: string
+  /** Identifiant anonyme du joueur, tiré au hasard une fois : une tentative par jour et par mode côté serveur */
+  playerId: string
   setLocale: (locale: Locale) => void
   setDifficulty: (difficulty: DifficultyId) => void
+  setPseudo: (pseudo: string) => void
   toggleCollapsed: (id: string) => void
 }
 
@@ -22,18 +27,30 @@ export const useSettingsStore = create<SettingsStore>()(
       locale: DEFAULT_LOCALE,
       collapsed: [],
       difficulty: DEFAULT_DIFFICULTY,
+      pseudo: '',
+      playerId: crypto.randomUUID(),
       setLocale: (locale) => set({ locale }),
       setDifficulty: (difficulty) => set({ difficulty }),
+      setPseudo: (pseudo) => set({ pseudo }),
       toggleCollapsed: (id) =>
         set((s) => ({ collapsed: s.collapsed.includes(id) ? s.collapsed.filter((entry) => entry !== id) : [...s.collapsed, id] })),
     }),
     {
       name: 'concordia-settings',
       storage: createJSONStorage(() => localStorage),
-      version: 3,
-      // Version 1 : la langue seulement ; version 2 : sans mode de difficulté. Les réglages gardés, le mode par défaut
-      migrate: (saved) => ({ locale: DEFAULT_LOCALE, collapsed: [], ...(typeof saved === 'object' ? saved : {}), difficulty: DEFAULT_DIFFICULTY }),
-      partialize: ({ locale, collapsed, difficulty }) => ({ locale, collapsed, difficulty }),
+      version: 4,
+      // Version 1 : la langue seulement ; 2 : sans mode de difficulté (mode par défaut) ; 3 : sans pseudo ni identifiant
+      // (ceux de l'état initial). Les réglages déjà là sont gardés
+      migrate: (saved, version) => ({
+        locale: DEFAULT_LOCALE,
+        collapsed: [],
+        difficulty: DEFAULT_DIFFICULTY,
+        pseudo: '',
+        playerId: crypto.randomUUID(),
+        ...(typeof saved === 'object' ? saved : {}),
+        ...(version < 3 ? { difficulty: DEFAULT_DIFFICULTY } : {}),
+      }),
+      partialize: ({ locale, collapsed, difficulty, pseudo, playerId }) => ({ locale, collapsed, difficulty, pseudo, playerId }),
     },
   ),
 )

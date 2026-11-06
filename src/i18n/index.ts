@@ -24,6 +24,8 @@ export type I18n = {
   /** Facteur en variation, lisible par tous : 0.85 → « −15 % », 1.5 → « +50 % » */
   change(factor: number): string
   number(value: number, maxDigits?: number): string
+  /** Jour d'une partie classée : « 2026-11-06 » → « 6 novembre » */
+  calendarDay(day: string): string
   /** Libellé d'une source de Breakdown : nom de la donnée de jeu ou de la règle */
   label(source: BreakdownSource): string
 }
@@ -55,6 +57,8 @@ function createI18n(locale: Locale): I18n {
   }
 
   const number = (value: number, maxDigits = 2) => format(value, { maximumFractionDigits: maxDigits })
+  // Jour UTC, comme la graine du jour (chap. 1)
+  const days = new Intl.DateTimeFormat(t.intlLocale, { day: 'numeric', month: 'long', timeZone: 'UTC' })
 
   return {
     locale,
@@ -65,6 +69,7 @@ function createI18n(locale: Locale): I18n {
     signedPercent: (fraction, maxDigits = 1) => format(fraction, { style: 'percent', maximumFractionDigits: maxDigits, signDisplay: 'exceptZero' }),
     change: (factor) => format(factor - 1, { style: 'percent', maximumFractionDigits: 0, signDisplay: 'exceptZero' }),
     number,
+    calendarDay: (day) => days.format(new Date(day)),
     label: (source) => labelOf(t, source),
   }
 }

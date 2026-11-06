@@ -13,14 +13,18 @@ Simulation économique satirique (Drug Wars-like). Game design : [docs/](docs/RE
 
 ## Arborescence
 
-| Dossier       | Rôle                                                                                     |
-| :------------ | :--------------------------------------------------------------------------------------- |
-| `src/data/`   | Contenu fixe du jeu, indexé par les IDs des docs (produits, districts, constantes…)      |
-| `src/engine/` | Règles pures, sans React et testées : types, RNG à graine, `Breakdown`, calculs, actions |
-| `src/stores/` | Stores Zustand : état de la partie sauvegardé, réglages                                  |
-| `src/i18n/`   | Textes traduits, clés dérivées des IDs                                                   |
-| `src/ui/`     | Composants React, découpés comme le chap. 10 (bandeau, marché, soute, carte…)            |
-| `sim/`        | Simulations (chap. 9) : bots, campagnes, rapports ; utilise `src/`, jamais l'inverse     |
+| Dossier       | Rôle                                                                                      |
+| :------------ | :---------------------------------------------------------------------------------------- |
+| `src/data/`   | Contenu fixe du jeu, indexé par les IDs des docs (produits, districts, constantes…)       |
+| `src/engine/` | Règles pures, sans React et testées : types, RNG à graine, `Breakdown`, calculs, actions  |
+| `src/stores/` | Stores Zustand : état de la partie sauvegardé, réglages                                   |
+| `src/i18n/`   | Textes traduits, clés dérivées des IDs                                                    |
+| `src/net/`    | Seul code réseau du jeu : envoi d'une partie classée, lecture du classement               |
+| `src/ui/`     | Composants React, découpés comme le chap. 10 (bandeau, marché, soute, carte…)             |
+| `sim/`        | Simulations (chap. 9) : bots, campagnes, rapports ; utilise `src/`, jamais l'inverse      |
+| `functions/`  | Fonctions Cloudflare Pages (`/api/…`) : envoi des parties classées, lecture du classement |
+| `server/`     | Code du serveur partagé par les fonctions et la vérification : schéma D1, contrôles       |
+| `scripts/`    | Vérification des parties classées par rejeu (GitHub Actions)                              |
 
 Données de jeu :
 
@@ -37,7 +41,7 @@ Conventions du moteur :
 Traductions :
 
 - **Un seul fichier par langue :** `src/i18n/fr.ts` est le catalogue de référence (tous les textes, indexés par les IDs des docs). L'anglais se fera en copiant ce fichier en `en.ts` (`satisfies Messages` : toute clé manquante casse la compilation), puis en l'ajoutant à `locales` dans `src/i18n/index.ts`.
-- **Noms propres invariables :** un district, un lieu, un véhicule, un module, un produit ou un personnage garde partout son nom officiel, celui de `fr.ts` (« Hives », jamais « les Ruches » ; « The Glass Spire », jamais « la Flèche de Verre »). Un nom propre ne se traduit pas, même s'il a une traduction possible. Seule abréviation permise : le nom sans son complément entre guillemets (« la Laverie », « le Garage », « le Fourgon « Panacea-V8 » » plutôt que « la Panacea », qui est un district). Un sous-titre décrit, il ne traduit pas le nom.
+- **Noms propres invariables :** un district, un lieu, un véhicule, un module, un produit ou un personnage garde partout son nom officiel, celui de `fr.ts` (« Hives », jamais « les Ruches » ; « The Glass Spire », jamais « la Flèche de Verre »). Un nom propre ne se traduit pas, même s'il a une traduction possible. Seule abréviation permise : le nom sans son complément entre guillemets (« la laverie », « le garage », « le Fourgon « Panacea-V8 » » plutôt que « la Panacea », qui est un district). Un sous-titre décrit, il ne traduit pas le nom.
 - **Aucun texte en dur dans les composants :** `const { t, credits, percent, label } = useI18n()`. Les nombres passent par les formateurs (`credits(2500)` → « 2 500 ₡ »), les lignes de `Breakdown` par `label(source)`.
 - Le moteur ne manipule jamais de texte, seulement des IDs.
 
@@ -86,6 +90,7 @@ Elles s'appliquent à tout le code, sans exception non justifiée. **Toute nouve
 - Sélecteurs fins : `useGameStore((s) => s.game.day)`. L'état entier seulement quand une fonction du moteur en a besoin, et le commentaire le dit.
 - Les changements d'état passent par les actions du store (`dispatch`, `newGame`), qui délèguent au moteur.
 - Le stockage navigateur passe uniquement par le middleware `persist`.
+- **Sauvegardes migrées :** depuis la première version publique (`PUBLIC_SAVE_VERSION` dans `gameStore.ts`), tout changement de forme d'un état sauvegardé incrémente la `version` de son store et ajoute une migration testée, qui convertit l'ancienne sauvegarde au lieu de l'effacer. Une sauvegarde plus ancienne que la version publique repart de zéro.
 
 **Tailwind CSS v4**
 
@@ -105,7 +110,7 @@ Elles s'appliquent à tout le code, sans exception non justifiée. **Toute nouve
 - Un facteur s'affiche en variation, lisible par tous : `change(0.85)` donne « −15 % », jamais « ×0,85 ».
 - Un bouton sans texte explicite porte un `aria-label` traduit (la page est en `lang="fr"`, un libellé anglais serait mal prononcé).
 - Focus clavier visible sur tout élément interactif (`FOCUS_RING`).
-- États d'affichage : données, liste vide, erreur (bandeau d'erreur d'action, `ErrorBoundary` autour de l'application). Pas d'état de chargement tant que rien n'est asynchrone.
+- États d'affichage : données, liste vide, erreur (bandeau d'erreur d'action, `ErrorBoundary` autour de l'application). Seul le classement est asynchrone : il a un état de chargement et un état hors ligne.
 
 **Animations (Motion)**
 
@@ -138,3 +143,12 @@ Elles s'appliquent à tout le code, sans exception non justifiée. **Toute nouve
 | `npm run format`                           | Formate tout le projet avec Prettier                         |
 | `npm run format:check`                     | Vérifie le formatage sans modifier                           |
 | `npm run simulate -- <campagne> [parties]` | Joue une campagne de simulation, rapport dans `sim/reports/` |
+
+## Mise en ligne (Cloudflare, offre gratuite)
+
+Le site et le classement tiennent dans l'offre gratuite de Cloudflare : le serveur ne fait que stocker et lire, la vérification des scores tourne sur GitHub Actions.
+
+- **Site :** Cloudflare Pages, relié au dépôt GitHub. Build `npm run build`, dossier `dist`. Chaque déploiement est construit depuis un commit : son SHA (`CF_PAGES_COMMIT_SHA`) devient la **version des règles** que porte chaque partie classée (`RULES_VERSION`).
+- **Classement :** les fonctions de `functions/api/` (Pages Functions) et une base **D1** liée sous le nom `DB` (réglages du projet Pages → Functions → liaisons D1). La table `runs` (une ligne par joueur, jour et mode) se crée une fois depuis la console D1 ; son script `server/schema.sql` reste hors dépôt. `POST /api/runs` enregistre une partie classée en attente (forme, date, une tentative par joueur, par jour et par mode) ; `GET /api/leaderboard` lit les scores vérifiés.
+- **Vérification :** `.github/workflows/verify.yml` lance `scripts/verify.ts` toutes les heures. Il lit les parties en attente par l'API D1, rejoue chacune avec le moteur de **sa** version des règles (le commit de son SHA, extrait à part avec `git worktree`), puis inscrit le score obtenu ou rejette la partie. La version venant de l'envoi, seul un commit de la branche principale est rejoué, et sans les secrets de la tâche. Secrets du dépôt : `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` (droit D1 : modifier), `D1_DATABASE_ID`.
+- **Sans serveur** (`npm run dev`) : le jeu tourne, le classement affiche son état hors ligne, et une partie classée se joue mais ne s'envoie pas (version des règles `dev`).

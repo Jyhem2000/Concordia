@@ -24,7 +24,7 @@ Index complet : chaque mécanique du jeu y figure, avec les chapitres qui la dé
 
 | Thème | Mécaniques | Où lire |
 | :--- | :--- | :--- |
-| **Partie** | objectif, audit du Jour 30, défaites (Bio-Briques, mort, exécution), grandes fins (Saboteur, Héritier et injections, Haut-Commissaire par cooptation, Baron), score, modes de difficulté | chap. 1 |
+| **Partie** | objectif, audit du Jour 30, défaites (Bio-Briques, mort, exécution), grandes fins (Saboteur, Héritier et injections, Haut-Commissaire par cooptation, Baron), score, modes de difficulté, partie libre et partie classée (graine du jour, tentative unique, classement, score vérifié par rejeu) | chap. 1 → chap. 7 (accueil, écran de fin) |
 | **Jauges** | ICC (paliers, suspicion, gains de route et plafond), Santé, châssis, carburant | chap. 1 → chap. 4 (capacités du véhicule) |
 | **Journée** | moments (Journée, 20h00, Nuit), routine de 06h00, service de jour, dilemme de 20h00 (relais, bivouac, tournée de nuit), livraison officielle du jour, missions de nuit et caisses scellées, after du couvre-feu, épuisement, demi-journée perdue, immobilisation, dépannage d'urgence | chap. 1 |
 | **Trajet** | ordre de résolution, consommation, usure de nuit et canicule, carte et districts traversés, couches du réseau (surface, galeries, quais), zone hors-réseau, mission de nuit | chap. 1 → chap. 3 → chap. 6 (canicule, aléas de jour) |

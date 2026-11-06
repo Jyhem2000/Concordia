@@ -1376,6 +1376,47 @@ export const fr = {
     newGame: 'Nouvelle partie',
     newGameConfirm: (mode: string) => `La partie en cours sera perdue. Commencer une nouvelle partie en mode ${mode} ?`,
     currentMode: (mode: string) => `Partie en cours : mode ${mode}. Le mode choisi vaut pour la prochaine partie.`,
+    currentRanked: (mode: string, day: string) => `Partie en cours : classée du ${day}, mode ${mode}. Le mode choisi vaut pour la prochaine partie.`,
+  },
+
+  /** Partie classée et classement du jour (chap. 1 et 7) */
+  ranked: {
+    title: 'Partie classée du jour',
+    info: "La même graine pour tous les joueurs aujourd'hui, une seule tentative par mode : l'abandonner la consomme. À la fin, le serveur rejoue ta partie pour vérifier ton score avant de l'inscrire au classement.",
+    pseudo: 'Pseudo',
+    pseudoHint: (min: number, max: number) => `De ${min} à ${max} caractères : lettres, chiffres, espaces, points et tirets.`,
+    play: (mode: string) => `Jouer la classée du jour (${mode})`,
+    confirmTitle: 'Partie classée du jour',
+    confirm: (mode: string) =>
+      `La partie en cours sera abandonnée. Lancer la partie classée du jour en mode ${mode} ? Tu n'as qu'une tentative par jour dans ce mode.`,
+    confirmAction: 'Lancer la classée',
+    noPseudo: "Choisis d'abord un pseudo valide.",
+    taken: (mode: string) => `Tentative du jour déjà prise en mode ${mode} : une nouvelle graine arrive à minuit UTC.`,
+    board: {
+      title: 'Classement du jour',
+      info: 'Les scores vérifiés seulement : la vérification passe toutes les heures. Une défaite vaut zéro ; à égalité, la première partie envoyée passe devant. Le classement de la veille est clos.',
+      today: "Aujourd'hui",
+      yesterday: 'Hier',
+      loading: 'Chargement du classement…',
+      offline: 'Classement indisponible : le serveur ne répond pas.',
+      empty: 'Aucun score vérifié pour l’instant.',
+      rank: (rank: number) => (rank > 1 ? `${rank}e` : `${rank}er`),
+      pending: 'Ta partie : en attente de vérification.',
+      own: (rank: string, score: string) => `Ta partie : ${rank}, ${score}.`,
+      rejected: 'Ta partie a été rejetée à la vérification.',
+    },
+    status: {
+      title: 'Partie classée',
+      idle: "Partie classée finie : prête à l'envoi.",
+      sending: 'Envoi de ta partie au classement…',
+      sent: 'Partie envoyée : elle entrera au classement après la vérification, toutes les heures. Résultat sur l’accueil.',
+      duplicate: 'Partie déjà reçue pour ce jour et ce mode.',
+      refused: 'Le serveur a refusé ta partie : classement clos, ou pseudo refusé.',
+      failed: 'Envoi impossible : pas de connexion au serveur.',
+      retry: 'Réessayer',
+      stale: 'Hors classement : le jeu a été mis à jour pendant ta partie, elle ne se rejoue plus à l’identique.',
+      local: 'Version de développement : la partie classée ne s’envoie pas.',
+    },
   },
 
   /** Bilan de fin de partie, à la victoire comme à la mort (chap. 7) */
@@ -1443,6 +1484,7 @@ export const fr = {
           `Ce score, et ce que tu as accompli, décident de ta fin : de simple Survivant à Saboteur. Une fois la dette initiale soldée, l’encart **« Objectifs du jour ${days} »** d’En bref montre ce que chaque grande fin exige.`,
           'On perd aussi en **mourant** (santé à zéro) ou en se faisant **fouiller avec le vieux serveur Aeterna** à bord.',
           "**Trois modes de difficulté**, au choix à l'accueil : Citoyen pour découvrir, Contrebandier pour le jeu normal, Hors-la-loi pour qui le connaît. Ils changent la dette de départ, l'avance de Viktor et les amendes de la BRC ; la carrière garde un meilleur score par mode.",
+          "**Partie libre ou classée** : la partie libre tire un nouveau hasard à chaque fois. La **partie classée du jour** est la même pour tous les joueurs, avec une seule tentative par mode ; à la fin, le serveur la rejoue pour vérifier ton score, puis l'inscrit au classement de l'accueil.",
         ],
       },
       {

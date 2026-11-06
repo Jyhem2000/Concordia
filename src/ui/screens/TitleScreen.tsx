@@ -16,6 +16,8 @@ import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
 import Rich from '../shared/Rich.tsx'
 import DifficultyPicker from './DifficultyPicker.tsx'
+import LeaderboardPanel from './LeaderboardPanel.tsx'
+import RankedPanel from './RankedPanel.tsx'
 
 type TitleScreenProps = {
   /** Entrer dans la partie (nouvelle, reprise, ou son bilan si elle est finie) */
@@ -37,17 +39,18 @@ function started(game: GameState): boolean {
 }
 
 /**
- * Écran d'accueil (chap. 7) : le monde, le rôle du joueur, le but et la journée type, les fins à atteindre ; puis lancer,
- * reprendre ou recommencer la partie, et le manuel
+ * Écran d'accueil (chap. 7) : le mode, puis lancer, reprendre ou recommencer une partie libre, et le manuel ; la partie
+ * classée du jour et son classement ; le monde, le rôle du joueur, le but et la journée type, les fins à atteindre
  */
 export default function TitleScreen({ onPlay }: TitleScreenProps) {
   const game = useGameStore((s) => s.game)
   const newGame = useGameStore((s) => s.newGame)
+  const ranked = useGameStore((s) => s.ranked)
   const games = useRecordsStore((s) => s.games)
   const reached = useRecordsStore((s) => s.endings)
   // Mode de la prochaine partie, retenu dans les réglages (chap. 1)
   const difficulty = useSettingsStore((s) => s.difficulty)
-  const { t, credits } = useI18n()
+  const { t, credits, calendarDay } = useI18n()
   const title = t.title
   const finished = game.status === 'finished'
   const ongoing = !finished && started(game)
@@ -66,7 +69,13 @@ export default function TitleScreen({ onPlay }: TitleScreenProps) {
       </header>
 
       <DifficultyPicker />
-      {ongoing && <Hint>{title.currentMode(t.difficulty.modes[game.difficulty].name)}</Hint>}
+      {ongoing && (
+        <Hint>
+          {ranked
+            ? title.currentRanked(t.difficulty.modes[game.difficulty].name, calendarDay(ranked.day))
+            : title.currentMode(t.difficulty.modes[game.difficulty].name)}
+        </Hint>
+      )}
 
       <div className="flex flex-wrap justify-center gap-2">
         {finished ? (
@@ -96,6 +105,11 @@ export default function TitleScreen({ onPlay }: TitleScreenProps) {
           </Button>
         )}
         <ManualButton />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <RankedPanel ongoing={ongoing} onPlay={onPlay} />
+        <LeaderboardPanel />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

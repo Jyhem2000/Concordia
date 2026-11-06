@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { savedPart, useGameStore } from './gameStore.ts'
+import { dailySeed, utcDay } from '../engine/ranked.ts'
+import { createInitialState } from '../engine/state.ts'
+import { migrateSave, PUBLIC_SAVE_VERSION, rankedBlock, SAVE_VERSION, savedPart, useGameStore } from './gameStore.ts'
+import { useRecordsStore } from './recordsStore.ts'
 
 /*
  * Le store relie l'interface au moteur : on vérifie qu'il applique les actions acceptées,
@@ -38,7 +41,34 @@ describe('gameStore', () => {
     expect(useGameStore.getState()).toMatchObject({ game: { day: 1, status: 'playing' }, lastError: null })
   })
 
-  it('ne sauvegarde que la partie', () => {
-    expect(Object.keys(savedPart(useGameStore.getState()))).toEqual(['game'])
+  it('sauvegarde la partie et son statut classé, pas l’erreur affichée', () => {
+    expect(Object.keys(savedPart(useGameStore.getState()))).toEqual(['game', 'ranked', 'actions', 'submission'])
+  })
+
+  it('ne note pas les actions d’une partie libre', () => {
+    useGameStore.getState().dispatch({ type: 'waitEvening' })
+    expect(useGameStore.getState()).toMatchObject({ ranked: null, actions: [] })
+  })
+
+  it('lance la partie classée sur la graine du jour, note la tentative et les actions acceptées', () => {
+    useRecordsStore.setState({ rankedTries: {} })
+    useGameStore.getState().newRankedGame('outlaw')
+    const day = utcDay(new Date())
+    expect(useGameStore.getState().game).toEqual(createInitialState(dailySeed(day), 'outlaw'))
+    expect(useRecordsStore.getState().rankedTries[day]).toEqual(['outlaw'])
+    useGameStore.getState().dispatch({ type: 'waitEvening' })
+    useGameStore.getState().dispatch({ type: 'refuel', qty: 1 })
+    expect(useGameStore.getState().actions).toEqual([{ type: 'waitEvening' }])
+  })
+
+  it('met hors classement une partie commencée avec d’autres règles', () => {
+    expect(rankedBlock({ day: '2026-11-06', seed: 1, rulesVersion: 'b'.repeat(40) })).toBe('stale')
+    // Les tests tournent sans commit déployé : leurs parties classées ne s'envoient jamais
+    expect(rankedBlock({ day: '2026-11-06', seed: 1, rulesVersion: 'dev' })).toBe('local')
+  })
+
+  it('repart de zéro depuis une sauvegarde antérieure à la version publique', () => {
+    expect(PUBLIC_SAVE_VERSION).toBeLessThanOrEqual(SAVE_VERSION)
+    expect(migrateSave()).toMatchObject({ game: { day: 1, status: 'playing' }, ranked: null, actions: [] })
   })
 })

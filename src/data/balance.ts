@@ -35,6 +35,12 @@ export const DIFFICULTIES: Readonly<Record<DifficultyId, { startDebt: number; su
 /** Mode d'une partie lancée sans choix (sauvegarde, simulations) */
 export const DEFAULT_DIFFICULTY: DifficultyId = 'smuggler'
 
+/**
+ * Partie classée (chap. 1) : longueur du pseudo, jours où un classement accepte une partie (le sien et le lendemain),
+ * plafond d'actions d'une partie envoyée, nombre de lignes affichées au classement
+ */
+export const RANKED = { pseudoMin: 3, pseudoMax: 20, openDays: 2, maxActions: 6_000, top: 50 }
+
 /** Bornes hautes des jauges du joueur (ICC en %, Santé en PV), plancher à 0 */
 export const ICC_MAX = 100
 export const HEALTH_MAX = 100
