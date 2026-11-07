@@ -33,9 +33,10 @@ type RecapStatsProps = {
 export default function EndScreen() {
   const game = useGameStore((s) => s.game)
   const newGame = useGameStore((s) => s.newGame)
+  const ranked = useGameStore((s) => s.ranked)
   // La nouvelle partie reprend le dernier mode choisi (chap. 1)
   const difficulty = useSettingsStore((s) => s.difficulty)
-  const { t, credits } = useI18n()
+  const { t, credits, calendarDay } = useI18n()
   const text = useHighlightText()
   // Bilan copié faute de partage natif : état d'interface éphémère
   const [copied, setCopied] = useState(false)
@@ -50,23 +51,24 @@ export default function EndScreen() {
     log.highlights.filter((highlight) => highlight.kind !== 'trip').map((highlight) => ({ day: log.day, line: text(highlight) })),
   )
 
-  // Bilan en quelques lignes, pour un message ou un réseau
+  // Bilan en quelques lignes, pour un message ou un réseau, avec l'adresse du jeu pour inviter à jouer (chap. 7)
   const share = async () => {
     const r = t.recap
+    const url = window.location.origin
     const lines = [
       score === null
         ? r.shareDefeat(t.end.endings[id].title, recap.days, mode)
         : r.shareVictory(t.end.endings[id].title, credits(score), recap.days, mode),
       r.shareStats(recap.controls, recap.escapes, recap.trips.night),
       ...(feats.length > 0 ? [r.shareFeats(feats.map((feat) => t.records.feat[feat].name).join(', '))] : []),
+      ...(ranked ? [r.shareRanked(calendarDay(ranked.day))] : []),
     ]
-    const message = lines.join('\n')
     if (typeof navigator.share === 'function') {
-      // Partage annulé par le joueur : rien à faire
-      await navigator.share({ title: r.shareTitle, text: message }).catch(() => undefined)
+      // Partage natif : le système joint le lien au texte. Partage annulé par le joueur : rien à faire
+      await navigator.share({ title: r.shareTitle, text: lines.join('\n'), url }).catch(() => undefined)
       return
     }
-    await navigator.clipboard.writeText(message)
+    await navigator.clipboard.writeText([...lines, r.shareInvite(url)].join('\n'))
     setCopied(true)
   }
 

@@ -3,8 +3,8 @@ import { createInitialState } from './state.ts'
 import type { DifficultyId, GameState } from './types.ts'
 
 /*
- * Partie classée (chap. 1) : la graine du jour, commune à tous les joueurs et à tous les modes, et le rejeu qui
- * recalcule une partie à partir de sa graine, de son mode et de la suite de ses actions.
+ * Partie classée (chap. 1) : le jour UTC, la graine des builds locaux, et le rejeu qui recalcule une partie à partir de
+ * sa graine, de son mode et de la suite de ses actions. En ligne, la graine du jour vient du serveur (`/api/start`).
  */
 
 /** Jour UTC d'un instant, au format AAAA-MM-JJ : la graine du jour change à minuit UTC */
@@ -12,8 +12,11 @@ export function utcDay(instant: Date): string {
   return instant.toISOString().slice(0, 10)
 }
 
-/** Graine du jour : empreinte FNV-1a (32 bits) du jour, la même partout et pour tous les modes */
-export function dailySeed(day: string): number {
+/**
+ * Graine du jour d'un build local, sans serveur : empreinte FNV-1a (32 bits) du jour. Publique et prévisible, elle ne
+ * sert jamais au classement, dont la graine est secrète
+ */
+export function localSeed(day: string): number {
   let hash = 0x811c9dc5
   for (const char of `concordia:${day}`) {
     hash ^= char.charCodeAt(0)

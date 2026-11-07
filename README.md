@@ -16,6 +16,16 @@ Le jeu est en français et en anglais, sur téléphone comme sur ordinateur, san
 
 **[Jouer à Concordia](https://concordia-game.pages.dev/)**
 
+![Un barrage de la BRC : fouille, bluff, corruption ou fuite, chaque chance affichée](docs/images/checkpoint.png)
+
+|                                      La carte et les lieux                                      |                               Le marché noir                                |
+| :---------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------: |
+|  ![Carte des six districts, couvre-feu de 20h00 et studio de Karma-Cham](docs/images/map.png)   | ![Marché noir de Pastel-Heights, véhicule et soute](docs/images/market.png) |
+|                                          **L'accueil**                                          |                             **Le bilan de fin**                             |
+| ![Accueil : modes de difficulté, partie libre et partie classée du jour](docs/images/title.png) | ![Écran de fin : score, bilan et courbe du patrimoine](docs/images/end.png) |
+
+Un bug, une idée ? [Ouvre un ticket](https://github.com/Jyhem2000/concordia/issues).
+
 ## Lancer le jeu en local
 
 Il faut [Node.js](https://nodejs.org/) 24 ou plus récent.

@@ -2,11 +2,13 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { openDays } from '../server/runs.ts'
 import { isVerdict, type PendingRun, type Verdict } from './verdict.ts'
 
 /*
  * Vérification des parties classées (chap. 1, chap. 9 « Mise en ligne »), lancée toutes les heures par GitHub Actions :
- * lit les parties en attente dans D1, rejoue chacune avec les règles du commit qui l'a vue naître, inscrit le verdict.
+ * lit les parties en attente dans D1 avec la graine secrète de leur jour, rejoue chacune avec les règles du commit qui l'a
+ * vue naître, inscrit le verdict, puis efface les ouvertures des jours clos.
  * Usage : CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… D1_DATABASE_ID=… node scripts/verify.ts
  */
 
@@ -70,15 +72,19 @@ function judge(dir: string, runs: PendingRun[]): Verdict[] {
   return Array.isArray(verdicts) ? verdicts.filter(isVerdict) : []
 }
 
-const rows = await query(`SELECT id, day, difficulty, rules_version AS version, actions FROM runs WHERE status = 'pending' ORDER BY id LIMIT ?`, [
-  BATCH,
-])
+const rows = await query(
+  `SELECT runs.id, runs.day, runs.difficulty, runs.rules_version AS version, runs.actions, days.seed
+   FROM runs LEFT JOIN days ON days.day = runs.day WHERE runs.status = 'pending' ORDER BY runs.id LIMIT ?`,
+  [BATCH],
+)
 const byVersion = new Map<string, PendingRun[]>()
 for (const row of rows) {
   if (typeof row !== 'object' || row === null || !('version' in row) || typeof row.version !== 'string') continue
   if (!('id' in row) || typeof row.id !== 'number' || !('day' in row) || typeof row.day !== 'string') continue
   if (!('difficulty' in row) || typeof row.difficulty !== 'string' || !('actions' in row) || typeof row.actions !== 'string') continue
-  const run = { id: row.id, day: row.day, difficulty: row.difficulty, actions: row.actions }
+  // Les règles d'avant la graine secrète tiraient la graine de la date et ignorent ce champ
+  const seed = 'seed' in row && typeof row.seed === 'number' ? { seed: row.seed } : {}
+  const run: PendingRun = { id: row.id, day: row.day, difficulty: row.difficulty, actions: row.actions, ...seed }
   byVersion.set(row.version, [...(byVersion.get(row.version) ?? []), run])
 }
 
@@ -113,4 +119,6 @@ try {
 } finally {
   for (const dir of worktrees) git('worktree', 'remove', '--force', dir)
 }
+// Ouvertures des jours clos : leur empreinte de connexion ne sert plus à rien, elle disparaît (chap. 1)
+await query(`DELETE FROM starts WHERE day < ?`, [openDays(new Date()).at(-1) ?? ''])
 console.log(`${rows.length} parties en attente : ${valid} retenues, ${rejected} rejetées`)

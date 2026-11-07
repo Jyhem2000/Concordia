@@ -1,5 +1,6 @@
 import type { ActionError } from '../engine/actions.ts'
 import type { RuleSource } from '../engine/breakdown.ts'
+import type { StartRefusal } from '../net/leaderboard.ts'
 import type {
   CrewId,
   DifficultyId,
@@ -1379,12 +1380,15 @@ export const en = {
     newGameConfirm: (mode: string) => `The current game will be lost. Start a new game in ${mode} mode?`,
     currentMode: (mode: string) => `Game in progress: ${mode} mode. The chosen mode applies to the next game.`,
     currentRanked: (mode: string, day: string) => `Game in progress: ranked game of ${day}, ${mode} mode.`,
+    feedback: 'A bug, an idea, an ending you cannot find?',
+    feedbackLink: 'Tell us on GitHub',
+    source: 'Source code',
   },
 
   /** Partie classée et classement du jour (chap. 1 et 7) */
   ranked: {
     title: 'Daily ranked game',
-    info: 'The same seed for every player today, a single attempt per mode: abandoning it uses it up. At the end, the server replays your game to verify your score before entering it on the leaderboard.',
+    info: 'The same seed for every player today, drawn and kept secret by the server: it hands it out at the start, so starting a ranked game needs the network. A single attempt per mode, for you and for your connection: abandoning it uses it up. At the end, the server replays your game to verify your score before entering it on the leaderboard.',
     pseudo: 'Nickname',
     pseudoHint: (min: number, max: number) => `${min} to ${max} characters: letters, digits, spaces, dots and dashes.`,
     play: 'Play ranked',
@@ -1397,6 +1401,13 @@ export const en = {
     confirmAction: 'Start the ranked game',
     noPseudo: 'Choose a valid nickname first.',
     taken: (mode: string) => `Today's attempt already used in ${mode} mode: a new seed arrives at midnight UTC.`,
+    opening: 'Opening the game with the server…',
+    startError: {
+      taken: (mode: string) => `The server already has your attempt for today in ${mode} mode: a new seed arrives at midnight UTC.`,
+      connection: (mode: string) =>
+        `A ranked game was already started today in ${mode} mode from this Internet connection: one per connection, per day and per mode.`,
+      failed: () => 'Server unreachable: a ranked game needs the network to start. Try again in a moment.',
+    } satisfies Record<StartRefusal, (mode: string) => string>,
     board: {
       title: 'Leaderboard',
       open: 'Leaderboard',
@@ -1480,6 +1491,8 @@ export const en = {
     shareStats: (controls: number, escapes: number, night: number) =>
       `${controls} BRC inspection${s(controls)}, ${escapes} escape${s(escapes)}, ${night} night trip${s(night)}.`,
     shareFeats: (feats: string) => `Feats: ${feats}.`,
+    shareRanked: (day: string) => `Ranked game of ${day}: same seed for everyone, your turn to beat it.`,
+    shareInvite: (url: string) => `Your turn: ${url}`,
   },
 
   /** Manuel du passeur : les règles en clair, depuis l'accueil et En bref (chap. 7) */
@@ -1497,7 +1510,7 @@ export const en = {
           `That score, and what you've accomplished, decide your ending: from mere Survivor to Saboteur. Once the initial debt is paid off, the Briefing's **“Objectives for day ${days}”** panel shows what each major ending requires.`,
           'You also lose by **dying** (health at zero) or by getting **searched with the old Aeterna server** on board.',
           '**Three difficulty modes**, chosen on the home screen: Citizen to discover, Smuggler for the normal game, Outlaw for those who know it. They change the starting debt, Viktor’s advance and the BRC’s fines; your career keeps a best score per mode.',
-          '**Free or ranked game**: the free game draws new randomness each time. The **daily ranked game** is the same for every player, with a single attempt per mode; at the end, the server replays it to verify your score, then enters it on the leaderboard (the Leaderboard button on the home screen).',
+          '**Free or ranked game**: the free game draws new randomness each time. The **daily ranked game** is the same for every player, with a single attempt per mode, for you and for your Internet connection. Its draw stays secret until you start it: you need the network to start it, not to play it. At the end, the server replays it to verify your score, then enters it on the leaderboard (the Leaderboard button on the home screen).',
         ],
       },
       {

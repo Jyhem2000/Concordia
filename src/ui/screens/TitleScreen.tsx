@@ -1,4 +1,4 @@
-import { Clock, Globe, ListOrdered, Lock, Play, RotateCcw, Target, Trophy, Truck } from 'lucide-react'
+import { Clock, Code, Globe, ListOrdered, Lock, MessageSquareText, Play, RotateCcw, Target, Trophy, Truck } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { DIFFICULTIES, GAME_LENGTH_DAYS, START_CASH } from '../../data/balance.ts'
@@ -11,6 +11,7 @@ import CareerView from '../fil/CareerView.tsx'
 import ManualButton from '../manual/ManualModal.tsx'
 import Button from '../shared/Button.tsx'
 import Chip from '../shared/Chip.tsx'
+import { FOCUS_RING } from '../shared/focus.ts'
 import ConfirmButton from '../shared/ConfirmButton.tsx'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
@@ -32,6 +33,12 @@ type BlockProps = {
   children: ReactNode
 }
 
+/** Dépôt public du jeu : code source et retours des joueurs (tickets GitHub) */
+const REPOSITORY_URL = 'https://github.com/Jyhem2000/concordia'
+
+/** Lien discret du pied de page, souligné au survol */
+const LINK = `inline-flex items-center gap-1 rounded-sm text-accent underline-offset-4 hover:underline ${FOCUS_RING}`
+
 /** Fins qui sont des accomplissements, de la plus prestigieuse à la plus modeste (chap. 1) */
 const ENDINGS = ['saboteur', 'resident', 'elite', 'mafia', 'notable', 'exemplary', 'standard'] as const satisfies readonly EndingId[]
 
@@ -42,7 +49,8 @@ function started(game: GameState): boolean {
 
 /**
  * Écran d'accueil (chap. 7) : la langue, le mode, puis lancer, reprendre ou recommencer une partie libre, le classement et le
- * manuel ; la partie classée du jour ; le monde, le rôle du joueur, le but et la journée type, les fins à atteindre
+ * manuel ; la partie classée du jour ; le monde, le rôle du joueur, le but et la journée type, les fins à atteindre ; au pied,
+ * les liens vers les retours des joueurs et le code source
  */
 export default function TitleScreen({ onPlay, onBoard }: TitleScreenProps) {
   const game = useGameStore((s) => s.game)
@@ -187,6 +195,19 @@ export default function TitleScreen({ onPlay, onBoard }: TitleScreenProps) {
           <CareerView />
         </Panel>
       )}
+
+      {/* Retours des joueurs et code source, au pied de l'accueil */}
+      <footer className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-center text-sm text-ink-muted">
+        <span>{title.feedback}</span>
+        <a href={`${REPOSITORY_URL}/issues`} target="_blank" rel="noreferrer" className={LINK}>
+          <MessageSquareText size={14} aria-hidden="true" />
+          {title.feedbackLink}
+        </a>
+        <a href={REPOSITORY_URL} target="_blank" rel="noreferrer" className={LINK}>
+          <Code size={14} aria-hidden="true" />
+          {title.source}
+        </a>
+      </footer>
     </main>
   )
 }

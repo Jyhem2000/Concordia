@@ -1,7 +1,9 @@
-import { Medal, Play } from 'lucide-react'
+import { CircleAlert, Medal, Play } from 'lucide-react'
+import { useState } from 'react'
 import { RANKED } from '../../data/balance.ts'
 import { pseudoError } from '../../../server/runs.ts'
 import { utcDay } from '../../engine/ranked.ts'
+import type { StartRefusal } from '../../net/leaderboard.ts'
 import { useI18n } from '../../i18n/useI18n.ts'
 import { useGameStore } from '../../stores/gameStore.ts'
 import { useRecordsStore } from '../../stores/recordsStore.ts'
@@ -22,7 +24,7 @@ type RankedPanelProps = {
 
 /**
  * Bloc de la partie classée du jour, sur l'accueil (chap. 7) : sa date, le mode de la tentative, la classée en cours à
- * reprendre, puis le pseudo et le lancement
+ * reprendre, puis le pseudo et le lancement, qui attend la graine du serveur et dit pourquoi il la refuse
  */
 export default function RankedPanel({ ongoing, onPlay }: RankedPanelProps) {
   const newRankedGame = useGameStore((s) => s.newRankedGame)
@@ -32,17 +34,24 @@ export default function RankedPanel({ ongoing, onPlay }: RankedPanelProps) {
   const pseudo = useSettingsStore((s) => s.pseudo)
   const setPseudo = useSettingsStore((s) => s.setPseudo)
   const tries = useRecordsStore((s) => s.rankedTries)
+  // Ouverture en cours auprès du serveur, et refus de la dernière : états d'interface éphémères
+  const [opening, setOpening] = useState(false)
+  const [refusal, setRefusal] = useState<StartRefusal | null>(null)
   const { t, calendarDay } = useI18n()
   const r = t.ranked
   const mode = t.difficulty.modes[difficulty].name
   // Le jour de la graine se lit au rendu : un accueil resté ouvert passé minuit propose la nouvelle graine au prochain rendu
   const today = utcDay(new Date())
   const taken = (tries[today] ?? []).includes(difficulty)
-  const reason = pseudoError(pseudo) !== null ? r.noPseudo : taken ? r.taken(mode) : null
-  // La partie en cours est une classée : elle se reprend ici, et le bilan d'une classée finie se revoit ici
-  const play = () => {
-    newRankedGame(difficulty)
-    onPlay()
+  const reason = opening ? r.opening : pseudoError(pseudo) !== null ? r.noPseudo : taken ? r.taken(mode) : null
+  // Le serveur donne la graine et note la tentative : la partie ne s'ouvre qu'avec sa réponse (chap. 1)
+  const play = async () => {
+    setOpening(true)
+    setRefusal(null)
+    const refused = await newRankedGame(difficulty)
+    setOpening(false)
+    if (refused) setRefusal(refused)
+    else onPlay()
   }
 
   return (
@@ -86,7 +95,7 @@ export default function RankedPanel({ ongoing, onPlay }: RankedPanelProps) {
               variant="ranked"
               disabled={reason !== null}
               reason={reason}
-              onClick={play}
+              onClick={() => void play()}
               confirm={ongoing ? { title: r.confirmTitle, message: r.confirm(mode), action: r.confirmAction } : undefined}
             >
               <Medal size={14} aria-hidden="true" />
@@ -94,6 +103,11 @@ export default function RankedPanel({ ongoing, onPlay }: RankedPanelProps) {
             </ConfirmButton>
           </div>
           <Hint>{r.pseudoHint(RANKED.pseudoMin, RANKED.pseudoMax)}</Hint>
+          {refusal && (
+            <Hint tone="danger" icon={CircleAlert}>
+              {r.startError[refusal](mode)}
+            </Hint>
+          )}
         </div>
       </div>
     </Panel>

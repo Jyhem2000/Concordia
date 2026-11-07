@@ -3,10 +3,10 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { openDays } from '../../server/runs.ts'
 import { applyAction, type Action, type ActionError } from '../engine/actions.ts'
-import { dailySeed, utcDay } from '../engine/ranked.ts'
+import { localSeed, utcDay } from '../engine/ranked.ts'
 import { randomSeed } from '../engine/rng.ts'
 import { createInitialState } from '../engine/state.ts'
-import { sendRun } from '../net/leaderboard.ts'
+import { sendRun, startRun, type StartOutcome, type StartRefusal } from '../net/leaderboard.ts'
 import { useRecordsStore } from './recordsStore.ts'
 import { LOCAL_BUILD, RULES_VERSION } from './rulesVersion.ts'
 import { useSettingsStore } from './settingsStore.ts'
@@ -37,8 +37,11 @@ type GameStore = {
   dispatch: (action: Action) => void
   /** Nouvelle partie libre dans ce mode de difficulté (chap. 1) */
   newGame: (difficulty: DifficultyId) => void
-  /** Partie classée du jour dans ce mode : la tentative du jour est notée dès le lancement */
-  newRankedGame: (difficulty: DifficultyId) => void
+  /**
+   * Partie classée du jour dans ce mode : le serveur donne la graine et note la tentative dès le lancement. Renvoie le
+   * refus, ou null si la partie est lancée
+   */
+  newRankedGame: (difficulty: DifficultyId) => Promise<StartRefusal | null>
   /** Envoie la partie classée finie, sauf si elle ne peut pas concourir */
   submit: () => Promise<void>
 }
@@ -87,10 +90,18 @@ export const useGameStore = create<GameStore>()(
         if (ending && ranked) void get().submit()
       },
       newGame: (difficulty) => set({ ...freeGame(difficulty), lastError: null }),
-      newRankedGame: (difficulty) => {
+      newRankedGame: async (difficulty) => {
         const now = new Date()
-        const day = utcDay(now)
-        const seed = dailySeed(day)
+        // Build local, sans serveur : la graine publique du jour, pour essayer la partie classée hors classement
+        const local: StartOutcome = { ok: true, grant: { day: utcDay(now), seed: localSeed(utcDay(now)) } }
+        const opened = LOCAL_BUILD ? local : await startRun({ playerId: useSettingsStore.getState().playerId, difficulty })
+        if (!opened.ok) {
+          // Le serveur a déjà une tentative de ce joueur : l'accueil la marque prise. Une connexion déjà servie ne la
+          // marque pas : le joueur peut encore tenter sa chance depuis une autre connexion
+          if (opened.error === 'taken') useRecordsStore.getState().markRanked(utcDay(now), difficulty, openDays(now))
+          return opened.error
+        }
+        const { day, seed } = opened.grant
         useRecordsStore.getState().markRanked(day, difficulty, openDays(now))
         set({
           game: createInitialState(seed, difficulty),
@@ -99,6 +110,7 @@ export const useGameStore = create<GameStore>()(
           submission: 'idle',
           lastError: null,
         })
+        return null
       },
       submit: async () => {
         const { game, ranked, actions, submission } = get()

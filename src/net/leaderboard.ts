@@ -1,13 +1,33 @@
-import type { Board, RunSubmission } from '../../server/runs.ts'
+import { isStartGrant, type Board, type RunStart, type RunSubmission, type StartGrant } from '../../server/runs.ts'
 import type { DifficultyId } from '../engine/types.ts'
 
 /*
  * Appels au serveur du classement (chap. 9, « Mise en ligne ») : les fonctions Cloudflare de `functions/api/`, sur le même
- * domaine que le jeu. Le seul code réseau du jeu.
+ * domaine que le jeu : ouverture d'une partie classée, envoi, lecture du classement. Le seul code réseau du jeu.
  */
 
 /** Issue d'un envoi : reçu (en attente de vérification), déjà reçu pour ce jour et ce mode, refusé, ou injoignable */
 export type SendOutcome = 'sent' | 'duplicate' | 'refused' | 'failed'
+
+/**
+ * Issue d'une ouverture de partie classée : le jour et la graine du serveur, ou le refus (tentative du joueur déjà
+ * prise, connexion déjà servie dans ce mode, serveur injoignable)
+ */
+export type StartOutcome = { ok: true; grant: StartGrant } | { ok: false; error: StartRefusal }
+
+export type StartRefusal = 'taken' | 'connection' | 'failed'
+
+export async function startRun(start: RunStart): Promise<StartOutcome> {
+  try {
+    const response = await fetch('/api/start', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(start) })
+    const body: unknown = await response.json()
+    if (response.ok && isStartGrant(body)) return { ok: true, grant: body }
+    const error = typeof body === 'object' && body !== null && 'error' in body ? body.error : null
+    return { ok: false, error: error === 'taken' || error === 'connection' ? error : 'failed' }
+  } catch {
+    return { ok: false, error: 'failed' }
+  }
+}
 
 export async function sendRun(run: RunSubmission): Promise<SendOutcome> {
   try {

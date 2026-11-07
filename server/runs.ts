@@ -5,8 +5,8 @@ import { keysOf } from '../src/engine/records.ts'
 import type { DifficultyId, EndingId } from '../src/engine/types.ts'
 
 /*
- * Parties classées (chap. 1) : la forme d'un envoi et ses contrôles, partagés par le jeu (avant l'envoi), les fonctions
- * Cloudflare (à la réception) et la vérification par rejeu. Rien ici ne calcule de score : seul le rejeu le fait.
+ * Parties classées (chap. 1) : la forme d'une ouverture et d'un envoi, et leurs contrôles, partagés par le jeu, les
+ * fonctions Cloudflare (à la réception) et la vérification par rejeu. Rien ici ne calcule de score : seul le rejeu le fait.
  */
 
 /** Partie classée envoyée à la fin : qui, quel jour, quel mode, quelles règles, quelles actions */
@@ -20,7 +20,8 @@ export type RunSubmission = {
   actions: readonly Action[]
 }
 
-export type SubmissionError = 'malformed' | 'pseudo' | 'closed' | 'rules' | 'too-long'
+/** Refus d'un envoi ; `unstarted` : la partie n'a pas été ouverte auprès du serveur */
+export type SubmissionError = 'malformed' | 'pseudo' | 'closed' | 'rules' | 'too-long' | 'unstarted'
 
 /** Vérification d'une partie : en attente du prochain passage, retenue avec son score, ou rejetée */
 export type RunStatus = 'pending' | 'valid' | 'rejected'
@@ -75,6 +76,46 @@ export function isActionList(value: unknown): value is Action[] {
   return (
     Array.isArray(value) && value.every((entry) => typeof entry === 'object' && entry !== null && 'type' in entry && typeof entry.type === 'string')
   )
+}
+
+/** Ouverture d'une partie classée : qui, dans quel mode. Le jour est celui du serveur, jamais celui du navigateur */
+export type RunStart = { playerId: string; difficulty: DifficultyId }
+
+/** Réponse à l'ouverture : le jour de la partie et sa graine secrète, donnée ce jour-là seulement */
+export type StartGrant = { day: string; seed: number }
+
+/** Refus d'une ouverture : demande illisible, tentative du joueur déjà prise, ou connexion déjà servie dans ce mode */
+export type StartError = 'malformed' | 'taken' | 'connection'
+
+/** Lit une demande d'ouverture de partie classée */
+export function parseStart(body: unknown): { ok: true; start: RunStart } | { ok: false; error: 'malformed' } {
+  if (typeof body !== 'object' || body === null) return { ok: false, error: 'malformed' }
+  const playerId = 'playerId' in body ? body.playerId : undefined
+  const difficulty = 'difficulty' in body ? body.difficulty : undefined
+  if (typeof playerId !== 'string' || !PLAYER_ID.test(playerId) || !isDifficulty(difficulty)) return { ok: false, error: 'malformed' }
+  return { ok: true, start: { playerId, difficulty } }
+}
+
+/** Réponse d'ouverture de la forme attendue */
+export function isStartGrant(value: unknown): value is StartGrant {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'day' in value &&
+    isDay(value.day) &&
+    'seed' in value &&
+    typeof value.seed === 'number' &&
+    Number.isInteger(value.seed)
+  )
+}
+
+/**
+ * Empreinte d'une connexion (chap. 1) : SHA-256 de l'adresse salée du secret du jour. L'adresse n'est jamais gardée, et
+ * l'empreinte d'un jour ne se compare pas à celle d'un autre
+ */
+export async function connectionOf(address: string, salt: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${salt}:${address}`))
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('')
 }
 
 /** Lit un envoi reçu par le serveur, à l'instant `now` */

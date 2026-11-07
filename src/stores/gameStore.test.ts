@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { dailySeed, utcDay } from '../engine/ranked.ts'
+import { localSeed, utcDay } from '../engine/ranked.ts'
 import { createInitialState } from '../engine/state.ts'
 import { migrateSave, PUBLIC_SAVE_VERSION, rankedBlock, SAVE_VERSION, savedPart, useGameStore } from './gameStore.ts'
 import { useRecordsStore } from './recordsStore.ts'
@@ -50,11 +50,11 @@ describe('gameStore', () => {
     expect(useGameStore.getState()).toMatchObject({ ranked: null, actions: [] })
   })
 
-  it('lance la partie classée sur la graine du jour, note la tentative et les actions acceptées', () => {
+  it('lance la partie classée sur la graine locale du jour hors serveur, note la tentative et les actions acceptées', async () => {
     useRecordsStore.setState({ rankedTries: {} })
-    useGameStore.getState().newRankedGame('outlaw')
+    expect(await useGameStore.getState().newRankedGame('outlaw')).toBeNull()
     const day = utcDay(new Date())
-    expect(useGameStore.getState().game).toEqual(createInitialState(dailySeed(day), 'outlaw'))
+    expect(useGameStore.getState().game).toEqual(createInitialState(localSeed(day), 'outlaw'))
     expect(useRecordsStore.getState().rankedTries[day]).toEqual(['outlaw'])
     useGameStore.getState().dispatch({ type: 'waitEvening' })
     useGameStore.getState().dispatch({ type: 'refuel', qty: 1 })

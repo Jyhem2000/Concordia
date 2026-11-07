@@ -22,6 +22,11 @@ export async function onRequestPost({ request, env }: PagesContext): Promise<Res
   const parsed = parseSubmission(body, new Date())
   if (!parsed.ok) return json({ error: parsed.error }, 400)
   const { playerId, pseudo, day, difficulty, rulesVersion, actions } = parsed.run
+  // Seule une partie ouverte par POST /api/start, avec la graine secrète du jour, concourt (chap. 1)
+  const started = await env.DB.prepare(`SELECT id FROM starts WHERE player_id = ? AND day = ? AND difficulty = ?`)
+    .bind(playerId, day, difficulty)
+    .first<{ id: number }>()
+  if (!started) return json({ error: 'unstarted' }, 403)
   // Une seule partie par joueur, par jour et par mode : la seconde est ignorée et signalée
   const { meta } = await env.DB.prepare(
     `INSERT INTO runs (player_id, pseudo, day, difficulty, rules_version, actions, submitted_at)

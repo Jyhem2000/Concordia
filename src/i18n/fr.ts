@@ -1,5 +1,6 @@
 import type { ActionError } from '../engine/actions.ts'
 import type { RuleSource } from '../engine/breakdown.ts'
+import type { StartRefusal } from '../net/leaderboard.ts'
 import type {
   CrewId,
   DifficultyId,
@@ -1388,12 +1389,15 @@ export const fr = {
     newGameConfirm: (mode: string) => `La partie en cours sera perdue. Commencer une nouvelle partie en mode ${mode} ?`,
     currentMode: (mode: string) => `Partie en cours : mode ${mode}. Le mode choisi vaut pour la prochaine partie.`,
     currentRanked: (mode: string, day: string) => `Partie en cours : classée du ${day}, mode ${mode}.`,
+    feedback: 'Un bug, une idée, une fin introuvable ?',
+    feedbackLink: 'Écris-le sur GitHub',
+    source: 'Code source',
   },
 
   /** Partie classée et classement du jour (chap. 1 et 7) */
   ranked: {
     title: 'Partie classée du jour',
-    info: "La même graine pour tous les joueurs aujourd'hui, une seule tentative par mode : l'abandonner la consomme. À la fin, le serveur rejoue ta partie pour vérifier ton score avant de l'inscrire au classement.",
+    info: "La même graine pour tous les joueurs aujourd'hui, tirée et gardée secrète par le serveur : il la donne au lancement, il faut donc le réseau pour lancer une classée. Une seule tentative par mode, pour toi comme pour ta connexion : l'abandonner la consomme. À la fin, le serveur rejoue ta partie pour vérifier ton score avant de l'inscrire au classement.",
     pseudo: 'Pseudo',
     pseudoHint: (min: number, max: number) => `De ${min} à ${max} caractères : lettres, chiffres, espaces, points et tirets.`,
     play: 'Jouer en classé',
@@ -1406,6 +1410,13 @@ export const fr = {
     confirmAction: 'Lancer la classée',
     noPseudo: "Choisis d'abord un pseudo valide.",
     taken: (mode: string) => `Tentative du jour déjà prise en mode ${mode} : une nouvelle graine arrive à minuit UTC.`,
+    opening: 'Ouverture de la partie auprès du serveur…',
+    startError: {
+      taken: (mode: string) => `Le serveur a déjà ta tentative du jour en mode ${mode} : une nouvelle graine arrive à minuit UTC.`,
+      connection: (mode: string) =>
+        `Une partie classée a déjà été lancée aujourd'hui en mode ${mode} depuis cette connexion Internet : une seule par connexion, par jour et par mode.`,
+      failed: () => 'Serveur injoignable : la partie classée a besoin du réseau pour démarrer. Réessaie dans un instant.',
+    } satisfies Record<StartRefusal, (mode: string) => string>,
     board: {
       title: 'Classement',
       open: 'Classement',
@@ -1490,6 +1501,8 @@ export const fr = {
     shareStats: (controls: number, escapes: number, night: number) =>
       `${controls} contrôle${controls > 1 ? 's' : ''} de la BRC, ${escapes} fuite${escapes > 1 ? 's' : ''}, ${night} trajet${night > 1 ? 's' : ''} de nuit.`,
     shareFeats: (feats: string) => `Hauts faits : ${feats}.`,
+    shareRanked: (day: string) => `Partie classée du ${day} : même graine pour tous, à toi de faire mieux.`,
+    shareInvite: (url: string) => `À ton tour : ${url}`,
   },
 
   /** Manuel du passeur : les règles en clair, depuis l'accueil et En bref (chap. 7) */
@@ -1507,7 +1520,7 @@ export const fr = {
           `Ce score, et ce que tu as accompli, décident de ta fin : de simple Survivant à Saboteur. Une fois la dette initiale soldée, l’encart **« Objectifs du jour ${days} »** d’En bref montre ce que chaque grande fin exige.`,
           'On perd aussi en **mourant** (santé à zéro) ou en se faisant **fouiller avec le vieux serveur Aeterna** à bord.',
           "**Trois modes de difficulté**, au choix à l'accueil : Citoyen pour découvrir, Contrebandier pour le jeu normal, Hors-la-loi pour qui le connaît. Ils changent la dette de départ, l'avance de Viktor et les amendes de la BRC ; la carrière garde un meilleur score par mode.",
-          "**Partie libre ou classée** : la partie libre tire un nouveau hasard à chaque fois. La **partie classée du jour** est la même pour tous les joueurs, avec une seule tentative par mode ; à la fin, le serveur la rejoue pour vérifier ton score, puis l'inscrit au classement (bouton Classement de l'accueil).",
+          "**Partie libre ou classée** : la partie libre tire un nouveau hasard à chaque fois. La **partie classée du jour** est la même pour tous les joueurs, avec une seule tentative par mode, pour toi comme pour ta connexion Internet. Son tirage reste secret jusqu'au lancement : il faut le réseau pour la lancer, plus pour la jouer. À la fin, le serveur la rejoue pour vérifier ton score, puis l'inscrit au classement (bouton Classement de l'accueil).",
         ],
       },
       {

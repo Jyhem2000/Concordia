@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { applyAction, type Action } from './actions.ts'
-import { dailySeed, replay, utcDay } from './ranked.ts'
+import { localSeed, replay, utcDay } from './ranked.ts'
 import { createInitialState } from './state.ts'
 import type { GameState } from './types.ts'
 
@@ -29,16 +29,16 @@ describe('graine du jour', () => {
   it('change avec le jour UTC, pas avec l’heure', () => {
     expect(utcDay(new Date('2026-11-06T23:59:00Z'))).toBe('2026-11-06')
     expect(utcDay(new Date('2026-11-07T00:00:00Z'))).toBe('2026-11-07')
-    expect(dailySeed('2026-11-06')).toBe(dailySeed('2026-11-06'))
-    expect(dailySeed('2026-11-06')).not.toBe(dailySeed('2026-11-07'))
+    expect(localSeed('2026-11-06')).toBe(localSeed('2026-11-06'))
+    expect(localSeed('2026-11-06')).not.toBe(localSeed('2026-11-07'))
   })
 })
 
 describe('rejeu d’une partie classée', () => {
   it('retrouve exactement la même partie à partir de sa graine, de son mode et de ses actions', () => {
-    const { state, actions } = playThrough(dailySeed('2026-11-06'))
+    const { state, actions } = playThrough(localSeed('2026-11-06'))
     expect(state.status).toBe('finished')
-    const replayed = replay(dailySeed('2026-11-06'), 'citizen', actions)
+    const replayed = replay(localSeed('2026-11-06'), 'citizen', actions)
     expect(replayed).toEqual({ ok: true, state })
   })
 

@@ -1,5 +1,5 @@
 import { isActionList, isDay, isDifficulty } from '../server/runs.ts'
-import { dailySeed, replay } from '../src/engine/ranked.ts'
+import { replay } from '../src/engine/ranked.ts'
 import { isDefeat } from '../src/engine/routine.ts'
 import type { EndingId } from '../src/engine/types.ts'
 
@@ -8,15 +8,20 @@ import type { EndingId } from '../src/engine/types.ts'
  * action refusée et finir. Son score est alors celui du rejeu, jamais celui d'un envoi.
  */
 
-/** Partie en attente telle que stockée dans D1 : les actions en JSON */
-export type PendingRun = { id: number; day: string; difficulty: string; actions: string }
+/**
+ * Partie en attente telle que stockée dans D1 : les actions en JSON, et la graine secrète de son jour (table `days`),
+ * absente si le serveur n'en a jamais tiré pour ce jour
+ */
+export type PendingRun = { id: number; day: string; difficulty: string; actions: string; seed?: number }
 
 export type Verdict =
   | { id: number; status: 'valid'; ending: EndingId; score: number }
   | { id: number; status: 'rejected'; reason: 'malformed' | 'refused' | 'unfinished' | 'error' | 'rules' }
 
 export function verdictOf(run: PendingRun): Verdict {
-  const { id, day, difficulty } = run
+  const { id, day, difficulty, seed } = run
+  // Sans graine du jour, la partie n'a pas pu être ouverte auprès du serveur
+  if (seed === undefined) return { id, status: 'rejected', reason: 'malformed' }
   let actions: unknown
   try {
     actions = JSON.parse(run.actions)
@@ -25,7 +30,7 @@ export function verdictOf(run: PendingRun): Verdict {
   }
   if (!isDay(day) || !isDifficulty(difficulty) || !isActionList(actions)) return { id, status: 'rejected', reason: 'malformed' }
   try {
-    const result = replay(dailySeed(day), difficulty, actions)
+    const result = replay(seed, difficulty, actions)
     if (!result.ok) return { id, status: 'rejected', reason: 'refused' }
     const { ending } = result.state
     if (result.state.status !== 'finished' || !ending) return { id, status: 'rejected', reason: 'unfinished' }
@@ -48,7 +53,8 @@ export function isPendingRun(value: unknown): value is PendingRun {
     'difficulty' in value &&
     typeof value.difficulty === 'string' &&
     'actions' in value &&
-    typeof value.actions === 'string'
+    typeof value.actions === 'string' &&
+    (!('seed' in value) || (typeof value.seed === 'number' && Number.isInteger(value.seed)))
   )
 }
 

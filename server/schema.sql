@@ -1,3 +1,20 @@
+CREATE TABLE IF NOT EXISTS days (
+  day TEXT PRIMARY KEY,
+  seed INTEGER NOT NULL,
+  salt TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS starts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  player_id TEXT NOT NULL,
+  day TEXT NOT NULL,
+  difficulty TEXT NOT NULL,
+  connection TEXT NOT NULL,
+  started_at TEXT NOT NULL,
+  UNIQUE (player_id, day, difficulty),
+  UNIQUE (connection, day, difficulty)
+);
+
 CREATE TABLE IF NOT EXISTS runs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   player_id TEXT NOT NULL,
