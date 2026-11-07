@@ -4,7 +4,18 @@ import { DISTRICT_IDS, DISTRICTS } from '../data/districts.ts'
 import { EVENT_MULT_CAP } from '../data/events.ts'
 import { PRODUCT_IDS, PRODUCTS } from '../data/products.ts'
 import { NO_EVENTS, type EventContext } from './events.ts'
-import { bestRemembered, demandQuota, demandRefill, drawMarket, productStatus, quoteBreakdown, saleQuote, shopProducts } from './market.ts'
+import {
+  bestRemembered,
+  demandQuota,
+  demandRefill,
+  drawMarket,
+  estimatedUnitSale,
+  productStatus,
+  quoteBreakdown,
+  saleQuote,
+  shopProducts,
+  tonightSaleFactor,
+} from './market.ts'
 import { createRng, seedRng } from './rng.ts'
 import { createInitialState } from './state.ts'
 import { defined } from './test-helpers.ts'
@@ -139,6 +150,16 @@ describe('prix de vente', () => {
     // Le joueur est à Hives (D1)
     expect(night('D1')).toBeGreaterThan(night('D2'))
     expect(night('D1', 'day')).toBe(night('D2', 'day'))
+  })
+
+  it("estime d'avance la vente de nuit : celle de l'after, celle d'ailleurs, rien pour un produit sans tag de nuit", () => {
+    const evening = { ...withLot(true), after: 'D1' as const }
+    const quote = quoteBreakdown(evening, 'D1', 'T2-02').total
+    // La caisse achetée la veille est de fraîcheur standard : l'estimation retrouve la vente réelle de cette nuit
+    expect(estimatedUnitSale(quote, tonightSaleFactor(evening, 'D1', 'T2-02'))).toBe(saleQuote({ ...evening, phase: 'night' }, 'T2-02', 1).total)
+    expect(tonightSaleFactor(evening, 'D1', 'T2-02')).toBeGreaterThan(tonightSaleFactor(evening, 'D2', 'T2-02'))
+    expect(tonightSaleFactor(evening, 'D2', 'T2-02')).toBeGreaterThan(1)
+    expect(tonightSaleFactor(evening, 'D1', 'T0-01')).toBe(1)
   })
 })
 

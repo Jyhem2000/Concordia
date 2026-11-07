@@ -79,7 +79,7 @@ export default function GameScreen({ onHome }: GameScreenProps) {
     <div className="flex min-h-full flex-col">
       <StatusBar />
       {finished ? (
-        <EndScreen />
+        <EndScreen onHome={onHome} />
       ) : intercepted ? (
         <InterceptionScreen />
       ) : roadEvent ? (

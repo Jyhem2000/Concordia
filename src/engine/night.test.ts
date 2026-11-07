@@ -123,6 +123,8 @@ describe('tournée de nuit en un geste', () => {
     expect(delivered.phase).toBe('night')
     expect(delivered.lastCurfewDay).toBe(3)
     expect(delivered.tripReport?.mission).toBe('delivered')
+    // Le carnet la note de nuit : bilan, partage et haut fait « Oiseau de nuit » la comptent (chap. 7)
+    expect(delivered.journal.flatMap((log) => log.highlights)).toContainEqual({ kind: 'trip', from: 'D1', to: 'D2', phase: 'night' })
   })
 
   it('ne change rien si le trajet ne peut pas partir : ni nuit, ni épuisement', () => {

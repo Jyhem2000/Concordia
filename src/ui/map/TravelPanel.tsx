@@ -6,7 +6,7 @@ import { PRODUCT_IDS, PRODUCTS } from '../../data/products.ts'
 import { beginNight, planTravel, sleeplessDrink } from '../../engine/actions.ts'
 import { averageCost, ownedQty } from '../../engine/cargo.ts'
 import { crewEffect } from '../../engine/crew.ts'
-import { estimatedUnitSale, fuelPriceBreakdown, lastSeen, productStatus } from '../../engine/market.ts'
+import { estimatedUnitSale, fuelPriceBreakdown, lastSeen, productStatus, tonightSaleFactor } from '../../engine/market.ts'
 import { flyingCheckShare } from '../../engine/interception.ts'
 import { riskBreakdown, routeRepeats, routeWatchRisk } from '../../engine/risk.ts'
 import { missionFee, missionOffer } from '../../engine/night.ts'
@@ -123,8 +123,12 @@ function DistrictDetails({ districtId, featured = false }: DistrictDetailsProps)
   const memory = useGameStore((s) => lastSeen(s.game, districtId))
   const events = useGameStore((s) => s.game.events)
   const phase = useGameStore((s) => s.game.phase)
+  // L'état entier : le bonus de vente de nuit se lit dans le moteur (after de ce soir, tags)
+  const game = useGameStore((s) => s.game)
   const { t, credits } = useI18n()
 
+  // À 20h00, le prochain départ est la tournée de nuit : l'estimation compte la vente de nuit à l'arrivée (chap. 7)
+  const tonight = phase === 'day' && game.dayTripDone
   const memoryLabel = !memory ? t.travel.memoryNever : memory.day === day ? t.travel.memoryToday : t.travel.memoryDaysAgo(day - memory.day)
   const security = DISTRICTS[districtId].security
   // Cours mémorisés des produits en soute : ce qui compte pour décider où vendre
@@ -181,7 +185,11 @@ function DistrictDetails({ districtId, featured = false }: DistrictDetailsProps)
                   <TrendBadge districtId={districtId} productId={id} />
                   {memory ? (
                     <>
-                      <Margin revenue={estimatedUnitSale(memory.quotes[id])} cost={averageCost(cargo, id) ?? 0} showAmount={false} />
+                      <Margin
+                        revenue={estimatedUnitSale(memory.quotes[id], tonight ? tonightSaleFactor(game, districtId, id) : 1)}
+                        cost={averageCost(cargo, id) ?? 0}
+                        showAmount={false}
+                      />
                       {credits(memory.quotes[id])}
                     </>
                   ) : (

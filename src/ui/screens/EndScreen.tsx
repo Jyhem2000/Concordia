@@ -1,4 +1,4 @@
-import { Award, BookMarked, ChartLine, Lightbulb, Printer, RotateCcw, Share2, Trophy } from 'lucide-react'
+import { Award, BookMarked, ChartLine, House, Lightbulb, Printer, RotateCcw, Share2, Trophy } from 'lucide-react'
 import { useState } from 'react'
 import { WANTED } from '../../data/balance.ts'
 import { featsOf } from '../../engine/feats.ts'
@@ -15,9 +15,18 @@ import ManualButton from '../manual/ManualModal.tsx'
 import Button from '../shared/Button.tsx'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
+import { FIELD } from '../shared/styles.ts'
 import RankedStatus from './RankedStatus.tsx'
 
 type Defeat = Extract<EndingId, 'bio-bricks' | 'death' | 'execution'>
+
+type EndScreenProps = {
+  /** Revenir à l'accueil, où s'ouvrent le classement et la prochaine partie */
+  onHome: () => void
+}
+
+/** Partage du bilan : pas encore, copié faute de partage natif, ou copie refusée par le navigateur (le texte s'affiche) */
+type ShareState = { status: 'idle' | 'copied' } | { status: 'failed'; text: string }
 
 type RecapStatsProps = {
   recap: RunRecap
@@ -28,9 +37,9 @@ type RecapStatsProps = {
 /**
  * Écran de fin (chap. 7) : la fin débloquée à l'Audit du Jour 30, ou l'écran de mort. Titre et épilogue, conseil après
  * une défaite, bilan chiffré et courbe du patrimoine, faits marquants, hauts faits, carrière ; imprimer, partager,
- * nouvelle partie
+ * nouvelle partie, accueil
  */
-export default function EndScreen() {
+export default function EndScreen({ onHome }: EndScreenProps) {
   const game = useGameStore((s) => s.game)
   const newGame = useGameStore((s) => s.newGame)
   const ranked = useGameStore((s) => s.ranked)
@@ -38,8 +47,8 @@ export default function EndScreen() {
   const difficulty = useSettingsStore((s) => s.difficulty)
   const { t, credits, calendarDay } = useI18n()
   const text = useHighlightText()
-  // Bilan copié faute de partage natif : état d'interface éphémère
-  const [copied, setCopied] = useState(false)
+  // Partage du bilan : état d'interface éphémère
+  const [shared, setShared] = useState<ShareState>({ status: 'idle' })
   const id = game.ending?.id ?? 'standard'
   const defeat = isDefeat(id)
   const score = defeat || !game.ending ? null : game.ending.score
@@ -68,8 +77,13 @@ export default function EndScreen() {
       await navigator.share({ title: r.shareTitle, text: lines.join('\n'), url }).catch(() => undefined)
       return
     }
-    await navigator.clipboard.writeText([...lines, r.shareInvite(url)].join('\n'))
-    setCopied(true)
+    const text = [...lines, r.shareInvite(url)].join('\n')
+    // Copie refusée (permission, page sans contexte sûr) : le texte s'affiche pour une copie à la main
+    const copied = await navigator.clipboard.writeText(text).then(
+      () => true,
+      () => false,
+    )
+    setShared(copied ? { status: 'copied' } : { status: 'failed', text })
   }
 
   return (
@@ -146,11 +160,30 @@ export default function EndScreen() {
           {t.recap.share}
         </Button>
         <ManualButton />
+        <Button onClick={onHome}>
+          <House size={14} aria-hidden="true" />
+          {t.hud.home}
+        </Button>
       </div>
-      {copied && (
+      {shared.status === 'copied' && (
         <Hint tone="success" className="text-center print:hidden">
           {t.recap.copied}
         </Hint>
+      )}
+      {shared.status === 'failed' && (
+        <div className="flex flex-col gap-2 print:hidden">
+          <Hint tone="warning" className="text-center">
+            {t.recap.copyFailed}
+          </Hint>
+          <textarea
+            readOnly
+            aria-label={t.recap.share}
+            rows={5}
+            value={shared.text}
+            onFocus={(event) => event.currentTarget.select()}
+            className={`${FIELD} w-full resize-none`}
+          />
+        </div>
       )}
     </main>
   )

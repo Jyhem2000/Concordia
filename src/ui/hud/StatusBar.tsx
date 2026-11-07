@@ -193,7 +193,8 @@ export default function StatusBar() {
           </Cell>
         </div>
       </div>
-      {game.day >= AUDIT_COUNTDOWN_DAY && (
+      {/* Compte à rebours de l'audit, tant que la partie se joue : l'écran de fin n'en a plus l'usage */}
+      {game.day >= AUDIT_COUNTDOWN_DAY && game.status === 'playing' && (
         <p className="flex items-center justify-center gap-1.5 border-t border-accent/40 bg-accent/10 px-4 py-1 text-center text-xs text-accent">
           <Hourglass size={12} aria-hidden="true" />
           {t.hud.countdown(GAME_LENGTH_DAYS)}

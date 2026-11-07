@@ -396,7 +396,7 @@ export const en = {
     healthValue: (health: string) => `${health} HP`,
     exhausted: 'Exhausted',
     exhaustedInfo:
-      'Night run yesterday: no new night on the road tonight, except with a drink for a sleepless night. A night at the truck stop or a bivouac clears the exhaustion.',
+      'Night run yesterday: no new night on the road tonight, except with a drink for a sleepless night. The night after a run brings no rest: sleeping tonight lets you set off at night tomorrow.',
     healthInfo: (below: number, penalty: string) =>
       `Driver's health: at zero, the game is lost. Under ${below} HP, driver worn out: bluff and escape at −${penalty}. Failed escapes, rackets, hazards, heatwaves and cells cost some; the truck stop and the Morgue give some back.`,
     worn: 'Worn out: bluff and escape reduced',
@@ -1113,7 +1113,7 @@ export const en = {
     sacrificed: 'including crates sacrificed',
     custody: (days: number) => `Custody: ${days} day${s(days)}, released at 20:00.`,
     tow: (bill: string) => `Chassis at 0: emergency towing billed ${bill}.`,
-    unpaidFine: (amount: string, days: number) => `Unpaid fine (${amount}): custody extended by ${days} day${s(days)}.`,
+    unpaidFine: (amount: string, days: number) => `Unpaid fine (${amount}): ${days} extra day${s(days)} in custody, included in the length above.`,
     dismiss: 'Got it',
   },
 
@@ -1167,7 +1167,8 @@ export const en = {
     deliveryActive: (district: string) => `Delivery in progress: sealed crates to hand over in ${district}, on the daytime trip.`,
     acceptDelivery: 'Accept the delivery',
     sealed: (crates: number, district: string) => `${crates} sealed DSC crates to deliver to ${district}`,
-    estimateHint: 'Estimated margin on the price seen, commission deducted (excluding know-how and saturation)',
+    estimateHint:
+      'Estimated margin on the price seen, commission deducted (excluding freshness and saturation). At 20:00, it counts the night sale on arrival, after-party included.',
   },
 
   evening: {
@@ -1192,8 +1193,8 @@ export const en = {
     lethalAction: 'Leave anyway',
     nightFromMap: 'To leave tonight, choose the destination on the map: “Go by night,” or “Deliver by night” to the mission.',
     sleepShort: 'Rest until 06:00.',
-    sleepRelayHint: 'A night at the DSC truck stop: ICC and health gain, exhaustion cleared.',
-    bivouacHint: 'Bivouac, for lack of a truck stop here: exhaustion cleared, but neither ICC nor health.',
+    sleepRelayHint: 'A night at the DSC truck stop: ICC and health gain, except after a night run.',
+    bivouacHint: 'Bivouac, for lack of a truck stop here: neither ICC nor health.',
     clandestineHint: (wanted: string) => `Off mission, to the district of your choice: higher risk, and ${wanted} if the trip goes through.`,
     clandestineHintPlated:
       'Off mission, to the district of your choice: higher risk; the rotating plate makes the trip unreadable for cameras, no watchlist.',
@@ -1485,6 +1486,7 @@ export const en = {
     print: 'Print',
     share: 'Share',
     copied: 'Results copied: just paste them.',
+    copyFailed: 'The browser refuses to copy: select the results below to copy them yourself.',
     shareTitle: 'Concordia',
     shareVictory: (ending: string, score: string, days: number, mode: string) => `Concordia (${mode}) — ${ending}. Score: ${score} in ${days} days.`,
     shareDefeat: (ending: string, day: number, mode: string) => `Concordia (${mode}) — ${ending}, on day ${day}.`,

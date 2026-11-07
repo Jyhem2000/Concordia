@@ -34,8 +34,10 @@ export function recordJournal(before: GameState, after: GameState, action: Actio
     if (highlight) highlights.push(highlight)
   }
 
-  if (action.type === 'travel' && after.districtId !== before.districtId)
-    note({ kind: 'trip', from: before.districtId, to: after.districtId, phase: before.phase })
+  // La tournée de nuit part du soir en un geste : son trajet se note de nuit
+  const trip = action.type === 'travel' || action.type === 'nightTrip'
+  if (trip && after.districtId !== before.districtId)
+    note({ kind: 'trip', from: before.districtId, to: after.districtId, phase: action.type === 'nightTrip' ? 'night' : before.phase })
   const report = after.interceptionReport
   if (before.interception && report && report !== before.interceptionReport && report.over)
     note({
@@ -48,10 +50,10 @@ export function recordJournal(before: GameState, after: GameState, action: Actio
     })
   const road = after.roadReport
   if (road && road !== before.roadReport) note({ kind: 'road', eventId: road.eventId, won: road.won })
-  const trip = after.tripReport
-  if (trip && trip !== before.tripReport) {
-    note(trip.mission === 'delivered' && { kind: 'delivered', fee: trip.missionFee })
-    note(trip.mission === 'deviated' && { kind: 'deviated' })
+  const tripReport = after.tripReport
+  if (tripReport && tripReport !== before.tripReport) {
+    note(tripReport.mission === 'delivered' && { kind: 'delivered', fee: tripReport.missionFee })
+    note(tripReport.mission === 'deviated' && { kind: 'deviated' })
   }
   note(after.progress.injections > before.progress.injections && { kind: 'injection', total: after.progress.injections })
   note(after.vehicleId !== before.vehicleId && { kind: 'vehicle', vehicleId: after.vehicleId })

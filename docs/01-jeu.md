@@ -183,8 +183,8 @@ Le joueur est officiellement livreur de Catégorie C : la plateforme logistique 
 
 ### Le dilemme de 20h00
 Les sirènes d'Aeterna annoncent le couvre-feu sanitaire : les citoyens rentrent, la logistique continue. Trois options :
-* **Dormir au relais routier du DSC** (dans chaque district sauf `[D4]`, côté quais de service) : jusqu'à 06h00. **Gain d'ICC et de Santé** (`RELAY_SLEEP` dans [`balance.ts`](../src/data/balance.ts)), réinitialise l'épuisement.
-* **Bivouac** (seule façon de dormir en `[D4]`) : réinitialise l'épuisement, mais **0 ICC, 0 PV**.
+* **Dormir au relais routier du DSC** (dans chaque district sauf `[D4]`, côté quais de service) : jusqu'à 06h00. **Gain d'ICC et de Santé** (`RELAY_SLEEP` dans [`balance.ts`](../src/data/balance.ts)).
+* **Bivouac** (seule façon de dormir en `[D4]`) : **0 ICC, 0 PV**.
 * **Tournée de nuit :** un second trajet dans la journée, dans les galeries de service. Elle part **le soir** : après le trajet du jour, après avoir attendu le soir sur place, ou après une demi-journée perdue (corvée DSC). La nuit qui suit ne rapporte aucun gain de sommeil, même en dormant ensuite dans un district à relais. Le passage à la nuit et le trajet partent ensemble : choisir de partir de nuit sans trajet n'existe pas, ni l'épuisement qui irait avec.
 
 ### Tournée de nuit
@@ -203,7 +203,7 @@ Tout est filmé : un camion la nuit n'est légitime que sur **ordre de mission**
 * *Fermeture nocturne :* le marché de rue reste ouvert, et l'Arrière-Salle de Viktor `[LOC-D1-1]`, qui ne ferme jamais ; tous les autres lieux spéciaux ferment jusqu'à 06h00. L'argent gagné de nuit peut rembourser la dette, mais pas rejoindre le compte offshore : il reste en Cash-Puce.
 
 ### Épuisement nerveux
-Si le joueur est parti en tournée de nuit le Jour J, la tournée est **verrouillée le soir du Jour J+1** — sauf via `[T2-05]`. Une 3e nuit blanche d'affilée est impossible.
+Si le joueur est parti en tournée de nuit le Jour J, la tournée est **verrouillée le soir du Jour J+1** — sauf via `[T2-05]`. Une 3e nuit blanche d'affilée est impossible. Dormir au relais ou bivouaquer après la tournée n'y change rien : cette nuit-là ne repose pas. Seules la garde à vue et l'immobilisation, qui comptent comme repos, lèvent le verrou.
 
 ### Perte d'une demi-journée
 * **De jour :** le joueur passe directement à 20h00 : son trajet de jour est perdu et les lieux spéciaux sont fermés (ils ouvrent de 06h00 à 20h00, sauf l'Arrière-Salle de Viktor) ; seul le marché de rue reste ouvert avant le dilemme de 20h00. Même situation à la sortie de garde à vue (chap. 5).

@@ -393,7 +393,7 @@ export const fr = {
     healthValue: (health: string) => `${health} PV`,
     exhausted: 'Épuisé',
     exhaustedInfo:
-      "Tournée de nuit hier : pas de nouvelle nuit sur la route ce soir, sauf boisson pour une nuit blanche. Une nuit au relais ou en bivouac efface l'épuisement.",
+      'Tournée de nuit hier : pas de nouvelle nuit sur la route ce soir, sauf boisson pour une nuit blanche. La nuit qui suit une tournée ne repose pas : dormir ce soir permet de repartir de nuit demain.',
     healthInfo: (below: number, penalty: string) =>
       `Santé du chauffeur : à zéro, la partie est perdue. Sous ${below} PV, chauffeur à bout : bluff et fuite à −${penalty}. Fuite ratée, racket, aléas, canicule et cellule en coûtent ; le relais et la Morgue en rendent.`,
     worn: 'À bout : bluff et fuite diminués',
@@ -1116,7 +1116,9 @@ export const fr = {
     sacrificed: 'dont caisses sacrifiées',
     custody: (days: number) => `Garde à vue : ${days} jour${days > 1 ? 's' : ''}, sortie à 20h00.`,
     tow: (bill: string) => `Châssis à 0 : dépannage d'urgence facturé ${bill}.`,
-    unpaidFine: (amount: string, days: number) => `Amende impayée (${amount}) : garde à vue prolongée de ${days} jour${days > 1 ? 's' : ''}.`,
+    /** Le jour ajouté par l'amende impayée est déjà compté dans la ligne de garde à vue, qui donne le total */
+    unpaidFine: (amount: string, days: number) =>
+      `Amende impayée (${amount}) : ${days} jour${days > 1 ? 's' : ''} de garde à vue en plus, compris dans la durée ci-dessus.`,
     dismiss: 'Compris',
   },
 
@@ -1172,7 +1174,8 @@ export const fr = {
     deliveryActive: (district: string) => `Livraison en cours : caisses scellées à remettre à ${district}, par le trajet de jour.`,
     acceptDelivery: 'Accepter la livraison',
     sealed: (crates: number, district: string) => `${crates} caisses scellées du DSC à livrer à ${district}`,
-    estimateHint: 'Marge estimée sur le cours vu, commission déduite (hors savoir-faire et saturation)',
+    estimateHint:
+      'Marge estimée sur le cours vu, commission déduite (hors fraîcheur et saturation). À 20h00, elle compte la vente de nuit à l’arrivée, after compris.',
   },
 
   evening: {
@@ -1198,8 +1201,8 @@ export const fr = {
     lethalAction: 'Partir quand même',
     nightFromMap: 'Pour partir cette nuit, choisissez la destination sur la carte : « Aller de nuit », ou « Livrer de nuit » vers la mission.',
     sleepShort: "Repos jusqu'à 06h00.",
-    sleepRelayHint: "Nuit au relais routier du DSC : gain d'ICC et de santé, épuisement effacé.",
-    bivouacHint: 'Bivouac, faute de relais ici : épuisement effacé, mais ni ICC, ni santé.',
+    sleepRelayHint: "Nuit au relais routier du DSC : gain d'ICC et de santé, sauf après une tournée de nuit.",
+    bivouacHint: 'Bivouac, faute de relais ici : ni ICC, ni santé.',
     clandestineHint: (wanted: string) => `Hors mission, vers le district de votre choix : risque accru, et ${wanted} si le trajet passe.`,
     clandestineHintPlated:
       'Hors mission, vers le district de votre choix : risque accru ; la plaque rotative rend le trajet illisible pour les caméras, sans fiche S.',
@@ -1494,6 +1497,7 @@ export const fr = {
     print: 'Imprimer',
     share: 'Partager',
     copied: 'Bilan copié : il ne reste qu’à le coller.',
+    copyFailed: 'Le navigateur refuse la copie : sélectionne le bilan ci-dessous pour le copier toi-même.',
     shareTitle: 'Concordia',
     shareVictory: (ending: string, score: string, days: number, mode: string) =>
       `Concordia (${mode}) — ${ending}. Score : ${score} en ${days} jours.`,

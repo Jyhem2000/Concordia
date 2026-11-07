@@ -112,7 +112,8 @@ function BriefingLines({ briefing }: BriefingLinesProps) {
         </li>
       )}
       {debtLate && <li className="text-danger">{t.briefing.debtLate}</li>}
-      {protection && (
+      {/* Une collecte sans rien à prendre (soute et Cash-Puce vides) ne s'affiche pas : une ligne à zéro n'apprend rien */}
+      {protection && protection.due.total > 0 && (
         <li>
           <BriefingRow label={t.briefing.protection} className="text-danger">
             <Detailed breakdown={protection.due} format={(amount) => `−${credits(amount)}`} />

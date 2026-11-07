@@ -227,11 +227,26 @@ export function knowHowBreakdown(state: GameState, lot: CargoLot, districtId: Di
     }
   }
 
-  if (knowHow.total > KNOW_HOW_SOFT_CAP) {
-    knowHow.set('rule.diminishing-returns', KNOW_HOW_SOFT_CAP + (knowHow.total - KNOW_HOW_SOFT_CAP) * KNOW_HOW_EXCESS_FACTOR)
-  }
+  if (knowHow.total > KNOW_HOW_SOFT_CAP) knowHow.set('rule.diminishing-returns', diminished(knowHow.total))
   if (!lot.travelled) knowHow.clamp(0, ANTI_ARBITRAGE_CAP, 'rule.anti-arbitrage')
   return knowHow.build()
+}
+
+/** Rendements décroissants du savoir-faire : au-delà du seuil, l'excédent compte moins */
+function diminished(total: number): number {
+  return total > KNOW_HOW_SOFT_CAP ? KNOW_HOW_SOFT_CAP + (total - KNOW_HOW_SOFT_CAP) * KNOW_HOW_EXCESS_FACTOR : total
+}
+
+/**
+ * Bonus de vente d'une caisse vendue cette nuit dans `districtId` (chap. 2) : tags de vente de nuit, ou prime festive si
+ * l'after de ce soir y est, avec les rendements décroissants. Connu dès le matin, il sert à estimer une tournée de nuit
+ */
+export function tonightSaleFactor(state: GameState, districtId: DistrictId, productId: ProductId): number {
+  const factor = PRODUCTS[productId].tags.reduce((total, tag) => {
+    if (tag === AFTER.tag && state.after === districtId) return total * AFTER.festiveFactor
+    return total * (TAGS[tag].nightSale ?? 1)
+  }, 1)
+  return diminished(factor)
 }
 
 const FRESHNESS_RULES = {
@@ -287,9 +302,12 @@ export function saleQuote(state: GameState, productId: ProductId, qty: number): 
   return { total, cost, saturatedQty: Math.max(0, sold - demandLeft), first }
 }
 
-/** Estimation du produit net d'une caisse à partir d'un cours mémorisé : commission seule, sans savoir-faire ni saturation */
-export function estimatedUnitSale(quote: number): number {
-  return Math.round(quote * SALE_COMMISSION)
+/**
+ * Estimation du produit net d'une caisse à partir d'un cours mémorisé : commission, et bonus de vente de nuit pour une
+ * tournée de nuit (`tonightSaleFactor`) ; ni fraîcheur, ni saturation
+ */
+export function estimatedUnitSale(quote: number, nightFactor = 1): number {
+  return Math.round(quote * SALE_COMMISSION * nightFactor)
 }
 
 /** Prix d'une ration de Synthanol dans le district actuel */
