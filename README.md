@@ -24,7 +24,7 @@ Le jeu est en français et en anglais, sur téléphone comme sur ordinateur, san
 |                                          **L'accueil**                                          |                             **Le bilan de fin**                             |
 | ![Accueil : modes de difficulté, partie libre et partie classée du jour](docs/images/title.png) | ![Écran de fin : score, bilan et courbe du patrimoine](docs/images/end.png) |
 
-Un bug, une idée ? [Ouvre un ticket](https://github.com/Jyhem2000/concordia/issues).
+Un bug, une idée ? [Ouvre un ticket](https://github.com/Jyhem2000/Concordia/issues).
 
 ## Lancer le jeu en local
 

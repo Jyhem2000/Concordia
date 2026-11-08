@@ -11,7 +11,7 @@ describe('lancement de la vérification à la soumission', () => {
     vi.stubGlobal('fetch', fetch)
     expect(await dispatchVerification('jeton')).toBe(true)
     expect(fetch).toHaveBeenCalledWith(
-      'https://api.github.com/repos/Jyhem2000/concordia/actions/workflows/verify.yml/dispatches',
+      'https://api.github.com/repos/Jyhem2000/Concordia/actions/workflows/verify.yml/dispatches',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ ref: 'master' }),

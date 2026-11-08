@@ -5,7 +5,7 @@
  */
 
 /** Dépôt, tâche et branche de la vérification */
-export const VERIFY_WORKFLOW = { repository: 'Jyhem2000/concordia', file: 'verify.yml', ref: 'master' } as const
+export const VERIFY_WORKFLOW = { repository: 'Jyhem2000/Concordia', file: 'verify.yml', ref: 'master' } as const
 
 /**
  * Demande à GitHub de lancer la vérification. Sans jeton, rien n'est demandé ; un refus ou une panne de GitHub ne fait pas

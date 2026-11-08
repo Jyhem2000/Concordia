@@ -34,7 +34,7 @@ type BlockProps = {
 }
 
 /** Dépôt public du jeu : code source et retours des joueurs (tickets GitHub) */
-const REPOSITORY_URL = 'https://github.com/Jyhem2000/concordia'
+const REPOSITORY_URL = 'https://github.com/Jyhem2000/Concordia'
 
 /** Lien discret du pied de page, souligné au survol */
 const LINK = `inline-flex items-center gap-1 rounded-sm text-accent underline-offset-4 hover:underline ${FOCUS_RING}`
