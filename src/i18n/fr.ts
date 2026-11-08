@@ -1425,7 +1425,7 @@ export const fr = {
       open: 'Classement',
       back: 'Accueil',
       intro:
-        'Un classement par jour et par mode, sur la graine du jour. Seuls les scores vérifiés y figurent : la vérification passe toutes les heures. Les défaites passent après toutes les victoires ; à égalité, la première partie envoyée passe devant. Le classement de la veille est clos.',
+        'Un classement par jour et par mode, sur la graine du jour. Seuls les scores vérifiés y figurent : la vérification part dès l’envoi et prend quelques minutes. Les défaites passent après toutes les victoires ; à égalité, la première partie envoyée passe devant. Le classement de la veille est clos.',
       modes: 'Mode',
       days: 'Jour',
       top: (count: number) => `Les ${count} meilleurs scores`,
@@ -1446,7 +1446,7 @@ export const fr = {
       title: 'Partie classée',
       idle: "Partie classée finie : prête à l'envoi.",
       sending: 'Envoi de ta partie au classement…',
-      sent: 'Partie envoyée : elle entrera au classement après la vérification, toutes les heures. Résultat dans le classement, depuis l’accueil.',
+      sent: 'Partie envoyée : elle entrera au classement après la vérification, d’ici quelques minutes. Résultat dans le classement, depuis l’accueil.',
       duplicate: 'Partie déjà reçue pour ce jour et ce mode.',
       refused: 'Le serveur a refusé ta partie : classement clos, ou pseudo refusé.',
       failed: 'Envoi impossible : pas de connexion au serveur.',

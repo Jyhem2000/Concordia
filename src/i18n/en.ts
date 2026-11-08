@@ -1414,7 +1414,7 @@ export const en = {
       open: 'Leaderboard',
       back: 'Home',
       intro:
-        "One leaderboard per day and per mode, on the daily seed. Only verified scores appear: verification runs every hour. Defeats come after all victories; on a tie, the first game sent goes ahead. Yesterday's leaderboard is closed.",
+        "One leaderboard per day and per mode, on the daily seed. Only verified scores appear: verification starts when the game is sent and takes a few minutes. Defeats come after all victories; on a tie, the first game sent goes ahead. Yesterday's leaderboard is closed.",
       modes: 'Mode',
       days: 'Day',
       top: (count: number) => `The ${count} best scores`,
@@ -1435,7 +1435,7 @@ export const en = {
       title: 'Ranked game',
       idle: 'Ranked game finished: ready to send.',
       sending: 'Sending your game to the leaderboard…',
-      sent: 'Game sent: it will enter the leaderboard after verification, every hour. See the result in the leaderboard, from the home screen.',
+      sent: 'Game sent: it will enter the leaderboard after verification, within a few minutes. See the result in the leaderboard, from the home screen.',
       duplicate: 'Game already received for this day and mode.',
       refused: 'The server refused your game: leaderboard closed, or nickname refused.',
       failed: 'Sending failed: no connection to the server.',

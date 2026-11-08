@@ -1,4 +1,5 @@
 import type { PagesContext } from '../../server/cloudflare.ts'
+import { dispatchVerification } from '../../server/dispatch.ts'
 import { json } from '../../server/http.ts'
 import { parseSubmission } from '../../server/runs.ts'
 
@@ -7,9 +8,10 @@ const MAX_BYTES = 512_000
 
 /**
  * POST /api/runs : enregistre une partie classée en attente de vérification (chap. 1). Rien n'est calculé ici : le score
- * viendra du rejeu (scripts/verify.ts)
+ * viendra du rejeu (scripts/verify.ts), lancé aussitôt la partie enregistrée
  */
-export async function onRequestPost({ request, env }: PagesContext): Promise<Response> {
+export async function onRequestPost(context: PagesContext): Promise<Response> {
+  const { request, env } = context
   if (Number(request.headers.get('content-length') ?? 0) > MAX_BYTES) return json({ error: 'too-long' }, 413)
   const text = await request.text()
   if (text.length > MAX_BYTES) return json({ error: 'too-long' }, 413)
@@ -34,5 +36,8 @@ export async function onRequestPost({ request, env }: PagesContext): Promise<Res
   )
     .bind(playerId, pseudo, day, difficulty, rulesVersion, JSON.stringify(actions), new Date().toISOString())
     .run()
-  return meta.changes === 0 ? json({ error: 'duplicate' }, 409) : json({ status: 'pending' }, 202)
+  if (meta.changes === 0) return json({ error: 'duplicate' }, 409)
+  // La vérification part sans faire attendre le joueur
+  context.waitUntil(dispatchVerification(env.GITHUB_TOKEN))
+  return json({ status: 'pending' }, 202)
 }

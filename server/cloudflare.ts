@@ -19,9 +19,16 @@ export type D1Database = {
 export type Env = {
   /** Base D1 liée au projet Pages sous ce nom (chap. 9, « Mise en ligne ») */
   DB: D1Database
+  /**
+   * Jeton GitHub (accès fin, ce dépôt seul, droit Actions : écriture) qui lance la vérification à chaque partie soumise.
+   * Absent : les parties attendent le passage horaire
+   */
+  GITHUB_TOKEN?: string
 }
 
 export type PagesContext = {
   request: Request
   env: Env
+  /** Prolonge la fonction après sa réponse, le temps d'une tâche annexe */
+  waitUntil(promise: Promise<unknown>): void
 }

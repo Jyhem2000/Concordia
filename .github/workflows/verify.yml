@@ -1,5 +1,6 @@
 # Vérification des parties classées (chap. 1, chap. 9 « Mise en ligne ») : rejoue les parties en attente dans D1 et
-# inscrit leur score. Toutes les heures, ou à la main depuis l'onglet Actions.
+# inscrit leur score. À chaque partie soumise (server/dispatch.ts), toutes les heures en secours, ou à la main depuis
+# l'onglet Actions.
 name: Vérification des parties classées
 
 on:
