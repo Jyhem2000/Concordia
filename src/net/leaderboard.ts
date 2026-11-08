@@ -40,10 +40,10 @@ export async function sendRun(run: RunSubmission): Promise<SendOutcome> {
   }
 }
 
-/** Classement d'un jour et d'un mode, avec la ligne du joueur ; null hors ligne ou sans serveur */
-export async function fetchBoard(day: string, difficulty: DifficultyId, playerId: string): Promise<Board | null> {
+/** Classement d'un jour, tous modes réunis (null) ou d'un seul mode, avec les parties du joueur ; null hors ligne ou sans serveur */
+export async function fetchBoard(day: string, difficulty: DifficultyId | null, playerId: string): Promise<Board | null> {
   try {
-    const query = new URLSearchParams({ day, difficulty, player: playerId })
+    const query = new URLSearchParams({ day, difficulty: difficulty ?? 'all', player: playerId })
     const response = await fetch(`/api/leaderboard?${query}`)
     if (!response.ok) return null
     const board: unknown = await response.json()
@@ -55,5 +55,7 @@ export async function fetchBoard(day: string, difficulty: DifficultyId, playerId
 
 /** Réponse du serveur de la forme attendue : un serveur d'une autre version ne casse pas l'accueil */
 function isBoard(value: unknown): value is Board {
-  return typeof value === 'object' && value !== null && 'entries' in value && Array.isArray(value.entries) && 'own' in value
+  return (
+    typeof value === 'object' && value !== null && 'entries' in value && Array.isArray(value.entries) && 'mine' in value && Array.isArray(value.mine)
+  )
 }

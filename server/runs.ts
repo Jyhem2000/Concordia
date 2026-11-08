@@ -26,14 +26,21 @@ export type SubmissionError = 'malformed' | 'pseudo' | 'closed' | 'rules' | 'too
 /** Vérification d'une partie : en attente du prochain passage, retenue avec son score, ou rejetée */
 export type RunStatus = 'pending' | 'valid' | 'rejected'
 
-export type BoardEntry = { rank: number; pseudo: string; ending: EndingId; score: number }
+/** Une ligne du classement ; le rang est celui de la vue demandée (tous les modes, ou un seul) */
+export type BoardEntry = { rank: number; pseudo: string; difficulty: DifficultyId; ending: EndingId; score: number }
 
-/** Réponse du classement d'un jour et d'un mode, avec la ligne du joueur s'il a envoyé une partie */
+/** Une partie du joueur dans la vue : son mode, sa vérification, et son rang dans la vue une fois validée */
+export type OwnRun = { difficulty: DifficultyId; status: RunStatus; rank: number | null; score: number | null; ending: EndingId | null }
+
+/**
+ * Réponse du classement d'un jour, tous modes réunis (`difficulty` à null) ou pour un seul mode, avec les parties que le
+ * joueur y a envoyées (une par mode au plus)
+ */
 export type Board = {
   day: string
-  difficulty: DifficultyId
+  difficulty: DifficultyId | null
   entries: readonly BoardEntry[]
-  own: { status: RunStatus; rank: number | null; score: number | null; ending: EndingId | null } | null
+  mine: readonly OwnRun[]
 }
 
 const PLAYER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
