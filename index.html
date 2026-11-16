@@ -2,6 +2,11 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
+    <!-- L'ancienne adresse renvoie vers le domaine du jeu ; les aperçus de déploiement (<hash>.concordia-game.pages.dev) restent sur place (chap. 9) -->
+    <script>
+      if (location.hostname === 'concordia-game.pages.dev')
+        location.replace('https://concordia.jyhem.cloud' + location.pathname + location.search + location.hash)
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Concordia</title>
     <meta
@@ -19,13 +24,13 @@
     <meta property="og:locale" content="fr_FR" />
     <meta property="og:locale:alternate" content="en_US" />
     <meta property="og:site_name" content="Concordia" />
-    <meta property="og:url" content="https://concordia-game.pages.dev/" />
-    <meta property="og:image" content="https://concordia-game.pages.dev/og.png" />
+    <meta property="og:url" content="https://concordia.jyhem.cloud/" />
+    <meta property="og:image" content="https://concordia.jyhem.cloud/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Concordia : un livreur passe café, beurre et whisky en fraude sous le nez d'une IA « bienveillante »." />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="canonical" href="https://concordia-game.pages.dev/" />
+    <link rel="canonical" href="https://concordia.jyhem.cloud/" />
   </head>
   <body>
     <div id="root"></div>

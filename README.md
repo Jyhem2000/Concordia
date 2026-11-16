@@ -14,7 +14,7 @@ En 30 jours, il faut rembourser la mafia, déjouer les contrôles de la Brigade 
 
 Le jeu est en français et en anglais, sur téléphone comme sur ordinateur, sans compte ni publicité.
 
-**[Jouer à Concordia](https://concordia-game.pages.dev/)**
+**[Jouer à Concordia](https://concordia.jyhem.cloud/)**
 
 ![Un barrage de la BRC : fouille, bluff, corruption ou fuite, chaque chance affichée](docs/images/checkpoint.png)
 
