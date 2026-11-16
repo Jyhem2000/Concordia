@@ -56,6 +56,13 @@ export async function fetchBoard(day: string, difficulty: DifficultyId | null, p
 /** Réponse du serveur de la forme attendue : un serveur d'une autre version ne casse pas l'accueil */
 function isBoard(value: unknown): value is Board {
   return (
-    typeof value === 'object' && value !== null && 'entries' in value && Array.isArray(value.entries) && 'mine' in value && Array.isArray(value.mine)
+    typeof value === 'object' &&
+    value !== null &&
+    'entries' in value &&
+    Array.isArray(value.entries) &&
+    'mine' in value &&
+    Array.isArray(value.mine) &&
+    'days' in value &&
+    Array.isArray(value.days)
   )
 }

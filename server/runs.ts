@@ -34,10 +34,12 @@ export type OwnRun = { difficulty: DifficultyId; status: RunStatus; rank: number
 
 /**
  * Réponse du classement d'un jour, tous modes réunis (`difficulty` à null) ou pour un seul mode, avec les parties que le
- * joueur y a envoyées (une par mode au plus)
+ * joueur y a envoyées (une par mode au plus), et les derniers jours qui ont un score vérifié (au plus `RANKED.pastDays`, du
+ * plus récent au plus ancien, tous modes réunis) pour le choix du jour
  */
 export type Board = {
   day: string
+  days: readonly string[]
   difficulty: DifficultyId | null
   entries: readonly BoardEntry[]
   mine: readonly OwnRun[]

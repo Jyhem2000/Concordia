@@ -18,7 +18,7 @@ const LOST = `CASE WHEN ending IN (${DEFEATS.map(() => '?').join(', ')}) THEN 1 
 /**
  * GET /api/leaderboard?day=&difficulty=&player= : les meilleurs scores vérifiés d'un jour, tous modes réunis (`all` ou
  * sans mode) ou pour un seul mode, et les parties du joueur dans cette vue (chap. 1 et 7). Les victoires d'abord, au
- * score, puis les défaites ; à égalité, la première partie reçue
+ * score, puis les défaites ; à égalité, la première partie reçue. Avec eux, les derniers jours qui ont un score vérifié
  */
 export async function onRequestGet({ request, env }: PagesContext): Promise<Response> {
   const params = new URL(request.url).searchParams
@@ -63,6 +63,17 @@ export async function onRequestGet({ request, env }: PagesContext): Promise<Resp
     mine.sort((a, b) => order.indexOf(a.difficulty) - order.indexOf(b.difficulty))
   }
 
-  const board: Board = { day, difficulty, entries: results.map((entry, index) => ({ rank: index + 1, ...entry })), mine }
+  // Les derniers jours qui ont un score vérifié, tous modes réunis, pour le choix du jour
+  const { results: days } = await env.DB.prepare(`SELECT DISTINCT day FROM runs WHERE status = 'valid' ORDER BY day DESC LIMIT ?`)
+    .bind(RANKED.pastDays)
+    .all<{ day: string }>()
+
+  const board: Board = {
+    day,
+    days: days.map((row) => row.day),
+    difficulty,
+    entries: results.map((entry, index) => ({ rank: index + 1, ...entry })),
+    mine,
+  }
   return json(board)
 }

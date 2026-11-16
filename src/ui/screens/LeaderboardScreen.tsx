@@ -12,6 +12,7 @@ import Button from '../shared/Button.tsx'
 import { FOCUS_RING } from '../shared/focus.ts'
 import Hint from '../shared/Hint.tsx'
 import Panel from '../shared/Panel.tsx'
+import { FIELD } from '../shared/styles.ts'
 
 type LeaderboardScreenProps = {
   /** Revenir à l'accueil */
@@ -36,8 +37,8 @@ type ModeFilter = DifficultyId | 'all'
 type Loaded = { key: string; board: Board | null }
 
 /**
- * Écran du classement (chap. 7), ouvert depuis l'accueil : un classement par jour (aujourd'hui, ou la veille, close),
- * tous modes réunis avec le mode de chaque partie, ou filtré sur un mode ; les meilleurs scores vérifiés et les parties
+ * Écran du classement (chap. 7), ouvert depuis l'accueil : un classement par jour (aujourd'hui par défaut, ou l'un des
+ * derniers jours qui ont un score), tous modes réunis avec le mode de chaque partie, ou filtré sur un mode ; les meilleurs scores vérifiés et les parties
  * du joueur.
  */
 export default function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
@@ -49,13 +50,20 @@ export default function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
   const [mode, setMode] = useState<ModeFilter>('all')
   const [day, setDay] = useState(today)
   const [loaded, setLoaded] = useState<Loaded | null>(null)
+  // Derniers jours qui ont un score, gardés d'un chargement à l'autre pour que la liste ne se vide pas pendant le suivant
+  const [pastDays, setPastDays] = useState<readonly string[]>([])
   const key = `${day}:${mode}`
+  const dayOptions = [today, ...pastDays.filter((past) => past !== today)]
+  const dayLabel = (option: string) =>
+    option === today ? `${b.today} · ${calendarDay(option)}` : option === yesterday ? `${b.yesterday} · ${calendarDay(option)}` : calendarDay(option)
 
   // Synchronisation externe : le classement vit sur le serveur
   useEffect(() => {
     let current = true
     void fetchBoard(day, mode === 'all' ? null : mode, playerId).then((board) => {
-      if (current) setLoaded({ key: `${day}:${mode}`, board })
+      if (!current) return
+      setLoaded({ key: `${day}:${mode}`, board })
+      if (board) setPastDays(board.days)
     })
     return () => {
       current = false
@@ -86,15 +94,16 @@ export default function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
           value={mode}
           onChange={setMode}
         />
-        <Pills
-          label={b.days}
-          options={[
-            { id: today, label: `${b.today} · ${calendarDay(today)}` },
-            { id: yesterday, label: `${b.yesterday} · ${calendarDay(yesterday)}` },
-          ]}
-          value={day}
-          onChange={setDay}
-        />
+        <label className="flex flex-col gap-1.5">
+          <span className="text-xs font-bold text-ink-muted uppercase">{b.days}</span>
+          <select value={day} onChange={(event) => setDay(event.target.value)} className={`self-start text-xs ${FIELD}`}>
+            {dayOptions.map((option) => (
+              <option key={option} value={option}>
+                {dayLabel(option)}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       <Panel icon={Medal} title={`${mode === 'all' ? b.allModes : modeName(mode)} · ${calendarDay(day)}`} subtitle={b.top(RANKED.top)}>
@@ -119,7 +128,7 @@ export default function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
   )
 }
 
-/** Choix exclusif en pastilles (mode, jour) */
+/** Choix exclusif en pastilles (mode) */
 function Pills<T extends string>({ label, options, value, onChange }: PillsProps<T>) {
   return (
     <div className="flex flex-col gap-1.5" role="group" aria-label={label}>
