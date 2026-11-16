@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
@@ -10,4 +11,6 @@ export default defineConfig({
     // Version des règles d'une partie classée : le commit déployé par Cloudflare Pages, « dev » ailleurs (chap. 9)
     __RULES_VERSION__: JSON.stringify(process.env.CF_PAGES_COMMIT_SHA ?? 'dev'),
   },
+  // Tests : un localStorage en mémoire, le même sous Node 24 et 26 (src/testSetup.ts)
+  test: { setupFiles: ['./src/testSetup.ts'] },
 })

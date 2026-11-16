@@ -9,7 +9,8 @@
 - Zustand + middleware `persist` pour l'état et la sauvegarde (`src/stores/`)
 - Motion (ex-Framer Motion) pour les animations : `import { motion } from 'motion/react'`
 - lucide-react pour les icônes
-- Vitest pour les tests du moteur
+- Vitest pour les tests du moteur ; `src/testSetup.ts` leur donne un `localStorage` en mémoire, le même quelle que soit la version de Node
+- Node 26, fixé dans `.node-version` : le poste, la tâche de vérification (GitHub Actions) et le build Cloudflare Pages le lisent tous
 
 ## Arborescence
 
