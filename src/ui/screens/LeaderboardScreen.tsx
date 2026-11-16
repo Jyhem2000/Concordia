@@ -96,7 +96,7 @@ export default function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
         />
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-bold text-ink-muted uppercase">{b.days}</span>
-          <select value={day} onChange={(event) => setDay(event.target.value)} className={`self-start text-xs ${FIELD}`}>
+          <select value={day} onChange={(event) => setDay(event.target.value)} className={`h-7 self-start text-xs sm:h-9 ${FIELD}`}>
             {dayOptions.map((option) => (
               <option key={option} value={option}>
                 {dayLabel(option)}
@@ -142,7 +142,7 @@ function Pills<T extends string>({ label, options, value, onChange }: PillsProps
               type="button"
               aria-pressed={active}
               onClick={() => onChange(option.id)}
-              className={`rounded-full border px-3 py-1 text-xs transition-colors ${FOCUS_RING} ${
+              className={`h-7 rounded-full border px-3 text-xs transition-colors sm:h-9 sm:text-sm ${FOCUS_RING} ${
                 active
                   ? 'border-ranked-soft/60 bg-ranked/20 font-bold text-ranked-soft'
                   : 'border-line text-ink-muted hover:border-line-strong hover:text-ink'
