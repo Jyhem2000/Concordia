@@ -28,7 +28,7 @@ Un bug, une idée ? [Ouvre un ticket](https://github.com/Jyhem2000/Concordia/iss
 
 ## Lancer le jeu en local
 
-Il faut [Node.js](https://nodejs.org/) 24 ou plus récent.
+Il faut [Node.js](https://nodejs.org/) 26 (version fixée dans `.node-version`).
 
 ```bash
 npm install
